@@ -195,6 +195,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 frCollections = new CollectionsFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frCollections);
                 break;
+            case R.id.nav_status:
+                fragmentTransaction.replace(R.id.my_fragment, new StatusFragment());
+                break;
             case R.id.nav_search:
                 break;
             case R.id.nav_settings:

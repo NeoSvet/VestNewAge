@@ -30,6 +30,7 @@
     <string name="unuse_dot">Запятую нельзя использовать</string>
     <string name="title_already_used">Данный заголовок уже используется!</string>
     <string name="media">Видео и пресса</string>
+    <string name="status">Состояние</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
     <string name="paragraph">Абзац</string>
