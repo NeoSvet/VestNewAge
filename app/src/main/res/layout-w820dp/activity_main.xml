@@ -1,35 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="ru.neosvet.blagayavest.BookActivity">
+    tools:openDrawer="start">
 
-    <android.support.design.widget.AppBarLayout
+    <FrameLayout
+        android:id="@+id/menu_fragment"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start" />
+
+    <FrameLayout
+        android:id="@+id/my_fragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <include layout="@layout/content_book" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabRefresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/refresh" />
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:layout_marginLeft="320dp" />
 
     <LinearLayout
         android:id="@+id/pStatus"
@@ -59,5 +47,4 @@
             android:padding="15dp"
             android:src="@drawable/refresh" />
     </LinearLayout>
-
 </android.support.design.widget.CoordinatorLayout>

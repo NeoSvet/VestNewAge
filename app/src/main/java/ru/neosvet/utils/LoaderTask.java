@@ -10,18 +10,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
-import ru.neosvet.blagayavest.BrowserActivity;
-import ru.neosvet.blagayavest.MainActivity;
-import ru.neosvet.blagayavest.R;
-import ru.neosvet.ui.MyActivity;
-
-/**
- * Created by NeoSvet on 16.12.2016.
- */
+import ru.neosvet.vestnewage.BrowserActivity;
+import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.SiteFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
+    private final int MAX = 6;
     private transient AppCompatActivity act;
     private transient Lib lib;
     private transient ProgressDialog di;
@@ -54,7 +50,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (act instanceof MyActivity) {
+        if (act instanceof MainActivity) {
             msg = act.getResources().getString(R.string.start);
             showD();
         }
@@ -64,7 +60,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         di = new ProgressDialog(act);
         di.setTitle(act.getResources().getString(R.string.load));
         di.setMessage(msg);
-        di.setMax(5);
+        di.setMax(MAX);
         di.setProgress(prog);
         di.setIndeterminate(false);
         di.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -86,7 +82,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         } else {
             di.dismiss();
             if (boolStart) {
-                ((MyActivity) act).finishAllLoad(result);
+                ((MainActivity) act).finishAllLoad(result);
                 boolStart = false;
             }
         }
@@ -115,26 +111,34 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            prog = 5;
+            prog = MAX;
         }
         return false;
     }
 
     private void refreshLists() throws Exception {
+        MainActivity mact = (MainActivity) act;
+        sub_prog = 0;
+        msg = act.getResources().getString(R.string.refresh_list)
+                + " " + act.getResources().getString(R.string.rss);
+        publishProgress();
+        SummaryTask t1 = new SummaryTask(mact);
+        t1.downloadList();
+        if (!boolStart) return;
+
         msg = act.getResources().getString(R.string.refresh_list)
                 + " " + act.getResources().getString(R.string.calendar);
         publishProgress();
         Date d = new Date();
-        MyActivity mact = (MyActivity) act;
-        CalendarTask t1 = new CalendarTask(mact);
+        CalendarTask t2 = new CalendarTask(mact);
         int max_y = d.getYear() + 1, max_m = 12;
+        prog++;
         sub_prog = 0;
         for (int y = 116; y < max_y && boolStart; y++) {
-            if (y == max_y)
+            if (y == max_y - 1)
                 max_m = d.getMonth() + 1;
             for (int m = 0; m < max_m && boolStart; m++) {
-//                Lib.LOG("calendar=" + m + "." + y);
-                t1.downloadCalendar(y, m);
+                t2.downloadCalendar(y, m);
                 sub_prog++;
             }
         }
@@ -145,32 +149,30 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         msg = act.getResources().getString(R.string.refresh_list)
                 + " " + act.getResources().getString(R.string.book);
         publishProgress();
-        BookTask t2 = new BookTask(mact);
-//        Lib.LOG("kat");
-        t2.downloadData(true);
+        BookTask t3 = new BookTask(mact);
+        t3.downloadData(true);
         if (!boolStart) return;
-//        Lib.LOG("pos");
-        t2.downloadData(false);
+        t3.downloadData(false);
 
         prog++;
         msg = act.getResources().getString(R.string.refresh_list)
                 + " " + act.getResources().getString(R.string.main);
         publishProgress();
-        MainTask t3 = new MainTask(mact);
+        SiteTask t4 = new SiteTask(mact);
         String[] url = new String[]{
                 Lib.SITE,
                 Lib.SITE + "novosti.html",
                 Lib.SITE + "media.html"
         };
         String[] file = new String[]{
-                getFile(MainActivity.MAIN).toString(),
-                getFile(MainActivity.NEWS).toString(),
-                getFile(MainActivity.MEDIA).toString()
+                getFile(SiteFragment.MAIN).toString(),
+                getFile(SiteFragment.NEWS).toString(),
+                getFile(SiteFragment.MEDIA).toString()
         };
         for (int i = 0; i < url.length && boolStart; i++) {
 //            Lib.LOG(url[i]);
-            t3.downloadList(url[i]);
-            t3.saveList(file[i]);
+            t4.downloadList(url[i]);
+            t4.saveList(file[i]);
         }
     }
 
@@ -179,8 +181,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         File[] d = new File[]{
 //                getFile(CalendarActivity.CALENDAR),
                 getFile(Lib.LIST),
-                getFile(MainActivity.MAIN),
-                getFile(MainActivity.MEDIA)
+                getFile(SiteFragment.MAIN),
+                getFile(SiteFragment.MEDIA)
         };
         prog++;
         msg = act.getResources().getString(R.string.download)
@@ -204,7 +206,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadList(d[i].toString());
 //            Lib.LOG("sub_prog="+sub_prog);
         }
-        prog = 5;
+        prog = MAX;
         publishProgress();
     }
 
@@ -212,8 +214,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
-                    while (boolStart && prog < 5) {
-                        TimeUnit.SECONDS.sleep(1);
+                    while (boolStart && prog < MAX) {
+//                        TimeUnit.SECONDS.sleep(1);
+                        Thread.sleep(1000);
                         publishProgress();
                     }
                 } catch (Exception e) {

@@ -13,29 +13,31 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.MainActivity;
+import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.SiteFragment;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
 
-/**
- * Created by NeoSvet on 21.12.2016.
- */
-
-public class MainTask extends AsyncTask<String, Void, String> implements Serializable {
-    private transient MyActivity act;
+public class SiteTask extends AsyncTask<String, Void, String> implements Serializable {
+    private transient SiteFragment frm;
+    private transient MainActivity act;
     List<ListItem> data = new ArrayList<ListItem>();
+
+    public SiteTask(SiteFragment frm) {
+        setFrm(frm);
+    }
+
+    public SiteTask(MainActivity act) {
+        this.act = act;
+    }
+
+    public void setFrm(SiteFragment frm) {
+        this.frm = frm;
+        act = (MainActivity) frm.getActivity();
+    }
 
     @Override
     protected void onProgressUpdate(Void... values) {
         super.onProgressUpdate(values);
-    }
-
-    public void setAct(MainActivity act) {
-        this.act = act;
-    }
-
-    public MainTask(MyActivity act) {
-        this.act = act;
     }
 
     @Override
@@ -46,8 +48,8 @@ public class MainTask extends AsyncTask<String, Void, String> implements Seriali
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        if (act instanceof MainActivity) {
-            ((MainActivity) act).finishLoad(result);
+        if (frm != null) {
+            frm.finishLoad(result);
         }
     }
 
@@ -92,7 +94,7 @@ public class MainTask extends AsyncTask<String, Void, String> implements Seriali
                     bw.write(data.get(i).getHead(j) + Lib.N);
                 }
             }
-            bw.write(MainActivity.END + Lib.N);
+            bw.write(SiteFragment.END + Lib.N);
             bw.flush();
         }
         bw.close();

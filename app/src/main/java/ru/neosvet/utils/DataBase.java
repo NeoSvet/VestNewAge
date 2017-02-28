@@ -4,10 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by NeoSvet on 25.12.2016.
- */
-
 public class DataBase extends SQLiteOpenHelper {
     public static final String NAME = "journal", TITLE = "title", LINK = "link", TIME = "time";
 

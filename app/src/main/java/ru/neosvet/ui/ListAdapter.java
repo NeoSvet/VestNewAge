@@ -10,12 +10,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.R;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
-
-/**
- * Created by NeoSvet on 15.12.2016.
- */
 
 public class ListAdapter extends BaseAdapter {
     private Context context;

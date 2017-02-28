@@ -1,15 +1,12 @@
-package ru.neosvet.blagayavest;
+package ru.neosvet.vestnewage;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -25,19 +22,17 @@ import java.util.Date;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
-import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.BookTask;
 import ru.neosvet.utils.Lib;
 
-public class BookActivity extends MyActivity {
+public class BookFragment extends Fragment {
     public final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
+    private MainActivity act;
+    private View container;
     private final DateFormat df = new SimpleDateFormat("MM.yy");
     private ListAdapter adBook;
-    private NavigationView navigationView;
     private View fabRefresh, ivPrev, ivNext;
     private TextView tvDate;
-    private StatusBar status;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
@@ -48,32 +43,25 @@ public class BookActivity extends MyActivity {
     private SharedPreferences.Editor editor;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_book);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        this.container = inflater.inflate(R.layout.fragment_book, container, false);
+        act = (MainActivity) getActivity();
         initViews();
         setViews();
         initTabs();
         restoreActivityState(savedInstanceState);
+        return this.container;
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_TAB, tab);
         outState.putSerializable(Lib.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        editor.putLong(KAT, dKat.getTime());
-        editor.putLong(POS, dPos.getTime());
-        editor.apply();
-    }
-
-    protected void restoreActivityState(Bundle state) {
-        super.restoreActivityState(state);
+    private void restoreActivityState(Bundle state) {
         long t = System.currentTimeMillis();
         dKat = new Date(pref.getLong(KAT, t));
         dPos = new Date(pref.getLong(POS, t));
@@ -88,14 +76,14 @@ public class BookActivity extends MyActivity {
             task = (BookTask) state.getSerializable(Lib.TASK);
             if (task != null) {
                 fabRefresh.setVisibility(View.GONE);
-                task.setAct(this);
-                status.setLoad(true);
+                task.setFrm(this);
+                act.status.setLoad(true);
             }
         }
     }
 
     private void initTabs() {
-        tabHost = (TabHost) findViewById(R.id.thBook);
+        tabHost = (TabHost) container.findViewById(R.id.thBook);
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
@@ -124,9 +112,9 @@ public class BookActivity extends MyActivity {
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
                 if (name.equals(KAT))
-                    BookActivity.this.setTitle(getResources().getString(R.string.katreny));
+                    act.setTitle(getResources().getString(R.string.katreny));
                 else
-                    BookActivity.this.setTitle(getResources().getString(R.string.poslaniya));
+                    act.setTitle(getResources().getString(R.string.poslaniya));
                 tab = tabHost.getCurrentTab();
                 if (getFile().exists())
                     openList(true);
@@ -164,9 +152,12 @@ public class BookActivity extends MyActivity {
             }
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                     + "\n" + (d.getYear() + 1900));
-            ivPrev.setEnabled(getFile(setDate(d,-1),bP).exists());
-            ivNext.setEnabled(getFile(setDate(d,1),bP).exists());
-            //f.lastModified()
+            ivPrev.setEnabled(getFile(setDate(d, -1), bP).exists());
+            ivNext.setEnabled(getFile(setDate(d, 1), bP).exists());
+            if (f.equals(getFile(new Date(), bP)))
+                act.status.checkTime(f.lastModified());
+            else
+                act.status.checkTime(System.currentTimeMillis());
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, s;
             while ((t = br.readLine()) != null) {
@@ -187,53 +178,35 @@ public class BookActivity extends MyActivity {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        editor.putLong(KAT, dKat.getTime());
+        editor.putLong(POS, dPos.getTime());
+        editor.apply();
+    }
+
     private File getFile() {
         String f = Lib.LIST;
         if (tab == 0)
             f += df.format(dKat);
         else
             f += df.format(dPos) + "p";
-        return new File(getFilesDir() + f);
+        return new File(act.getFilesDir() + f);
     }
 
     private File getFile(Date d, boolean addP) {
         String f = Lib.LIST + df.format(d) + (addP ? "p" : "");
-        return new File(getFilesDir() + f);
+        return new File(act.getFilesDir() + f);
     }
 
     private void initViews() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        pref = getSharedPreferences("book", MODE_PRIVATE);
+        pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
         editor = pref.edit();
-        fabRefresh = findViewById(R.id.fabRefresh);
-        tvDate = (TextView) findViewById(R.id.tvDate);
-        ivPrev = findViewById(R.id.ivPrev);
-        ivNext = findViewById(R.id.ivNext);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        navigationView.setCheckedItem(R.id.nav_book);
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        fabRefresh = container.findViewById(R.id.fabRefresh);
+        tvDate = (TextView) container.findViewById(R.id.tvDate);
+        ivPrev = container.findViewById(R.id.ivPrev);
+        ivNext = container.findViewById(R.id.ivNext);
     }
 
     private void setViews() {
@@ -243,14 +216,14 @@ public class BookActivity extends MyActivity {
                 startLoad(tab);
             }
         });
-        lvBook = (ListView) findViewById(R.id.lvBook);
-        adBook = new ListAdapter(this);
+        lvBook = (ListView) container.findViewById(R.id.lvBook);
+        adBook = new ListAdapter(act);
         lvBook.setAdapter(adBook);
         lvBook.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (boolNotClick) return;
-                BrowserActivity.openActivity(getApplicationContext(), adBook.getItem(pos).getLink(), false);
+                BrowserActivity.openActivity(act, adBook.getItem(pos).getLink(), false);
 //
 //                    PopupMenu pMenu = new PopupMenu(BookActivity.this, view);
 //                    pMenu.inflate(R.menu.menu_calendar);
@@ -279,11 +252,11 @@ public class BookActivity extends MyActivity {
                         if (r > (int) (30 * getResources().getDisplayMetrics().density))
                             if (r > Math.abs(y - (int) event.getY(0))) {
                                 if (x > x2) { // next
-                                    if(ivNext.isEnabled())
+                                    if (ivNext.isEnabled())
                                         openMonth(1);
                                     boolNotClick = true;
                                 } else if (x < x2) { // prev
-                                    if(ivPrev.isEnabled())
+                                    if (ivPrev.isEnabled())
                                         openMonth(-1);
                                     boolNotClick = true;
                                 }
@@ -305,11 +278,13 @@ public class BookActivity extends MyActivity {
                 openMonth(1);
             }
         });
-        status.setClick(new View.OnClickListener() {
+        act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (status.onClick())
+                if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
+                else if (act.status.isTime())
+                    startLoad(tab);
             }
         });
     }
@@ -343,28 +318,21 @@ public class BookActivity extends MyActivity {
     }
 
     private void startLoad(int tab) {
-        status.setCrash(false);
+        act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new BookTask(this);
         task.execute((byte) tab);
-        status.setLoad(true);
+        act.status.setLoad(true);
     }
 
     public void finishLoad(boolean suc) {
         task = null;
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
-            status.setLoad(false);
+            act.status.setLoad(false);
             openList(false);
         } else {
-            status.setCrash(true);
+            act.status.setCrash(true);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        status.setCrash(false);
-        downloadAll();
-        return super.onOptionsItemSelected(item);
     }
 }

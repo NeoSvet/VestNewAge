@@ -1,10 +1,14 @@
 package ru.neosvet.utils;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -28,11 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import ru.neosvet.blagayavest.R;
-
-/**
- * Created by NeoSvet on 16.12.2016.
- */
+import ru.neosvet.vestnewage.R;
 
 public class Lib {
     public static final String SITE = "http://blagayavest.info/", N = "\n",
@@ -57,7 +57,7 @@ public class Lib {
                 BufferedReader br = new BufferedReader(new InputStreamReader(context.openFileInput(file.getName())));
                 while ((t = br.readLine()) != null) {
                     l = br.readLine();
-                    if (link.equals(l)) {
+                    if (l.contains(link)) {
                         b = true;
                     } else {
                         f.append(t);
@@ -79,7 +79,6 @@ public class Lib {
     }
 
     public void setCookies(String s, String t, String n) {
-//        Log.d("tag", "get: " + s + "; " + t + "; " + n);
         SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         if (s != null)
@@ -119,8 +118,6 @@ public class Lib {
     }
 
     public void downloadFile(String url, String file) {
-        // LOG("FROM=" + FROM);
-        // LOG("TO=" + TO);
         try {
             File f = new File(file);
             //if(f.exists()) f.delete();
@@ -136,13 +133,11 @@ public class Lib {
             in.close();
         } catch (Exception e) {
             e.printStackTrace();
-            // LOG("error_download=" + e.getMessage());
         }
 
     }
 
     public void downloadPage(String link, String path, boolean bCounter) throws Exception {
-//        Log.d("tag", "download page");
         String line, s, url, end;
         url = SITE + link;
         if (link.contains(print)) {
@@ -235,7 +230,6 @@ public class Lib {
         req.setHeader("User-Agent", context.getPackageName());
         if (url.contains(SITE) && !url.contains(print)) {
             String s = getCookies();
-//            Log.d("tag", "send: " + s);
             if (!s.equals(""))
                 req.setHeader(COOKIE, s);
             res = client.execute(req);
@@ -333,15 +327,14 @@ public class Lib {
         while ((i = line.indexOf("img src", i)) > -1) {
             i += 9;
             final String link_counter = line.substring(i, line.indexOf("\"", i));
-            Thread t = new Thread(new Runnable() {
+            new Thread(new Runnable() {
                 public void run() {
                     try {
                         getStream(link_counter);
                     } catch (Exception ex) {
                     }
                 }
-            });
-            t.start();
+            }).start();
         }
     }
 
@@ -359,7 +352,7 @@ public class Lib {
             if (url.indexOf("/") == 0)
                 url = url.substring(2);
             copyAddress(url);
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -368,5 +361,62 @@ public class Lib {
         ClipData clip = ClipData.newPlainText(context.getResources().getText(R.string.app_name), txt);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(context, context.getResources().getText(R.string.address_copied), Toast.LENGTH_LONG).show();
+    }
+
+    public String getDiffDate(long now, long t) {
+        t = (now - t) / 1000;
+        int k;
+        if (t < 60) {
+            if (t == 0)
+                t = 1;
+            k = 0;
+        } else {
+            t = t / 60;
+            if (t < 60)
+                k = 3;
+            else {
+                t = t / 60;
+                if (t < 24)
+                    k = 6;
+                else {
+                    t = t / 24;
+                    k = 9;
+                }
+            }
+        }
+        String time;
+        if (t > 4 && t < 21)
+            time = t + context.getResources().getStringArray(R.array.time)[1 + k];
+        else {
+            if (t == 1)
+                time = context.getResources().getStringArray(R.array.time)[k];
+            else {
+                int n = (int) t % 10;
+                if (n == 1)
+                    time = t + " " + context.getResources().getStringArray(R.array.time)[k];
+                else if (n > 1 && n < 5)
+                    time = t + context.getResources().getStringArray(R.array.time)[2 + k];
+                else
+                    time = t + context.getResources().getStringArray(R.array.time)[1 + k];
+            }
+        }
+
+        return time + context.getResources().getStringArray(R.array.time)[12];
+    }
+
+    public boolean verifyStoragePermissions(int code) {
+        //http://stackoverflow.com/questions/38989050/android-6-0-write-to-external-sd-card
+        int permission = ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity)context,
+                    new String[] {
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    }, code);
+            return true;
+        }
+        return false;
     }
 }

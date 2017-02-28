@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/starsky_bg">
+
+    <ImageView
+        android:layout_width="318dp"
+        android:layout_height="201dp"
+        android:src="@drawable/side_nav_bar" />
+
+    <ListView
+        android:id="@+id/lvMenu"
+        android:layout_width="318dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="201dp" />
+
+    <View
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/colorAccentLight" />
+</RelativeLayout>

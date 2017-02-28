@@ -3,11 +3,8 @@ package ru.neosvet.ui;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import ru.neosvet.blagayavest.BrowserActivity;
+import ru.neosvet.vestnewage.BrowserActivity;
 
-/**
- * Created by NeoSvet on 22.12.2016.
- */
 public class WebClient extends WebViewClient {
     private final String files = "file";
     private BrowserActivity act;
@@ -38,7 +35,7 @@ public class WebClient extends WebViewClient {
         else
             act.openLink(url);
 //        super.shouldOverrideUrlLoading(view, url);
-        return false;
+        return true;
     }
 
     public void onPageFinished(WebView view, String url) {

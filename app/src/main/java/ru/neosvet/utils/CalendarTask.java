@@ -19,24 +19,26 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.CalendarActivity;
+import ru.neosvet.vestnewage.CalendarFragment;
+import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
-
-/**
- * Created by NeoSvet on 14.12.2016.
- */
 
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
-    private transient MyActivity act;
+    private transient CalendarFragment frm;
+    private transient MainActivity act;
     List<ListItem> data = new ArrayList<ListItem>();
 
-    public CalendarTask(MyActivity act) {
+    public CalendarTask(CalendarFragment frm) {
+        setFrm(frm);
+    }
+
+    public CalendarTask(MainActivity act) {
         this.act = act;
     }
 
-    public void setAct(CalendarActivity act) {
-        this.act = act;
+    public void setFrm(CalendarFragment frm) {
+        this.frm = frm;
+        act = (MainActivity) frm.getActivity();
     }
 
     @Override
@@ -46,8 +48,8 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
 
     @Override
     protected void onPostExecute(Boolean result) {
-        if (act instanceof CalendarActivity) {
-            ((CalendarActivity) act).finishLoad(result);
+        if (frm != null) {
+            frm.finishLoad(result);
         }
     }
 
@@ -98,54 +100,57 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
     }
 
     public void downloadCalendar(int year, int month) throws Exception {
-        JSONObject json, jsonI;
-        JSONArray jsonA;
-        String r, s;
-        DefaultHttpClient client = new DefaultHttpClient();
-        HttpGet rget = new HttpGet(Lib.SITE + "?json&year="
-                + (year + 1900) + "&month=" + (month + 1));
-        final String poemOutDict = "poemOutDict";
-        HttpResponse res = client.execute(rget);
-        r = EntityUtils.toString(res.getEntity());
-        json = new JSONObject(r);
-        int n;
-        for (int i = 0; i < json.names().length(); i++) {
-            s = json.names().get(i).toString();
-            jsonI = json.optJSONObject(s);
-            n = data.size();
-            data.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
-            if (jsonI == null) {
-                jsonA = json.optJSONArray(s);
-                for (int j = 0; j < jsonA.length(); j++) {
-                    jsonI = jsonA.getJSONObject(j);
-                    r = jsonI.getString(DataBase.LINK);
-                    jsonI = jsonI.getJSONObject("data");
-                    if (jsonI.has(poemOutDict)) {
-                        if (jsonI.getBoolean(poemOutDict))
-                            data.get(n).addLink(r);
-                        else addLink(n, r);
-                    } else
-                        addLink(n, r);
+        try {
+            JSONObject json, jsonI;
+            JSONArray jsonA;
+            String r, s;
+            DefaultHttpClient client = new DefaultHttpClient();
+            HttpGet rget = new HttpGet(Lib.SITE + "?json&year="
+                    + (year + 1900) + "&month=" + (month + 1));
+            final String poemOutDict = "poemOutDict";
+            HttpResponse res = client.execute(rget);
+            r = EntityUtils.toString(res.getEntity());
+            json = new JSONObject(r);
+            int n;
+            for (int i = 0; i < json.names().length(); i++) {
+                s = json.names().get(i).toString();
+                jsonI = json.optJSONObject(s);
+                n = data.size();
+                data.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
+                if (jsonI == null) {
+                    jsonA = json.optJSONArray(s);
+                    for (int j = 0; j < jsonA.length(); j++) {
+                        jsonI = jsonA.getJSONObject(j);
+                        r = jsonI.getString(DataBase.LINK);
+                        jsonI = jsonI.getJSONObject("data");
+                        if (jsonI.has(poemOutDict)) {
+                            if (jsonI.getBoolean(poemOutDict))
+                                data.get(n).addLink(r);
+                            else addLink(n, r);
+                        } else
+                            addLink(n, r);
+                    }
+                } else {
+                    data.get(n).addLink(jsonI.getString(DataBase.LINK));
                 }
-            } else {
-                data.get(n).addLink(jsonI.getString(DataBase.LINK));
             }
-        }
 
-        File file = new File(act.getFilesDir() + CalendarActivity.CALENDAR);
-        file.mkdir();
-        file = new File(file.toString() + File.separator + month + "." + year);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        for (int i = 0; i < data.size(); i++) {
-            bw.write(data.get(i).getTitle() + Lib.N);
-            for (int j = 0; j < data.get(i).getCount(); j++) {
-                bw.write(data.get(i).getLink(j) + Lib.N);
+            File file = new File(act.getFilesDir() + CalendarFragment.CALENDAR);
+            file.mkdir();
+            file = new File(file.toString() + File.separator + month + "." + year);
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            for (int i = 0; i < data.size(); i++) {
+                bw.write(data.get(i).getTitle() + Lib.N);
+                for (int j = 0; j < data.get(i).getCount(); j++) {
+                    bw.write(data.get(i).getLink(j) + Lib.N);
+                }
+                bw.write(Lib.N);
+                bw.flush();
             }
-            bw.write(Lib.N);
-            bw.flush();
+            bw.close();
+            data.clear();
+        } catch (org.json.JSONException e) {
         }
-        bw.close();
-        data.clear();
     }
 
     private void addLink(int n, String link) {

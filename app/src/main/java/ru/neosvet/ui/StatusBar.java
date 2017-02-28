@@ -7,12 +7,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import ru.neosvet.blagayavest.R;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
-
-/**
- * Created by NeoSvet on 25.12.2016.
- */
 
 public class StatusBar {
     private Context cntxt;
@@ -20,7 +16,7 @@ public class StatusBar {
     private View panel;
     private TextView tv;
     private ImageView iv;
-    private boolean crash = false, stop = false;
+    private boolean crash = false, stop = true, time = false;
 
     public StatusBar(Context context, View p) {
         cntxt = context;
@@ -51,6 +47,8 @@ public class StatusBar {
     public void setLoad(boolean boolStart) {
         stop = !boolStart;
         if (boolStart) {
+            crash = false;
+            time = false;
             panel.setVisibility(View.VISIBLE);
             iv.startAnimation(anStatus);
         } else {
@@ -60,17 +58,33 @@ public class StatusBar {
     }
 
     public void setCrash(boolean crash) {
-        stop = true;
         this.crash = crash;
         if (crash) {
+            stop = true;
+            time = false;
             tv.setText(cntxt.getResources().getString(R.string.crash));
             panel.setBackgroundDrawable(cntxt.getResources().getDrawable(R.drawable.shape_red));
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
         } else {
             restoreText();
+            panel.setVisibility(View.GONE);
             panel.setBackgroundDrawable(cntxt.getResources().getDrawable(R.drawable.shape_norm));
             iv.setImageResource(R.drawable.refresh);
+        }
+    }
+
+    public void checkTime(long t) {
+        if (!stop || crash)
+            return;
+        if (System.currentTimeMillis() - t > 86400000) {
+            time = true;
+            panel.setVisibility(View.VISIBLE);
+            tv.setText(cntxt.getResources().getString(R.string.refresh) + "?");
+        } else {
+            time = false;
+            panel.setVisibility(View.GONE);
+            restoreText();
         }
     }
 
@@ -98,5 +112,9 @@ public class StatusBar {
             return true;
         }
         return false;
+    }
+
+    public boolean isTime() {
+        return time;
     }
 }

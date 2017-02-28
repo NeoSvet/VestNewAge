@@ -10,11 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.R;
-
-/**
- * Created by NeoSvet on 26.11.2016.
- */
+import ru.neosvet.vestnewage.R;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHolder> {
     private List<CalendarItem> data = new ArrayList<CalendarItem>();

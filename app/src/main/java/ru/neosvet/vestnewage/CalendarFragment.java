@@ -1,19 +1,14 @@
-package ru.neosvet.blagayavest;
+package ru.neosvet.vestnewage;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -31,60 +26,47 @@ import ru.neosvet.ui.CalendarAdapter;
 import ru.neosvet.ui.CalendarItem;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
-import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.CalendarTask;
 import ru.neosvet.utils.Lib;
 
-
-public class CalendarActivity extends MyActivity {
+public class CalendarFragment extends Fragment {
     public static final String CURRENT_DATE = "current_date", CALENDAR = "/calendar/";
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
-    private int x, y;
-    private boolean boolNotClick = false;
-    private NavigationView navigationView;
     private Date dCurrent;
-    private StatusBar status;
     private TextView tvDate, tvNew;
     private ListView lvNoread;
     private View pCalendar, ivPrev, ivNext, fabRefresh, fabClose, fabClear;
     private CalendarTask task = null;
     private ListAdapter adNoread;
+    private View container;
+    private MainActivity act;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calendar);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        this.container = inflater.inflate(R.layout.fragment_calendar, container, false);
+        act = (MainActivity) getActivity();
+        act.setTitle(getResources().getString(R.string.calendar));
         initViews();
         setViews();
         initCalendar();
         restoreActivityState(savedInstanceState);
-
-        SharedPreferences pref = getSharedPreferences("set", MODE_PRIVATE);
-        if (pref.getBoolean("first", true)) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putBoolean("first", false);
-            editor.apply();
-            Intent intent = new Intent(this, HelpActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-        }
+        return this.container;
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(Lib.NOREAD, (fabClose.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Lib.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
-    protected void restoreActivityState(Bundle state) {
-        super.restoreActivityState(state);
+    private void restoreActivityState(Bundle state) {
         if (state == null) {
             Date d = new Date();
             dCurrent = new Date(d.getYear(), d.getMonth(), d.getDate());
@@ -93,7 +75,7 @@ public class CalendarActivity extends MyActivity {
             task = (CalendarTask) state.getSerializable(Lib.TASK);
             if (task != null) {
                 setStatus(true);
-                task.setAct(this);
+                task.setFrm(this);
             }
             if (state.getBoolean(Lib.NOREAD, false)) {
                 pCalendar.setVisibility(View.GONE);
@@ -116,8 +98,10 @@ public class CalendarActivity extends MyActivity {
             public void onClick(View view) {
                 if (tvNew.getText().toString().equals("0"))
                     return;
-                if (tvNew.getText().toString().equals("..."))
+                if (tvNew.getText().toString().equals("...")) {
+                    adNoread.clear();
                     adNoread.addItem(new ListItem(getResources().getString(R.string.no_list), ""));
+                }
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
@@ -136,13 +120,7 @@ public class CalendarActivity extends MyActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (!adNoread.getItem(i).getLink().equals("")) {
-                    String link = adNoread.getItem(i).getLink();
-                    adNoread.clear();
-                    BrowserActivity.openActivity(getApplicationContext(), link, false);
-//                    list.remove(i);
-//                    adNoread.notifyDataSetChanged();
-//                    int n = Integer.parseInt(tvNew.getText().toString());
-//                    tvNew.setText(Integer.toString(n - 1));
+                    openLink(adNoread.getItem(i).getLink());
                 }
             }
         });
@@ -157,7 +135,7 @@ public class CalendarActivity extends MyActivity {
             public void onClick(View view) {
                 closeNoread();
                 tvNew.setText("0");
-                lib.setCookies("", "", "");
+                act.lib.setCookies("", "", "");
             }
         });
         fabRefresh.setOnClickListener(new View.OnClickListener() {
@@ -166,10 +144,10 @@ public class CalendarActivity extends MyActivity {
                 startLoad();
             }
         });
-        status.setClick(new View.OnClickListener() {
+        act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (status.onClick()) {
+                if (act.status.onClick()) {
                     tvNew.setVisibility(View.VISIBLE);
                     fabRefresh.setVisibility(View.VISIBLE);
                 }
@@ -212,9 +190,8 @@ public class CalendarActivity extends MyActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        navigationView.setCheckedItem(R.id.nav_calendar);
         if (adNoread.getCount() == 0) {
             createNoreadList(true);
             if (adNoread.getCount() == 0 && lvNoread.getVisibility() == View.VISIBLE) {
@@ -227,65 +204,46 @@ public class CalendarActivity extends MyActivity {
         Date d = new Date();
         today_m = d.getMonth();
         today_y = d.getYear();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        setTitle(getResources().getString(R.string.calendar));
-        tvNew = (TextView) findViewById(R.id.tvNew);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
-        fabRefresh = findViewById(R.id.fabRefresh);
-        fabClose = findViewById(R.id.fabClose);
-        fabClear = findViewById(R.id.fabClear);
-        lvNoread = (ListView) findViewById(R.id.lvNoread);
-        adNoread = new ListAdapter(this);
+        tvNew = (TextView) container.findViewById(R.id.tvNew);
+        fabRefresh = container.findViewById(R.id.fabRefresh);
+        fabClose = container.findViewById(R.id.fabClose);
+        fabClear = container.findViewById(R.id.fabClear);
+        lvNoread = (ListView) container.findViewById(R.id.lvNoread);
+        adNoread = new ListAdapter(act);
         lvNoread.setAdapter(adNoread);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (lvNoread.getVisibility() == View.VISIBLE) {
-            closeNoread();
-        } else {
-            super.onBackPressed();
+
+    public boolean onBackPressed() {
+       if (lvNoread.getVisibility() == View.VISIBLE) {
+           closeNoread();
+           return false;
         }
+        return true;
     }
 
     private void initCalendar() {
-        pCalendar = findViewById(R.id.pCalendar);
-        tvDate = (TextView) findViewById(R.id.tvDate);
-        ivPrev = findViewById(R.id.ivPrev);
-        ivNext = findViewById(R.id.ivNext);
-        rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 7);
+        pCalendar = container.findViewById(R.id.pCalendar);
+        tvDate = (TextView) container.findViewById(R.id.tvDate);
+        ivPrev = container.findViewById(R.id.ivPrev);
+        ivNext = container.findViewById(R.id.ivNext);
+        rvCalendar = (RecyclerView) container.findViewById(R.id.rvCalendar);
+        GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
         adCalendar = new CalendarAdapter();
         rvCalendar.setLayoutManager(layoutManager);
         rvCalendar.setAdapter(adCalendar);
 
         rvCalendar.addOnItemTouchListener(
-                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, final int pos) {
                         int k = adCalendar.getItem(pos).getCount();
                         if (k == 1) {
-                            adNoread.clear();
-                            BrowserActivity.openActivity(getApplicationContext(),
-                                    adCalendar.getItem(pos).getLink(0), false);
+                            openLink(adCalendar.getItem(pos).getLink(0));
                         } else if (k > 1) {
-                            PopupMenu popupMenu = new PopupMenu(CalendarActivity.this,
-                                    rvCalendar.getChildAt(pos));
+                            PopupMenu popupMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
                             popupMenu.inflate(R.menu.menu_calendar);
-                            List<ListItem> list = getList(adCalendar.getItem(pos).getLink(0));
+                            List<ListItem> list = getList(pos);
                             String s;
                             for (int i = 0; i < 5; i++) {
                                 if (i < k) {
@@ -315,9 +273,7 @@ public class CalendarActivity extends MyActivity {
                                         index = 3;
                                     else
                                         index = 4;
-                                    adNoread.clear();
-                                    BrowserActivity.openActivity(getApplicationContext(),
-                                            adCalendar.getItem(pos).getLink(index), false);
+                                    openLink(adCalendar.getItem(pos).getLink(index));
                                     return true;
                                 }
                             });
@@ -326,36 +282,7 @@ public class CalendarActivity extends MyActivity {
                     }
                 })
         );
-        rvCalendar.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        x = (int) event.getX(0);
-                        y = (int) event.getY(0);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        final int r = Math.abs(x -(int) event.getX(0));
-//                        r2=Math.abs(y - (int) event.getY(0));
-//                        Lib.LOG("r="+r);
-//                        Lib.LOG("r2="+r2);
-                        boolNotClick = false;
-//                        if (r > r2) {
-                            if (r < 175) { // next
-                                if (ivNext.isEnabled())
-                                    openMonth(1);
-                                boolNotClick = true;
-                            } else if (r > 350) { // prev
-                                if (ivPrev.isEnabled())
-                                    openMonth(-1);
-                                boolNotClick = true;
-                            }
-//                        }
-                        break;
-                }
-                return false;
-            }
-        });
+
         ivPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -370,16 +297,28 @@ public class CalendarActivity extends MyActivity {
         });
     }
 
+    private void openLink(String link) {
+        BrowserActivity.openActivity(act, link, !link.contains("/"));
+        adNoread.clear();
+    }
+
     private void openMonth(int v) {
         if (task == null)
             createCalendar(v);
     }
 
-    private List<ListItem> getList(String link) {
+    private List<ListItem> getList(int pos) {
+        String link = adCalendar.getItem(pos).getLink(0);
         List<ListItem> data = new ArrayList<ListItem>();
+        if (!link.contains("/")) {
+            data.add(new ListItem(
+                    getResources().getString(R.string.prom_for_soul_unite),
+                    link));
+            link = adCalendar.getItem(pos).getLink(1);
+        }
         int n = link.indexOf(".") + 1;
         String t, f = Lib.LIST + link.substring(n, n + 5);
-        File file = new File(getFilesDir() + f);
+        File file = new File(act.getFilesDir() + f);
         while (true) {
             if (file.exists()) {
                 try {
@@ -402,7 +341,7 @@ public class CalendarActivity extends MyActivity {
             if (f.contains("p"))
                 break;
             f += "p";
-            file = new File(getFilesDir() + f);
+            file = new File(act.getFilesDir() + f);
         }
         return data;
     }
@@ -415,8 +354,8 @@ public class CalendarActivity extends MyActivity {
                 + "\n" + (d.getYear() + 1900));
         adCalendar.clear();
         for (int i = -1; i > -7; i--)
-            adCalendar.addItem(new CalendarItem(this, i, R.color.light_gray));
-        adCalendar.addItem(new CalendarItem(this, 0, R.color.light_gray));
+            adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));
+        adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray));
         int n;
         final int m = d.getMonth();
         d.setDate(1);
@@ -428,20 +367,20 @@ public class CalendarActivity extends MyActivity {
                 d.setDate(2 - d.getDay());
             n = d.getDate();
             while (d.getDate() > 1) {
-                adCalendar.addItem(new CalendarItem(this, d.getDate(), R.color.gray));
+                adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.gray));
                 n++;
                 d.setDate(n);
             }
         }
         n = 1;
         while (d.getMonth() == m) {
-            adCalendar.addItem(new CalendarItem(this, d.getDate(), R.color.white));
+            adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.white));
             n++;
             d.setDate(n);
         }
         n = 1;
         while (d.getDay() != 1) {
-            adCalendar.addItem(new CalendarItem(this, d.getDate(), R.color.gray));
+            adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.gray));
             n++;
             d.setDate(n);
         }
@@ -463,14 +402,14 @@ public class CalendarActivity extends MyActivity {
         try {
             if (task != null)
                 return;
-            File file = new File(getFilesDir() + CALENDAR +
+            File file = new File(act.getFilesDir() + CALENDAR +
                     dCurrent.getMonth() + "." + dCurrent.getYear());
             if (!file.exists()) {
                 if (boolLoad)
                     startLoad();
             } else {
                 if (isCurMonth() && boolLoad) {
-                    long t = lib.getTimeLastVisit();
+                    long t = act.lib.getTimeLastVisit();
                     t = System.currentTimeMillis() - t;
                     if (t > 3600000) {
                         startLoad();
@@ -512,7 +451,7 @@ public class CalendarActivity extends MyActivity {
         if (suc) {
             setStatus(false);
         } else {
-            status.setCrash(true);
+            act.status.setCrash(true);
         }
         if (adNoread.getCount() == 0)
             createNoreadList(false);
@@ -522,10 +461,10 @@ public class CalendarActivity extends MyActivity {
 
     private void createNoreadList(boolean boolLoad) {
         try {
-            File file = new File(getFilesDir() + File.separator + Lib.NOREAD);
+            File file = new File(act.getFilesDir() + File.separator + Lib.NOREAD);
             if (file.exists()) {
                 String s;
-                BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput(file.getName())));
+                BufferedReader br = new BufferedReader(new InputStreamReader(act.openFileInput(file.getName())));
                 while ((s = br.readLine()) != null) {
                     adNoread.addItem(new ListItem(s, br.readLine()));
                 }
@@ -558,8 +497,8 @@ public class CalendarActivity extends MyActivity {
     }
 
     private void setStatus(boolean boolStart) {
-        status.setCrash(false);
-        status.setLoad(boolStart);
+        act.status.setCrash(false);
+        act.status.setLoad(boolStart);
         if (boolStart) {
             tvNew.setVisibility(View.GONE);
             fabRefresh.setVisibility(View.GONE);
@@ -567,12 +506,5 @@ public class CalendarActivity extends MyActivity {
             tvNew.setVisibility(View.VISIBLE);
             fabRefresh.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        status.setCrash(false);
-        downloadAll();
-        return super.onOptionsItemSelected(item);
     }
 }

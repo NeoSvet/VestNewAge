@@ -5,10 +5,6 @@ import java.util.List;
 
 import ru.neosvet.utils.Lib;
 
-/**
- * Created by NeoSvet on 15.12.2016.
- */
-
 public class ListItem {
     private String title, des = null;
 

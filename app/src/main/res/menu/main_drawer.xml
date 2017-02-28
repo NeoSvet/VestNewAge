@@ -5,8 +5,7 @@
         <item
             android:id="@+id/nav_rss"
             android:icon="@drawable/rss"
-            android:title="@string/rss"
-            android:visible="false" />
+            android:title="@string/rss" />
         <item
             android:id="@+id/nav_main"
             android:icon="@drawable/main"
@@ -31,8 +30,7 @@
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/settings"
-            android:title="@string/settings"
-            android:visible="false" />
+            android:title="@string/settings" />
         <item
             android:id="@+id/nav_help"
             android:icon="@drawable/help"

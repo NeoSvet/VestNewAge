@@ -6,11 +6,8 @@ import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.R;
-
-/**
- * Created by NeoSvet on 26,28.11.2016.
- */
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.utils.Lib;
 
 public class CalendarItem {
     private Context context;
@@ -26,15 +23,24 @@ public class CalendarItem {
         color = context.getResources().getColor(id_color);
         if (num < 1 || num == 4 || num == 17 || num == 26 || num == 30) {
             bold = true;
-            if (id_color == R.color.white)
+            if (id_color == R.color.white) {
                 color = context.getResources().getColor(R.color.colorAccentLight);
+                links.add(Lib.LINK + "Posyl-na-Edinenie");
+            }
         }
     }
 
     public void clear() {
-        links.clear();
-        kat = false;
-        pos = false;
+        if (links.size() > 0) {
+            if (links.get(0).contains("/"))
+                links.clear();
+            else {
+                while (links.size() > 1)
+                    links.remove(1);
+            }
+            kat = false;
+            pos = false;
+        }
     }
 
     public String getLink(int i) {

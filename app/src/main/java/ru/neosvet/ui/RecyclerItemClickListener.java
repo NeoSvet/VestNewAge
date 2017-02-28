@@ -1,9 +1,5 @@
 package ru.neosvet.ui;
 
-/**
- * Created by NeoSvet on 23.11.2016.
- */
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;

@@ -1,4 +1,4 @@
-package ru.neosvet.blagayavest;
+package ru.neosvet.vestnewage;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -32,6 +32,7 @@ public class BrowserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String ARTICLE = "article", THEME = "theme",
             NOMENU = "nomenu", SCALE = "scale", FILE = "file://", PNG = ".png";
+    private final int CODE_OPEN = 1, CODE_DOWNLOAD = 2;
     private boolean bArticle, bNomenu, bTheme, bTwo = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -199,15 +200,30 @@ public class BrowserActivity extends AppCompatActivity
         super.onStop();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        //http://stackoverflow.com/questions/35484767/activitycompat-requestpermissions-not-showing-dialog-box
+        if (grantResults.length > 0 && grantResults[0] == 0) {
+            if (requestCode == CODE_OPEN)
+                openFile();
+            else
+                downloadFile(getFile());
+        } else {
+            //Permission Denied
+        }
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_refresh) {
             if (loader == null) {
-                if (link.contains(PNG))
+                if (link.contains(PNG)) {
+                    if (lib.verifyStoragePermissions(CODE_DOWNLOAD))
+                        return true;
                     downloadFile(getFile());
-                else
+                } else
                     downloadPage(true);
             }
         } else if (id == R.id.nav_nomenu) {
@@ -280,6 +296,7 @@ public class BrowserActivity extends AppCompatActivity
 
     public void openFile() {
         status.setLoad(false);
+        if (lib.verifyStoragePermissions(CODE_OPEN)) return;
         File f = getFile();
         if (f.exists()) {
             wvBrowser.loadUrl(FILE + f.toString());
@@ -293,6 +310,7 @@ public class BrowserActivity extends AppCompatActivity
                 Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
                 .toString() + link.substring(link.lastIndexOf("/")));
     }
+
 
     private void downloadFile(File f) {
         loader = new LoaderTask(this);
@@ -345,9 +363,9 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void finishLoad(boolean suc) {
-        status.setLoad(false);
         loader = null;
         if (suc) {
+            status.setLoad(false);
             if (link.contains(PNG))
                 openFile();
             else

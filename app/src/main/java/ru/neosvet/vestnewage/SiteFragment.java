@@ -1,16 +1,13 @@
-package ru.neosvet.blagayavest;
+package ru.neosvet.vestnewage;
 
-import android.content.Intent;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -23,59 +20,57 @@ import java.io.FileReader;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
-import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.MainTask;
+import ru.neosvet.utils.SiteTask;
 
-public class MainActivity extends MyActivity {
+public class SiteFragment extends Fragment {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";
+    private MainActivity act;
     private ListAdapter adMain;
-    private NavigationView navigationView;
-    private View fabRefresh;
-    private StatusBar status;
-    private MainTask task = null;
+    private View container, fabRefresh;
+    private SiteTask task = null;
     private TabHost tabHost;
     private ListView lvMain;
     private int x, y;
     private boolean boolNotClick = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        this.container = inflater.inflate(R.layout.fragment_site, container, false);
+        act = (MainActivity) getActivity();
         initViews();
         setViews();
         initTabs();
         restoreActivityState(savedInstanceState);
+        return this.container;
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_TAB, tabHost.getCurrentTab());
         outState.putSerializable(Lib.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
-    protected void restoreActivityState(Bundle state) {
-        super.restoreActivityState(state);
+    private void restoreActivityState(Bundle state) {
         if (state == null) {
             tabHost.setCurrentTab(0);
         } else {
             if (state.getInt(CURRENT_TAB) == 1)
                 tabHost.setCurrentTab(0);
             tabHost.setCurrentTab(state.getInt(CURRENT_TAB));
-            task = (MainTask) state.getSerializable(Lib.TASK);
+            task = (SiteTask) state.getSerializable(Lib.TASK);
             if (task != null) {
                 fabRefresh.setVisibility(View.GONE);
-                status.setLoad(true);
-                task.setAct(this);
+                act.status.setLoad(true);
+                task.setFrm(this);
             }
         }
     }
 
     private void initTabs() {
-        tabHost = (TabHost) findViewById(R.id.thMain);
+        tabHost = (TabHost) container.findViewById(R.id.thMain);
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
@@ -110,13 +105,14 @@ public class MainActivity extends MyActivity {
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
                 if (name.equals(MAIN))
-                    MainActivity.this.setTitle(getResources().getString(R.string.main));
+                    act.setTitle(getResources().getString(R.string.main));
                 else if (name.equals(NEWS))
-                    MainActivity.this.setTitle(getResources().getString(R.string.news));
+                    act.setTitle(getResources().getString(R.string.news));
                 else if (name.equals(MEDIA))
-                    MainActivity.this.setTitle(getResources().getString(R.string.media));
-                if (getFile(name).exists())
-                    openList(name, true);
+                    act.setTitle(getResources().getString(R.string.media));
+                File f = getFile(name);
+                if (f.exists())
+                    openList(f, true);
                 else
                     startLoad(name);
             }
@@ -124,33 +120,7 @@ public class MainActivity extends MyActivity {
     }
 
     private void initViews() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        fabRefresh = findViewById(R.id.fabRefresh);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        navigationView.setCheckedItem(R.id.nav_main);
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        fabRefresh = container.findViewById(R.id.fabRefresh);
     }
 
     private void setViews() {
@@ -160,8 +130,8 @@ public class MainActivity extends MyActivity {
                 startLoad(tabHost.getCurrentTabTag());
             }
         });
-        lvMain = (ListView) findViewById(R.id.lvMain);
-        adMain = new ListAdapter(this);
+        lvMain = (ListView) container.findViewById(R.id.lvMain);
+        adMain = new ListAdapter(act);
         lvMain.setAdapter(adMain);
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -172,22 +142,20 @@ public class MainActivity extends MyActivity {
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 0) { // main
                         if (pos == 1 || pos == 5) { //poslaniya
-                            Intent intent = new Intent(MainActivity.this, BookActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            startActivity(intent);
+                            act.setFragment(R.id.nav_book);
                         } else if (pos == adMain.getCount() - 2) { //rss
-//                            Intent intent = new Intent(MainActivity.this, Summary Activity.class);
+//                            Intent intent = new Intent(SiteFragment.this, Summary Activity.class);
 //                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 //                            startActivity(intent);
                         } else if (pos == 6 || pos == 7) { //no article
-                            BrowserActivity.openActivity(getApplicationContext(), link, false);
+                            BrowserActivity.openActivity(act, link, false);
                         } else
                             OpenPage(link);
                     } else {
                         OpenPage(link);
                     }
                 } else {
-                    PopupMenu pMenu = new PopupMenu(MainActivity.this, view);
+                    PopupMenu pMenu = new PopupMenu(act, view);
                     pMenu.inflate(R.menu.menu_calendar);
                     for (int i = 0; i < 5; i++) {
                         if (i < adMain.getItem(pos).getCount())
@@ -246,19 +214,22 @@ public class MainActivity extends MyActivity {
                 return false;
             }
         });
-        status.setClick(new View.OnClickListener() {
+        act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (status.onClick())
+                if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
+                else if (act.status.isTime())
+                    startLoad(tabHost.getCurrentTabTag());
             }
         });
     }
 
-    private void openList(String name, boolean boolLoad) {
+    private void openList(File f, boolean boolLoad) {
         try {
             adMain.clear();
-            BufferedReader br = new BufferedReader(new FileReader(getFile(name)));
+            act.status.checkTime(f.lastModified());
+            BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
             while ((t = br.readLine()) != null) {
@@ -298,14 +269,14 @@ public class MainActivity extends MyActivity {
 
     private void OpenPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
-            lib.openInApps(url);
+            act.lib.openInApps(url);
         } else {
-            BrowserActivity.openActivity(getApplicationContext(), url, !url.contains("press"));
+            BrowserActivity.openActivity(act, url, !url.contains("press"));
         }
     }
 
     private void startLoad(String name) {
-        status.setCrash(false);
+        act.status.setCrash(false);
         String url = Lib.SITE;
         switch (name) {
             case NEWS:
@@ -316,30 +287,23 @@ public class MainActivity extends MyActivity {
                 break;
         }
         fabRefresh.setVisibility(View.GONE);
-        task = new MainTask(this);
+        task = new SiteTask(this);
         task.execute(url, getFile(name).toString());
-        status.setLoad(true);
+        act.status.setLoad(true);
     }
 
     private File getFile(String name) {
-        return new File(getFilesDir() + name);
+        return new File(act.getFilesDir() + name);
     }
 
     public void finishLoad(String name) {
         task = null;
         if (name == null) {
-            status.setCrash(true);
+            act.status.setCrash(true);
         } else {
             fabRefresh.setVisibility(View.VISIBLE);
-            status.setLoad(false);
-            openList(name, false);
+            act.status.setLoad(false);
+            openList(getFile(name), false);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        status.setCrash(false);
-        downloadAll();
-        return super.onOptionsItemSelected(item);
     }
 }

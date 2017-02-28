@@ -14,31 +14,34 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.blagayavest.BookActivity;
+import ru.neosvet.vestnewage.BookFragment;
+import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.MyActivity;
-
-/**
- * Created by NeoSvet on 26.12.2016.
- */
 
 public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializable {
-    private transient MyActivity act;
+    private transient BookFragment frm;
+    private transient MainActivity act;
     private List<ListItem> data = new ArrayList<ListItem>();
 
-    public BookTask(MyActivity act) {
+    public BookTask(BookFragment frm) {
+        setFrm(frm);
+    }
+
+    public BookTask(MainActivity act) {
         this.act = act;
     }
 
-    public void setAct(BookActivity act) {
-        this.act = act;
+    public void setFrm(BookFragment frm) {
+        this.frm = frm;
+        act = (MainActivity) frm.getActivity();
     }
+
 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        if (act instanceof BookActivity) {
-            ((BookActivity) act).finishLoad(result);
+        if (frm != null) {
+            frm.finishLoad(result);
         }
     }
 
@@ -77,6 +80,8 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
             if (!b) {
                 b = t.contains("h2");//razdel
             } else if (t.contains(Lib.HREF)) {
+                if (t.contains("years"))
+                    t = t.substring(0, t.indexOf("years"));
                 n = 0;
                 while (t.indexOf(Lib.HREF, n) > -1) {
                     n = t.indexOf(Lib.HREF, n) + 7;
