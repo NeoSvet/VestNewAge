@@ -15,6 +15,14 @@
         <item>&#160;дня</item>
         <item>&#160;назад</item>
     </string-array>
+    <string-array name="status">
+        <item>Восстановить доступ</item>
+        <item>к личному кабинету</item>
+        <item>Зарегистрироваться</item>
+        <item>на Сайте Откровений</item>
+        <item>Статистика</item>
+        <item>Ход трансформации внутреннего “Я” участников Сообщества</item>
+    </string-array>
     <string-array name="help_title">
         <item>Добро пожаловать!</item>
         <item>О меню</item>

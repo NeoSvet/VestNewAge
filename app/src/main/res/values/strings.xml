@@ -32,6 +32,11 @@
     <string name="media">Видео и пресса</string>
     <string name="status">Состояние</string>
     <string name="settings">Настройки</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="remember_email">запомнить email</string>
+    <string name="remember_password">запомнить пароль</string>
+    <string name="status_tip">Вход в личный кабинет сайта «Откровения людям Нового века» для передачи ощущений (с 6:00 до 11:00)</string>
     <string name="help">Справка</string>
     <string name="paragraph">Абзац</string>
     <string name="position">Позиция</string>
