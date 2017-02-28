@@ -4,8 +4,6 @@ import android.app.Fragment;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,11 +16,10 @@ import android.widget.ListView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
+import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
@@ -32,17 +29,11 @@ public class JournalFragment extends Fragment {
     private DataBase dbJournal;
     private ListAdapter adJournal;
     private MainActivity act;
-    private View container, fabClear, fabPrev, fabNext, tvFinish;
+    private Tip tip;
+    private View container, fabClear, fabPrev, fabNext;
     private int offset = 0;
-    private Animation anShow, anHide, anMin, anMax;
-    private boolean boolShow = false, boolFinish = true;
-    final Handler hFinish = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            tvFinish.startAnimation(anHide);
-            return false;
-        }
-    });
+    private Animation anMin, anMax;
+    private boolean boolFinish = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,10 +61,9 @@ public class JournalFragment extends Fragment {
     }
 
     private void createList() {
-        tvFinish.clearAnimation();
-        tvFinish.setVisibility(View.GONE);
+        tip.hide();
         SQLiteDatabase db = dbJournal.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.NAME, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
+        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
         if (cursor.moveToFirst()) {
             int iTime = cursor.getColumnIndex(DataBase.TIME);
             int iLink = cursor.getColumnIndex(DataBase.LINK);
@@ -109,7 +99,7 @@ public class JournalFragment extends Fragment {
     }
 
     private void initViews() {
-        tvFinish = container.findViewById(R.id.tvFinishJournal);
+        tip = new Tip(act, container.findViewById(R.id.tvFinish));
         fabPrev = container.findViewById(R.id.fabPrev);
         fabNext = container.findViewById(R.id.fabNext);
         fabClear = container.findViewById(R.id.fabClear);
@@ -117,7 +107,7 @@ public class JournalFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (offset == 0) {
-                    showFinish();
+                    tip.show();
                 } else {
                     offset -= MAX;
                     adJournal.clear();
@@ -129,7 +119,7 @@ public class JournalFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (boolFinish) {
-                    showFinish();
+                    tip.show();
                 } else {
                     offset += MAX;
                     adJournal.clear();
@@ -143,7 +133,7 @@ public class JournalFragment extends Fragment {
                 fabClear.setVisibility(View.GONE);
                 container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
-                db.delete(DataBase.NAME, null, null);
+                db.delete(DataBase.JOURNAL, null, null);
                 dbJournal.close();
                 adJournal.clear();
                 adJournal.notifyDataSetChanged();
@@ -153,7 +143,7 @@ public class JournalFragment extends Fragment {
                 offset = 0;
             }
         });
-        dbJournal = new DataBase(act);
+        dbJournal = new DataBase(act, DataBase.JOURNAL);
         ListView lvJournal = (ListView) container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
@@ -163,27 +153,8 @@ public class JournalFragment extends Fragment {
                 String link = adJournal.getItem(pos).getLink();
                 if (link.indexOf(BrowserActivity.ARTICLE) == Lib.LINK.length()) //атавизм-рудимент
                     link = link.substring(BrowserActivity.ARTICLE.length());
-                BrowserActivity.openActivity(act, link);
+                BrowserActivity.openPage(act, link, "");
                 adJournal.clear();
-            }
-        });
-        anShow = AnimationUtils.loadAnimation(act, R.anim.show);
-        anHide = AnimationUtils.loadAnimation(act, R.anim.hide);
-        anHide.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                tvFinish.setVisibility(View.GONE);
-                boolShow = false;
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
             }
         });
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
@@ -231,20 +202,6 @@ public class JournalFragment extends Fragment {
                 return false;
             }
         });
-    }
-
-    private void showFinish() {
-        if (boolShow)
-            return;
-        boolShow = true;
-        tvFinish.setVisibility(View.VISIBLE);
-        tvFinish.startAnimation(anShow);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                hFinish.sendEmptyMessage(0);
-            }
-        }, 2500);
     }
 
     @Override

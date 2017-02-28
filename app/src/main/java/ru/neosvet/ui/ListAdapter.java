@@ -23,6 +23,10 @@ public class ListAdapter extends BaseAdapter {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    public void insertItem(int pos, ListItem item) {
+        data.add(pos, item);
+    }
+
     public void addItem(ListItem item) {
         data.add(item);
     }
@@ -73,6 +77,10 @@ public class ListAdapter extends BaseAdapter {
         tv.setText(data.get(position).getTitle());
         if (data.get(position).getLink().equals("@") && b)
             tv.setTextColor(context.getResources().getColor(R.color.light_gray));
+        if(data.get(position).isSelect())
+            convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
+        else
+            convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
         return convertView;
     }
 }

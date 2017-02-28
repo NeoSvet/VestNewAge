@@ -176,10 +176,20 @@ public class BookFragment extends Fragment {
             }
             br.close();
             if (f.equals(getFile(new Date(), bP)))
-                bP =act.status.checkTime(f.lastModified());
-            else
-                bP = act.status.checkTime(System.currentTimeMillis());
-            if(bP)
+                bP = act.status.checkTime(f.lastModified());
+            else {
+                Date n = new Date();
+                if ((d.getMonth() == n.getMonth() - 1 && d.getYear() == n.getYear()) ||
+                        (d.getMonth() == 11 && d.getYear() == n.getYear() - 1)) {
+                    d = new Date(f.lastModified());
+                    if (d.getMonth() != n.getMonth())
+                        act.status.checkTime(f.lastModified());
+                    else
+                        bP = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+                } else
+                    bP = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+            }
+            if (bP)
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
@@ -255,7 +265,7 @@ public class BookFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (boolNotClick) return;
-                BrowserActivity.openActivity(act, adBook.getItem(pos).getLink());
+                BrowserActivity.openPage(act, adBook.getItem(pos).getLink(), "");
             }
         });
         lvBook.setOnTouchListener(new View.OnTouchListener() {

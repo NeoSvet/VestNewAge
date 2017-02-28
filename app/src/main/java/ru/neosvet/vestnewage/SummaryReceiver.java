@@ -1,10 +1,8 @@
 package ru.neosvet.vestnewage;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.WakefulBroadcastReceiver;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,7 +28,7 @@ import ru.neosvet.utils.Lib;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class SummaryReceiver extends BroadcastReceiver {
+public class SummaryReceiver extends WakefulBroadcastReceiver {
     private static final int notif_id = 111;
 
     public static void cancelNotif(Context context) {
@@ -40,13 +39,11 @@ public class SummaryReceiver extends BroadcastReceiver {
     public static void setReceiver(Context context, int p) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SummaryReceiver.class);
+        PendingIntent piCheck = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.cancel(piCheck);
         if (p > -1) {
             p = (p + 1) * 600000;
-            PendingIntent piCheck = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            am.set(1, p + System.currentTimeMillis(), piCheck);
-        } else {
-            PendingIntent piCancel = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_NO_CREATE);
-            am.cancel(piCancel);
+            am.set(AlarmManager.RTC_WAKEUP, p + System.currentTimeMillis(), piCheck);
         }
     }
 
@@ -99,7 +96,6 @@ public class SummaryReceiver extends BroadcastReceiver {
                             .setFullScreenIntent(piEmpty, true)
                             .setContentIntent(piSummary)
                             .setLights(Color.GREEN, 1000, 1000)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setAutoCancel(true);
                     if (boolSound)
                         mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));

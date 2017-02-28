@@ -61,5 +61,6 @@
         android:layout_height="300dp"
         android:layout_centerInParent="true"
         android:background="@drawable/field"
+        android:padding="3dp"
         android:visibility="gone" />
 </RelativeLayout>

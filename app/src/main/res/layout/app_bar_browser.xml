@@ -21,6 +21,19 @@
 
     <include layout="@layout/content_browser" />
 
+    <TextView
+        android:id="@+id/tvFinish"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="55dp"
+        android:background="@drawable/field"
+        android:padding="10dp"
+        android:text="@string/finish_list"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/ivMenu"
         android:layout_width="wrap_content"

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/m_up"
+        android:title="@string/link1" />
+    <item
+        android:id="@+id/m_down"
+        android:title="@string/link2" />
+    <item
+        android:id="@+id/m_delete"
+        android:title="@string/link3" />
+    <item
+        android:id="@+id/m_edit"
+        android:title="@string/link4" />
+</menu>

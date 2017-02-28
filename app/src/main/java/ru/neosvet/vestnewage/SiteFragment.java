@@ -170,7 +170,7 @@ public class SiteFragment extends Fragment {
 //                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 //                            startActivity(intent);
                         } else if (pos == 6 || pos == 7) { //no article
-                            BrowserActivity.openActivity(act, link);
+                            BrowserActivity.openPage(act, link, "");
                         } else
                             OpenPage(link);
                     } else {
@@ -307,7 +307,7 @@ public class SiteFragment extends Fragment {
                 act.lib.openInApps(url, null);
             }
         } else {
-            BrowserActivity.openActivity(act, url);
+            BrowserActivity.openPage(act, url, "");
         }
     }
 

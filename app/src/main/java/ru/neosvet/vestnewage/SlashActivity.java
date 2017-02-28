@@ -53,6 +53,7 @@ public class SlashActivity extends AppCompatActivity {
         } else
             link = data.getPath();
         if (link != null) {
+//            Lib.LOG("link1=" + link);
             if (link.contains("/rss")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_rss);
             } else if (link.length() < 2 || link.equals("/index.html")) {
@@ -65,14 +66,28 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
                 main.putExtra(MainActivity.TAB, 2);
             } else if (link.contains("html")) {
-                link = Lib.LINK + link.substring(1);
-                BrowserActivity.openActivity(this, link);
+                BrowserActivity.openPage(this, link.substring(1), "");
+            } else if (data.getQuery() != null && data.getQuery().contains("date")) {
+                String s = data.getQuery().substring(5);
+                String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
+                link = link.substring(1) + s.substring(0, s.indexOf("-"))
+                        + "." + (m.length() == 1 ? "0" : "") + m
+                        + "." + s.substring(s.lastIndexOf("-") + 3) + ".html";
+                BrowserActivity.openPage(this, link, "");
             } else if (link.contains("/poems")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 0);
             } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 1);
+            } else if (link.contains("/search")) {
+                //http://blagayavest.info/search/?query=любовь&where=0
+               /* <option selected="" value="0">в Посланиях</option>
+                <option value="5">в Катренах</option>
+                <option value="1">в заголовках</option>
+                <option value="2">по всему Сайту</option>
+                <option value="3">по дате</option>
+                <!-- <option  value="4">в цитатах</option> -->*/
             }
         }
     }

@@ -7,6 +7,16 @@
         android:title="@string/refresh" />
 
     <item
+        android:id="@+id/nav_marker"
+        android:icon="@drawable/marker"
+        android:title="@string/in_markers" />
+
+    <item
+        android:id="@+id/nav_scale"
+        android:icon="@drawable/one_one"
+        android:title="@string/reset_scale" />
+
+    <item
         android:id="@+id/nav_nomenu"
         android:icon="@drawable/none"
         android:title="@string/hide_menu" />

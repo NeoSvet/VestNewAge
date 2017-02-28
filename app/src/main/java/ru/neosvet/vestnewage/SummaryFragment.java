@@ -123,7 +123,7 @@ public class SummaryFragment extends Fragment {
                 if (link.indexOf(BrowserActivity.ARTICLE) == Lib.LINK.length()) {
                     link = link.substring(BrowserActivity.ARTICLE.length());
                 }
-                BrowserActivity.openActivity(act, link);
+                BrowserActivity.openPage(act, link, "");
             }
         });
         lvSummary.setOnTouchListener(new View.OnTouchListener() {

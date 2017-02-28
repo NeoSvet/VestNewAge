@@ -19,6 +19,10 @@
             android:icon="@drawable/book"
             android:title="@string/book" />
         <item
+            android:id="@+id/nav_marker"
+            android:icon="@drawable/marker"
+            android:title="@string/markers" />
+        <item
             android:id="@+id/nav_journal"
             android:icon="@drawable/journal"
             android:title="@string/journal" />

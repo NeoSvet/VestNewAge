@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -38,8 +39,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!--https://vk.com/away.php?utf=1&to=http%3A%2F%2Fblagayavest.info
-                /.*blagayavest\.info.*-->
+                <!--
+                https://vk.com/away.php?utf=1&to=http%3A%2F%2Fblagayavest.info
+                /.*blagayavest\.info.*
+                -->
                 <data
                     android:host="m.vk.com"
                     android:pathPrefix="/away"
@@ -65,14 +68,22 @@
         <activity
             android:name=".BrowserActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".MarkerActivity"
+            android:label="@string/marker"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PresentationActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver android:name=".SummaryReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".PromReceiver">
-        </receiver>
+        <receiver android:name=".PromReceiver" />
+
+
     </application>
 
 </manifest>

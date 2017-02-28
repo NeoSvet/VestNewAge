@@ -1,9 +1,11 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -18,9 +20,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +40,7 @@ import ru.neosvet.utils.CalendarTask;
 import ru.neosvet.utils.Lib;
 
 public class CalendarFragment extends Fragment {
-    public static final String CURRENT_DATE = "current_date", CALENDAR = "/calendar/";
+    public static final String CURRENT_DATE = "current_date", ADS = "ads", CALENDAR = "/calendar/";
     private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -77,7 +80,7 @@ public class CalendarFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(Lib.NOREAD, (fabClose.getVisibility() == View.VISIBLE));
+        outState.putBoolean(Lib.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Lib.TASK, task);
 //        outState.putInt(MainActivity.TAB, adNoread.getCount());
@@ -153,9 +156,36 @@ public class CalendarFragment extends Fragment {
         });
         lvNoread.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!adNoread.getItem(i).getLink().equals("")) {
-                    openLink(adNoread.getItem(i).getLink());
+            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (adNoread.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
+                    if (adNoread.getItem(pos).getCount() == 1 && adNoread.getItem(pos).getLink().contains("http")) {
+                        // only link
+                        act.lib.openInApps(adNoread.getItem(pos).getLink(), null);
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+                        if (adNoread.getItem(pos).getCount() == 1) { // only des
+                            builder.setMessage(adNoread.getItem(pos).getLink().substring(Lib.LINK.length()));
+                            builder.setPositiveButton(getResources().getString(android.R.string.ok),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                        } else { // link and des
+                            builder.setMessage(adNoread.getItem(pos).getLink(1).substring(Lib.LINK.length()));
+                            final String link = adNoread.getItem(pos).getLink();
+                            builder.setPositiveButton(getResources().getString(R.string.open_link),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            act.lib.openInApps(link, null);
+                                            dialog.dismiss();
+                                        }
+                                    });
+                        }
+                        builder.create().show();
+                    }
+                } else if (!adNoread.getItem(pos).getLink().equals("")) {
+                    openLink(adNoread.getItem(pos).getLink());
                 }
             }
         });
@@ -171,6 +201,19 @@ public class CalendarFragment extends Fragment {
                 closeNoread();
                 tvNew.setText("0");
                 act.lib.setCookies("", "", "");
+                File file = new File(act.getFilesDir() + File.separator + ADS);
+                if (file.exists()) {
+                    try {
+                        BufferedReader br = new BufferedReader(new FileReader(file));
+                        String t = br.readLine();
+                        br.close();
+                        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                        bw.write(t);
+                        bw.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
         fabRefresh.setOnClickListener(new View.OnClickListener() {
@@ -354,7 +397,7 @@ public class CalendarFragment extends Fragment {
     }
 
     private void openLink(String link) {
-        BrowserActivity.openActivity(act, link);
+        BrowserActivity.openPage(act, link, "");
         adNoread.clear();
     }
 
@@ -409,9 +452,9 @@ public class CalendarFragment extends Fragment {
         tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                 + "\n" + (d.getYear() + 1900));
         adCalendar.clear();
-        for (int i = -1; i > -7; i--)
+        for (int i = -1; i > -7; i--) //monday-saturday
             adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));
-        adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray));
+        adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray)); //sunday
         int n;
         final int m = d.getMonth();
         d.setDate(1);
@@ -431,6 +474,8 @@ public class CalendarFragment extends Fragment {
         n = 1;
         while (d.getMonth() == m) {
             adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.white));
+            if (d.getDay() == 3) // wednesday
+                adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
             n++;
             d.setDate(n);
         }
@@ -464,8 +509,18 @@ public class CalendarFragment extends Fragment {
                 if (boolLoad)
                     startLoad();
             } else {
-                if (isCurMonth() && boolLoad) {
-                    act.status.checkTime(act.lib.getTimeLastVisit());
+                if (boolLoad) {
+                    if (isCurMonth()) {
+                        long t = act.lib.getTimeLastVisit();
+                        if (t > 0)
+                            act.status.checkTime(t);
+                    }
+                    if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
+                            (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
+                        Date d = new Date(file.lastModified());
+                        if (d.getMonth() != today_m)
+                            act.status.checkTime(file.lastModified());
+                    }
                 }
                 int i;
                 String s;
@@ -514,29 +569,68 @@ public class CalendarFragment extends Fragment {
             File file = new File(act.getFilesDir() + File.separator + Lib.NOREAD);
             if (file.exists()) {
                 String s;
-                BufferedReader br = new BufferedReader(new InputStreamReader(act.openFileInput(file.getName())));
+                BufferedReader br = new BufferedReader(new FileReader(file));
                 while ((s = br.readLine()) != null) {
                     adNoread.addItem(new ListItem(s, br.readLine()));
                 }
                 br.close();
             }
-            setNewText(adNoread.getCount());
+            boolean bNewAds = false;
+            file = new File(act.getFilesDir() + File.separator + ADS);
+            String s;
+            int n;
+            if (file.exists()) {
+                bNewAds = (System.currentTimeMillis() - file.lastModified() < 10000);
+                String t;
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                //tut
+                br.readLine(); //time
+                final String end = "<e>";
+                while ((s = br.readLine()) != null) {
+                    if (s.contains("<t>")) {
+                        adNoread.insertItem(0, new ListItem(
+                                getResources().getString(R.string.ad)
+                                        + ": " + s.substring(3)));
+                    } else if (s.contains("<u>")) {
+                        n = Integer.parseInt(s.substring(3));
+                        if (n > act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode) {
+                            adNoread.insertItem(0, new ListItem(
+                                    getResources().getString(R.string.ad) + ": " +
+                                            getResources().getString(R.string.access_new_version)));
+                            adNoread.getItem(0).addLink(
+                                    getResources().getString(R.string.url_on_app));
+                        } else {
+                            while (!s.equals(end))
+                                s = br.readLine();
+                        }
+                    } else if (s.contains("<d>")) {
+                        t = s.substring(3);
+                        s = br.readLine();
+                        while (!s.equals(end)) {
+                            t += Lib.N + s;
+                            s = br.readLine();
+                        }
+                        adNoread.getItem(0).addLink(t);
+                    } else if (s.contains("<l>")) {
+                        adNoread.getItem(0).addLink(s.substring(3));
+                    }
+                }
+                br.close();
+            }
             adNoread.notifyDataSetChanged();
+            s = tvNew.getText().toString();
+            n = adNoread.getCount();
+            tvNew.setText(Integer.toString(n));
+            if (!s.contains(".")) {
+                if (bNewAds || (n > Integer.parseInt(s) && n > 0) || n > 19) {
+                    tvNew.clearAnimation();
+                    tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad && isCurMonth())
                 startLoad();
-        }
-    }
-
-    private void setNewText(int n) {
-        String s = tvNew.getText().toString();
-        tvNew.setText(Integer.toString(n));
-        if (!s.contains(".")) {
-            if ((n > Integer.parseInt(s) && n > 0) || n == 20) {
-                tvNew.clearAnimation();
-                tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-            }
         }
     }
 

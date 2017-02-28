@@ -150,7 +150,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbPromSound.isChecked());
         editor.putBoolean(VIBR, cbPromVibr.isChecked());
         editor.apply();
-        PromReceiver.setReceiver(act, p);
+        PromReceiver.setReceiver(act, p, false);
     }
 
     private void initViews() {
@@ -225,11 +225,14 @@ public class SettingsFragment extends Fragment {
         int p = sbPromTime.getProgress();
         StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
         t.append(" ");
-        if (p == 0)
-            t.append(getResources().getString(R.string.at_moment_prom));
-        else {
-            t.append(getResources().getString(R.string.on));
-            t.append(" ");
+        t.append(getResources().getString(R.string.on));
+        t.append(" ");
+        if (p == 0) {
+            t.append(getResources().getString(R.string.secs));
+//            t.append(getResources().getString(R.string.at_moment_prom));
+        } else {
+//            t.append(getResources().getString(R.string.on));
+//            t.append(" ");
             if (p > 4 && p < 21)
                 t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
             else {

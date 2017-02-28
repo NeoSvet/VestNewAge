@@ -28,6 +28,7 @@ import ru.neosvet.utils.Prom;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static boolean boolFirst = false;
     private CalendarFragment frCalendar;
+    private CollectionsFragment frCollections;
     private boolean boolLoad = false, boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
@@ -56,10 +57,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (boolLoad) {
                 setFragment(R.id.nav_rss);
             } else {
-                if (pref.getBoolean("first", true)) {
+                if (pref.getBoolean(Lib.FIRST, true)) {
                     SharedPreferences.Editor editor = pref.edit();
-                    editor.putBoolean("first", false);
+                    editor.putBoolean(Lib.FIRST, false);
                     editor.apply();
+                    tab = -1;
                     setFragment(R.id.nav_help);
                     boolFirst = true;
                 } else
@@ -73,6 +75,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         initInterface();
         prom = new Prom(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        prom.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        prom.resume();
     }
 
     private void initInterface() {
@@ -138,6 +152,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.frCalendar = frCalendar;
     }
 
+    public void setFrCollections(CollectionsFragment frCollections) {
+        this.frCollections = frCollections;
+    }
+
     public void setFragment(int id) {
         if (cur_id != id)
             boolFirst = false;
@@ -149,15 +167,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frCalendar = null;
         switch (id) {
             case R.id.nav_rss:
-                SummaryFragment fr1 = new SummaryFragment();
-                fr1.setLoad(boolLoad);
-                fragmentTransaction.replace(R.id.my_fragment, fr1);
+                SummaryFragment frSummary = new SummaryFragment();
+                frSummary.setLoad(boolLoad);
+                fragmentTransaction.replace(R.id.my_fragment, frSummary);
                 boolLoad = false;
                 break;
             case R.id.nav_main:
-                SiteFragment fr2 = new SiteFragment();
-                fr2.setTab(tab);
-                fragmentTransaction.replace(R.id.my_fragment, fr2);
+                SiteFragment frSite = new SiteFragment();
+                frSite.setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, frSite);
                 break;
             case R.id.nav_calendar:
                 frCalendar = new CalendarFragment();
@@ -166,12 +184,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frCalendar);
                 break;
             case R.id.nav_book:
-                BookFragment fr3 = new BookFragment();
-                fr3.setTab(tab);
-                fragmentTransaction.replace(R.id.my_fragment, fr3);
+                BookFragment frBook = new BookFragment();
+                frBook.setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, frBook);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
+                break;
+            case R.id.nav_marker:
+                frCollections = new CollectionsFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frCollections);
                 break;
             case R.id.nav_search:
                 break;
@@ -179,7 +201,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, new SettingsFragment());
                 break;
             case R.id.nav_help:
-                fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
+                if (tab == -1) { //first start
+                    tab = 0;
+                    HelpFragment frHelp = new HelpFragment();
+                    fragmentTransaction.replace(R.id.my_fragment, frHelp);
+                    frHelp.setOpenHelp(0);
+                } else
+                    fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
                 break;
         }
         tab = 0;
@@ -203,6 +231,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (frCollections != null) {
+            if (requestCode == frCollections.MARKER_REQUEST)
+                frCollections.putResult(resultCode);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -212,6 +249,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setMenuFragment();
         } else if (frCalendar != null) {
             if (frCalendar.onBackPressed())
+                exit();
+        } else if (frCollections != null) {
+            if (frCollections.onBackPressed())
                 exit();
         } else {
             exit();

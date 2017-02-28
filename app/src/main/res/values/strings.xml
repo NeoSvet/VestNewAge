@@ -2,6 +2,12 @@
     <string name="app_name">Весть Нового Века</string>
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
+    <string name="link_on_app">Ссылка на приложение</string>
+    <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
+    <string name="ad">Объявление</string>
+    <string name="access_new_version">Доступна новая версия приложения!</string>
+    <string name="open_link">Открыть ссылку</string>
+    <string name="not_found_file">Файл не найден</string>
     <string name="rss">Сводка</string>
     <string name="main">Главная</string>
     <string name="calendar">Календарь</string>
@@ -10,9 +16,33 @@
     <string name="katreny">Катрены</string>
     <string name="katren">Катрен</string>
     <string name="search">Поиск</string>
+    <string name="marker">Закладка</string>
+    <string name="markers">Закладки</string>
+    <string name="in_markers">В закладки</string>
+    <string name="reset_scale">Сбросить масштаб</string>
+    <string name="collections">Подборки</string>
+    <string name="enter_name">Введите название</string>
+    <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>
+    <string name="no_collections">Вне подборок</string>
+    <string name="cancel_rename">Переименование отменено</string>
+    <string name="collection_is_empty">Подборока пуста!</string>
+    <string name="nothing_edit">Редактировать нечего!</string>
+    <string name="unuse_dot">Запятую нельзя использовать</string>
+    <string name="title_already_used">Данный заголовок уже используется!</string>
     <string name="media">Видео и пресса</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
+    <string name="paragraph">Абзац</string>
+    <string name="position">Позиция</string>
+    <string name="sel_pos">Выбрана позиция:&#160;</string>
+    <string name="pos_n">Приблизительно на&#160;</string>
+    <string name="stop_for_text">(остановитесь и увидите текст)</string>
+    <string name="page_entirely">Страница целиком</string>
+    <string name="desctription">Описание</string>
+    <string name="add_col">Добавить подборку</string>
+    <string name="sel_col">Выбраны подборки:&#160;</string>
+    <string name="sel_par">Выбраны абзацы №№:&#160;</string>
+    <string name="par_n">Абзацы №№&#160;</string>
     <string name="video_on_vimeo">Видео на Vimeo</string>
     <string name="download_all">Загрузить всё</string>
     <string name="link1">Первая ссылка</string>
@@ -25,8 +55,6 @@
     <string name="start">Запуск&#8230;</string>
     <string name="page">Страница:</string>
     <string name="copyright">©</string>
-    <string name="show_changelog">Список изменений</string>
-    <string name="hide_changelog">Скрыть список</string>
     <string name="downloaded">Загружено:</string>
     <string name="theme">Оформление</string>
     <string name="light">Светлое</string>
@@ -47,11 +75,14 @@
     <string name="check_on_connect">Так же проверка будет производиться при подключении к интернету.</string>
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="on">за</string>
-    <string name="at_moment_prom">в момент Посыла</string>
+    <string name="secs">30 секунд</string>
+    <string name="prom_notif_alert">Будьте внимательны!\nУведомление может сработать с задержкой до 4 минут.\nПричины выясняю и исправляю... А может это лишь на моём смартфоне? Попробуйте!</string>
+    <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
     <string name="refresh_list">Обновление списков раздела</string>
     <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
+    <string name="empty_collections">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
     <string name="finish_list">Список закончился</string>
     <string name="empty_list">Список пуст</string>
     <string name="to_prom">До Посыла</string>
@@ -64,24 +95,16 @@
     <string name="materials">материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="all_load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
+    <string name="changelog">Список изменений:</string>
+    <string name="current_publication">Текущая публикация: №</string>
     <string name="publication">Публикация №</string>
-    <string name="write_mail">Написать письмо</string>
+    <string name="write_to_dev">Написать разработчику</string>
     <string name="appeared_new">Появилась новая информация!</string>
-    <string name="dev_name">Юрий Тихомиров</string>
     <string name="to_load">Загрузить</string>
     <string name="site_name">«Благая Весть»</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="help_text">Добро пожаловать в приложение «Весть Нового Века»!\n\n
-Это приложение является неофициальным клиентом к сайту «Благая Весть». Приложение загружает материалы сайта на ваше устройство, и в дальнейшем их можно будет изучать без доступа к интернету. Материалы предоставляются без какого-либо смыслового изменения, и я, разработчик приложения, за их содержание ответственности не несу.\n\n
-Чтобы перейти в другой раздел – проведите пальцем от левого края экрана вправо и откроется меню со списком разделов (на планшете это меню открыто сразу). В дальнейшем, этот список будет пополняться. На экране чтения это боковое меню содержит другие команды – рекомендую ознакомиться.\n\n
-Если внизу справа написано «Обновить?», значит текущий список не обновлялся более суток.\n\n
-Кнопка «Загрузить всё» (белая стрелка указывающая вниз) позволяет загрузить с сайта все материалы. Находится эта кпнока наверху справа или в левом меню.\n\n
-Внизу справа можете встретить круглые кнопки: \n
-- стрелки – обновить текущий список или месяц календаря; \n
-- урна – очистить список; \n
-- цифры – количество элементов в списке непрочитанного (по нажатию он и откроется); \n
-- крестик – закрыть список непрочитанного. \n\n
-Об проблемах и предложениях писать мне на почту.
-</string>
+    <string name="delete">Удалить?</string>
+    <string name="next">Далее</string>
+    <string name="finish">Закончить</string>
     <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
 </resources>

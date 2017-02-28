@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/field"
+        android:gravity="center"
         android:padding="15dp"
         android:text="@string/empty_journal"
         android:visibility="gone" />
@@ -28,7 +29,7 @@
         app:srcCompat="@drawable/clear" />
 
     <TextView
-        android:id="@+id/tvFinishJournal"
+        android:id="@+id/tvFinish"
         style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

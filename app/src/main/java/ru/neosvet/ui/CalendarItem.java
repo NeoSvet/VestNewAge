@@ -21,13 +21,14 @@ public class CalendarItem {
         cur = id_color == R.color.white;
 
         color = context.getResources().getColor(id_color);
-        if (num < 1 || num == 4 || num == 17 || num == 26 || num == 30) {
+        if (num < 1)
             bold = true;
-            if (id_color == R.color.white) {
-                color = context.getResources().getColor(R.color.colorAccentLight);
-                links.add(Lib.LINK + "Posyl-na-Edinenie");
-            }
-        }
+    }
+
+    public void setProm() {
+        bold = true;
+        color = context.getResources().getColor(R.color.colorAccentLight);
+        links.add(Lib.LINK + "Posyl-na-Edinenie");
     }
 
     public void clear() {

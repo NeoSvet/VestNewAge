@@ -14,31 +14,43 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.PromReceiver;
 import ru.neosvet.vestnewage.R;
 
 public class Prom {
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
+    private Timer timer = null;
     private Lib lib;
 
     public Prom(Context context) {
         this.context = context;
         if (context instanceof Activity) {
             Date today = getMoscowDate();
-            int i = today.getDate();
-            if (i == 4 || i == 17 || i == 26 || i == 30) {
-            if (today.getHours() > 11)
-                return;
+            if (today.getDay() == 3) { // wednesday
+                if (today.getHours() >= PromReceiver.hour_prom)
+                    return;
                 Activity act = (Activity) context;
                 tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
                 tvPromTime.setVisibility(View.VISIBLE);
                 lib = new Lib(context);
                 setViews();
-                setPromTime();
             }
         } else
             lib = new Lib(context);
+    }
+
+    public void stop() {
+        if (timer != null) {
+            timer.cancel();
+        }
+    }
+
+    public void resume() {
+        if (isProm()) {
+            setPromTime();
+        }
     }
 
     private void setViews() {
@@ -65,7 +77,8 @@ public class Prom {
                 @Override
                 public void onClick(View view) {
                     tvPromTime.startAnimation(anMin);
-                    new Timer().schedule(new TimerTask() {
+                    timer = new Timer();
+                    timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
                             hTime.sendEmptyMessage(1);
@@ -136,7 +149,8 @@ public class Prom {
         }
         tvPromTime.setText(t);
         if (t.equals(context.getResources().getString(R.string.prom))) {
-            new Timer().schedule(new TimerTask() {
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     hTime.sendEmptyMessage(0);
@@ -149,7 +163,7 @@ public class Prom {
     public String getPromText() {
         Date d = getMoscowDate();
         long now = d.getTime();
-        d.setHours(11); // prom time
+        d.setHours(PromReceiver.hour_prom); // prom time
         d.setMinutes(0);
         d.setSeconds(0);
         String t = lib.getDiffDate(d.getTime(), now);
@@ -168,13 +182,15 @@ public class Prom {
                             t = t.replace(context.getResources().getStringArray(R.array.time)[i]
                                     , context.getResources().getString(R.string.seconde));
                     }
-                    if (hTime != null)
-                        new Timer().schedule(new TimerTask() {
+                    if (hTime != null) {
+                        timer = new Timer();
+                        timer.schedule(new TimerTask() {
                             @Override
                             public void run() {
                                 hTime.sendEmptyMessage(0);
                             }
                         }, 1000);
+                    }
                     break;
                 } else if (i < 6) {
                     if (i == 3)
@@ -187,13 +203,15 @@ public class Prom {
                     d.setMinutes(0);
                     d.setSeconds(1);
                 }
-                if (hTime != null)
-                    new Timer().schedule(new TimerTask() {
+                if (hTime != null) {
+                    timer = new Timer();
+                    timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
                             hTime.sendEmptyMessage(0);
                         }
                     }, d);
+                }
                 break;
             }
         }

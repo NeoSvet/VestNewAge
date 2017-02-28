@@ -14,7 +14,7 @@ public class ResizeAnim extends Animation {
         iSize = size;
         bSquare = square;
         if (square || size == 10)
-            iStart = 500;
+            iStart = view.getHeight();
         else
             iStart = 10;
     }

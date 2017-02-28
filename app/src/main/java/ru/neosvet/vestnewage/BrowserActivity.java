@@ -19,14 +19,18 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
 import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -44,23 +48,27 @@ public class BrowserActivity extends AppCompatActivity
     private LoaderTask loader = null;
     private WebView wvBrowser;
     private DataBase dbJournal;
-    private TextView tvPromTime;
+    private TextView tvPromTime, tvPlace;
     private StatusBar status;
-    private View ivMenu;
+    private View ivMenu, pSearch;
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link;
+    private String[] place;
+    private int iPlace = -1;
     private Prom prom;
     private Animation anMin, anMax;
     private MenuItem miTheme, miNomenu;
+    private Tip tip;
 
 
-    public static void openActivity(Context context, String link) {
+    public static void openPage(Context context, String link, String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
         if (link.contains(Lib.LINK))
             intent.putExtra(DataBase.LINK, link.substring(Lib.LINK.length()));
         else
             intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(DataBase.PLACE, place);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -69,16 +77,116 @@ public class BrowserActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_browser);
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
+        initPlace();
+    }
+
+    private void initPlace() {
+        String p = getIntent().getStringExtra(DataBase.PLACE);
+        if (p.length() == 0)
+            return;
+        if (iPlace == -1)
+            iPlace = 0;
+        ivMenu.setVisibility(View.GONE);
+        tvPlace = (TextView) findViewById(R.id.tvPlace);
+        View bPrev = findViewById(R.id.bPrev);
+        View bNext = findViewById(R.id.bNext);
+        if (p.contains("\n\n")) {
+            place = p.split("\n\n");
+            bPrev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (iPlace > 0) {
+                        iPlace--;
+                        setPlace();
+                    } else
+                        tip.show();
+                }
+            });
+            bNext.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (iPlace < place.length - 1) {
+                        iPlace++;
+                        setPlace();
+                    } else
+                        tip.show();
+                }
+            });
+        } else {
+            place = new String[]{p};
+            bPrev.setVisibility(View.GONE);
+            bNext.setVisibility(View.GONE);
+        }
+        findViewById(R.id.bClose).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeSearch();
+            }
+        });
+        pSearch.setVisibility(View.VISIBLE);
+    }
+
+    private void closeSearch() {
+        tip.hide();
+        iPlace = -1;
+        place = null;
+        getIntent().putExtra(DataBase.PLACE, "");
+        pSearch.setVisibility(View.GONE);
+        if (!bNomenu) {
+            ivMenu.setVisibility(View.VISIBLE);
+            ivMenu.startAnimation(anMax);
+        }
+        wvBrowser.clearMatches();
+    }
+
+    public void setPlace() {
+        if (iPlace == -1) return;
+        String s = place[iPlace];
+        tvPlace.setText(s.replace(Lib.N, " "));
+        if (android.os.Build.VERSION.SDK_INT > 15)
+            wvBrowser.findAllAsync(s);
+        else {
+            if(s.contains(Lib.N))
+                s=s.substring(0,s.indexOf(Lib.N));
+            wvBrowser.findAll(s);
+            try{
+                //Can't use getMethod() as it's a private method
+                for(Method m : WebView.class.getDeclaredMethods()){
+                    if(m.getName().equals("setFindIsUp")){
+                        m.setAccessible(true);
+                        m.invoke(wvBrowser, true);
+                        break;
+                    }
+                }
+            }catch(Exception ignored){}
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        prom.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        prom.resume();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(Lib.TASK, loader);
         outState.putString(DataBase.LINK, link);
+        outState.putInt(DataBase.PLACE, iPlace);
         super.onSaveInstanceState(outState);
     }
 
@@ -104,6 +212,7 @@ public class BrowserActivity extends AppCompatActivity
                 loader.setAct(this);
                 status.setLoad(true);
             }
+            iPlace = state.getInt(DataBase.PLACE, 0);
         }
         miTheme.setVisible(!link.contains(PNG));
     }
@@ -125,17 +234,19 @@ public class BrowserActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.GONE);
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
+        tip = new Tip(this, findViewById(R.id.tvFinish));
+        pSearch = findViewById(R.id.pSearch);
         tvPromTime = (TextView) findViewById(R.id.tvPromTime);
         status = new StatusBar(this, findViewById(R.id.pStatus));
         ivMenu = findViewById(R.id.ivMenu);
-        dbJournal = new DataBase(this);
+        dbJournal = new DataBase(this, DataBase.JOURNAL);
         prom = new Prom(this);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
-//        miLight = navMenu.getMenu().getItem(2).getSubMenu().getItem(0);
-//        miDark = navMenu.getMenu().getItem(2).getSubMenu().getItem(1);
-        miNomenu = navMenu.getMenu().getItem(1);
-        miTheme = navMenu.getMenu().getItem(2);
+//        miLight = navMenu.getMenu().getItem(4).getSubMenu().getItem(0);
+//        miDark = navMenu.getMenu().getItem(4).getSubMenu().getItem(1);
+        miNomenu = navMenu.getMenu().getItem(3);
+        miTheme = navMenu.getMenu().getItem(4);
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -178,6 +289,8 @@ public class BrowserActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (iPlace > -1) {
+            closeSearch();
         } else if (wvBrowser.canGoBack()) {
             wvBrowser.goBack();
         } else {
@@ -191,13 +304,13 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (!bNomenu)
+                    if (!bNomenu && iPlace == -1)
                         ivMenu.startAnimation(anMin);
                     if (prom.isProm())
                         tvPromTime.startAnimation(anMin);
                 } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
                         event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    if (!bNomenu) {
+                    if (!bNomenu && iPlace == -1) {
                         ivMenu.setVisibility(View.VISIBLE);
                         ivMenu.startAnimation(anMax);
                     }
@@ -281,6 +394,16 @@ public class BrowserActivity extends AppCompatActivity
                 ivMenu.setVisibility(View.GONE);
             else
                 ivMenu.setVisibility(View.VISIBLE);
+        } else if (id == R.id.nav_marker) {
+            Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
+            marker.putExtra(DataBase.TITLE, wvBrowser.getTitle());
+            marker.putExtra(DataBase.LINK, link);
+            marker.putExtra(DataBase.PLACE, (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
+                    / ((float) wvBrowser.getContentHeight()) * 100.0f);
+            startActivity(marker);
+        } else if (id == R.id.nav_scale) {
+            //tut
+            wvBrowser.setInitialScale((int) (100f * getResources().getDisplayMetrics().density));
         } else if (id == R.id.nav_light || id == R.id.nav_dark) {
             if ((id == R.id.nav_light && bTheme)
                     || (id == R.id.nav_dark && !bTheme))
@@ -300,7 +423,7 @@ public class BrowserActivity extends AppCompatActivity
 
     private void setCheckItem(MenuItem item, boolean check) {
         if (check) {
-            item.setIcon(R.drawable.check);
+            item.setIcon(R.drawable.check_transparent);
         } else {
             item.setIcon(R.drawable.none);
         }
@@ -399,14 +522,14 @@ public class BrowserActivity extends AppCompatActivity
         cv.put(DataBase.TITLE, wvBrowser.getTitle());
         cv.put(DataBase.LINK, link);
         SQLiteDatabase db = dbJournal.getWritableDatabase();
-        int i = db.update(DataBase.NAME, cv, DataBase.LINK + DataBase.Q, new String[]{link});
+        int i = db.update(DataBase.JOURNAL, cv, DataBase.LINK + DataBase.Q, new String[]{link});
         if (i == 0) // no update
-            db.insert(DataBase.NAME, null, cv);
-        Cursor cursor = db.query(DataBase.NAME, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
+            db.insert(DataBase.JOURNAL, null, cv);
+        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
         if (cursor.getCount() > 100) {
             cursor.moveToLast();
             i = cursor.getColumnIndex(DataBase.LINK);
-            db.delete(DataBase.NAME, DataBase.LINK + DataBase.Q, new String[]{cursor.getString(i)});
+            db.delete(DataBase.JOURNAL, DataBase.LINK + DataBase.Q, new String[]{cursor.getString(i)});
         }
         dbJournal.close();
     }

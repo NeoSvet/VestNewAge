@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_collections"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="ru.neosvet.vestnewage.CollectionsFragment"
+    tools:showIn="@layout/fragment_collections">
+
+    <ListView
+        android:id="@+id/lvMarker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="6" />
+
+    <View
+        android:id="@+id/divEdit"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/colorAccent"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/pEdit"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/bTop"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/top" />
+
+        <ImageButton
+            android:id="@+id/bBottom"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/bottom" />
+
+        <ImageButton
+            android:id="@+id/bEdit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/edit" />
+
+        <ImageButton
+            android:id="@+id/bDelete"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/clear" />
+
+        <ImageButton
+            android:id="@+id/bOk"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ok" />
+    </LinearLayout>
+</LinearLayout>

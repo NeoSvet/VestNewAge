@@ -53,17 +53,6 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
         }
     }
 
-    private String withOutTags(String s) {
-        int i;
-        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”")
-                .replace("&laquo;", "«").replace("&raquo;", "»")
-                .replace("&ndash;", "–").replace("&gt;", ">").replace("&nbsp;", " ");
-        while ((i = s.indexOf("<")) > -1) {
-            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
-        }
-        return s.trim();
-    }
-
     @Override
     protected String doInBackground(String... params) {
         try {
@@ -120,18 +109,18 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                     setDes(d);
                     d = "";
                     if (line.contains("h3")) {
-                        line = withOutTags(line);
+                        line = act.lib.withOutTags(line);
                         if (line.length() > 5) {
                             data.add(new ListItem(line));
                             addLink("", "@");
                         }
                     } else
-                        data.add(new ListItem(withOutTags(line), true));
+                        data.add(new ListItem(act.lib.withOutTags(line), true));
                 } else if (line.contains("href")) {
                     m = line.split("<br />");
                     for (i = 0; i < m.length; i++) {
                         n = 0;
-                        line = withOutTags(m[i]);
+                        line = act.lib.withOutTags(m[i]);
                         if (line.length() < 5 || line.contains(">>")) continue;
                         setDes(d);
                         d = "";
@@ -142,13 +131,13 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                                 s = m[i].substring(n, m[i].indexOf(">", n) - 1);
                                 if (s.contains("..")) s = s.substring(2);
                                 n = m[i].indexOf(">", n) + 1;
-                                addLink(withOutTags(m[i].substring(n, m[i].indexOf("<", n))), s);
+                                addLink(act.lib.withOutTags(m[i].substring(n, m[i].indexOf("<", n))), s);
                             } // links
                         } else
                             addLink("", "@");
                     } // lines
                 } else if (line.contains("<p")) {
-                    line = withOutTags(line);
+                    line = act.lib.withOutTags(line).replace(Lib.N, "<br>");
                     if (line.length() > 5) {
                         d += line + "<br>";
                     }

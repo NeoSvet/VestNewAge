@@ -1,14 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_browser"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:showIn="@layout/app_bar_browser">
+
+    <LinearLayout
+        android:id="@+id/pSearch"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/starsky_bg"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/bClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/close" />
+
+        <TextView
+            android:id="@+id/tvPlace"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/bPrev"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/left2" />
+
+        <ImageButton
+            android:id="@+id/bNext"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/right2" />
+    </LinearLayout>
 
     <WebView
         android:id="@+id/wvBrowser"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-</RelativeLayout>
+</LinearLayout>

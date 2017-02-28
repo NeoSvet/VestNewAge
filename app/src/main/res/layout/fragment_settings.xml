@@ -75,6 +75,13 @@
                 android:layout_marginTop="20dp"
                 android:text="@string/prom_notif" />
 
+            <TextView
+                style="@style/Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/prom_notif_alert" />
+
             <SeekBar
                 android:id="@+id/sbPromTime"
                 android:layout_width="match_parent"

@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -75,11 +76,48 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             if (params[2] == 1) { // noread
                 downloadNoread();
             }
+            downloadAds(); //ads
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void downloadAds() {
+        try {
+            String t = "0";
+            BufferedReader br;
+            File file = new File(act.getFilesDir() + File.separator + CalendarFragment.ADS);
+            if (file.exists()) {
+                br = new BufferedReader(new FileReader(file));
+                t = br.readLine();
+                br.close();
+            }
+            String s = "http://neosvet.ucoz.ru/ads_vna.txt";
+            if (act instanceof MainActivity) {
+                br = new BufferedReader(new InputStreamReader
+                        (((MainActivity) act).lib.getStream(s)));
+            } else {
+                br = new BufferedReader(new InputStreamReader
+                        (((SlashActivity) act).lib.getStream(s)));
+            }
+            if (isCancelled())
+                return;
+            s = br.readLine();
+            if (Long.parseLong(s) > Long.parseLong(t)) {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write(System.currentTimeMillis() + Lib.N);
+                while ((s = br.readLine()) != null) {
+                    bw.write(s + Lib.N);
+                    bw.flush();
+                }
+                bw.close();
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void downloadNoread() throws Exception {
@@ -91,7 +129,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             br = new BufferedReader(new InputStreamReader
                     (((SlashActivity) act).lib.getStream(Lib.SITE)));
         }
-        if(isCancelled())
+        if (isCancelled())
             return;
         String s;
         while ((s = br.readLine()) != null) {
@@ -108,8 +146,8 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
                 act.openFileOutput(Lib.NOREAD, act.MODE_PRIVATE)));
         for (int i = 0; i < data.size(); i++) {
-            bw.write(data.get(i).getTitle() + "\n");
-            bw.write(data.get(i).getLink() + "\n");
+            bw.write(data.get(i).getTitle() + Lib.N);
+            bw.write(data.get(i).getLink() + Lib.N);
             bw.flush();
         }
         bw.close();
@@ -126,7 +164,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     + (year + 1900) + "&month=" + (month + 1));
             final String poemOutDict = "poemOutDict";
             HttpResponse res = client.execute(rget);
-            if(isCancelled())
+            if (isCancelled())
                 return;
             r = EntityUtils.toString(res.getEntity());
             json = new JSONObject(r);
@@ -153,7 +191,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     data.get(n).addLink(jsonI.getString(DataBase.LINK));
                 }
             }
-            if(isCancelled())
+            if (isCancelled())
                 return;
             File file = new File(act.getFilesDir() + CalendarFragment.CALENDAR);
             file.mkdir();

@@ -36,7 +36,7 @@ import ru.neosvet.vestnewage.R;
 
 public class Lib {
     public static final String SITE = "http://blagayavest.info/", N = "\n",
-            TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID",
+            TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
             LIGHT = "/style/light.css", DARK = "/style/dark.css", STYLE = "/style/style.css",
             print = "?styletpl=print", LIST = "/list/", HREF = "href";
@@ -422,5 +422,17 @@ public class Lib {
             return true;
         }
         return false;
+    }
+
+    public String withOutTags(String s) {
+        int i;
+        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace("<br />", N)
+                .replace("&laquo;", "«").replace("&raquo;", "»").replace(N + " ", N)
+                .replace("&ndash;", "–").replace("&gt;", ">").replace("&nbsp;", " ");
+
+        while ((i = s.indexOf("<")) > -1) {
+            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
+        }
+        return s.trim();
     }
 }
