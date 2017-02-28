@@ -57,7 +57,7 @@ public class CheckAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.check_item, null);
+            convertView = inflater.inflate(R.layout.item_check, null);
         }
         CheckBox cb = (CheckBox) convertView.findViewById(R.id.check_field);
         cb.setText(data.get(position).getTitle());
