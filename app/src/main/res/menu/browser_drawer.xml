@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_refresh"
+        android:icon="@drawable/refresh"
+        android:title="@string/refresh" />
+
+    <item
+        android:id="@+id/nav_nomenu"
+        android:icon="@drawable/none"
+        android:title="@string/hide_menu" />
+
+    <item android:title="@string/theme">
+        <menu>
+            <item
+                android:id="@+id/nav_light"
+                android:icon="@drawable/none"
+                android:title="@string/light" />
+            <item
+                android:id="@+id/nav_dark"
+                android:icon="@drawable/none"
+                android:title="@string/dark" />
+        </menu>
+    </item>
+
+</menu>

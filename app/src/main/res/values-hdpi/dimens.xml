@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="calendar_title">310dp</dimen>
+    <dimen name="cell_size">42dp</dimen>
+    <dimen name="title_div">36dp</dimen>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="time">
+        <item>секунду</item>
+        <item>&#160;секунд</item>
+        <item>&#160;секунды</item>
+        <item>минуту</item>
+        <item>&#160;минут</item>
+        <item>&#160;минуты</item>
+        <item>час</item>
+        <item>&#160;часов</item>
+        <item>&#160;часа</item>
+        <item>день</item>
+        <item>&#160;дней</item>
+        <item>&#160;дня</item>
+        <item>&#160;назад</item>
+    </string-array>
+</resources>

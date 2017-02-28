@@ -1,0 +1,372 @@
+package ru.neosvet.utils;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.widget.Toast;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import ru.neosvet.blagayavest.R;
+
+/**
+ * Created by NeoSvet on 16.12.2016.
+ */
+
+public class Lib {
+    public static final String SITE = "http://blagayavest.info/", N = "\n",
+            TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID",
+            TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
+            LIGHT = "/style/light.css", DARK = "/style/dark.css", STYLE = "/style/style.css",
+            print = "?styletpl=print", LIST = "/list/", HREF = "href";
+    private Context context;
+
+    public Lib(Context context) {
+        this.context = context;
+    }
+
+    public void checkNoreadList(String link) {
+        try {
+            File file = new File(context.getFilesDir() + File.separator + Lib.NOREAD);
+            if (file.exists()) {
+                boolean b = false;
+                String t, l;
+                final String N = "\n";
+                StringBuilder f = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(context.openFileInput(file.getName())));
+                while ((t = br.readLine()) != null) {
+                    l = br.readLine();
+                    if (link.equals(l)) {
+                        b = true;
+                    } else {
+                        f.append(t);
+                        f.append(N);
+                        f.append(l);
+                        f.append(N);
+                    }
+                }
+                br.close();
+                if (b) {
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Lib.NOREAD, context.MODE_PRIVATE)));
+                    bw.write(f.toString());
+                    bw.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setCookies(String s, String t, String n) {
+//        Log.d("tag", "get: " + s + "; " + t + "; " + n);
+        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        if (s != null)
+            editor.putString(SESSION_ID, s);
+        editor.putString(TIME_LAST_VISIT, t);
+        editor.putString(NOREAD, n);
+        editor.apply();
+    }
+
+    public String getCookies() {
+//        return SESSION_ID + "=vs50e3l2soiopvmsbk24rvkmu2; "
+//                + TIME_LAST_VISIT + "=16.12.2016+14%3A50%3A22; "
+//                + NOREAD + "=a%3A1%3A%7Bi%3A0%3Ba%3A2%3A%7Bs%3A2%3A%22id%22%3Bi%3A1398%3Bs%3A4%3A%22link%22%3Bs%3A14%3A%22poems%2F15.12.16%22%3B%7D%7D";
+        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
+        if (pref.getString(SESSION_ID, "").equals(""))
+            return "";
+        else
+            return SESSION_ID + "=" + pref.getString(SESSION_ID, "") + "; "
+                    + TIME_LAST_VISIT + "=" + pref.getString(TIME_LAST_VISIT, "")
+                    + "; " + NOREAD + "=" + pref.getString(NOREAD, "");
+    }
+
+    public long getTimeLastVisit() {
+        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
+        String s = pref.getString(TIME_LAST_VISIT, "");
+        if (s.equals(""))
+            return 0;
+        s = s.replace("%3A", ":").replace("+", " ");
+        try {
+            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            Date d = df.parse(s);
+            return d.getTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public void downloadFile(String url, String file) {
+        // LOG("FROM=" + FROM);
+        // LOG("TO=" + TO);
+        try {
+            File f = new File(file);
+            //if(f.exists()) f.delete();
+            OutputStream out = new FileOutputStream(f, false);
+            byte[] buf = new byte[1024];
+            InputStream in = new BufferedInputStream(getStream(url));
+            int i;
+            while ((i = in.read(buf)) > 0) {
+                out.write(buf, 0, i);
+                out.flush();
+            }
+            out.close();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // LOG("error_download=" + e.getMessage());
+        }
+
+    }
+
+    public void downloadPage(String link, String path, boolean bCounter) throws Exception {
+//        Log.d("tag", "download page");
+        String line, s, url, end;
+        url = SITE + link;
+        if (link.contains(print)) {
+            end = "<!--/row-->";
+        } else {
+            end = "page-title";
+        }
+        InputStream in = new BufferedInputStream(getStream(url));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
+        boolean b = false;
+        if (url.contains(print))
+            url = url.substring(0, url.length() - print.length());
+        while ((line = br.readLine()) != null) {
+            if (b) {
+                if (line.contains(end)) {
+                    line = getNow();
+                    line = "<div style=\"margin-top:20px\" class=\"print2\">\n"
+                            + context.getResources().getString(R.string.page) + " " + url +
+                            "<br>Copyright " + context.getResources().getString(R.string.copyright)
+                            + " Leonid Maslov 2004-20" + line.substring(line.lastIndexOf(".") + 1) + "<br>"
+                            + context.getResources().getString(R.string.downloaded) + " " + line;
+                    bw.write(line + "\n</div></body></html>");
+                    bw.flush();
+                    b = false;
+                } else if (line.contains("<")) {
+                    line = line.trim();
+                    if (line.length() < 7) continue;
+//                    if(line.contains("color")) {
+//                        i=line.indexOf("color");
+//                    }
+                    if (line.contains("iframe")) {
+                        if (!line.contains("</iframe"))
+                            line += br.readLine();
+                        if (line.contains("?"))
+                            s = line.substring(line.indexOf("video/") + 6,
+                                    line.indexOf("?"));
+                        else
+                            s = line.substring(line.indexOf("video/") + 6,
+                                    line.indexOf("\"", 65));
+                        s = "<a href=\"https://vimeo.com/" +
+                                s + "\">" +
+                                context.getResources().getString
+                                        (R.string.video_on_vimeo) + "</a>";
+                        if (line.contains("center"))
+                            line = "<center>" + s + "</center>";
+                        else line = s;
+                    }
+                    bw.write(line.replace("color", "cvet") + N);
+                    bw.flush();
+                }
+            } else if (line.contains("<h1")) {
+                writeStartPage(bw, line);
+                br.readLine();
+                b = true;
+            } else if (line.contains("counter") && bCounter) { // counters
+                sendCounter(line);
+                if (line.contains("rambler"))
+                    break;
+            }
+        }
+        br.close();
+        bw.close();
+        if (bCounter)
+            checkNoreadList(link);
+    }
+
+    public static void showToast(Context context, String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    }
+
+    private void writeStartPage(BufferedWriter bw, String line) throws Exception {
+        bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
+        int i;
+        String s = line.trim().replace("&nbsp;", " ");
+        while ((i = s.indexOf("<")) > -1) {
+            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
+        }
+        bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\".." +
+                STYLE + "\">\n</head><body>");
+        bw.write("\n" + line.substring(line.indexOf("<")) + "\n");
+        bw.flush();
+    }
+
+    public InputStream getStream(String url) throws Exception {
+        DefaultHttpClient client = new DefaultHttpClient();
+        HttpGet req = new HttpGet(url);
+        HttpEntity entity;
+        HttpResponse res;
+        req.setHeader("User-Agent", context.getPackageName());
+        if (url.contains(SITE) && !url.contains(print)) {
+            String s = getCookies();
+//            Log.d("tag", "send: " + s);
+            if (!s.equals(""))
+                req.setHeader(COOKIE, s);
+            res = client.execute(req);
+            entity = res.getEntity();
+            List<Cookie> cookies = client.getCookieStore().getCookies();
+            if (!cookies.isEmpty()) {
+                if (cookies.size() == 2) {
+                    setCookies(null, cookies.get(0).getValue(),
+                            cookies.get(1).getValue());
+                } else {
+                    setCookies(cookies.get(0).getValue(),
+                            cookies.get(1).getValue(), cookies.get(2).getValue());
+                }
+            }
+        } else {
+            req.setHeader("Referer", SITE);
+            res = client.execute(req);
+            entity = res.getEntity();
+        }
+        return entity.getContent();
+    }
+
+    public File getPageFile(String link) {
+        if (link.contains("#"))
+            link = link.substring(0, link.indexOf("#"));
+        String p = "/" + link.substring(0, link.lastIndexOf("/"));
+        File file = new File(context.getFilesDir() + p);
+        if (!file.exists())
+            file.mkdirs();
+        file = new File(file.toString() + link.substring(link.lastIndexOf("/")));
+        return file;
+    }
+
+    public File getFile(String link) {
+        File file = new File(context.getFilesDir() + link.substring(0, link.lastIndexOf("/")));
+        if (!file.exists())
+            file.mkdirs();
+        file = new File(context.getFilesDir() + link);
+        return file;
+    }
+
+    public String getNow() {
+        Date d = new Date(System.currentTimeMillis());
+        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+        return df.format(d);
+    }
+
+//    public String getDate(long millis) {
+//        Date d = new Date(millis);
+//        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+//        return df.format(d);
+//    }
+
+    public void downloadStyle(boolean bReplaceStyle) throws Exception {
+        final File fLight = getFile(LIGHT);
+        final File fDark = getFile(DARK);
+        if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
+            String line = "";
+            int i;
+            InputStream in = new BufferedInputStream(getStream(SITE + "org/otk/tpl/otk/css/style-print.css"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+            BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
+            BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
+            for (i = 0; i < 7; i++) {
+                br.readLine();
+            }
+            while ((line = br.readLine()) != null) {
+                bwLight.write(line + N);
+                if (line.contains("#000")) {
+                    line = line.replace("000000", "000").replace("#000", "#fff");
+                } else
+                    line = line.replace("#fff", "#000");
+                line = line.replace("333333", "333").replace("#333", "#ccc");
+                bwDark.write(line + N);
+                if (line.contains("body")) {
+                    line = "    padding-left: 5px;\n    padding-right: 5px;";
+                    bwLight.write(line + N);
+                    bwDark.write(line + N);
+                } else if (line.contains("print2")) {
+                    line = br.readLine().replace("8pt/9pt", "12pt");
+                    bwLight.write(line + N);
+                    bwDark.write(line + N);
+                }
+                bwLight.flush();
+                bwDark.flush();
+            }
+            br.close();
+            bwLight.close();
+            bwDark.close();
+        }
+    }
+
+    public void sendCounter(String line) {
+        int i = 0;
+        while ((i = line.indexOf("img src", i)) > -1) {
+            i += 9;
+            final String link_counter = line.substring(i, line.indexOf("\"", i));
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        getStream(link_counter);
+                    } catch (Exception ex) {
+                    }
+                }
+            });
+            t.start();
+        }
+    }
+
+    public static void LOG(String msg) {
+        Log.d("tag", msg);
+    }
+
+    public void openInApps(String url) {
+        Intent myIntent = new Intent(Intent.ACTION_VIEW);
+        try {
+            myIntent.setData(android.net.Uri.parse(url));
+            context.startActivity(myIntent);
+        } catch (Exception e) {
+            url = url.substring(url.indexOf(":") + 1);
+            if (url.indexOf("/") == 0)
+                url = url.substring(2);
+            copyAddress(url);
+            e.printStackTrace();
+        }
+    }
+
+    public void copyAddress(String txt) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(context.getResources().getText(R.string.app_name), txt);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, context.getResources().getText(R.string.address_copied), Toast.LENGTH_LONG).show();
+    }
+}
