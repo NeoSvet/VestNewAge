@@ -2,6 +2,8 @@ package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,6 +24,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ru.neosvet.ui.CalendarAdapter;
 import ru.neosvet.ui.CalendarItem;
@@ -33,17 +38,25 @@ import ru.neosvet.utils.Lib;
 
 public class CalendarFragment extends Fragment {
     public static final String CURRENT_DATE = "current_date", CALENDAR = "/calendar/";
-    private int today_m, today_y;
+    private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
     private Date dCurrent;
     private TextView tvDate, tvNew;
     private ListView lvNoread;
-    private View pCalendar, ivPrev, ivNext, fabRefresh, fabClose, fabClear;
+    private View container, tvEmpty, pCalendar, ivPrev, ivNext, fabRefresh, fabClose, fabClear;
     private CalendarTask task = null;
     private ListAdapter adNoread;
-    private View container;
     private MainActivity act;
+    private Animation anShow, anHide;
+    private boolean boolShow = false;
+    final Handler hEmpty = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            tvEmpty.startAnimation(anHide);
+            return false;
+        }
+    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,11 +71,16 @@ public class CalendarFragment extends Fragment {
         return this.container;
     }
 
+    public void setNew(int n) {
+        iNew = n;
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(Lib.NOREAD, (fabClose.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Lib.TASK, task);
+//        outState.putInt(MainActivity.TAB, adNoread.getCount());
         super.onSaveInstanceState(outState);
     }
 
@@ -71,11 +89,12 @@ public class CalendarFragment extends Fragment {
             Date d = new Date();
             dCurrent = new Date(d.getYear(), d.getMonth(), d.getDate());
         } else {
+            act.setFrCalendar(this);
             dCurrent = new Date(state.getLong(CURRENT_DATE));
             task = (CalendarTask) state.getSerializable(Lib.TASK);
             if (task != null) {
-                setStatus(true);
                 task.setFrm(this);
+                setStatus(true);
             }
             if (state.getBoolean(Lib.NOREAD, false)) {
                 pCalendar.setVisibility(View.GONE);
@@ -93,11 +112,27 @@ public class CalendarFragment extends Fragment {
     }
 
     private void setViews() {
+        if (iNew > -1) {
+            tvNew.setText(Integer.toString(iNew));
+            iNew = -1;
+        }
         tvNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tvNew.getText().toString().equals("0"))
+                if (tvNew.getText().toString().equals("0")) {
+                    if (boolShow)
+                        return;
+                    boolShow = true;
+                    tvEmpty.setVisibility(View.VISIBLE);
+                    tvEmpty.startAnimation(anShow);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            hEmpty.sendEmptyMessage(0);
+                        }
+                    }, 2500);
                     return;
+                }
                 if (tvNew.getText().toString().equals("...")) {
                     adNoread.clear();
                     adNoread.addItem(new ListItem(getResources().getString(R.string.no_list), ""));
@@ -150,7 +185,8 @@ public class CalendarFragment extends Fragment {
                 if (act.status.onClick()) {
                     tvNew.setVisibility(View.VISIBLE);
                     fabRefresh.setVisibility(View.VISIBLE);
-                }
+                } else if (act.status.isTime())
+                    startLoad();
             }
         });
     }
@@ -208,16 +244,36 @@ public class CalendarFragment extends Fragment {
         fabRefresh = container.findViewById(R.id.fabRefresh);
         fabClose = container.findViewById(R.id.fabClose);
         fabClear = container.findViewById(R.id.fabClear);
+        tvEmpty = container.findViewById(R.id.tvEmptyList);
         lvNoread = (ListView) container.findViewById(R.id.lvNoread);
         adNoread = new ListAdapter(act);
         lvNoread.setAdapter(adNoread);
+        anShow = AnimationUtils.loadAnimation(act, R.anim.show);
+        anHide = AnimationUtils.loadAnimation(act, R.anim.hide);
+        anHide.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                tvEmpty.setVisibility(View.GONE);
+                boolShow = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
 
     public boolean onBackPressed() {
-       if (lvNoread.getVisibility() == View.VISIBLE) {
-           closeNoread();
-           return false;
+        if (lvNoread.getVisibility() == View.VISIBLE) {
+            closeNoread();
+            return false;
         }
         return true;
     }
@@ -298,7 +354,7 @@ public class CalendarFragment extends Fragment {
     }
 
     private void openLink(String link) {
-        BrowserActivity.openActivity(act, link, !link.contains("/"));
+        BrowserActivity.openActivity(act, link);
         adNoread.clear();
     }
 
@@ -409,12 +465,7 @@ public class CalendarFragment extends Fragment {
                     startLoad();
             } else {
                 if (isCurMonth() && boolLoad) {
-                    long t = act.lib.getTimeLastVisit();
-                    t = System.currentTimeMillis() - t;
-                    if (t > 3600000) {
-                        startLoad();
-                        return;
-                    }
+                    act.status.checkTime(act.lib.getTimeLastVisit());
                 }
                 int i;
                 String s;
@@ -448,11 +499,10 @@ public class CalendarFragment extends Fragment {
 
     public void finishLoad(boolean suc) {
         task = null;
-        if (suc) {
+        if (suc)
             setStatus(false);
-        } else {
+        else
             act.status.setCrash(true);
-        }
         if (adNoread.getCount() == 0)
             createNoreadList(false);
         clearDays();
@@ -470,7 +520,7 @@ public class CalendarFragment extends Fragment {
                 }
                 br.close();
             }
-            setNew(adNoread.getCount(), !boolLoad);
+            setNewText(adNoread.getCount());
             adNoread.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
@@ -479,19 +529,13 @@ public class CalendarFragment extends Fragment {
         }
     }
 
-    private void setNew(int n, boolean boolAnim) {
+    private void setNewText(int n) {
         String s = tvNew.getText().toString();
         tvNew.setText(Integer.toString(n));
-        if (boolAnim) {
-            boolean b = s.contains(".");
-            if (!b)
-                b = (n > Integer.parseInt(s) && n > 0) || n == 20;
-            if (b) {
-                ResizeAnim anim = new ResizeAnim(tvNew, true,
-                        (int) (56 * getResources().getDisplayMetrics().density));
-                anim.setDuration(700);
+        if (!s.contains(".")) {
+            if ((n > Integer.parseInt(s) && n > 0) || n == 20) {
                 tvNew.clearAnimation();
-                tvNew.startAnimation(anim);
+                tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
             }
         }
     }

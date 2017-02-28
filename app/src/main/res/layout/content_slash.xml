@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_slash"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/starsky_bg"
+    tools:context="ru.neosvet.vestnewage.SlashActivity"
+    tools:showIn="@layout/activity_slash">
+
+    <ImageView
+        android:id="@+id/ivStart"
+        android:layout_width="256dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:src="@drawable/big_star" />
+</LinearLayout>

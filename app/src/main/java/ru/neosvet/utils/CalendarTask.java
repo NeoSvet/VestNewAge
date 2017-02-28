@@ -1,5 +1,6 @@
 package ru.neosvet.utils;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 
 import org.apache.http.HttpResponse;
@@ -19,26 +20,31 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.ui.ListItem;
 import ru.neosvet.vestnewage.CalendarFragment;
 import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.SlashActivity;
 
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
     private transient CalendarFragment frm;
-    private transient MainActivity act;
+    private transient Activity act;
     List<ListItem> data = new ArrayList<ListItem>();
 
     public CalendarTask(CalendarFragment frm) {
         setFrm(frm);
     }
 
-    public CalendarTask(MainActivity act) {
+    public CalendarTask(Activity act) {
         this.act = act;
     }
 
     public void setFrm(CalendarFragment frm) {
         this.frm = frm;
-        act = (MainActivity) frm.getActivity();
+        act = frm.getActivity();
+    }
+
+    public void setAct(Activity act) {
+        this.act = act;
     }
 
     @Override
@@ -50,6 +56,9 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
     protected void onPostExecute(Boolean result) {
         if (frm != null) {
             frm.finishLoad(result);
+        } else if (act != null) {
+            if (act instanceof SlashActivity)
+                ((SlashActivity) act).finishLoad();
         }
     }
 
@@ -74,8 +83,16 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
     }
 
     private void downloadNoread() throws Exception {
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(act.lib.getStream(Lib.SITE)));
+        BufferedReader br;
+        if (act instanceof MainActivity) {
+            br = new BufferedReader(new InputStreamReader
+                    (((MainActivity) act).lib.getStream(Lib.SITE)));
+        } else {
+            br = new BufferedReader(new InputStreamReader
+                    (((SlashActivity) act).lib.getStream(Lib.SITE)));
+        }
+        if(isCancelled())
+            return;
         String s;
         while ((s = br.readLine()) != null) {
             if (s.contains("clear-unread")) break;
@@ -109,6 +126,8 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     + (year + 1900) + "&month=" + (month + 1));
             final String poemOutDict = "poemOutDict";
             HttpResponse res = client.execute(rget);
+            if(isCancelled())
+                return;
             r = EntityUtils.toString(res.getEntity());
             json = new JSONObject(r);
             int n;
@@ -134,7 +153,8 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     data.get(n).addLink(jsonI.getString(DataBase.LINK));
                 }
             }
-
+            if(isCancelled())
+                return;
             File file = new File(act.getFilesDir() + CalendarFragment.CALENDAR);
             file.mkdir();
             file = new File(file.toString() + File.separator + month + "." + year);

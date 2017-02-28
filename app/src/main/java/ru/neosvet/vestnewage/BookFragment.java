@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -29,6 +31,7 @@ public class BookFragment extends Fragment {
     public final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
+    private Animation anMin, anMax;
     private final DateFormat df = new SimpleDateFormat("MM.yy");
     private ListAdapter adBook;
     private View fabRefresh, ivPrev, ivNext;
@@ -36,7 +39,7 @@ public class BookFragment extends Fragment {
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
-    private int x, y, tab;
+    private int x, y, tab = 0;
     private boolean boolNotClick = false;
     private Date dKat, dPos;
     private SharedPreferences pref;
@@ -65,21 +68,20 @@ public class BookFragment extends Fragment {
         long t = System.currentTimeMillis();
         dKat = new Date(pref.getLong(KAT, t));
         dPos = new Date(pref.getLong(POS, t));
-        if (state == null) {
-            tabHost.setCurrentTab(0);
-            tab = 0;
-        } else {
+        if (state != null) {
             tab = state.getInt(CURRENT_TAB);
-            if (tab == 1)
-                tabHost.setCurrentTab(0);
-            tabHost.setCurrentTab(tab);
             task = (BookTask) state.getSerializable(Lib.TASK);
             if (task != null) {
-                fabRefresh.setVisibility(View.GONE);
+//                fabRefresh.setVisibility(View.GONE);
                 task.setFrm(this);
                 act.status.setLoad(true);
             }
         }
+        if (tab == 1) {
+            tabHost.setCurrentTab(0);
+            tabHost.setCurrentTab(1);
+        } else
+            tabHost.setCurrentTab(tab);
     }
 
     private void initTabs() {
@@ -129,9 +131,17 @@ public class BookFragment extends Fragment {
             adBook.clear();
             Date d;
             boolean bP = false;
-            if (tab == 0)
+            if (tab == 0) {
+                if (dKat.getYear() < 100) {
+                    dKat.setMonth(1);
+                    dKat.setYear(116);
+                }
                 d = dKat;
-            else {
+            } else {
+                if (dPos.getYear() < 100) {
+                    dPos.setMonth(0);
+                    dPos.setYear(116);
+                }
                 d = dPos;
                 bP = true;
             }
@@ -154,10 +164,6 @@ public class BookFragment extends Fragment {
                     + "\n" + (d.getYear() + 1900));
             ivPrev.setEnabled(getFile(setDate(d, -1), bP).exists());
             ivNext.setEnabled(getFile(setDate(d, 1), bP).exists());
-            if (f.equals(getFile(new Date(), bP)))
-                act.status.checkTime(f.lastModified());
-            else
-                act.status.checkTime(System.currentTimeMillis());
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, s;
             while ((t = br.readLine()) != null) {
@@ -169,6 +175,14 @@ public class BookFragment extends Fragment {
                     adBook.addItem(new ListItem(t, br.readLine()));
             }
             br.close();
+            if (f.equals(getFile(new Date(), bP)))
+                bP =act.status.checkTime(f.lastModified());
+            else
+                bP = act.status.checkTime(System.currentTimeMillis());
+            if(bP)
+                fabRefresh.setVisibility(View.GONE);
+            else
+                fabRefresh.setVisibility(View.VISIBLE);
             adBook.notifyDataSetChanged();
             lvBook.smoothScrollToPosition(0);
         } catch (Exception e) {
@@ -207,6 +221,24 @@ public class BookFragment extends Fragment {
         tvDate = (TextView) container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
+        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
+        anMin.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                fabRefresh.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
     }
 
     private void setViews() {
@@ -223,19 +255,7 @@ public class BookFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (boolNotClick) return;
-                BrowserActivity.openActivity(act, adBook.getItem(pos).getLink(), false);
-//
-//                    PopupMenu pMenu = new PopupMenu(BookActivity.this, view);
-//                    pMenu.inflate(R.menu.menu_calendar);
-//                    pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//                        @Override
-//                        public boolean onMenuItemClick(MenuItem item) {
-//                            if (item.getItemId() == R.id.link1)
-//                            return true;
-//                        }
-//                    });
-//                    pMenu.show();
-//                }
+                BrowserActivity.openActivity(act, adBook.getItem(pos).getLink());
             }
         });
         lvBook.setOnTouchListener(new View.OnTouchListener() {
@@ -243,6 +263,8 @@ public class BookFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
+                        if (!act.status.startMin())
+                            fabRefresh.startAnimation(anMin);
                         x = (int) event.getX(0);
                         y = (int) event.getY(0);
                         break;
@@ -261,6 +283,11 @@ public class BookFragment extends Fragment {
                                     boolNotClick = true;
                                 }
                             }
+                    case MotionEvent.ACTION_CANCEL:
+                        if (!act.status.startMax()) {
+                            fabRefresh.setVisibility(View.VISIBLE);
+                            fabRefresh.startAnimation(anMax);
+                        }
                         break;
                 }
                 return false;
@@ -334,5 +361,9 @@ public class BookFragment extends Fragment {
         } else {
             act.status.setCrash(true);
         }
+    }
+
+    public void setTab(int tab) {
+        this.tab = tab;
     }
 }

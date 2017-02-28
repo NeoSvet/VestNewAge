@@ -45,9 +45,19 @@
     <string name="each_one">каждый час        </string>
     <string name="each_more">каждые</string>
     <string name="check_on_connect">Так же проверка будет производиться при подключении к интернету.</string>
+    <string name="prom_notif">Уведомлять о Посыле</string>
+    <string name="on">за</string>
+    <string name="at_moment_prom">в момент Посыла</string>
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
     <string name="refresh_list">Обновление списков раздела</string>
+    <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
+    <string name="finish_list">Список закончился</string>
+    <string name="empty_list">Список пуст</string>
+    <string name="to_prom">До Посыла</string>
+    <string name="prom">Посыл!</string>
+    <string name="seconde">секунда</string>
+    <string name="minute">минута</string>
     <string name="download">Загрузка</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
     <string name="kat_n_pos">Катренов и Посланий</string>
@@ -58,6 +68,8 @@
     <string name="write_mail">Написать письмо</string>
     <string name="appeared_new">Появилась новая информация!</string>
     <string name="dev_name">Юрий Тихомиров</string>
+    <string name="to_load">Загрузить</string>
+    <string name="site_name">«Благая Весть»</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
     <string name="help_text">Добро пожаловать в приложение «Весть Нового Века»!\n\n
 Это приложение является неофициальным клиентом к сайту «Благая Весть». Приложение загружает материалы сайта на ваше устройство, и в дальнейшем их можно будет изучать без доступа к интернету. Материалы предоставляются без какого-либо смыслового изменения, и я, разработчик приложения, за их содержание ответственности не несу.\n\n
@@ -71,4 +83,5 @@
 - крестик – закрыть список непрочитанного. \n\n
 Об проблемах и предложениях писать мне на почту.
 </string>
+    <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
 </resources>

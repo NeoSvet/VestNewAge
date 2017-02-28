@@ -17,7 +17,7 @@
             android:padding="20dp">
 
             <CheckBox
-                android:id="@+id/cbAutoCheck"
+                android:id="@+id/cbCheckAuto"
                 style="@style/CheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -54,6 +54,49 @@
 
             <CheckBox
                 android:id="@+id/cbCheckVibr"
+                style="@style/CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/vibr"
+                android:visibility="gone" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/colorAccentLight" />
+
+            <CheckBox
+                android:id="@+id/cbPromNotif"
+                style="@style/CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/prom_notif" />
+
+            <SeekBar
+                android:id="@+id/sbPromTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="20dp"
+                android:max="60"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_bar"
+                android:thumb="@drawable/sb_thumb"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/cbPromSound"
+                style="@style/CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/notif_sound"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/cbPromVibr"
                 style="@style/CheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -4,37 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    tools:context="ru.neosvet.vestnewage.SlashActivity">
 
-    <FrameLayout
-        android:id="@+id/menu_fragment"
-        android:layout_width="320dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start" />
-
-    <FrameLayout
-        android:id="@+id/my_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:layout_marginLeft="320dp" />
-
-    <TextView
-        android:id="@+id/tvPromTime"
-        style="@style/Label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="10dp"
-        android:background="@drawable/field"
-        android:padding="10dp"
-        android:visibility="gone" />
+    <include layout="@layout/content_slash" />
 
     <LinearLayout
         android:id="@+id/pStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom|center"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/shape_norm"
         android:orientation="horizontal"
@@ -58,4 +36,5 @@
             android:padding="15dp"
             android:src="@drawable/refresh" />
     </LinearLayout>
+
 </android.support.design.widget.CoordinatorLayout>

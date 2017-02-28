@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -14,10 +15,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.LoaderTask;
+import ru.neosvet.utils.Prom;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static boolean boolFirst = false;
@@ -25,12 +31,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean boolLoad = false, boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
-    private final String LOADER = "loader", CUR_ID = "cur_id";
+    private final String LOADER = "loader";
+    public static final String CUR_ID = "cur_id", TAB = "tab";
     public Lib lib = new Lib(this);
     private NavigationView navigationView;
     private DrawerLayout drawer;
     public StatusBar status;
-    private int cur_id = R.id.nav_calendar;
+    private Prom prom;
+    private int cur_id, tab = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +50,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (savedInstanceState == null) {
             SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
-            boolLoad = getIntent().getBooleanExtra(SummaryFragment.RSS, false);
+            Intent intent = getIntent();
+            boolLoad = intent.getBooleanExtra(SummaryFragment.RSS, false);
+            tab = intent.getIntExtra(TAB, 0);
             if (boolLoad) {
                 setFragment(R.id.nav_rss);
             } else {
@@ -53,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setFragment(R.id.nav_help);
                     boolFirst = true;
                 } else
-                    setFragment(R.id.nav_calendar);
+                    setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
             }
         } else {
             cur_id = savedInstanceState.getInt(CUR_ID);
@@ -62,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 loader.setAct(this);
         }
         initInterface();
+        prom = new Prom(this);
     }
 
     private void initInterface() {
@@ -80,6 +91,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
             navigationView.setCheckedItem(cur_id);
+
+            navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    lib.openInApps(Lib.SITE.substring(0, Lib.SITE.length() - 1), null);
+//                    startActivity(Intent.createChooser(lib.openInApps(Lib.SITE),
+//                            getResources().getString(R.string.open)));
+                }
+            });
         }
     }
 
@@ -114,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    public void setFrCalendar(CalendarFragment frCalendar) {
+        this.frCalendar = frCalendar;
+    }
+
     public void setFragment(int id) {
         if (cur_id != id)
             boolFirst = false;
@@ -125,20 +149,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frCalendar = null;
         switch (id) {
             case R.id.nav_rss:
-                SummaryFragment fr = new SummaryFragment();
-                fr.setLoad(boolLoad);
-                fragmentTransaction.replace(R.id.my_fragment, fr);
+                SummaryFragment fr1 = new SummaryFragment();
+                fr1.setLoad(boolLoad);
+                fragmentTransaction.replace(R.id.my_fragment, fr1);
                 boolLoad = false;
                 break;
             case R.id.nav_main:
-                fragmentTransaction.replace(R.id.my_fragment, new SiteFragment());
+                SiteFragment fr2 = new SiteFragment();
+                fr2.setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, fr2);
                 break;
             case R.id.nav_calendar:
                 frCalendar = new CalendarFragment();
+                if (tab > 0)
+                    frCalendar.setNew(tab - 1);
                 fragmentTransaction.replace(R.id.my_fragment, frCalendar);
                 break;
             case R.id.nav_book:
-                fragmentTransaction.replace(R.id.my_fragment, new BookFragment());
+                BookFragment fr3 = new BookFragment();
+                fr3.setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, fr3);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
@@ -152,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
                 break;
         }
+        tab = 0;
         fragmentTransaction.commit();
     }
 
@@ -193,15 +224,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             boolExit = true;
             Lib.showToast(this, getResources().getString(R.string.click_for_exit));
-            new Thread(new Runnable() {
+            new Timer().schedule(new TimerTask() {
+                @Override
                 public void run() {
-                    try {
-                        Thread.sleep(3000);
-                        boolExit = false;
-                    } catch (Exception ex) {
-                    }
+                    boolExit = false;
                 }
-            }).start();
+            }, 3000);
         }
     }
 
@@ -212,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void downloadAll() {
-        status.setCrash(false);
+//        status.setCrash(false);
         loader = new LoaderTask(this);
         loader.execute();
     }

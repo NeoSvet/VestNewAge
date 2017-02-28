@@ -5,6 +5,7 @@
     android:background="@drawable/starsky_bg">
 
     <ImageView
+        android:id="@+id/ivHeadMenu"
         android:layout_width="318dp"
         android:layout_height="201dp"
         android:src="@drawable/side_nav_bar" />

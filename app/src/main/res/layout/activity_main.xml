@@ -28,9 +28,9 @@
 
         <FrameLayout
             android:id="@+id/my_fragment"
-            android:layout_marginTop="?attr/actionBarSize"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize" />
 
         <LinearLayout
             android:id="@+id/pStatus"
@@ -60,6 +60,17 @@
                 android:padding="15dp"
                 android:src="@drawable/refresh" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvPromTime"
+            style="@style/Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="10dp"
+            android:background="@drawable/field"
+            android:padding="10dp"
+            android:visibility="gone" />
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView

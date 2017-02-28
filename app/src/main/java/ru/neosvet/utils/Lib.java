@@ -88,13 +88,15 @@ public class Lib {
         editor.apply();
     }
 
-    public String getCookies() {
+    public String getCookies(boolean boolNoreadOnly) {
 //        return SESSION_ID + "=vs50e3l2soiopvmsbk24rvkmu2; "
 //                + TIME_LAST_VISIT + "=16.12.2016+14%3A50%3A22; "
 //                + NOREAD + "=a%3A1%3A%7Bi%3A0%3Ba%3A2%3A%7Bs%3A2%3A%22id%22%3Bi%3A1398%3Bs%3A4%3A%22link%22%3Bs%3A14%3A%22poems%2F15.12.16%22%3B%7D%7D";
         SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
         if (pref.getString(SESSION_ID, "").equals(""))
             return "";
+        else if (boolNoreadOnly)
+            return pref.getString(NOREAD, "");
         else
             return SESSION_ID + "=" + pref.getString(SESSION_ID, "") + "; "
                     + TIME_LAST_VISIT + "=" + pref.getString(TIME_LAST_VISIT, "")
@@ -229,7 +231,7 @@ public class Lib {
         HttpResponse res;
         req.setHeader("User-Agent", context.getPackageName());
         if (url.contains(SITE) && !url.contains(print)) {
-            String s = getCookies();
+            String s = getCookies(false);
             if (!s.equals(""))
                 req.setHeader(COOKIE, s);
             res = client.execute(req);
@@ -239,7 +241,7 @@ public class Lib {
                 if (cookies.size() == 2) {
                     setCookies(null, cookies.get(0).getValue(),
                             cookies.get(1).getValue());
-                } else {
+                } else if (cookies.size() == 3) {
                     setCookies(cookies.get(0).getValue(),
                             cookies.get(1).getValue(), cookies.get(2).getValue());
                 }
@@ -342,17 +344,19 @@ public class Lib {
         Log.d("tag", msg);
     }
 
-    public void openInApps(String url) {
+    public void openInApps(String url, String titleChooser) {
         Intent myIntent = new Intent(Intent.ACTION_VIEW);
         try {
             myIntent.setData(android.net.Uri.parse(url));
-            context.startActivity(myIntent);
+            if (titleChooser == null)
+                context.startActivity(myIntent);
+            else
+                context.startActivity(Intent.createChooser(myIntent, titleChooser));
         } catch (Exception e) {
             url = url.substring(url.indexOf(":") + 1);
             if (url.indexOf("/") == 0)
                 url = url.substring(2);
             copyAddress(url);
-//            e.printStackTrace();
         }
     }
 
@@ -410,8 +414,8 @@ public class Lib {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity)context,
-                    new String[] {
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{
                             Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE
                     }, code);

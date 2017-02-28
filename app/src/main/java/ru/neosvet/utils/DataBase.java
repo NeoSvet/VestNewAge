@@ -5,7 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataBase extends SQLiteOpenHelper {
-    public static final String NAME = "journal", TITLE = "title", LINK = "link", TIME = "time";
+    public static final String NAME = "journal", Q = " = ?", TITLE = "title",
+            LINK = "link", TIME = "time", DESC = " DESC";
 
     public DataBase(Context context) {
         super(context, NAME, null, 1);

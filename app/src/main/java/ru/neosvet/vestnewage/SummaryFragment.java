@@ -3,8 +3,11 @@ package ru.neosvet.vestnewage;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -28,6 +31,7 @@ public class SummaryFragment extends Fragment {
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
+    private Animation anMin, anMax;
     private View container;
     private View fabRefresh;
     private SummaryTask task = null;
@@ -39,6 +43,7 @@ public class SummaryFragment extends Fragment {
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.rss));
         initViews();
+        setViews();
         restoreActivityState(savedInstanceState);
         return this.container;
     }
@@ -59,7 +64,10 @@ public class SummaryFragment extends Fragment {
         }
         File f = new File(act.getFilesDir() + RSS);
         if (f.exists() && !boolLoad) {
-            act.status.checkTime(f.lastModified());
+            if (act.status.checkTime(f.lastModified()))
+                fabRefresh.setVisibility(View.GONE);
+            else
+                fabRefresh.setVisibility(View.VISIBLE);
             createList(true);
         } else {
             boolLoad = false;
@@ -69,6 +77,30 @@ public class SummaryFragment extends Fragment {
 
     private void initViews() {
         fabRefresh = container.findViewById(R.id.fabRefresh);
+        lvSummary = (ListView) container.findViewById(R.id.lvSummary);
+        adSummary = new ListAdapter(act);
+        lvSummary.setAdapter(adSummary);
+        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
+        anMin.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                fabRefresh.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
+    }
+
+    private void setViews() {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,20 +116,30 @@ public class SummaryFragment extends Fragment {
                     startLoad();
             }
         });
-
-        lvSummary = (ListView) container.findViewById(R.id.lvSummary);
-        adSummary = new ListAdapter(act);
-        lvSummary.setAdapter(adSummary);
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adSummary.getItem(pos).getLink();
-                boolean b = false;
                 if (link.indexOf(BrowserActivity.ARTICLE) == Lib.LINK.length()) {
                     link = link.substring(BrowserActivity.ARTICLE.length());
-                    b = true;
                 }
-                BrowserActivity.openActivity(act, link, b);
+                BrowserActivity.openActivity(act, link);
+            }
+        });
+        lvSummary.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (!act.status.startMin())
+                        fabRefresh.startAnimation(anMin);
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    if (!act.status.startMax()) {
+                        fabRefresh.setVisibility(View.VISIBLE);
+                        fabRefresh.startAnimation(anMax);
+                    }
+                }
+                return false;
             }
         });
     }

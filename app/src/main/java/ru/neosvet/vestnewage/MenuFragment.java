@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import ru.neosvet.ui.MenuAdapter;
+import ru.neosvet.utils.Lib;
 
 public class MenuFragment extends Fragment {
     private static final String SELECT = "select";
@@ -35,6 +36,16 @@ public class MenuFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.container = inflater.inflate(R.layout.fragment_menu, container, false);
         act = (MainActivity) getActivity();
+
+        this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.lib.openInApps(Lib.SITE.substring(0, Lib.SITE.length() - 1), null);
+//                startActivity(Intent.createChooser(act.lib.openInApps(Lib.SITE),
+//                        getResources().getString(R.string.open)));
+            }
+        });
+
         ListView lvMenu = (ListView) this.container.findViewById(R.id.lvMenu);
         adMenu = new MenuAdapter(act);
         lvMenu.setAdapter(adMenu);

@@ -31,6 +31,17 @@
         android:background="@drawable/oval"
         android:src="@drawable/menu" />
 
+    <TextView
+        android:id="@+id/tvPromTime"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="10dp"
+        android:background="@drawable/field"
+        android:padding="10dp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/pStatus"
         android:layout_width="wrap_content"

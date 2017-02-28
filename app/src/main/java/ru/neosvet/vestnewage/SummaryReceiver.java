@@ -92,7 +92,7 @@ public class SummaryReceiver extends BroadcastReceiver {
                     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.star)
                             .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                            .setContentTitle(context.getResources().getString(R.string.app_name))
+                            .setContentTitle(context.getResources().getString(R.string.site_name))
                             .setContentText(context.getResources().getString(R.string.appeared_new))
                             .setTicker(context.getResources().getString(R.string.appeared_new))
                             .setWhen(System.currentTimeMillis())

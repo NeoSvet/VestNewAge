@@ -13,11 +13,12 @@ import android.widget.SeekBar;
 import static android.content.Context.MODE_PRIVATE;
 
 public class SettingsFragment extends Fragment {
-    public static final String SUMMARY = "Summary", TIME = "time", SOUND = "sound", VIBR = "vibr";
+    public static final String SUMMARY = "Summary", PROM = "Prom",
+            TIME = "time", SOUND = "sound", VIBR = "vibr";
     private MainActivity act;
     private View container, tvCheck;
-    private CheckBox cbAutoCheck, cbCheckSound, cbCheckVibr;
-    private SeekBar sbCheckTime;
+    private CheckBox cbCheckAuto, cbCheckSound, cbCheckVibr, cbPromNotif, cbPromSound, cbPromVibr;
+    private SeekBar sbCheckTime, sbPromTime;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,17 +44,17 @@ public class SettingsFragment extends Fragment {
                 saveSummary();
             }
         });
-        cbAutoCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cbCheckAuto.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                 if (check) {
-                    setTimeText();
+                    setCheckTime();
                     tvCheck.setVisibility(View.VISIBLE);
                     sbCheckTime.setVisibility(View.VISIBLE);
                     cbCheckSound.setVisibility(View.VISIBLE);
                     cbCheckVibr.setVisibility(View.VISIBLE);
                 } else {
-                    cbAutoCheck.setText(getResources().getString(R.string.auto_check));
+                    cbCheckAuto.setText(getResources().getString(R.string.auto_check));
                     tvCheck.setVisibility(View.GONE);
                     sbCheckTime.setVisibility(View.GONE);
                     cbCheckSound.setVisibility(View.GONE);
@@ -65,7 +66,7 @@ public class SettingsFragment extends Fragment {
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                setTimeText();
+                setCheckTime();
             }
 
             @Override
@@ -78,13 +79,59 @@ public class SettingsFragment extends Fragment {
                 saveSummary();
             }
         });
+
+        cbPromSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                saveProm();
+            }
+        });
+        cbPromVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                saveProm();
+            }
+        });
+        cbPromNotif.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                if (check) {
+                    setPromTime();
+                    sbPromTime.setVisibility(View.VISIBLE);
+                    cbPromSound.setVisibility(View.VISIBLE);
+                    cbPromVibr.setVisibility(View.VISIBLE);
+                } else {
+                    cbPromNotif.setText(getResources().getString(R.string.prom_notif));
+                    sbPromTime.setVisibility(View.GONE);
+                    cbPromSound.setVisibility(View.GONE);
+                    cbPromVibr.setVisibility(View.GONE);
+                }
+                saveProm();
+            }
+        });
+        sbPromTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                setPromTime();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                saveProm();
+            }
+        });
     }
 
     private void saveSummary() {
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = -1;
-        if (cbAutoCheck.isChecked())
+        if (cbCheckAuto.isChecked())
             p = sbCheckTime.getProgress();
         editor.putInt(TIME, p);
         editor.putBoolean(SOUND, cbCheckSound.isChecked());
@@ -93,28 +140,58 @@ public class SettingsFragment extends Fragment {
         SummaryReceiver.setReceiver(act, p);
     }
 
+    private void saveProm() {
+        SharedPreferences pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        int p = -1;
+        if (cbPromNotif.isChecked())
+            p = sbPromTime.getProgress();
+        editor.putInt(TIME, p);
+        editor.putBoolean(SOUND, cbPromSound.isChecked());
+        editor.putBoolean(VIBR, cbPromVibr.isChecked());
+        editor.apply();
+        PromReceiver.setReceiver(act, p);
+    }
+
     private void initViews() {
         tvCheck = container.findViewById(R.id.tvCheck);
-        cbAutoCheck = (CheckBox) container.findViewById(R.id.cbAutoCheck);
+        cbCheckAuto = (CheckBox) container.findViewById(R.id.cbCheckAuto);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
         cbCheckVibr = (CheckBox) container.findViewById(R.id.cbCheckVibr);
         sbCheckTime = (SeekBar) container.findViewById(R.id.sbCheckTime);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(TIME, -1);
         if (p > -1) {
-            cbAutoCheck.setChecked(true);
+            cbCheckAuto.setChecked(true);
             tvCheck.setVisibility(View.VISIBLE);
             sbCheckTime.setVisibility(View.VISIBLE);
             cbCheckSound.setVisibility(View.VISIBLE);
             cbCheckVibr.setVisibility(View.VISIBLE);
             sbCheckTime.setProgress(p);
-            setTimeText();
+            setCheckTime();
         }
         cbCheckSound.setChecked(pref.getBoolean(SOUND, false));
         cbCheckVibr.setChecked(pref.getBoolean(VIBR, true));
+
+        cbPromNotif = (CheckBox) container.findViewById(R.id.cbPromNotif);
+        cbPromSound = (CheckBox) container.findViewById(R.id.cbPromSound);
+        cbPromVibr = (CheckBox) container.findViewById(R.id.cbPromVibr);
+        sbPromTime = (SeekBar) container.findViewById(R.id.sbPromTime);
+        pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
+        p = pref.getInt(TIME, -1);
+        if (p > -1) {
+            cbPromNotif.setChecked(true);
+            sbPromTime.setVisibility(View.VISIBLE);
+            cbPromSound.setVisibility(View.VISIBLE);
+            cbPromVibr.setVisibility(View.VISIBLE);
+            sbPromTime.setProgress(p);
+            setPromTime();
+        }
+        cbPromSound.setChecked(pref.getBoolean(SOUND, false));
+        cbPromVibr.setChecked(pref.getBoolean(VIBR, true));
     }
 
-    private void setTimeText() {
+    private void setCheckTime() {
         int p = sbCheckTime.getProgress() + 1;
         boolean bH = false;
         if (p > 5) {
@@ -141,6 +218,34 @@ public class SettingsFragment extends Fragment {
             else
                 t.append(getResources().getString(R.string.minutes));
         }
-        cbAutoCheck.setText(t);
+        cbCheckAuto.setText(t);
+    }
+
+    private void setPromTime() {
+        int p = sbPromTime.getProgress();
+        StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
+        t.append(" ");
+        if (p == 0)
+            t.append(getResources().getString(R.string.at_moment_prom));
+        else {
+            t.append(getResources().getString(R.string.on));
+            t.append(" ");
+            if (p > 4 && p < 21)
+                t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
+            else {
+                if (p == 1)
+                    t.append(getResources().getStringArray(R.array.time)[3]);
+                else {
+                    int n = (int) p % 10;
+                    if (n == 1)
+                        t.append(p + " " + getResources().getStringArray(R.array.time)[3]);
+                    else if (n > 1 && n < 5)
+                        t.append(p + " " + getResources().getStringArray(R.array.time)[5]);
+                    else
+                        t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
+                }
+            }
+        }
+        cbPromNotif.setText(t);
     }
 }

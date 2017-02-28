@@ -56,7 +56,7 @@ public class HelpFragment extends Fragment {
         container.findViewById(R.id.bWriteMail).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                act.lib.openInApps("mailto:neosvet333@gmail.com");
+                act.lib.openInApps("mailto:neosvet333@gmail.com", null);
             }
         });
         bChangelog.setOnClickListener(new View.OnClickListener() {

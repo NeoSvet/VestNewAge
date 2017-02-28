@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -28,10 +30,11 @@ public class SiteFragment extends Fragment {
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh;
+    private Animation anMin, anMax;
     private SiteTask task = null;
     private TabHost tabHost;
     private ListView lvMain;
-    private int x, y;
+    private int x, y, tab = 0;
     private boolean boolNotClick = false;
 
     @Override
@@ -54,12 +57,8 @@ public class SiteFragment extends Fragment {
     }
 
     private void restoreActivityState(Bundle state) {
-        if (state == null) {
-            tabHost.setCurrentTab(0);
-        } else {
-            if (state.getInt(CURRENT_TAB) == 1)
-                tabHost.setCurrentTab(0);
-            tabHost.setCurrentTab(state.getInt(CURRENT_TAB));
+        if (state != null) {
+            tab = state.getInt(CURRENT_TAB);
             task = (SiteTask) state.getSerializable(Lib.TASK);
             if (task != null) {
                 fabRefresh.setVisibility(View.GONE);
@@ -67,6 +66,11 @@ public class SiteFragment extends Fragment {
                 task.setFrm(this);
             }
         }
+        if (tab == 1) {
+            tabHost.setCurrentTab(0);
+            tabHost.setCurrentTab(1);
+        } else
+            tabHost.setCurrentTab(tab);
     }
 
     private void initTabs() {
@@ -121,6 +125,24 @@ public class SiteFragment extends Fragment {
 
     private void initViews() {
         fabRefresh = container.findViewById(R.id.fabRefresh);
+        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
+        anMin.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                fabRefresh.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
     }
 
     private void setViews() {
@@ -148,7 +170,7 @@ public class SiteFragment extends Fragment {
 //                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 //                            startActivity(intent);
                         } else if (pos == 6 || pos == 7) { //no article
-                            BrowserActivity.openActivity(act, link, false);
+                            BrowserActivity.openActivity(act, link);
                         } else
                             OpenPage(link);
                     } else {
@@ -190,6 +212,8 @@ public class SiteFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
+                        if (!act.status.startMin())
+                            fabRefresh.startAnimation(anMin);
                         x = (int) event.getX(0);
                         y = (int) event.getY(0);
                         break;
@@ -209,6 +233,11 @@ public class SiteFragment extends Fragment {
                                     boolNotClick = true;
                                 }
                             }
+                    case MotionEvent.ACTION_CANCEL:
+                        if (!act.status.startMax()) {
+                            fabRefresh.setVisibility(View.VISIBLE);
+                            fabRefresh.startAnimation(anMax);
+                        }
                         break;
                 }
                 return false;
@@ -228,7 +257,10 @@ public class SiteFragment extends Fragment {
     private void openList(File f, boolean boolLoad) {
         try {
             adMain.clear();
-            act.status.checkTime(f.lastModified());
+            if(act.status.checkTime(f.lastModified()))
+                fabRefresh.setVisibility(View.GONE);
+            else
+                fabRefresh.setVisibility(View.VISIBLE);
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
@@ -269,9 +301,13 @@ public class SiteFragment extends Fragment {
 
     private void OpenPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
-            act.lib.openInApps(url);
+            if (url.contains(Lib.SITE)) {
+                act.lib.openInApps(Lib.SITE, getResources().getString(R.string.to_load));
+            } else {
+                act.lib.openInApps(url, null);
+            }
         } else {
-            BrowserActivity.openActivity(act, url, !url.contains("press"));
+            BrowserActivity.openActivity(act, url);
         }
     }
 
@@ -305,5 +341,9 @@ public class SiteFragment extends Fragment {
             act.status.setLoad(false);
             openList(getFile(name), false);
         }
+    }
+
+    public void setTab(int tab) {
+        this.tab = tab;
     }
 }

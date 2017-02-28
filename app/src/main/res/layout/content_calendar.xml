@@ -58,7 +58,7 @@
     <ListView
         android:id="@+id/lvNoread"
         android:layout_width="@dimen/calendar_title"
-        android:layout_height="500dp"
+        android:layout_height="300dp"
         android:layout_centerInParent="true"
         android:background="@drawable/field"
         android:visibility="gone" />

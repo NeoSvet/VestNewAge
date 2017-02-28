@@ -7,19 +7,21 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
 
 public class StatusBar {
-    private Context cntxt;
+    private Context context;
     private Animation anStatus;
     private View panel;
     private TextView tv;
     private ImageView iv;
-    private boolean crash = false, stop = true, time = false;
+    private Animation anMin, anMax;
+    private boolean crash = false, stop = true, time = false, vis;
 
     public StatusBar(Context context, View p) {
-        cntxt = context;
+        this.context = context;
         this.panel = p;
         tv = (TextView) panel.findViewById(R.id.tvStatus);
         iv = (ImageView) panel.findViewById(R.id.ivStatus);
@@ -42,6 +44,26 @@ public class StatusBar {
 
             }
         });
+        if (context instanceof MainActivity) {
+            anMin = AnimationUtils.loadAnimation(context, R.anim.minimize);
+            anMin.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    panel.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            anMax = AnimationUtils.loadAnimation(context, R.anim.maximize);
+        }
     }
 
     public void setLoad(boolean boolStart) {
@@ -50,9 +72,11 @@ public class StatusBar {
             crash = false;
             time = false;
             panel.setVisibility(View.VISIBLE);
+            vis = true;
             iv.startAnimation(anStatus);
         } else {
             panel.setVisibility(View.GONE);
+            vis = false;
             iv.clearAnimation();
         }
     }
@@ -62,30 +86,35 @@ public class StatusBar {
         if (crash) {
             stop = true;
             time = false;
-            tv.setText(cntxt.getResources().getString(R.string.crash));
-            panel.setBackgroundDrawable(cntxt.getResources().getDrawable(R.drawable.shape_red));
+            tv.setText(context.getResources().getString(R.string.crash));
+            panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_red));
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
         } else {
             restoreText();
             panel.setVisibility(View.GONE);
-            panel.setBackgroundDrawable(cntxt.getResources().getDrawable(R.drawable.shape_norm));
+            vis = false;
+            panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_norm));
             iv.setImageResource(R.drawable.refresh);
         }
     }
 
-    public void checkTime(long t) {
+    public boolean checkTime(long t) {
         if (!stop || crash)
-            return;
+            return true;
         if (System.currentTimeMillis() - t > 86400000) {
             time = true;
             panel.setVisibility(View.VISIBLE);
-            tv.setText(cntxt.getResources().getString(R.string.refresh) + "?");
+            vis = true;
+            tv.setText(context.getResources().getString(R.string.refresh) + "?");
+            return true;
         } else {
             time = false;
+            vis = false;
             panel.setVisibility(View.GONE);
             restoreText();
         }
+        return false;
     }
 
     public boolean isCrash() {
@@ -97,7 +126,7 @@ public class StatusBar {
     }
 
     public void restoreText() {
-        tv.setText(cntxt.getResources().getString(R.string.load));
+        tv.setText(context.getResources().getString(R.string.load));
     }
 
     public void setClick(View.OnClickListener event) {
@@ -106,7 +135,7 @@ public class StatusBar {
 
     public boolean onClick() {
         if (isCrash()) {
-            Lib.showToast(cntxt, cntxt.getResources().getString(R.string.about_crash));
+            Lib.showToast(context, context.getResources().getString(R.string.about_crash));
             setLoad(false);
             setCrash(false);
             return true;
@@ -116,5 +145,27 @@ public class StatusBar {
 
     public boolean isTime() {
         return time;
+    }
+
+//    public void setVisible(boolean boolVis) {
+//        if (boolVis) {
+//            if (vis)
+//                panel.setVisibility(View.VISIBLE);
+//        } else
+//            panel.setVisibility(View.GONE);
+//    }
+
+    public boolean startMin() {
+        if (vis)
+            panel.startAnimation(anMin);
+        return vis;
+    }
+
+    public boolean startMax() {
+        if (vis) {
+            panel.setVisibility(View.VISIBLE);
+            panel.startAnimation(anMax);
+        }
+        return vis;
     }
 }
