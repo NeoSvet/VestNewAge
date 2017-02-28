@@ -50,7 +50,7 @@ public class BrowserActivity extends AppCompatActivity
     private DataBase dbJournal;
     private TextView tvPromTime, tvPlace;
     private StatusBar status;
-    private View ivMenu, pSearch;
+    private View fabMenu, pSearch;
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link;
@@ -81,7 +81,7 @@ public class BrowserActivity extends AppCompatActivity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_browser);
+        setContentView(R.layout.browser_activity);
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
@@ -94,7 +94,7 @@ public class BrowserActivity extends AppCompatActivity
             return;
         if (iPlace == -1)
             iPlace = 0;
-        ivMenu.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.GONE);
         tvPlace = (TextView) findViewById(R.id.tvPlace);
         View bPrev = findViewById(R.id.bPrev);
         View bNext = findViewById(R.id.bNext);
@@ -141,8 +141,8 @@ public class BrowserActivity extends AppCompatActivity
         getIntent().putExtra(DataBase.PLACE, "");
         pSearch.setVisibility(View.GONE);
         if (!bNomenu) {
-            ivMenu.setVisibility(View.VISIBLE);
-            ivMenu.startAnimation(anMax);
+            fabMenu.setVisibility(View.VISIBLE);
+            fabMenu.startAnimation(anMax);
         }
         wvBrowser.clearMatches();
     }
@@ -238,7 +238,7 @@ public class BrowserActivity extends AppCompatActivity
         pSearch = findViewById(R.id.pSearch);
         tvPromTime = (TextView) findViewById(R.id.tvPromTime);
         status = new StatusBar(this, findViewById(R.id.pStatus));
-        ivMenu = findViewById(R.id.ivMenu);
+        fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
         prom = new Prom(this);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
@@ -271,7 +271,7 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public void onAnimationEnd(Animation animation) {
                 if (!bNomenu)
-                    ivMenu.setVisibility(View.GONE);
+                    fabMenu.setVisibility(View.GONE);
                 if (prom.isProm())
                     tvPromTime.setVisibility(View.GONE);
             }
@@ -305,14 +305,14 @@ public class BrowserActivity extends AppCompatActivity
             public boolean onTouch(View view, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     if (!bNomenu && iPlace == -1)
-                        ivMenu.startAnimation(anMin);
+                        fabMenu.startAnimation(anMin);
                     if (prom.isProm())
                         tvPromTime.startAnimation(anMin);
                 } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
                         event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     if (!bNomenu && iPlace == -1) {
-                        ivMenu.setVisibility(View.VISIBLE);
-                        ivMenu.startAnimation(anMax);
+                        fabMenu.setVisibility(View.VISIBLE);
+                        fabMenu.startAnimation(anMax);
                     }
                     if (prom.isProm()) {
                         tvPromTime.setVisibility(View.VISIBLE);
@@ -330,7 +330,7 @@ public class BrowserActivity extends AppCompatActivity
                 return false;
             }
         });
-        ivMenu.setOnClickListener(new View.OnClickListener() {
+        fabMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 drawerMenu.openDrawer(Gravity.LEFT);
@@ -343,7 +343,7 @@ public class BrowserActivity extends AppCompatActivity
         if (pref.getBoolean(NOMENU, false)) {
             bNomenu = true;
             setCheckItem(miNomenu, bNomenu);
-            ivMenu.setVisibility(View.GONE);
+            fabMenu.setVisibility(View.GONE);
         }
         status.setClick(new View.OnClickListener() {
             @Override
@@ -391,9 +391,9 @@ public class BrowserActivity extends AppCompatActivity
             setCheckItem(item, bNomenu);
             editor.putBoolean(NOMENU, bNomenu);
             if (bNomenu)
-                ivMenu.setVisibility(View.GONE);
+                fabMenu.setVisibility(View.GONE);
             else
-                ivMenu.setVisibility(View.VISIBLE);
+                fabMenu.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_marker) {
             Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
             marker.putExtra(DataBase.TITLE, wvBrowser.getTitle());

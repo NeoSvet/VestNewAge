@@ -23,7 +23,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_settings, container, false);
+        this.container = inflater.inflate(R.layout.settings_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.settings));
         initViews();

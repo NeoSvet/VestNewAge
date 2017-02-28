@@ -64,7 +64,7 @@ public class CalendarFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_calendar, container, false);
+        this.container = inflater.inflate(R.layout.calendar_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.calendar));
         initViews();
@@ -341,7 +341,7 @@ public class CalendarFragment extends Fragment {
                             openLink(adCalendar.getItem(pos).getLink(0));
                         } else if (k > 1) {
                             PopupMenu popupMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
-                            popupMenu.inflate(R.menu.menu_calendar);
+                            popupMenu.inflate(R.menu.menu_links);
                             List<ListItem> list = getList(pos);
                             String s;
                             for (int i = 0; i < 5; i++) {

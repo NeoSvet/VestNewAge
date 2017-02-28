@@ -46,7 +46,7 @@ public class CollectionsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_collections, container, false);
+        this.container = inflater.inflate(R.layout.collections_fragment, container, false);
         act = (MainActivity) getActivity();
 
         initViews();
@@ -184,7 +184,7 @@ public class CollectionsFragment extends Fragment {
                 b.insert(0, getResources().getString(R.string.pos_n) + p + ":" + Lib.N);
             } else {
                 b.append(getResources().getString(R.string.par_n));
-                b.append(p);
+                b.append(p.replace(",", ", "));
                 b.append(":");
                 b.append(Lib.N);
                 p = DataBase.closeList(p);
@@ -203,7 +203,7 @@ public class CollectionsFragment extends Fragment {
             }
             br.close();
             if (b.length() > 0)
-                return b.toString().replace(",", ", ");
+                return b.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

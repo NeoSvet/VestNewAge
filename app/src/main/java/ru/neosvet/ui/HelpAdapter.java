@@ -49,7 +49,7 @@ public class HelpAdapter extends BaseAdapter {
     public View getView(int pos, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.detail_item, null);
+            convertView = inflater.inflate(R.layout.item_detail, null);
         }
         TextView tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(pos).getTitle());

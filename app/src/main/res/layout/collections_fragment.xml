@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/include"
-        layout="@layout/content_collections" />
+        layout="@layout/collections_content" />
 
     <TextView
         android:id="@+id/tvEmptyCollections"

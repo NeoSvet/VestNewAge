@@ -38,7 +38,7 @@ public class JournalFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_journal, container, false);
+        this.container = inflater.inflate(R.layout.journal_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.journal));
         initViews();

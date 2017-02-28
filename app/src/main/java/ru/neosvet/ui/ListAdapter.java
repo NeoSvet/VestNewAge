@@ -61,12 +61,12 @@ public class ListAdapter extends BaseAdapter {
         TextView tv;
         boolean b = false;
         if (data.get(position).getLink().equals("#"))
-            convertView = inflater.inflate(R.layout.title_item, null);
+            convertView = inflater.inflate(R.layout.item_title, null);
         else if (data.get(position).getDes().equals("")) {
-            convertView = inflater.inflate(R.layout.list_item, null);
+            convertView = inflater.inflate(R.layout.item_list, null);
             b = true;
         } else {
-            convertView = inflater.inflate(R.layout.detail_item, null);
+            convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
             tv.setText(data.get(position).getDes().replace("<br>", Lib.N));
             if (data.get(position).getLink().equals("@"))

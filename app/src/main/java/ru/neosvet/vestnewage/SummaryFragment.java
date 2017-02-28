@@ -39,7 +39,7 @@ public class SummaryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_summary, container, false);
+        this.container = inflater.inflate(R.layout.summary_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.rss));
         initViews();

@@ -48,7 +48,7 @@ public class BookFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_book, container, false);
+        this.container = inflater.inflate(R.layout.book_fragment, container, false);
         act = (MainActivity) getActivity();
         initViews();
         setViews();

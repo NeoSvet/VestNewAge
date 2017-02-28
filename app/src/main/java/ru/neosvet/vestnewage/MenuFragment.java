@@ -33,7 +33,7 @@ public class MenuFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_menu, container, false);
+        this.container = inflater.inflate(R.layout.menu_fragment, container, false);
         act = (MainActivity) getActivity();
 
         this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {

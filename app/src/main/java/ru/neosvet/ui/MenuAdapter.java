@@ -44,7 +44,7 @@ public class MenuAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.menu_item, null);
+            convertView = inflater.inflate(R.layout.item_menu, null);
         }
         TextView tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());

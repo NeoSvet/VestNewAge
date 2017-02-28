@@ -60,7 +60,7 @@ public class MarkerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_marker);
+        setContentView(R.layout.marker_activity);
 
         if (PresentationActivity.checkPresentation(this, 2))
             PresentationActivity.startPresentation(this, 2, true);

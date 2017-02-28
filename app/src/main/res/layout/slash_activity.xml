@@ -6,7 +6,7 @@
     android:fitsSystemWindows="true"
     tools:context="ru.neosvet.vestnewage.SlashActivity">
 
-    <include layout="@layout/content_slash" />
+    <include layout="@layout/slash_content" />
 
     <LinearLayout
         android:id="@+id/pStatus"

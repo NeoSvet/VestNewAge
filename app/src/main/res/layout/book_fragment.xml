@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/content_book" />
+    <include layout="@layout/book_content" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabRefresh"

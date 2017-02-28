@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_margin="0dp">
 
-    <include layout="@layout/content_calendar" />
+    <include layout="@layout/calendar_content" />
 
     <TextView
         android:id="@+id/tvNew"

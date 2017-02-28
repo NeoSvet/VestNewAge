@@ -26,7 +26,7 @@ public class SlashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_slash);
+        setContentView(R.layout.slash_activity);
         main = new Intent(getApplicationContext(), MainActivity.class);
         status = new StatusBar(this, findViewById(R.id.pStatus));
         lib = new Lib(this);

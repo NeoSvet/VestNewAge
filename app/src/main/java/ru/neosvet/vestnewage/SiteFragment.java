@@ -40,7 +40,7 @@ public class SiteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.fragment_site, container, false);
+        this.container = inflater.inflate(R.layout.settings_fragment, container, false);
         act = (MainActivity) getActivity();
         initViews();
         setViews();
@@ -178,7 +178,7 @@ public class SiteFragment extends Fragment {
                     }
                 } else {
                     PopupMenu pMenu = new PopupMenu(act, view);
-                    pMenu.inflate(R.menu.menu_calendar);
+                    pMenu.inflate(R.menu.menu_links);
                     for (int i = 0; i < 5; i++) {
                         if (i < adMain.getItem(pos).getCount())
                             pMenu.getMenu().getItem(i).setTitle(adMain.getItem(pos).getHead(i));

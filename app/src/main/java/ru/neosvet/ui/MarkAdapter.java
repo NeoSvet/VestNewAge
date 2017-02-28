@@ -53,9 +53,9 @@ public class MarkAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView tv;
         if (data.get(position).getDes().equals("")) {
-            convertView = inflater.inflate(R.layout.list_item, null);
+            convertView = inflater.inflate(R.layout.item_list, null);
         } else {
-            convertView = inflater.inflate(R.layout.detail_item, null);
+            convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
             tv.setText(data.get(position).getDes());
         }

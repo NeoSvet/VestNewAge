@@ -40,7 +40,7 @@ public class PresentationActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_presentation);
+        setContentView(R.layout.presentation_activity);
 
         int id = getIntent().getIntExtra(DataBase.ID, -1);
         if (id == -1) {
