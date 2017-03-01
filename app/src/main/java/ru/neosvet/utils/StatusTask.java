@@ -1,8 +1,19 @@
 package ru.neosvet.utils;
 
-/**
- * Created by NeoSvet on 28.02.2017.
- */
+import android.os.AsyncTask;
 
-public class StatusTask {
+import java.io.Serializable;
+
+import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.StatusFragment;
+
+public class StatusTask extends AsyncTask<String, Void, Boolean> implements Serializable {
+    private transient StatusFragment frm;
+    private transient MainActivity act;
+
+    @Override
+    protected Boolean doInBackground(String... strings) {
+
+        return true;
+    }
 }
