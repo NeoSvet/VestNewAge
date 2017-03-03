@@ -23,9 +23,9 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.StatusTask;
+import ru.neosvet.utils.CabTask;
 
-public class StatusFragment extends Fragment {
+public class CabmainFragment extends Fragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
     private MainActivity act;
     private ListAdapter adMain;
@@ -34,12 +34,12 @@ public class StatusFragment extends Fragment {
     private EditText etEmail, etPassword;
     private View container, fabEnter, fabExit, pMain;
     private String cookie = "";
-    private StatusTask task;
+    private CabTask task;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.status_fragment, container, false);
+        this.container = inflater.inflate(R.layout.cabmain_fragment, container, false);
         act = (MainActivity) getActivity();
         initViews();
         setViews();
@@ -63,7 +63,7 @@ public class StatusFragment extends Fragment {
             defaultList();
         } else {
             cookie = state.getString(Lib.COOKIE);
-            task = (StatusTask) state.getSerializable(Lib.TASK);
+            task = (CabTask) state.getSerializable(Lib.TASK);
             if (task != null) {
                 task.setFrm(this);
                 act.status.setLoad(true);
@@ -104,7 +104,7 @@ public class StatusFragment extends Fragment {
     }
 
     private void initViews() {
-        act.setTitle(getResources().getString(R.string.status));
+        act.setTitle(getResources().getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
@@ -113,7 +113,7 @@ public class StatusFragment extends Fragment {
         cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
         cbRemPassword = (CheckBox) container.findViewById(R.id.cbRemPassword);
         InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
-        LinearLayout main = (LinearLayout) container.findViewById(R.id.content_status);
+        LinearLayout main = (LinearLayout) container.findViewById(R.id.content_cabmain);
         softKeyboard = new SoftKeyboard(main, im);
         softKeyboard.setSoftKeyboardCallback(new SoftKeyboard.SoftKeyboardChanged() {
             @Override
@@ -134,7 +134,7 @@ public class StatusFragment extends Fragment {
                     adMain.clear();
                     defaultList();
                 } else if (adMain.getItem(pos).getDes() == null) { //is word - save data
-                    task = new StatusTask(StatusFragment.this);
+                    task = new CabTask(CabmainFragment.this);
                     task.execute(etEmail.getText().toString(), cookie, String.valueOf(pos));
                     act.status.setLoad(true);
                 } else { //default list
@@ -150,7 +150,7 @@ public class StatusFragment extends Fragment {
                             s = "trans.html";
                             break;
                     }
-                    ViewerActivity.openPage(act, s);
+                    CabpageActivity.openPage(act, s);
                 }
             }
         });
@@ -279,7 +279,7 @@ public class StatusFragment extends Fragment {
             }
             editor.commit();
         }
-        task = new StatusTask(this);
+        task = new CabTask(this);
         task.execute(etEmail.getText().toString(), etPassword.getText().toString());
         act.status.setLoad(true);
     }

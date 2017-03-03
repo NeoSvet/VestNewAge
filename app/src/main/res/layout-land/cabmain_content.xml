@@ -1,17 +1,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_status"
+    android:id="@+id/content_cabmain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
-    android:orientation="vertical"
-    tools:context=".StatusFragment"
-    tools:showIn="@layout/status_fragment">
+    android:orientation="horizontal"
+    tools:context=".CabmainFragment"
+    tools:showIn="@layout/cabmain_fragment">
+
+    <ListView
+        android:id="@+id/lvList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <View
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent" />
 
     <ScrollView
         android:id="@+id/pMain"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,7 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="@string/status_tip" />
+                android:text="@string/cabinet_tip" />
 
             <View
                 android:layout_width="match_parent"
@@ -79,14 +91,4 @@
                 android:text="@string/remember_password" />
         </LinearLayout>
     </ScrollView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@color/colorAccent" />
-
-    <ListView
-        android:id="@+id/lvList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>

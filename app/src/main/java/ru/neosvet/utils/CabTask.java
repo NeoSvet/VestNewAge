@@ -15,20 +15,20 @@ import java.net.URL;
 
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.StatusFragment;
+import ru.neosvet.vestnewage.CabmainFragment;
 
-public class StatusTask extends AsyncTask<String, Integer, String> implements Serializable {
+public class CabTask extends AsyncTask<String, Integer, String> implements Serializable {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/",
             USER_AGENT = "User-Agent", COOKIE = "Cookie", ENCODING = "cp1251";
     private final int PING = 10000;
-    private transient StatusFragment frm;
+    private transient CabmainFragment frm;
     private transient MainActivity act;
 
-    public StatusTask(StatusFragment frm) {
+    public CabTask(CabmainFragment frm) {
         setFrm(frm);
     }
 
-    public void setFrm(StatusFragment frm) {
+    public void setFrm(CabmainFragment frm) {
         this.frm = frm;
         act = (MainActivity) frm.getActivity();
     }

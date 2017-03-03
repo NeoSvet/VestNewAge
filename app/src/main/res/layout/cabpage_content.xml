@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingTop="?attr/actionBarSize"
-    tools:showIn="@layout/viewer_activity">
+    tools:showIn="@layout/cabpage_activity">
 
     <WebView
         android:id="@+id/wvBrowser"

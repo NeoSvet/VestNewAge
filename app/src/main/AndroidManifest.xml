@@ -76,7 +76,7 @@
             android:name=".PresentationActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ViewerActivity"
+            android:name=".CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver android:name=".SummaryReceiver">
