@@ -55,7 +55,6 @@ public class MarkerActivity extends AppCompatActivity {
     private int id, heightList, k_par;
     private byte modeList = 0;
     private boolean boolPosVis = false;
-    private ContentValues markerValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
