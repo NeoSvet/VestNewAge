@@ -55,6 +55,7 @@ public class StatusFragment extends Fragment {
                     etPassword.setText(uncriptPassword(s));
                 }
             }
+            defaultList();
         } else {
             cookie = state.getString(Lib.COOKIE);
             task = (StatusTask) state.getSerializable(Lib.TASK);
@@ -62,13 +63,30 @@ public class StatusFragment extends Fragment {
                 task.setFrm(this);
                 act.status.setLoad(true);
             }
+            String d;
+            for (String t : state.getStringArray(Lib.LIST)) {
+                if (t.contains("#")) {
+                    d = t.substring(t.indexOf("#") + 1);
+                    t = t.substring(0, t.indexOf("#"));
+                    adMain.addItem(new ListItem(t), d);
+                } else
+                    adMain.addItem(new ListItem(t));
+            }
         }
+        adMain.notifyDataSetChanged();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Lib.COOKIE, cookie);
         outState.putSerializable(Lib.TASK, task);
+        String[] m = new String[adMain.getCount()];
+        String d;
+        for (int i = 0; i < adMain.getCount(); i++) {
+            d = adMain.getItem(i).getDes();
+            m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
+        }
+        outState.putStringArray(Lib.LIST, m);
         super.onSaveInstanceState(outState);
     }
 
@@ -88,7 +106,6 @@ public class StatusFragment extends Fragment {
         ListView lvList = (ListView) container.findViewById(R.id.lvList);
         adMain = new ListAdapter(act);
         lvList.setAdapter(adMain);
-        defaultList();
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
