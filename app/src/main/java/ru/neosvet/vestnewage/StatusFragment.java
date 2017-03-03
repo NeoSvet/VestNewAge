@@ -27,8 +27,8 @@ public class StatusFragment extends Fragment {
     private ListAdapter adMain;
     private CheckBox cbRemEmail, cbRemPassword;
     private EditText etEmail, etPassword;
-    private View container, fabEnter, fabExit;
-    private String cookie;
+    private View container, fabEnter, fabExit, pMain;
+    private String cookie = "";
     private StatusTask task;
 
     @Override
@@ -78,6 +78,7 @@ public class StatusFragment extends Fragment {
 
     private void initViews() {
         act.setTitle(getResources().getString(R.string.status));
+        pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
         etEmail = (EditText) container.findViewById(R.id.etEmail);
@@ -177,6 +178,12 @@ public class StatusFragment extends Fragment {
         fabExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cookie = "";
+                adMain.clear();
+                defaultList();
+                fabEnter.setVisibility(View.VISIBLE);
+                fabExit.setVisibility(View.GONE);
+                pMain.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -242,6 +249,9 @@ public class StatusFragment extends Fragment {
         task = null;
         adMain.clear();
         if (result.contains(Lib.N) && !result.contains(":")) { // list word
+            pMain.setVisibility(View.GONE);
+            fabEnter.setVisibility(View.GONE);
+            fabExit.setVisibility(View.VISIBLE);
             String[] m = result.split(Lib.N);
             for (int i = 0; i < m.length; i++) {
                 adMain.addItem(new ListItem(m[i]));
