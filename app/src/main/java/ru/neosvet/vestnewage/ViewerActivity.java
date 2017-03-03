@@ -18,7 +18,7 @@ import ru.neosvet.utils.DataBase;
 
 public class ViewerActivity extends AppCompatActivity {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/", SCRIPT =
-            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('lnk')-34);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:20px\">'+s+'</div>';";
+            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('lnk')-34);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\">'+s+'</div>';";
     private WebView wvBrowser;
     private StatusBar status;
 
