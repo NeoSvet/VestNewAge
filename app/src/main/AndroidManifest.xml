@@ -75,6 +75,8 @@
         <activity
             android:name=".PresentationActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ViewerActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver android:name=".SummaryReceiver">
             <intent-filter>
@@ -82,8 +84,6 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".PromReceiver" />
-
-
     </application>
 
 </manifest>
