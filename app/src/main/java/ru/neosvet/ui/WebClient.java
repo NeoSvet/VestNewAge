@@ -2,6 +2,7 @@ package ru.neosvet.ui;
 
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -26,6 +27,7 @@ public class WebClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
 //        Lib.LOG("shouldOverrideUrlLoading1=" + url);
+        view.setVisibility(View.GONE);
         if (url.contains(files)) {
             url = getUrl(url);
             if (url.contains(BrowserActivity.PNG)) {
@@ -44,8 +46,8 @@ public class WebClient extends WebViewClient {
     }
 
     public void onPageFinished(WebView view, String url) {
-
 //        Lib.LOG("onPageFinished=" + url);
+        view.setVisibility(View.VISIBLE);
         if (url.contains(files)) {
             act.newLink(getUrl(url));
             if (!url.contains(BrowserActivity.PNG))
