@@ -32,6 +32,8 @@
     <string name="media">Видео и пресса</string>
     <string name="status">Состояние</string>
     <string name="settings">Настройки</string>
+    <string name="anketa_failed">Анкета загружена неверно</string>
+    <string name="selected">Выбрано:</string>
     <string name="email">Email</string>
     <string name="password">Пароль</string>
     <string name="remember_email">запомнить email</string>
