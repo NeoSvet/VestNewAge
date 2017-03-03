@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
+import android.app.Service;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,14 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
+import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.StatusTask;
 
@@ -25,6 +29,7 @@ public class StatusFragment extends Fragment {
     private final String EMAIL = "email", PASSWORD = "password";
     private MainActivity act;
     private ListAdapter adMain;
+    private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
     private EditText etEmail, etPassword;
     private View container, fabEnter, fabExit, pMain;
@@ -74,6 +79,7 @@ public class StatusFragment extends Fragment {
             }
         }
         adMain.notifyDataSetChanged();
+        softKeyboard.closeSoftKeyboard();
     }
 
     @Override
@@ -103,6 +109,18 @@ public class StatusFragment extends Fragment {
         etPassword = (EditText) container.findViewById(R.id.etPassword);
         cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
         cbRemPassword = (CheckBox) container.findViewById(R.id.cbRemPassword);
+        InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
+        LinearLayout main = (LinearLayout) container.findViewById(R.id.content_status);
+        softKeyboard = new SoftKeyboard(main, im);
+        softKeyboard.setSoftKeyboardCallback(new SoftKeyboard.SoftKeyboardChanged() {
+            @Override
+            public void onSoftKeyboardHide() {
+            }
+
+            @Override
+            public void onSoftKeyboardShow() {
+            }
+        });
         ListView lvList = (ListView) container.findViewById(R.id.lvList);
         adMain = new ListAdapter(act);
         lvList.setAdapter(adMain);
@@ -242,6 +260,7 @@ public class StatusFragment extends Fragment {
     }
 
     private void subLogin() {
+        softKeyboard.closeSoftKeyboard();
         if (task != null)
             return;
         if (adMain.getCount() == 1) {
