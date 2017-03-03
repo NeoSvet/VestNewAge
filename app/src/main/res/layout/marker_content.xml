@@ -80,14 +80,14 @@
             <EditText
                 android:id="@+id/etDes"
                 style="@style/Label"
-                android:background="@color/colorPrimary"
-                android:padding="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:background="@color/colorPrimary"
                 android:hint="@string/desctription"
                 android:imeOptions="actionDone"
                 android:inputType="text"
+                android:padding="5dp"
                 android:textColorHint="@color/light_gray" />
 
             <View
@@ -98,14 +98,14 @@
             <EditText
                 android:id="@+id/etCol"
                 style="@style/Label"
-                android:background="@color/colorPrimary"
-                android:padding="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:background="@color/colorPrimary"
                 android:hint="@string/add_col"
                 android:imeOptions="actionGo"
                 android:inputType="text"
+                android:padding="5dp"
                 android:textColorHint="@color/light_gray" />
 
             <View
