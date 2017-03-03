@@ -15,13 +15,18 @@
         <item>&#160;дня</item>
         <item>&#160;назад</item>
     </string-array>
-    <string-array name="status">
+    <string-array name="cabinet_main">
         <item>Восстановить доступ</item>
         <item>к личному кабинету</item>
         <item>Зарегистрироваться</item>
         <item>на Сайте Откровений</item>
         <item>Статистика</item>
         <item>Ход трансформации внутреннего “Я” Единомышленников</item>
+    </string-array>
+    <string-array name="cabinet_enter">
+        <item>Передать ощущение</item>
+        <item>Моя анкета</item>
+        <item>Мои Единомышленники</item>
     </string-array>
     <string-array name="help_title">
         <item>Добро пожаловать!</item>
