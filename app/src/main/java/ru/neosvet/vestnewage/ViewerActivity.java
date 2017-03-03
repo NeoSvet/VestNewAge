@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -40,7 +39,6 @@ public class ViewerActivity extends AppCompatActivity {
         wvBrowser.loadUrl(HOST + link);
     }
 
-    @SuppressLint("JavascriptInterface")
     private void initView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
