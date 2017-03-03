@@ -26,7 +26,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.StatusTask;
 
 public class StatusFragment extends Fragment {
-    private final String EMAIL = "email", PASSWORD = "password";
+    private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -68,6 +68,8 @@ public class StatusFragment extends Fragment {
                 task.setFrm(this);
                 act.status.setLoad(true);
             }
+            if (!state.getBoolean(PANEL))
+                pMain.setVisibility(View.GONE);
             String d;
             for (String t : state.getStringArray(Lib.LIST)) {
                 if (t.contains("#")) {
@@ -86,6 +88,7 @@ public class StatusFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Lib.COOKIE, cookie);
         outState.putSerializable(Lib.TASK, task);
+        outState.putBoolean(PANEL, pMain.getVisibility() == View.VISIBLE);
         String[] m = new String[adMain.getCount()];
         String d;
         for (int i = 0; i < adMain.getCount(); i++) {
