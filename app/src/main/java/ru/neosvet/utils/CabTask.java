@@ -36,10 +36,13 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     @Override
     protected String doInBackground(String... params) {
         try {
-            if (params.length == 2) {
-                return getListWord(params[0], params[1]);
-            } else {
-                return saveData(params[0], params[1], Integer.parseInt(params[2]));
+            switch (params.length) {
+                case 1: // get list
+                    return getListWord(params[0], false);
+                case 2: // login
+                    return subLogin(params[0], params[1]);
+                default: // (3) send word
+                    return sendWord(params[0], params[1], Integer.parseInt(params[2]));
             }
         } catch (Exception e) {
             return e.getMessage();
@@ -52,37 +55,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         frm.putResultTask(result);
     }
 
-    private String saveData(String email, String cookie, int index) throws Exception {
-        URL url = new URL(HOST + "savedata.php");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(PING);
-        conn.setReadTimeout(PING);
-        conn.setRequestMethod("POST");
-        String s = "keyw=" + (index + 1) + "&login=" + email + "&hash=";
-        conn.setRequestProperty("Content-Length", Integer.toString(s.length()));
-        conn.setRequestProperty(USER_AGENT, act.getPackageName());
-        conn.setRequestProperty(COOKIE, cookie);
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, ENCODING));
-        bw.write(s);
-        bw.close();
-        os.close();
-        InputStream in = new BufferedInputStream(conn.getInputStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
-        s = br.readLine();
-        br.close();
-        in.close();
-        conn.disconnect();
-        if (s == null) { //no error
-            return act.getResources().getString(R.string.selected) + index;
-        } else {
-            return s;
-        }
-    }
-
-    private String getListWord(String email, String pass) throws Exception {
+    private String subLogin(String email, String pass) throws Exception {
         StringBuilder list = new StringBuilder();
         URL url = new URL(HOST);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -116,52 +89,88 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         in.close();
         conn.disconnect();
         if (s.length() == 2) { // ok
-            publishProgress(0);
-            url = new URL(HOST + "edinenie/anketa.html");
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(PING);
-            conn.setReadTimeout(PING);
-            conn.setRequestProperty(USER_AGENT, act.getPackageName());
-            conn.setRequestProperty(COOKIE, cookie);
-            in = new BufferedInputStream(conn.getInputStream());
-            br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
-            s = br.readLine();
-            while (!s.contains("fd_box") && !s.contains("lt_box") && !s.contains("name=\"keyw")) {
-                s = br.readLine();
-                if (s == null) {
-                    s = " ";
-                    break;
-                }
-            }
-            br.close();
-            in.close();
-            conn.disconnect();
-            if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
-                s = s.replace("<br>", Lib.N);
-                if (s.contains(" ("))
-                    s = s.substring(0, s.indexOf(" ("));
-                else
-                    s = s.substring(0, s.indexOf("</p"));
-                s = s.substring(s.lastIndexOf(">") + 1);
-                return s;
-            } else if (s.contains("name=\"keyw")) { // list word
-                s = s.substring(s.indexOf("-<") + 10, s.indexOf("</select>") - 9);
-                s = s.replace("<option>", "");
-                String[] m = s.split("</option>");
-                for (int i = 0; i < m.length; i++) {
-                    if (m[i].contains("selected")) {
-                        return act.getResources().getString(R.string.selected) + " "
-                                + m[i].substring(m[i].indexOf(">") + 1);
-                    }
-                    list.append(m[i]);
-                    list.append(Lib.N);
-                }
-                list.delete(list.length() - 1, list.length());
-                return list.toString();
-            } else {
-                return act.getResources().getString(R.string.anketa_failed);
-            }
+            return getListWord(cookie, true);
         } else { // incorrect password
+            return s;
+        }
+    }
+
+    private String getListWord(String cookie, boolean boolOne) throws Exception {
+        StringBuilder list = new StringBuilder();
+        URL url = new URL(HOST + "edinenie/anketa.html");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(PING);
+        conn.setReadTimeout(PING);
+        conn.setRequestProperty(USER_AGENT, act.getPackageName());
+        conn.setRequestProperty(COOKIE, cookie);
+        InputStream in = new BufferedInputStream(conn.getInputStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
+        String s = br.readLine();
+        while (!s.contains("lt_box") && !s.contains("name=\"keyw")) { //!s.contains("fd_box") &&
+            s = br.readLine();
+            if (s == null) {
+                s = " ";
+                break;
+            }
+        }
+        br.close();
+        in.close();
+        conn.disconnect();
+        if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
+            s = s.replace("<br>", Lib.N);
+            if (s.contains(" ("))
+                s = s.substring(0, s.indexOf(" ("));
+            else
+                s = s.substring(0, s.indexOf("</p"));
+            s = s.substring(s.lastIndexOf(">") + 1);
+            return s;
+        } else if (s.contains("name=\"keyw")) { // list word
+            s = s.substring(s.indexOf("-<") + 10, s.indexOf("</select>") - 9);
+            s = s.replace("<option>", "");
+            String[] m = s.split("</option>");
+            for (int i = 0; i < m.length; i++) {
+                if (m[i].contains("selected")) {
+                    return act.getResources().getString(R.string.selected) + " "
+                            + m[i].substring(m[i].indexOf(">") + 1);
+                }
+                list.append(m[i]);
+                list.append(Lib.N);
+            }
+            if (boolOne)
+                return act.getResources().getString(R.string.select_word);
+            list.delete(list.length() - 1, list.length());
+            return list.toString();
+        } else {
+            return act.getResources().getString(R.string.anketa_failed);
+        }
+    }
+
+    private String sendWord(String email, String cookie, int index) throws Exception {
+        URL url = new URL(HOST + "savedata.php");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(PING);
+        conn.setReadTimeout(PING);
+        conn.setRequestMethod("POST");
+        String s = "keyw=" + (index + 1) + "&login=" + email + "&hash=";
+        conn.setRequestProperty("Content-Length", Integer.toString(s.length()));
+        conn.setRequestProperty(USER_AGENT, act.getPackageName());
+        conn.setRequestProperty(COOKIE, cookie);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        OutputStream os = conn.getOutputStream();
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, ENCODING));
+        bw.write(s);
+        bw.close();
+        os.close();
+        InputStream in = new BufferedInputStream(conn.getInputStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
+        s = br.readLine();
+        br.close();
+        in.close();
+        conn.disconnect();
+        if (s == null) { //no error
+            return act.getResources().getString(R.string.selected) + index;
+        } else {
             return s;
         }
     }

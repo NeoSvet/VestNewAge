@@ -34,6 +34,8 @@
     <string name="settings">Настройки</string>
     <string name="anketa_failed">Анкета загружена неверно</string>
     <string name="selected">Выбрано:</string>
+    <string name="select_word">Выберите слово</string>
+    <string name="send_unlivable">Сейчас передать невозможно</string>
     <string name="email">Email</string>
     <string name="password">Пароль</string>
     <string name="remember_email">запомнить email</string>

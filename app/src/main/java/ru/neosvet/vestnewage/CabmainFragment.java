@@ -27,13 +27,15 @@ import ru.neosvet.utils.CabTask;
 
 public class CabmainFragment extends Fragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
+    private final byte LOGIN = 0, ENTER = 1, WORDS = 2, SUPPORTERS = 3;
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
     private EditText etEmail, etPassword;
-    private View container, fabEnter, fabExit, pMain;
+    private View container, fabEnter, fabExit, pMain, divCab;
     private String cookie = "";
+    private byte mode_list = 0;
     private CabTask task;
 
     @Override
@@ -68,8 +70,12 @@ public class CabmainFragment extends Fragment {
                 task.setFrm(this);
                 act.status.setLoad(true);
             }
-            if (!state.getBoolean(PANEL))
+            mode_list = state.getByte(PANEL);
+            if (mode_list > LOGIN) {
                 pMain.setVisibility(View.GONE);
+                divCab.setVisibility(View.GONE);
+                fabExit.setVisibility(View.VISIBLE);
+            }
             String d;
             for (String t : state.getStringArray(Lib.LIST)) {
                 if (t.contains("#")) {
@@ -88,7 +94,7 @@ public class CabmainFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Lib.COOKIE, cookie);
         outState.putSerializable(Lib.TASK, task);
-        outState.putBoolean(PANEL, pMain.getVisibility() == View.VISIBLE);
+        outState.putByte(PANEL, mode_list);
         String[] m = new String[adMain.getCount()];
         String d;
         for (int i = 0; i < adMain.getCount(); i++) {
@@ -106,6 +112,7 @@ public class CabmainFragment extends Fragment {
     private void initViews() {
         act.setTitle(getResources().getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
+        divCab = container.findViewById(R.id.divCab);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
         etEmail = (EditText) container.findViewById(R.id.etEmail);
@@ -130,14 +137,7 @@ public class CabmainFragment extends Fragment {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (adMain.getCount() == 1) {
-                    adMain.clear();
-                    defaultList();
-                } else if (adMain.getItem(pos).getDes() == null) { //is word - save data
-                    task = new CabTask(CabmainFragment.this);
-                    task.execute(etEmail.getText().toString(), cookie, String.valueOf(pos));
-                    act.status.setLoad(true);
-                } else { //default list
+                if (mode_list == LOGIN) { //до кабинета
                     String s;
                     switch (pos) {
                         case 0: //восстановить доступ
@@ -150,16 +150,39 @@ public class CabmainFragment extends Fragment {
                             s = "trans.html";
                             break;
                     }
-                    CabpageActivity.openPage(act, s);
+                    CabpageActivity.openPage(act, s, null);
+                } else if (mode_list == ENTER) { // в кабинете
+                    switch (pos) {
+                        case 0: //передача ощущений
+                            if (adMain.getItem(pos).getDes().equals(
+                                    getResources().getString(R.string.select_word))) {
+                                //get list words
+                                task = new CabTask(CabmainFragment.this);
+                                task.execute(cookie);
+                                act.status.setLoad(true);
+                            } else
+                                Lib.showToast(act, getResources().getString(R.string.send_unlivable));
+                            break;
+                        case 1: //анкета
+                            CabpageActivity.openPage(act, "edinenie/anketa.html", cookie);
+                            break;
+                        default: //единомышленники
+                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", cookie);
+                            break;
+                    }
+                } else if (mode_list == WORDS) { //выбор слова
+                    task = new CabTask(CabmainFragment.this);
+                    task.execute(etEmail.getText().toString(), cookie, String.valueOf(pos));
+                    act.status.setLoad(true);
                 }
             }
         });
     }
 
     private void defaultList() {
-        for (int i = 0; i < getResources().getStringArray(R.array.status).length; i += 2) {
-            adMain.addItem(new ListItem(getResources().getStringArray(R.array.status)[i]),
-                    getResources().getStringArray(R.array.status)[i + 1]);
+        for (int i = 0; i < getResources().getStringArray(R.array.cabinet_main).length; i += 2) {
+            adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_main)[i]),
+                    getResources().getStringArray(R.array.cabinet_main)[i + 1]);
         }
         adMain.notifyDataSetChanged();
     }
@@ -169,7 +192,8 @@ public class CabmainFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 boolean b = false;
                 if (etEmail.length() > 5 && etPassword.length() > 5) {
-                    b = (etEmail.getText().toString().contains("@") && etEmail.getText().toString().contains("."));
+                    b = (etEmail.getText().toString().contains("@")
+                            && etEmail.getText().toString().contains("."));
                 }
                 if (b) { //ready to login
                     fabEnter.setVisibility(View.VISIBLE);
@@ -216,12 +240,14 @@ public class CabmainFragment extends Fragment {
         fabExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mode_list = LOGIN;
                 cookie = "";
                 adMain.clear();
                 defaultList();
                 fabEnter.setVisibility(View.VISIBLE);
                 fabExit.setVisibility(View.GONE);
                 pMain.setVisibility(View.VISIBLE);
+                divCab.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -284,19 +310,45 @@ public class CabmainFragment extends Fragment {
         act.status.setLoad(true);
     }
 
+//    public void putResultTask(String result) {
+//        task = null;
+//        adMain.clear();
+//        if (result.contains(Lib.N) && !result.contains(":")) { // list word
+//            pMain.setVisibility(View.GONE);
+//            fabEnter.setVisibility(View.GONE);
+//            fabExit.setVisibility(View.VISIBLE);
+//            String[] m = result.split(Lib.N);
+//            for (int i = 0; i < m.length; i++) {
+//                adMain.addItem(new ListItem(m[i]));
+//            }
+//        } else { // message
+//            adMain.addItem(new ListItem(result));
+//        }
+//        adMain.notifyDataSetChanged();
+//        act.status.setLoad(false);
+//    }
+
     public void putResultTask(String result) {
         task = null;
+        mode_list++;
         adMain.clear();
-        if (result.contains(Lib.N) && !result.contains(":")) { // list word
-            pMain.setVisibility(View.GONE);
-            fabEnter.setVisibility(View.GONE);
-            fabExit.setVisibility(View.VISIBLE);
+        if (mode_list == WORDS) {
             String[] m = result.split(Lib.N);
             for (int i = 0; i < m.length; i++) {
                 adMain.addItem(new ListItem(m[i]));
             }
-        } else { // message
-            adMain.addItem(new ListItem(result));
+        } else { // ENTER or after select word
+            if (mode_list == ENTER) {
+                pMain.setVisibility(View.GONE);
+                divCab.setVisibility(View.GONE);
+                fabEnter.setVisibility(View.GONE);
+                fabExit.setVisibility(View.VISIBLE);
+            } else // режим списка - в кабинете
+                mode_list = ENTER;
+            for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
+                adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
+            }
+            adMain.getItem(0).setDes(result);
         }
         adMain.notifyDataSetChanged();
         act.status.setLoad(false);
