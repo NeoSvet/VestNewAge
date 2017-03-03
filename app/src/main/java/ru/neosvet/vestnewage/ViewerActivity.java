@@ -18,7 +18,8 @@ import ru.neosvet.utils.DataBase;
 
 public class ViewerActivity extends AppCompatActivity {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/", SCRIPT =
-            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('lnk')-34);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\">'+s+'</div>';";
+            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('lnk')-34);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\">'+s+'</div><div id=\"main\" style=\"display:none\"><div id=\"d31\"></div><div id=\"d32\"></div><div id=\"d33\"></div><div id=\"d34\"></div><div id=\"d35\"></div></div>';";
+    //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
 
@@ -43,10 +44,13 @@ public class ViewerActivity extends AppCompatActivity {
     private void initView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setVisibility(View.VISIBLE);
         this.setTitle("");
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         wvBrowser.getSettings().setJavaScriptEnabled(true);
         wvBrowser.setWebViewClient(new wvClient());
+        wvBrowser.clearCache(true);
+        wvBrowser.clearHistory();
         status = new StatusBar(this, findViewById(R.id.pStatus));
     }
 
@@ -73,6 +77,7 @@ public class ViewerActivity extends AppCompatActivity {
                 wvBrowser.loadUrl("javascript: " + SCRIPT + " return false;");
                 wvBrowser.setVisibility(View.VISIBLE);
             }
+
             String s = wvBrowser.getTitle();
             ViewerActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
             status.setLoad(false);
