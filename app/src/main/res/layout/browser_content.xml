@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:showIn="@layout/app_bar_browser">
+    tools:showIn="@layout/browser_float">
 
     <LinearLayout
         android:id="@+id/pSearch"
