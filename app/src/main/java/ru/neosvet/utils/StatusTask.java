@@ -136,8 +136,7 @@ public class StatusTask extends AsyncTask<String, Integer, String> implements Se
             br.close();
             in.close();
             conn.disconnect();
-            Lib.LOG("s=" + s);
-            if (s.contains("fd_box") || s.contains("lt_box")) {  // incorrect time
+            if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
                 s = s.replace("<br>", Lib.N);
                 if (s.contains(" ("))
                     s = s.substring(0, s.indexOf(" ("));
