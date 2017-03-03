@@ -94,6 +94,24 @@ public class StatusFragment extends Fragment {
                 if (adMain.getCount() == 1) {
                     adMain.clear();
                     defaultList();
+                } else if (adMain.getItem(pos).getDes() == null) { //is word - save data
+                    task = new StatusTask(StatusFragment.this);
+                    task.execute(etEmail.getText().toString(), cookie, String.valueOf(pos));
+                    act.status.setLoad(true);
+                } else { //default list
+                    String s;
+                    switch (pos) {
+                        case 0: //восстановить доступ
+                            s = "sendpass.html";
+                            break;
+                        case 1: //зарегистрироваться
+                            s = "register.html";
+                            break;
+                        default: //стастистика
+                            s = "trans.html";
+                            break;
+                    }
+                    ViewerActivity.openPage(act, s);
                 }
             }
         });
@@ -202,6 +220,10 @@ public class StatusFragment extends Fragment {
     private void subLogin() {
         if (task != null)
             return;
+        if (adMain.getCount() == 1) {
+            adMain.clear();
+            defaultList();
+        }
         if (cbRemEmail.isChecked()) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
