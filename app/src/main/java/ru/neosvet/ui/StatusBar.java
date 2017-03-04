@@ -66,6 +66,10 @@ public class StatusBar {
         }
     }
 
+    public boolean isVis() {
+        return vis;
+    }
+
     public void setLoad(boolean boolStart) {
         stop = !boolStart;
         if (boolStart) {

@@ -62,7 +62,7 @@ public class CabmainFragment extends Fragment {
                     etPassword.setText(uncriptPassword(s));
                 }
             }
-            defaultList();
+            loginList();
         } else {
             cookie = state.getString(Lib.COOKIE);
             task = (CabTask) state.getSerializable(Lib.TASK);
@@ -74,6 +74,7 @@ public class CabmainFragment extends Fragment {
             if (mode_list > LOGIN) {
                 pMain.setVisibility(View.GONE);
                 divCab.setVisibility(View.GONE);
+                fabEnter.setVisibility(View.GONE);
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
@@ -137,6 +138,7 @@ public class CabmainFragment extends Fragment {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if(act.status.isVis()) return;
                 if (mode_list == LOGIN) { //до кабинета
                     String s;
                     switch (pos) {
@@ -189,7 +191,7 @@ public class CabmainFragment extends Fragment {
         });
     }
 
-    private void defaultList() {
+    private void loginList() {
         for (int i = 0; i < getResources().getStringArray(R.array.cabinet_main).length; i += 2) {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_main)[i]),
                     getResources().getStringArray(R.array.cabinet_main)[i + 1]);
@@ -253,7 +255,7 @@ public class CabmainFragment extends Fragment {
                 mode_list = LOGIN;
                 cookie = "";
                 adMain.clear();
-                defaultList();
+                loginList();
                 fabEnter.setVisibility(View.VISIBLE);
                 fabExit.setVisibility(View.GONE);
                 pMain.setVisibility(View.VISIBLE);
@@ -304,7 +306,7 @@ public class CabmainFragment extends Fragment {
             return;
         if (adMain.getCount() == 1) {
             adMain.clear();
-            defaultList();
+            loginList();
         }
         if (cbRemEmail.isChecked()) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
@@ -351,5 +353,27 @@ public class CabmainFragment extends Fragment {
         }
         adMain.notifyDataSetChanged();
         act.status.setLoad(false);
+    }
+
+    public boolean onBackPressed() {
+        if (mode_list == LOGIN)
+            return true;
+        else {
+            mode_list--;
+            if (mode_list == LOGIN) {
+                pMain.setVisibility(View.VISIBLE);
+                divCab.setVisibility(View.VISIBLE);
+                fabEnter.setVisibility(View.VISIBLE);
+                fabExit.setVisibility(View.GONE);
+                adMain.clear();
+                loginList();
+            } else { //ENTER
+                mode_list = LOGIN;
+                task = new CabTask(this);
+                task.execute(etEmail.getText().toString(), etPassword.getText().toString());
+                act.status.setLoad(true);
+            }
+            return false;
+        }
     }
 }

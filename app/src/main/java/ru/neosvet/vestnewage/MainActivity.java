@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static boolean boolFirst = false;
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
+    private CabmainFragment frCabinet;
     private boolean boolLoad = false, boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
@@ -196,7 +197,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frCollections);
                 break;
             case R.id.nav_cabinet:
-                fragmentTransaction.replace(R.id.my_fragment, new CabmainFragment());
+                frCabinet=new CabmainFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frCabinet);
                 break;
             case R.id.nav_search:
                 break;
@@ -255,6 +257,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 exit();
         } else if (frCollections != null) {
             if (frCollections.onBackPressed())
+                exit();
+        } else if (frCabinet != null) {
+            if (frCabinet.onBackPressed())
                 exit();
         } else {
             exit();
