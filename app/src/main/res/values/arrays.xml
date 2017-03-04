@@ -31,6 +31,7 @@
         <item>Передать ощущение</item>
         <item>Моя анкета</item>
         <item>Мои Единомышленники</item>
+        <item>Подсказка</item>
     </string-array>
     <string-array name="help_title">
         <item>Добро пожаловать!</item>

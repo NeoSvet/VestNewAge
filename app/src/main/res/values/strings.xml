@@ -40,7 +40,8 @@
     <string name="password">Пароль</string>
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
-    <string name="cabinet_tip">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться...», то нажмите «Назад» и откройте страницу повторно.</string>
     <string name="help">Справка</string>
     <string name="paragraph">Абзац</string>
     <string name="position">Позиция</string>

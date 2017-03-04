@@ -174,8 +174,10 @@ public class CabmainFragment extends Fragment {
                         case 1: //анкета
                             CabpageActivity.openPage(act, "edinenie/anketa.html", cookie);
                             break;
-                        default: //(2) единомышленники
+                        case 2: //единомышленники
                             CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", cookie);
+                            break;
+                        default:
                             break;
                     }
                 } else if (mode_list == WORDS) { //выбор слова
@@ -345,6 +347,7 @@ public class CabmainFragment extends Fragment {
                 adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
             }
             adMain.getItem(0).setDes(result);
+            adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         }
         adMain.notifyDataSetChanged();
         act.status.setLoad(false);
