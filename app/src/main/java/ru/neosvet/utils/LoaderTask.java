@@ -5,10 +5,19 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.neosvet.vestnewage.BrowserActivity;
@@ -103,10 +112,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             }
             String p0 = params[0], p1 = params[1];
             if (p0.contains(".png"))
-                lib.downloadFile(p0, p1);
+                downloadFile(p0, p1);
             else {
-                lib.downloadStyle(params.length == 3);
-                lib.downloadPage(p0, p1, true);
+                downloadStyle(params.length == 3);
+                downloadPage(p0, p1, true);
             }
             return true;
         } catch (Exception e) {
@@ -227,9 +236,67 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         t.start();
     }
 
-    public void downloadList(String path) throws Exception {
+    private void downloadFile(String url, String file) {
+        try {
+            File f = new File(file);
+            //if(f.exists()) f.delete();
+            OutputStream out = new FileOutputStream(f, false);
+            byte[] buf = new byte[1024];
+            InputStream in = new BufferedInputStream(lib.getStream(url));
+            int i;
+            while ((i = in.read(buf)) > 0) {
+                out.write(buf, 0, i);
+                out.flush();
+            }
+            out.close();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadStyle(boolean bReplaceStyle) throws Exception {
+        final File fLight = getFile(Lib.LIGHT);
+        final File fDark = getFile(Lib.DARK);
+        if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
+            String line = "";
+            int i;
+            InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + "org/otk/tpl/otk/css/style-print.css"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+            BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
+            BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
+            for (i = 0; i < 7; i++) {
+                br.readLine();
+            }
+            while ((line = br.readLine()) != null) {
+                bwLight.write(line + Lib.N);
+                if (line.contains("#000")) {
+                    line = line.replace("000000", "000").replace("#000", "#fff");
+                } else
+                    line = line.replace("#fff", "#000");
+                line = line.replace("333333", "333").replace("#333", "#ccc");
+                bwDark.write(line + Lib.N);
+                if (line.contains("body")) {
+                    line = "    padding-left: 5px;\n    padding-right: 5px;";
+                    bwLight.write(line + Lib.N);
+                    bwDark.write(line + Lib.N);
+                } else if (line.contains("print2")) {
+                    line = br.readLine().replace("8pt/9pt", "12pt");
+                    bwLight.write(line + Lib.N);
+                    bwDark.write(line + Lib.N);
+                }
+                bwLight.flush();
+                bwDark.flush();
+            }
+            br.close();
+            bwLight.close();
+            bwDark.close();
+        }
+    }
+
+    private void downloadList(String path) throws Exception {
 //        Lib.LOG("list="+path);
-        lib.downloadStyle(false);
+        downloadStyle(false);
         if (!boolStart) return;
         File f = new File(path);//context.getFilesDir() +
         BufferedReader br = new BufferedReader(new FileReader(f));
@@ -249,11 +316,146 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 //                Lib.LOG("path=" + f.toString());
                 if (!f.exists()) {
 //                    Lib.LOG("download");
-                    lib.downloadPage(s + Lib.print, f.toString(), false);
+                    downloadPage(s + Lib.PRINT, f.toString(), false);
                     sub_prog++;
                 }
             }
         }
         br.close();
+    }
+
+    private void downloadPage(String link, String path, boolean bCounter) throws Exception {
+        String line, s, url, end;
+        url = Lib.SITE + link;
+        if (link.contains(Lib.PRINT)) {
+            end = "<!--/row-->";
+        } else {
+            end = "page-title";
+        }
+        InputStream in = new BufferedInputStream(lib.getStream(url));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
+        boolean b = false;
+        if (url.contains(Lib.PRINT))
+            url = url.substring(0, url.length() - Lib.PRINT.length());
+        while ((line = br.readLine()) != null) {
+            if (b) {
+                if (line.contains(end)) {
+                    line = getNow();
+                    line = "<div style=\"margin-top:20px\" class=\"print2\">\n"
+                            + act.getResources().getString(R.string.page) + " " + url +
+                            "<br>Copyright " + act.getResources().getString(R.string.copyright)
+                            + " Leonid Maslov 2004-20" + line.substring(line.lastIndexOf(".") + 1) + "<br>"
+                            + act.getResources().getString(R.string.downloaded) + " " + line;
+                    bw.write(line + "\n</div></body></html>");
+                    bw.flush();
+                    b = false;
+                } else if (line.contains("<")) {
+                    line = line.trim();
+                    if (line.length() < 7) continue;
+//                    if(line.contains("color")) {
+//                        i=line.indexOf("color");
+//                    }
+                    if (line.contains("iframe")) {
+                        if (!line.contains("</iframe"))
+                            line += br.readLine();
+                        if (line.contains("?"))
+                            s = line.substring(line.indexOf("video/") + 6,
+                                    line.indexOf("?"));
+                        else
+                            s = line.substring(line.indexOf("video/") + 6,
+                                    line.indexOf("\"", 65));
+                        s = "<a href=\"https://vimeo.com/" +
+                                s + "\">" +
+                                act.getResources().getString
+                                        (R.string.video_on_vimeo) + "</a>";
+                        if (line.contains("center"))
+                            line = "<center>" + s + "</center>";
+                        else line = s;
+                    }
+                    bw.write(line.replace("color", "cvet") + Lib.N);
+                    bw.flush();
+                }
+            } else if (line.contains("<h1")) {
+                writeStartPage(bw, line);
+                br.readLine();
+                b = true;
+            } else if (line.contains("counter") && bCounter) { // counters
+                sendCounter(line);
+                if (line.contains("rambler"))
+                    break;
+            }
+        }
+        br.close();
+        bw.close();
+        if (bCounter)
+            checkNoreadList(link);
+    }
+
+    private String getNow() {
+        Date d = new Date(System.currentTimeMillis());
+        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+        return df.format(d);
+    }
+
+    private void sendCounter(String line) {
+        int i = 0;
+        while ((i = line.indexOf("img src", i)) > -1) {
+            i += 9;
+            final String link_counter = line.substring(i, line.indexOf("\"", i));
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        lib.getStream(link_counter);
+                    } catch (Exception ex) {
+                    }
+                }
+            }).start();
+        }
+    }
+
+    private void checkNoreadList(String link) {
+        try {
+            File file = new File(act.getFilesDir() + File.separator + Lib.NOREAD);
+            if (file.exists()) {
+                boolean b = false;
+                String t, l;
+                final String N = "\n";
+                StringBuilder f = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(act.openFileInput(file.getName())));
+                while ((t = br.readLine()) != null) {
+                    l = br.readLine();
+                    if (l.contains(link)) {
+                        b = true;
+                    } else {
+                        f.append(t);
+                        f.append(N);
+                        f.append(l);
+                        f.append(N);
+                    }
+                }
+                br.close();
+                if (b) {
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(act.openFileOutput(Lib.NOREAD, act.MODE_PRIVATE)));
+                    bw.write(f.toString());
+                    bw.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeStartPage(BufferedWriter bw, String line) throws Exception {
+        bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
+        int i;
+        String s = line.trim().replace("&nbsp;", " ");
+        while ((i = s.indexOf("<")) > -1) {
+            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
+        }
+        bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\".." +
+                Lib.STYLE + "\">\n</head><body>");
+        bw.write("\n" + line.substring(line.indexOf("<")) + "\n");
+        bw.flush();
     }
 }

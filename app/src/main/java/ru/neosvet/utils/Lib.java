@@ -18,15 +18,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,43 +32,11 @@ public class Lib {
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
             LIGHT = "/style/light.css", DARK = "/style/dark.css", STYLE = "/style/style.css",
-            print = "?styletpl=print", LIST = "/list/", HREF = "href";
+            PRINT = "?styletpl=print", LIST = "/list/", HREF = "href";
     private Context context;
 
     public Lib(Context context) {
         this.context = context;
-    }
-
-    public void checkNoreadList(String link) {
-        try {
-            File file = new File(context.getFilesDir() + File.separator + Lib.NOREAD);
-            if (file.exists()) {
-                boolean b = false;
-                String t, l;
-                final String N = "\n";
-                StringBuilder f = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(context.openFileInput(file.getName())));
-                while ((t = br.readLine()) != null) {
-                    l = br.readLine();
-                    if (l.contains(link)) {
-                        b = true;
-                    } else {
-                        f.append(t);
-                        f.append(N);
-                        f.append(l);
-                        f.append(N);
-                    }
-                }
-                br.close();
-                if (b) {
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Lib.NOREAD, context.MODE_PRIVATE)));
-                    bw.write(f.toString());
-                    bw.close();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void setCookies(String s, String t, String n) {
@@ -119,109 +80,8 @@ public class Lib {
         }
     }
 
-    public void downloadFile(String url, String file) {
-        try {
-            File f = new File(file);
-            //if(f.exists()) f.delete();
-            OutputStream out = new FileOutputStream(f, false);
-            byte[] buf = new byte[1024];
-            InputStream in = new BufferedInputStream(getStream(url));
-            int i;
-            while ((i = in.read(buf)) > 0) {
-                out.write(buf, 0, i);
-                out.flush();
-            }
-            out.close();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void downloadPage(String link, String path, boolean bCounter) throws Exception {
-        String line, s, url, end;
-        url = SITE + link;
-        if (link.contains(print)) {
-            end = "<!--/row-->";
-        } else {
-            end = "page-title";
-        }
-        InputStream in = new BufferedInputStream(getStream(url));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
-        boolean b = false;
-        if (url.contains(print))
-            url = url.substring(0, url.length() - print.length());
-        while ((line = br.readLine()) != null) {
-            if (b) {
-                if (line.contains(end)) {
-                    line = getNow();
-                    line = "<div style=\"margin-top:20px\" class=\"print2\">\n"
-                            + context.getResources().getString(R.string.page) + " " + url +
-                            "<br>Copyright " + context.getResources().getString(R.string.copyright)
-                            + " Leonid Maslov 2004-20" + line.substring(line.lastIndexOf(".") + 1) + "<br>"
-                            + context.getResources().getString(R.string.downloaded) + " " + line;
-                    bw.write(line + "\n</div></body></html>");
-                    bw.flush();
-                    b = false;
-                } else if (line.contains("<")) {
-                    line = line.trim();
-                    if (line.length() < 7) continue;
-//                    if(line.contains("color")) {
-//                        i=line.indexOf("color");
-//                    }
-                    if (line.contains("iframe")) {
-                        if (!line.contains("</iframe"))
-                            line += br.readLine();
-                        if (line.contains("?"))
-                            s = line.substring(line.indexOf("video/") + 6,
-                                    line.indexOf("?"));
-                        else
-                            s = line.substring(line.indexOf("video/") + 6,
-                                    line.indexOf("\"", 65));
-                        s = "<a href=\"https://vimeo.com/" +
-                                s + "\">" +
-                                context.getResources().getString
-                                        (R.string.video_on_vimeo) + "</a>";
-                        if (line.contains("center"))
-                            line = "<center>" + s + "</center>";
-                        else line = s;
-                    }
-                    bw.write(line.replace("color", "cvet") + N);
-                    bw.flush();
-                }
-            } else if (line.contains("<h1")) {
-                writeStartPage(bw, line);
-                br.readLine();
-                b = true;
-            } else if (line.contains("counter") && bCounter) { // counters
-                sendCounter(line);
-                if (line.contains("rambler"))
-                    break;
-            }
-        }
-        br.close();
-        bw.close();
-        if (bCounter)
-            checkNoreadList(link);
-    }
-
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-    }
-
-    private void writeStartPage(BufferedWriter bw, String line) throws Exception {
-        bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
-        int i;
-        String s = line.trim().replace("&nbsp;", " ");
-        while ((i = s.indexOf("<")) > -1) {
-            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
-        }
-        bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\".." +
-                STYLE + "\">\n</head><body>");
-        bw.write("\n" + line.substring(line.indexOf("<")) + "\n");
-        bw.flush();
     }
 
     public InputStream getStream(String url) throws Exception {
@@ -230,7 +90,7 @@ public class Lib {
         HttpEntity entity;
         HttpResponse res;
         req.setHeader("User-Agent", context.getPackageName());
-        if (url.contains(SITE) && !url.contains(print)) {
+        if (url.contains(SITE) && !url.contains(PRINT)) {
             String s = getCookies(false);
             if (!s.equals(""))
                 req.setHeader(COOKIE, s);
@@ -271,73 +131,6 @@ public class Lib {
             file.mkdirs();
         file = new File(context.getFilesDir() + link);
         return file;
-    }
-
-    public String getNow() {
-        Date d = new Date(System.currentTimeMillis());
-        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-        return df.format(d);
-    }
-
-//    public String getDate(long millis) {
-//        Date d = new Date(millis);
-//        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-//        return df.format(d);
-//    }
-
-    public void downloadStyle(boolean bReplaceStyle) throws Exception {
-        final File fLight = getFile(LIGHT);
-        final File fDark = getFile(DARK);
-        if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
-            String line = "";
-            int i;
-            InputStream in = new BufferedInputStream(getStream(SITE + "org/otk/tpl/otk/css/style-print.css"));
-            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-            BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
-            BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
-            for (i = 0; i < 7; i++) {
-                br.readLine();
-            }
-            while ((line = br.readLine()) != null) {
-                bwLight.write(line + N);
-                if (line.contains("#000")) {
-                    line = line.replace("000000", "000").replace("#000", "#fff");
-                } else
-                    line = line.replace("#fff", "#000");
-                line = line.replace("333333", "333").replace("#333", "#ccc");
-                bwDark.write(line + N);
-                if (line.contains("body")) {
-                    line = "    padding-left: 5px;\n    padding-right: 5px;";
-                    bwLight.write(line + N);
-                    bwDark.write(line + N);
-                } else if (line.contains("print2")) {
-                    line = br.readLine().replace("8pt/9pt", "12pt");
-                    bwLight.write(line + N);
-                    bwDark.write(line + N);
-                }
-                bwLight.flush();
-                bwDark.flush();
-            }
-            br.close();
-            bwLight.close();
-            bwDark.close();
-        }
-    }
-
-    public void sendCounter(String line) {
-        int i = 0;
-        while ((i = line.indexOf("img src", i)) > -1) {
-            i += 9;
-            final String link_counter = line.substring(i, line.indexOf("\"", i));
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        getStream(link_counter);
-                    } catch (Exception ex) {
-                    }
-                }
-            }).start();
-        }
     }
 
     public static void LOG(String msg) {
