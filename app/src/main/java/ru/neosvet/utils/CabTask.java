@@ -130,8 +130,9 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
             String[] m = s.split("</option>");
             for (int i = 0; i < m.length; i++) {
                 if (m[i].contains("selected")) {
-                    return act.getResources().getString(R.string.selected) + " "
-                            + m[i].substring(m[i].indexOf(">") + 1);
+                    m[i] = m[i].substring(m[i].indexOf(">") + 1);
+                    if (boolOne)
+                        return act.getResources().getString(R.string.selected) + " " + m[i];
                 }
                 list.append(m[i]);
                 list.append(Lib.N);
@@ -169,7 +170,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         in.close();
         conn.disconnect();
         if (s == null) { //no error
-            return act.getResources().getString(R.string.selected) + index;
+            return "ok" + index;
         } else {
             return s;
         }

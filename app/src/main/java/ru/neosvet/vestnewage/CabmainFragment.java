@@ -22,12 +22,12 @@ import android.widget.ListView;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.CabTask;
+import ru.neosvet.utils.Lib;
 
 public class CabmainFragment extends Fragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
-    private final byte LOGIN = 0, ENTER = 1, WORDS = 2, SUPPORTERS = 3;
+    private final byte LOGIN = 0, ENTER = 1, WORDS = 2;
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -146,7 +146,13 @@ public class CabmainFragment extends Fragment {
                         case 1: //зарегистрироваться
                             s = "register.html";
                             break;
-                        default: //стастистика
+                        case 2: //о регистрации
+                            s = "reginfo.html";
+                            break;
+                        case 3: //стастистика регистраций
+                            s = "regstat.html";
+                            break;
+                        default: //(4) стастистика слов
                             s = "trans.html";
                             break;
                     }
@@ -155,7 +161,9 @@ public class CabmainFragment extends Fragment {
                     switch (pos) {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
-                                    getResources().getString(R.string.select_word))) {
+                                    getResources().getString(R.string.select_word))
+                                    || adMain.getItem(pos).getDes().contains(
+                                    getResources().getString(R.string.selected))) {
                                 //get list words
                                 task = new CabTask(CabmainFragment.this);
                                 task.execute(cookie);
@@ -166,7 +174,7 @@ public class CabmainFragment extends Fragment {
                         case 1: //анкета
                             CabpageActivity.openPage(act, "edinenie/anketa.html", cookie);
                             break;
-                        default: //единомышленники
+                        default: //(2) единомышленники
                             CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", cookie);
                             break;
                     }
@@ -310,29 +318,11 @@ public class CabmainFragment extends Fragment {
         act.status.setLoad(true);
     }
 
-//    public void putResultTask(String result) {
-//        task = null;
-//        adMain.clear();
-//        if (result.contains(Lib.N) && !result.contains(":")) { // list word
-//            pMain.setVisibility(View.GONE);
-//            fabEnter.setVisibility(View.GONE);
-//            fabExit.setVisibility(View.VISIBLE);
-//            String[] m = result.split(Lib.N);
-//            for (int i = 0; i < m.length; i++) {
-//                adMain.addItem(new ListItem(m[i]));
-//            }
-//        } else { // message
-//            adMain.addItem(new ListItem(result));
-//        }
-//        adMain.notifyDataSetChanged();
-//        act.status.setLoad(false);
-//    }
-
     public void putResultTask(String result) {
         task = null;
         mode_list++;
-        adMain.clear();
         if (mode_list == WORDS) {
+            adMain.clear();
             String[] m = result.split(Lib.N);
             for (int i = 0; i < m.length; i++) {
                 adMain.addItem(new ListItem(m[i]));
@@ -343,8 +333,14 @@ public class CabmainFragment extends Fragment {
                 divCab.setVisibility(View.GONE);
                 fabEnter.setVisibility(View.GONE);
                 fabExit.setVisibility(View.VISIBLE);
-            } else // режим списка - в кабинете
+            } else {// режим списка - в кабинете
                 mode_list = ENTER;
+                if (result.indexOf("ok") == 0) { //слово выбрано успешно
+                    result = act.getResources().getString(R.string.selected) + " " +
+                            adMain.getItem(Integer.parseInt(result.substring(2))).getTitle();
+                }
+            }
+            adMain.clear();
             for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
                 adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
             }
