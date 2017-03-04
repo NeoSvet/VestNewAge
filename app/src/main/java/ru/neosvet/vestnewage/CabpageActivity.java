@@ -20,7 +20,7 @@ import ru.neosvet.utils.Lib;
 
 public class CabpageActivity extends AppCompatActivity {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =
-            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);if(s.indexOf('lnk2')>0)s=s.substring(0,s.indexOf('lnk2')-34); else s=s.substring(0,s.indexOf('hr2')-12); document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\">'+s+'</div><div id=\"main\" style=\"display:none\"><div id=\"d31\"></div><div id=\"d32\"></div><div id=\"d33\"></div><div id=\"d34\"></div><div id=\"d35\"></div></div>';";
+            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div><div id=\"main\" style=\"display:none\"><div id=\"d31\"></div><div id=\"d32\"></div><div id=\"d33\"></div><div id=\"d34\"></div><div id=\"d35\"></div></div>';";
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
@@ -45,7 +45,7 @@ public class CabpageActivity extends AppCompatActivity {
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
             cookieManager.removeSessionCookie();
-            cookieManager.setCookie(HOST, cookie + "; domain="+HOST.substring(7));
+            cookieManager.setCookie(HOST, cookie + "; domain=" + HOST.substring(7));
             cookieSyncManager.getInstance().sync();
 //            cookieManager.getCookie(HOST);
         }
@@ -74,6 +74,7 @@ public class CabpageActivity extends AppCompatActivity {
     private class wvClient extends WebViewClient {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            if (url.contains("#")) return;
             status.setLoad(true);
             CabpageActivity.this.setTitle("");
             view.setVisibility(View.GONE);
@@ -82,6 +83,7 @@ public class CabpageActivity extends AppCompatActivity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
+            if (url.contains("#")) return;
             if (android.os.Build.VERSION.SDK_INT > 18) {
                 wvBrowser.evaluateJavascript(SCRIPT,
                         new ValueCallback<String>() {
