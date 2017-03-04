@@ -115,7 +115,7 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
         boolAnim = true;
-        if (System.currentTimeMillis() - lib.getTimeLastVisit() > 3600) {
+        if (System.currentTimeMillis() - lib.getTimeLastVisit() > 3600000) {
             try {
                 String s = lib.getCookies(true);
                 //a:3:{i:0;a:2:{s:2:
@@ -162,12 +162,12 @@ public class SlashActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-//                if (task == null) {
-//                    startActivity(main);
-//                    finish();
-//                } else {
+                if (task == null) {
+                    startActivity(main);
+                    finish();
+                } else {
                     setStatus();
-//                }
+                }
             }
 
             @Override
