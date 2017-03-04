@@ -302,7 +302,7 @@ public class SiteFragment extends Fragment {
     private void OpenPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
             if (url.contains(Lib.SITE)) {
-                act.lib.openInApps(Lib.SITE, getResources().getString(R.string.to_load));
+                act.lib.openInApps(url, getResources().getString(R.string.to_load));
             } else {
                 act.lib.openInApps(url, null);
             }
