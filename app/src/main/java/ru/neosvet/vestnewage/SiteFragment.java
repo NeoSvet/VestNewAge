@@ -40,7 +40,7 @@ public class SiteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.settings_fragment, container, false);
+        this.container = inflater.inflate(R.layout.site_fragment, container, false);
         act = (MainActivity) getActivity();
         initViews();
         setViews();
