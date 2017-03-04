@@ -13,7 +13,7 @@ import ru.neosvet.utils.Lib;
 
 public class StatusBar {
     private Context context;
-    private Animation anStatus;
+    private Animation anRotate;
     private View panel;
     private TextView tv;
     private ImageView iv;
@@ -26,8 +26,8 @@ public class StatusBar {
         tv = (TextView) panel.findViewById(R.id.tvStatus);
         iv = (ImageView) panel.findViewById(R.id.ivStatus);
 
-        anStatus = AnimationUtils.loadAnimation(context, R.anim.rotate);
-        anStatus.setAnimationListener(new Animation.AnimationListener() {
+        anRotate = AnimationUtils.loadAnimation(context, R.anim.rotate);
+        anRotate.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
 
@@ -36,7 +36,7 @@ public class StatusBar {
             @Override
             public void onAnimationEnd(Animation animation) {
                 if (!stop) //panel.getVisibility() == View.VISIBLE
-                    iv.startAnimation(anStatus);
+                    iv.startAnimation(anRotate);
             }
 
             @Override
@@ -77,7 +77,7 @@ public class StatusBar {
             time = false;
             panel.setVisibility(View.VISIBLE);
             vis = true;
-            iv.startAnimation(anStatus);
+            iv.startAnimation(anRotate);
         } else {
             panel.setVisibility(View.GONE);
             vis = false;
