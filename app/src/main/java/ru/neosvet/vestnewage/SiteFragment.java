@@ -172,9 +172,9 @@ public class SiteFragment extends Fragment {
                         } else if (pos == 6 || pos == 7) { //no article
                             BrowserActivity.openPage(act, link, "");
                         } else
-                            OpenPage(link);
+                            openPage(link);
                     } else {
-                        OpenPage(link);
+                        openPage(link);
                     }
                 } else {
                     PopupMenu pMenu = new PopupMenu(act, view);
@@ -199,7 +199,7 @@ public class SiteFragment extends Fragment {
                                 index = 3;
                             else
                                 index = 4;
-                            OpenPage(adMain.getItem(pos).getLink(index));
+                            openPage(adMain.getItem(pos).getLink(index));
                             return true;
                         }
                     });
@@ -299,7 +299,7 @@ public class SiteFragment extends Fragment {
         }
     }
 
-    private void OpenPage(String url) {
+    private void openPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
             if (url.contains(Lib.SITE)) {
                 act.lib.openInApps(url, getResources().getString(R.string.to_load));
