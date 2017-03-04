@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (suc)
             builder.setMessage(getResources().getString(R.string.all_load_suc));
         else
-            builder.setMessage(getResources().getString(R.string.all_load_fail));
+            builder.setMessage(getResources().getString(R.string.load_fail));
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
