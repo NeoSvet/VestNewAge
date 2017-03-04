@@ -10,7 +10,7 @@
     tools:showIn="@layout/slash_activity">
 
     <ImageView
-        android:id="@+id/ivStart"
+        android:id="@+id/ivStar"
         android:layout_width="256dp"
         android:layout_height="match_parent"
         android:layout_gravity="center"
