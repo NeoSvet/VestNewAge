@@ -86,15 +86,18 @@ public class ListItem {
         links.add(link);
     }
 
+    public void addHead(String head) {
+        heads.add(head);
+    }
+
     public String getHead(int index) {
-        return heads.get(index);
+        if (index < heads.size())
+            return heads.get(index);
+        else
+            return "";
     }
 
     public boolean isSelect() {
         return boolSelect;
-    }
-
-    public void setSelect(boolean select) {
-        boolSelect = select;
     }
 }

@@ -158,13 +158,14 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (adNoread.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
-                    if (adNoread.getItem(pos).getCount() == 1 && adNoread.getItem(pos).getLink().contains("http")) {
-                        // only link
-                        act.lib.openInApps(adNoread.getItem(pos).getLink(), null);
+                    final String link = adNoread.getItem(pos).getLink();
+                    final String des = adNoread.getItem(pos).getHead(0);
+                    if (des.equals("")) {// only link
+                        act.lib.openInApps(link, null);
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(act);
-                        if (adNoread.getItem(pos).getCount() == 1) { // only des
-                            builder.setMessage(adNoread.getItem(pos).getLink().substring(Lib.LINK.length()));
+                        builder.setMessage(des);
+                        if (link.equals("")) { // only des
                             builder.setPositiveButton(getResources().getString(android.R.string.ok),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
@@ -172,8 +173,6 @@ public class CalendarFragment extends Fragment {
                                         }
                                     });
                         } else { // link and des
-                            builder.setMessage(adNoread.getItem(pos).getLink(1).substring(Lib.LINK.length()));
-                            final String link = adNoread.getItem(pos).getLink();
                             builder.setPositiveButton(getResources().getString(R.string.open_link),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
@@ -610,7 +609,7 @@ public class CalendarFragment extends Fragment {
                             t += Lib.N + s;
                             s = br.readLine();
                         }
-                        adNoread.getItem(0).addLink(t);
+                        adNoread.getItem(0).addHead(t);
                     } else if (s.contains("<l>")) {
                         adNoread.getItem(0).addLink(s.substring(3));
                     }
