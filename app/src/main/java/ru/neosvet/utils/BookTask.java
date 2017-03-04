@@ -67,7 +67,7 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
     }
 
     public void downloadData(boolean boolKat) throws Exception {
-        String url = Lib.SITE + (boolKat ? "poems" : "tolkovaniya") + Lib.print;
+        String url = Lib.SITE + (boolKat ? "poems" : "tolkovaniya") + Lib.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         File file = new File(act.getFilesDir() + Lib.LIST);
