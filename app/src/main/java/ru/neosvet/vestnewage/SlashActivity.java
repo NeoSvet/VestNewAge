@@ -3,6 +3,8 @@ package ru.neosvet.vestnewage;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -10,6 +12,8 @@ import android.view.animation.AnimationUtils;
 
 import java.net.URLDecoder;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.CalendarTask;
@@ -111,7 +115,7 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
         boolAnim = true;
-        if (System.currentTimeMillis() - lib.getTimeLastVisit() > 3600000) {
+        if (System.currentTimeMillis() - lib.getTimeLastVisit() > 3600) {
             try {
                 String s = lib.getCookies(true);
                 //a:3:{i:0;a:2:{s:2:
@@ -154,26 +158,24 @@ public class SlashActivity extends AppCompatActivity {
         anStar.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (task == null) {
-                    startActivity(main);
-                    finish();
-                } else {
+//                if (task == null) {
+//                    startActivity(main);
+//                    finish();
+//                } else {
                     setStatus();
-                }
+//                }
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
-        View ivStart = findViewById(R.id.ivStart);
-        ivStart.startAnimation(anStar);
+        View ivStar = findViewById(R.id.ivStar);
+        ivStar.startAnimation(anStar);
     }
 
     private void setStatus() {
@@ -184,7 +186,22 @@ public class SlashActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
-        status.setLoad(true);
+        //костыль, чтобы крутилось нормально:
+        findViewById(R.id.pStatus).setVisibility(View.VISIBLE);
+        final Handler hStatus = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                status.setLoad(true);
+                return false;
+            }
+        });
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hStatus.sendEmptyMessage(0);
+            }
+        }, 10);
+
     }
 
 //    @Override
