@@ -119,7 +119,7 @@
     <string name="kat_n_pos">Катренов и Посланий</string>
     <string name="materials">материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
-    <string name="all_load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
+    <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
     <!--StatusBar-->
     <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
     <string name="crash">Сбой</string>
