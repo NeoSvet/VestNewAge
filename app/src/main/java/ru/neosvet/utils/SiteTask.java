@@ -92,7 +92,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
 
     public void downloadList(String url) throws Exception {
         String line;
-        url += Lib.print;
+        url += Lib.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean b = false;
