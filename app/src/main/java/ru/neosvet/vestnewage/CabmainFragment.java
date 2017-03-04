@@ -138,7 +138,7 @@ public class CabmainFragment extends Fragment {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if(act.status.isVis()) return;
+                if (act.status.isVis()) return;
                 if (mode_list == LOGIN) { //до кабинета
                     String s;
                     switch (pos) {
@@ -324,6 +324,11 @@ public class CabmainFragment extends Fragment {
 
     public void putResultTask(String result) {
         task = null;
+        act.status.setLoad(false);
+        if (result.equals(getResources().getString(R.string.load_fail))) {
+            Lib.showToast(act, result);
+            return;
+        }
         mode_list++;
         if (mode_list == WORDS) {
             adMain.clear();
@@ -352,7 +357,6 @@ public class CabmainFragment extends Fragment {
             adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         }
         adMain.notifyDataSetChanged();
-        act.status.setLoad(false);
     }
 
     public boolean onBackPressed() {

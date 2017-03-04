@@ -45,7 +45,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
                     return sendWord(params[0], params[1], Integer.parseInt(params[2]));
             }
         } catch (Exception e) {
-            return e.getMessage();
+            return act.getResources().getString(R.string.load_fail);
         }
     }
 

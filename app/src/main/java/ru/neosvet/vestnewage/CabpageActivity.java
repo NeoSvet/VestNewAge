@@ -91,6 +91,11 @@ public class CabpageActivity extends AppCompatActivity {
                 wvBrowser.setVisibility(View.VISIBLE);
             }
             String s = wvBrowser.getTitle();
+            if(!s.contains(":")) {
+                Lib.showToast(CabpageActivity.this, getResources().getString(R.string.load_fail));
+                finish();
+                return;
+            }
             CabpageActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
             status.setLoad(false);
             super.onPageFinished(view, url);
