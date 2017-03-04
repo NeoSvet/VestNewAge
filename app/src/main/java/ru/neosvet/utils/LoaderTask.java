@@ -295,27 +295,20 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadList(String path) throws Exception {
-//        Lib.LOG("list="+path);
         downloadStyle(false);
         if (!boolStart) return;
-        File f = new File(path);//context.getFilesDir() +
+        File f = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(f));
         String s;
         while ((s = br.readLine()) != null && boolStart) {
             if (s.contains(Lib.LINK)) {
                 s = s.substring(Lib.LINK.length());
-//                Lib.LOG("link=" + s);
                 if (s.contains("/"))
                     f = lib.getPageFile(s);
                 else {
-                    f = getFile("/" + BrowserActivity.ARTICLE);
-                    if (!f.exists())
-                        f.mkdir();
-                    f = getFile("/" + BrowserActivity.ARTICLE + "/" + s);
+                    f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + s);
                 }
-//                Lib.LOG("path=" + f.toString());
                 if (!f.exists()) {
-//                    Lib.LOG("download");
                     downloadPage(s + Lib.PRINT, f.toString(), false);
                     sub_prog++;
                 }
