@@ -256,7 +256,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadStyle(boolean bReplaceStyle) throws Exception {
-        final File fLight = getFile(Lib.LIGHT);
+        final File fLight = lib.getFile(Lib.LIGHT);
         final File fDark = getFile(Lib.DARK);
         if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
             String line = "";
