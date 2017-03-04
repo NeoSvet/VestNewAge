@@ -1,48 +1,61 @@
 <resources>
+    <!--MainActivity-->
     <string name="app_name">Весть Нового Века</string>
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
-    <string name="link_on_app">Ссылка на приложение</string>
-    <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
-    <string name="ad">Объявление</string>
-    <string name="access_new_version">Доступна новая версия приложения!</string>
-    <string name="open_link">Открыть ссылку</string>
-    <string name="not_found_file">Файл не найден</string>
+    <string name="click_for_exit">Нажмите ещё раз для выхода</string>
+    <string name="download_all">Загрузить всё</string>
+    <!--Lib-->
+    <string name="address_copied">Адрес скопирован</string>
+    <!--Menu-->
     <string name="rss">Сводка</string>
     <string name="main">Главная</string>
     <string name="calendar">Календарь</string>
-    <string name="news">Объявления</string>
+    <string name="book">Книга</string>
+    <string name="markers">Закладки</string>
+    <string name="journal">Журнал</string>
+    <string name="search">Поиск</string>
+    <string name="cabinet">Кабинет</string>
+    <string name="settings">Настройки</string>
+    <string name="help">Справка</string>
+    <!--CalendarFragment-->
+    <string name="ad">Объявление</string>
+    <string name="katren">Катрен</string>
+    <string name="empty_list">Список пуст</string>
+    <string name="access_new_version">Доступна новая версия приложения!</string>
+    <string name="no_list">Список ещё не загружен</string>
+    <string name="open_link">Открыть ссылку</string>
+    <string name="link1">Первая ссылка</string>
+    <string name="link2">Вторая ссылка</string>
+    <string name="link3">Третья ссылка</string>
+    <string name="link4">Четвертая ссылка</string>
+    <string name="link5">Пятая ссылка</string>
+    <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
-    <string name="katren">Катрен</string>
-    <string name="search">Поиск</string>
-    <string name="marker">Закладка</string>
-    <string name="markers">Закладки</string>
+    <!--BrowserActivity-->
+    <string name="refresh">Обновить</string>
     <string name="in_markers">В закладки</string>
     <string name="reset_scale">Сбросить масштаб</string>
+    <string name="hide_menu">Скрыть кнопку меню</string>
+    <string name="theme">Оформление</string>
+    <string name="light">Светлое</string>
+    <string name="dark">Темное</string>
+    <!--CollectionsFragment-->
+    <string name="not_found_file">Файл не найден</string>
+    <string name="delete">Удалить?</string>
     <string name="collections">Подборки</string>
-    <string name="enter_name">Введите название</string>
-    <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>
-    <string name="no_collections">Вне подборок</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
     <string name="nothing_edit">Редактировать нечего!</string>
+    <string name="empty_collections">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
+    <!--MarkerActivity-->
+    <string name="marker">Закладка</string>
+    <string name="enter_name">Введите название</string>
+    <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>
+    <string name="no_collections">Вне подборок</string>
     <string name="unuse_dot">Запятую нельзя использовать</string>
     <string name="title_already_used">Данный заголовок уже используется!</string>
-    <string name="media">Видео и пресса</string>
-    <string name="cabinet">Кабинет</string>
-    <string name="settings">Настройки</string>
-    <string name="anketa_failed">Анкета загружена неверно</string>
-    <string name="selected">Выбрано:</string>
-    <string name="select_word">Выберите слово</string>
-    <string name="send_unlivable">Сейчас передать невозможно</string>
-    <string name="email">Email</string>
-    <string name="password">Пароль</string>
-    <string name="remember_email">запомнить email</string>
-    <string name="remember_password">запомнить пароль</string>
-    <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
-    <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться...», то нажмите «Назад» и откройте страницу повторно.</string>
-    <string name="help">Справка</string>
     <string name="paragraph">Абзац</string>
     <string name="position">Позиция</string>
     <string name="sel_pos">Выбрана позиция:&#160;</string>
@@ -54,29 +67,27 @@
     <string name="sel_col">Выбраны подборки:&#160;</string>
     <string name="sel_par">Выбраны абзацы №№:&#160;</string>
     <string name="par_n">Абзацы №№&#160;</string>
+    <!--SiteFragment-->
+    <string name="news">Объявления</string>
+    <string name="media">Видео и пресса</string>
+    <string name="to_load">Загрузить</string>
+    <!--CabmainFragment-->
+    <string name="anketa_failed">Анкета загружена неверно</string>
+    <string name="selected">Выбрано:</string>
+    <string name="select_word">Выберите слово</string>
+    <string name="send_unlivable">Сейчас передать невозможно</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="remember_email">запомнить email</string>
+    <string name="remember_password">запомнить пароль</string>
+    <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться...», то нажмите «Назад» и откройте страницу повторно.</string>
+    <!--Страница-->
     <string name="video_on_vimeo">Видео на Vimeo</string>
-    <string name="download_all">Загрузить всё</string>
-    <string name="link1">Первая ссылка</string>
-    <string name="link2">Вторая ссылка</string>
-    <string name="link3">Третья ссылка</string>
-    <string name="link4">Четвертая ссылка</string>
-    <string name="link5">Пятая ссылка</string>
-    <string name="refresh">Обновить</string>
-    <string name="load">Загрузка&#8230;</string>
-    <string name="start">Запуск&#8230;</string>
     <string name="page">Страница:</string>
     <string name="copyright">©</string>
     <string name="downloaded">Загружено:</string>
-    <string name="theme">Оформление</string>
-    <string name="light">Светлое</string>
-    <string name="dark">Темное</string>
-    <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
-    <string name="hide_menu">Скрыть кнопку меню</string>
-    <string name="no_list">Список ещё не загружен</string>
-    <string name="journal">Журнал</string>
-    <string name="book">Книга</string>
-    <string name="address_copied">Адрес скопирован</string>
-    <string name="crash">Сбой</string>
+    <!--SettingsFragment-->
     <string name="from">от</string>
     <string name="hours">часа</string>
     <string name="minutes">минут</string>
@@ -91,30 +102,38 @@
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
-    <string name="refresh_list">Обновление списков раздела</string>
+    <!--JournalFragment-->
     <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
-    <string name="empty_collections">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
     <string name="finish_list">Список закончился</string>
-    <string name="empty_list">Список пуст</string>
+    <!--Посыл-->
     <string name="to_prom">До Посыла</string>
     <string name="prom">Посыл!</string>
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
-    <string name="download">Загрузка</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
+    <!--Загрузка-->
+    <string name="load">Загрузка&#8230;</string>
+    <string name="start">Запуск&#8230;</string>
+    <string name="refresh_list">Обновление списков раздела</string>
+    <string name="download">Загрузка</string>
     <string name="kat_n_pos">Катренов и Посланий</string>
     <string name="materials">материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="all_load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
+    <!--StatusBar-->
+    <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
+    <string name="crash">Сбой</string>
+    <!--SummaryReceiver-->
+    <string name="appeared_new">Появилась новая информация!</string>
+    <string name="site_name">«Благая Весть»</string>
+    <!--HelpFragment-->
+    <string name="link_on_app">Ссылка на приложение</string>
+    <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений:</string>
     <string name="current_publication">Текущая публикация: №</string>
     <string name="publication">Публикация №</string>
     <string name="write_to_dev">Написать разработчику</string>
-    <string name="appeared_new">Появилась новая информация!</string>
-    <string name="to_load">Загрузить</string>
-    <string name="site_name">«Благая Весть»</string>
-    <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="delete">Удалить?</string>
+    <!--PresentationActivity-->
     <string name="next">Далее</string>
     <string name="finish">Закончить</string>
     <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
