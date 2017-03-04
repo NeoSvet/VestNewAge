@@ -20,7 +20,7 @@ import ru.neosvet.utils.Lib;
 
 public class CabpageActivity extends AppCompatActivity {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =
-            "var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div><div id=\"main\" style=\"display:none\"><div id=\"d31\"></div><div id=\"d32\"></div><div id=\"d33\"></div><div id=\"d34\"></div><div id=\"d35\"></div></div>';";
+            "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
@@ -50,12 +50,6 @@ public class CabpageActivity extends AppCompatActivity {
 //            cookieManager.getCookie(HOST);
         }
         wvBrowser.loadUrl(HOST + "/" + getIntent().getStringExtra(DataBase.LINK));
-    }
-
-    @Override
-    protected void onDestroy() {
-        wvBrowser.getSettings().setJavaScriptEnabled(false);
-        super.onDestroy();
     }
 
     private void initView() {
