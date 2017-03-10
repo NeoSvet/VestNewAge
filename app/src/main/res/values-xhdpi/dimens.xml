@@ -5,4 +5,5 @@
     <dimen name="activity_vertical_margin">6dp</dimen>
     <dimen name="cell_size">47dp</dimen>
     <dimen name="title_div">40dp</dimen>
+    <dimen name="menu_width">320dp</dimen>
 </resources>

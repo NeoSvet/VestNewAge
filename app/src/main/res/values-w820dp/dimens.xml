@@ -13,4 +13,5 @@
     <integer name="top_minus">100</integer>
     <integer name="screen_mode">3</integer>
     <integer name="height_list">600</integer>
+    <dimen name="menu_width">350dp</dimen>
 </resources>

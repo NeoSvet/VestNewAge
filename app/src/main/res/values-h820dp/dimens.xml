@@ -12,4 +12,5 @@
     <dimen name="calendar_margin_top">12dp</dimen>
     <integer name="screen_mode">2</integer>
     <integer name="height_list">600</integer>
+    <dimen name="menu_width">350dp</dimen>
 </resources>

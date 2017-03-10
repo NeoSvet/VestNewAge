@@ -18,6 +18,7 @@
     <integer name="screen_mode">0</integer>
     <dimen name="app_bar_height">200dp</dimen>
     <dimen name="item_width">200dp</dimen>
+    <dimen name="menu_width">260dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="calendar_margin_top">8dp</dimen>
     <integer name="height_list">350</integer>
