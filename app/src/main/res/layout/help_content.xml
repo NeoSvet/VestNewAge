@@ -25,7 +25,7 @@
 
             <LinearLayout
                 android:id="@+id/bAppLink"
-                android:layout_width="wrap_content"
+                android:layout_width="260dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
@@ -41,8 +41,9 @@
 
                 <TextView
                     style="@style/Label"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:padding="2dp"
                     android:text="@string/link_on_app"
                     android:textSize="18sp" />
@@ -50,7 +51,7 @@
 
             <LinearLayout
                 android:id="@+id/bWriteMail"
-                android:layout_width="wrap_content"
+                android:layout_width="260dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
@@ -66,8 +67,9 @@
 
                 <TextView
                     style="@style/Label"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:padding="2dp"
                     android:text="@string/write_to_dev"
                     android:textSize="18sp" />
