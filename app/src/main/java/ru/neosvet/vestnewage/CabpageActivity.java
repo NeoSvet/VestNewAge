@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -24,6 +25,7 @@ public class CabpageActivity extends AppCompatActivity {
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
+    private boolean bTwo = false;
 
     public static void openPage(Context context, String link, String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
@@ -62,6 +64,22 @@ public class CabpageActivity extends AppCompatActivity {
         wvBrowser.setWebViewClient(new wvClient());
         wvBrowser.clearCache(true);
         wvBrowser.clearHistory();
+        wvBrowser.getSettings().setBuiltInZoomControls(true);
+        wvBrowser.getSettings().setDisplayZoomControls(false);
+        if (android.os.Build.VERSION.SDK_INT > 18) {
+            wvBrowser.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent event) {
+                    if (event.getPointerCount() == 2) {
+                        bTwo = true;
+                    } else if (bTwo) {
+                        bTwo = false;
+                        wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
+                    }
+                    return false;
+                }
+            });
+        }
         status = new StatusBar(this, findViewById(R.id.pStatus));
     }
 
@@ -91,7 +109,7 @@ public class CabpageActivity extends AppCompatActivity {
                 wvBrowser.setVisibility(View.VISIBLE);
             }
             String s = wvBrowser.getTitle();
-            if(!s.contains(":")) {
+            if (!s.contains(":")) {
                 Lib.showToast(CabpageActivity.this, getResources().getString(R.string.load_fail));
                 finish();
                 return;
