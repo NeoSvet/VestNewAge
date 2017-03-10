@@ -138,7 +138,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
                 list.append(Lib.N);
             }
             if (boolOne)
-                return act.getResources().getString(R.string.select_word);
+                return act.getResources().getString(R.string.select_status);
             list.delete(list.length() - 1, list.length());
             return list.toString();
         } else {

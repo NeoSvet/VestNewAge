@@ -163,7 +163,7 @@ public class CabmainFragment extends Fragment {
                     switch (pos) {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
-                                    getResources().getString(R.string.select_word))
+                                    getResources().getString(R.string.select_status))
                                     || adMain.getItem(pos).getDes().contains(
                                     getResources().getString(R.string.selected))) {
                                 //get list words
