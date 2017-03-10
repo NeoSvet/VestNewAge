@@ -78,7 +78,7 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine()) + Lib.N); //title
-                bw.write(withOutTag(br.readLine()).substring(Lib.SITE.length()) + Lib.N); //link
+                bw.write(Lib.LINK + withOutTag(br.readLine()).substring(Lib.SITE.length()) + Lib.N); //link
                 bw.write(withOutTag(br.readLine()) + Lib.N); //des
                 bw.write(Long.toString(Date.parse(withOutTag(br.readLine()))) + Lib.N); //time
                 bw.flush();

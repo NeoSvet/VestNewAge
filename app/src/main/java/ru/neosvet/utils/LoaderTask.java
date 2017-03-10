@@ -1,9 +1,9 @@
 package ru.neosvet.utils;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -21,13 +21,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.neosvet.vestnewage.BrowserActivity;
+import ru.neosvet.vestnewage.CalendarFragment;
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.SiteFragment;
+import ru.neosvet.vestnewage.SummaryFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
-    private final int MAX = 6;
-    private transient AppCompatActivity act;
+    private int MAX = 6;
+    private transient Activity act;
     private transient Lib lib;
     private transient ProgressDialog di;
     private int prog = 0, sub_prog = 0;
@@ -37,12 +39,17 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-//        prog = values[0];
+        if (values.length == 1) { //set max
+            MAX = 2;
+            di.dismiss();
+            showD();
+            return;
+        }
         di.setProgress(prog);
         di.setMessage(msg + (sub_prog > 0 ? " (" + sub_prog + ")" : ""));
     }
 
-    public void setAct(AppCompatActivity act) {
+    public void setAct(Activity act) {
         this.act = act;
         lib = new Lib(act);
         if (di != null && boolStart) {
@@ -51,7 +58,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
     }
 
-    public LoaderTask(AppCompatActivity act) {
+    public LoaderTask(Activity act) {
         this.act = act;
         lib = new Lib(act);
     }
@@ -91,7 +98,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         } else {
             di.dismiss();
             if (boolStart) {
-                ((MainActivity) act).finishAllLoad(result);
+                ((MainActivity) act).finishAllLoad(result, MAX == 6);
                 boolStart = false;
             }
         }
@@ -104,10 +111,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected Boolean doInBackground(String... params) {
         try {
-            if (params.length == 0) {
+            if (params.length < 2) {
                 startTimer();
-                refreshLists();
-                downloadAll();
+                int p = -1;
+                if (params.length == 1) {
+                    p = Integer.parseInt(params[0]);
+                    publishProgress(2);
+                }
+                refreshLists(p);
+                downloadAll(p);
                 return true;
             }
             String p0 = params[0], p1 = params[1];
@@ -125,77 +137,117 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         return false;
     }
 
-    private void refreshLists() throws Exception {
-        MainActivity mact = (MainActivity) act;
+    private void refreshLists(int p) throws Exception {
         sub_prog = 0;
-        msg = act.getResources().getString(R.string.refresh_list)
-                + " " + act.getResources().getString(R.string.rss);
-        publishProgress();
-        SummaryTask t1 = new SummaryTask(mact);
-        t1.downloadList();
-        if (!boolStart) return;
-
-        msg = act.getResources().getString(R.string.refresh_list)
-                + " " + act.getResources().getString(R.string.calendar);
-        publishProgress();
-        Date d = new Date();
-        CalendarTask t2 = new CalendarTask(mact);
-        int max_y = d.getYear() + 1, max_m = 12;
-        prog++;
-        sub_prog = 0;
-        for (int y = 116; y < max_y && boolStart; y++) {
-            if (y == max_y - 1)
-                max_m = d.getMonth() + 1;
-            for (int m = 0; m < max_m && boolStart; m++) {
-                t2.downloadCalendar(y, m);
-                sub_prog++;
-            }
+        if (p == -1 || p == R.id.nav_rss) {
+            msg = act.getResources().getString(R.string.refresh_list)
+                    + " " + act.getResources().getString(R.string.rss);
+            publishProgress();
+            SummaryTask t1 = new SummaryTask((MainActivity) act);
+            t1.downloadList();
+            prog++;
         }
         if (!boolStart) return;
 
-        prog++;
-        sub_prog = 0;
-        msg = act.getResources().getString(R.string.refresh_list)
-                + " " + act.getResources().getString(R.string.book);
-        publishProgress();
-        BookTask t3 = new BookTask(mact);
-        t3.downloadData(true);
+        if (p == -1 || p == R.id.nav_main) {
+            msg = act.getResources().getString(R.string.refresh_list)
+                    + " " + act.getResources().getString(R.string.main);
+            publishProgress();
+            SiteTask t4 = new SiteTask((MainActivity) act);
+            String[] url = new String[]{
+                    Lib.SITE,
+                    Lib.SITE + "novosti.html",
+                    Lib.SITE + "media.html"
+            };
+            String[] file = new String[]{
+                    getFile(SiteFragment.MAIN).toString(),
+                    getFile(SiteFragment.NEWS).toString(),
+                    getFile(SiteFragment.MEDIA).toString()
+            };
+            for (int i = 0; i < url.length && boolStart; i++) {
+                t4.downloadList(url[i]);
+                t4.saveList(file[i]);
+            }
+            prog++;
+        }
         if (!boolStart) return;
-        t3.downloadData(false);
 
-        prog++;
-        msg = act.getResources().getString(R.string.refresh_list)
-                + " " + act.getResources().getString(R.string.main);
-        publishProgress();
-        SiteTask t4 = new SiteTask(mact);
-        String[] url = new String[]{
-                Lib.SITE,
-                Lib.SITE + "novosti.html",
-                Lib.SITE + "media.html"
-        };
-        String[] file = new String[]{
-                getFile(SiteFragment.MAIN).toString(),
-                getFile(SiteFragment.NEWS).toString(),
-                getFile(SiteFragment.MEDIA).toString()
-        };
-        for (int i = 0; i < url.length && boolStart; i++) {
-//            Lib.LOG(url[i]);
-            t4.downloadList(url[i]);
-            t4.saveList(file[i]);
+        if (p == -1 || p == R.id.nav_calendar) {
+            msg = act.getResources().getString(R.string.refresh_list)
+                    + " " + act.getResources().getString(R.string.calendar);
+            sub_prog = 0;
+            publishProgress();
+            Date d = new Date();
+            CalendarTask t2 = new CalendarTask(act);
+            int max_y = d.getYear() + 1, max_m = 12;
+            for (int y = 116; y < max_y && boolStart; y++) {
+                if (y == max_y - 1)
+                    max_m = d.getMonth() + 1;
+                for (int m = 0; m < max_m && boolStart; m++) {
+                    t2.downloadCalendar(y, m);
+                    sub_prog++;
+                }
+            }
+            prog++;
+        }
+        if (!boolStart) return;
+
+        if (p == -1 || p == R.id.nav_book) {
+            msg = act.getResources().getString(R.string.refresh_list)
+                    + " " + act.getResources().getString(R.string.book);
+            sub_prog = 0;
+            publishProgress();
+            BookTask t3 = new BookTask((MainActivity) act);
+            t3.downloadData(true);
+            t3.downloadData(false);
+            prog++;
         }
     }
 
-    private void downloadAll() throws Exception {
+    private void downloadAll(int p) throws Exception {
         if (!boolStart) return;
-        File[] d = new File[]{
-//                getFile(CalendarActivity.CALENDAR),
-                getFile(Lib.LIST),
-                getFile(SiteFragment.MAIN),
-                getFile(SiteFragment.MEDIA)
-        };
-        prog++;
-        msg = act.getResources().getString(R.string.download)
-                + " " + act.getResources().getString(R.string.kat_n_pos);
+        File[] d;
+        if (p == -1) { //download all
+            d = new File[]{
+                    getFile(Lib.LIST),
+                    getFile(SiteFragment.MAIN),
+                    getFile(SiteFragment.MEDIA)
+            };
+            msg = act.getResources().getString(R.string.download)
+                    + " " + act.getResources().getString(R.string.kat_n_pos);
+        } else { // download it
+            switch (p) {
+                case R.id.nav_rss:
+                    d = new File[]{
+                            getFile(SummaryFragment.RSS)
+                    };
+                    msg = act.getResources().getString(R.string.download)
+                            + " " + act.getResources().getString(R.string.materials);
+                    break;
+                case R.id.nav_main:
+                    d = new File[]{
+                            getFile(SiteFragment.MAIN),
+                            getFile(SiteFragment.MEDIA)
+                    };
+                    msg = act.getResources().getString(R.string.download)
+                            + " " + act.getResources().getString(R.string.materials);
+                    break;
+                case R.id.nav_calendar:
+                    d = new File[]{
+                            getFile(CalendarFragment.CALENDAR)
+                    };
+                    msg = act.getResources().getString(R.string.download)
+                            + " " + act.getResources().getString(R.string.kat_n_pos);
+                    break;
+                default:
+                    d = new File[]{
+                            getFile(Lib.LIST)
+                    };
+                    msg = act.getResources().getString(R.string.download)
+                            + " " + act.getResources().getString(R.string.kat_n_pos);
+                    break;
+            }
+        }
         publishProgress();
         for (int i = 0; i < d.length && boolStart; i++) {
             if (i == 2) {
@@ -213,7 +265,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 }
             } else
                 downloadList(d[i].toString());
-//            Lib.LOG("sub_prog="+sub_prog);
         }
         prog = MAX;
         publishProgress();
@@ -224,7 +275,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             public void run() {
                 try {
                     while (boolStart && prog < MAX) {
-//                        TimeUnit.SECONDS.sleep(1);
                         Thread.sleep(1000);
                         publishProgress();
                     }
@@ -303,15 +353,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         while ((s = br.readLine()) != null && boolStart) {
             if (s.contains(Lib.LINK)) {
                 s = s.substring(Lib.LINK.length());
+                if (!s.contains(".html")) s += ".html";
                 if (s.contains("/"))
                     f = lib.getPageFile(s);
                 else {
                     f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + s);
                 }
-                if (!f.exists()) {
+                if (!f.exists())
                     downloadPage(s + Lib.PRINT, f.toString(), false);
-                    sub_prog++;
-                }
+                sub_prog++;
             }
         }
         br.close();

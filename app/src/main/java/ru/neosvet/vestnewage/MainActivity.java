@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tip.hide();
                 loader = new LoaderTask(MainActivity.this);
                 loader.execute();
             }
@@ -129,8 +130,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViewById(R.id.bDownloadIt).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tip.hide();
                 loader = new LoaderTask(MainActivity.this);
-                loader.execute();
+                loader.execute(String.valueOf(cur_id));
             }
         });
     }
@@ -236,12 +238,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
     }
 
-    public void finishAllLoad(Boolean suc) {
+    public void finishAllLoad(boolean suc, boolean all) {
         loader = null;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if (suc)
-            builder.setMessage(getResources().getString(R.string.all_load_suc));
-        else
+        if (suc) {
+            if (all)
+                builder.setMessage(getResources().getString(R.string.all_load_suc));
+            else
+                builder.setMessage(getResources().getString(R.string.it_load_suc));
+        } else
             builder.setMessage(getResources().getString(R.string.load_fail));
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
