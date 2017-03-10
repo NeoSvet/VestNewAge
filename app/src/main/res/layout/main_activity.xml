@@ -33,6 +33,42 @@
             android:layout_marginTop="?attr/actionBarSize" />
 
         <LinearLayout
+            android:id="@+id/pDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:background="@drawable/field"
+            android:orientation="vertical"
+            android:padding="3dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/bDownloadAll"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/press"
+                android:padding="10dp"
+                android:text="@string/download_all" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorAccentLight" />
+
+            <TextView
+                android:id="@+id/bDownloadIt"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/press"
+                android:padding="10dp"
+                android:text="@string/download_it" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/pStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

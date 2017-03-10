@@ -21,6 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.LoaderTask;
 import ru.neosvet.utils.Prom;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final String LOADER = "loader";
     public static final String CUR_ID = "cur_id", TAB = "tab";
     public Lib lib = new Lib(this);
+    private Tip tip;
     private NavigationView navigationView;
     private DrawerLayout drawer;
     public StatusBar status;
@@ -116,6 +118,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
+        tip = new Tip(this, findViewById(R.id.pDownload));
+        findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loader = new LoaderTask(MainActivity.this);
+                loader.execute();
+            }
+        });
+        findViewById(R.id.bDownloadIt).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loader = new LoaderTask(MainActivity.this);
+                loader.execute();
+            }
+        });
     }
 
     private void setMenuFragment() {
@@ -135,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.menu_table, menu);
-        MenuItem miDownloadAll = menu.add(getResources().getString(R.string.download_all));
+        MenuItem miDownloadAll = menu.add(getResources().getString(R.string.download_title));
         miDownloadAll.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         miDownloadAll.setIcon(R.drawable.download);
         return true;
@@ -197,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frCollections);
                 break;
             case R.id.nav_cabinet:
-                frCabinet=new CabmainFragment();
+                frCabinet = new CabmainFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frCabinet);
                 break;
             case R.id.nav_search:
@@ -283,13 +300,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        downloadAll();
+        showDownloadMenu();
         return super.onOptionsItemSelected(item);
     }
 
-    public void downloadAll() {
-//        status.setCrash(false);
-        loader = new LoaderTask(this);
-        loader.execute();
+    public void showDownloadMenu() {
+        if (tip.isShow())
+            tip.hide();
+        else
+            tip.show();
     }
 }

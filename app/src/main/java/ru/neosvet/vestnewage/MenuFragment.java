@@ -51,7 +51,7 @@ public class MenuFragment extends Fragment {
         int[] mImage = new int[]{R.drawable.download, R.drawable.rss, R.drawable.main,
                 R.drawable.calendar, R.drawable.book, R.drawable.marker, R.drawable.journal,
                 R.drawable.cabinet, R.drawable.settings, R.drawable.help};
-        int[] mTitle = new int[]{R.string.download_all, R.string.rss, R.string.main, R.string.calendar, R.string.book,
+        int[] mTitle = new int[]{R.string.download_title, R.string.rss, R.string.main, R.string.calendar, R.string.book,
                 R.string.markers, R.string.journal, R.string.cabinet, R.string.settings, R.string.help};
         for (int i = 0; i < mImage.length; i++) {
             adMenu.addItem(mImage[i], act.getResources().getString(mTitle[i]));
@@ -61,7 +61,7 @@ public class MenuFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (pos == 0) {
-                    act.downloadAll();
+                    act.showDownloadMenu();
                     return;
                 }
                 if (adMenu.getItem(pos).isSelect()) return;

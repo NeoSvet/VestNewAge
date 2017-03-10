@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    android:fitsSystemWindows="true">
 
     <FrameLayout
         android:id="@+id/menu_fragment"
@@ -18,6 +16,42 @@
         android:layout_height="match_parent"
         android:layout_gravity="top"
         android:layout_marginLeft="320dp" />
+
+    <LinearLayout
+        android:id="@+id/pDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginTop="250dp"
+        android:background="@drawable/field"
+        android:orientation="vertical"
+        android:padding="3dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/bDownloadAll"
+            style="@style/Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/press"
+            android:padding="10dp"
+            android:text="@string/download_all" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorAccentLight" />
+
+        <TextView
+            android:id="@+id/bDownloadIt"
+            style="@style/Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/press"
+            android:padding="10dp"
+            android:text="@string/download_it" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvPromTime"

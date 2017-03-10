@@ -4,7 +4,9 @@
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="download_all">Загрузить всё</string>
+    <string name="download_title">Загрузить...</string>
+    <string name="download_all">Загрузить все материалы</string>
+    <string name="download_it">Загрузить весь данный раздел</string>
     <!--Lib-->
     <string name="address_copied">Адрес скопирован</string>
     <!--Menu-->
