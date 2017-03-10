@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Tip tip;
     private NavigationView navigationView;
     private DrawerLayout drawer;
+    private View bDownloadIt;
     public StatusBar status;
     private Prom prom;
     private int cur_id, tab = 0;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         myFragmentManager = getFragmentManager();
         status = new StatusBar(this, findViewById(R.id.pStatus));
+        tip = new Tip(this, findViewById(R.id.pDownload));
 
         if (savedInstanceState == null) {
             SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
@@ -118,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
-        tip = new Tip(this, findViewById(R.id.pDownload));
         findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,7 +128,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 loader.execute();
             }
         });
-        findViewById(R.id.bDownloadIt).setOnClickListener(new View.OnClickListener() {
+        bDownloadIt = findViewById(R.id.bDownloadIt);
+        bDownloadIt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 tip.hide();
@@ -179,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void setFragment(int id) {
         if (cur_id != id)
             boolFirst = false;
+        tip.hide();
         cur_id = id;
         if (navigationView != null) //tut
             navigationView.setCheckedItem(id);
@@ -312,7 +315,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void showDownloadMenu() {
         if (tip.isShow())
             tip.hide();
-        else
+        else {
+            if (cur_id == R.id.nav_rss || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar || cur_id == R.id.nav_book)
+                bDownloadIt.setVisibility(View.VISIBLE);
+            else
+                bDownloadIt.setVisibility(View.GONE);
             tip.show();
+        }
     }
 }
