@@ -24,7 +24,8 @@ public class Tip {
     final Handler hHide = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            object.startAnimation(anHide);
+            if(boolShow)
+                object.startAnimation(anHide);
             return false;
         }
     });
@@ -69,5 +70,10 @@ public class Tip {
     public void hide() {
         object.clearAnimation();
         object.setVisibility(View.GONE);
+        boolShow = false;
+    }
+
+    public boolean isShow() {
+        return boolShow;
     }
 }
