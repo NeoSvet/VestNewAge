@@ -46,7 +46,7 @@
             <TextView
                 android:id="@+id/bDownloadAll"
                 style="@style/Label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/press"
                 android:padding="10dp"
