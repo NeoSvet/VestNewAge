@@ -12,19 +12,16 @@ import java.util.TimerTask;
 
 import ru.neosvet.vestnewage.R;
 
-/**
- * Created by NeoSvet on 21.02.2017.
- */
-
 public class Tip {
     private View object;
     private boolean boolShow = false;
     private Animation anShow, anHide;
+    private Timer timer;
 
     final Handler hHide = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            if(boolShow)
+            if (boolShow)
                 object.startAnimation(anHide);
             return false;
         }
@@ -59,7 +56,8 @@ public class Tip {
         boolShow = true;
         object.setVisibility(View.VISIBLE);
         object.startAnimation(anShow);
-        new Timer().schedule(new TimerTask() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 hHide.sendEmptyMessage(0);
@@ -68,6 +66,9 @@ public class Tip {
     }
 
     public void hide() {
+        if (!boolShow)
+            return;
+        timer.cancel();
         object.clearAnimation();
         object.setVisibility(View.GONE);
         boolShow = false;
