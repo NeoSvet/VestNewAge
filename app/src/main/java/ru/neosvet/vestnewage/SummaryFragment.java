@@ -178,9 +178,9 @@ public class SummaryFragment extends Fragment {
         act.status.setLoad(true);
     }
 
-    public void finishLoad(Boolean result) {
+    public void finishLoad(Boolean suc) {
         task = null;
-        if (result) {
+        if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             createList(false);
