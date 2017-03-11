@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -112,6 +114,46 @@ public class Lib {
             entity = res.getEntity();
         }
         return entity.getContent();
+    }
+
+    public String getDatePage(String link) {
+        if (!link.contains("/") || link.contains("press"))
+            return "";
+        else {
+            if (link.contains("-")) { //http://blagayavest.info/poems/?date=11-3-2017
+                link = link.substring(link.indexOf("-") + 1);
+                if (link.length() == 6)
+                    link = "0" + link;
+                return link.replace("-20", ".");
+            } else { //http://blagayavest.info/poems/11.03.17.html
+                return link.substring(link.lastIndexOf(".") - 5, link.lastIndexOf("."));
+            }
+        }
+    }
+
+    public boolean existsPage(String link) {
+        String date = getDatePage(link);
+        DataBase dbTable = new DataBase(context, date);
+        SQLiteDatabase db = dbTable.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
+                DataBase.LINK + DataBase.Q, new String[]{link},
+                null, null, null);
+        int id = 0;
+        if (cursor.moveToFirst())
+            id = cursor.getInt(0);
+        if (id == 0) {
+            cursor.close();
+            dbTable.close();
+            return false;
+        }
+        db = dbTable.getWritableDatabase();
+        cursor = db.query(DataBase.PARAGRAPH, null,
+                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                null, null, null);
+        boolean b = cursor.moveToFirst();
+        cursor.close();
+        dbTable.close();
+        return b;
     }
 
     public File getPageFile(String link) {
