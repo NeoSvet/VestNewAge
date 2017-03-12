@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import ru.neosvet.vestnewage.R;
 
 public class DataBase extends SQLiteOpenHelper {
-    public static final String JOURNAL = "journal", MARKERS = "markers",// LIST = "list",
+    public static final String PARAGRAPH = "paragraph",
+            JOURNAL = "journal", MARKERS = "markers",// LIST = "list",
             Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
             LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
     private Context context;
@@ -23,7 +24,23 @@ public class DataBase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        if (name.equals(JOURNAL)) {
+        if (name.contains(".")) { // базы данных с материалами
+            db.execSQL("create table if not exists " + TITLE + " ("
+                    + ID + " integer primary key autoincrement," //id TITLE
+                    + LINK + " text,"
+                    + TITLE + " text,"
+                    + TIME + " integer);");
+            Cursor cursor = db.query(TITLE, null, null, null, null, null, null);
+            if (cursor.getCount() == 0) { //если таблица пуста, то записываем дату создания
+                // в дальнейшем это будет дата изменений
+                ContentValues cv = new ContentValues();
+                cv.put(TIME, System.currentTimeMillis());
+                db.insert(TITLE, null, cv);
+            }
+            db.execSQL("create table if not exists " + PARAGRAPH + " ("
+                    + ID + " integer," //id TITLE
+                    + PARAGRAPH + " text);");
+        } else if (name.equals(JOURNAL)) {
             db.execSQL("create table if not exists " + JOURNAL + " ("
                     + LINK + " text primary key,"
                     + TITLE + " text,"
