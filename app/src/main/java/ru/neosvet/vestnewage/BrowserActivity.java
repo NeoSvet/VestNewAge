@@ -26,8 +26,14 @@ import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
@@ -39,10 +45,11 @@ import ru.neosvet.utils.Prom;
 
 public class BrowserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    public static final String ARTICLE = "article", THEME = "theme",
-            NOMENU = "nomenu", SCALE = "scale", FILE = "file://", PNG = ".png";
+    public static final String THEME = "theme", NOMENU = "nomenu",
+            SCALE = "scale", FILE = "file://", PNG = ".png",
+            STYLE = "/style/style.css";
     private final int CODE_OPEN = 1, CODE_DOWNLOAD = 2;
-    private boolean bArticle, bNomenu, bTheme, bTwo = false;
+    private boolean bNomenu, bTheme, bTwo = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private LoaderTask loader = null;
@@ -154,19 +161,20 @@ public class BrowserActivity extends AppCompatActivity
         if (android.os.Build.VERSION.SDK_INT > 15)
             wvBrowser.findAllAsync(s);
         else {
-            if(s.contains(Lib.N))
-                s=s.substring(0,s.indexOf(Lib.N));
+            if (s.contains(Lib.N))
+                s = s.substring(0, s.indexOf(Lib.N));
             wvBrowser.findAll(s);
-            try{
+            try {
                 //Can't use getMethod() as it's a private method
-                for(Method m : WebView.class.getDeclaredMethods()){
-                    if(m.getName().equals("setFindIsUp")){
+                for (Method m : WebView.class.getDeclaredMethods()) {
+                    if (m.getName().equals("setFindIsUp")) {
                         m.setAccessible(true);
                         m.invoke(wvBrowser, true);
                         break;
                     }
                 }
-            }catch(Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -190,15 +198,6 @@ public class BrowserActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
     }
 
-    private File getPage() {
-        File f;
-        if (bArticle)
-            f = lib.getFile("/" + ARTICLE + "/" + link);
-        else
-            f = lib.getPageFile(link);
-        return f;
-    }
-
     private void restoreActivityState(Bundle state) {
         if (state == null) {
             link = getIntent().getStringExtra(DataBase.LINK);
@@ -207,7 +206,7 @@ public class BrowserActivity extends AppCompatActivity
             loader = (LoaderTask) state.getSerializable(Lib.TASK);
             link = state.getString(DataBase.LINK);
             if (loader == null) {
-                openLink(link);
+                openPage(false);
             } else {
                 loader.setAct(this);
                 status.setLoad(true);
@@ -224,9 +223,9 @@ public class BrowserActivity extends AppCompatActivity
         status.setCrash(false);
         status.setLoad(true);
         if (bReplaceStyle)
-            loader.execute(link, getPage().toString(), "");
+            loader.execute(link, DataBase.LINK, "");
         else
-            loader.execute(link, getPage().toString());
+            loader.execute(link, DataBase.LINK);
     }
 
     private void initViews() {
@@ -256,7 +255,7 @@ public class BrowserActivity extends AppCompatActivity
         pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         editor = pref.edit();
         bTheme = pref.getInt(THEME, 0) == 0;
-        if(!bTheme) //dark
+        if (!bTheme) //dark
             findViewById(R.id.content_browser).setBackgroundColor(getResources().getColor(R.color.black));
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
@@ -415,7 +414,7 @@ public class BrowserActivity extends AppCompatActivity
             setCheckItem(miTheme.getSubMenu().getItem(1), !bTheme);
             editor.putInt(THEME, (bTheme ? 0 : 1));
             wvBrowser.clearCache(true);
-            openPage();
+            openPage(false);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -432,7 +431,7 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     private void restoreStyle() {
-        final File fStyle = lib.getFile(Lib.STYLE);
+        final File fStyle = lib.getFile(STYLE);
         if (fStyle.exists()) {
             final File fDark = lib.getFile(Lib.DARK);
             if (fDark.exists())
@@ -444,23 +443,17 @@ public class BrowserActivity extends AppCompatActivity
 
     public void openLink(String url) {
         link = url;
-        bArticle = !link.contains("/");
         if (url.contains(PNG)) {
             openFile();
         } else {
-            if (getPage().exists())
-                openPage();
+            if (lib.existsPage(link))
+                openPage(true);
             else
                 downloadPage(false);
         }
     }
 
     public void newLink(String url) {
-        if (url.contains(ARTICLE)) {
-            bArticle = true;
-            url = url.substring(ARTICLE.length() + 1);
-        } else
-            bArticle = false;
         if (!link.equals(url)) {
             link = url;
             miTheme.setVisible(!link.contains(PNG));
@@ -491,11 +484,11 @@ public class BrowserActivity extends AppCompatActivity
         loader.execute(Lib.SITE + link, f.toString());
     }
 
-    public void openPage() {
+    private void openPage(boolean newPage) {
         status.setLoad(false);
         final File fLight = lib.getFile(Lib.LIGHT);
         final File fDark = lib.getFile(Lib.DARK);
-        final File fStyle = lib.getFile(Lib.STYLE);
+        final File fStyle = lib.getFile(STYLE);
         boolean b = true;
         if (fStyle.exists()) {
             b = (fDark.exists() && !bTheme) || (fLight.exists() && bTheme);
@@ -512,10 +505,60 @@ public class BrowserActivity extends AppCompatActivity
             else
                 fDark.renameTo(fStyle);
         }
-        String page = getPage().toString();
-        if (link.contains("#"))
-            page += link.substring(link.indexOf("#"));
-        wvBrowser.loadUrl(FILE + page);
+
+        try {
+            File file = new File(getFilesDir() + "/page.html");
+            String s;
+            if (newPage) {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                DataBase dbTable = new DataBase(this, lib.getDatePage(link));
+                SQLiteDatabase db = dbTable.getWritableDatabase();
+                Cursor cursor = db.query(DataBase.TITLE, null,
+                        DataBase.LINK + DataBase.Q, new String[]{link},
+                        null, null, null);
+                int id = 0;
+                Date d = new Date();
+                if (cursor.moveToFirst()) {
+                    id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
+                    s = cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
+                    d = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
+                    bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"" + STYLE.substring(1)
+                            + "\">\n</head><body>\n");
+                    bw.write("<h1 class=\"page-title\">" + s + "</h1>\n");
+                    bw.flush();
+                }
+                cursor.close();
+                db = dbTable.getWritableDatabase();
+                cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                        null, null, null);
+                if (cursor.moveToFirst()) {
+                    do {
+                        bw.write(cursor.getString(0));
+                        bw.write(Lib.N);
+                        bw.flush();
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+                dbTable.close();
+                DateFormat df = new SimpleDateFormat("yy");
+                bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
+                bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
+                bw.write("<br>Copyright " + getResources().getString(R.string.copyright) + " Leonid Maslov 2004-20");
+                bw.write(df.format(d) + "<br>");
+                df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+                bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
+                bw.write("\n</div></body></html>");
+                bw.close();
+            }
+            s = file.toString();
+            if (link.contains("#"))
+                s += link.substring(link.indexOf("#"));
+            wvBrowser.loadUrl(FILE + s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addJournal() {
@@ -547,7 +590,7 @@ public class BrowserActivity extends AppCompatActivity
             if (link.contains(PNG))
                 openFile();
             else
-                openPage();
+                openPage(true);
         } else {
             status.setCrash(true);
         }
