@@ -21,7 +21,6 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";
@@ -151,8 +150,6 @@ public class JournalFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adJournal.getItem(pos).getLink();
-                if (link.indexOf(BrowserActivity.ARTICLE) == Lib.LINK.length()) //атавизм-рудимент
-                    link = link.substring(BrowserActivity.ARTICLE.length());
                 BrowserActivity.openPage(act, link, "");
                 adJournal.clear();
             }

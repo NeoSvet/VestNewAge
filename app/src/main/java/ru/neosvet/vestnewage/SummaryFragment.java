@@ -120,9 +120,6 @@ public class SummaryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adSummary.getItem(pos).getLink();
-                if (link.indexOf(BrowserActivity.ARTICLE) == Lib.LINK.length()) {
-                    link = link.substring(BrowserActivity.ARTICLE.length());
-                }
                 BrowserActivity.openPage(act, link, "");
             }
         });
