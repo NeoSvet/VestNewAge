@@ -2,7 +2,10 @@ package ru.neosvet.utils;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
@@ -16,8 +19,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.neosvet.vestnewage.BrowserActivity;
@@ -122,12 +123,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadAll(p);
                 return true;
             }
-            String p0 = params[0], p1 = params[1];
-            if (p0.contains(".png"))
-                downloadFile(p0, p1);
+            String link = params[0];
+            if (link.contains(".png"))
+                downloadFile(link, params[1]);
             else {
                 downloadStyle(params.length == 3);
-                downloadPage(p0, p1, true);
+                downloadPage(link, true);
             }
             return true;
         } catch (Exception e) {
@@ -354,51 +355,30 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             if (s.contains(Lib.LINK)) {
                 s = s.substring(Lib.LINK.length());
                 if (!s.contains(".html")) s += ".html";
-                if (s.contains("/"))
-                    f = lib.getPageFile(s);
-                else {
-                    f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + s);
-                }
-                if (!f.exists())
-                    downloadPage(s + Lib.PRINT, f.toString(), false);
+                if (!lib.existsPage(s))
+                    downloadPage(s, false);
                 sub_prog++;
             }
         }
         br.close();
     }
 
-    private void downloadPage(String link, String path, boolean bCounter) throws Exception {
-        String line, s, url, end;
-        url = Lib.SITE + link;
-        if (link.contains(Lib.PRINT)) {
-            end = "<!--/row-->";
-        } else {
-            end = "page-title";
-        }
-        InputStream in = new BufferedInputStream(lib.getStream(url));
+    private void downloadPage(String link, boolean bCounter) throws Exception {
+        String line, s;
+        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
+        DataBase dbTable = new DataBase(act, lib.getDatePage(link));
+        SQLiteDatabase db = dbTable.getWritableDatabase();
+        ContentValues cv;
         boolean b = false;
-        if (url.contains(Lib.PRINT))
-            url = url.substring(0, url.length() - Lib.PRINT.length());
+        int i = 0;
         while ((line = br.readLine()) != null) {
             if (b) {
-                if (line.contains(end)) {
-                    line = getNow();
-                    line = "<div style=\"margin-top:20px\" class=\"print2\">\n"
-                            + act.getResources().getString(R.string.page) + " " + url +
-                            "<br>Copyright " + act.getResources().getString(R.string.copyright)
-                            + " Leonid Maslov 2004-20" + line.substring(line.lastIndexOf(".") + 1) + "<br>"
-                            + act.getResources().getString(R.string.downloaded) + " " + line;
-                    bw.write(line + "\n</div></body></html>");
-                    bw.flush();
-                    b = false;
+                if (line.contains("<!--/row-->")) {
+                    break;
                 } else if (line.contains("<")) {
                     line = line.trim();
                     if (line.length() < 7) continue;
-//                    if(line.contains("color")) {
-//                        i=line.indexOf("color");
-//                    }
                     if (line.contains("iframe")) {
                         if (!line.contains("</iframe"))
                             line += br.readLine();
@@ -416,29 +396,44 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             line = "<center>" + s + "</center>";
                         else line = s;
                     }
-                    bw.write(line.replace("color", "cvet") + Lib.N);
-                    bw.flush();
+                    line = line.replace("color", "cvet");
+                    cv = new ContentValues();
+                    cv.put(DataBase.ID, i);
+                    cv.put(DataBase.PARAGRAPH, line);
+                    db.insert(DataBase.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
-                writeStartPage(bw, line);
+                Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
+                        DataBase.LINK + DataBase.Q, new String[]{link}
+                        , null, null, null);
+                if (cursor.moveToFirst())
+                    i = cursor.getInt(0);
+                if (i == 0) { // not exists title - add
+                    s = line.trim().replace("&nbsp;", " ");
+                    while ((i = s.indexOf("<")) > -1) {
+                        s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
+                    }
+                    cv = new ContentValues();
+                    cv.put(DataBase.LINK, link);
+                    cv.put(DataBase.TIME, System.currentTimeMillis());
+                    cv.put(DataBase.TITLE, s);
+                    i = (int) db.insert(DataBase.TITLE, null, cv);
+                    //обновляем дату изменения списка:
+                    cv = new ContentValues();
+                    cv.put(DataBase.TIME, System.currentTimeMillis());
+                    db.update(DataBase.TITLE, cv,
+                            DataBase.ID + DataBase.Q, new String[]{"1"});
+                }
+                cursor.close();
                 br.readLine();
                 b = true;
             } else if (line.contains("counter") && bCounter) { // counters
                 sendCounter(line);
-                if (line.contains("rambler"))
-                    break;
             }
         }
         br.close();
-        bw.close();
         if (bCounter)
             checkNoreadList(link);
-    }
-
-    private String getNow() {
-        Date d = new Date(System.currentTimeMillis());
-        DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-        return df.format(d);
     }
 
     private void sendCounter(String line) {
@@ -487,18 +482,5 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void writeStartPage(BufferedWriter bw, String line) throws Exception {
-        bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
-        int i;
-        String s = line.trim().replace("&nbsp;", " ");
-        while ((i = s.indexOf("<")) > -1) {
-            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
-        }
-        bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\".." +
-                Lib.STYLE + "\">\n</head><body>");
-        bw.write("\n" + line.substring(line.indexOf("<")) + "\n");
-        bw.flush();
     }
 }
