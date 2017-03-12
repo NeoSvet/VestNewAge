@@ -33,7 +33,7 @@ public class Lib {
     public static final String SITE = "http://blagayavest.info/", N = "\n",
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
-            LIGHT = "/style/light.css", DARK = "/style/dark.css", STYLE = "/style/style.css",
+            LIGHT = "/style/light.css", DARK = "/style/dark.css",
             PRINT = "?styletpl=print", LIST = "/list/", HREF = "href";
     private Context context;
 
@@ -118,7 +118,7 @@ public class Lib {
 
     public String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
-            return "";
+            return "00.00";
         else {
             if (link.contains("-")) { //http://blagayavest.info/poems/?date=11-3-2017
                 link = link.substring(link.indexOf("-") + 1);
@@ -126,31 +126,20 @@ public class Lib {
                     link = "0" + link;
                 return link.replace("-20", ".");
             } else { //http://blagayavest.info/poems/11.03.17.html
-                return link.substring(link.lastIndexOf(".") - 5, link.lastIndexOf("."));
+                link = link.substring(link.lastIndexOf(".") - 5, link.lastIndexOf("."));
+                if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
+                return link;
             }
         }
     }
 
     public boolean existsPage(String link) {
-        String date = getDatePage(link);
-        DataBase dbTable = new DataBase(context, date);
+        DataBase dbTable = new DataBase(context, getDatePage(link));
         SQLiteDatabase db = dbTable.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
-                DataBase.LINK + DataBase.Q, new String[]{link},
-                null, null, null);
-        int id = 0;
-        if (cursor.moveToFirst())
-            id = cursor.getInt(0);
-        if (id == 0) {
-            cursor.close();
-            dbTable.close();
-            return false;
-        }
-        db = dbTable.getWritableDatabase();
-        cursor = db.query(DataBase.PARAGRAPH, null,
-                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                null, null, null);
-        boolean b = cursor.moveToFirst();
+        Cursor cursor = db.rawQuery("SELECT COUNT(p.id) FROM paragraph p INNER JOIN title t ON t.id = p.id WHERE t.link"
+                + DataBase.Q, new String[]{link});
+        cursor.moveToFirst();
+        boolean b = cursor.getInt(0) > 0; //count > 0
         cursor.close();
         dbTable.close();
         return b;
