@@ -12,14 +12,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.ui.ListItem;
 import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
 
 public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializable {
     private transient BookFragment frm;
     private transient MainActivity act;
-    private List<ListItem> data = new ArrayList<ListItem>();
+    private boolean boolClear = false;
+    private List<String> title = new ArrayList<String>();
+    private List<String> links = new ArrayList<String>();
 
     public BookTask(BookFragment frm) {
         setFrm(frm);
@@ -34,6 +35,9 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
         act = (MainActivity) frm.getActivity();
     }
 
+    public void setClear(boolean boolClear) {
+        this.boolClear = boolClear;
+    }
 
     @Override
     protected void onPostExecute(Boolean result) {
@@ -90,7 +94,8 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
                     if (t.contains("(")) //poems
                         t = t.substring(0, t.indexOf("("));
-                    data.add(new ListItem(t, s));
+                    title.add(t);
+                    links.add(s);
                 }
                 saveData(f1);
             }
@@ -98,18 +103,28 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
     }
 
     private void saveData(String date) throws Exception {
-        if (data.size() > 0) {
-            DataBase dbTable = new DataBase(act, date);
-            SQLiteDatabase db = dbTable.getWritableDatabase();
+        if (title.size() > 0) {
+            DataBase dataBase = new DataBase(act, date);
+            SQLiteDatabase db = dataBase.getWritableDatabase();
+            if (boolClear) {
+                String s;
+                if (links.get(0).contains(Lib.POEMS))
+                    s = Lib.POEMS;
+                else
+                    s = "2016";
+                db.delete(DataBase.TITLE, DataBase.LINK +
+                        " LIKE ?", new String[]{"%" + s + "%"});
+            }
             ContentValues cv;
-            for (int i = 0; i < data.size(); i++) {
+            for (int i = 0; i < title.size(); i++) {
                 cv = new ContentValues();
-                cv.put(DataBase.LINK, data.get(i).getLink());
-                cv.put(DataBase.TITLE, data.get(i).getTitle());
+                cv.put(DataBase.LINK, links.get(i));
+                cv.put(DataBase.TITLE, title.get(i));
                 db.insert(DataBase.TITLE, null, cv);
             }
-            dbTable.close();
-            data.clear();
+            dataBase.close();
+            title.clear();
+            links.clear();
         }
     }
 }

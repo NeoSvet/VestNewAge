@@ -1,8 +1,10 @@
 package ru.neosvet.vestnewage;
 
-import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,9 +17,6 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,10 +24,11 @@ import java.util.Date;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.BookTask;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
 public class BookFragment extends Fragment {
-    public final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
+    private final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
     private Animation anMin, anMax;
@@ -118,78 +118,90 @@ public class BookFragment extends Fragment {
                 else
                     act.setTitle(getResources().getString(R.string.poslaniya));
                 tab = tabHost.getCurrentTab();
-                if (getFile().exists())
-                    openList(true);
-                else
-                    startLoad(tab);
+                openList(true);
             }
         });
     }
 
     private void openList(boolean boolLoad) {
         try {
-            adBook.clear();
             Date d;
-            boolean bP = false;
+            boolean bKat;
             if (tab == 0) {
                 if (dKat.getYear() < 100) {
                     dKat.setMonth(1);
                     dKat.setYear(116);
                 }
                 d = dKat;
+                bKat = true;
             } else {
                 if (dPos.getYear() < 100) {
                     dPos.setMonth(0);
                     dPos.setYear(116);
                 }
                 d = dPos;
-                bP = true;
+                bKat = false;
             }
-            File f = getFile(d, bP);
             int m = d.getMonth(), y = d.getYear();
-            while (!f.exists()) {
+            while (!existsList(d, bKat)) {
                 if (m == 0) {
                     if (y == 116) {
                         if (boolLoad)
-                            startLoad(tab);
+                            startLoad(false);
                         return;
                     } else
                         d.setYear(--y);
                     m = 12;
                 }
                 d.setMonth(--m);
-                f = getFile(d, bP);
             }
+
+            adBook.clear();
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                     + "\n" + (d.getYear() + 1900));
-            ivPrev.setEnabled(getFile(setDate(d, -1), bP).exists());
-            ivNext.setEnabled(getFile(setDate(d, 1), bP).exists());
-            BufferedReader br = new BufferedReader(new FileReader(f));
+            ivPrev.setEnabled(existsList(setDate(d, -1), bKat));
+            ivNext.setEnabled(existsList(setDate(d, 1), bKat));
+
+            DataBase dbBase = new DataBase(act, df.format(d));
+            SQLiteDatabase db = dbBase.getWritableDatabase();
             String t, s;
-            while ((t = br.readLine()) != null) {
-                if (bP) {
-                    s = br.readLine();
-                    t += " (" + getResources().getString(R.string.from) + " " + s.substring(11, s.lastIndexOf(".")) + ")";
-                    adBook.addItem(new ListItem(t, s));
-                } else
-                    adBook.addItem(new ListItem(t, br.readLine()));
-            }
-            br.close();
-            if (f.equals(getFile(new Date(), bP)))
-                bP = act.status.checkTime(f.lastModified());
-            else {
-                Date n = new Date();
+            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            Date dModList;
+            if (cursor.moveToFirst()) {
+                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                int iLink = cursor.getColumnIndex(DataBase.LINK);
+                dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                while (cursor.moveToNext()) {
+                    s = cursor.getString(iLink);
+                    if ((s.contains(Lib.POEMS) && bKat) ||
+                            (!s.contains(Lib.POEMS) && !bKat)) {
+                        t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
+                        if (t.contains("_"))
+                            t = t.substring(0, t.indexOf("_"));
+                        t = cursor.getString(iTitle) +
+                                " (" + getResources().getString(R.string.from) + " " + t + ")";
+                        adBook.addItem(new ListItem(t, s));
+                    }
+                }
+            } else
+                dModList = (Date) d.clone();
+            dbBase.close();
+
+            Date n = new Date();
+            if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
+                bKat = act.status.checkTime(dModList.getTime());
+            } else {
+                //если выбранный месяц - предыдущий, то проверяем когда список был обновлен
                 if ((d.getMonth() == n.getMonth() - 1 && d.getYear() == n.getYear()) ||
                         (d.getMonth() == 11 && d.getYear() == n.getYear() - 1)) {
-                    d = new Date(f.lastModified());
-                    if (d.getMonth() != n.getMonth())
-                        act.status.checkTime(f.lastModified());
+                    if (dModList.getMonth() != n.getMonth())
+                        act.status.checkTime(dModList.getTime());
                     else
-                        bP = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+                        bKat = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
                 } else
-                    bP = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+                    bKat = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
             }
-            if (bP)
+            if (bKat)
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
@@ -198,8 +210,27 @@ public class BookFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
-                startLoad(tab);
+                startLoad(true);
         }
+    }
+
+    private boolean existsList(Date d, boolean bKat) {
+        DataBase dbBase = new DataBase(act, df.format(d));
+        SQLiteDatabase db = dbBase.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+                null, null, null, null, null);
+        String s;
+        if (cursor.moveToFirst()) {
+            // первую запись пропускаем, т.к. там дата изменения списка
+            while (cursor.moveToNext()) {
+                s = cursor.getString(0);
+                if ((s.contains(Lib.POEMS) && bKat) ||
+                        (!s.contains(Lib.POEMS) && !bKat)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -208,20 +239,6 @@ public class BookFragment extends Fragment {
         editor.putLong(KAT, dKat.getTime());
         editor.putLong(POS, dPos.getTime());
         editor.apply();
-    }
-
-    private File getFile() {
-        String f = Lib.LIST;
-        if (tab == 0)
-            f += df.format(dKat);
-        else
-            f += df.format(dPos) + "p";
-        return new File(act.getFilesDir() + f);
-    }
-
-    private File getFile(Date d, boolean addP) {
-        String f = Lib.LIST + df.format(d) + (addP ? "p" : "");
-        return new File(act.getFilesDir() + f);
     }
 
     private void initViews() {
@@ -255,7 +272,7 @@ public class BookFragment extends Fragment {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startLoad(tab);
+                startLoad(true);
             }
         });
         lvBook = (ListView) container.findViewById(R.id.lvBook);
@@ -321,7 +338,7 @@ public class BookFragment extends Fragment {
                 if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
-                    startLoad(tab);
+                    startLoad(true);
             }
         });
     }
@@ -354,10 +371,11 @@ public class BookFragment extends Fragment {
         return new Date(y, m, 1);
     }
 
-    private void startLoad(int tab) {
+    private void startLoad(boolean boolClear) {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new BookTask(this);
+        task.setClear(boolClear);
         task.execute((byte) tab);
         act.status.setLoad(true);
     }
