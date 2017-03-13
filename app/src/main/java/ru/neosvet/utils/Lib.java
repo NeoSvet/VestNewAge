@@ -135,14 +135,14 @@ public class Lib {
     }
 
     public boolean existsPage(String link) {
-        DataBase dbTable = new DataBase(context, getDatePage(link));
-        SQLiteDatabase db = dbTable.getWritableDatabase();
+        DataBase dataBase = new DataBase(context, getDatePage(link));
+        SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(p.id) FROM paragraph p INNER JOIN title t ON t.id = p.id WHERE t.link"
                 + DataBase.Q, new String[]{link});
         cursor.moveToFirst();
         boolean b = cursor.getInt(0) > 0; //count > 0
         cursor.close();
-        dbTable.close();
+        dataBase.close();
         return b;
     }
 

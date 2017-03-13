@@ -135,10 +135,11 @@ public class CollectionsFragment extends Fragment {
         if (p.equals("0"))
             return getResources().getString(R.string.page_entirely);
         try {
+            //tut db
             File file;
-            if (!link.contains("/"))
-                file = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-            else
+//            if (!link.contains("/"))
+//                file = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
+//            else
                 file = act.lib.getPageFile(link);
 //            if (file.exists()) {
             String s;
@@ -217,10 +218,11 @@ public class CollectionsFragment extends Fragment {
 
     private String getTitle(String link) {
         try {
+            //tut db
             File f;
-            if (!link.contains("/"))
-                f = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-            else
+//            if (!link.contains("/"))
+//                f = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
+//            else
                 f = act.lib.getPageFile(link);
 //            if (file.exists()) {
             String s;

@@ -280,9 +280,10 @@ public class MarkerActivity extends AppCompatActivity {
         try {
             File f;
             Lib lib = new Lib(this);
-            if (!link.contains("/"))
-                f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-            else
+            //tut db
+//            if (!link.contains("/"))
+//                f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
+//            else
                 f = lib.getPageFile(link);
 //            if (file.exists()) {
             String s;

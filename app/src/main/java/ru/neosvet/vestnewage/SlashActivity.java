@@ -58,6 +58,7 @@ public class SlashActivity extends AppCompatActivity {
             link = data.getPath();
         if (link != null) {
 //            Lib.LOG("link1=" + link);
+            ////http://blagayavest.info/poems/?date=11-3-2017
             if (link.contains("/rss")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_rss);
             } else if (link.length() < 2 || link.equals("/index.html")) {
