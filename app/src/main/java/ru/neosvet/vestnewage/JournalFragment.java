@@ -88,6 +88,7 @@ public class JournalFragment extends Fragment {
             } else
                 boolFinish = true;
         }
+		cursor.close();
         db.close();
         adJournal.notifyDataSetChanged();
         if (adJournal.getCount() == 0) {

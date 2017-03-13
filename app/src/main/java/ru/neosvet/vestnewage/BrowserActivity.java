@@ -601,6 +601,7 @@ public class BrowserActivity extends AppCompatActivity
             i = cursor.getColumnIndex(DataBase.LINK);
             db.delete(DataBase.JOURNAL, DataBase.LINK + DataBase.Q, new String[]{cursor.getString(i)});
         }
+		cursor.close();
         dbJournal.close();
     }
 

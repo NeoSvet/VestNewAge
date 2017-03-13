@@ -37,6 +37,7 @@ public class DataBase extends SQLiteOpenHelper {
                 cv.put(TIME, System.currentTimeMillis());
                 db.insert(TITLE, null, cv);
             }
+			cursor.close();
             db.execSQL("create table if not exists " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
@@ -63,6 +64,7 @@ public class DataBase extends SQLiteOpenHelper {
                 cv.put(TITLE, context.getResources().getString(R.string.no_collections));
                 db.insert(COLLECTIONS, null, cv);
             }
+			cursor.close();
         }
     }
 

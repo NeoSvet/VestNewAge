@@ -185,6 +185,7 @@ public class BookFragment extends Fragment {
                 }
             } else
                 dModList = (Date) d.clone();
+			cursor.close();
             dbBase.close();
 
             Date n = new Date();
@@ -226,10 +227,12 @@ public class BookFragment extends Fragment {
                 s = cursor.getString(0);
                 if ((s.contains(Lib.POEMS) && bKat) ||
                         (!s.contains(Lib.POEMS) && !bKat)) {
+					cursor.close();
                     return true;
                 }
             }
         }
+		cursor.close();
         return false;
     }
 
