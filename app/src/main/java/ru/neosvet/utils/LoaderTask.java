@@ -364,10 +364,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadPage(String link, boolean bCounter) throws Exception {
-        String line, s;
+        String line, s = lib.getDatePage(link);
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        DataBase dbTable = new DataBase(act, lib.getDatePage(link));
+        DataBase dbTable = new DataBase(act, s);
         SQLiteDatabase db = dbTable.getWritableDatabase();
         ContentValues cv;
         boolean b = false;
@@ -409,14 +409,20 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 if (cursor.moveToFirst())
                     i = cursor.getInt(0);
                 if (i == 0) { // not exists title - add
-                    s = line.trim().replace("&nbsp;", " ");
-                    while ((i = s.indexOf("<")) > -1) {
-                        s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
+                    line = line.trim().replace("&nbsp;", " ");
+                    while ((i = line.indexOf("<")) > -1) {
+                        line = line.substring(0, i) +
+                                line.substring(line.indexOf(">", i) + 1);
                     }
                     cv = new ContentValues();
                     cv.put(DataBase.LINK, link);
                     cv.put(DataBase.TIME, System.currentTimeMillis());
-                    cv.put(DataBase.TITLE, s);
+                    if (line.contains(s)) {
+                        line = line.substring(9);
+                        if (line.contains(Lib.KV_OPEN))
+                            line = line.substring(line.indexOf(Lib.KV_OPEN) + 1, line.length() - 1);
+                    }
+                    cv.put(DataBase.TITLE, line);
                     i = (int) db.insert(DataBase.TITLE, null, cv);
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
