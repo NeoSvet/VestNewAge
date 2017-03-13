@@ -34,7 +34,8 @@ public class Lib {
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
             LIGHT = "/style/light.css", DARK = "/style/dark.css",
-            PRINT = "?styletpl=print", LIST = "/list/", HREF = "href";
+            PRINT = "?styletpl=print", LIST = "/list/", HREF = "href",
+            KV_OPEN = "“", POEMS = "poems";
     private Context context;
 
     public Lib(Context context) {
