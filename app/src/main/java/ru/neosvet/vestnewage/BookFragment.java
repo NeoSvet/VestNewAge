@@ -162,8 +162,8 @@ public class BookFragment extends Fragment {
             ivPrev.setEnabled(existsList(setDate(d, -1), bKat));
             ivNext.setEnabled(existsList(setDate(d, 1), bKat));
 
-            DataBase dbBase = new DataBase(act, df.format(d));
-            SQLiteDatabase db = dbBase.getWritableDatabase();
+            DataBase dataBase = new DataBase(act, df.format(d));
+            SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
             Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
             Date dModList;
@@ -186,7 +186,7 @@ public class BookFragment extends Fragment {
             } else
                 dModList = (Date) d.clone();
 			cursor.close();
-            dbBase.close();
+            dataBase.close();
 
             Date n = new Date();
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
@@ -216,8 +216,8 @@ public class BookFragment extends Fragment {
     }
 
     private boolean existsList(Date d, boolean bKat) {
-        DataBase dbBase = new DataBase(act, df.format(d));
-        SQLiteDatabase db = dbBase.getWritableDatabase();
+        DataBase dataBase = new DataBase(act, df.format(d));
+        SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
                 null, null, null, null, null);
         String s;

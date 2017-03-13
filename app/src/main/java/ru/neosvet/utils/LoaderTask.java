@@ -367,8 +367,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         String line, s = lib.getDatePage(link);
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        DataBase dbTable = new DataBase(act, s);
-        SQLiteDatabase db = dbTable.getWritableDatabase();
+        DataBase dataBase = new DataBase(act, s);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         boolean b = false;
         int i = 0;
