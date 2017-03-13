@@ -1,22 +1,20 @@
 package ru.neosvet.utils;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.ui.ListItem;
 import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.ui.ListItem;
 
 public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializable {
     private transient BookFragment frm;
@@ -67,52 +65,50 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
     }
 
     public void downloadData(boolean boolKat) throws Exception {
-        String url = Lib.SITE + (boolKat ? "poems" : "tolkovaniya") + Lib.PRINT;
+        String url = Lib.SITE + (boolKat ? Lib.POEMS : "tolkovaniya") + Lib.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        File file = new File(act.getFilesDir() + Lib.LIST);
-        if (!file.exists())
-            file.mkdir();
         boolean b = false;
         int i, n;
-        String t, s, f1 = "", f2;
-        while ((t = br.readLine()) != null) {
+        String line, t, s, f1 = "", f2;
+        while ((line = br.readLine()) != null) {
             if (!b) {
-                b = t.contains("h2");//razdel
-            } else if (t.contains(Lib.HREF)) {
-                if (t.contains("years"))
-                    t = t.substring(0, t.indexOf("years"));
+                b = line.contains("h2");//razdel
+            } else if (line.contains(Lib.HREF)) {
+                if (line.contains("years"))
+                    line = line.substring(0, line.indexOf("years"));
                 n = 0;
-                while (t.indexOf(Lib.HREF, n) > -1) {
-                    n = t.indexOf(Lib.HREF, n) + 7;
-                    s = t.substring(n, t.indexOf("'", n)); //)-5
+                while (line.indexOf(Lib.HREF, n) > -1) {
+                    n = line.indexOf(Lib.HREF, n) + 7;
+                    s = line.substring(n, line.indexOf("'", n)); //)-5
                     i = s.indexOf(".") + 1;
                     f2 = s.substring(i, i + 5);
                     if (!f2.equals(f1)) {
-                        if (!boolKat) f1 += "p";
                         saveData(f1);
                         f1 = f2;
                     }
-                    data.add(new ListItem(t.substring(t.indexOf(">", n)
-                            + 1, t.indexOf("<", n)), s));
+                    t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
+                    if (t.contains("(")) //poems
+                        t = t.substring(0, t.indexOf("("));
+                    data.add(new ListItem(t, s));
                 }
-                if (!boolKat) f1 += "p";
                 saveData(f1);
             }
         }
     }
 
-    private void saveData(String name) throws Exception {
+    private void saveData(String date) throws Exception {
         if (data.size() > 0) {
-            File file = new File(act.getFilesDir() + Lib.LIST + name);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(file)));
+            DataBase dbTable = new DataBase(act, date);
+            SQLiteDatabase db = dbTable.getWritableDatabase();
+            ContentValues cv;
             for (int i = 0; i < data.size(); i++) {
-                bw.write(data.get(i).getTitle() + Lib.N);
-                bw.write(data.get(i).getLink() + Lib.N);
-                bw.flush();
+                cv = new ContentValues();
+                cv.put(DataBase.LINK, data.get(i).getLink());
+                cv.put(DataBase.TITLE, data.get(i).getTitle());
+                db.insert(DataBase.TITLE, null, cv);
             }
-            bw.close();
+            dbTable.close();
             data.clear();
         }
     }
