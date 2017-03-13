@@ -20,7 +20,7 @@ public class WebClient extends WebViewClient {
     }
 
     private String getUrl(String url) {
-        url = url.substring(url.indexOf(files, 10) + 8);
+        url = url.substring(url.indexOf(files, 10) + 9);
         if (url.contains(act.getPackageName()))
             url = url.substring(url.indexOf("age") + 4);
         return url;

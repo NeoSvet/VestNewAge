@@ -510,10 +510,14 @@ public class BrowserActivity extends AppCompatActivity
             File file = new File(getFilesDir() + "/page.html");
             String s;
             if (newPage) {
+                if(!lib.existsPage(link)) {
+                    downloadPage(false);
+                    return;
+                }
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
                 String date = lib.getDatePage(link);
-                DataBase dbTable = new DataBase(this, date);
-                SQLiteDatabase db = dbTable.getWritableDatabase();
+                DataBase dataBase = new DataBase(this, date);
+                SQLiteDatabase db = dataBase.getWritableDatabase();
                 Cursor cursor = db.query(DataBase.TITLE, null,
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
@@ -544,13 +548,13 @@ public class BrowserActivity extends AppCompatActivity
                     bw.write(s);
                     bw.write("</h1>\n");
                     bw.flush();
-                } else { //need download page
-                    cursor.close();
-                    downloadPage(false);
+                } else {
+                    //заголовка нет - значит нет и страницы
+                    //сюда никогдане попадет, т.к. выше есть проверка existsPage
                     return;
                 }
                 cursor.close();
-                db = dbTable.getWritableDatabase();
+                db = dataBase.getWritableDatabase();
                 cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                         DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                         null, null, null);
@@ -562,7 +566,7 @@ public class BrowserActivity extends AppCompatActivity
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
-                dbTable.close();
+                dataBase.close();
                 DateFormat df = new SimpleDateFormat("yy");
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
                 bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
