@@ -20,21 +20,24 @@ public class WebClient extends WebViewClient {
     }
 
     private String getUrl(String url) {
-        url = url.substring(url.indexOf(files, 10) + 6);
+        url = url.substring(url.indexOf(files, 10) + 8);
+        if (url.contains(act.getPackageName()))
+            url = url.substring(url.indexOf("age") + 4);
         return url;
     }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//        Lib.LOG("shouldOverrideUrlLoading1=" + url);
+        //Lib.LOG("shouldOverrideUrlLoading1=" + url);
         view.setVisibility(View.GONE);
         if (url.contains(files)) {
             url = getUrl(url);
-            if (url.contains(BrowserActivity.PNG)) {
-                act.newLink(url);
+            act.newLink(url);
+            if (url.contains(BrowserActivity.PNG))
                 act.openFile();
-                return true;
-            }
+            else
+                act.openPage(true);
+            return true;
         }
 //        Lib.LOG("shouldOverrideUrlLoading2=" + url);
         if (url.contains("http") || url.contains("mailto"))

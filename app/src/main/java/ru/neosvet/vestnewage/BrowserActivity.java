@@ -484,7 +484,7 @@ public class BrowserActivity extends AppCompatActivity
         loader.execute(Lib.SITE + link, f.toString());
     }
 
-    private void openPage(boolean newPage) {
+    public void openPage(boolean newPage) {
         status.setLoad(false);
         final File fLight = lib.getFile(Lib.LIGHT);
         final File fDark = lib.getFile(Lib.DARK);
@@ -511,22 +511,43 @@ public class BrowserActivity extends AppCompatActivity
             String s;
             if (newPage) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                DataBase dbTable = new DataBase(this, lib.getDatePage(link));
+                String date = lib.getDatePage(link);
+                DataBase dbTable = new DataBase(this, date);
                 SQLiteDatabase db = dbTable.getWritableDatabase();
                 Cursor cursor = db.query(DataBase.TITLE, null,
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
-                int id = 0;
-                Date d = new Date();
+                int id;
+                Date d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-                    s = cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
+                    if (date.equals("00.00")) {
+                        s = cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
+                    } else {
+                        s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
+                        if (s.contains("_"))
+                            s = s.substring(0, s.indexOf("_"));
+                        if (link.contains(Lib.POEMS)) {
+                            s += " " + getResources().getString(R.string.katren) + " " + Lib.KV_OPEN +
+                                    cursor.getString(cursor.getColumnIndex(DataBase.TITLE)) + "”";
+                        } else
+                            s += " " + cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
+                    }
+
                     d = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
-                    bw.write(s + "</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"" + STYLE.substring(1)
-                            + "\">\n</head><body>\n");
-                    bw.write("<h1 class=\"page-title\">" + s + "</h1>\n");
+                    bw.write(s);
+                    bw.write("</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+                    bw.write(STYLE.substring(1));
+                    bw.write("\">\n</head><body>\n");
+                    bw.write("<h1 class=\"page-title\">");
+                    bw.write(s);
+                    bw.write("</h1>\n");
                     bw.flush();
+                } else { //need download page
+                    cursor.close();
+                    downloadPage(false);
+                    return;
                 }
                 cursor.close();
                 db = dbTable.getWritableDatabase();
