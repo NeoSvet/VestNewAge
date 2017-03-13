@@ -65,9 +65,10 @@ public class BookFragment extends Fragment {
     }
 
     private void restoreActivityState(Bundle state) {
-        long t = System.currentTimeMillis();
-        dKat = new Date(pref.getLong(KAT, t));
-        dPos = new Date(pref.getLong(POS, t));
+        Date d = new Date();
+        d.setYear(2000);
+        dKat = new Date(pref.getLong(KAT, d.getTime()));
+        dPos = new Date(pref.getLong(POS, d.getTime()));
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
@@ -113,6 +114,7 @@ public class BookFragment extends Fragment {
         tabHost.setCurrentTab(1);
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
+                if (task != null) return;
                 if (name.equals(KAT))
                     act.setTitle(getResources().getString(R.string.katreny));
                 else
@@ -128,37 +130,22 @@ public class BookFragment extends Fragment {
             Date d;
             boolean bKat;
             if (tab == 0) {
-                if (dKat.getYear() < 100) {
-                    dKat.setMonth(1);
-                    dKat.setYear(116);
-                }
                 d = dKat;
                 bKat = true;
             } else {
-                if (dPos.getYear() < 100) {
-                    dPos.setMonth(0);
-                    dPos.setYear(116);
-                }
                 d = dPos;
                 bKat = false;
             }
-            int m = d.getMonth(), y = d.getYear();
-            while (!existsList(d, bKat)) {
-                if (m == 0) {
-                    if (y == 116) {
-                        if (boolLoad)
-                            startLoad(false);
-                        return;
-                    } else
-                        d.setYear(--y);
-                    m = 12;
-                }
-                d.setMonth(--m);
+
+            if (!existsList(d, bKat)) {
+                if (boolLoad)
+                    startLoad();
+                return;
             }
 
             adBook.clear();
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
-                    + "\n" + (d.getYear() + 1900));
+                    + "\n" + d.getYear());
             ivPrev.setEnabled(existsList(setDate(d, -1), bKat));
             ivNext.setEnabled(existsList(setDate(d, 1), bKat));
 
@@ -173,6 +160,7 @@ public class BookFragment extends Fragment {
                 dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                 while (cursor.moveToNext()) {
                     s = cursor.getString(iLink);
+                    if (s == null) continue; // need?
                     if ((s.contains(Lib.POEMS) && bKat) ||
                             (!s.contains(Lib.POEMS) && !bKat)) {
                         t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
@@ -183,11 +171,11 @@ public class BookFragment extends Fragment {
                         adBook.addItem(new ListItem(t, s));
                     }
                 }
-            } else
-                dModList = (Date) d.clone();
-			cursor.close();
+            } else {
+                dModList = d;
+            }
+            cursor.close();
             dataBase.close();
-
             Date n = new Date();
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
                 bKat = act.status.checkTime(dModList.getTime());
@@ -211,7 +199,7 @@ public class BookFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
-                startLoad(true);
+                startLoad();
         }
     }
 
@@ -225,14 +213,15 @@ public class BookFragment extends Fragment {
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0);
+                if (s == null) continue; // need?
                 if ((s.contains(Lib.POEMS) && bKat) ||
                         (!s.contains(Lib.POEMS) && !bKat)) {
-					cursor.close();
+                    cursor.close();
                     return true;
                 }
             }
         }
-		cursor.close();
+        cursor.close();
         return false;
     }
 
@@ -275,7 +264,7 @@ public class BookFragment extends Fragment {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startLoad(true);
+                startLoad();
             }
         });
         lvBook = (ListView) container.findViewById(R.id.lvBook);
@@ -341,7 +330,7 @@ public class BookFragment extends Fragment {
                 if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
-                    startLoad(true);
+                    startLoad();
             }
         });
     }
@@ -374,18 +363,33 @@ public class BookFragment extends Fragment {
         return new Date(y, m, 1);
     }
 
-    private void startLoad(boolean boolClear) {
+    private void startLoad() {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new BookTask(this);
-        task.setClear(boolClear);
         task.execute((byte) tab);
         act.status.setLoad(true);
     }
 
-    public void finishLoad(boolean suc) {
+    public void finishLoad(String result) {
+        if (tabHost.getCurrentTab() != tab)
+            tabHost.setCurrentTab(tab);
         task = null;
-        if (suc) {
+        if (result.length() > 0) {
+            boolean b;
+            if (tab == 0)
+                b = dKat.getYear() == 2000;
+            else
+                b = dPos.getYear() == 2000;
+            if (b) {
+                Date d = new Date();
+                d.setYear(2000 + Integer.parseInt(result.substring(3, 5)));
+                d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
+                if (tab == 0)
+                    dKat = d;
+                else
+                    dPos = d;
+            }
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             openList(false);

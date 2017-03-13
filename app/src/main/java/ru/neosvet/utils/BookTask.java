@@ -15,10 +15,9 @@ import java.util.List;
 import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
 
-public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializable {
+public class BookTask extends AsyncTask<Byte, Void, String> implements Serializable {
     private transient BookFragment frm;
     private transient MainActivity act;
-    private boolean boolClear = false;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
 
@@ -35,12 +34,8 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
         act = (MainActivity) frm.getActivity();
     }
 
-    public void setClear(boolean boolClear) {
-        this.boolClear = boolClear;
-    }
-
     @Override
-    protected void onPostExecute(Boolean result) {
+    protected void onPostExecute(String result) {
         super.onPostExecute(result);
         if (frm != null) {
             frm.finishLoad(result);
@@ -58,23 +53,22 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
     }
 
     @Override
-    protected Boolean doInBackground(Byte... params) {
+    protected String doInBackground(Byte... params) {
         try {
-            downloadData(params[0] == 0);
-            return true;
+            return downloadData(params[0] == 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return "";
     }
 
-    public void downloadData(boolean boolKat) throws Exception {
+    public String downloadData(boolean boolKat) throws Exception {
         String url = Lib.SITE + (boolKat ? Lib.POEMS : "tolkovaniya") + Lib.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean b = false;
         int i, n;
-        String line, t, s, f1 = "", f2;
+        String line, t, s, date1 = "", date2;
         while ((line = br.readLine()) != null) {
             if (!b) {
                 b = line.contains("h2");//razdel
@@ -86,10 +80,10 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
                     n = line.indexOf(Lib.HREF, n) + 7;
                     s = line.substring(n, line.indexOf("'", n)); //)-5
                     i = s.indexOf(".") + 1;
-                    f2 = s.substring(i, i + 5);
-                    if (!f2.equals(f1)) {
-                        saveData(f1);
-                        f1 = f2;
+                    date2 = s.substring(i, i + 5);
+                    if (!date2.equals(date1)) {
+                        saveData(date1);
+                        date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
                     if (t.contains("(")) //poems
@@ -97,25 +91,31 @@ public class BookTask extends AsyncTask<Byte, Void, Boolean> implements Serializ
                     title.add(t);
                     links.add(s);
                 }
-                saveData(f1);
+                saveData(date1);
             }
         }
+        return date1;
     }
 
     private void saveData(String date) throws Exception {
         if (title.size() > 0) {
             DataBase dataBase = new DataBase(act, date);
             SQLiteDatabase db = dataBase.getWritableDatabase();
-            if (boolClear) {
-                String s;
-                if (links.get(0).contains(Lib.POEMS))
-                    s = Lib.POEMS;
-                else
-                    s = "2016";
-                db.delete(DataBase.TITLE, DataBase.LINK +
-                        " LIKE ?", new String[]{"%" + s + "%"});
+            String s;
+            if (links.get(0).contains(Lib.POEMS))
+                s = Lib.POEMS;
+            else
+                s = "2016";
+            db.delete(DataBase.TITLE, DataBase.LINK +
+                    " LIKE ?", new String[]{"%" + s + "%"});
+
+            ContentValues cv = new ContentValues();
+            cv.put(DataBase.TIME, System.currentTimeMillis());
+            if (db.update(DataBase.TITLE, cv,
+                    DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
+                db.insert(DataBase.TITLE, null, cv);
             }
-            ContentValues cv;
+
             for (int i = 0; i < title.size(); i++) {
                 cv = new ContentValues();
                 cv.put(DataBase.LINK, links.get(i));
