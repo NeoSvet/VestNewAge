@@ -369,9 +369,8 @@ public class BrowserActivity extends AppCompatActivity
                 openFile();
             else
                 downloadFile(getFile());
-        } else {
-            //Permission Denied
-        }
+        } else
+            Lib.showToast(this, getResources().getString(R.string.permission_denied));
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -510,7 +509,7 @@ public class BrowserActivity extends AppCompatActivity
             File file = new File(getFilesDir() + "/page.html");
             String s;
             if (newPage) {
-                if(!lib.existsPage(link)) {
+                if (!lib.existsPage(link)) {
                     downloadPage(false);
                     return;
                 }
@@ -601,7 +600,7 @@ public class BrowserActivity extends AppCompatActivity
             i = cursor.getColumnIndex(DataBase.LINK);
             db.delete(DataBase.JOURNAL, DataBase.LINK + DataBase.Q, new String[]{cursor.getString(i)});
         }
-		cursor.close();
+        cursor.close();
         dbJournal.close();
     }
 
