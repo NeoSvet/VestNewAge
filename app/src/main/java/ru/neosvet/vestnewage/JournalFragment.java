@@ -61,35 +61,53 @@ public class JournalFragment extends Fragment {
 
     private void createList() {
         tip.hide();
-        SQLiteDatabase db = dbJournal.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
-        if (cursor.moveToFirst()) {
-            int iTime = cursor.getColumnIndex(DataBase.TIME);
-            int iLink = cursor.getColumnIndex(DataBase.LINK);
-            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+        SQLiteDatabase dbJ = dbJournal.getWritableDatabase();
+        Cursor curJ = dbJ.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
+        if (curJ.moveToFirst()) {
+            DataBase dataBase;
+            SQLiteDatabase db;
+            Cursor cursor;
+            int iTime = curJ.getColumnIndex(DataBase.TIME);
+            int iID = curJ.getColumnIndex(DataBase.ID);
             int i = 0;
+            String id, link;
             ListItem item;
             DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
             long now = System.currentTimeMillis();
             long t;
             if (offset > 0)
-                cursor.moveToPosition(offset);
+                curJ.moveToPosition(offset);
             do {
-                item = new ListItem(cursor.getString(iTitle), cursor.getString(iLink));
-                t = cursor.getLong(iTime);
-                item.setDes(act.lib.getDiffDate(now, t) + "\n(" + df.format(new Date(t)) + ")");
-                adJournal.addItem(item);
-                i++;
-            } while (cursor.moveToNext() && i < MAX);
-            if (cursor.moveToNext()) {
+                id = curJ.getString(iID);
+                dataBase = new DataBase(act, id.substring(0, id.indexOf("&")));
+                db = dataBase.getWritableDatabase();
+                cursor = db.query(DataBase.TITLE, null,
+                        DataBase.ID + DataBase.Q,
+                        new String[]{id.substring(id.indexOf("&") + 1)},
+                        null, null, null);
+                if (cursor.moveToFirst()) {
+                    link = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
+                    item = new ListItem(dataBase.getPageTitle(cursor.getString(
+                            cursor.getColumnIndex(DataBase.TITLE)), link), link);
+                    cursor.close();
+                    dataBase.close();
+                    t = curJ.getLong(iTime);
+                    item.setDes(act.lib.getDiffDate(now, t) + "\n(" + df.format(new Date(t)) + ")");
+                    adJournal.addItem(item);
+                    i++;
+                } else { //материал отсутствует в базе - удаляем запись о нём из журнала
+                    dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, new String[]{id});
+                }
+            } while (curJ.moveToNext() && i < MAX);
+            if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
                 boolFinish = false;
             } else
                 boolFinish = true;
         }
-		cursor.close();
-        db.close();
+        curJ.close();
+        dbJ.close();
         adJournal.notifyDataSetChanged();
         if (adJournal.getCount() == 0) {
             fabClear.setVisibility(View.GONE);
