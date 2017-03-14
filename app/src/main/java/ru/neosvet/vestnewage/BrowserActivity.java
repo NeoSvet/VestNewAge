@@ -47,7 +47,7 @@ public class BrowserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String THEME = "theme", NOMENU = "nomenu",
             SCALE = "scale", FILE = "file://", PNG = ".png",
-            STYLE = "/style/style.css";
+            STYLE = "/style/style.css", PAGE = "/page.html";
     private final int CODE_OPEN = 1, CODE_DOWNLOAD = 2;
     private boolean bNomenu, bTheme, bTwo = false;
     private SharedPreferences pref;
@@ -454,7 +454,7 @@ public class BrowserActivity extends AppCompatActivity
 
     public void newLink(String url) {
         if (!link.equals(url)) {
-            link = url;
+            if (!url.contains(PAGE)) link = url;
             miTheme.setVisible(!link.contains(PNG));
         }
     }
@@ -506,7 +506,7 @@ public class BrowserActivity extends AppCompatActivity
         }
 
         try {
-            File file = new File(getFilesDir() + "/page.html");
+            File file = new File(getFilesDir() + PAGE);
             String s;
             if (newPage) {
                 if (!lib.existsPage(link)) {
