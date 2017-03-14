@@ -408,15 +408,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                         , null, null, null);
                 if (cursor.moveToFirst())
                     i = cursor.getInt(0);
+                cv = new ContentValues();
+                cv.put(DataBase.TIME, System.currentTimeMillis());
                 if (i == 0) { // not exists title - add
                     line = line.trim().replace("&nbsp;", " ");
                     while ((i = line.indexOf("<")) > -1) {
                         line = line.substring(0, i) +
                                 line.substring(line.indexOf(">", i) + 1);
                     }
-                    cv = new ContentValues();
                     cv.put(DataBase.LINK, link);
-                    cv.put(DataBase.TIME, System.currentTimeMillis());
                     if (line.contains(s)) {
                         line = line.substring(9);
                         if (line.contains(Lib.KV_OPEN))
@@ -427,8 +427,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
                     cv.put(DataBase.TIME, System.currentTimeMillis());
-                    db.update(DataBase.TITLE, cv,
-                            DataBase.ID + DataBase.Q, new String[]{"1"});
+                    db.update(DataBase.TITLE, cv, DataBase.ID +
+                            DataBase.Q, new String[]{"1"});
+                } else { //обновляем дату загрузки материала
+                    db.update(DataBase.TITLE, cv, DataBase.ID +
+                            DataBase.Q, new String[]{String.valueOf(i)});
                 }
                 cursor.close();
                 br.readLine();
