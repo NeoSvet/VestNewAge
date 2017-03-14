@@ -410,7 +410,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     i = cursor.getInt(0);
                 cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
-                if (i == 0) { // not exists title - add
+                if (i == 0) { // id не найден, материала нет - добавляем
                     line = line.trim().replace("&nbsp;", " ");
                     while ((i = line.indexOf("<")) > -1) {
                         line = line.substring(0, i) +
@@ -429,8 +429,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     cv.put(DataBase.TIME, System.currentTimeMillis());
                     db.update(DataBase.TITLE, cv, DataBase.ID +
                             DataBase.Q, new String[]{"1"});
-                } else { //обновляем дату загрузки материала
+                } else { // id найден, значит материал есть
+                    //обновляем дату загрузки материала
                     db.update(DataBase.TITLE, cv, DataBase.ID +
+                            DataBase.Q, new String[]{String.valueOf(i)});
+                    //удаляем содержимое материала
+                    db.delete(DataBase.PARAGRAPH, DataBase.ID +
                             DataBase.Q, new String[]{String.valueOf(i)});
                 }
                 cursor.close();
