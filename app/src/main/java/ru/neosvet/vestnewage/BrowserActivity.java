@@ -72,7 +72,7 @@ public class BrowserActivity extends AppCompatActivity
     private Tip tip;
 
 
-    public static void openPage(Context context, String link, String place) {
+    public static void openReader(Context context, String link, String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
         if (link.contains(Lib.LINK))
             intent.putExtra(DataBase.LINK, link.substring(Lib.LINK.length()));

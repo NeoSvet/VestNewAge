@@ -169,7 +169,7 @@ public class JournalFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adJournal.getItem(pos).getLink();
-                BrowserActivity.openPage(act, link, "");
+                BrowserActivity.openReader(act, link, "");
                 adJournal.clear();
             }
         });

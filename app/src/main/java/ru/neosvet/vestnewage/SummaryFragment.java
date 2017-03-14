@@ -120,7 +120,7 @@ public class SummaryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adSummary.getItem(pos).getLink();
-                BrowserActivity.openPage(act, link, "");
+                BrowserActivity.openReader(act, link, "");
             }
         });
         lvSummary.setOnTouchListener(new View.OnTouchListener() {

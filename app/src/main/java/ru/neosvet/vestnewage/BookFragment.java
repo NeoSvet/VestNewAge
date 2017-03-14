@@ -276,7 +276,7 @@ public class BookFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (boolNotClick) return;
-                BrowserActivity.openPage(act, adBook.getItem(pos).getLink(), "");
+                BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), "");
             }
         });
         lvBook.setOnTouchListener(new View.OnTouchListener() {

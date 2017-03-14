@@ -396,7 +396,7 @@ public class CalendarFragment extends Fragment {
     }
 
     private void openLink(String link) {
-        BrowserActivity.openPage(act, link, "");
+        BrowserActivity.openReader(act, link, "");
         adNoread.clear();
     }
 
