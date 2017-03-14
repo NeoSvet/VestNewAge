@@ -355,19 +355,21 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             if (s.contains(Lib.LINK)) {
                 s = s.substring(Lib.LINK.length());
                 if (!s.contains(".html")) s += ".html";
-                if (!lib.existsPage(s))
-                    downloadPage(s, false);
+                downloadPage(s, false);
                 sub_prog++;
             }
         }
         br.close();
     }
 
-    private void downloadPage(String link, boolean bCounter) throws Exception {
-        String line, s = lib.getDatePage(link);
+    private void downloadPage(String link, boolean bSinglePage) throws Exception {
+        // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
+        DataBase dataBase = new DataBase(act, link);
+        if (!bSinglePage && dataBase.existsPage(link))
+            return;
+        String line, s;
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        DataBase dataBase = new DataBase(act, s);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         boolean b = false;
@@ -417,7 +419,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                                 line.substring(line.indexOf(">", i) + 1);
                     }
                     cv.put(DataBase.LINK, link);
-                    if (line.contains(s)) {
+                    if (line.contains(dataBase.getName())) {
                         line = line.substring(9);
                         if (line.contains(Lib.KV_OPEN))
                             line = line.substring(line.indexOf(Lib.KV_OPEN) + 1, line.length() - 1);
@@ -440,12 +442,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 cursor.close();
                 br.readLine();
                 b = true;
-            } else if (line.contains("counter") && bCounter) { // counters
+            } else if (line.contains("counter") && bSinglePage) { // счетчики
                 sendCounter(line);
             }
         }
         br.close();
-        if (bCounter)
+        if (bSinglePage)
             checkNoreadList(link);
     }
 

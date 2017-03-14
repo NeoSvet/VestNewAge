@@ -57,13 +57,13 @@ public class BrowserActivity extends AppCompatActivity
     private SharedPreferences.Editor editor;
     private LoaderTask loader = null;
     private WebView wvBrowser;
-    private DataBase dbJournal;
+    private DataBase dbPage, dbJournal;
     private TextView tvPromTime, tvPlace;
     private StatusBar status;
     private View fabMenu, pSearch;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link;
+    private String link = "";
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -96,6 +96,44 @@ public class BrowserActivity extends AppCompatActivity
         setViews();
         restoreActivityState(savedInstanceState);
         initPlace();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        prom.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        prom.resume();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(Lib.TASK, loader);
+        outState.putString(DataBase.LINK, link);
+        outState.putInt(DataBase.PLACE, iPlace);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void restoreActivityState(Bundle state) {
+        if (state == null) {
+            openLink(getIntent().getStringExtra(DataBase.LINK));
+        } else {
+            loader = (LoaderTask) state.getSerializable(Lib.TASK);
+            link = state.getString(DataBase.LINK);
+            dbPage = new DataBase(this, link);
+            if (loader == null) {
+                openPage(false);
+            } else {
+                loader.setAct(this);
+                status.setLoad(true);
+            }
+            iPlace = state.getInt(DataBase.PLACE, 0);
+        }
+        miTheme.setVisible(!link.contains(PNG));
     }
 
     private void initPlace() {
@@ -179,44 +217,6 @@ public class BrowserActivity extends AppCompatActivity
             } catch (Exception ignored) {
             }
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        prom.stop();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        prom.resume();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Lib.TASK, loader);
-        outState.putString(DataBase.LINK, link);
-        outState.putInt(DataBase.PLACE, iPlace);
-        super.onSaveInstanceState(outState);
-    }
-
-    private void restoreActivityState(Bundle state) {
-        if (state == null) {
-            link = getIntent().getStringExtra(DataBase.LINK);
-            openLink(link);
-        } else {
-            loader = (LoaderTask) state.getSerializable(Lib.TASK);
-            link = state.getString(DataBase.LINK);
-            if (loader == null) {
-                openPage(false);
-            } else {
-                loader.setAct(this);
-                status.setLoad(true);
-            }
-            iPlace = state.getInt(DataBase.PLACE, 0);
-        }
-        miTheme.setVisible(!link.contains(PNG));
     }
 
     private void downloadPage(boolean bReplaceStyle) {
@@ -453,13 +453,14 @@ public class BrowserActivity extends AppCompatActivity
                 else
                     history.add(0, link);
                 link = url;
+                dbPage = new DataBase(this, link);
             }
             miTheme.setVisible(!link.contains(PNG));
         }
         if (url.contains(PNG)) {
             openFile();
         } else {
-            if (lib.existsPage(link))
+            if (dbPage.existsPage(link))
                 openPage(true);
             else
                 downloadPage(false);
@@ -516,14 +517,14 @@ public class BrowserActivity extends AppCompatActivity
             File file = new File(getFilesDir() + PAGE);
             String s;
             if (newPage) {
-                if (!lib.existsPage(link)) {
+                dbPage = new DataBase(this, link);
+                if (!dbPage.existsPage(link)) {
                     downloadPage(false);
                     return;
                 }
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                String date = lib.getDatePage(link);
-                DataBase dataBase = new DataBase(this, date);
-                SQLiteDatabase db = dataBase.getWritableDatabase();
+
+                SQLiteDatabase db = dbPage.getWritableDatabase();
                 Cursor cursor = db.query(DataBase.TITLE, null,
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
@@ -531,26 +532,13 @@ public class BrowserActivity extends AppCompatActivity
                 Date d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-                    if (date.equals("00.00")) {
-                        s = cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
-                    } else {
-                        s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
-                        if (s.contains("_"))
-                            s = s.substring(0, s.indexOf("_"));
-                        if (link.contains(Lib.POEMS)) {
-                            s += " " + getResources().getString(R.string.katren) + " " + Lib.KV_OPEN +
-                                    cursor.getString(cursor.getColumnIndex(DataBase.TITLE)) + "”";
-                        } else
-                            s += " " + cursor.getString(cursor.getColumnIndex(DataBase.TITLE));
-                    }
-
+                    s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
                     d = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
-                    bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>");
-                    bw.write(s);
-                    bw.write("</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+                    bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
+                    bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+                    bw.flush();
                     bw.write(STYLE.substring(1));
-                    bw.write("\">\n</head><body>\n");
-                    bw.write("<h1 class=\"page-title\">");
+                    bw.write("\">\n</head><body>\n<h1 class=\"page-title\">");
                     bw.write(s);
                     bw.write("</h1>\n");
                     bw.flush();
@@ -560,7 +548,7 @@ public class BrowserActivity extends AppCompatActivity
                     return;
                 }
                 cursor.close();
-                db = dataBase.getWritableDatabase();
+                db = dbPage.getWritableDatabase();
                 cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                         DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                         null, null, null);
@@ -572,7 +560,7 @@ public class BrowserActivity extends AppCompatActivity
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
-                dataBase.close();
+                dbPage.close();
                 DateFormat df = new SimpleDateFormat("yy");
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
                 bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
@@ -595,17 +583,17 @@ public class BrowserActivity extends AppCompatActivity
     public void addJournal() {
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, System.currentTimeMillis());
-        cv.put(DataBase.TITLE, wvBrowser.getTitle());
-        cv.put(DataBase.LINK, link);
+        String id = dbPage.getDatePage(link) + "&" + dbPage.getPageId(link);
+        cv.put(DataBase.ID, id);
         SQLiteDatabase db = dbJournal.getWritableDatabase();
-        int i = db.update(DataBase.JOURNAL, cv, DataBase.LINK + DataBase.Q, new String[]{link});
+        int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
         if (i == 0) // no update
             db.insert(DataBase.JOURNAL, null, cv);
-        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
+        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
         if (cursor.getCount() > 100) {
-            cursor.moveToLast();
-            i = cursor.getColumnIndex(DataBase.LINK);
-            db.delete(DataBase.JOURNAL, DataBase.LINK + DataBase.Q, new String[]{cursor.getString(i)});
+            cursor.moveToFirst();
+            i = cursor.getColumnIndex(DataBase.ID);
+            db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, new String[]{cursor.getString(i)});
         }
         cursor.close();
         dbJournal.close();

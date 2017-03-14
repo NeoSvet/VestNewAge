@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -115,35 +113,6 @@ public class Lib {
             entity = res.getEntity();
         }
         return entity.getContent();
-    }
-
-    public String getDatePage(String link) {
-        if (!link.contains("/") || link.contains("press"))
-            return "00.00";
-        else {
-            if (link.contains("-")) { //http://blagayavest.info/poems/?date=11-3-2017
-                link = link.substring(link.indexOf("-") + 1);
-                if (link.length() == 6)
-                    link = "0" + link;
-                return link.replace("-20", ".");
-            } else { //http://blagayavest.info/poems/11.03.17.html
-                link = link.substring(link.lastIndexOf(".") - 5, link.lastIndexOf("."));
-                if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
-                return link;
-            }
-        }
-    }
-
-    public boolean existsPage(String link) {
-        DataBase dataBase = new DataBase(context, getDatePage(link));
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(p.id) FROM paragraph p INNER JOIN title t ON t.id = p.id WHERE t.link"
-                + DataBase.Q, new String[]{link});
-        cursor.moveToFirst();
-        boolean b = cursor.getInt(0) > 0; //count > 0
-        cursor.close();
-        dataBase.close();
-        return b;
     }
 
     public File getPageFile(String link) {
