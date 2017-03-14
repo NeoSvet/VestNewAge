@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
@@ -49,7 +51,8 @@ public class BrowserActivity extends AppCompatActivity
             SCALE = "scale", FILE = "file://", PNG = ".png",
             STYLE = "/style/style.css", PAGE = "/page.html";
     private final int CODE_OPEN = 1, CODE_DOWNLOAD = 2;
-    private boolean bNomenu, bTheme, bTwo = false;
+    private List<String> history = new ArrayList<String>();
+    private boolean bNomenu, bTheme, bTwo = false, boolBack = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private LoaderTask loader = null;
@@ -292,8 +295,10 @@ public class BrowserActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else if (iPlace > -1) {
             closeSearch();
-        } else if (wvBrowser.canGoBack()) {
-            wvBrowser.goBack();
+        } else if (history.size() > 0) {
+            boolBack = true;
+            openLink(history.get(0));
+            history.remove(0);
         } else {
             super.onBackPressed();
         }
@@ -441,7 +446,16 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void openLink(String url) {
-        link = url;
+        if (!link.equals(url)) {
+            if (!url.contains(PAGE)) {
+                if (boolBack)
+                    boolBack = false;
+                else
+                    history.add(0, link);
+                link = url;
+            }
+            miTheme.setVisible(!link.contains(PNG));
+        }
         if (url.contains(PNG)) {
             openFile();
         } else {
@@ -452,14 +466,7 @@ public class BrowserActivity extends AppCompatActivity
         }
     }
 
-    public void newLink(String url) {
-        if (!link.equals(url)) {
-            if (!url.contains(PAGE)) link = url;
-            miTheme.setVisible(!link.contains(PNG));
-        }
-    }
-
-    public void openFile() {
+    private void openFile() {
         status.setLoad(false);
         if (lib.verifyStoragePermissions(CODE_OPEN)) return;
         File f = getFile();
