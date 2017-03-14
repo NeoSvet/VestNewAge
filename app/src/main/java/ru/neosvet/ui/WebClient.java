@@ -20,7 +20,9 @@ public class WebClient extends WebViewClient {
     }
 
     private String getUrl(String url) {
-        if (!url.contains(BrowserActivity.PAGE)) // page.html
+        if (url.contains(act.getPackageName())) // страница во внутренем хранилище
+            url = url.substring(url.indexOf("age") + 4);
+        else
             url = url.substring(url.indexOf(files) + 8);
         return url;
     }
