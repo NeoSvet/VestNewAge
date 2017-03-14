@@ -32,18 +32,14 @@ public class WebClient extends WebViewClient {
         //Lib.LOG("shouldOverrideUrlLoading1=" + url);
         view.setVisibility(View.GONE);
         if (url.contains(files)) {
-            url = getUrl(url);
-            act.newLink(url);
-            if (url.contains(BrowserActivity.PNG))
-                act.openFile();
-            else
-                act.openPage(true);
+            act.openLink(getUrl(url));
             return true;
         }
 //        Lib.LOG("shouldOverrideUrlLoading2=" + url);
-        if (url.contains("http") || url.contains("mailto"))
+        if (url.contains("http") || url.contains("mailto")) {
+            act.openPage(false);
             act.openInApps(url);
-        else
+        } else
             act.openLink(url);
 //        super.shouldOverrideUrlLoading(view, url);
         return true;
@@ -53,7 +49,6 @@ public class WebClient extends WebViewClient {
 //        Lib.LOG("onPageFinished=" + url);
         view.setVisibility(View.VISIBLE);
         if (url.contains(files)) {
-            act.newLink(getUrl(url));
             if (!url.contains(BrowserActivity.PNG))
                 act.addJournal();
         }
