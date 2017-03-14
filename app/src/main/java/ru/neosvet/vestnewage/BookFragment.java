@@ -68,7 +68,9 @@ public class BookFragment extends Fragment {
         Date d = new Date();
         d.setYear(2000);
         dKat = new Date(pref.getLong(KAT, d.getTime()));
+        if (dKat.getYear() < 2000) dKat.setYear(dKat.getYear() + 1900);
         dPos = new Date(pref.getLong(POS, d.getTime()));
+        if (dPos.getYear() < 2000) dPos.setYear(dPos.getYear() + 1900);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
