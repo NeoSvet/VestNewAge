@@ -38,7 +38,7 @@ public class MarkerActivity extends AppCompatActivity {
     private final int height_pos = 230;
     private float density;
     private DataBase dbCol, dbMar;
-    private StringBuilder pageCon = new StringBuilder();
+    private String pageCon;
     private CheckAdapter adPage, adCol;
     private TextView tvSel, tvPos, tvCol;
     private EditText etDes, etCol;
@@ -277,46 +277,18 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void loadPage() {
-        DataBase dataBase = new DataBase(this, link);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE, null,
-                DataBase.LINK + DataBase.Q, new String[]{link},
-                null, null, null);
-        int id;
-        String s;
         k_par = 0;
-        if (cursor.moveToFirst()) {
-            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-            s = dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
-            pageCon.append(s);
-            pageCon.append(Lib.N);
-            pageCon.append(Lib.N);
-            adPage.addItem(s);
-        } else { // страница не загружена...
-            adPage.clear();
+        pageCon = DataBase.getContentPage(this, link);
+        adPage.clear();
+        if (pageCon == null) // страница не загружена...
             return;
+        String[] m = pageCon.split("\n\n");
+        int i;
+        for (i = 0; i < m.length; i++) {
+            adPage.addItem(m[i]);
         }
-        cursor.close();
-        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                null, null, null);
-        Lib lib = new Lib(this);
-        if (cursor.moveToFirst()) {
-            do {
-                s = lib.withOutTags(cursor.getString(0));
-                pageCon.append(s);
-                pageCon.append(Lib.N);
-                pageCon.append(Lib.N);
-                adPage.addItem(s);
-            } while (cursor.moveToNext());
-        } else { // страница не загружена...
-            adPage.clear();
-            return;
-        }
-        cursor.close();
-        dataBase.close();
 
-        int i = pageCon.indexOf(Lib.N);
+        i = pageCon.indexOf(Lib.N);
         while (i > -1) {
             k_par++;
             i = pageCon.indexOf(Lib.N, i + 1);
