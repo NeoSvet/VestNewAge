@@ -96,7 +96,8 @@ public class DataBase extends SQLiteOpenHelper {
             return new String[]{s};
     }
 
-    public static String getContentPage(Context ctxt, String link) {
+    // для материалов в базах данных:
+    public static String getContentPage(Context ctxt, String link, boolean boolOnlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, null,
@@ -106,10 +107,15 @@ public class DataBase extends SQLiteOpenHelper {
 
         StringBuilder pageCon = new StringBuilder();
         if (cursor.moveToFirst()) {
-            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link));
+            if(boolOnlyTitle) {
+                cursor.close();
+                dataBase.close();
+                return pageCon.toString();
+            }
             pageCon.append(Lib.N);
             pageCon.append(Lib.N);
+            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
         } else { // страница не загружена...
             cursor.close();
             dataBase.close();
@@ -137,7 +143,6 @@ public class DataBase extends SQLiteOpenHelper {
         return pageCon.toString();
     }
 
-    // для материалов в базах данных:
     public static String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
             return "00.00";
