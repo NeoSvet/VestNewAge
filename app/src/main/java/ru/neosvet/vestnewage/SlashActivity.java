@@ -49,30 +49,21 @@ public class SlashActivity extends AppCompatActivity {
         // удаление таблицы журнала старого образца:
         DataBase dbJournal = new DataBase(this, DataBase.JOURNAL);
         SQLiteDatabase db = dbJournal.getWritableDatabase();
-        // сначала проверяем, что таблица существует
-        Cursor cursor = db.rawQuery("SELECT * FROM sqlite_master WHERE type='table' AND name"
-                + DataBase.Q, new String[]{DataBase.JOURNAL});
-        if (cursor != null) {
-            if (cursor.getCount() > 0) {
-                if (cursor.moveToFirst()) { // таблица существует
-                    cursor.close();
-                    // теперь проверяем, что наличие столбца ID
-                    cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
-                    boolean b = true;
-                    if (cursor.moveToFirst()) {
-                        b = cursor.getColumnIndex(DataBase.ID) == -1; // будет -1, если столбец отсутствует
-                    }
-                    if (b) { // true, если таблица пустая или если отсутствует столбце ID
-                        db.execSQL("drop table " + DataBase.JOURNAL); // удаляем таблицу старого образца
-                        //создаем таблицу нового образца:
-                        db.execSQL("create table if not exists " + DataBase.JOURNAL + " ("
-                                + DataBase.ID + " text primary key,"
-                                + DataBase.TIME + " integer);");
-                    }
-                }
-            }
-            cursor.close();
+        // проверяем, что наличие столбца ID (он появился в новом образце
+        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
+        boolean b = true;
+        if (cursor.moveToFirst()) {
+            b = cursor.getColumnIndex(DataBase.ID) == -1; // будет -1, если столбец отсутствует
         }
+        if (b) { // true, если таблица пустая или если отсутствует столбце ID
+            db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
+            //создаем таблицу нового образца:
+            db.execSQL("create table " + DataBase.JOURNAL + " ("
+                    + DataBase.ID + " text primary key,"
+                    + DataBase.TIME + " integer);");
+        }
+        cursor.close();
+        dbJournal.close();
     }
 
     private void parseUri(Uri data) {
