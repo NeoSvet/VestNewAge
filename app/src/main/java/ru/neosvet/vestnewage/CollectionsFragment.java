@@ -119,6 +119,7 @@ public class CollectionsFragment extends Fragment {
                                 + getPlace(link, place));
                 k++;
             }
+			cursor.close();
         }
         dbMar.close();
         adMarker.notifyDataSetChanged();
@@ -135,25 +136,11 @@ public class CollectionsFragment extends Fragment {
         if (p.equals("0"))
             return getResources().getString(R.string.page_entirely);
         try {
-            //tut db
-            File file;
-//            if (!link.contains("/"))
-//                file = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-//            else
-                file = act.lib.getPageFile(link);
-//            if (file.exists()) {
             String s;
             StringBuilder b = new StringBuilder();
-            BufferedReader br = new BufferedReader(new FileReader(file));
             if (p.contains("%")) {
                 b.append(Lib.N);
-                while ((s = br.readLine()) != null) {
-                    if (s.contains("<title") || s.contains("<p")) {
-                        b.append(act.lib.withOutTags(s));
-                        b.append(Lib.N);
-                        b.append(Lib.N);
-                    }
-                }
+               b.append(DataBase.getContentPage(act, link));
                 int k = 0;
                 int i = b.indexOf(Lib.N);
                 while (i > -1) {
@@ -189,20 +176,22 @@ public class CollectionsFragment extends Fragment {
                 b.append(":");
                 b.append(Lib.N);
                 p = DataBase.closeList(p);
-                int i = 1;
-                while ((s = br.readLine()) != null) {
+                s = DataBase.getContentPage(act, link);
+                s=s.substring(s.indexOf(Lib.N)+2);
+                int a = 1;
+                int i = 0;
+                while ((i=s.indexOf("\n\n",i)) >-1) {
                     if (s.contains("<p")) {
                         if (p.contains(DataBase.closeList(String.valueOf(i)))) {
                             b.append(act.lib.withOutTags(s));
                             b.append(Lib.N);
                             b.append(Lib.N);
                         }
-                        i++;
+                        a++;
                     }
                 }
                 b.delete(b.length() - 2, b.length());
             }
-            br.close();
             if (b.length() > 0)
                 return b.toString();
         } catch (Exception ex) {
@@ -262,6 +251,7 @@ public class CollectionsFragment extends Fragment {
                 adMarker.addItem(new MarkItem(cursor.getString(iTitle), cursor.getInt(iID), s));
             } while (cursor.moveToNext());
         }
+		cursor.close();
         dbCol.close();
         if (boolNull && adMarker.getCount() == 1) {
             adMarker.clear();
@@ -359,7 +349,7 @@ public class CollectionsFragment extends Fragment {
                         p = adMarker.getItem(pos).getDes();
                         p = p.substring(p.indexOf(Lib.N, p.indexOf(Lib.N) + 1) + 1);
                     }
-                    BrowserActivity.openPage(act, adMarker.getItem(pos).getData(), p);
+                    BrowserActivity.openReader(act, adMarker.getItem(pos).getData(), p);
                 }
             }
         });
@@ -577,6 +567,7 @@ public class CollectionsFragment extends Fragment {
                         , null, null, null);
                 if (!cursor.moveToFirst()) continue;
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
+				cursor.close();
                 s = s.replace(DataBase.closeList(id), ""); //убираем удаляемую подборку
                 if (s.length() == 0) { //в списке не осталось подборок
                     s = "1"; //указываем "Вне подборок"
@@ -604,6 +595,7 @@ public class CollectionsFragment extends Fragment {
                     s = cursor.getString(0);
                 else
                     s = "";
+				cursor.close();
                 //дополняем список:
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, b.toString() + s);
@@ -635,6 +627,7 @@ public class CollectionsFragment extends Fragment {
                             new String[]{mId[i]});
                 }
             }
+			cursor.close();
             //удаляем закладку:
             dbM.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, new String[]{id});
             adMarker.removeAt(iSel);
@@ -683,6 +676,7 @@ public class CollectionsFragment extends Fragment {
                 sCol += Lib.N + cursor.getString(0); //список закладок в подборке
             else
                 sCol += Lib.N;
+			cursor.close();
             dbCol.close();
 
             loadMarList();
