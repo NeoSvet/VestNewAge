@@ -401,7 +401,6 @@ public class BrowserActivity extends AppCompatActivity
                 fabMenu.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_marker) {
             Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
-            marker.putExtra(DataBase.TITLE, wvBrowser.getTitle());
             marker.putExtra(DataBase.LINK, link);
             marker.putExtra(DataBase.PLACE, (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
                     / ((float) wvBrowser.getContentHeight()) * 100.0f);
