@@ -37,7 +37,7 @@ public class HelpFragment extends Fragment {
         public boolean handleMessage(Message message) {
             tvHelp.setVisibility(View.VISIBLE);
             tvHelp.startAnimation(anMax);
-            boolAnim=false;
+            boolAnim = false;
             return false;
         }
     });
@@ -103,7 +103,7 @@ public class HelpFragment extends Fragment {
         anMin.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                boolAnim=true;
+                boolAnim = true;
             }
 
             @Override
@@ -197,7 +197,7 @@ public class HelpFragment extends Fragment {
     }
 
     private void hideButton() {
-        if(boolAnim) return;
+        if (boolAnim) return;
         tvHelp.startAnimation(anMin);
         new Timer().schedule(new TimerTask() {
             @Override
