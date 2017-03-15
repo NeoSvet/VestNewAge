@@ -78,7 +78,7 @@ public class CabmainFragment extends Fragment {
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
-            for (String t : state.getStringArray(Lib.LIST)) {
+            for (String t : state.getStringArray(Lib.LINK)) {
                 if (t.contains("#")) {
                     d = t.substring(t.indexOf("#") + 1);
                     t = t.substring(0, t.indexOf("#"));
@@ -102,7 +102,7 @@ public class CabmainFragment extends Fragment {
             d = adMain.getItem(i).getDes();
             m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
         }
-        outState.putStringArray(Lib.LIST, m);
+        outState.putStringArray(Lib.LINK, m);
         super.onSaveInstanceState(outState);
     }
 

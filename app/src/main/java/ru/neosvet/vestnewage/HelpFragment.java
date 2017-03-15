@@ -66,7 +66,7 @@ public class HelpFragment extends Fragment {
                 mHelp = new boolean[COUNT];
         } else {
             n_log = state.getInt(N_LOG);
-            mHelp = state.getBooleanArray(Lib.LIST);
+            mHelp = state.getBooleanArray(Lib.LINK);
             adHelp.notifyDataSetChanged();
             if (!state.getBoolean(HELP)) {
                 lvHelp.setVisibility(View.GONE);
@@ -86,7 +86,7 @@ public class HelpFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(N_LOG, n_log);
-        outState.putBooleanArray(Lib.LIST, mHelp);
+        outState.putBooleanArray(Lib.LINK, mHelp);
         outState.putBoolean(HELP, lvHelp.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }
