@@ -96,6 +96,47 @@ public class DataBase extends SQLiteOpenHelper {
             return new String[]{s};
     }
 
+    public static String getContentPage(Context ctxt, String link) {
+        DataBase dataBase = new DataBase(ctxt, link);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, null,
+                DataBase.LINK + DataBase.Q, new String[]{link},
+                null, null, null);
+        int id;
+
+        StringBuilder pageCon = new StringBuilder();
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
+            pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link));
+            pageCon.append(Lib.N);
+            pageCon.append(Lib.N);
+        } else { // страница не загружена...
+            cursor.close();
+            dataBase.close();
+            return null;
+        }
+        cursor.close();
+        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                null, null, null);
+        Lib lib = new Lib(ctxt);
+        if (cursor.moveToFirst()) {
+            do {
+                pageCon.append(lib.withOutTags(cursor.getString(0)));
+                pageCon.append(Lib.N);
+                pageCon.append(Lib.N);
+            } while (cursor.moveToNext());
+        } else { // страница не загружена...
+            cursor.close();
+            dataBase.close();
+            return null;
+        }
+        cursor.close();
+        dataBase.close();
+        pageCon.delete(pageCon.length() - 2, pageCon.length());
+        return pageCon.toString();
+    }
+
     // для материалов в базах данных:
     public static String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
