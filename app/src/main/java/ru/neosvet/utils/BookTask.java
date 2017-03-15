@@ -87,7 +87,7 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
                     if (t.contains("(")) //poems
-                        t = t.substring(0, t.indexOf("("));
+                        t = t.substring(0, t.indexOf(" ("));
                     title.add(t);
                     links.add(s);
                 }
