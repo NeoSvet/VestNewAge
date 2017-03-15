@@ -140,5 +140,8 @@
     <!--PresentationActivity-->
     <string name="next">Далее</string>
     <string name="finish">Закончить</string>
+    <!--SearchFragment-->
+    <string name="string_for_search">Строка для поиска</string>
+
     <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
 </resources>

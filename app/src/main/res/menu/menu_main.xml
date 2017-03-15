@@ -19,6 +19,10 @@
             android:icon="@drawable/book"
             android:title="@string/book" />
         <item
+            android:id="@+id/nav_search"
+            android:icon="@drawable/search"
+            android:title="@string/search" />
+        <item
             android:id="@+id/nav_marker"
             android:icon="@drawable/marker"
             android:title="@string/markers" />
@@ -26,11 +30,6 @@
             android:id="@+id/nav_journal"
             android:icon="@drawable/journal"
             android:title="@string/journal" />
-        <item
-            android:id="@+id/nav_search"
-            android:icon="@drawable/search"
-            android:title="@string/search"
-            android:visible="false" />
         <item
             android:id="@+id/nav_cabinet"
             android:icon="@drawable/cabinet"

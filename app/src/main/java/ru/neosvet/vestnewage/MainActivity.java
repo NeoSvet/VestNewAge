@@ -211,6 +211,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 frBook.setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, frBook);
                 break;
+            case R.id.nav_search:
+                fragmentTransaction.replace(R.id.my_fragment, new SearchFragment());
+                break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
                 break;
@@ -221,8 +224,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_cabinet:
                 frCabinet = new CabmainFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frCabinet);
-                break;
-            case R.id.nav_search:
                 break;
             case R.id.nav_settings:
                 fragmentTransaction.replace(R.id.my_fragment, new SettingsFragment());
