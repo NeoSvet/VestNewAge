@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +19,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.CalendarTask;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
 public class SlashActivity extends AppCompatActivity {
@@ -42,6 +45,34 @@ public class SlashActivity extends AppCompatActivity {
         initAnimation();
         if (data != null)
             parseUri(data);
+
+        // удаление таблицы журнала старого образца:
+        DataBase dbJournal = new DataBase(this, DataBase.JOURNAL);
+        SQLiteDatabase db = dbJournal.getWritableDatabase();
+        // сначала проверяем, что таблица существует
+        Cursor cursor = db.rawQuery("SELECT * FROM sqlite_master WHERE type='table' AND name"
+                + DataBase.Q, new String[]{DataBase.JOURNAL});
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
+                if (cursor.moveToFirst()) { // таблица существует
+                    cursor.close();
+                    // теперь проверяем, что наличие столбца ID
+                    cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
+                    boolean b = true;
+                    if (cursor.moveToFirst()) {
+                        b = cursor.getColumnIndex(DataBase.ID) == -1; // будет -1, если столбец отсутствует
+                    }
+                    if (b) { // true, если таблица пустая или если отсутствует столбце ID
+                        db.execSQL("drop table " + DataBase.JOURNAL); // удаляем таблицу старого образца
+                        //создаем таблицу нового образца:
+                        db.execSQL("create table if not exists " + DataBase.JOURNAL + " ("
+                                + DataBase.ID + " text primary key,"
+                                + DataBase.TIME + " integer);");
+                    }
+                }
+            }
+            cursor.close();
+        }
     }
 
     private void parseUri(Uri data) {
@@ -71,14 +102,14 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
                 main.putExtra(MainActivity.TAB, 2);
             } else if (link.contains("html")) {
-                BrowserActivity.openPage(this, link.substring(1), "");
+                BrowserActivity.openReader(this, link.substring(1), "");
             } else if (data.getQuery() != null && data.getQuery().contains("date")) {
                 String s = data.getQuery().substring(5);
                 String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
                 link = link.substring(1) + s.substring(0, s.indexOf("-"))
                         + "." + (m.length() == 1 ? "0" : "") + m
                         + "." + s.substring(s.lastIndexOf("-") + 3) + ".html";
-                BrowserActivity.openPage(this, link, "");
+                BrowserActivity.openReader(this, link, "");
             } else if (link.contains("/poems")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 0);
