@@ -215,6 +215,7 @@ public class MarkerActivity extends AppCompatActivity {
                 boolPosVis = true;
             }
         } else if (id == -1) { //add marker mode
+            loadPage();
             DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
             tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
             adPage.getItem(0).setCheck(true);
@@ -278,12 +279,13 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void loadPage() {
         k_par = 0;
-        pageCon = DataBase.getContentPage(this, link);
+        pageCon = DataBase.getContentPage(this, link, false);
         adPage.clear();
         if (pageCon == null) // страница не загружена...
             return;
         String[] m = pageCon.split("\n\n");
         int i;
+        ((TextView) findViewById(R.id.tvTitle)).setText(m[0]);
         for (i = 0; i < m.length; i++) {
             adPage.addItem(m[i]);
         }
@@ -302,10 +304,7 @@ public class MarkerActivity extends AppCompatActivity {
         dbMar = new DataBase(MarkerActivity.this, DataBase.MARKERS);
         adPage = new CheckAdapter(this);
         adCol = new CheckAdapter(this);
-        loadPage();
         loadCol();
-        tvSel = (TextView) findViewById(R.id.tvTitle);
-        tvSel.setText(getIntent().getStringExtra(DataBase.TITLE)); //title
         tvSel = (TextView) findViewById(R.id.tvSel);
         rPar = (RadioButton) findViewById(R.id.rPar);
         rPos = (RadioButton) findViewById(R.id.rPos);
