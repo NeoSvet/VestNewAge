@@ -2,8 +2,6 @@ package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -342,11 +340,20 @@ public class CalendarFragment extends Fragment {
                         } else if (k > 1) {
                             PopupMenu popupMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
                             popupMenu.inflate(R.menu.menu_links);
-                            String[] list = getTitleList(pos);
+
+                            String s;
                             for (int i = 0; i < 5; i++) {
                                 if (i < k) {
-                                    if (list[i] != null)
-                                        popupMenu.getMenu().getItem(i).setTitle(list[i]);
+                                    s = adCalendar.getItem(pos).getLink(i).substring(Lib.LINK.length());
+                                    if (!s.contains("/"))
+                                        popupMenu.getMenu().getItem(i).setTitle(
+                                                getResources().getString(R.string.prom_for_soul_unite));
+                                    else {
+                                        s = DataBase.getContentPage(act, s, true);
+                                        if (s != null)
+                                            popupMenu.getMenu().getItem(i).setTitle(
+                                                    s.substring(s.indexOf(" ") + 1));
+                                    }
                                 } else {
                                     popupMenu.getMenu().getItem(i).setVisible(false);
                                 }
@@ -404,40 +411,6 @@ public class CalendarFragment extends Fragment {
     private void openMonth(int v) {
         if (task == null)
             createCalendar(v);
-    }
-
-    private String[] getTitleList(int pos) {
-        String link = "";
-        String[] list = new String[adCalendar.getItem(pos).getCount()];
-        DataBase dataBase = null;
-        SQLiteDatabase db = null;
-        Cursor cursor;
-        for (int i = 0; i < list.length; i++) {
-            link = adCalendar.getItem(pos).getLink(i).substring(Lib.LINK.length());
-            if (!link.contains("/")) {
-                list[i] = getResources().getString(R.string.prom_for_soul_unite);
-            } else {
-                if (dataBase == null) {
-                    dataBase = new DataBase(act, link);
-                    db = dataBase.getWritableDatabase();
-                }
-                cursor = db.query(DataBase.TITLE, new String[]{DataBase.TITLE},
-                        DataBase.LINK + DataBase.Q, new String[]{link},
-                        null, null, null);
-                if (cursor.moveToFirst()) {
-                    list[i] = cursor.getString(0);
-                    if (link.contains(Lib.POEMS)) {
-                        list[i] = getResources().getString(R.string.katren)
-                                + " " + Lib.KV_OPEN + list[i] + Lib.KV_CLOSE;
-                    }
-                } else
-                    list[i] = null;
-                cursor.close();
-            }
-        }
-        if (dataBase != null)
-            dataBase.close();
-        return list;
     }
 
     private void createCalendar(int v) {
