@@ -23,9 +23,6 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -75,7 +72,7 @@ public class MarkerActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putByte(Lib.LIST, modeList);
+        outState.putByte(DataBase.LINK, modeList);
         outState.putString(DataBase.PLACE, tvSel.getText().toString());
         outState.putString(DataBase.JOURNAL, sel);
         outState.putString(DataBase.COLLECTIONS, tvCol.getText().toString());
@@ -170,6 +167,7 @@ public class MarkerActivity extends AppCompatActivity {
                 adCol.addItem(cursor.getInt(iID), cursor.getString(iTitle));
             } while (cursor.moveToNext());
         }
+        cursor.close();
         dbCol.close();
     }
 
@@ -196,7 +194,7 @@ public class MarkerActivity extends AppCompatActivity {
             }
             setPageList(s);
 
-            modeList = state.getByte(Lib.LIST, modeList);
+            modeList = state.getByte(DataBase.LINK, modeList);
             if (modeList > 0) {
                 if (modeList == 1)
                     lvList.setAdapter(adPage);
@@ -255,6 +253,7 @@ public class MarkerActivity extends AppCompatActivity {
             setPageList(s);
             tvSel.setText(s);
             s = cursor.getString(cursor.getColumnIndex(DataBase.COLLECTIONS));
+            cursor.close();
             dbMar.close();
 
             db = dbCol.getWritableDatabase();
@@ -269,6 +268,7 @@ public class MarkerActivity extends AppCompatActivity {
                     b.append(", ");
                 }
             }
+            cursor.close();
             dbCol.close();
             b.delete(b.length() - 2, b.length());
             setColList(b.toString());
@@ -277,35 +277,49 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void loadPage() {
-        try {
-            File f;
-            Lib lib = new Lib(this);
-            //tut db
-//            if (!link.contains("/"))
-//                f = lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-//            else
-                f = lib.getPageFile(link);
-//            if (file.exists()) {
-            String s;
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            while ((s = br.readLine()) != null) {
-                if (s.contains("<title") || s.contains("<p")) {
-                    s = lib.withOutTags(s);
-                    pageCon.append(s);
-                    pageCon.append(Lib.N);
-                    pageCon.append(Lib.N);
-                    adPage.addItem(s);
-                }
-            }
-            br.close();
-            k_par = 0;
-            int i = pageCon.indexOf(Lib.N);
-            while (i > -1) {
-                k_par++;
-                i = pageCon.indexOf(Lib.N, i + 1);
-            }
-        } catch (Exception ex) {
+        DataBase dataBase = new DataBase(this, link);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, null,
+                DataBase.LINK + DataBase.Q, new String[]{link},
+                null, null, null);
+        int id;
+        String s;
+        k_par = 0;
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
+            s = dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
+            pageCon.append(s);
+            pageCon.append(Lib.N);
+            pageCon.append(Lib.N);
+            adPage.addItem(s);
+        } else { // страница не загружена...
             adPage.clear();
+            return;
+        }
+        cursor.close();
+        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                null, null, null);
+        Lib lib = new Lib(this);
+        if (cursor.moveToFirst()) {
+            do {
+                s = lib.withOutTags(cursor.getString(0));
+                pageCon.append(s);
+                pageCon.append(Lib.N);
+                pageCon.append(Lib.N);
+                adPage.addItem(s);
+            } while (cursor.moveToNext());
+        } else { // страница не загружена...
+            adPage.clear();
+            return;
+        }
+        cursor.close();
+        dataBase.close();
+
+        int i = pageCon.indexOf(Lib.N);
+        while (i > -1) {
+            k_par++;
+            i = pageCon.indexOf(Lib.N, i + 1);
         }
     }
 
@@ -513,6 +527,7 @@ public class MarkerActivity extends AppCompatActivity {
                                 }
                             } while (cursor.moveToNext());
                         }
+                        cursor.close();
                         //добавляем новую подборку на первую позицию
                         cv = new ContentValues();
                         cv.put(DataBase.PLACE, 1);
@@ -524,6 +539,7 @@ public class MarkerActivity extends AppCompatActivity {
                             adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
                                     cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
                         }
+                        cursor.close();
                         dbCol.close();
                         //добавляем подборку в поле
                         tvCol.setText(tvCol.getText() + ", " + s);
@@ -583,6 +599,7 @@ public class MarkerActivity extends AppCompatActivity {
                     }
                 }
             }
+            cursor.close();
         }
         dbCol.close();
     }
@@ -623,6 +640,7 @@ public class MarkerActivity extends AppCompatActivity {
                     db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                             new String[]{String.valueOf(col_id)});
                 }
+                cursor.close();
             }
         }
         dbCol.close();
