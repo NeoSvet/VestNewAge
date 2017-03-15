@@ -2,6 +2,8 @@ package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,9 +26,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,6 +37,7 @@ import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.CalendarTask;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
 public class CalendarFragment extends Fragment {
@@ -341,18 +342,11 @@ public class CalendarFragment extends Fragment {
                         } else if (k > 1) {
                             PopupMenu popupMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
                             popupMenu.inflate(R.menu.menu_links);
-                            List<ListItem> list = getList(pos);
-                            String s;
+                            String[] list = getTitleList(pos);
                             for (int i = 0; i < 5; i++) {
                                 if (i < k) {
-                                    s = adCalendar.getItem(pos).getLink(i);
-                                    for (int j = 0; j < list.size(); j++) {
-                                        if (list.get(j).containsLink(s)) {
-                                            popupMenu.getMenu().getItem(i)
-                                                    .setTitle(list.get(j).getTitle());
-                                            break;
-                                        }
-                                    }
+                                    if (list[i] != null)
+                                        popupMenu.getMenu().getItem(i).setTitle(list[i]);
                                 } else {
                                     popupMenu.getMenu().getItem(i).setVisible(false);
                                 }
@@ -361,16 +355,23 @@ public class CalendarFragment extends Fragment {
                                 @Override
                                 public boolean onMenuItemClick(MenuItem item) {
                                     int index;
-                                    if (item.getItemId() == R.id.link1)
-                                        index = 0;
-                                    else if (item.getItemId() == R.id.link2)
-                                        index = 1;
-                                    else if (item.getItemId() == R.id.link3)
-                                        index = 2;
-                                    else if (item.getItemId() == R.id.link4)
-                                        index = 3;
-                                    else
-                                        index = 4;
+                                    switch (item.getItemId()) {
+                                        case R.id.link1:
+                                            index = 0;
+                                            break;
+                                        case R.id.link2:
+                                            index = 1;
+                                            break;
+                                        case R.id.link3:
+                                            index = 2;
+                                            break;
+                                        case R.id.link4:
+                                            index = 3;
+                                            break;
+                                        default:
+                                            index = 4;
+                                            break;
+                                    }
                                     openLink(adCalendar.getItem(pos).getLink(index));
                                     return true;
                                 }
@@ -405,43 +406,38 @@ public class CalendarFragment extends Fragment {
             createCalendar(v);
     }
 
-    private List<ListItem> getList(int pos) {
-        String link = adCalendar.getItem(pos).getLink(0);
-        List<ListItem> data = new ArrayList<ListItem>();
-        if (!link.contains("/")) {
-            data.add(new ListItem(
-                    getResources().getString(R.string.prom_for_soul_unite),
-                    link));
-            link = adCalendar.getItem(pos).getLink(1);
-        }
-        int n = link.indexOf(".") + 1;
-        String t, f = Lib.LIST + link.substring(n, n + 5);
-        File file = new File(act.getFilesDir() + f);
-        while (true) {
-            if (file.exists()) {
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(file));
-                    while ((t = br.readLine()) != null) {
-                        if (f.contains("p")) {
-                            data.add(new ListItem(t, br.readLine()));
-                        } else {
-                            if (t.contains("("))
-                                t = t.substring(0, t.indexOf("(") - 1);
-                            data.add(new ListItem(getResources().getString(R.string.katren)
-                                    + " " + t, br.readLine()));
-                        }
-                    }
-                    br.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+    private String[] getTitleList(int pos) {
+        String link = "";
+        String[] list = new String[adCalendar.getItem(pos).getCount()];
+        DataBase dataBase = null;
+        SQLiteDatabase db = null;
+        Cursor cursor;
+        for (int i = 0; i < list.length; i++) {
+            link = adCalendar.getItem(pos).getLink(i).substring(Lib.LINK.length());
+            if (!link.contains("/")) {
+                list[i] = getResources().getString(R.string.prom_for_soul_unite);
+            } else {
+                if (dataBase == null) {
+                    dataBase = new DataBase(act, link);
+                    db = dataBase.getWritableDatabase();
                 }
+                cursor = db.query(DataBase.TITLE, new String[]{DataBase.TITLE},
+                        DataBase.LINK + DataBase.Q, new String[]{link},
+                        null, null, null);
+                if (cursor.moveToFirst()) {
+                    list[i] = cursor.getString(0);
+                    if (link.contains(Lib.POEMS)) {
+                        list[i] = getResources().getString(R.string.katren)
+                                + " " + Lib.KV_OPEN + list[i] + Lib.KV_CLOSE;
+                    }
+                } else
+                    list[i] = null;
+                cursor.close();
             }
-            if (f.contains("p"))
-                break;
-            f += "p";
-            file = new File(act.getFilesDir() + f);
         }
-        return data;
+        if (dataBase != null)
+            dataBase.close();
+        return list;
     }
 
     private void createCalendar(int v) {
