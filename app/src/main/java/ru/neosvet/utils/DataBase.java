@@ -14,15 +14,18 @@ public class DataBase extends SQLiteOpenHelper {
             Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
             LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
     private Context context;
-    private String name;
+    private String name = "";
 
     public DataBase(Context context, String name) {
-        super(context, name, null, 1);
+        super(context, configName(name), null, 1);
         this.context = context;
+        this.name = configName(name);
+    }
+
+    private static String configName(String name) {
         if (name.contains(".html"))
-            this.name = getDatePage(name);
-        else
-            this.name = name;
+            name = getDatePage(name);
+        return name;
     }
 
     public String getName() {
@@ -32,45 +35,38 @@ public class DataBase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         if (name.contains(".")) { // базы данных с материалами
-            db.execSQL("create table if not exists " + TITLE + " ("
+            db.execSQL("create table " + TITLE + " ("
                     + ID + " integer primary key autoincrement," //id TITLE
                     + LINK + " text,"
                     + TITLE + " text,"
                     + TIME + " integer);");
-            Cursor cursor = db.query(TITLE, null, null, null, null, null, null);
-            if (cursor.getCount() == 0) { //если таблица пуста, то записываем дату создания
-                // в дальнейшем это будет дата изменений
-                ContentValues cv = new ContentValues();
-                cv.put(TIME, System.currentTimeMillis());
-                db.insert(TITLE, null, cv);
-            }
-            cursor.close();
-            db.execSQL("create table if not exists " + PARAGRAPH + " ("
+            //записываем дату создания (в дальнейшем это будет дата изменений):
+            ContentValues cv = new ContentValues();
+            cv.put(TIME, System.currentTimeMillis());
+            db.insert(TITLE, null, cv);
+            db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
         } else if (name.equals(JOURNAL)) {
             db.execSQL("create table if not exists " + JOURNAL + " ("
-                    + ID + " text primary key," // date&id
+                    + ID + " text primary key," // date&id TITLE
                     + TIME + " integer);");
         } else {
-            db.execSQL("create table if not exists " + MARKERS + " ("
+            db.execSQL("create table " + MARKERS + " ("
                     + ID + " integer primary key autoincrement," //id закладки
                     + LINK + " text," //ссылка на материал
                     + COLLECTIONS + " text," //список id подборок, в которые включен материал
                     + DESCTRIPTION + " text,"  //описание
                     + PLACE + " text);"); //место в материале
-            db.execSQL("create table if not exists " + COLLECTIONS + " ("
+            db.execSQL("create table " + COLLECTIONS + " ("
                     + ID + " integer primary key autoincrement," //id подборок
                     + MARKERS + " text," //список id закладок
                     + PLACE + " integer," //место подборки в списке подоборок
                     + TITLE + " text);"); //название Подборки
-            Cursor cursor = db.query(COLLECTIONS, null, null, null, null, null, null);
-            if (cursor.getCount() == 0) {
-                ContentValues cv = new ContentValues();
-                cv.put(TITLE, context.getResources().getString(R.string.no_collections));
-                db.insert(COLLECTIONS, null, cv);
-            }
-            cursor.close();
+            // добавляем подборку по умолчанию - "вне подборок":
+            ContentValues cv = new ContentValues();
+            cv.put(TITLE, context.getResources().getString(R.string.no_collections));
+            db.insert(COLLECTIONS, null, cv);
         }
     }
 
@@ -101,7 +97,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     // для материалов в базах данных:
-    public String getDatePage(String link) {
+    public static String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
             return "00.00";
         else {
@@ -135,7 +131,8 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public int getPageId(String link) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        DataBase dataBase = new DataBase(context, name);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE,
                 new String[]{DataBase.ID},
                 DataBase.LINK + DataBase.Q, new String[]{link},
@@ -144,18 +141,19 @@ public class DataBase extends SQLiteOpenHelper {
         if (cursor.moveToFirst())
             r = cursor.getInt(0);
         cursor.close();
-        this.close();
+        dataBase.close();
         return r;
     }
 
     public boolean existsPage(String link) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        DataBase dataBase = new DataBase(context, name);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(p.id) FROM paragraph p INNER JOIN title t ON t.id = p.id WHERE t.link"
                 + DataBase.Q, new String[]{link});
         cursor.moveToFirst();
         boolean b = cursor.getInt(0) > 0; //count > 0
         cursor.close();
-        this.close();
+        dataBase.close();
         return b;
     }
 }

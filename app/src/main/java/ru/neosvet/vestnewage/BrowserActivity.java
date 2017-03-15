@@ -63,7 +63,7 @@ public class BrowserActivity extends AppCompatActivity
     private View fabMenu, pSearch;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = "";
+    private String link = Lib.LINK;
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -450,16 +450,16 @@ public class BrowserActivity extends AppCompatActivity
             if (!url.contains(PAGE)) {
                 if (boolBack)
                     boolBack = false;
-                else
+                else if (!link.equals(Lib.LINK))
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);
             }
             miTheme.setVisible(!link.contains(PNG));
         }
-        if (url.contains(PNG)) {
+        if (url.contains(PNG))
             openFile();
-        } else {
+        else {
             if (dbPage.existsPage(link))
                 openPage(true);
             else
@@ -517,13 +517,8 @@ public class BrowserActivity extends AppCompatActivity
             File file = new File(getFilesDir() + PAGE);
             String s;
             if (newPage) {
-                dbPage = new DataBase(this, link);
-                if (!dbPage.existsPage(link)) {
-                    downloadPage(false);
-                    return;
-                }
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-
+                dbPage = new DataBase(this, link);
                 SQLiteDatabase db = dbPage.getWritableDatabase();
                 Cursor cursor = db.query(DataBase.TITLE, null,
                         DataBase.LINK + DataBase.Q, new String[]{link},
@@ -584,11 +579,13 @@ public class BrowserActivity extends AppCompatActivity
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, System.currentTimeMillis());
         String id = dbPage.getDatePage(link) + "&" + dbPage.getPageId(link);
-        cv.put(DataBase.ID, id);
+
         SQLiteDatabase db = dbJournal.getWritableDatabase();
         int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
-        if (i == 0) // no update
+        if (i == 0) {// no update
+            cv.put(DataBase.ID, id);
             db.insert(DataBase.JOURNAL, null, cv);
+        }
         Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
         if (cursor.getCount() > 100) {
             cursor.moveToFirst();
