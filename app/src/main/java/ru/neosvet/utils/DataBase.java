@@ -107,7 +107,7 @@ public class DataBase extends SQLiteOpenHelper {
                     link = "0" + link;
                 return link.replace("-20", ".");
             } else { //http://blagayavest.info/poems/11.03.17.html
-                link = link.substring(link.lastIndexOf(".") - 5, link.lastIndexOf("."));
+                link = link.substring(link.lastIndexOf("/") + 4, link.lastIndexOf("."));
                 if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
                 return link;
             }
@@ -123,7 +123,7 @@ public class DataBase extends SQLiteOpenHelper {
                 s = s.substring(0, s.indexOf("_"));
             if (link.contains(Lib.POEMS)) {
                 s += " " + context.getResources().getString(R.string.katren)
-                        + " " + Lib.KV_OPEN + title + "”";
+                        + " " + Lib.KV_OPEN + title + Lib.KV_CLOSE;
             } else
                 s += " " + title;
             return s;
