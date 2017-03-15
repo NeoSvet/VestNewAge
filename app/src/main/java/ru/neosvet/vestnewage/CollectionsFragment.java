@@ -19,10 +19,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 import ru.neosvet.ui.MarkAdapter;
 import ru.neosvet.ui.MarkItem;
 import ru.neosvet.utils.DataBase;
@@ -119,7 +115,7 @@ public class CollectionsFragment extends Fragment {
                                 + getPlace(link, place));
                 k++;
             }
-			cursor.close();
+            cursor.close();
         }
         dbMar.close();
         adMarker.notifyDataSetChanged();
@@ -136,11 +132,10 @@ public class CollectionsFragment extends Fragment {
         if (p.equals("0"))
             return getResources().getString(R.string.page_entirely);
         try {
-            String s;
             StringBuilder b = new StringBuilder();
             if (p.contains("%")) {
                 b.append(Lib.N);
-               b.append(DataBase.getContentPage(act, link));
+                b.append(DataBase.getContentPage(act, link, false));
                 int k = 0;
                 int i = b.indexOf(Lib.N);
                 while (i > -1) {
@@ -176,20 +171,41 @@ public class CollectionsFragment extends Fragment {
                 b.append(":");
                 b.append(Lib.N);
                 p = DataBase.closeList(p);
-                s = DataBase.getContentPage(act, link);
-                s=s.substring(s.indexOf(Lib.N)+2);
-                int a = 1;
-                int i = 0;
-                while ((i=s.indexOf("\n\n",i)) >-1) {
-                    if (s.contains("<p")) {
+
+                DataBase dataBase = new DataBase(act, link);
+                SQLiteDatabase db = dataBase.getWritableDatabase();
+                Cursor cursor = db.query(DataBase.TITLE, null,
+                        DataBase.LINK + DataBase.Q, new String[]{link},
+                        null, null, null);
+                int id;
+                if (cursor.moveToFirst()) {
+                    id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
+                } else { // страница не загружена...
+                    cursor.close();
+                    dataBase.close();
+                    throw new Exception();
+                }
+                cursor.close();
+                cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                        null, null, null);
+                int i = 1;
+                if (cursor.moveToFirst()) {
+                    do {
                         if (p.contains(DataBase.closeList(String.valueOf(i)))) {
-                            b.append(act.lib.withOutTags(s));
+                            b.append(act.lib.withOutTags(cursor.getString(0)));
                             b.append(Lib.N);
                             b.append(Lib.N);
                         }
-                        a++;
-                    }
+                        i++;
+                    } while (cursor.moveToNext());
+                } else { // страница не загружена...
+                    cursor.close();
+                    dataBase.close();
+                    throw new Exception();
                 }
+                cursor.close();
+                dataBase.close();
                 b.delete(b.length() - 2, b.length());
             }
             if (b.length() > 0)
@@ -206,25 +222,10 @@ public class CollectionsFragment extends Fragment {
     }
 
     private String getTitle(String link) {
-        try {
-            //tut db
-            File f;
-//            if (!link.contains("/"))
-//                f = act.lib.getFile("/" + BrowserActivity.ARTICLE + "/" + link);
-//            else
-                f = act.lib.getPageFile(link);
-//            if (file.exists()) {
-            String s;
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            do {
-                s = br.readLine();
-            } while (s != null && !s.contains("<title"));
-            br.close();
-            if (s != null)
-                return s.substring(s.indexOf(">") + 1, s.indexOf("</"));
-        } catch (Exception ex) {
-        }
-        return getResources().getString(R.string.not_found_file);
+        String t = DataBase.getContentPage(act, link, true);
+        if (t == null)
+            return getResources().getString(R.string.not_found_page);
+        return t;
     }
 
     private void loadColList() {
@@ -251,7 +252,7 @@ public class CollectionsFragment extends Fragment {
                 adMarker.addItem(new MarkItem(cursor.getString(iTitle), cursor.getInt(iID), s));
             } while (cursor.moveToNext());
         }
-		cursor.close();
+        cursor.close();
         dbCol.close();
         if (boolNull && adMarker.getCount() == 1) {
             adMarker.clear();
@@ -478,7 +479,6 @@ public class CollectionsFragment extends Fragment {
                 } else {
                     saveChange();
                     Intent marker = new Intent(act, MarkerActivity.class);
-                    marker.putExtra(DataBase.TITLE, adMarker.getItem(iSel).getTitle());
                     marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
                     act.startActivityForResult(marker, MARKER_REQUEST);
                 }
@@ -567,7 +567,7 @@ public class CollectionsFragment extends Fragment {
                         , null, null, null);
                 if (!cursor.moveToFirst()) continue;
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
-				cursor.close();
+                cursor.close();
                 s = s.replace(DataBase.closeList(id), ""); //убираем удаляемую подборку
                 if (s.length() == 0) { //в списке не осталось подборок
                     s = "1"; //указываем "Вне подборок"
@@ -595,7 +595,7 @@ public class CollectionsFragment extends Fragment {
                     s = cursor.getString(0);
                 else
                     s = "";
-				cursor.close();
+                cursor.close();
                 //дополняем список:
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, b.toString() + s);
@@ -627,7 +627,7 @@ public class CollectionsFragment extends Fragment {
                             new String[]{mId[i]});
                 }
             }
-			cursor.close();
+            cursor.close();
             //удаляем закладку:
             dbM.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, new String[]{id});
             adMarker.removeAt(iSel);
@@ -676,7 +676,7 @@ public class CollectionsFragment extends Fragment {
                 sCol += Lib.N + cursor.getString(0); //список закладок в подборке
             else
                 sCol += Lib.N;
-			cursor.close();
+            cursor.close();
             dbCol.close();
 
             loadMarList();
