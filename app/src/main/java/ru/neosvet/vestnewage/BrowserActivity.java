@@ -543,7 +543,6 @@ public class BrowserActivity extends AppCompatActivity
                     return;
                 }
                 cursor.close();
-                db = dbPage.getWritableDatabase();
                 cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                         DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                         null, null, null);
