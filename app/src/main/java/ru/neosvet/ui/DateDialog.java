@@ -1,0 +1,188 @@
+package ru.neosvet.ui;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import ru.neosvet.vestnewage.R;
+
+public class DateDialog extends Dialog {
+
+    private Activity act;
+    private TextView tvYear;
+    private Date date;
+    private Result result;
+    private MonthAdapter adMonth;
+    private int min_year = 116, max_year, max_month;
+    private boolean boolCancel = true;
+
+    public DateDialog(Activity act, Date date) {
+        super(act);
+        this.act = act;
+        this.date = (Date) date.clone();
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public void setMinYear(int min_year) {
+        this.min_year = min_year;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.date_activity);
+
+        tvYear = (TextView) findViewById(R.id.tvYear);
+        findViewById(R.id.bMinus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (date.getYear() > min_year) {
+                    date.setYear(date.getYear() - 1);
+                    date.setMonth(11);
+                    setCalendar();
+                }
+            }
+        });
+        findViewById(R.id.bPlus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (date.getYear() < max_year) {
+                    date.setYear(date.getYear() + 1);
+                    date.setMonth(0);
+                    setCalendar();
+                }
+            }
+        });
+
+        RecyclerView rvMonth = (RecyclerView) findViewById(R.id.rvMonth);
+        GridLayoutManager layoutManager = new GridLayoutManager(act, 3);
+        adMonth = new MonthAdapter();
+        for (int i = 0; i < 12; i++) {
+            adMonth.addItem(act.getResources().getStringArray(R.array.months)[i]);
+        }
+        rvMonth.setLayoutManager(layoutManager);
+        rvMonth.setAdapter(adMonth);
+        Date d = new Date();
+        max_year = d.getYear();
+        max_month = d.getMonth();
+        setCalendar();
+        rvMonth.addOnItemTouchListener(
+                new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, final int pos) {
+                        date.setMonth(pos);
+                        adMonth.setSelect(pos);
+                        adMonth.notifyDataSetChanged();
+                    }
+                }));
+
+        findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                date.setMonth(adMonth.getSelect());
+                result.putDate(date);
+                boolCancel = false;
+                DateDialog.this.dismiss();
+            }
+        });
+    }
+
+    private void setCalendar() {
+        tvYear.setText(String.valueOf(date.getYear() + 1900));
+        if (date.getYear() == max_year)
+            adMonth.setMaxMonth(max_month);
+        else
+            adMonth.setMaxMonth(-1);
+        adMonth.setSelect(date.getMonth());
+        adMonth.notifyDataSetChanged();
+    }
+
+    @Override
+    public void dismiss() {
+        if (boolCancel)
+            result.putDate(null);
+        super.dismiss();
+    }
+
+    public interface Result {
+        void putDate(Date date);
+    }
+
+    class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {
+        private List<String> data = new ArrayList<String>();
+        private int select, max_month = -1;
+
+        @Override
+        public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(act).inflate(R.layout.item_month, parent, false);
+            return new MonthAdapter.ViewHolder(view);
+        }
+
+        public void setMaxMonth(int max_month) {
+            this.max_month = max_month;
+        }
+
+        public void setSelect(int pos) {
+            if (pos <= max_month || max_month == -1)
+                select = pos;
+        }
+
+        public int getSelect() {
+            return select;
+        }
+
+        @Override
+        public void onBindViewHolder(MonthAdapter.ViewHolder holder, int pos) {
+            holder.tv.setText(data.get(pos));
+            if (pos > max_month && max_month > -1) {
+                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
+                holder.bg.setEnabled(false);
+            } else if (pos == max_month) {
+                if (pos == select)
+                    holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_kp));
+                else
+                    holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_p));
+            } else if (pos == select)
+                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_k));
+            else
+                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
+
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
+
+        public void addItem(String s) {
+            data.add(s);
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            View bg;
+            TextView tv;
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                bg = itemView.findViewById(R.id.cell_bg);
+                tv = (TextView) itemView.findViewById(R.id.cell_tv);
+            }
+        }
+    }
+}

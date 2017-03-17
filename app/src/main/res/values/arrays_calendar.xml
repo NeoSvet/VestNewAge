@@ -23,4 +23,18 @@
         <item>Ноябрь</item>
         <item>Декабрь</item>
     </array>
+    <array name="months_short">
+        <item>янв.</item>
+        <item>февр.</item>
+        <item>март</item>
+        <item>апр.</item>
+        <item>май</item>
+        <item>июнь</item>
+        <item>июль</item>
+        <item>авг.</item>
+        <item>сент.</item>
+        <item>окт.</item>
+        <item>нояб.</item>
+        <item>дек.</item>
+    </array>
 </resources>
