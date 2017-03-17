@@ -19,7 +19,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import ru.neosvet.vestnewage.BrowserActivity;
 import ru.neosvet.vestnewage.CalendarFragment;
@@ -210,7 +214,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         File[] d;
         if (p == -1) { //download all
             d = new File[]{
-                    getFile(Lib.LIST),
+                    null,
                     getFile(SiteFragment.MAIN),
                     getFile(SiteFragment.MEDIA)
             };
@@ -242,7 +246,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     break;
                 default:
                     d = new File[]{
-                            getFile(Lib.LIST)
+                            null
                     };
                     msg = act.getResources().getString(R.string.download)
                             + " " + act.getResources().getString(R.string.kat_n_pos);
@@ -251,24 +255,76 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         publishProgress();
         for (int i = 0; i < d.length && boolStart; i++) {
-            if (i == 2) {
+            if (i == 1) {
                 sub_prog = 0;
                 prog++;
                 msg = act.getResources().getString(R.string.download)
                         + " " + act.getResources().getString(R.string.materials);
-                publishProgress();
             }
-            if (d[i].isDirectory()) {
-                File[] f = d[i].listFiles();
-                for (int j = 0; j < f.length && boolStart; j++) {
-                    if (f[j].isFile())
-                        downloadList(f[j].toString());
-                }
-            } else
+            if (d[i] == null)
+                downloadBook();
+            else
                 downloadList(d[i].toString());
         }
         prog = MAX;
         publishProgress();
+    }
+
+    private void downloadBook() throws Exception {
+        List<String> list = new ArrayList<String>();
+        File dir = lib.getDBFolder();
+        File[] f = dir.listFiles();
+        int i;
+        for (i = 0; i < f.length && boolStart; i++) {
+            if (f[i].getName().length() == 5)
+                list.add(f[i].getName());
+        }
+        int sy, sm, ey, em;
+        sm = 0;
+        sy = 116;
+        Date d = new Date();
+        em = d.getMonth();
+        ey = d.getYear();
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        while (boolStart) {
+            d = new Date(sy, sm, 1);
+            for (i = 0; i < list.size(); i++) {
+                if (list.contains(df.format(d))) {
+                    downloadBookList(df.format(d));
+                    break;
+                }
+            }
+            if (sy == ey && sm == em)
+                break;
+            sm++;
+            if (sm == 12) {
+                sm = 0;
+                sy++;
+            }
+        }
+    }
+
+    private void downloadBookList(String name) throws Exception {
+        DataBase dataBase = new DataBase(act, name);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        if (curTitle.moveToFirst()) {
+            Cursor curPar;
+            int iLink = curTitle.getColumnIndex(DataBase.LINK);
+            int iID = curTitle.getColumnIndex(DataBase.ID);
+            // пропускаем первую запись - там только дата изменения списка
+            while (curTitle.moveToNext()) {
+                curPar = db.query(DataBase.PARAGRAPH, null,
+                        DataBase.ID + DataBase.Q,
+                        new String[]{String.valueOf(curTitle.getInt(iID))}
+                        , null, null, null);
+                if (!curPar.moveToFirst())
+                    downloadPage(curTitle.getString(iLink), false);
+                sub_prog++;
+            }
+        }
+        curTitle.close();
+        dataBase.close();
     }
 
     private void startTimer() {
@@ -368,6 +424,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!bSinglePage && dataBase.existsPage(link))
             return;
         String line, s;
+        final String par = "</p>";
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -399,6 +456,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                         else line = s;
                     }
                     line = line.replace("color", "cvet");
+                    if (line.indexOf(par) + par.length() < line.length()) {
+                        // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
+                        s = line.substring(0, line.indexOf(par) + par.length());
+                        cv = new ContentValues();
+                        cv.put(DataBase.ID, i);
+                        cv.put(DataBase.PARAGRAPH, s);
+                        db.insert(DataBase.PARAGRAPH, null, cv);
+                        line = line.substring(s.length());
+                    }
                     cv = new ContentValues();
                     cv.put(DataBase.ID, i);
                     cv.put(DataBase.PARAGRAPH, line);
