@@ -121,17 +121,8 @@ public class CabmainFragment extends Fragment {
         cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
         cbRemPassword = (CheckBox) container.findViewById(R.id.cbRemPassword);
         InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
-        LinearLayout main = (LinearLayout) container.findViewById(R.id.content_cabmain);
-        softKeyboard = new SoftKeyboard(main, im);
-        softKeyboard.setSoftKeyboardCallback(new SoftKeyboard.SoftKeyboardChanged() {
-            @Override
-            public void onSoftKeyboardHide() {
-            }
-
-            @Override
-            public void onSoftKeyboardShow() {
-            }
-        });
+        LinearLayout mainLayout = (LinearLayout) container.findViewById(R.id.content_cabmain);
+        softKeyboard = new SoftKeyboard(mainLayout, im);
         ListView lvList = (ListView) container.findViewById(R.id.lvList);
         adMain = new ListAdapter(act);
         lvList.setAdapter(adMain);
