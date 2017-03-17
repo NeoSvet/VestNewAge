@@ -1,10 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_search"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
     android:orientation="vertical">
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/etSearch"
         style="@style/Label"
         android:layout_width="match_parent"
@@ -16,6 +17,17 @@
         android:inputType="text"
         android:padding="5dp"
         android:textColorHint="@color/light_gray" />
+
+    <CheckBox
+        android:id="@+id/cbSearchInResults"
+        style="@style/CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:checked="true"
+        android:text="@string/search_in_results"
+        android:visibility="gone" />
 
     <View
         android:layout_width="match_parent"
