@@ -115,15 +115,10 @@ public class Lib {
         return entity.getContent();
     }
 
-    public File getPageFile(String link) {
-        if (link.contains("#"))
-            link = link.substring(0, link.indexOf("#"));
-        String p = "/" + link.substring(0, link.lastIndexOf("/"));
-        File file = new File(context.getFilesDir() + p);
-        if (!file.exists())
-            file.mkdirs();
-        file = new File(file.toString() + link.substring(link.lastIndexOf("/")));
-        return file;
+    public File getDBFolder() {
+        String s = context.getFilesDir().toString();
+        File f = new File(s.substring(0, s.length() - 5) + "databases");
+        return f;
     }
 
     public File getFile(String link) {
