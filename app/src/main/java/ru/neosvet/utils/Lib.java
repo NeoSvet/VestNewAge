@@ -215,13 +215,13 @@ public class Lib {
 
     public String withOutTags(String s) {
         int i;
-        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace("<br />", N)
+        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace("<br>", N)
                 .replace("&laquo;", "«").replace("&raquo;", "»").replace(N + " ", N)
-                .replace("&ndash;", "–").replace("&gt;", ">").replace("&nbsp;", " ");
+                .replace("&ndash;", "–").replace("&nbsp;", " ");
 
         while ((i = s.indexOf("<")) > -1) {
             s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
         }
-        return s.trim();
+        return s.trim().replace("&gt;", ">");
     }
 }
