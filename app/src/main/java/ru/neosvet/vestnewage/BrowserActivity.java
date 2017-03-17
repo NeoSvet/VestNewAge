@@ -146,8 +146,8 @@ public class BrowserActivity extends AppCompatActivity
         tvPlace = (TextView) findViewById(R.id.tvPlace);
         View bPrev = findViewById(R.id.bPrev);
         View bNext = findViewById(R.id.bNext);
-        if (p.contains("\n\n")) {
-            place = p.split("\n\n");
+        if (p.contains(Lib.NN)) {
+            place = p.split(Lib.NN);
             bPrev.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

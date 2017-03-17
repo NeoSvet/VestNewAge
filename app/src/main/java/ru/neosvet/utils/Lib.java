@@ -28,7 +28,7 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    public static final String SITE = "http://blagayavest.info/", N = "\n",
+    public static final String SITE = "http://blagayavest.info/", N = "\n", NN = "\n\n",
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
             LIGHT = "/style/light.css", DARK = "/style/dark.css",

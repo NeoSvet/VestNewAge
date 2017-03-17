@@ -280,7 +280,7 @@ public class MarkerActivity extends AppCompatActivity {
         adPage.clear();
         if (pageCon == null) // страница не загружена...
             return;
-        String[] m = pageCon.split("\n\n");
+        String[] m = pageCon.split(Lib.NN);
         int i;
         ((TextView) findViewById(R.id.tvTitle)).setText(m[0]);
         for (i = 0; i < m.length; i++) {
