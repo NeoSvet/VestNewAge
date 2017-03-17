@@ -438,6 +438,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 } else if (line.contains("<")) {
                     line = line.trim();
                     if (line.length() < 7) continue;
+                    if (line.contains("<p")) {
+                        while (!line.contains(par)) {
+                            line += br.readLine();
+                        }
+                    }
                     if (line.contains("iframe")) {
                         if (!line.contains("</iframe"))
                             line += br.readLine();
@@ -455,8 +460,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             line = "<center>" + s + "</center>";
                         else line = s;
                     }
-                    line = line.replace("color", "cvet");
-                    if (line.indexOf(par) + par.length() < line.length()) {
+                    line = line.replace("<br />", "<br>").replace("color", "cvet");
+                    while (line.indexOf(par) + par.length() < line.length()) {
+                        if (!line.contains(par)) break;
                         // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
                         s = line.substring(0, line.indexOf(par) + par.length());
                         cv = new ContentValues();
