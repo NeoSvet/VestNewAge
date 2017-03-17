@@ -52,22 +52,18 @@ public class WebClient extends WebViewClient {
             if (!url.contains(BrowserActivity.PNG))
                 act.addJournal();
         }
-        if (android.os.Build.VERSION.SDK_INT > 15)
-            act.setPlace();
-        else {
-            final Handler hPlace = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message message) {
-                    act.setPlace();
-                    return false;
-                }
-            });
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    hPlace.sendEmptyMessage(0);
-                }
-            }, 500);
-        }
+        final Handler hPlace = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                act.setPlace();
+                return false;
+            }
+        });
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hPlace.sendEmptyMessage(0);
+            }
+        }, 500);
     }
 }
