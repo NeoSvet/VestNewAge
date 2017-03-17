@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.R;
 
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "paragraph",
-            JOURNAL = "journal", MARKERS = "markers",// LIST = "list",
+            JOURNAL = "journal", MARKERS = "markers", LIKE = " LIKE ?",
             Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
             LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
     private Context context;
