@@ -32,7 +32,7 @@ public class Lib {
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
             LIGHT = "/style/light.css", DARK = "/style/dark.css",
-            PRINT = "?styletpl=print", HREF = "href",
+            PRINT = "?styletpl=print", HREF = "href", DIALOG = "dialog",
             KV_OPEN = "“", KV_CLOSE = "”", POEMS = "poems";
     private Context context;
 
