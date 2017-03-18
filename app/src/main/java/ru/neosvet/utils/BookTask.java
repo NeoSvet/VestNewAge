@@ -101,26 +101,23 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
         if (title.size() > 0) {
             DataBase dataBase = new DataBase(act, date);
             SQLiteDatabase db = dataBase.getWritableDatabase();
-            String s;
-            if (links.get(0).contains(Lib.POEMS))
-                s = Lib.POEMS;
-            else
-                s = "2016";
-            db.delete(DataBase.TITLE, DataBase.LINK +
-                    " LIKE ?", new String[]{"%" + s + "%"});
-
             ContentValues cv = new ContentValues();
             cv.put(DataBase.TIME, System.currentTimeMillis());
             if (db.update(DataBase.TITLE, cv,
                     DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
                 db.insert(DataBase.TITLE, null, cv);
             }
-
             for (int i = 0; i < title.size(); i++) {
                 cv = new ContentValues();
-                cv.put(DataBase.LINK, links.get(i));
                 cv.put(DataBase.TITLE, title.get(i));
-                db.insert(DataBase.TITLE, null, cv);
+                // пытаемся обновить запись:
+                if (db.update(DataBase.TITLE, cv,
+                        DataBase.LINK + DataBase.Q,
+                        new String[]{links.get(i)}) == 0) {
+                    // обновить не получилось, добавляем:
+                    cv.put(DataBase.LINK, links.get(i));
+                    db.insert(DataBase.TITLE, null, cv);
+                }
             }
             dataBase.close();
             title.clear();
