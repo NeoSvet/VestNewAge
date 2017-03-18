@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,14 +22,17 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.BookTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
-public class BookFragment extends Fragment {
+public class BookFragment extends Fragment implements DateDialog.Result {
     private final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
@@ -36,14 +41,22 @@ public class BookFragment extends Fragment {
     private ListAdapter adBook;
     private View fabRefresh, ivPrev, ivNext;
     private TextView tvDate;
+    private DateDialog dateDialog;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
     private int x, y, tab = 0;
-    private boolean boolNotClick = false;
+    private boolean boolNotClick = false, boolDialog = false;
     private Date dKat, dPos;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
+    final Handler hTimer = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press));
+            return false;
+        }
+    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,6 +72,9 @@ public class BookFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(Lib.DIALOG, boolDialog);
+        if (boolDialog)
+            dateDialog.dismiss();
         outState.putInt(CURRENT_TAB, tab);
         outState.putSerializable(Lib.TASK, task);
         super.onSaveInstanceState(outState);
@@ -78,7 +94,8 @@ public class BookFragment extends Fragment {
 //                fabRefresh.setVisibility(View.GONE);
                 task.setFrm(this);
                 act.status.setLoad(true);
-            }
+            } else if (state.getBoolean(Lib.DIALOG))
+                showDatePicker();
         }
         if (tab == 1) {
             tabHost.setCurrentTab(0);
@@ -335,11 +352,24 @@ public class BookFragment extends Fragment {
                     startLoad();
             }
         });
+        tvDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDatePicker();
+            }
+        });
     }
 
     private void openMonth(int v) {
         if (task == null) {
             setDate(v);
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press_shape));
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    hTimer.sendEmptyMessage(1);
+                }
+            }, 300);
             openList(true);
         }
     }
@@ -402,5 +432,37 @@ public class BookFragment extends Fragment {
 
     public void setTab(int tab) {
         this.tab = tab;
+    }
+
+    private void showDatePicker() {
+        boolDialog = true;
+        Date d;
+        if (tab == 0)
+            d = (Date) dKat.clone();
+        else
+            d = (Date) dPos.clone();
+        d.setYear(d.getYear() - 1900);
+        dateDialog = new DateDialog(act, d);
+        dateDialog.setResult(BookFragment.this);
+        if (tab == 0) {
+            dateDialog.setMinMonth(1); // feb
+        } else {
+            dateDialog.setMaxMonth(8); // sep
+            dateDialog.setMaxYear(116); // 2016
+        }
+        dateDialog.show();
+    }
+
+    @Override
+    public void putDate(Date date) {
+        boolDialog = false;
+        if (date == null) // cancel
+            return;
+        date.setYear(date.getYear() + 1900);
+        if (tab == 0)
+            dKat = date;
+        else
+            dPos = date;
+        openList(true);
     }
 }

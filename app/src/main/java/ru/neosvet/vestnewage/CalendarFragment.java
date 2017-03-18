@@ -30,6 +30,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.CalendarAdapter;
 import ru.neosvet.ui.CalendarItem;
+import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
@@ -38,7 +39,7 @@ import ru.neosvet.utils.CalendarTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
-public class CalendarFragment extends Fragment {
+public class CalendarFragment extends Fragment implements DateDialog.Result {
     public static final String CURRENT_DATE = "current_date", ADS = "ads", CALENDAR = "/calendar/";
     private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
@@ -50,12 +51,16 @@ public class CalendarFragment extends Fragment {
     private CalendarTask task = null;
     private ListAdapter adNoread;
     private MainActivity act;
+    private DateDialog dateDialog;
     private Animation anShow, anHide;
-    private boolean boolShow = false;
-    final Handler hEmpty = new Handler(new Handler.Callback() {
+    private boolean boolShow = false, boolDialog = false;
+    final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            tvEmpty.startAnimation(anHide);
+            if (message.what == 0)
+                tvEmpty.startAnimation(anHide);
+            else
+                tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press));
             return false;
         }
     });
@@ -79,6 +84,9 @@ public class CalendarFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(Lib.DIALOG, boolDialog);
+        if (boolDialog)
+            dateDialog.dismiss();
         outState.putBoolean(Lib.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Lib.TASK, task);
@@ -108,7 +116,8 @@ public class CalendarFragment extends Fragment {
                         * getResources().getDisplayMetrics().density);
                 lvNoread.requestLayout();
                 lvNoread.setVisibility(View.VISIBLE);
-            }
+            } else if (state.getBoolean(Lib.DIALOG))
+                showDatePicker();
         }
         createCalendar(0);
     }
@@ -130,7 +139,7 @@ public class CalendarFragment extends Fragment {
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            hEmpty.sendEmptyMessage(0);
+                            hTimer.sendEmptyMessage(0);
                         }
                     }, 2500);
                     return;
@@ -401,6 +410,12 @@ public class CalendarFragment extends Fragment {
                 openMonth(1);
             }
         });
+        tvDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDatePicker();
+            }
+        });
     }
 
     private void openLink(String link) {
@@ -409,8 +424,16 @@ public class CalendarFragment extends Fragment {
     }
 
     private void openMonth(int v) {
-        if (task == null)
+        if (task == null) {
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press_shape));
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    hTimer.sendEmptyMessage(1);
+                }
+            }, 300);
             createCalendar(v);
+        }
     }
 
     private void createCalendar(int v) {
@@ -551,7 +574,6 @@ public class CalendarFragment extends Fragment {
                 bNewAds = (System.currentTimeMillis() - file.lastModified() < 10000);
                 String t;
                 BufferedReader br = new BufferedReader(new FileReader(file));
-                //tut
                 br.readLine(); //time
                 final String end = "<e>";
                 while ((s = br.readLine()) != null) {
@@ -612,5 +634,21 @@ public class CalendarFragment extends Fragment {
             tvNew.setVisibility(View.VISIBLE);
             fabRefresh.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void showDatePicker() {
+        boolDialog = true;
+        dateDialog = new DateDialog(act, dCurrent);
+        dateDialog.setResult(CalendarFragment.this);
+        dateDialog.show();
+    }
+
+    @Override
+    public void putDate(Date date) {
+        boolDialog = false;
+        if (date == null) // cancel
+            return;
+        dCurrent = date;
+        createCalendar(0);
     }
 }
