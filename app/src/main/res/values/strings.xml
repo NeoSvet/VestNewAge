@@ -4,7 +4,7 @@
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="download_title">Загрузить...</string>
+    <string name="download_title">Загрузить&#8230;</string>
     <string name="download_all">Загрузить все материалы</string>
     <string name="download_it">Загрузить весь данный раздел</string>
     <!--Lib-->
@@ -85,7 +85,7 @@
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
-    <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться...», то нажмите «Назад» и откройте страницу повторно.</string>
+    <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться&#8230;», то нажмите «Назад» и откройте страницу повторно.</string>
     <!--Страница-->
     <string name="video_on_vimeo">Видео на Vimeo</string>
     <string name="page">Страница:</string>
@@ -102,7 +102,7 @@
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="on">за</string>
     <string name="secs">30 секунд</string>
-    <string name="prom_notif_alert">Будьте внимательны!\nУведомление может сработать с задержкой до 4 минут.\nПричины выясняю и исправляю... А может это лишь на моём смартфоне? Попробуйте!</string>
+    <string name="prom_notif_alert">Будьте внимательны!\nУведомление может сработать с задержкой до 4 минут.\nПричины выясняю и исправляю&#8230; А может это лишь на моём смартфоне? Попробуйте!</string>
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
