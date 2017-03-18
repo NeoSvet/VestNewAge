@@ -24,7 +24,7 @@ public class DateDialog extends Dialog {
     private Date date;
     private Result result;
     private MonthAdapter adMonth;
-    private int min_year = 116, max_year, max_month;
+    private int min_year = 116, min_month = 0, max_year = 0, max_month = 0;
     private boolean boolCancel = true;
 
     public DateDialog(Activity act, Date date) {
@@ -39,6 +39,18 @@ public class DateDialog extends Dialog {
 
     public void setMinYear(int min_year) {
         this.min_year = min_year;
+    }
+
+    public void setMaxYear(int max_year) {
+        this.max_year = max_year;
+    }
+
+    public void setMinMonth(int min_month) {
+        this.min_month = min_month;
+    }
+
+    public void setMaxMonth(int max_month) {
+        this.max_month = max_month;
     }
 
     @Override
@@ -78,8 +90,10 @@ public class DateDialog extends Dialog {
         rvMonth.setLayoutManager(layoutManager);
         rvMonth.setAdapter(adMonth);
         Date d = new Date();
-        max_year = d.getYear();
-        max_month = d.getMonth();
+        if (max_year == 0)
+            max_year = d.getYear();
+        if (max_month == 0)
+            max_month = d.getMonth();
         setCalendar();
         rvMonth.addOnItemTouchListener(
                 new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
@@ -104,10 +118,14 @@ public class DateDialog extends Dialog {
 
     private void setCalendar() {
         tvYear.setText(String.valueOf(date.getYear() + 1900));
+        if (date.getYear() == min_year)
+            adMonth.setMinMonth(min_month);
+        else
+            adMonth.setMinMonth(-1);
         if (date.getYear() == max_year)
             adMonth.setMaxMonth(max_month);
         else
-            adMonth.setMaxMonth(-1);
+            adMonth.setMaxMonth(12);
         adMonth.setSelect(date.getMonth());
         adMonth.notifyDataSetChanged();
     }
@@ -125,7 +143,7 @@ public class DateDialog extends Dialog {
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {
         private List<String> data = new ArrayList<String>();
-        private int select, max_month = -1;
+        private int select, min_month = -1, max_month = 12;
 
         @Override
         public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -133,12 +151,16 @@ public class DateDialog extends Dialog {
             return new MonthAdapter.ViewHolder(view);
         }
 
+        public void setMinMonth(int min_month) {
+            this.min_month = min_month;
+        }
+
         public void setMaxMonth(int max_month) {
             this.max_month = max_month;
         }
 
         public void setSelect(int pos) {
-            if (pos <= max_month || max_month == -1)
+            if (pos <= max_month && pos >= min_month)
                 select = pos;
         }
 
@@ -149,10 +171,10 @@ public class DateDialog extends Dialog {
         @Override
         public void onBindViewHolder(MonthAdapter.ViewHolder holder, int pos) {
             holder.tv.setText(data.get(pos));
-            if (pos > max_month && max_month > -1) {
+            if (pos > max_month && pos < min_year) {
                 holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
                 holder.bg.setEnabled(false);
-            } else if (pos == max_month) {
+            } else if (pos == max_month || pos == min_month) {
                 if (pos == select)
                     holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_kp));
                 else
