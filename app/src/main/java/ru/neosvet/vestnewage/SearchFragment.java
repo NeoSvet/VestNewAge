@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -24,31 +25,37 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
+import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.SearchTask;
 
 
 public class SearchFragment extends Fragment implements DateDialog.Result {
-    private final String SEARCH = "search", START = "start", END = "end", SETTINGS = "s", DIALOG = "d";
+    private final String SEARCH = "search", START = "start", END = "end", SETTINGS = "s";
     private final DateFormat df = new SimpleDateFormat(" yyyy");
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings;
     private LinearLayout mainLayout;
     private CheckBox cbSearchInResults;
+    private ListView lvResult;
     private Button bStart, bEnd;
     private AutoCompleteTextView etSearch;
     private ArrayAdapter<String> adSearch;
+    List<String> liSearch = new ArrayList<String>();
     private SearchTask task = null;
     private Date dStart, dEnd;
     private ListAdapter adResults;
     private int dialog = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
+    private boolean boolScrollToFirst = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,7 +73,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(DIALOG, dialog);
+        outState.putInt(Lib.DIALOG, dialog);
         if (dialog > -1)
             dateDialog.dismiss();
         outState.putSerializable(Lib.TASK, task);
@@ -94,7 +101,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
             cbSearchInResults.setChecked(state.getBoolean(SEARCH));
             if (state.getBoolean(SETTINGS)) {
                 visSettings();
-                dialog = state.getInt(DIALOG);
+                dialog = state.getInt(Lib.DIALOG);
                 if (dialog > -1)
                     showDatePicker(dialog);
             }
@@ -119,15 +126,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         final File f = new File(act.getFilesDir() + SEARCH);
-        if (adSearch.getCount() == 0) {
+        if (liSearch.size() == 0) {
             if (f.exists()) f.delete();
         } else {
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-                for (int i = 0; i < adSearch.getCount() - 1; i++) {
-                    bw.write(adSearch.getItem(i) + Lib.N);
+                for (int i = 0; i < liSearch.size(); i++) {
+                    bw.write(liSearch.get(i) + Lib.N);
                     bw.flush();
                 }
                 bw.close();
@@ -135,10 +141,11 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                 e.printStackTrace();
             }
         }
+        super.onDestroy();
     }
 
     private void initViews() {
-        mainLayout=(LinearLayout) container.findViewById(R.id.content_search);
+        mainLayout = (LinearLayout) container.findViewById(R.id.content_search);
         pSettings = container.findViewById(R.id.pSettings);
         fabSettings = container.findViewById(R.id.fabSettings);
         fabOk = container.findViewById(R.id.fabOk);
@@ -146,33 +153,28 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         bEnd = (Button) container.findViewById(R.id.bEndRange);
         cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
-        ListView lvResult = (ListView) container.findViewById(R.id.lvResult);
+        lvResult = (ListView) container.findViewById(R.id.lvResult);
         adResults = new ListAdapter(act);
         lvResult.setAdapter(adResults);
-        lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-
-            }
-        });
         InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
         softKeyboard = new SoftKeyboard(mainLayout, im);
     }
 
     private void setViews() {
         final File f = new File(act.getFilesDir() + SEARCH);
-        adSearch = new ArrayAdapter<String>(act, android.R.layout.select_dialog_item);
         if (f.exists()) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(f));
                 String s;
-                while ((s = br.readLine()) != null)
-                    adSearch.add(s);
+                while ((s = br.readLine()) != null) {
+                    liSearch.add(s);
+                }
                 br.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        adSearch = new ArrayAdapter<String>(act, android.R.layout.select_dialog_item, liSearch);
         etSearch.setThreshold(1);
         etSearch.setAdapter(adSearch);
         etSearch.setOnKeyListener(new View.OnKeyListener() {
@@ -186,16 +188,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                         softKeyboard.closeSoftKeyboard();
                         final String s = etSearch.getText().toString();
                         task = new SearchTask(SearchFragment.this);
-                        task.execute(s);
-                        boolean b = true;
-                        for (int i = 0; i < adSearch.getCount(); i++) {
-                            if (adSearch.getItem(i).equals(s)) {
-                                b = false;
-                                break;
-                            }
-                        }
-                        if (b) {
-                            adSearch.add(s);
+                        DateFormat df = new SimpleDateFormat("MM.yy");
+                        task.execute(s, df.format(dStart), df.format(dEnd));
+                        if (!liSearch.contains(s)) {
+                            liSearch.add(s);
                             adSearch.notifyDataSetChanged();
                         }
                     }
@@ -205,9 +201,17 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                 return false;
             }
         });
+        lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
+                        adResults.getItem(pos).getDes());
+            }
+        });
         fabSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                softKeyboard.closeSoftKeyboard();
                 visSettings();
             }
         });
@@ -223,7 +227,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         container.findViewById(R.id.bClearSearch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adSearch.clear();
+                liSearch.clear();
                 adSearch.notifyDataSetChanged();
             }
         });
@@ -247,6 +251,22 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                 dStart = d;
                 bStart.setText(formatDate(dStart));
                 bEnd.setText(formatDate(dEnd));
+            }
+        });
+        lvResult.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                    if (lvResult.getFirstVisiblePosition() > 0)
+                        lvResult.smoothScrollToPosition(0);
+                    else
+                        boolScrollToFirst = false;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
             }
         });
     }
@@ -280,8 +300,19 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     }
 
 
-    public void finishSearch(String result) {
+    public void finishSearch(List<ListItem> data) {
         task = null;
+        adResults.clear();
+        adResults.notifyDataSetChanged();
+        for (int i = 0; i < data.size(); i++) {
+            adResults.addItem(data.get(i));
+        }
+        data.clear();
+        adResults.notifyDataSetChanged();
+        if (lvResult.getFirstVisiblePosition() > 0) {
+            boolScrollToFirst = true;
+            lvResult.smoothScrollToPosition(0);
+        }
     }
 
 
