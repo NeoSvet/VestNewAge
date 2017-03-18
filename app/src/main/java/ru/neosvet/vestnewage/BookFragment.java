@@ -82,11 +82,9 @@ public class BookFragment extends Fragment implements DateDialog.Result {
 
     private void restoreActivityState(Bundle state) {
         Date d = new Date();
-        d.setYear(2000);
+        d.setYear(100);
         dKat = new Date(pref.getLong(KAT, d.getTime()));
-        if (dKat.getYear() < 2000) dKat.setYear(dKat.getYear() + 1900);
         dPos = new Date(pref.getLong(POS, d.getTime()));
-        if (dPos.getYear() < 2000) dPos.setYear(dPos.getYear() + 1900);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
@@ -164,7 +162,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
 
             adBook.clear();
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
-                    + "\n" + d.getYear());
+                    + "\n" + (d.getYear() + 1900));
             ivPrev.setEnabled(existsList(setDate(d, -1), bKat));
             ivNext.setEnabled(existsList(setDate(d, 1), bKat));
 
@@ -408,14 +406,19 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             tabHost.setCurrentTab(tab);
         task = null;
         if (result.length() > 0) {
-            boolean b;
+            boolean b = false;
+            Date d;
             if (tab == 0)
-                b = dKat.getYear() == 2000;
+                d = dKat;
             else
-                b = dPos.getYear() == 2000;
+                d = dPos;
+            if (!existsList(d, tab == 0))
+                b = true;
             if (b) {
-                Date d = new Date();
-                d.setYear(2000 + Integer.parseInt(result.substring(3, 5)));
+                if (d.getYear() > 100) //def year
+                    Lib.showToast(act, getResources().getString(R.string.katreny_is_not));
+                d = new Date();
+                d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
                 if (tab == 0)
                     dKat = d;
@@ -438,15 +441,14 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         boolDialog = true;
         Date d;
         if (tab == 0)
-            d = (Date) dKat.clone();
+            d = dKat;
         else
-            d = (Date) dPos.clone();
-        d.setYear(d.getYear() - 1900);
+            d = dPos;
         dateDialog = new DateDialog(act, d);
         dateDialog.setResult(BookFragment.this);
-        if (tab == 0) {
+        if (tab == 0) { // katreny
             dateDialog.setMinMonth(1); // feb
-        } else {
+        } else { // poslyania
             dateDialog.setMaxMonth(8); // sep
             dateDialog.setMaxYear(116); // 2016
         }
@@ -458,7 +460,6 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         boolDialog = false;
         if (date == null) // cancel
             return;
-        date.setYear(date.getYear() + 1900);
         if (tab == 0)
             dKat = date;
         else
