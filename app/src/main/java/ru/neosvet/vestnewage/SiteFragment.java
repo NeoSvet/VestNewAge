@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -35,7 +36,7 @@ public class SiteFragment extends Fragment {
     private TabHost tabHost;
     private ListView lvMain;
     private int x, y, tab = 0;
-    private boolean boolNotClick = false;
+    private boolean boolNotClick = false, boolScrollToFirst = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -252,12 +253,28 @@ public class SiteFragment extends Fragment {
                     startLoad(tabHost.getCurrentTabTag());
             }
         });
+        lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                    if (lvMain.getFirstVisiblePosition() > 0)
+                        lvMain.smoothScrollToPosition(0);
+                    else
+                        boolScrollToFirst = false;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+            }
+        });
     }
 
     private void openList(File f, boolean boolLoad) {
         try {
             adMain.clear();
-            if(act.status.checkTime(f.lastModified()))
+            if (act.status.checkTime(f.lastModified()))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
@@ -291,7 +308,10 @@ public class SiteFragment extends Fragment {
             }
             br.close();
             adMain.notifyDataSetChanged();
-            lvMain.smoothScrollToPosition(0);
+            if (lvMain.getFirstVisiblePosition() > 0) {
+                boolScrollToFirst = true;
+                lvMain.smoothScrollToPosition(0);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
