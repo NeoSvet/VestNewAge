@@ -108,7 +108,7 @@ public class DataBase extends SQLiteOpenHelper {
         StringBuilder pageCon = new StringBuilder();
         if (cursor.moveToFirst()) {
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link));
-            if(boolOnlyTitle) {
+            if (boolOnlyTitle) {
                 cursor.close();
                 dataBase.close();
                 return pageCon.toString();
@@ -192,14 +192,19 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public boolean existsPage(String link) {
-        DataBase dataBase = new DataBase(context, name);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(p.id) FROM paragraph p INNER JOIN title t ON t.id = p.id WHERE t.link"
-                + DataBase.Q, new String[]{link});
-        cursor.moveToFirst();
-        boolean b = cursor.getInt(0) > 0; //count > 0
-        cursor.close();
-        dataBase.close();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.ID},
+                DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
+        boolean b = false;
+        if (curTitle.moveToFirst()) {
+            Cursor curPar = db.query(DataBase.PARAGRAPH, null,
+                    DataBase.ID + DataBase.Q,
+                    new String[]{String.valueOf(curTitle.getInt(0))}
+                    , null, null, null);
+            b = curPar.moveToFirst();
+            curPar.close();
+        }
+        curTitle.close();
         return b;
     }
 }
