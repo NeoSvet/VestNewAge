@@ -307,19 +307,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadBookList(String name) throws Exception {
         DataBase dataBase = new DataBase(act, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+                null, null, null, null, null);
         if (curTitle.moveToFirst()) {
-            Cursor curPar;
-            int iLink = curTitle.getColumnIndex(DataBase.LINK);
-            int iID = curTitle.getColumnIndex(DataBase.ID);
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
-                curPar = db.query(DataBase.PARAGRAPH, null,
-                        DataBase.ID + DataBase.Q,
-                        new String[]{String.valueOf(curTitle.getInt(iID))}
-                        , null, null, null);
-                if (!curPar.moveToFirst())
-                    downloadPage(curTitle.getString(iLink), false);
+                downloadPage(curTitle.getString(0), false);
                 sub_prog++;
             }
         }
