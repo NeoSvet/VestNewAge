@@ -35,6 +35,7 @@
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
+    <string name="katreny_is_not">Катренов за этот месяц ещё нет!</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
     <string name="in_markers">В закладки</string>
