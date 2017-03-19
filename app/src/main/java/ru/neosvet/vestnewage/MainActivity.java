@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //getMenuInflater().inflate(R.menu.menu_table, menu);
         MenuItem miDownloadAll = menu.add(getResources().getString(R.string.download_title));
         miDownloadAll.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        miDownloadAll.setIcon(R.drawable.download);
+        miDownloadAll.setIcon(R.drawable.download_button);
         return true;
     }
 
