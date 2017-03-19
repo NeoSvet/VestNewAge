@@ -57,7 +57,7 @@ public class DateDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.date_activity);
+        setContentView(R.layout.date_dialog);
 
         tvYear = (TextView) findViewById(R.id.tvYear);
         findViewById(R.id.bMinus).setOnClickListener(new View.OnClickListener() {
