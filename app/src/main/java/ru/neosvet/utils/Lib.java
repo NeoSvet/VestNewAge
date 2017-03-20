@@ -134,8 +134,8 @@ public class Lib {
     }
 
     public void openInApps(String url, String titleChooser) {
-        Intent myIntent = new Intent(Intent.ACTION_VIEW);
         try {
+            Intent myIntent = new Intent(Intent.ACTION_VIEW);
             myIntent.setData(android.net.Uri.parse(url));
             if (titleChooser == null)
                 context.startActivity(myIntent);

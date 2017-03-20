@@ -56,7 +56,6 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String subLogin(String email, String pass) throws Exception {
-        StringBuilder list = new StringBuilder();
         URL url = new URL(HOST);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(PING);
