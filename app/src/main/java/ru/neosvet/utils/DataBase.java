@@ -146,7 +146,12 @@ public class DataBase extends SQLiteOpenHelper {
     public static String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
             return "00.00";
-        else {
+        else if (link.contains("pred")) {
+            if (link.contains("2004"))
+                return "12.04";
+            else
+                return "08.04";
+        } else {
             if (link.contains("-")) { //http://blagayavest.info/poems/?date=11-3-2017
                 link = link.substring(link.indexOf("-") + 1);
                 if (link.length() == 6)
@@ -161,7 +166,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public String getPageTitle(String title, String link) {
-        if (name.equals("00.00")) {
+        if (name.equals("00.00") || link.contains("2004") || link.contains("pred")) {
             return title;
         } else {
             String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
