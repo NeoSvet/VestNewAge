@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -118,6 +119,7 @@ public class BrowserActivity extends AppCompatActivity
         else
             outState.putString(DataBase.LINK, link);
         outState.putInt(DataBase.PLACE, iPlace);
+        outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
         super.onSaveInstanceState(outState);
     }
 
@@ -130,6 +132,24 @@ public class BrowserActivity extends AppCompatActivity
             dbPage = new DataBase(this, link);
             if (loader == null) {
                 openPage(false);
+                final float pos = state.getFloat(DataBase.PARAGRAPH);
+                final Handler h = new Handler() {
+                    public void handleMessage(android.os.Message msg) {
+                        wvBrowser.scrollTo(0, (int) (pos * wvBrowser.getScale()
+                                * (float) wvBrowser.getContentHeight()));
+                    }
+                };
+                Thread t = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            Thread.sleep(500);
+                            h.sendEmptyMessage(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                t.start();
             } else {
                 loader.setAct(this);
                 status.setLoad(true);
@@ -408,8 +428,7 @@ public class BrowserActivity extends AppCompatActivity
         } else if (id == R.id.nav_marker) {
             Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
             marker.putExtra(DataBase.LINK, link);
-            marker.putExtra(DataBase.PLACE, (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
-                    / ((float) wvBrowser.getContentHeight()) * 100.0f);
+            marker.putExtra(DataBase.PLACE, getPositionOnPage() * 100f);
             startActivity(marker);
         } else if (id == R.id.nav_scale) {
             //tut
@@ -624,5 +643,10 @@ public class BrowserActivity extends AppCompatActivity
         } else {
             status.setCrash(true);
         }
+    }
+
+    public float getPositionOnPage() {
+        return (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
+                / ((float) wvBrowser.getContentHeight());
     }
 }
