@@ -68,7 +68,7 @@ public class BrowserActivity extends AppCompatActivity
     private int iPlace = -1;
     private Prom prom;
     private Animation anMin, anMax;
-    private MenuItem miTheme, miNomenu;
+    private MenuItem miTheme, miNomenu, miRefresh;
     private Tip tip;
 
 
@@ -248,8 +248,7 @@ public class BrowserActivity extends AppCompatActivity
         prom = new Prom(this);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
-//        miLight = navMenu.getMenu().getItem(4).getSubMenu().getItem(0);
-//        miDark = navMenu.getMenu().getItem(4).getSubMenu().getItem(1);
+        miRefresh = navMenu.getMenu().getItem(0);
         miNomenu = navMenu.getMenu().getItem(3);
         miTheme = navMenu.getMenu().getItem(4);
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -569,7 +568,10 @@ public class BrowserActivity extends AppCompatActivity
                 dbPage.close();
                 DateFormat df = new SimpleDateFormat("yy");
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
-                bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
+                if (link.contains("print")) // материалы с сайта Откровений
+                    miRefresh.setVisible(false);
+                else
+                    bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
                 bw.write("<br>Copyright " + getResources().getString(R.string.copyright) + " Leonid Maslov 2004-20");
                 bw.write(df.format(d) + "<br>");
                 df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
