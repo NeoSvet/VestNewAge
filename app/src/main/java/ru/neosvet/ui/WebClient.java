@@ -49,7 +49,6 @@ public class WebClient extends WebViewClient {
 //        Lib.LOG("onPageFinished=" + url);
         view.setVisibility(View.VISIBLE);
         if (url.contains(files)) {
-            if (!url.contains(BrowserActivity.PNG))
                 act.addJournal();
         }
         final Handler hPlace = new Handler(new Handler.Callback() {

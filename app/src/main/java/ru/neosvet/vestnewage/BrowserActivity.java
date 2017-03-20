@@ -113,7 +113,10 @@ public class BrowserActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(Lib.TASK, loader);
-        outState.putString(DataBase.LINK, link);
+        if (link.contains(PNG))
+            outState.putString(DataBase.LINK, history.get(0));
+        else
+            outState.putString(DataBase.LINK, link);
         outState.putInt(DataBase.PLACE, iPlace);
         super.onSaveInstanceState(outState);
     }
@@ -296,12 +299,16 @@ public class BrowserActivity extends AppCompatActivity
         } else if (iPlace > -1) {
             closeSearch();
         } else if (history.size() > 0) {
-            boolBack = true;
-            openLink(history.get(0));
-            history.remove(0);
+            onBackBrowser();
         } else {
             super.onBackPressed();
         }
+    }
+
+    private void onBackBrowser() {
+        boolBack = true;
+        openLink(history.get(0));
+        history.remove(0);
     }
 
     private void setViews() {
@@ -445,6 +452,12 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void openLink(String url) {
+        if (url.contains(PNG)) {
+            history.add(0, link);
+            link = url;
+            openFile();
+            return;
+        }
         if (!link.equals(url)) {
             if (!url.contains(PAGE)) {
                 if (boolBack)
@@ -454,16 +467,11 @@ public class BrowserActivity extends AppCompatActivity
                 link = url;
                 dbPage = new DataBase(this, link);
             }
-            miTheme.setVisible(!link.contains(PNG));
         }
-        if (url.contains(PNG))
-            openFile();
-        else {
-            if (dbPage.existsPage(link))
-                openPage(true);
-            else
-                downloadPage(false);
-        }
+        if (dbPage.existsPage(link))
+            openPage(true);
+        else
+            downloadPage(false);
     }
 
     private void openFile() {
@@ -471,10 +479,15 @@ public class BrowserActivity extends AppCompatActivity
         if (lib.verifyStoragePermissions(CODE_OPEN)) return;
         File f = getFile();
         if (f.exists()) {
-            wvBrowser.loadUrl(FILE + f.toString());
-        } else {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(android.net.Uri.fromFile(f), "image/png");
+                startActivity(intent);
+            } catch (Exception e) {
+            }
+            onBackBrowser();
+        } else
             downloadFile(f);
-        }
     }
 
     private File getFile() {
