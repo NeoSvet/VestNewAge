@@ -36,6 +36,9 @@
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
     <string name="katreny_is_not">Катренов за этот месяц ещё нет!</string>
+    <string name="rnd_stih">«Случайный» стих</string>
+    <string name="rnd_pos">«Случайное» Послание</string>
+    <string name="rnd_kat">«Случайный» Катрен</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
     <string name="in_markers">В закладки</string>
