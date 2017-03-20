@@ -28,25 +28,27 @@ import java.util.TimerTask;
 import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
+import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.BookTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
 public class BookFragment extends Fragment implements DateDialog.Result {
-    private final String POS = "pos", KAT = "kat", CURRENT_TAB = "tab";
+    private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
     private Animation anMin, anMax;
     private final DateFormat df = new SimpleDateFormat("MM.yy");
     private ListAdapter adBook;
-    private View fabRefresh, ivPrev, ivNext;
+    private View fabRefresh, fabRndMenu, fabDownloadOtkr, ivPrev, ivNext;
     private TextView tvDate;
     private DateDialog dateDialog;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
     private int x, y, tab = 0;
-    private boolean boolNotClick = false, boolDialog = false;
+    private Tip tip;
+    private boolean boolNotClick = false, boolDialog = false, boolOtkr;
     private Date dKat, dPos;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -85,6 +87,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         d.setYear(100);
         dKat = new Date(pref.getLong(KAT, d.getTime()));
         dPos = new Date(pref.getLong(POS, d.getTime()));
+        boolOtkr = pref.getBoolean(OTKR, true);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
@@ -180,11 +183,15 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                     if (s == null) continue; // need?
                     if ((s.contains(Lib.POEMS) && bKat) ||
                             (!s.contains(Lib.POEMS) && !bKat)) {
-                        t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
-                        if (t.contains("_"))
-                            t = t.substring(0, t.indexOf("_"));
-                        t = cursor.getString(iTitle) +
-                                " (" + getResources().getString(R.string.from) + " " + t + ")";
+                        if (s.contains("2004") || s.contains("pred"))
+                            t = cursor.getString(iTitle);
+                        else {
+                            t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
+                            if (t.contains("_"))
+                                t = t.substring(0, t.indexOf("_"));
+                            t = cursor.getString(iTitle) +
+                                    " (" + getResources().getString(R.string.from) + " " + t + ")";
+                        }
                         adBook.addItem(new ListItem(t, s));
                     }
                 }
@@ -195,6 +202,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             dataBase.close();
             Date n = new Date();
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
+                //если выбранный месяц - текущий
                 bKat = act.status.checkTime(dModList.getTime());
             } else {
                 //если выбранный месяц - предыдущий, то проверяем когда список был обновлен
@@ -213,6 +221,11 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                 fabRefresh.setVisibility(View.VISIBLE);
             adBook.notifyDataSetChanged();
             lvBook.smoothScrollToPosition(0);
+            if (d.getMonth() == 0 && d.getYear() == 116 && boolOtkr) {
+                fabDownloadOtkr.setVisibility(View.VISIBLE);
+                fabDownloadOtkr.startAnimation(anMax);
+            } else
+                fabDownloadOtkr.setVisibility(View.GONE);
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
@@ -253,7 +266,10 @@ public class BookFragment extends Fragment implements DateDialog.Result {
     private void initViews() {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
         editor = pref.edit();
+        tip = new Tip(act, container.findViewById(R.id.pRnd));
         fabRefresh = container.findViewById(R.id.fabRefresh);
+        fabRndMenu = container.findViewById(R.id.fabRndMenu);
+        fabDownloadOtkr = container.findViewById(R.id.fabDownloadOtkr);
         tvDate = (TextView) container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
@@ -267,6 +283,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onAnimationEnd(Animation animation) {
                 fabRefresh.setVisibility(View.GONE);
+                fabRndMenu.setVisibility(View.GONE);
             }
 
             @Override
@@ -299,8 +316,11 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        if (!act.status.startMin())
+                        if (!act.status.startMin()) {
                             fabRefresh.startAnimation(anMin);
+                            fabRndMenu.startAnimation(anMin);
+                            tip.hide();
+                        }
                         x = (int) event.getX(0);
                         y = (int) event.getY(0);
                         break;
@@ -323,6 +343,8 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                         if (!act.status.startMax()) {
                             fabRefresh.setVisibility(View.VISIBLE);
                             fabRefresh.startAnimation(anMax);
+                            fabRndMenu.setVisibility(View.VISIBLE);
+                            fabRndMenu.startAnimation(anMax);
                         }
                         break;
                 }
@@ -354,6 +376,40 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onClick(View view) {
                 showDatePicker();
+            }
+        });
+        fabRndMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (tip.isShow())
+                    tip.hide();
+                else
+                    tip.show();
+            }
+        });
+        container.findViewById(R.id.bRndStih).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tip.hide(); //tut
+            }
+        });
+        container.findViewById(R.id.bRndPos).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tip.hide();
+            }
+        });
+        container.findViewById(R.id.bRndKat).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tip.hide();
+            }
+        });
+        fabDownloadOtkr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                task = new BookTask(BookFragment.this);
+                task.execute((byte) 3);
             }
         });
     }
@@ -406,17 +462,24 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             tabHost.setCurrentTab(tab);
         task = null;
         if (result.length() > 0) {
+            if (result.length() == 6) { //значит была загрузка с сайта Откровений
+                if (result.substring(5).equals("1")) { //загрузка была полностью завершена
+                    editor.putBoolean(OTKR, false);
+                    boolOtkr = false;
+                }
+                result = result.substring(0, 5);
+            }
             boolean b = false;
             Date d;
             if (tab == 0)
                 d = dKat;
             else
                 d = dPos;
-            if (!existsList(d, tab == 0))
+            if (existsList(d, tab == 0))
                 b = true;
+            else if (d.getYear() > 100) //def year
+                Lib.showToast(act, getResources().getString(R.string.katreny_is_not));
             if (b) {
-                if (d.getYear() > 100) //def year
-                    Lib.showToast(act, getResources().getString(R.string.katreny_is_not));
                 d = new Date();
                 d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
@@ -449,6 +512,10 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         if (tab == 0) { // katreny
             dateDialog.setMinMonth(1); // feb
         } else { // poslyania
+            if (!boolOtkr) {
+                dateDialog.setMinMonth(7); //aug
+                dateDialog.setMinYear(104); //2004
+            }
             dateDialog.setMaxMonth(8); // sep
             dateDialog.setMaxYear(116); // 2016
         }
