@@ -149,6 +149,8 @@ public class DataBase extends SQLiteOpenHelper {
         else if (link.contains("pred")) {
             if (link.contains("2004"))
                 return "12.04";
+            else if (link.contains("2009"))
+                return "01.09";
             else
                 return "08.04";
         } else {
