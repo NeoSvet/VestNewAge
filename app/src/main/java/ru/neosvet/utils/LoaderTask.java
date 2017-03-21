@@ -132,7 +132,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadFile(link, params[1]);
             else {
                 downloadStyle(params.length == 3);
-                downloadPage(link, true);
+                if(!link.equals(""))
+                    downloadPage(link, true);
             }
             return true;
         } catch (Exception e) {
