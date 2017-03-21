@@ -52,7 +52,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private SearchTask task = null;
     private Date dStart, dEnd;
     private ListAdapter adResults;
-    private int dialog = -1;
+    private int min_m = 0, min_y = 116, dialog = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private boolean boolScrollToFirst = false;
@@ -85,11 +85,17 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     }
 
     private void restoreActivityState(Bundle state) {
+        File f = new File(act.lib.getDBFolder() + "/12.15");
+        if (f.exists()) {
+            // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
+            min_m = 7; //aug
+            min_y = 104; //2004
+        }
         if (state == null) {
             dEnd = new Date();
             dStart = new Date();
-            dStart.setYear(116);
-            dStart.setMonth(0);
+            dStart.setYear(min_y);
+            dStart.setMonth(min_m);
         } else {
             task = (SearchTask) state.getSerializable(Lib.TASK);
             if (task != null) {
@@ -279,6 +285,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
             d = dEnd;
         dialog = id;
         dateDialog = new DateDialog(act, d);
+        dateDialog.setMinMonth(min_m);
+        dateDialog.setMinYear(min_y);
         dateDialog.setResult(this);
         dateDialog.show();
     }
