@@ -80,6 +80,22 @@ public class DateDialog extends Dialog {
                 }
             }
         });
+        findViewById(R.id.bStart).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                date.setYear(min_year);
+                date.setMonth(min_month);
+                setCalendar();
+            }
+        });
+        findViewById(R.id.bEnd).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                date.setYear(max_year);
+                date.setMonth(max_month);
+                setCalendar();
+            }
+        });
 
         RecyclerView rvMonth = (RecyclerView) findViewById(R.id.rvMonth);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 3);
