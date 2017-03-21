@@ -66,16 +66,6 @@
         app:srcCompat="@drawable/list" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabDownloadOtkr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:layout_marginRight="90dp"
-        android:visibility="gone"
-        app:srcCompat="@drawable/download" />
-
-    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabRefresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
