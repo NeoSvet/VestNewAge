@@ -400,8 +400,10 @@ public class BrowserActivity extends AppCompatActivity
                 openFile();
             else
                 downloadFile(getFile());
-        } else
-            Lib.showToast(this, getResources().getString(R.string.permission_denied));
+        } else {
+            lib.openInApps(Lib.SITE + link, null);
+            onBackBrowser();
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -409,14 +411,8 @@ public class BrowserActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_refresh) {
-            if (loader == null) {
-                if (link.contains(PNG)) {
-                    if (lib.verifyStoragePermissions(CODE_DOWNLOAD))
-                        return true;
-                    downloadFile(getFile());
-                } else
-                    downloadPage(true);
-            }
+            if (loader == null)
+                downloadPage(true);
         } else if (id == R.id.nav_nomenu) {
             bNomenu = !bNomenu;
             setCheckItem(item, bNomenu);
@@ -494,7 +490,8 @@ public class BrowserActivity extends AppCompatActivity
 
     private void openFile() {
         status.setLoad(false);
-        if (lib.verifyStoragePermissions(CODE_OPEN)) return;
+        if (lib.verifyStoragePermissions(CODE_OPEN))
+            return;
         File f = getFile();
         if (f.exists()) {
             try {

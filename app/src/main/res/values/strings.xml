@@ -47,7 +47,6 @@
     <string name="theme">Оформление</string>
     <string name="light">Светлое</string>
     <string name="dark">Темное</string>
-    <string name="permission_denied">В доступе к памяти отказано</string>
     <!--CollectionsFragment-->
     <string name="not_found_page">Страница не найдена</string>
     <string name="delete">Удалить?</string>
