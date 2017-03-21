@@ -521,6 +521,13 @@ public class BrowserActivity extends AppCompatActivity
     public void openPage(boolean newPage) {
         status.setLoad(false);
         final File fLight = lib.getFile(Lib.LIGHT);
+        if(!fLight.exists()) { //download style
+            loader = new LoaderTask(this);
+            status.setCrash(false);
+            status.setLoad(true);
+            loader.execute("", DataBase.LINK, "");
+            return;
+        }
         final File fDark = lib.getFile(Lib.DARK);
         final File fStyle = lib.getFile(STYLE);
         boolean b = true;
@@ -584,14 +591,21 @@ public class BrowserActivity extends AppCompatActivity
                 dbPage.close();
                 DateFormat df = new SimpleDateFormat("yy");
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
-                if (link.contains("print")) // материалы с сайта Откровений
+                if (link.contains("print")) {// материалы с сайта Откровений
                     miRefresh.setVisible(false);
-                else
+                    bw.write("Copyright ");
+                    bw.write(getResources().getString(R.string.copyright));
+                    bw.write(" Leonid Maslov 2004-20");
+                    bw.write(df.format(d) + "<br>");
+                } else {
                     bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
-                bw.write("<br>Copyright " + getResources().getString(R.string.copyright) + " Leonid Maslov 2004-20");
-                bw.write(df.format(d) + "<br>");
-                df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-                bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
+                    bw.write("<br>Copyright ");
+                    bw.write(getResources().getString(R.string.copyright));
+                    bw.write(" Leonid Maslov 2004-20");
+                    bw.write(df.format(d) + "<br>");
+                    df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+                    bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
+                }
                 bw.write("\n</div></body></html>");
                 bw.close();
             }
