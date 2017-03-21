@@ -195,9 +195,8 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                         adBook.addItem(new ListItem(t, s));
                     }
                 }
-            } else {
+            } else
                 dModList = d;
-            }
             cursor.close();
             dataBase.close();
             Date n = new Date();
@@ -466,20 +465,19 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                 if (result.substring(5).equals("1")) { //загрузка была полностью завершена
                     editor.putBoolean(OTKR, false);
                     boolOtkr = false;
-                }
+                } else // загрузка не была завершена
+                    return;
                 result = result.substring(0, 5);
             }
-            boolean b = false;
             Date d;
             if (tab == 0)
                 d = dKat;
             else
                 d = dPos;
-            if (existsList(d, tab == 0))
-                b = true;
-            else if (d.getYear() > 100) //def year
-                Lib.showToast(act, getResources().getString(R.string.katreny_is_not));
-            if (b) {
+            fabRefresh.setVisibility(View.VISIBLE);
+            act.status.setLoad(false);
+            if(d.getYear() == 100 || !existsList(d, tab == 0)) {
+                // 100 - year in default date
                 d = new Date();
                 d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
@@ -488,9 +486,15 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                 else
                     dPos = d;
             }
-            fabRefresh.setVisibility(View.VISIBLE);
-            act.status.setLoad(false);
-            openList(false);
+            if (existsList(d, tab == 0)) {
+                openList(false);
+            } else {
+                Date n = new Date();
+                if (n.getMonth() == d.getMonth() && n.getYear() == d.getYear())
+                    Lib.showToast(act, getResources().getString(R.string.list_is_empty));
+                else
+                    startLoad();
+            }
         } else {
             act.status.setCrash(true);
         }
