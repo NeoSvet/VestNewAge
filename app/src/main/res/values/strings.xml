@@ -35,7 +35,7 @@
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
-    <string name="katreny_is_not">Катренов за этот месяц ещё нет!</string>
+    <string name="list_is_empty">Список за этот месяц пуст</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
@@ -121,6 +121,7 @@
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
     <string name="refresh_list">Обновление списков раздела</string>
+    <string name="download_list">Загрузка списка</string>
     <string name="download">Загрузка</string>
     <string name="kat_n_pos">Катренов и Посланий</string>
     <string name="materials">материалов</string>
