@@ -1,6 +1,8 @@
 package ru.neosvet.utils;
 
+import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
@@ -14,12 +16,18 @@ import java.util.List;
 
 import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.R;
 
-public class BookTask extends AsyncTask<Byte, Void, String> implements Serializable {
+public class BookTask extends AsyncTask<Byte, Boolean, String> implements Serializable {
+    private final String SITE = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private transient BookFragment frm;
     private transient MainActivity act;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
+    private transient ProgressDialog di;
+    private int prog = 0;
+    private String msg = null;
+    private boolean boolStart = true;
 
     public BookTask(BookFragment frm) {
         setFrm(frm);
@@ -32,11 +40,15 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
     public void setFrm(BookFragment frm) {
         this.frm = frm;
         act = (MainActivity) frm.getActivity();
+        if (msg != null)
+            publishProgress(true);
     }
 
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+        if (di != null)
+            di.dismiss();
         if (frm != null) {
             frm.finishLoad(result);
         }
@@ -48,18 +60,123 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(Boolean... values) {
         super.onProgressUpdate(values);
+        if (values[0]) {
+            di = new ProgressDialog(act);
+            di.setTitle(act.getResources().getString(R.string.load));
+            di.setMessage(msg);
+            di.setMax(1010);
+            di.setProgress(prog);
+            di.setIndeterminate(false);
+            di.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            di.setProgressDrawable(act.getResources().getDrawable(R.drawable.progress_bar));
+            di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    boolStart = false;
+                }
+            });
+            di.show();
+        } else {
+            di.setMessage(msg);
+            di.setProgress(prog);
+        }
     }
 
     @Override
     protected String doInBackground(Byte... params) {
         try {
+            if (params[0] == 3)
+                return downloadOtrk();
             return downloadData(params[0] == 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
+    }
+
+    private String downloadOtrk() throws Exception {
+        msg = act.getResources().getString(R.string.start);
+        publishProgress(true);
+        String[] urls = {"/print/otkroveniya.html", "/print/tolkovaniya.html"};
+        InputStream in;
+        BufferedReader br;
+        boolean b;
+        int n;
+        String line, t, s, date1 = "", date2;
+        for (int i = 0; i < urls.length && boolStart; i++) {
+            in = new BufferedInputStream(act.lib.getStream(SITE + urls[i]));
+            br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
+            b = false;
+            while ((line = br.readLine()) != null && boolStart) {
+                if (!b)
+                    b = line.contains("h2");//razdel
+                else if (line.contains("years") || line.contains("2016"))
+                    break;
+                else if (line.contains(Lib.HREF)) {
+                    n = line.indexOf(Lib.HREF) + 7;
+                    s = line.substring(n, line.indexOf("\"", n));
+                    t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
+                    msg = t;
+                    publishProgress(false);
+                    date2 = DataBase.getDatePage(s);
+                    if (!date2.equals(date1)) {
+                        date1 = date2;
+                        addOtrkPage(t, s, date1, true);
+                    } else
+                        addOtrkPage(t, s, date1, false);
+                    prog++;
+                }
+            }
+            br.close();
+        }
+        return date1 + (boolStart ? 1 : 0);
+    }
+
+    private void addOtrkPage(String title, String link, String date, boolean boolFirst) throws Exception {
+        DataBase dataBase = new DataBase(act, date);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        // если эта страница первая за этот месяце, то добавляем дату обновления списка:
+        if (boolFirst) {
+            cv.put(DataBase.TIME, System.currentTimeMillis());
+            if (db.update(DataBase.TITLE, cv,
+                    DataBase.TITLE + DataBase.Q, new String[]{title}) == 1) {
+                // обновить получилось, значит надо базу очистить
+                db.delete(DataBase.TITLE, null, null);
+                db.delete(DataBase.PARAGRAPH, null, null);
+            }
+            db.insert(DataBase.TITLE, null, cv);
+            cv = new ContentValues();
+        }
+        // добавление страницы в список:
+        cv.put(DataBase.TITLE, title);
+        cv.put(DataBase.LINK, link);
+        cv.put(DataBase.TIME, System.currentTimeMillis());
+        int id = (int) db.insert(DataBase.TITLE, null, cv);
+        // загрузка страницы:
+        InputStream in = new BufferedInputStream(act.lib.getStream(SITE + link));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
+        boolean b = false;
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.contains("<h1>"))
+                b = true;
+            else if (b) {
+                if (line.contains("print2"))
+                    break;
+                line = line.replace("color", "cvet");
+                if (line.contains("</td>"))
+                    line = line.substring(0, line.length() - 10);
+                cv = new ContentValues();
+                cv.put(DataBase.ID, id);
+                cv.put(DataBase.PARAGRAPH, line);
+                db.insert(DataBase.PARAGRAPH, null, cv);
+            }
+        }
+        br.close();
+        dataBase.close();
     }
 
     public String downloadData(boolean boolKat) throws Exception {
@@ -70,9 +187,11 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
         int i, n;
         String line, t, s, date1 = "", date2;
         while ((line = br.readLine()) != null) {
-            if (!b) {
+            if (!b)
                 b = line.contains("h2");//razdel
-            } else if (line.contains(Lib.HREF)) {
+            else if (line.contains("clear"))
+                break;
+            else if (line.contains(Lib.HREF)) {
                 if (line.contains("years"))
                     line = line.substring(0, line.indexOf("years"));
                 n = 0;
@@ -94,6 +213,7 @@ public class BookTask extends AsyncTask<Byte, Void, String> implements Serializa
                 saveData(date1);
             }
         }
+        br.close();
         return date1;
     }
 
