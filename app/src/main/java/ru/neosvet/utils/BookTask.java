@@ -8,8 +8,11 @@ import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,7 @@ public class BookTask extends AsyncTask<Byte, Boolean, String> implements Serial
             di = new ProgressDialog(act);
             di.setTitle(act.getResources().getString(R.string.load));
             di.setMessage(msg);
-            di.setMax(1010);
+            di.setMax(137);
             di.setProgress(prog);
             di.setIndeterminate(false);
             di.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -99,84 +102,35 @@ public class BookTask extends AsyncTask<Byte, Boolean, String> implements Serial
     private String downloadOtrk() throws Exception {
         msg = act.getResources().getString(R.string.start);
         publishProgress(true);
-        String[] urls = {"/print/otkroveniya.html", "/print/tolkovaniya.html"};
         InputStream in;
-        BufferedReader br;
-        boolean b;
-        int n;
-        String line, t, s, date1 = "", date2;
-        for (int i = 0; i < urls.length && boolStart; i++) {
-            in = new BufferedInputStream(act.lib.getStream(SITE + urls[i]));
-            br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
-            b = false;
-            while ((line = br.readLine()) != null && boolStart) {
-                if (!b)
-                    b = line.contains("h2");//razdel
-                else if (line.contains("years") || line.contains("2016"))
-                    break;
-                else if (line.contains(Lib.HREF)) {
-                    n = line.indexOf(Lib.HREF) + 7;
-                    s = line.substring(n, line.indexOf("\"", n));
-                    t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
-                    msg = t;
-                    publishProgress(false);
-                    date2 = DataBase.getDatePage(s);
-                    if (!date2.equals(date1)) {
-                        date1 = date2;
-                        addOtrkPage(t, s, date1, true);
-                    } else
-                        addOtrkPage(t, s, date1, false);
-                    prog++;
+        OutputStream out;
+        byte[] buf = new byte[1024];
+        int i, m = 8, y = 4;
+        String name = "01.16";
+        File f;
+        while (y < 16 && boolStart) {
+            name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
+            msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
+            publishProgress(false);
+            f = new File(act.lib.getDBFolder() + "/" + name);
+            if (!f.exists()) {
+                out = new FileOutputStream(f, false);
+                in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
+                while ((i = in.read(buf)) > 0) {
+                    out.write(buf, 0, i);
+                    out.flush();
                 }
+                out.close();
+                in.close();
             }
-            br.close();
+            if (m == 12) {
+                m = 1;
+                y++;
+            } else
+                m++;
+            prog++;
         }
-        return date1 + (boolStart ? 1 : 0);
-    }
-
-    private void addOtrkPage(String title, String link, String date, boolean boolFirst) throws Exception {
-        DataBase dataBase = new DataBase(act, date);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        // если эта страница первая за этот месяце, то добавляем дату обновления списка:
-        if (boolFirst) {
-            cv.put(DataBase.TIME, System.currentTimeMillis());
-            if (db.update(DataBase.TITLE, cv,
-                    DataBase.TITLE + DataBase.Q, new String[]{title}) == 1) {
-                // обновить получилось, значит надо базу очистить
-                db.delete(DataBase.TITLE, null, null);
-                db.delete(DataBase.PARAGRAPH, null, null);
-            }
-            db.insert(DataBase.TITLE, null, cv);
-            cv = new ContentValues();
-        }
-        // добавление страницы в список:
-        cv.put(DataBase.TITLE, title);
-        cv.put(DataBase.LINK, link);
-        cv.put(DataBase.TIME, System.currentTimeMillis());
-        int id = (int) db.insert(DataBase.TITLE, null, cv);
-        // загрузка страницы:
-        InputStream in = new BufferedInputStream(act.lib.getStream(SITE + link));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
-        boolean b = false;
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (line.contains("<h1>"))
-                b = true;
-            else if (b) {
-                if (line.contains("print2"))
-                    break;
-                line = line.replace("color", "cvet");
-                if (line.contains("</td>"))
-                    line = line.substring(0, line.length() - 10);
-                cv = new ContentValues();
-                cv.put(DataBase.ID, id);
-                cv.put(DataBase.PARAGRAPH, line);
-                db.insert(DataBase.PARAGRAPH, null, cv);
-            }
-        }
-        br.close();
-        dataBase.close();
+        return name + (boolStart ? 1 : 0);
     }
 
     public String downloadData(boolean boolKat) throws Exception {
