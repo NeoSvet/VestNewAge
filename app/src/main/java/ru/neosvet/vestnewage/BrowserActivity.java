@@ -521,14 +521,14 @@ public class BrowserActivity extends AppCompatActivity
     public void openPage(boolean newPage) {
         status.setLoad(false);
         final File fLight = lib.getFile(Lib.LIGHT);
-        if(!fLight.exists()) { //download style
+        final File fDark = lib.getFile(Lib.DARK);
+        if(!fLight.exists() && !fDark.exists()) { //download style
             loader = new LoaderTask(this);
             status.setCrash(false);
             status.setLoad(true);
             loader.execute("", DataBase.LINK, "");
             return;
         }
-        final File fDark = lib.getFile(Lib.DARK);
         final File fStyle = lib.getFile(STYLE);
         boolean b = true;
         if (fStyle.exists()) {
