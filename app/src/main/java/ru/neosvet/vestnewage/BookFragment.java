@@ -422,7 +422,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     task = new BookTask(BookFragment.this);
-                                    task.execute((byte) 3);
+                                    task.execute(3);
                                     dialog.dismiss();
                                 }
                             });
@@ -467,7 +467,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new BookTask(this);
-        task.execute((byte) tab);
+        task.execute(tab);
         act.status.setLoad(true);
     }
 

@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
 
-public class BookTask extends AsyncTask<Byte, Boolean, String> implements Serializable {
+public class BookTask extends AsyncTask<Integer, Boolean, String> implements Serializable {
     private final String SITE = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private transient BookFragment frm;
     private transient MainActivity act;
@@ -88,7 +88,7 @@ public class BookTask extends AsyncTask<Byte, Boolean, String> implements Serial
     }
 
     @Override
-    protected String doInBackground(Byte... params) {
+    protected String doInBackground(Integer... params) {
         try {
             if (params[0] == 3)
                 return downloadOtrk();
