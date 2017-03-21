@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="330dp"
+    android:layout_width="325dp"
     android:layout_height="wrap_content"
     android:background="@drawable/field"
     android:orientation="vertical"
