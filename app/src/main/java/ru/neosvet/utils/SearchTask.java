@@ -110,8 +110,11 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
             DateFormat df = new SimpleDateFormat("MM.yy");
             while (boolStart) {
                 d = new Date(sy, sm, 1);
-                if (list.contains(df.format(d)))
+                if (list.contains(df.format(d))) {
+                    publishProgress(act.getResources().getStringArray(R.array.months)
+                            [d.getMonth()] + " " + (1900 + d.getYear()));
                     searchList(df.format(d), s, step == -1);
+                }
 //                if (data.size() > 5) break; tut
                 if (sy == ey && sm == em)
                     break;
@@ -132,7 +135,6 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
     }
 
     private void searchList(String name, String s, boolean boolDesc) {
-        publishProgress(name);
         DataBase dataBase = new DataBase(act, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curPar = db.query(DataBase.PARAGRAPH, null,
