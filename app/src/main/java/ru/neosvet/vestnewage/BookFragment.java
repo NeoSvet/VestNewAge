@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -21,9 +22,11 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,7 +38,7 @@ import ru.neosvet.utils.BookTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 
-public class BookFragment extends Fragment implements DateDialog.Result {
+public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
     private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
@@ -49,7 +52,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
     private TabHost tabHost;
     private ListView lvBook;
     private int x, y, tab = 0;
-    private Tip tip;
+    private Tip menuRnd;
     private boolean boolNotClick = false, boolDialog = false, boolOtkr;
     private Date dKat, dPos;
     private SharedPreferences pref;
@@ -266,7 +269,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
     private void initViews() {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
         editor = pref.edit();
-        tip = new Tip(act, container.findViewById(R.id.pRnd));
+        menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
         fabRefresh = container.findViewById(R.id.fabRefresh);
         fabRndMenu = container.findViewById(R.id.fabRndMenu);
         tvDate = (TextView) container.findViewById(R.id.tvDate);
@@ -318,7 +321,7 @@ public class BookFragment extends Fragment implements DateDialog.Result {
                         if (!act.status.startMin()) {
                             fabRefresh.startAnimation(anMin);
                             fabRndMenu.startAnimation(anMin);
-                            tip.hide();
+                            menuRnd.hide();
                         }
                         x = (int) event.getX(0);
                         y = (int) event.getY(0);
@@ -380,30 +383,15 @@ public class BookFragment extends Fragment implements DateDialog.Result {
         fabRndMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tip.isShow())
-                    tip.hide();
+                if (menuRnd.isShow())
+                    menuRnd.hide();
                 else
-                    tip.show();
+                    menuRnd.show();
             }
         });
-        container.findViewById(R.id.bRndStih).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tip.hide(); //tut
-            }
-        });
-        container.findViewById(R.id.bRndPos).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tip.hide();
-            }
-        });
-        container.findViewById(R.id.bRndKat).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tip.hide();
-            }
-        });
+        container.findViewById(R.id.bRndStih).setOnClickListener(this);
+        container.findViewById(R.id.bRndPos).setOnClickListener(this);
+        container.findViewById(R.id.bRndKat).setOnClickListener(this);
     }
 
     private void openMonth(int v) {
@@ -528,15 +516,15 @@ public class BookFragment extends Fragment implements DateDialog.Result {
             d = dPos;
         dateDialog = new DateDialog(act, d);
         dateDialog.setResult(BookFragment.this);
-        if (tab == 0) { // katreny
-            dateDialog.setMinMonth(1); // feb
-        } else { // poslyania
+        if (tab == 0) { //katreny
+            dateDialog.setMinMonth(1); //feb
+        } else { //poslyania
             if (boolOtkr) {
                 dateDialog.setMinMonth(7); //aug
                 dateDialog.setMinYear(104); //2004
             }
-            dateDialog.setMaxMonth(8); // sep
-            dateDialog.setMaxYear(116); // 2016
+            dateDialog.setMaxMonth(8); //sep
+            dateDialog.setMaxYear(116); //2016
         }
         dateDialog.show();
     }
@@ -544,12 +532,126 @@ public class BookFragment extends Fragment implements DateDialog.Result {
     @Override
     public void putDate(Date date) {
         boolDialog = false;
-        if (date == null) // cancel
+        if (date == null) //cancel
             return;
         if (tab == 0)
             dKat = date;
         else
             dPos = date;
         openList(true);
+    }
+
+    @Override
+    public void onClick(View view) {
+        menuRnd.hide();
+        //Определяем диапозон дат:
+        Date d = new Date();
+        int m, y, max_m = d.getMonth() + 1, max_y = d.getYear() - 100;
+        if (view.getId() == R.id.bRndKat) {
+            m = 2;
+            y = 16;
+        } else {
+            if (boolOtkr) {
+                m = 8;
+                y = 4;
+            } else {
+                m = 1;
+                y = 16;
+            }
+            if (view.getId() == R.id.bRndPos) {
+                max_m = 9;
+                max_y = 16;
+            }
+        }
+        int n = (max_y - y) * 12 + max_m - m;
+        if (max_y > 16) { //проверка на существование текущего месяца
+            File f = new File(act.lib.getDBFolder() + "/" + df.format(d));
+            if (!f.exists()) n--;
+        }
+        //определяем случайный месяц:
+        Random g = new Random();
+        n = g.nextInt(n);
+        while (n > 0) { //определяем случайную дату
+            if (m == 12) {
+                m = 1;
+                y++;
+            } else
+                m++;
+            n--;
+        }
+        //открываем базу по случайной дате:
+        String name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
+        DataBase dataBase = new DataBase(act, name);
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor curTitle;
+        //определяем условие отбора в соотвтствии с выбранным пунктом:
+        if (view.getId() == R.id.bRndKat) { //случайный катрен
+            curTitle = db.query(DataBase.TITLE, null,
+                    DataBase.LINK + DataBase.LIKE,
+                    new String[]{"%" + Lib.POEMS + "%"}
+                    , null, null, null);
+        } else if (view.getId() == R.id.bRndPos) { //случайное послание
+            curTitle = db.query(DataBase.TITLE, null,
+                    DataBase.LINK + " NOT" + DataBase.LIKE,
+                    new String[]{"%" + Lib.POEMS + "%"}
+                    , null, null, null);
+        } else { //случайных стих
+            curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        }
+        //определяем случайных текст:
+        g = new Random();
+        n = g.nextInt(curTitle.getCount() - 2) + 2; //0 - отсуствует, 1 - дата изменения списка
+        if (curTitle.moveToPosition(n)) { //если случайный текст найден
+            String s = "";
+            int p = -1;
+            if (view.getId() == R.id.bRndStih) { //случайных стих
+                s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
+                Cursor curPar = db.query(DataBase.PARAGRAPH,
+                        new String[]{DataBase.PARAGRAPH},
+                        DataBase.ID + DataBase.Q,
+                        new String[]{s}, null, null, null);
+                if (curPar.getCount() > 0) { //если текст скачен
+                    g = new Random();
+                    n = curPar.getCount(); //номер случайного стиха
+                    if (y > 13 || (y == 13 && m > 7))
+                        n--; //исключаем подпись
+                    n = g.nextInt(n);
+                    if (curPar.moveToPosition(n)) { //если случайный стих найден
+                        p = n;
+                        s = act.lib.withOutTags(curPar.getString(0));
+                    } else
+                        s = "";
+                } else
+                    s = "";
+                curPar.close();
+                if (s.equals("")) //случайный стих не найден
+                    Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+            }
+            //выводим на экран:
+            String title = curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE));
+            final String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
+            curTitle.close();
+            final String place = s;
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setMessage(dataBase.getPageTitle(title, link) + (s.equals("") ? "" : Lib.N + s));
+            builder.setPositiveButton(getResources().getString(R.string.open),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            BrowserActivity.openReader(act, link, place);
+                            dialog.dismiss();
+                        }
+                    });
+            builder.create().show();
+            //добавляем в журнал:
+            ContentValues cv = new ContentValues();
+            cv.put(DataBase.TIME, System.currentTimeMillis());
+            String id = dataBase.getDatePage(link) + "&" + dataBase.getPageId(link) + "&" + p;
+            DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
+            db = dbJournal.getWritableDatabase();
+            cv.put(DataBase.ID, id);
+            db.insert(DataBase.JOURNAL, null, cv);
+            dbJournal.close();
+        } else
+            Lib.showToast(act, getResources().getString(R.string.alert_rnd));
     }
 }
