@@ -40,6 +40,7 @@
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
+    <string name="open">Открыть</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
     <string name="in_markers">В закладки</string>
