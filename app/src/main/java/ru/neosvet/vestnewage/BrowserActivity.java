@@ -522,7 +522,7 @@ public class BrowserActivity extends AppCompatActivity
         status.setLoad(false);
         final File fLight = lib.getFile(Lib.LIGHT);
         final File fDark = lib.getFile(Lib.DARK);
-        if(!fLight.exists() && !fDark.exists()) { //download style
+        if (!fLight.exists() && !fDark.exists()) { //download style
             loader = new LoaderTask(this);
             status.setCrash(false);
             status.setLoad(true);
@@ -629,11 +629,14 @@ public class BrowserActivity extends AppCompatActivity
             cv.put(DataBase.ID, id);
             db.insert(DataBase.JOURNAL, null, cv);
         }
-        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
-        if (cursor.getCount() > 100) {
-            cursor.moveToFirst();
-            i = cursor.getColumnIndex(DataBase.ID);
-            db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, new String[]{cursor.getString(i)});
+        Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
+        i = cursor.getCount();
+        cursor.moveToFirst();
+        while (i > 100) {
+            db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
+                    new String[]{cursor.getString(0)});
+            cursor.moveToNext();
+            i--;
         }
         cursor.close();
         dbJournal.close();
