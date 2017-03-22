@@ -21,6 +21,7 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";
@@ -70,7 +71,8 @@ public class JournalFragment extends Fragment {
             int iTime = curJ.getColumnIndex(DataBase.TIME);
             int iID = curJ.getColumnIndex(DataBase.ID);
             int i = 0;
-            String id, link;
+            String s;
+            String[] id;
             ListItem item;
             DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
             long now = System.currentTimeMillis();
@@ -78,25 +80,42 @@ public class JournalFragment extends Fragment {
             if (offset > 0)
                 curJ.moveToPosition(offset);
             do {
-                id = curJ.getString(iID);
-                dataBase = new DataBase(act, id.substring(0, id.indexOf("&")));
+                id = curJ.getString(iID).split("&");
+                dataBase = new DataBase(act, id[0]);
                 db = dataBase.getWritableDatabase();
-                cursor = db.query(DataBase.TITLE, null,
-                        DataBase.ID + DataBase.Q,
-                        new String[]{id.substring(id.indexOf("&") + 1)},
-                        null, null, null);
+                cursor = db.query(DataBase.TITLE, null, DataBase.ID + DataBase.Q,
+                        new String[]{id[1]}, null, null, null);
                 if (cursor.moveToFirst()) {
-                    link = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
+                    s = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
-                            cursor.getColumnIndex(DataBase.TITLE)), link), link);
-                    cursor.close();
-                    dataBase.close();
+                            cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
                     item.setDes(act.lib.getDiffDate(now, t) + "\n(" + df.format(new Date(t)) + ")");
+                    if (id.length == 3) { //случайные
+                        if (id[2].equals("-1")) { //случайный катрен или послание
+                            if (s.contains(Lib.POEMS))
+                                s = getResources().getString(R.string.rnd_kat);
+                            else
+                                s = getResources().getString(R.string.rnd_pos);
+                        } else { //случаный стих
+                            cursor.close();
+                            cursor = db.query(DataBase.PARAGRAPH,
+                                    new String[]{DataBase.PARAGRAPH},
+                                    DataBase.ID + DataBase.Q,
+                                    new String[]{id[1]}, null, null, null);
+                            s = getResources().getString(R.string.rnd_stih);
+                            if (cursor.moveToPosition(Integer.parseInt(id[2])))
+                                s += ":" + Lib.N + act.lib.withOutTags(cursor.getString(0));
+                        }
+                        item.setDes(item.getDes() + Lib.N + s);
+                    }
+                    cursor.close();
+                    dataBase.close();
                     adJournal.addItem(item);
                     i++;
                 } else { //материал отсутствует в базе - удаляем запись о нём из журнала
-                    dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, new String[]{id});
+                    dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
+                            new String[]{curJ.getString(iID)});
                 }
             } while (curJ.moveToNext() && i < MAX);
             if (curJ.moveToNext()) {
@@ -169,7 +188,13 @@ public class JournalFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String link = adJournal.getItem(pos).getLink();
-                BrowserActivity.openReader(act, link, "");
+                String s = adJournal.getItem(pos).getDes();
+                if (s.contains(getResources().getString(R.string.rnd_stih))) {
+                    s = s.substring(s.indexOf(Lib.N, s.indexOf(
+                            getResources().getString(R.string.rnd_stih))) + 1);
+                } else
+                    s = "";
+                BrowserActivity.openReader(act, link, s);
                 adJournal.clear();
             }
         });
