@@ -237,6 +237,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private boolean existsList(Date d, boolean bKat) {
+        if (d.getYear() == 100) return false; //def year
         DataBase dataBase = new DataBase(act, df.format(d));
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
@@ -599,8 +600,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
         }
         //определяем случайных текст:
-        g = new Random();
-        n = g.nextInt(curTitle.getCount() - 2) + 2; //0 - отсуствует, 1 - дата изменения списка
+        if (curTitle.getCount() < 2)
+            n = 0;
+        else {
+            g = new Random();
+            n = g.nextInt(curTitle.getCount() - 2) + 2; //0 - отсуствует, 1 - дата изменения списка
+        }
         if (curTitle.moveToPosition(n)) { //если случайный текст найден
             String s = "";
             int p = -1;
