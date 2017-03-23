@@ -281,7 +281,7 @@ public class BrowserActivity extends AppCompatActivity
         editor = pref.edit();
         bTheme = pref.getInt(THEME, 0) == 0;
         if (!bTheme) //dark
-            findViewById(R.id.content_browser).setBackgroundColor(getResources().getColor(R.color.black));
+            findViewById(R.id.content_browser).setBackgroundColor(getResources().getColor(android.R.color.black));
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
         int z = pref.getInt(SCALE, 0);

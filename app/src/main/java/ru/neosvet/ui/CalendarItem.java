@@ -18,7 +18,7 @@ public class CalendarItem {
     public CalendarItem(Context context, int num, int id_color) {
         this.context = context;
         this.num = num;
-        cur = id_color == R.color.white;
+        cur = id_color == android.R.color.white;
 
         color = context.getResources().getColor(id_color);
         if (num < 1)

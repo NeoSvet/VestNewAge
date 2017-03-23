@@ -457,14 +457,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 d.setDate(2 - d.getDay());
             n = d.getDate();
             while (d.getDate() > 1) {
-                adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.gray));
+                adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.darker_gray));
                 n++;
                 d.setDate(n);
             }
         }
         n = 1;
         while (d.getMonth() == m) {
-            adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.white));
+            adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.white));
             if (d.getDay() == 3) // wednesday
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
             n++;
@@ -472,7 +472,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
         n = 1;
         while (d.getDay() != 1) {
-            adCalendar.addItem(new CalendarItem(act, d.getDate(), R.color.gray));
+            adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.darker_gray));
             n++;
             d.setDate(n);
         }
