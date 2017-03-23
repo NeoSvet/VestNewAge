@@ -22,7 +22,6 @@ import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
 
 public class BookTask extends AsyncTask<Integer, Boolean, String> implements Serializable {
-    private final String SITE = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private transient BookFragment frm;
     private transient MainActivity act;
     private List<String> title = new ArrayList<String>();
