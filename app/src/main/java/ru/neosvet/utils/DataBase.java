@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import ru.neosvet.vestnewage.R;
 
 public class DataBase extends SQLiteOpenHelper {
-    public static final String PARAGRAPH = "paragraph",
+    public static final String PARAGRAPH = "par",
             JOURNAL = "journal", MARKERS = "markers", LIKE = " LIKE ?",
             Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
             LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
@@ -154,11 +154,14 @@ public class DataBase extends SQLiteOpenHelper {
             else
                 return "08.04";
         } else {
-            if (link.contains("-")) { //http://blagayavest.info/poems/?date=11-3-2017
+            if (link.contains("=")) { //http://blagayavest.info/poems/?date=11-3-2017
                 link = link.substring(link.indexOf("-") + 1);
                 if (link.length() == 6)
                     link = "0" + link;
                 return link.replace("-20", ".");
+            } else if (link.contains("-")) {///2005/01-02.08.05.html
+                link = link.substring(link.indexOf("-") + 4, link.lastIndexOf("."));
+                return link;
             } else { //http://blagayavest.info/poems/11.03.17.html
                 link = link.substring(link.lastIndexOf("/") + 4, link.lastIndexOf("."));
                 if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
