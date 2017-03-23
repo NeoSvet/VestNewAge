@@ -158,15 +158,14 @@ public class DataBase extends SQLiteOpenHelper {
                 link = link.substring(link.indexOf("-") + 1);
                 if (link.length() == 6)
                     link = "0" + link;
-                return link.replace("-20", ".");
+                link= link.replace("-20", ".");
             } else if (link.contains("-")) {///2005/01-02.08.05.html
                 link = link.substring(link.indexOf("-") + 4, link.lastIndexOf("."));
-                return link;
             } else { //http://blagayavest.info/poems/11.03.17.html
                 link = link.substring(link.lastIndexOf("/") + 4, link.lastIndexOf("."));
                 if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
-                return link;
             }
+            return link;
         }
     }
 
