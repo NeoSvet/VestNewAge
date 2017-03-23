@@ -22,6 +22,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.LoaderTask;
 import ru.neosvet.utils.Prom;
@@ -212,7 +213,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frBook);
                 break;
             case R.id.nav_search:
-                fragmentTransaction.replace(R.id.my_fragment, new SearchFragment());
+                SearchFragment frSearch = new SearchFragment();
+                String s = getIntent().getStringExtra(DataBase.LINK);
+                if (s != null)
+                    frSearch.setString(s);
+                fragmentTransaction.replace(R.id.my_fragment, frSearch);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());

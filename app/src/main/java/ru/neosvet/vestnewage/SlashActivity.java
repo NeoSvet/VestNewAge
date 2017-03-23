@@ -131,6 +131,10 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 1);
             } else if (link.contains("/search")) {
+                link = data.getQuery();
+                link = link.substring(link.indexOf("=") + 1, link.indexOf("&"));
+                main.putExtra(MainActivity.CUR_ID, R.id.nav_search);
+                main.putExtra(DataBase.LINK, link);
                 //http://blagayavest.info/search/?query=любовь&where=0
                /* <option selected="" value="0">в Посланиях</option>
                 <option value="5">в Катренах</option>

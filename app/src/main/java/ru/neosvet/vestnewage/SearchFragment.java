@@ -2,7 +2,9 @@ package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
 import android.app.Service;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +57,12 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private int min_m = 0, min_y = 116, dialog = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
+    private String string;
     private boolean boolScrollToFirst = false;
+
+    public void setString(String s) {
+        string = s;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,6 +73,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
+        if (string != null) {
+            etSearch.setText(string);
+            startSearch();
+        }
 
         return this.container;
     }
@@ -190,17 +201,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                         || keyCode == EditorInfo.IME_ACTION_SEARCH) {
                     if (etSearch.length() < 3)
                         Lib.showToast(act, getResources().getString(R.string.low_sym_for_search));
-                    else {
-                        softKeyboard.closeSoftKeyboard();
-                        final String s = etSearch.getText().toString();
-                        task = new SearchTask(SearchFragment.this);
-                        DateFormat df = new SimpleDateFormat("MM.yy");
-                        task.execute(s, df.format(dStart), df.format(dEnd));
-                        if (!liSearch.contains(s)) {
-                            liSearch.add(s);
-                            adSearch.notifyDataSetChanged();
-                        }
-                    }
+                    else
+                        startSearch();
 
                     return true;
                 }
@@ -307,6 +309,17 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         dialog = -1;
     }
 
+    private void startSearch() {
+        softKeyboard.closeSoftKeyboard();
+        final String s = etSearch.getText().toString();
+        task = new SearchTask(SearchFragment.this);
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        task.execute(s, df.format(dStart), df.format(dEnd));
+        if (!liSearch.contains(s)) {
+            liSearch.add(s);
+            adSearch.notifyDataSetChanged();
+        }
+    }
 
     public void finishSearch(List<ListItem> data) {
         task = null;
@@ -325,3 +338,4 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
 
 }
+
