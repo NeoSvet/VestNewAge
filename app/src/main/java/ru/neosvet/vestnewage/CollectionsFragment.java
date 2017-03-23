@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -489,21 +489,33 @@ public class CollectionsFragment extends Fragment {
             public void onClick(View view) {
                 lvMarker.smoothScrollToPosition(iSel);
                 AlertDialog.Builder builder = new AlertDialog.Builder(act);
-                builder.setTitle(getResources().getString(R.string.delete));
-                builder.setMessage(adMarker.getItem(iSel).getTitle());
-                builder.setPositiveButton(getResources().getString(android.R.string.yes),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteElement();
-                            }
-                        });
-                builder.setNegativeButton(getResources().getString(android.R.string.no),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        });
-                builder.create().show();
+                LayoutInflater inflater = act.getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+                builder.setView(dialogView);
+                TextView tv = (TextView)dialogView.findViewById(R.id.title);
+                tv.setText(getResources().getString(R.string.delete));
+                tv = (TextView)dialogView.findViewById(R.id.message);
+                tv.setText(adMarker.getItem(iSel).getTitle());
+                Button button = (Button)dialogView.findViewById(R.id.leftButton);
+                button.setText(getResources().getString(android.R.string.no));
+                button.setVisibility(View.VISIBLE);
+                final AlertDialog dialog= builder.create();
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                button = (Button)dialogView.findViewById(R.id.rightButton);
+                button.setText(getResources().getString(android.R.string.yes));
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        deleteElement();
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
         });
         fabHelp.setOnClickListener(new View.OnClickListener() {
