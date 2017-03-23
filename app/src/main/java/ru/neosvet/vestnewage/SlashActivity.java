@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import java.io.File;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.Timer;
@@ -46,24 +47,46 @@ public class SlashActivity extends AppCompatActivity {
         if (data != null)
             parseUri(data);
 
-        // удаление таблицы журнала старого образца:
-        DataBase dbJournal = new DataBase(this, DataBase.JOURNAL);
-        SQLiteDatabase db = dbJournal.getWritableDatabase();
-        // проверяем, что наличие столбца ID (он появился в новом образце
-        Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
-        boolean b = true;
-        if (cursor.moveToFirst()) {
-            b = cursor.getColumnIndex(DataBase.ID) == -1; // будет -1, если столбец отсутствует
-        }
-        if (b) { // true, если таблица пустая или если отсутствует столбце ID
-            db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
-            //создаем таблицу нового образца:
-            db.execSQL("create table " + DataBase.JOURNAL + " ("
-                    + DataBase.ID + " text primary key,"
-                    + DataBase.TIME + " integer);");
-        }
-        cursor.close();
-        dbJournal.close();
+        adapterNewVersion();
+    }
+
+    private void adapterNewVersion() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // удаляем материалы в виде страниц:
+                File dir = getFilesDir();
+                if((new File(dir + "/list")).exists()) {
+                    for (File d : dir.listFiles()) {
+                        if (d.isDirectory() &&
+                                !d.getName().contains("cal")) { //calendar
+                            for (File f : d.listFiles())
+                                f.delete();
+                            d.delete();
+                        }
+                    }
+                }
+                // удаление таблицы журнала старого образца:
+                DataBase dbJournal = new DataBase(SlashActivity.this, DataBase.JOURNAL);
+                SQLiteDatabase db = dbJournal.getWritableDatabase();
+                // проверяем, что наличие столбца ID (он появился в новом образце
+                Cursor cursor = db.query(DataBase.JOURNAL, null, null, null, null, null, null);
+                boolean b = true;
+                if (cursor.moveToFirst()) {
+                    b = cursor.getColumnIndex(DataBase.ID) == -1; // будет -1, если столбец отсутствует
+                }
+                if (b) { // true, если таблица пустая или если отсутствует столбце ID
+                    db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
+                    //создаем таблицу нового образца:
+                    db.execSQL("create table " + DataBase.JOURNAL + " ("
+                            + DataBase.ID + " text primary key,"
+                            + DataBase.TIME + " integer);");
+                }
+                cursor.close();
+                dbJournal.close();
+            }
+        });
+        t.start();
     }
 
     private void parseUri(Uri data) {
