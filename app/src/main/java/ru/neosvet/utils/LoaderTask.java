@@ -132,7 +132,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadFile(link, params[1]);
             else {
                 downloadStyle(params.length == 3);
-                if(!link.equals(""))
+                if (!link.equals(""))
                     downloadPage(link, true);
             }
             return true;
@@ -375,6 +375,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     line = line.replace("000000", "000").replace("#000", "#fff");
                 } else
                     line = line.replace("#fff", "#000");
+                if (line.contains("P B {")) { //correct bold
+                    br.readLine(); //font-weight:600;
+                    br.readLine(); //}
+                    line = br.readLine();
+                }
                 line = line.replace("333333", "333").replace("#333", "#ccc");
                 bwDark.write(line + Lib.N);
                 if (line.contains("body")) {
