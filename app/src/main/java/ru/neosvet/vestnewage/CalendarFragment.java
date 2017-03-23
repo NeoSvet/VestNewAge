@@ -171,7 +171,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     if (des.equals("")) {// only link
                         act.lib.openInApps(link, null);
                     } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                         builder.setMessage(des);
                         if (link.equals("")) { // only des
                             builder.setPositiveButton(getResources().getString(android.R.string.ok),

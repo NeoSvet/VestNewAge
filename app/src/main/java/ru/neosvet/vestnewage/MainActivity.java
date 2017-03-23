@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void finishAllLoad(boolean suc, boolean all) {
         loader = null;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (suc) {
             if (all)
                 builder.setMessage(getResources().getString(R.string.all_load_suc));

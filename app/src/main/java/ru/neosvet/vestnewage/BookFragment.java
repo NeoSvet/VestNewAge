@@ -399,7 +399,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         if (task == null) {
             if (v == -1 && tab == 1) {
                 if (dPos.getMonth() == 0 && dPos.getYear() == 116 && !boolOtkr) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(act);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                     builder.setMessage(getResources().getString(R.string.alert_download_otkr));
                     builder.setNegativeButton(getResources().getString(android.R.string.no),
                             new DialogInterface.OnClickListener() {
@@ -637,7 +637,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             final String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
             curTitle.close();
             final String place = s;
-            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
             builder.setMessage(dataBase.getPageTitle(title, link) + (s.equals("") ? "" : Lib.N + s));
             builder.setPositiveButton(getResources().getString(R.string.open),
                     new DialogInterface.OnClickListener() {
