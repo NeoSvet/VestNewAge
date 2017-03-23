@@ -325,17 +325,25 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         task = null;
         adResults.clear();
         adResults.notifyDataSetChanged();
-        for (int i = 0; i < data.size(); i++) {
-            adResults.addItem(data.get(i));
-        }
-        data.clear();
-        adResults.notifyDataSetChanged();
-        if (lvResult.getFirstVisiblePosition() > 0) {
-            boolScrollToFirst = true;
-            lvResult.smoothScrollToPosition(0);
+        if (data.size() == 0) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
+            builder.setMessage(getResources().getString(R.string.alert_search));
+            builder.setPositiveButton(getResources().getString(android.R.string.ok),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+            builder.create().show();
+        } else {
+            for (int i = 0; i < data.size(); i++)
+                adResults.addItem(data.get(i));
+            data.clear();
+            adResults.notifyDataSetChanged();
+            if (lvResult.getFirstVisiblePosition() > 0) {
+                boolScrollToFirst = true;
+                lvResult.smoothScrollToPosition(0);
+            }
         }
     }
-
-
 }
-

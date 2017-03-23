@@ -149,6 +149,7 @@
     <!--SearchFragment-->
     <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>
+    <string name="alert_search">Результатов нет. Вы загрузили все материалы прежде, чем приступать к поиску?</string>
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапозон для поиска:</string>
     <string name="change_range">Поменять местами</string>
