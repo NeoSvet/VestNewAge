@@ -31,6 +31,21 @@
             android:padding="10dp" />
     </ScrollView>
 
+    <EditText
+        android:id="@+id/input"
+        style="@style/Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:padding="5dp"
+        android:textColorHint="@color/light_gray"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,14 +59,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:gravity="center" />
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/rightButton"
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center" />
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
 
     </LinearLayout>
 </LinearLayout>
