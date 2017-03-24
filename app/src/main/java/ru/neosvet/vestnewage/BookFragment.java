@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage;
 import android.app.Fragment;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -585,13 +587,16 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         DataBase dataBase = new DataBase(act, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle;
+        String title = null;
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         if (view.getId() == R.id.bRndKat) { //случайный катрен
+            title = getResources().getString(R.string.rnd_kat);
             curTitle = db.query(DataBase.TITLE, null,
                     DataBase.LINK + DataBase.LIKE,
                     new String[]{"%" + Lib.POEMS + "%"}
                     , null, null, null);
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
+            title = getResources().getString(R.string.rnd_pos);
             curTitle = db.query(DataBase.TITLE, null,
                     DataBase.LINK + " NOT" + DataBase.LIKE,
                     new String[]{"%" + Lib.POEMS + "%"}
@@ -608,7 +613,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         }
         if (curTitle.moveToPosition(n)) { //если случайный текст найден
             String s = "";
-            int p = -1;
             if (view.getId() == R.id.bRndStih) { //случайных стих
                 s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
                 Cursor curPar = db.query(DataBase.PARAGRAPH,
@@ -622,35 +626,66 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                         n--; //исключаем подпись
                     n = g.nextInt(n);
                     if (curPar.moveToPosition(n)) { //если случайный стих найден
-                        p = n;
                         s = act.lib.withOutTags(curPar.getString(0));
-                    } else
+                    } else {
                         s = "";
+                        n = -1;
+                    }
                 } else
                     s = "";
                 curPar.close();
-                if (s.equals("")) //случайный стих не найден
+                if (s.equals("")) {//случайный стих не найден
                     Lib.showToast(act, getResources().getString(R.string.alert_rnd));
-            }
+                    title = getResources().getString(R.string.rnd_stih);
+                }
+            } else // случайный катрен или послание
+                n = -1;
             //выводим на экран:
-            String title = curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE));
             final String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
+            String msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), link);
+            if (title == null) {
+                title = msg;
+                msg = s;
+            }
             curTitle.close();
             final String place = s;
-            AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
-            builder.setMessage(dataBase.getPageTitle(title, link) + (s.equals("") ? "" : Lib.N + s));
-            builder.setPositiveButton(getResources().getString(R.string.open),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            BrowserActivity.openReader(act, link, place);
-                            dialog.dismiss();
-                        }
-                    });
-            builder.create().show();
+            final int par = n;
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(act);
+            LayoutInflater inflater = act.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+            builder.setView(dialogView);
+            TextView tv = (TextView) dialogView.findViewById(R.id.title);
+            tv.setText(title);
+            tv = (TextView) dialogView.findViewById(R.id.message);
+            tv.setText(msg);
+            Button button = (Button) dialogView.findViewById(R.id.leftButton);
+            button.setText(getResources().getString(R.string.in_markers));
+            button.setVisibility(View.VISIBLE);
+            final android.app.AlertDialog dialog = builder.create();
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent marker = new Intent(act, MarkerActivity.class);
+                    marker.putExtra(DataBase.LINK, link);
+                    marker.putExtra(DataBase.PARAGRAPH, par);
+                    startActivity(marker);
+                    dialog.dismiss();
+                }
+            });
+            button = (Button) dialogView.findViewById(R.id.rightButton);
+            button.setText(getResources().getString(R.string.open));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    BrowserActivity.openReader(act, link, place);
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
             //добавляем в журнал:
             ContentValues cv = new ContentValues();
             cv.put(DataBase.TIME, System.currentTimeMillis());
-            String id = dataBase.getDatePage(link) + "&" + dataBase.getPageId(link) + "&" + p;
+            String id = dataBase.getDatePage(link) + "&" + dataBase.getPageId(link) + "&" + n;
             DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
             db = dbJournal.getWritableDatabase();
             cv.put(DataBase.ID, id);
