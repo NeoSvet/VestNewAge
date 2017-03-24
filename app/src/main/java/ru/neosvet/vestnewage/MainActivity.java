@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final String LOADER = "loader";
     public static final String CUR_ID = "cur_id", TAB = "tab";
     public Lib lib = new Lib(this);
-    private Tip tip;
+    private Tip menuDownload;
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private View bDownloadIt;
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         myFragmentManager = getFragmentManager();
         status = new StatusBar(this, findViewById(R.id.pStatus));
-        tip = new Tip(this, findViewById(R.id.pDownload));
+        menuDownload = new Tip(this, findViewById(R.id.pDownload));
 
         if (savedInstanceState == null) {
             SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tip.hide();
+                menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
                 loader.execute();
             }
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bDownloadIt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tip.hide();
+                menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
                 loader.execute(String.valueOf(cur_id));
             }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void setFragment(int id) {
         if (cur_id != id)
             boolFirst = false;
-        tip.hide();
+        menuDownload.hide();
         cur_id = id;
         if (navigationView != null) //tut
             navigationView.setCheckedItem(id);
@@ -319,14 +319,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void showDownloadMenu() {
-        if (tip.isShow())
-            tip.hide();
+        if (menuDownload.isShow())
+            menuDownload.hide();
         else {
             if (cur_id == R.id.nav_rss || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar || cur_id == R.id.nav_book)
                 bDownloadIt.setVisibility(View.VISIBLE);
             else
                 bDownloadIt.setVisibility(View.GONE);
-            tip.show();
+            menuDownload.show();
         }
     }
 }
