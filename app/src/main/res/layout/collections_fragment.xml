@@ -20,50 +20,6 @@
         android:padding="15dp"
         android:visibility="gone" />
 
-    <RelativeLayout
-        android:id="@+id/pRename"
-        android:layout_width="@dimen/calendar_title"
-        android:layout_height="115dp"
-        android:layout_gravity="center"
-        android:background="@drawable/field"
-        android:visibility="gone">
-
-        <EditText
-            android:id="@+id/etName"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="10dp"
-            android:background="@color/colorPrimaryDark"
-            android:hint="@string/enter_name"
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            android:padding="5dp"
-            android:textColorHint="@color/light_gray" />
-
-        <Button
-            android:id="@+id/bCancel"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
-            android:layout_toLeftOf="@+id/bRename"
-            android:text="@android:string/cancel" />
-
-        <Button
-            android:id="@+id/bRename"
-            style="@style/Button"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="10dp"
-            android:text="@android:string/ok" />
-    </RelativeLayout>
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabHelp"
         android:layout_width="wrap_content"

@@ -53,7 +53,10 @@
     <!--CollectionsFragment-->
     <string name="not_found_page">Страница не найдена</string>
     <string name="delete">Удалить?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
     <string name="collections">Подборки</string>
+    <string name="new_name">Новое название</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
     <string name="nothing_edit">Редактировать нечего!</string>

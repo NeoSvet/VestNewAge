@@ -3,10 +3,13 @@ package ru.neosvet.vestnewage;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,15 +31,14 @@ public class CollectionsFragment extends Fragment {
     private final String SEL = "sel", RENAME = "rename";
     public final int MARKER_REQUEST = 11;
     private ListView lvMarker;
-    private View container, fabEdit, fabHelp, divEdit, pEdit, pRename;
+    private View container, fabEdit, fabHelp, divEdit, pEdit;
     private TextView tvEmpty;
-    private EditText etName;
     private MainActivity act;
     private DataBase dbCol, dbMar;
     private MarkAdapter adMarker;
     private int iSel = -1;
-    private boolean boolRename = false, boolChange = false;
-    private String sCol = null;
+    private boolean boolChange = false, boolDelete = false;
+    private String sCol = null, sName = null;
     private Animation anMin, anMax;
 
     @Override
@@ -51,7 +53,8 @@ public class CollectionsFragment extends Fragment {
             act.setFrCollections(this);
             sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
             iSel = savedInstanceState.getInt(SEL, -1);
-            boolRename = savedInstanceState.getBoolean(RENAME, false);
+            sName = savedInstanceState.getString(RENAME, null);
+            boolDelete = savedInstanceState.getBoolean(Lib.DIALOG, false);
         }
 
         if (sCol == null)
@@ -61,10 +64,10 @@ public class CollectionsFragment extends Fragment {
 
         if (iSel > -1) {
             goToEdit();
-            if (boolRename) {
-                pRename.setVisibility(View.VISIBLE);
-                setAllVis(View.GONE);
-            }
+            if (sName != null)
+                renameDialog(sName);
+            else if (boolDelete)
+                deleteDialog();
         }
 
         return this.container;
@@ -75,7 +78,8 @@ public class CollectionsFragment extends Fragment {
         saveChange();
         outState.putString(DataBase.COLLECTIONS, sCol);
         outState.putInt(SEL, iSel);
-        outState.putBoolean(RENAME, boolRename);
+        outState.putString(RENAME, sName);
+        outState.putBoolean(Lib.DIALOG, boolDelete);
         super.onSaveInstanceState(outState);
     }
 
@@ -136,7 +140,7 @@ public class CollectionsFragment extends Fragment {
             if (p.contains("%")) {
                 b.append(Lib.N);
                 b.append(DataBase.getContentPage(act, link, false));
-                int k = 0;
+                int k = 5; // имитация нижнего "колонтитула" страницы
                 int i = b.indexOf(Lib.N);
                 while (i > -1) {
                     k++;
@@ -269,10 +273,7 @@ public class CollectionsFragment extends Fragment {
     }
 
     public boolean onBackPressed() {
-        if (boolRename) {
-            closeRename();
-            return false;
-        } else if (iSel > -1) {
+        if (iSel > -1) {
             unSelect();
             if (sCol == null)
                 loadColList();
@@ -287,12 +288,6 @@ public class CollectionsFragment extends Fragment {
         return true;
     }
 
-    private void closeRename() {
-        boolRename = false;
-        setAllVis(View.VISIBLE);
-        pRename.setVisibility(View.GONE);
-    }
-
     private void initViews() {
         dbMar = new DataBase(act, DataBase.MARKERS);
         dbCol = new DataBase(act, DataBase.COLLECTIONS);
@@ -300,9 +295,7 @@ public class CollectionsFragment extends Fragment {
         fabHelp = container.findViewById(R.id.fabHelp);
         divEdit = container.findViewById(R.id.divEdit);
         pEdit = container.findViewById(R.id.pEdit);
-        pRename = container.findViewById(R.id.pRename);
         tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
-        etName = (EditText) container.findViewById(R.id.etName);
         lvMarker = (ListView) container.findViewById(R.id.lvMarker);
         adMarker = new MarkAdapter(act);
         lvMarker.setAdapter(adMarker);
@@ -395,46 +388,6 @@ public class CollectionsFragment extends Fragment {
                 unSelect();
             }
         });
-        container.findViewById(R.id.bCancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeRename();
-            }
-        });
-        container.findViewById(R.id.bRename).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeRename();
-                String name = etName.getText().toString();
-                boolean bCancel = (name.length() == 0);
-                if (!bCancel) {
-                    if (name.contains(",")) {
-                        Lib.showToast(act, getResources().getString(R.string.unuse_dot));
-                        return;
-                    }
-                    for (int i = 0; i < adMarker.getCount(); i++) {
-                        if (name.equals(adMarker.getItem(i).getTitle())) {
-                            bCancel = true;
-                            break;
-                        }
-                    }
-                }
-                if (bCancel) {
-                    Lib.showToast(act, getResources().getString(R.string.cancel_rename));
-                    return;
-                }
-                SQLiteDatabase db = dbCol.getWritableDatabase();
-                ContentValues cv = new ContentValues();
-                cv.put(DataBase.TITLE, name);
-                int r = db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                        adMarker.getItem(iSel).getStrId());
-                dbCol.close();
-//                if (r == 1) {
-                adMarker.getItem(iSel).setTitle(name);
-                adMarker.notifyDataSetChanged();
-//                }
-            }
-        });
         container.findViewById(R.id.bTop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -472,10 +425,7 @@ public class CollectionsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (sCol == null) {
-                    etName.setText(adMarker.getItem(iSel).getTitle());
-                    pRename.setVisibility(View.VISIBLE);
-                    setAllVis(View.GONE);
-                    boolRename = true;
+                    renameDialog(adMarker.getItem(iSel).getTitle());
                 } else {
                     saveChange();
                     Intent marker = new Intent(act, MarkerActivity.class);
@@ -487,35 +437,8 @@ public class CollectionsFragment extends Fragment {
         container.findViewById(R.id.bDelete).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                lvMarker.smoothScrollToPosition(iSel);
-                AlertDialog.Builder builder = new AlertDialog.Builder(act);
-                LayoutInflater inflater = act.getLayoutInflater();
-                View dialogView = inflater.inflate(R.layout.layout_dialog, null);
-                builder.setView(dialogView);
-                TextView tv = (TextView)dialogView.findViewById(R.id.title);
-                tv.setText(getResources().getString(R.string.delete));
-                tv = (TextView)dialogView.findViewById(R.id.message);
-                tv.setText(adMarker.getItem(iSel).getTitle());
-                Button button = (Button)dialogView.findViewById(R.id.leftButton);
-                button.setText(getResources().getString(android.R.string.no));
-                button.setVisibility(View.VISIBLE);
-                final AlertDialog dialog= builder.create();
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-                button = (Button)dialogView.findViewById(R.id.rightButton);
-                button.setText(getResources().getString(android.R.string.yes));
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        deleteElement();
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
+                boolDelete = true;
+                deleteDialog();
             }
         });
         fabHelp.setOnClickListener(new View.OnClickListener() {
@@ -524,6 +447,132 @@ public class CollectionsFragment extends Fragment {
                 PresentationActivity.startPresentation(act, 1, false);
             }
         });
+    }
+
+    private void deleteDialog() {
+        lvMarker.smoothScrollToPosition(iSel);
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        LayoutInflater inflater = act.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        builder.setView(dialogView);
+        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+        tv.setText(getResources().getString(R.string.delete));
+        tv = (TextView) dialogView.findViewById(R.id.message);
+        tv.setText(adMarker.getItem(iSel).getTitle());
+        Button button = (Button) dialogView.findViewById(R.id.leftButton);
+        button.setText(getResources().getString(R.string.no));
+        button.setVisibility(View.VISIBLE);
+        final AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                boolDelete = false;
+            }
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        button = (Button) dialogView.findViewById(R.id.rightButton);
+        button.setText(getResources().getString(R.string.yes));
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteElement();
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    private void renameDialog(String old_name) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        LayoutInflater inflater = act.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        builder.setView(dialogView);
+        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+        tv.setText(getResources().getString(R.string.new_name));
+        tv = (TextView) dialogView.findViewById(R.id.message);
+        tv.setVisibility(View.GONE);
+        final EditText input = (EditText) dialogView.findViewById(R.id.input);
+        input.setVisibility(View.VISIBLE);
+        sName = old_name;
+        input.setText(old_name);
+        input.setSelection(old_name.length());
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                sName = input.getText().toString();
+            }
+        });
+        Button button = (Button) dialogView.findViewById(R.id.leftButton);
+        button.setText(getResources().getString(android.R.string.no));
+        button.setVisibility(View.VISIBLE);
+        final AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                sName = null;
+            }
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        button = (Button) dialogView.findViewById(R.id.rightButton);
+        button.setText(getResources().getString(android.R.string.yes));
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                renameCol(input.getText().toString());
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    private void renameCol(String name) {
+        boolean bCancel = (name.length() == 0);
+        if (!bCancel) {
+            if (name.contains(",")) {
+                Lib.showToast(act, getResources().getString(R.string.unuse_dot));
+                return;
+            }
+            for (int i = 0; i < adMarker.getCount(); i++) {
+                if (name.equals(adMarker.getItem(i).getTitle())) {
+                    bCancel = true;
+                    break;
+                }
+            }
+        }
+        if (bCancel) {
+            Lib.showToast(act, getResources().getString(R.string.cancel_rename));
+            return;
+        }
+        SQLiteDatabase db = dbCol.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(DataBase.TITLE, name);
+        int r = db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                adMarker.getItem(iSel).getStrId());
+        dbCol.close();
+//                if (r == 1) {
+        adMarker.getItem(iSel).setTitle(name);
+        adMarker.notifyDataSetChanged();
+//                }
     }
 
     private void goToEdit() {
@@ -669,12 +718,6 @@ public class CollectionsFragment extends Fragment {
         divEdit.setVisibility(View.GONE);
         pEdit.setVisibility(View.GONE);
         iSel = -1;
-    }
-
-    public void setAllVis(int vis) {
-        lvMarker.setVisibility(vis);
-        divEdit.setVisibility(vis);
-        pEdit.setVisibility(vis);
     }
 
     public void putResult(int resultCode) {
