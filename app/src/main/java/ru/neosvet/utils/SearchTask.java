@@ -55,11 +55,6 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
         di = new ProgressDialog(act);
         di.setTitle(act.getResources().getString(R.string.search));
         di.setMessage(msg);
-//        di.setMax(MAX);
-//        di.setProgress(prog);
-//        di.setIndeterminate(false);
-//        di.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//        di.setProgressDrawable(act.getResources().getDrawable(R.drawable.progress_bar));
         di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -84,11 +79,10 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
     protected Boolean doInBackground(String... params) {
         try {
             List<String> list = new ArrayList<String>();
-            File dir = act.lib.getDBFolder();
-            File[] f = dir.listFiles();
-            for (int i = 0; i < f.length && boolStart; i++) {
-                if (f[i].getName().length() == 5)
-                    list.add(f[i].getName());
+            for (File f : act.lib.getDBFolder().listFiles()) {
+                if (f.getName().length() == 5)
+                    list.add(f.getName());
+                if (!boolStart) return true;
             }
             if (list.size() == 0) {
                 //empty list
