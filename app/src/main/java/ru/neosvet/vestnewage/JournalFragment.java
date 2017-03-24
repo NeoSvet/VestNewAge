@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -33,7 +34,8 @@ public class JournalFragment extends Fragment {
     private View container, fabClear, fabPrev, fabNext;
     private int offset = 0;
     private Animation anMin, anMax;
-    private boolean boolFinish = true;
+    private ListView lvJournal;
+    private boolean boolFinish = true, boolScrollToFirst = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -128,6 +130,10 @@ public class JournalFragment extends Fragment {
         curJ.close();
         dbJ.close();
         adJournal.notifyDataSetChanged();
+        if (lvJournal.getFirstVisiblePosition() > 0) {
+            boolScrollToFirst = true;
+            lvJournal.smoothScrollToPosition(0);
+        }
         if (adJournal.getCount() == 0) {
             fabClear.setVisibility(View.GONE);
             container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
@@ -181,7 +187,7 @@ public class JournalFragment extends Fragment {
             }
         });
         dbJournal = new DataBase(act, DataBase.JOURNAL);
-        ListView lvJournal = (ListView) container.findViewById(R.id.lvJournal);
+        lvJournal = (ListView) container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
         lvJournal.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -196,6 +202,22 @@ public class JournalFragment extends Fragment {
                     s = "";
                 BrowserActivity.openReader(act, link, s);
                 adJournal.clear();
+            }
+        });
+        lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                    if (lvJournal.getFirstVisiblePosition() > 0)
+                        lvJournal.smoothScrollToPosition(0);
+                    else
+                        boolScrollToFirst = false;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
             }
         });
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
