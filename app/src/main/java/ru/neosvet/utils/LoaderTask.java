@@ -423,7 +423,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!bSinglePage && dataBase.existsPage(link))
             return;
         String line, s;
-        final String par = "</p>";
+        final String par = "</p>", nl = "<br>";
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -459,16 +459,28 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             line = "<center>" + s + "</center>";
                         else line = s;
                     }
-                    line = line.replace("<br />", "<br>").replace("color", "cvet");
-                    while (line.indexOf(par) + par.length() < line.length()) {
-                        if (!line.contains(par)) break;
-                        // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
-                        s = line.substring(0, line.indexOf(par) + par.length());
-                        cv = new ContentValues();
-                        cv.put(DataBase.ID, i);
-                        cv.put(DataBase.PARAGRAPH, s);
-                        db.insert(DataBase.PARAGRAPH, null, cv);
-                        line = line.substring(s.length());
+                    line = line.replace("<br />", nl).replace("color", "cvet");
+                    if (line.contains("noind")) { // объединяем подпись в один абзац
+                        s = br.readLine();
+                        while (s.contains("noind")) {
+                            line += s;
+                            s = br.readLine();
+                        }
+                        while (line.indexOf(par) + par.length() < line.length()) {
+                            line = line.substring(0, line.indexOf(par)) + nl +
+                                    line.substring(line.indexOf("\">", line.indexOf(par)) + 2);
+                        }
+                    } else {
+                        while (line.indexOf(par) + par.length() < line.length()) {
+                            if (!line.contains(par)) break;
+                            // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
+                            s = line.substring(0, line.indexOf(par) + par.length());
+                            cv = new ContentValues();
+                            cv.put(DataBase.ID, i);
+                            cv.put(DataBase.PARAGRAPH, s);
+                            db.insert(DataBase.PARAGRAPH, null, cv);
+                            line = line.substring(s.length());
+                        }
                     }
                     cv = new ContentValues();
                     cv.put(DataBase.ID, i);
@@ -518,6 +530,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             }
         }
         br.close();
+        dataBase.close();
         if (bSinglePage)
             checkNoreadList(link);
     }
