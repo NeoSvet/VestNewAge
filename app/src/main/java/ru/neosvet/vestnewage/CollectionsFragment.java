@@ -154,7 +154,7 @@ public class CollectionsFragment extends Fragment {
                     k--;
                     u = i;
                     i = b.indexOf(Lib.N, u + 1);
-                } while (k > 1);
+                } while (k > 1 && i > -1);
                 if (b.substring(u + 1, u + 2).equals(Lib.N))
                     u++;
                 if (i > -1)

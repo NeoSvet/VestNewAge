@@ -702,7 +702,7 @@ public class MarkerActivity extends AppCompatActivity {
             k--;
             u = i;
             i = pageCon.indexOf(Lib.N, u + 1);
-        } while (k > 1);
+        } while (k > 1 && i > -1);
         if (i > -1)
             i = pageCon.indexOf(Lib.N, i + 1);
         if (i > -1)
