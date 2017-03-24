@@ -143,7 +143,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void onDestroy() {
-        final File f = new File(act.getFilesDir() + SEARCH);
+        final File f = new File(act.getFilesDir() + File.separator + SEARCH);
         if (liSearch.size() == 0) {
             if (f.exists()) f.delete();
         } else {
@@ -178,7 +178,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     }
 
     private void setViews() {
-        final File f = new File(act.getFilesDir() + SEARCH);
+        final File f = new File(act.getFilesDir() + File.separator + SEARCH);
         if (f.exists()) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(f));
