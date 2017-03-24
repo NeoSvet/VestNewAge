@@ -1,11 +1,9 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -171,25 +170,35 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     if (des.equals("")) {// only link
                         act.lib.openInApps(link, null);
                     } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
-                        builder.setMessage(des);
+                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(act);
+                        LayoutInflater inflater = act.getLayoutInflater();
+                        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+                        builder.setView(dialogView);
+                        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+                        tv.setText(getResources().getString(R.string.ad));
+                        tv = (TextView) dialogView.findViewById(R.id.message);
+                        tv.setText(des);
+                        Button button = (Button) dialogView.findViewById(R.id.rightButton);
+                        final android.app.AlertDialog dialog = builder.create();
                         if (link.equals("")) { // only des
-                            builder.setPositiveButton(getResources().getString(android.R.string.ok),
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                        } else { // link and des
-                            builder.setPositiveButton(getResources().getString(R.string.open_link),
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            act.lib.openInApps(link, null);
-                                            dialog.dismiss();
-                                        }
-                                    });
+                            button.setText(getResources().getString(android.R.string.ok));
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        } else {
+                            button.setText(getResources().getString(R.string.open_link));
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    act.lib.openInApps(link, null);
+                                    dialog.dismiss();
+                                }
+                            });
                         }
-                        builder.create().show();
+                        dialog.show();
                     }
                 } else if (!adNoread.getItem(pos).getLink().equals("")) {
                     openLink(adNoread.getItem(pos).getLink());
