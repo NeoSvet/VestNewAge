@@ -427,7 +427,6 @@ public class BrowserActivity extends AppCompatActivity
             marker.putExtra(DataBase.PLACE, getPositionOnPage() * 100f);
             startActivity(marker);
         } else if (id == R.id.nav_scale) {
-            //tut
             wvBrowser.setInitialScale((int) (100f * getResources().getDisplayMetrics().density));
         } else if (id == R.id.nav_light || id == R.id.nav_dark) {
             if ((id == R.id.nav_light && bTheme)
