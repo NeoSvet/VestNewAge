@@ -221,7 +221,13 @@ public class MarkerActivity extends AppCompatActivity {
             adPage.getItem(0).setCheck(true);
             etDes.setText(df.format(new Date()));
             rPar.setChecked(true);
-            tvSel.setText(getResources().getString(R.string.page_entirely));
+            int par = getIntent().getIntExtra(DataBase.PARAGRAPH, -1);
+            if (par == -1)
+                tvSel.setText(getResources().getString(R.string.page_entirely));
+            else { // случайный стих
+                adPage.getItem(par).setCheck(true);
+                tvSel.setText(getResources().getString(R.string.sel_par) + (par + 1));
+            }
             sel = getResources().getString(R.string.sel_pos) +
                     String.format("%.1f", getIntent().getFloatExtra(DataBase.PLACE, 0f)) + "%";
         } else { //edit mode
@@ -275,7 +281,7 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void loadPage() {
-        k_par = 0;
+        k_par = 5; // имитация нижнего "колонтитула" страницы
         pageCon = DataBase.getContentPage(this, link, false);
         adPage.clear();
         if (pageCon == null) // страница не загружена...
