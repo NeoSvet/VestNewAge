@@ -618,27 +618,33 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void addJournal() {
-        ContentValues cv = new ContentValues();
-        cv.put(DataBase.TIME, System.currentTimeMillis());
-        String id = dbPage.getDatePage(link) + "&" + dbPage.getPageId(link);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ContentValues cv = new ContentValues();
+                cv.put(DataBase.TIME, System.currentTimeMillis());
+                String id = dbPage.getDatePage(link) + "&" + dbPage.getPageId(link);
 
-        SQLiteDatabase db = dbJournal.getWritableDatabase();
-        int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
-        if (i == 0) {// no update
-            cv.put(DataBase.ID, id);
-            db.insert(DataBase.JOURNAL, null, cv);
-        }
-        Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
-        i = cursor.getCount();
-        cursor.moveToFirst();
-        while (i > 100) {
-            db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
-                    new String[]{cursor.getString(0)});
-            cursor.moveToNext();
-            i--;
-        }
-        cursor.close();
-        dbJournal.close();
+                SQLiteDatabase db = dbJournal.getWritableDatabase();
+                int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
+                if (i == 0) {// no update
+                    cv.put(DataBase.ID, id);
+                    db.insert(DataBase.JOURNAL, null, cv);
+                }
+                Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
+                i = cursor.getCount();
+                cursor.moveToFirst();
+                while (i > 100) {
+                    db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
+                            new String[]{cursor.getString(0)});
+                    cursor.moveToNext();
+                    i--;
+                }
+                cursor.close();
+                dbJournal.close();
+            }
+        });
+        t.start();
     }
 
     public void openInApps(String url) {
