@@ -51,7 +51,7 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table if not exists " + JOURNAL + " ("
                     + ID + " text primary key," // date&id TITLE
                     + TIME + " integer);");
-        } else {
+        } else if (name.equals(MARKERS)) {
             db.execSQL("create table " + MARKERS + " ("
                     + ID + " integer primary key autoincrement," //id закладки
                     + LINK + " text," //ссылка на материал

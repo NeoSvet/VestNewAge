@@ -34,7 +34,6 @@ public class CollectionsFragment extends Fragment {
     private View container, fabEdit, fabHelp, divEdit, pEdit;
     private TextView tvEmpty;
     private MainActivity act;
-    private DataBase dbCol, dbMar;
     private MarkAdapter adMarker;
     private int iSel = -1;
     private boolean boolChange = false, boolDelete = false;
@@ -90,7 +89,8 @@ public class CollectionsFragment extends Fragment {
         fabHelp.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Lib.N)));
-        SQLiteDatabase db = dbMar.getWritableDatabase();
+        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         int iID, iPlace, iLink, iDes;
         String[] mId;
         String link = sCol.substring(sCol.indexOf(Lib.N) + 1);
@@ -121,7 +121,7 @@ public class CollectionsFragment extends Fragment {
             }
             cursor.close();
         }
-        dbMar.close();
+        dbMarker.close();
         adMarker.notifyDataSetChanged();
         if (adMarker.getCount() == 0) {
             tvEmpty.setText(getResources().getString(R.string.collection_is_empty));
@@ -239,7 +239,8 @@ public class CollectionsFragment extends Fragment {
         fabHelp.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
-        SQLiteDatabase db = dbCol.getWritableDatabase();
+        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.PLACE);
         String s;
         boolean boolNull = false;
@@ -257,7 +258,7 @@ public class CollectionsFragment extends Fragment {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        dbCol.close();
+        dbMarker.close();
         if (boolNull && adMarker.getCount() == 1) {
             adMarker.clear();
             tvEmpty.setText(getResources().getString(R.string.empty_collections));
@@ -289,8 +290,6 @@ public class CollectionsFragment extends Fragment {
     }
 
     private void initViews() {
-        dbMar = new DataBase(act, DataBase.MARKERS);
-        dbCol = new DataBase(act, DataBase.COLLECTIONS);
         fabEdit = container.findViewById(R.id.fabEdit);
         fabHelp = container.findViewById(R.id.fabHelp);
         divEdit = container.findViewById(R.id.divEdit);
@@ -563,16 +562,18 @@ public class CollectionsFragment extends Fragment {
             Lib.showToast(act, getResources().getString(R.string.cancel_rename));
             return;
         }
-        SQLiteDatabase db = dbCol.getWritableDatabase();
+        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TITLE, name);
         int r = db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                 adMarker.getItem(iSel).getStrId());
-        dbCol.close();
-//                if (r == 1) {
-        adMarker.getItem(iSel).setTitle(name);
-        adMarker.notifyDataSetChanged();
-//                }
+        dbMarker.close();
+        if (r == 1) {
+            adMarker.getItem(iSel).setTitle(name);
+            adMarker.notifyDataSetChanged();
+        } else
+            Lib.showToast(act, getResources().getString(R.string.cancel_rename));
     }
 
     private void goToEdit() {
@@ -586,7 +587,8 @@ public class CollectionsFragment extends Fragment {
 
     private void saveChange() {
         if (boolChange) {
-            SQLiteDatabase db = dbCol.getWritableDatabase();
+            DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+            SQLiteDatabase db = dbMarker.getWritableDatabase();
             ContentValues cv;
             if (sCol == null) {
                 for (int i = 1; i < adMarker.getCount(); i++) {
@@ -603,14 +605,14 @@ public class CollectionsFragment extends Fragment {
                         new String[]{sCol.substring(0, sCol.indexOf(Lib.N))});
                 sCol = sCol.substring(0, sCol.indexOf(Lib.N) + 1) + t;
             }
-            dbCol.close();
+            dbMarker.close();
             boolChange = false;
         }
     }
 
     private void deleteElement() {
-        SQLiteDatabase dbM = dbMar.getWritableDatabase();
-        SQLiteDatabase dbC = dbCol.getWritableDatabase();
+        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         int n;
         String s, id = String.valueOf(adMarker.getItem(iSel).getId());
         ContentValues cv;
@@ -623,7 +625,7 @@ public class CollectionsFragment extends Fragment {
             s = adMarker.getItem(iSel).getData();
             mId = DataBase.getList(s);
             for (int i = 0; i < mId.length; i++) { //перебираем список закладок.
-                cursor = dbM.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
+                cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
                         DataBase.ID + DataBase.Q, new String[]{mId[i]}
                         , null, null, null);
                 if (!cursor.moveToFirst()) continue;
@@ -641,15 +643,15 @@ public class CollectionsFragment extends Fragment {
                 //обновляем закладку:
                 cv = new ContentValues();
                 cv.put(DataBase.COLLECTIONS, s);
-                dbM.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q,
+                db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q,
                         new String[]{mId[i]});
             }
             //удаляем подборку:
-            dbC.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, new String[]{id});
+            db.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, new String[]{id});
             //дополняем список "Вне подоборок"
             if (b.length() > 0) { //список на добавление не пуст
                 //получаем список закладок в "Вне подоборок":
-                cursor = dbC.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
+                cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
                         DataBase.ID + DataBase.Q, new String[]{"1"}
                         , null, null, null);
                 if (cursor.moveToFirst())
@@ -660,21 +662,21 @@ public class CollectionsFragment extends Fragment {
                 //дополняем список:
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, b.toString() + s);
-                dbC.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                         new String[]{"1"});
                 loadColList(); //обновляем список подборок
             } else //иначе просто удаляем подборку из списка
                 adMarker.removeAt(iSel);
         } else { //удаляем закладку
             n = 0;
-            cursor = dbM.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
+            cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
                     DataBase.ID + DataBase.Q, new String[]{id}
                     , null, null, null);
             if (cursor.moveToFirst()) {
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 mId = DataBase.getList(s);
                 for (int i = 0; i < mId.length; i++) { //перебираем список подборок
-                    cursor = dbC.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
+                    cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
                             DataBase.ID + DataBase.Q, new String[]{mId[i]}
                             , null, null, null);
                     if (!cursor.moveToFirst()) continue;
@@ -684,17 +686,16 @@ public class CollectionsFragment extends Fragment {
                     //обновляем подборку:
                     cv = new ContentValues();
                     cv.put(DataBase.MARKERS, s);
-                    dbC.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                             new String[]{mId[i]});
                 }
             }
             cursor.close();
             //удаляем закладку:
-            dbM.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, new String[]{id});
+            db.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, new String[]{id});
             adMarker.removeAt(iSel);
         }
-        dbMar.close();
-        dbCol.close();
+        dbMarker.close();
         if (adMarker.getCount() == n) { //не осталось элементов для редактирования
             if (n == 0) { //список закладок пуст
                 tvEmpty.setText(getResources().getString(R.string.collection_is_empty));
@@ -723,7 +724,8 @@ public class CollectionsFragment extends Fragment {
     public void putResult(int resultCode) {
         if (resultCode == 1) {
             sCol = sCol.substring(0, sCol.indexOf(Lib.N));
-            SQLiteDatabase db = dbCol.getWritableDatabase();
+            DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+            SQLiteDatabase db = dbMarker.getWritableDatabase();
             Cursor cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
                     DataBase.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)}
                     , null, null, null);
@@ -732,7 +734,7 @@ public class CollectionsFragment extends Fragment {
             else
                 sCol += Lib.N;
             cursor.close();
-            dbCol.close();
+            dbMarker.close();
 
             loadMarList();
             if (iSel == adMarker.getCount())

@@ -37,7 +37,6 @@ public class MarkerActivity extends AppCompatActivity {
     private final String PAGE = "page", COL = "col";
     private final int height_pos = 230;
     private float density;
-    private DataBase dbCol, dbMar;
     private String pageCon;
     private CheckAdapter adPage, adCol;
     private TextView tvSel, tvPos, tvCol;
@@ -156,7 +155,8 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void loadCol() {
-        SQLiteDatabase db = dbCol.getWritableDatabase();
+        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         Cursor cursor = db.query(DataBase.COLLECTIONS,
                 new String[]{DataBase.ID, DataBase.TITLE},
                 null, null, null, null, DataBase.PLACE);
@@ -168,7 +168,7 @@ public class MarkerActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        dbCol.close();
+        dbMarker.close();
     }
 
     private void restoreActivityState(Bundle state) {
@@ -232,7 +232,8 @@ public class MarkerActivity extends AppCompatActivity {
                     String.format("%.1f", getIntent().getFloatExtra(DataBase.PLACE, 0f)) + "%";
         } else { //edit mode
             setResult(0);
-            SQLiteDatabase db = dbMar.getWritableDatabase();
+            DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+            SQLiteDatabase db = dbMarker.getWritableDatabase();
             Cursor cursor = db.query(DataBase.MARKERS, null,
                     DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)}
                     , null, null, null);
@@ -258,9 +259,7 @@ public class MarkerActivity extends AppCompatActivity {
             tvSel.setText(s);
             s = cursor.getString(cursor.getColumnIndex(DataBase.COLLECTIONS));
             cursor.close();
-            dbMar.close();
 
-            db = dbCol.getWritableDatabase();
             String[] mId = DataBase.getList(s);
             StringBuilder b = new StringBuilder(getResources().getString(R.string.sel_col));
             for (int i = 0; i < mId.length; i++) {
@@ -273,7 +272,7 @@ public class MarkerActivity extends AppCompatActivity {
                 }
             }
             cursor.close();
-            dbCol.close();
+            dbMarker.close();
             b.delete(b.length() - 2, b.length());
             setColList(b.toString());
             tvCol.setText(b);
@@ -303,8 +302,6 @@ public class MarkerActivity extends AppCompatActivity {
     private void initViews() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        dbCol = new DataBase(MarkerActivity.this, DataBase.COLLECTIONS);
-        dbMar = new DataBase(MarkerActivity.this, DataBase.MARKERS);
         adPage = new CheckAdapter(this);
         adCol = new CheckAdapter(this);
         loadCol();
@@ -480,7 +477,8 @@ public class MarkerActivity extends AppCompatActivity {
                             }
                         }
                         etCol.setText("");
-                        SQLiteDatabase db = dbCol.getWritableDatabase();
+                        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+                        SQLiteDatabase db = dbMarker.getWritableDatabase();
                         ContentValues cv;
                         //освобождаем первую позицию (PLACE) путем смещения всех вперед..
                         Cursor cursor = db.query(DataBase.COLLECTIONS,
@@ -514,7 +512,7 @@ public class MarkerActivity extends AppCompatActivity {
                                     cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
                         }
                         cursor.close();
-                        dbCol.close();
+                        dbMarker.close();
                         //добавляем подборку в поле
                         tvCol.setText(tvCol.getText() + ", " + s);
                     }
@@ -527,15 +525,16 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void updateMarker() {
         //формуируем закладку
-        SQLiteDatabase db = dbMar.getWritableDatabase();
+        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = getMarkerValues();
         //обновляем закладку в базе
         String sid = String.valueOf(id);
         db.update(DataBase.MARKERS, cv,
                 DataBase.ID + DataBase.Q, new String[]{sid});
-        dbMar.close();
+        dbMarker.close();
         //обновляем подборки
-        db = dbCol.getWritableDatabase();
+        db = dbMarker.getWritableDatabase();
         Cursor cursor;
         int col_id;
         String s;
@@ -575,7 +574,7 @@ public class MarkerActivity extends AppCompatActivity {
             }
             cursor.close();
         }
-        dbCol.close();
+        dbMarker.close();
     }
 
     private void newProgPos() {
@@ -585,13 +584,13 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void addMarker() {
         //формулируем закладку
-        SQLiteDatabase db = dbMar.getWritableDatabase();
+        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = getMarkerValues();
         //добавляем в базу и получаем id
         long mar_id = db.insert(DataBase.MARKERS, null, cv);
-        dbMar.close();
         //обновляем подборки, в которые добавлена закладка
-        db = dbCol.getWritableDatabase();
+        db = dbMarker.getWritableDatabase();
         Cursor cursor;
         int col_id;
         String s;
@@ -617,7 +616,7 @@ public class MarkerActivity extends AppCompatActivity {
                 cursor.close();
             }
         }
-        dbCol.close();
+        dbMarker.close();
     }
 
     private void setPageList(String s) {
