@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:spinnerStyle">@style/SpinnerStyle</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -53,6 +55,18 @@
         <item name="android:textColorPrimary">@android:color/white</item>
         <!--dialog background-->
         <item name="android:windowBackground">@drawable/field</item>
+    </style>
+
+    <style name="SpinnerStyle">
+        <item name="android:padding">10dp</item>
+        <item name="android:background">@drawable/button</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="SpinnerItem">
+        <item name="android:textSize">16sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>

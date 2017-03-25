@@ -33,6 +33,13 @@
         <item>Мои Единомышленники</item>
         <item>Подсказка</item>
     </string-array>
+    <string-array name="search_mode">
+        <item>Искать в Посланиях</item>
+        <item>Искать в Катренах</item>
+        <item>Искать в заголовках</item>
+        <item>Искать по всем материалам</item>
+        <item>Искать в Посланиях и Катренах</item>
+    </string-array>
     <string-array name="help_title">
         <item>Добро пожаловать!</item>
         <item>О меню</item>

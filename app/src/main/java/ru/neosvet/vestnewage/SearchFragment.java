@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -48,13 +49,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private CheckBox cbSearchInResults;
     private ListView lvResult;
     private Button bStart, bEnd;
+    private Spinner sMode;
     private AutoCompleteTextView etSearch;
     private ArrayAdapter<String> adSearch;
     List<String> liSearch = new ArrayList<String>();
     private SearchTask task = null;
     private Date dStart, dEnd;
     private ListAdapter adResults;
-    private int min_m = 0, min_y = 116, dialog = -1;
+    private int min_m = 0, min_y = 116, dialog = -1, mode = 4;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
@@ -62,6 +64,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
     public void setString(String s) {
         string = s;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 
     @Override
@@ -80,7 +86,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
         return this.container;
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -107,6 +112,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
             dStart = new Date();
             dStart.setYear(min_y);
             dStart.setMonth(min_m);
+            sMode.setSelection(mode);
         } else {
             task = (SearchTask) state.getSerializable(Lib.TASK);
             if (task != null) {
@@ -170,6 +176,11 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         bEnd = (Button) container.findViewById(R.id.bEndRange);
         cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
+        sMode = (Spinner) container.findViewById(R.id.sMode);
+        ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, android.R.layout.simple_spinner_item,
+                getResources().getStringArray(R.array.search_mode));
+        adBook.setDropDownViewResource(R.layout.spinner_item);
+        sMode.setAdapter(adBook);
         lvResult = (ListView) container.findViewById(R.id.lvResult);
         adResults = new ListAdapter(act);
         lvResult.setAdapter(adResults);
@@ -314,7 +325,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         final String s = etSearch.getText().toString();
         task = new SearchTask(SearchFragment.this);
         DateFormat df = new SimpleDateFormat("MM.yy");
-        task.execute(s, df.format(dStart), df.format(dEnd));
+        task.execute(s, String.valueOf(sMode.getSelectedItemPosition()),
+                df.format(dStart), df.format(dEnd));
         if (!liSearch.contains(s)) {
             liSearch.add(s);
             adSearch.notifyDataSetChanged();

@@ -7,7 +7,7 @@
 
     <include layout="@layout/search_content" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/pSettings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,73 +16,85 @@
         android:layout_marginRight="@dimen/margin_side"
         android:layout_marginTop="@dimen/margin_top"
         android:background="@drawable/field"
-        android:orientation="vertical"
-        android:padding="13dp"
-        android:visibility="gone">
+        android:padding="13dp">
 
-        <Button
-            android:id="@+id/bClearSearch"
-            style="@style/Button"
+        <Spinner
+            android:id="@+id/sMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:text="@string/clear_search" />
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true" />
 
         <TextView
+            android:id="@+id/label1"
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/sMode"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
             android:text="@string/range_for_search" />
 
-        <LinearLayout
+
+        <Button
+            android:id="@+id/bStartRange"
+            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal">
+            android:layout_below="@+id/label1"
+            android:layout_toLeftOf="@+id/label2"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
 
-            <Button
-                android:id="@+id/bStartRange"
-                style="@style/Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" />
+        <TextView
+            android:id="@+id/label2"
+            style="@style/Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/label1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="12dp"
+            android:text="–"
+            android:textStyle="bold" />
 
-            <TextView
-                style="@style/Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:text="–"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/bEndRange"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/label1"
+            android:layout_toRightOf="@+id/label2"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
 
-            <Button
-                android:id="@+id/bEndRange"
-                style="@style/Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" />
-
-        </LinearLayout>
 
         <Button
             android:id="@+id/bChangeRange"
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
+            android:layout_below="@+id/bStartRange"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:text="@string/change_range" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/bClearSearch"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bChangeRange"
+            android:layout_centerHorizontal="true"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:text="@string/clear_search" />
+
+    </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabSettings"
