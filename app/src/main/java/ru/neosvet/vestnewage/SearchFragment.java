@@ -56,7 +56,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private SearchTask task = null;
     private Date dStart, dEnd;
     private ListAdapter adResults;
-    private int min_m = 0, min_y = 116, dialog = -1, mode = 4;
+    private int min_m = 0, min_y = 116, dialog = -1, mode = 5;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
@@ -177,7 +177,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
         sMode = (Spinner) container.findViewById(R.id.sMode);
-        ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, android.R.layout.simple_spinner_item,
+        ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, R.layout.spinner_button,
                 getResources().getStringArray(R.array.search_mode));
         adBook.setDropDownViewResource(R.layout.spinner_item);
         sMode.setAdapter(adBook);
@@ -202,7 +202,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
                 e.printStackTrace();
             }
         }
-        adSearch = new ArrayAdapter<String>(act, android.R.layout.select_dialog_item, liSearch);
+        adSearch = new ArrayAdapter<String>(act, R.layout.spinner_item, liSearch);
         etSearch.setThreshold(1);
         etSearch.setAdapter(adSearch);
         etSearch.setOnKeyListener(new View.OnKeyListener() {
