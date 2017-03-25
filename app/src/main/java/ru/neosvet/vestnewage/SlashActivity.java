@@ -133,15 +133,14 @@ public class SlashActivity extends AppCompatActivity {
             } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0
                 link = data.getQuery();
                 int mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
-                 /* <option selected="" value="0">в Посланиях</option>
-                <option value="5">в Катренах</option>
-                <option value="1">в заголовках</option>
-                <option value="2">по всему Сайту</option>
-                <option value="3">по дате</option>
+                 /* <option selected="" value="0">в Посланиях</option> 0
+                <option value="5">в Катренах</option> 1
+                <option value="1">в заголовках</option> 2
+                <option value="2">по всему Сайту</option> 3
+                <option value="3">по дате</option> 4
                 <!-- <option  value="4">в цитатах</option> -->*/
-                if (mode == 5) mode = 1;
-                else if (mode > 0) mode++;
-                if (mode > 3) mode = 3;
+                if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
+                else if (mode > 0) mode++; // поэтому остальное смещается
                 main.putExtra(MainActivity.TAB, mode);
                 link = link.substring(link.indexOf("=") + 1, link.indexOf("&"));
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_search);
