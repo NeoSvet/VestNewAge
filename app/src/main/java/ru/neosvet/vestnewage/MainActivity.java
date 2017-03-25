@@ -215,8 +215,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_search:
                 SearchFragment frSearch = new SearchFragment();
                 String s = getIntent().getStringExtra(DataBase.LINK);
-                if (s != null)
+                if (s != null) {
                     frSearch.setString(s);
+                    frSearch.setMode(tab);
+                }
                 fragmentTransaction.replace(R.id.my_fragment, frSearch);
                 break;
             case R.id.nav_journal:
@@ -243,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
                 break;
         }
+
         tab = 0;
         fragmentTransaction.commit();
     }
