@@ -11,28 +11,29 @@
         style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:layout_weight="1"
-        android:padding="10dp"
+        android:paddingLeft="5dp"
         android:textColor="@color/colorAccentLight" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:background="@color/colorAccentLight" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="20">
+        android:layout_weight="30">
 
         <TextView
             android:id="@+id/message"
             style="@style/Label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp" />
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp" />
     </ScrollView>
 
     <EditText
@@ -42,8 +43,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:background="@color/colorPrimaryDark"
         android:imeOptions="actionDone"
         android:inputType="text"
@@ -57,14 +58,14 @@
         android:layout_weight="1"
         android:gravity="right"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="5dp">
 
         <Button
             android:id="@+id/leftButton"
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="5dp"
             android:gravity="center"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
