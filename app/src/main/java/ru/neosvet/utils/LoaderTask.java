@@ -422,9 +422,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         DataBase dataBase = new DataBase(act, link);
         if (!bSinglePage && dataBase.existsPage(link))
             return;
-        String line, s = "";
+        String line, s = link;
         final String par = "</p>", nl = "<br>";
-        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link.replace("#2", "") + Lib.PRINT));
+        if (link.contains("#")) s = s.substring(0, s.indexOf("#"));
+        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + s + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
@@ -487,11 +488,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     db.insert(DataBase.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
-                if (link.contains("#")) {
-                    // ссылка на второй текст на странице - мотаем до него
-                    line = br.readLine();
-                    while (!line.contains("<h1"))
+                if (link.contains("#")) {// ссылка на последующий текст на странице
+                    // узнаем его номер:
+                    id = Integer.parseInt(link.substring(link.indexOf("#") + 1));
+                    // мотаем до него:
+                    while (id > 1) {
                         line = br.readLine();
+                        if (line.contains("<h1"))
+                            id--;
+                    }
                 }
                 Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
                         DataBase.LINK + DataBase.Q, new String[]{link}
