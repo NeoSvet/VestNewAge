@@ -38,6 +38,7 @@
         <item>Искать в Катренах</item>
         <item>Искать в заголовках</item>
         <item>Искать по всем материалам</item>
+        <item>Искать по дате</item>
         <item>Искать в Посланиях и Катренах</item>
     </string-array>
     <string-array name="help_title">
