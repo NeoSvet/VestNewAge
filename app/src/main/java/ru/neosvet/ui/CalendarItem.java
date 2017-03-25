@@ -45,6 +45,12 @@ public class CalendarItem {
     }
 
     public String getLink(int i) {
+        if (links.get(i).contains("#")) {
+            String link = links.get(i);
+            link = link.substring(0, link.indexOf("#"))
+                    + ".html" + link.substring(link.indexOf("#"));
+            return link;
+        }
         return links.get(i) + ".html";
     }
 

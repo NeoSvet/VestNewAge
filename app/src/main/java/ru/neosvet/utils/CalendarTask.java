@@ -174,7 +174,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                 jsonI = json.optJSONObject(s);
                 n = data.size();
                 data.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
-                if (jsonI == null) {
+                if (jsonI == null) { // несколько материалов за день
                     jsonA = json.optJSONArray(s);
                     for (int j = 0; j < jsonA.length(); j++) {
                         jsonI = jsonA.getJSONObject(j);
@@ -187,8 +187,16 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                         } else
                             addLink(n, r);
                     }
-                } else {
-                    data.get(n).addLink(jsonI.getString(DataBase.LINK));
+                } else { // один материал за день
+                    r = jsonI.getString(DataBase.LINK);
+                    data.get(n).addLink(r);
+                    jsonI = jsonI.getJSONObject("data");
+                    if (jsonI != null) {
+                        if (jsonI.has("title2")) {
+                            if (!jsonI.getString("title2").equals(""))
+                                addLink(n, r + "#2");
+                        }
+                    }
                 }
             }
             if (isCancelled())

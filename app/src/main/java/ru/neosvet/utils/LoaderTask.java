@@ -422,21 +422,22 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         DataBase dataBase = new DataBase(act, link);
         if (!bSinglePage && dataBase.existsPage(link))
             return;
-        String line, s;
+        String line, s = "";
         final String par = "</p>", nl = "<br>";
-        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link + Lib.PRINT));
+        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + link.replace("#2", "") + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         boolean b = false;
-        int i = 0;
+        int id = 0;
         while ((line = br.readLine()) != null) {
             if (b) {
-                if (line.contains("<!--/row-->")) {
+                if (line.contains("<!--/row-->") || line.contains("<h1>")) {
                     break;
                 } else if (line.contains("<")) {
                     line = line.trim();
                     if (line.length() < 7) continue;
+                    line = line.replace("<br />", nl).replace("color", "cvet");
                     if (line.contains("<p")) {
                         while (!line.contains(par)) {
                             line += br.readLine();
@@ -458,9 +459,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                         if (line.contains("center"))
                             line = "<center>" + s + "</center>";
                         else line = s;
-                    }
-                    line = line.replace("<br />", nl).replace("color", "cvet");
-                    if (line.contains("noind")) { // объединяем подпись в один абзац
+                    } else if (line.contains("noind")) { // объединяем подпись в один абзац
                         s = br.readLine();
                         while (s.contains("noind")) {
                             line += s;
@@ -476,31 +475,35 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
                             s = line.substring(0, line.indexOf(par) + par.length());
                             cv = new ContentValues();
-                            cv.put(DataBase.ID, i);
+                            cv.put(DataBase.ID, id);
                             cv.put(DataBase.PARAGRAPH, s);
                             db.insert(DataBase.PARAGRAPH, null, cv);
                             line = line.substring(s.length());
                         }
                     }
                     cv = new ContentValues();
-                    cv.put(DataBase.ID, i);
+                    cv.put(DataBase.ID, id);
                     cv.put(DataBase.PARAGRAPH, line);
                     db.insert(DataBase.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
+                if (link.contains("#")) {
+                    // ссылка на второй текст на странице - мотаем до него
+                    line = br.readLine();
+                    while (!line.contains("<h1"))
+                        line = br.readLine();
+                }
                 Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
                         DataBase.LINK + DataBase.Q, new String[]{link}
                         , null, null, null);
                 if (cursor.moveToFirst())
-                    i = cursor.getInt(0);
+                    id = cursor.getInt(0);
                 cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
-                if (i == 0) { // id не найден, материала нет - добавляем
-                    line = line.trim().replace("&nbsp;", " ");
-                    while ((i = line.indexOf("<")) > -1) {
-                        line = line.substring(0, i) +
-                                line.substring(line.indexOf(">", i) + 1);
-                    }
+                if (id == 0) { // id не найден, материала нет - добавляем
+                    line = line.replace("&ldquo;", "“").replace("&rdquo;", "”");
+                    line = lib.withOutTags(line);
+
                     cv.put(DataBase.LINK, link);
                     if (line.contains(dataBase.getName())) {
                         line = line.substring(9);
@@ -508,7 +511,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             line = line.substring(line.indexOf(Lib.KV_OPEN) + 1, line.length() - 1);
                     }
                     cv.put(DataBase.TITLE, line);
-                    i = (int) db.insert(DataBase.TITLE, null, cv);
+                    id = (int) db.insert(DataBase.TITLE, null, cv);
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
                     cv.put(DataBase.TIME, System.currentTimeMillis());
@@ -517,10 +520,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 } else { // id найден, значит материал есть
                     //обновляем дату загрузки материала
                     db.update(DataBase.TITLE, cv, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(i)});
+                            DataBase.Q, new String[]{String.valueOf(id)});
                     //удаляем содержимое материала
                     db.delete(DataBase.PARAGRAPH, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(i)});
+                            DataBase.Q, new String[]{String.valueOf(id)});
                 }
                 cursor.close();
                 br.readLine();

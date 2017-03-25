@@ -183,7 +183,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             DataBase dataBase = new DataBase(act, df.format(d));
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
-            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, DataBase.LINK);
             Date dModList;
             if (cursor.moveToFirst()) {
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
@@ -198,10 +198,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                             t = cursor.getString(iTitle);
                         else {
                             t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
-                            if (t.contains("_"))
-                                t = t.substring(0, t.indexOf("_"));
+                            if (t.contains("_")) t = t.substring(0, t.indexOf("_"));
+                            if (t.contains("#")) t = t.substring(0, t.indexOf("#"));
                             t = cursor.getString(iTitle) +
-                                    " (" + getResources().getString(R.string.from) + " " + t + ")";
+                                    " (" + getResources().getString(R.string.from)
+                                    + " " + t + ")";
                         }
                         adBook.addItem(new ListItem(t, s));
                     }

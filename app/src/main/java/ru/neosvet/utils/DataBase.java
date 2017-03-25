@@ -164,6 +164,7 @@ public class DataBase extends SQLiteOpenHelper {
             } else { //http://blagayavest.info/poems/11.03.17.html
                 link = link.substring(link.lastIndexOf("/") + 4, link.lastIndexOf("."));
                 if (link.contains("_")) link = link.substring(0, link.indexOf("_"));
+                if (link.contains("#")) link = link.substring(0, link.indexOf("#"));
             }
             return link;
         }
@@ -174,8 +175,8 @@ public class DataBase extends SQLiteOpenHelper {
             return title;
         } else {
             String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
-            if (s.contains("_"))
-                s = s.substring(0, s.indexOf("_"));
+            if (s.contains("_")) s = s.substring(0, s.indexOf("_"));
+            if (s.contains("#")) s = s.substring(0, s.indexOf("#"));
             if (link.contains(Lib.POEMS)) {
                 s += " " + context.getResources().getString(R.string.katren)
                         + " " + Lib.KV_OPEN + title + Lib.KV_CLOSE;
