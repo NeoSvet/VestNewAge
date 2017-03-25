@@ -26,7 +26,7 @@ import ru.neosvet.utils.Lib;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";
-    private final int MAX = 10;
+    private final int MAX = 20;
     private DataBase dbJournal;
     private ListAdapter adJournal;
     private MainActivity act;
