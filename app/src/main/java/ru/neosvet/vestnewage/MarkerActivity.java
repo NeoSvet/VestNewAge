@@ -215,7 +215,6 @@ public class MarkerActivity extends AppCompatActivity {
                 boolPosVis = true;
             }
         } else if (id == -1) { //add marker mode
-            loadPage();
             DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
             tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
             adPage.getItem(0).setCheck(true);
@@ -241,7 +240,6 @@ public class MarkerActivity extends AppCompatActivity {
             link = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
             etDes.setText(cursor.getString(cursor.getColumnIndex(DataBase.DESCTRIPTION)));
             String s = cursor.getString(cursor.getColumnIndex(DataBase.PLACE));
-            loadPage();
             if (s.contains("%")) {
                 rPos.setChecked(true);
                 setPosText(Float.parseFloat(s.substring(0, s.length() - 1).replace(",", ".")));
@@ -291,7 +289,6 @@ public class MarkerActivity extends AppCompatActivity {
         for (i = 0; i < m.length; i++) {
             adPage.addItem(m[i]);
         }
-
         i = pageCon.indexOf(Lib.N);
         while (i > -1) {
             k_par++;
@@ -303,6 +300,7 @@ public class MarkerActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         adPage = new CheckAdapter(this);
+        loadPage();
         adCol = new CheckAdapter(this);
         loadCol();
         tvSel = (TextView) findViewById(R.id.tvSel);
