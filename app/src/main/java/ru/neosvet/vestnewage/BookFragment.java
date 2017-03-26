@@ -183,17 +183,27 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             DataBase dataBase = new DataBase(act, df.format(d));
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
-            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, DataBase.LINK);
+            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
             Date dModList;
             if (cursor.moveToFirst()) {
-                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                int iLink = cursor.getColumnIndex(DataBase.LINK);
                 dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
-                while (cursor.moveToNext()) {
-                    s = cursor.getString(iLink);
-                    if (s == null) continue; // need?
-                    if ((s.contains(Lib.POEMS) && bKat) ||
-                            (!s.contains(Lib.POEMS) && !bKat)) {
+                cursor.close();
+                if (bKat) { // катрены
+                    cursor = db.query(DataBase.TITLE, null,
+                            DataBase.LINK + DataBase.LIKE,
+                            new String[]{"%" + Lib.POEMS + "%"}
+                            , null, null, DataBase.LINK);
+                } else { // послания
+                    cursor = db.query(DataBase.TITLE, null,
+                            DataBase.LINK + " NOT" + DataBase.LIKE,
+                            new String[]{"%" + Lib.POEMS + "%"}
+                            , null, null, DataBase.LINK);
+                }
+                if (cursor.moveToFirst()) {
+                    int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                    int iLink = cursor.getColumnIndex(DataBase.LINK);
+                    do {
+                        s = cursor.getString(iLink);
                         if (s.contains("2004") || s.contains("pred"))
                             t = cursor.getString(iTitle);
                         else {
@@ -205,7 +215,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                                     + " " + t + ")";
                         }
                         adBook.addItem(new ListItem(t, s));
-                    }
+                    } while (cursor.moveToNext());
                 }
             } else
                 dModList = d;
