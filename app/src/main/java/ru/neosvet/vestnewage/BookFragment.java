@@ -55,7 +55,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private ListView lvBook;
     private int x, y, tab = 0;
     private Tip menuRnd;
-    private boolean boolNotClick = false, boolDialog = false, boolOtkr;
+    private String dialog = "";
+    private boolean boolNotClick = false, boolOtkr;
     private Date dKat, dPos;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -81,8 +82,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(Lib.DIALOG, boolDialog);
-        if (boolDialog)
+        outState.putString(Lib.DIALOG, dialog);
+        if (dialog.length() == 1)
             dateDialog.dismiss();
         outState.putInt(CURRENT_TAB, tab);
         outState.putSerializable(Lib.TASK, task);
@@ -99,11 +100,18 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
             if (task != null) {
-//                fabRefresh.setVisibility(View.GONE);
+                fabRefresh.setVisibility(View.GONE);
                 task.setFrm(this);
                 act.status.setLoad(true);
-            } else if (state.getBoolean(Lib.DIALOG))
-                showDatePicker();
+            } else {
+                dialog = state.getString(Lib.DIALOG);
+                if (dialog.length() == 1)
+                    showDatePicker();
+                else if (dialog.length() > 1) {
+                    String[] m = dialog.split(Lib.AND);
+                    showRndAlert(m[0], m[1], m[2], m[3], Integer.parseInt(m[4]));
+                }
+            }
         }
         if (tab == 1) {
             tabHost.setCurrentTab(0);
@@ -391,6 +399,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         tvDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                dialog = "1";
                 showDatePicker();
             }
         });
@@ -414,13 +423,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 if (dPos.getMonth() == 0 && dPos.getYear() == 116 && !boolOtkr) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                     builder.setMessage(getResources().getString(R.string.alert_download_otkr));
-                    builder.setNegativeButton(getResources().getString(android.R.string.no),
+                    builder.setNegativeButton(getResources().getString(R.string.no),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.dismiss();
                                 }
                             });
-                    builder.setPositiveButton(getResources().getString(android.R.string.yes),
+                    builder.setPositiveButton(getResources().getString(R.string.yes),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     task = new BookTask(BookFragment.this);
@@ -522,7 +531,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void showDatePicker() {
-        boolDialog = true;
         Date d;
         if (tab == 0)
             d = dKat;
@@ -545,7 +553,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     @Override
     public void putDate(Date date) {
-        boolDialog = false;
+        dialog = "";
         if (date == null) //cancel
             return;
         if (tab == 0)
@@ -652,51 +660,19 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             } else // случайный катрен или послание
                 n = -1;
             //выводим на экран:
-            final String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
+            String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
             String msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), link);
             if (title == null) {
                 title = msg;
                 msg = s;
             }
             curTitle.close();
-            final String place = s;
-            final int par = n;
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(act);
-            LayoutInflater inflater = act.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.layout_dialog, null);
-            builder.setView(dialogView);
-            TextView tv = (TextView) dialogView.findViewById(R.id.title);
-            tv.setText(title);
-            tv = (TextView) dialogView.findViewById(R.id.message);
-            tv.setText(msg);
-            Button button = (Button) dialogView.findViewById(R.id.leftButton);
-            button.setText(getResources().getString(R.string.in_markers));
-            button.setVisibility(View.VISIBLE);
-            final android.app.AlertDialog dialog = builder.create();
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent marker = new Intent(act, MarkerActivity.class);
-                    marker.putExtra(DataBase.LINK, link);
-                    marker.putExtra(DataBase.PARAGRAPH, par);
-                    startActivity(marker);
-                    dialog.dismiss();
-                }
-            });
-            button = (Button) dialogView.findViewById(R.id.rightButton);
-            button.setText(getResources().getString(R.string.open));
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    BrowserActivity.openReader(act, link, place);
-                    dialog.dismiss();
-                }
-            });
-            dialog.show();
+            dialog = title + Lib.AND + link + Lib.AND + msg + Lib.AND + s + Lib.AND + n;
+            showRndAlert(title, link, msg, s, n);
             //добавляем в журнал:
             ContentValues cv = new ContentValues();
             cv.put(DataBase.TIME, System.currentTimeMillis());
-            String id = dataBase.getDatePage(link) + "&" + dataBase.getPageId(link) + "&" + n;
+            String id = dataBase.getDatePage(link) + Lib.AND + dataBase.getPageId(link) + Lib.AND + n;
             DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
             db = dbJournal.getWritableDatabase();
             cv.put(DataBase.ID, id);
@@ -704,5 +680,46 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             dbJournal.close();
         } else
             Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+    }
+
+    private void showRndAlert(String title, final String link, String msg, final String place, final int par) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        LayoutInflater inflater = act.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        builder.setView(dialogView);
+        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+        tv.setText(title);
+        tv = (TextView) dialogView.findViewById(R.id.message);
+        tv.setText(msg);
+        Button button = (Button) dialogView.findViewById(R.id.leftButton);
+        button.setText(getResources().getString(R.string.in_markers));
+        button.setVisibility(View.VISIBLE);
+        final AlertDialog alert = builder.create();
+        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialog = "";
+            }
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent marker = new Intent(act, MarkerActivity.class);
+                marker.putExtra(DataBase.LINK, link);
+                marker.putExtra(DataBase.PARAGRAPH, par);
+                startActivity(marker);
+                alert.dismiss();
+            }
+        });
+        button = (Button) dialogView.findViewById(R.id.rightButton);
+        button.setText(getResources().getString(R.string.open));
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BrowserActivity.openReader(act, link, place);
+                alert.dismiss();
+            }
+        });
+        alert.show();
     }
 }
