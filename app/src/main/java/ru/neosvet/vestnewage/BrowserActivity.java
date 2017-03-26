@@ -623,7 +623,7 @@ public class BrowserActivity extends AppCompatActivity
             public void run() {
                 ContentValues cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
-                String id = dbPage.getDatePage(link) + "&" + dbPage.getPageId(link);
+                String id = dbPage.getDatePage(link) + Lib.AND + dbPage.getPageId(link);
 
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
                 int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});

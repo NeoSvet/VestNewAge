@@ -31,7 +31,7 @@ public class Lib {
     public static final String SITE = "http://blagayavest.info/", N = "\n", NN = "\n\n",
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
-            LIGHT = "/style/light.css", DARK = "/style/dark.css",
+            LIGHT = "/style/light.css", DARK = "/style/dark.css", AND = "&",
             PRINT = "?styletpl=print", HREF = "href", DIALOG = "dialog",
             KV_OPEN = "“", KV_CLOSE = "”", POEMS = "poems";
     private Context context;

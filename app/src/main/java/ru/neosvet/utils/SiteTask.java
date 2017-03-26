@@ -105,7 +105,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
             }
             if (b) {
                 if (line.contains("<h")) {
-                    if (line.contains("&")) continue;
+                    if (line.contains(Lib.AND)) continue;
                     setDes(d);
                     d = "";
                     if (line.contains("h3")) {

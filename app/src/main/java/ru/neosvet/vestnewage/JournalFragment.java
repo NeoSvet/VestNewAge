@@ -82,7 +82,7 @@ public class JournalFragment extends Fragment {
             if (offset > 0)
                 curJ.moveToPosition(offset);
             do {
-                id = curJ.getString(iID).split("&");
+                id = curJ.getString(iID).split(Lib.AND);
                 dataBase = new DataBase(act, id[0]);
                 db = dataBase.getWritableDatabase();
                 cursor = db.query(DataBase.TITLE, null, DataBase.ID + DataBase.Q,
