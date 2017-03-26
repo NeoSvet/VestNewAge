@@ -88,11 +88,12 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                 //empty list
                 return false;
             }
-            int sy, sm, ey, em, step;
-            String s = params[1]; // начальная дата
+            int sy, sm, ey, em, step, mode;
+            mode = Integer.parseInt(params[1]);
+            String s = params[2]; // начальная дата
             sm = Integer.parseInt(s.substring(0, 2)) - 1;
             sy = Integer.parseInt(s.substring(3, 5));
-            s = params[2]; // конечная дата
+            s = params[3]; // конечная дата
             em = Integer.parseInt(s.substring(0, 2)) - 1;
             ey = Integer.parseInt(s.substring(3, 5));
             s = params[0]; // строка для поиска
@@ -102,14 +103,18 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                 step = -1;
             Date d;
             DateFormat df = new SimpleDateFormat("MM.yy");
+            if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
+                //поиск по материалам (статьям)
+                searchList("00.00", s, mode, step == -1);
+            }
             while (boolStart) {
                 d = new Date(sy, sm, 1);
                 if (list.contains(df.format(d))) {
                     publishProgress(act.getResources().getStringArray(R.array.months)
-                            [d.getMonth()] + " " + (1900 + d.getYear()));
-                    searchList(df.format(d), s, step == -1);
+                            [d.getMonth()] + " " + (2000 + d.getYear()));
+                    searchList(df.format(d), s, mode, step == -1);
                 }
-//                if (data.size() > 5) break; tut
+//                if (data.size() > 15) break; tut
                 if (sy == ey && sm == em)
                     break;
                 sm += step;
@@ -128,43 +133,63 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
         return false;
     }
 
-    private void searchList(String name, String s, boolean boolDesc) {
+    private void searchList(String name, String s, int mode, boolean boolDesc) {
         DataBase dataBase = new DataBase(act, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curPar = db.query(DataBase.PARAGRAPH, null,
-                DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + s + "%"}
-                , null, null, null);
+        Cursor curSearch;
+        if (mode == 2) { //Искать в заголовках
+            curSearch = db.query(DataBase.TITLE, null,
+                    DataBase.TITLE + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    , null, null, null);
+        } else if (mode == 4) { //Искать по дате - ищем по ссылкам
+            curSearch = db.query(DataBase.TITLE, null,
+                    DataBase.LINK + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    , null, null, null);
+        } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
+            // фильтрация по 0 и 1 будет позже
+            curSearch = db.query(DataBase.PARAGRAPH, null,
+                    DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    , null, null, null);
+        }
         final int size = data.size();
-        if (curPar.moveToFirst()) {
-            int iPar = curPar.getColumnIndex(DataBase.PARAGRAPH);
-            int iID = curPar.getColumnIndex(DataBase.ID);
+        if (curSearch.moveToFirst()) {
+            int iPar = curSearch.getColumnIndex(DataBase.PARAGRAPH);
+            int iID = curSearch.getColumnIndex(DataBase.ID);
             String t;
             int i = size - 1, id = -1;
             Cursor curTitle;
             ListItem item;
+            boolean boolAdd = true;
             do {
-                if (id == curPar.getInt(iID)) {
+                if (id == curSearch.getInt(iID) && boolAdd) {
                     data.get(i).setDes(data.get(i).getDes()
-                            + Lib.NN + act.lib.withOutTags(curPar.getString(iPar)));
+                            + Lib.NN + act.lib.withOutTags(curSearch.getString(iPar)));
                 } else {
-                    id = curPar.getInt(iID);
+                    id = curSearch.getInt(iID);
                     curTitle = db.query(DataBase.TITLE, null,
                             DataBase.ID + DataBase.Q,
                             new String[]{String.valueOf(id)},
                             null, null, null);
                     if (curTitle.moveToFirst()) {
                         s = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
-                        t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
-                        item = new ListItem(t, s);
-                        item.setDes(act.lib.withOutTags(curPar.getString(iPar)));
-                        data.add(item);
-                        i++;
+                        if (mode == 0) //Искать в Посланиях
+                            boolAdd = !s.contains(Lib.POEMS);
+                        else if (mode == 1) //Искать в Катренах
+                            boolAdd = s.contains(Lib.POEMS);
+                        if (boolAdd) {
+                            t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
+                            item = new ListItem(t, s);
+                            if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
+                                item.setDes(act.lib.withOutTags(curSearch.getString(iPar)));
+                            data.add(item);
+                            i++;
+                        }
                     }
                     curTitle.close();
                 }
-            } while (curPar.moveToNext());
+            } while (curSearch.moveToNext());
         }
-        curPar.close();
+        curSearch.close();
         dataBase.close();
         // сортировка списка:
         if (data.size() > size) {
