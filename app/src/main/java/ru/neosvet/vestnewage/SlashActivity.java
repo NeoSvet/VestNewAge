@@ -147,9 +147,10 @@ public class SlashActivity extends AppCompatActivity {
             } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 1);
-            } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0
+            } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
                 link = data.getQuery();
-                int mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                int mode = link.lastIndexOf("=") + 1;
+                mode = Integer.parseInt(link.substring(mode, mode + 1));
                  /* <option selected="" value="0">в Посланиях</option> 0
                 <option value="5">в Катренах</option> 1
                 <option value="1">в заголовках</option> 2
@@ -159,7 +160,7 @@ public class SlashActivity extends AppCompatActivity {
                 if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
                 else if (mode > 0) mode++; // поэтому остальное смещается
                 main.putExtra(MainActivity.TAB, mode);
-                link = link.substring(link.indexOf("=") + 1, link.indexOf("&"));
+                link = link.substring(link.indexOf("=") + 1, link.indexOf(Lib.AND));
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_search);
                 main.putExtra(DataBase.LINK, link);
             }
