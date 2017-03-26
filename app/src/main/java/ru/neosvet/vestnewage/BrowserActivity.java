@@ -51,7 +51,7 @@ public class BrowserActivity extends AppCompatActivity
     public static final String THEME = "theme", NOMENU = "nomenu",
             SCALE = "scale", FILE = "file://", PNG = ".png",
             STYLE = "/style/style.css", PAGE = "/page.html";
-    private final int CODE_OPEN = 1, CODE_DOWNLOAD = 2;
+    private final int CODE_OPEN = 1;
     private List<String> history = new ArrayList<String>();
     private boolean bNomenu, bTheme, bTwo = false, boolBack = false;
     private SharedPreferences pref;
