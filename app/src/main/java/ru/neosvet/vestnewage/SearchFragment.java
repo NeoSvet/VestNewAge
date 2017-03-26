@@ -110,8 +110,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         if (state == null) {
             dEnd = new Date();
             dStart = new Date();
-            dStart.setYear(min_y);
-            dStart.setMonth(min_m);
+            if (mode < 5) { // открываем ссылку с сайта Благая Весть
+                dStart.setYear(0);
+                dStart.setMonth(116);
+            } else {
+                dStart.setYear(min_y);
+                dStart.setMonth(min_m);
+            }
             sMode.setSelection(mode);
         } else {
             task = (SearchTask) state.getSerializable(Lib.TASK);
