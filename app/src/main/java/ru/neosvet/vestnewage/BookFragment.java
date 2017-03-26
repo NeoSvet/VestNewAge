@@ -50,6 +50,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
     private TextView tvDate;
     private DateDialog dateDialog;
+    private AlertDialog alertRnd;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
@@ -85,6 +86,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         outState.putString(Lib.DIALOG, dialog);
         if (dialog.length() == 1)
             dateDialog.dismiss();
+        else  if (dialog.length() > 1)
+            alertRnd.dismiss();
         outState.putInt(CURRENT_TAB, tab);
         outState.putSerializable(Lib.TASK, task);
         super.onSaveInstanceState(outState);
@@ -694,8 +697,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         Button button = (Button) dialogView.findViewById(R.id.leftButton);
         button.setText(getResources().getString(R.string.in_markers));
         button.setVisibility(View.VISIBLE);
-        final AlertDialog alert = builder.create();
-        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        alertRnd = builder.create();
+        alertRnd.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 dialog = "";
@@ -708,7 +711,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 marker.putExtra(DataBase.LINK, link);
                 marker.putExtra(DataBase.PARAGRAPH, par);
                 startActivity(marker);
-                alert.dismiss();
+                alertRnd.dismiss();
             }
         });
         button = (Button) dialogView.findViewById(R.id.rightButton);
@@ -717,9 +720,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             @Override
             public void onClick(View view) {
                 BrowserActivity.openReader(act, link, place);
-                alert.dismiss();
+                alertRnd.dismiss();
             }
         });
-        alert.show();
+        alertRnd.show();
     }
 }
