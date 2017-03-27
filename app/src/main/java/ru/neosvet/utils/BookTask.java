@@ -2,16 +2,18 @@ package ru.neosvet.utils;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,27 +98,53 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     private String downloadOtrk() throws Exception {
         msg = act.getResources().getString(R.string.start);
         publishProgress(true);
-        InputStream in;
-        OutputStream out;
-        byte[] buf = new byte[1024];
-        int i, m = 8, y = 4;
+        int m = 8, y = 4;
         String name = "01.16";
-        File f;
+        int a, b;
+        DataBase dataBase;
+        SQLiteDatabase db;
+        Cursor cursor;
+        File f = new File(act.getFilesDir() + "/list/");
+        f.mkdir();
+        BufferedWriter bw;
+        String s;
         while (y < 16 && boolStart) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
             publishProgress(false);
-            f = new File(act.lib.getDBFolder() + "/" + name);
-            if (!f.exists()) {
-                out = new FileOutputStream(f, false);
-                in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
-                while ((i = in.read(buf)) > 0) {
-                    out.write(buf, 0, i);
-                    out.flush();
+            f = new File(act.getFilesDir() + "/list/" + name);
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "cp1251"));
+            dataBase = new DataBase(act, name);
+            db = dataBase.getWritableDatabase();
+            cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                a = cursor.getColumnIndex(DataBase.LINK);
+                b = cursor.getColumnIndex(DataBase.TITLE);
+                while (cursor.moveToNext()) {
+                    s = cursor.getString(a);
+                    if (s == null) continue;
+                    bw.write(s);
+                    bw.write(Lib.N);
+                    bw.write(cursor.getString(b));
+                    bw.write(Lib.N);
+                    bw.flush();
                 }
-                out.close();
-                in.close();
             }
+            cursor.close();
+            bw.write(Lib.AND + Lib.N);
+            cursor = db.query(DataBase.PARAGRAPH, null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                a = cursor.getColumnIndex(DataBase.ID);
+                b = cursor.getColumnIndex(DataBase.PARAGRAPH);
+                do {
+                    bw.write(String.valueOf(cursor.getInt(a)));
+                    bw.write(Lib.N);
+                    bw.write(cursor.getString(b));
+                    bw.write(Lib.N);
+                    bw.flush();
+                } while (cursor.moveToNext());
+            }
+            bw.close();
             if (m == 12) {
                 m = 1;
                 y++;
