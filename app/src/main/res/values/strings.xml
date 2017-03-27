@@ -126,10 +126,8 @@
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
-    <string name="refresh_list">Обновление списков раздела</string>
-    <string name="download">Загрузка</string>
-    <string name="kat_n_pos">Катренов и Посланий</string>
-    <string name="materials">материалов</string>
+    <string name="download_list">Загрузка списков</string>
+    <string name="download_materials">Загрузка материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="it_load_suc">Раздел успешно загружен</string>
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
