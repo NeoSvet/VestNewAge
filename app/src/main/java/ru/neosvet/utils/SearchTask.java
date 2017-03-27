@@ -1,6 +1,5 @@
 package ru.neosvet.utils;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.ListItem;
+import ru.neosvet.ui.ProgressDialog;
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.SearchFragment;
@@ -52,9 +52,7 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
     }
 
     private void showD() {
-        di = new ProgressDialog(act);
-        di.setTitle(act.getResources().getString(R.string.search));
-        di.setMessage(msg);
+        di = new ProgressDialog(act, 0);
         di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -62,6 +60,8 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
             }
         });
         di.show();
+        di.setTitle(act.getResources().getString(R.string.search));
+        di.setMessage(msg);
     }
 
     @Override

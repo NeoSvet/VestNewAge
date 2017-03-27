@@ -1,6 +1,5 @@
 package ru.neosvet.utils;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.ui.ProgressDialog;
 import ru.neosvet.vestnewage.BookFragment;
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
@@ -65,14 +65,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     protected void onProgressUpdate(Boolean... values) {
         super.onProgressUpdate(values);
         if (values[0]) {
-            di = new ProgressDialog(act);
-            di.setTitle(act.getResources().getString(R.string.load));
-            di.setMessage(msg);
-            di.setMax(137);
-            di.setProgress(prog);
-            di.setIndeterminate(false);
-            di.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            di.setProgressDrawable(act.getResources().getDrawable(R.drawable.progress_bar));
+            di = new ProgressDialog(act, 137);
             di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -80,6 +73,8 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 }
             });
             di.show();
+            di.setMessage(msg);
+            di.setProgress(prog);
         } else {
             di.setMessage(msg);
             di.setProgress(prog);
