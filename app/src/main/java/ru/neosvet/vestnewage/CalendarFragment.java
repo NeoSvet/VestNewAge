@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,8 +53,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private ListAdapter adNoread;
     private MainActivity act;
     private DateDialog dateDialog;
+    private AlertDialog alert;
     private Animation anShow, anHide;
-    private boolean boolShow = false, boolDialog = false;
+    private int dialog = -2;
+    private boolean boolShow = false;
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -83,13 +87,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(Lib.DIALOG, boolDialog);
-        if (boolDialog)
+        outState.putInt(Lib.DIALOG, dialog);
+        if (dialog == -1)
             dateDialog.dismiss();
+        else if (dialog > -1)
+            alert.dismiss();
         outState.putBoolean(Lib.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Lib.TASK, task);
-//        outState.putInt(MainActivity.TAB, adNoread.getCount());
         super.onSaveInstanceState(outState);
     }
 
@@ -115,8 +120,15 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                         * getResources().getDisplayMetrics().density);
                 lvNoread.requestLayout();
                 lvNoread.setVisibility(View.VISIBLE);
-            } else if (state.getBoolean(Lib.DIALOG))
+            }
+            dialog = state.getInt(Lib.DIALOG);
+            if (dialog == -1)
                 showDatePicker();
+            else if (dialog > -1) {
+                createNoreadList(false);
+                showAd(adNoread.getItem(dialog).getLink(),
+                        adNoread.getItem(dialog).getHead(0));
+            }
         }
         createCalendar(0);
     }
@@ -165,40 +177,13 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (adNoread.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
-                    final String link = adNoread.getItem(pos).getLink();
-                    final String des = adNoread.getItem(pos).getHead(0);
-                    if (des.equals("")) {// only link
+                    String link = adNoread.getItem(pos).getLink();
+                    String des = adNoread.getItem(pos).getHead(0);
+                    if (des.equals("")) // only link
                         act.lib.openInApps(link, null);
-                    } else {
-                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(act);
-                        LayoutInflater inflater = act.getLayoutInflater();
-                        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-                        builder.setView(dialogView);
-                        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-                        tv.setText(getResources().getString(R.string.ad));
-                        tv = (TextView) dialogView.findViewById(R.id.message);
-                        tv.setText(des);
-                        Button button = (Button) dialogView.findViewById(R.id.rightButton);
-                        final android.app.AlertDialog dialog = builder.create();
-                        if (link.equals("")) { // only des
-                            button.setText(getResources().getString(android.R.string.ok));
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                }
-                            });
-                        } else {
-                            button.setText(getResources().getString(R.string.open_link));
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    act.lib.openInApps(link, null);
-                                    dialog.dismiss();
-                                }
-                            });
-                        }
-                        dialog.show();
+                    else {
+                        dialog = pos;
+                        showAd(link, des);
                     }
                 } else if (!adNoread.getItem(pos).getLink().equals("")) {
                     openLink(adNoread.getItem(pos).getLink());
@@ -248,6 +233,44 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     startLoad();
             }
         });
+    }
+
+    private void showAd(final String link, String des) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        LayoutInflater inflater = act.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
+        builder.setView(dialogView);
+        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+        tv.setText(getResources().getString(R.string.ad));
+        tv = (TextView) dialogView.findViewById(R.id.message);
+        tv.setText(des);
+        Button button = (Button) dialogView.findViewById(R.id.rightButton);
+        alert = builder.create();
+        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialog = -2;
+            }
+        });
+        if (link.equals("")) { // only des
+            button.setText(getResources().getString(android.R.string.ok));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    alert.dismiss();
+                }
+            });
+        } else {
+            button.setText(getResources().getString(R.string.open_link));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    act.lib.openInApps(link, null);
+                    alert.dismiss();
+                }
+            });
+        }
+        alert.show();
     }
 
     private void closeNoread() {
@@ -646,7 +669,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void showDatePicker() {
-        boolDialog = true;
+        dialog = -1;
         dateDialog = new DateDialog(act, dCurrent);
         dateDialog.setResult(CalendarFragment.this);
         dateDialog.show();
@@ -654,7 +677,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void putDate(Date date) {
-        boolDialog = false;
+        dialog = -2;
         if (date == null) // cancel
             return;
         dCurrent = date;
