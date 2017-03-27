@@ -457,7 +457,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void openMonth(int v) {
         if (task == null) {
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press_shape));
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {

@@ -445,7 +445,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 }
             }
             setDate(v);
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press_shape));
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
