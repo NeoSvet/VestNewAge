@@ -452,7 +452,7 @@ public class CollectionsFragment extends Fragment {
         lvMarker.smoothScrollToPosition(iSel);
         AlertDialog.Builder builder = new AlertDialog.Builder(act);
         LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
         builder.setView(dialogView);
         TextView tv = (TextView) dialogView.findViewById(R.id.title);
         tv.setText(getResources().getString(R.string.delete));
@@ -489,7 +489,7 @@ public class CollectionsFragment extends Fragment {
     private void renameDialog(String old_name) {
         AlertDialog.Builder builder = new AlertDialog.Builder(act);
         LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
         builder.setView(dialogView);
         TextView tv = (TextView) dialogView.findViewById(R.id.title);
         tv.setText(getResources().getString(R.string.new_name));

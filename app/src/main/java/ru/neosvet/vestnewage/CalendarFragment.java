@@ -172,7 +172,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     } else {
                         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(act);
                         LayoutInflater inflater = act.getLayoutInflater();
-                        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+                        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
                         builder.setView(dialogView);
                         TextView tv = (TextView) dialogView.findViewById(R.id.title);
                         tv.setText(getResources().getString(R.string.ad));

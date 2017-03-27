@@ -688,7 +688,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void showRndAlert(String title, final String link, String msg, final String place, final int par) {
         AlertDialog.Builder builder = new AlertDialog.Builder(act);
         LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.layout_dialog, null);
+        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
         builder.setView(dialogView);
         TextView tv = (TextView) dialogView.findViewById(R.id.title);
         tv.setText(title);
