@@ -86,7 +86,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         outState.putString(Lib.DIALOG, dialog);
         if (dialog.length() == 1)
             dateDialog.dismiss();
-        else  if (dialog.length() > 1)
+        else if (dialog.length() > 1)
             alertRnd.dismiss();
         outState.putInt(CURRENT_TAB, tab);
         outState.putSerializable(Lib.TASK, task);
@@ -198,36 +198,38 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             Date dModList;
             if (cursor.moveToFirst()) {
                 dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
-                cursor.close();
-                if (bKat) { // катрены
-                    cursor = db.query(DataBase.TITLE, null,
-                            DataBase.LINK + DataBase.LIKE,
-                            new String[]{"%" + Lib.POEMS + "%"}
-                            , null, null, DataBase.LINK);
-                } else { // послания
-                    cursor = db.query(DataBase.TITLE, null,
-                            DataBase.LINK + " NOT" + DataBase.LIKE,
-                            new String[]{"%" + Lib.POEMS + "%"}
-                            , null, null, DataBase.LINK);
+                if (d.getYear() > 115) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
+                    cursor.close();
+                    if (bKat) { // катрены
+                        cursor = db.query(DataBase.TITLE, null,
+                                DataBase.LINK + DataBase.LIKE,
+                                new String[]{"%" + Lib.POEMS + "%"}
+                                , null, null, DataBase.LINK);
+                    } else { // послания
+                        cursor = db.query(DataBase.TITLE, null,
+                                DataBase.LINK + " NOT" + DataBase.LIKE,
+                                new String[]{"%" + Lib.POEMS + "%"}
+                                , null, null, DataBase.LINK);
+                    }
+                    cursor.moveToFirst();
                 }
-                if (cursor.moveToFirst()) {
-                    int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                    int iLink = cursor.getColumnIndex(DataBase.LINK);
-                    do {
-                        s = cursor.getString(iLink);
-                        if (s.contains("2004") || s.contains("pred"))
-                            t = cursor.getString(iTitle);
-                        else {
-                            t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
-                            if (t.contains("_")) t = t.substring(0, t.indexOf("_"));
-                            if (t.contains("#")) t = t.substring(0, t.indexOf("#"));
-                            t = cursor.getString(iTitle) +
-                                    " (" + getResources().getString(R.string.from)
-                                    + " " + t + ")";
-                        }
-                        adBook.addItem(new ListItem(t, s));
-                    } while (cursor.moveToNext());
-                }
+                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                int iLink = cursor.getColumnIndex(DataBase.LINK);
+                do {
+                    s = cursor.getString(iLink);
+                    if (s == null) continue; // need? why?
+                    if (s.contains("2004") || s.contains("pred"))
+                        t = cursor.getString(iTitle);
+                    else {
+                        t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
+                        if (t.contains("_")) t = t.substring(0, t.indexOf("_"));
+                        if (t.contains("#")) t = t.substring(0, t.indexOf("#"));
+                        t = cursor.getString(iTitle) +
+                                " (" + getResources().getString(R.string.from)
+                                + " " + t + ")";
+                    }
+                    adBook.addItem(new ListItem(t, s));
+                } while (cursor.moveToNext());
             } else
                 dModList = d;
             cursor.close();
@@ -271,7 +273,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0);
-                if (s == null) continue; // need?
+                if (s == null) continue; // need? why?
                 if ((s.contains(Lib.POEMS) && bKat) ||
                         (!s.contains(Lib.POEMS) && !bKat)) {
                     cursor.close();
