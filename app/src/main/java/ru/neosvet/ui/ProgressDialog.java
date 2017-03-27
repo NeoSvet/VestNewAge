@@ -31,7 +31,6 @@ public class ProgressDialog extends Dialog {
         tvTitle = (TextView) findViewById(R.id.title);
         tvTitle.setText(context.getResources().getString(R.string.load));
         tvMessage = (TextView) findViewById(R.id.message);
-        tvMessage.setText(context.getResources().getString(R.string.start));
         progressBar = (ProgressBar) findViewById(R.id.progress);
         if (max == 0) {
             progressBar.setVisibility(View.GONE);
@@ -42,11 +41,6 @@ public class ProgressDialog extends Dialog {
 
     public void setProgress(int progress) {
         progressBar.setProgress(progress);
-    }
-
-    public void setMax(int max) {
-        progressBar.setProgress(0);
-        progressBar.setMax(max);
     }
 
     public void setTitle(String title) {
