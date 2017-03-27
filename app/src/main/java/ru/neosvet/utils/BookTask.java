@@ -2,18 +2,14 @@ package ru.neosvet.utils;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,51 +96,46 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         publishProgress(true);
         int m = 8, y = 4;
         String name = "01.16";
-        int a, b;
+        File f;
+        String s;
+        BufferedInputStream in;
+        BufferedReader br;
         DataBase dataBase;
         SQLiteDatabase db;
-        Cursor cursor;
-        File f = new File(act.getFilesDir() + "/list/");
-        f.mkdir();
-        BufferedWriter bw;
-        String s;
+        ContentValues cv;
+        boolean boolTitle;
+        final long time = System.currentTimeMillis();
         while (y < 16 && boolStart) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
             publishProgress(false);
-            f = new File(act.getFilesDir() + "/list/" + name);
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "cp1251"));
-            dataBase = new DataBase(act, name);
-            db = dataBase.getWritableDatabase();
-            cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                a = cursor.getColumnIndex(DataBase.LINK);
-                b = cursor.getColumnIndex(DataBase.TITLE);
-                while (cursor.moveToNext()) {
-                    s = cursor.getString(a);
-                    if (s == null) continue;
-                    bw.write(s);
-                    bw.write(Lib.N);
-                    bw.write(cursor.getString(b));
-                    bw.write(Lib.N);
-                    bw.flush();
+            f = new File(act.lib.getDBFolder() + "/" + name);
+            if (!f.exists()) {
+                dataBase = new DataBase(act, name);
+                db = dataBase.getWritableDatabase();
+                boolTitle = true;
+                in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
+                br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
+                while ((s = br.readLine()) != null) {
+                    if (s.equals(Lib.AND)) {
+                        boolTitle = false;
+                        s = br.readLine();
+                    }
+                    cv = new ContentValues();
+                    if (boolTitle) {
+                        cv.put(DataBase.LINK, s);
+                        cv.put(DataBase.TITLE, br.readLine());
+                        cv.put(DataBase.TIME, time);
+                        db.insert(DataBase.TITLE, null, cv);
+                    } else {
+                        cv.put(DataBase.ID, Integer.parseInt(s) - 1);
+                        cv.put(DataBase.PARAGRAPH, br.readLine());
+                        db.insert(DataBase.PARAGRAPH, null, cv);
+                    }
                 }
+                br.close();
+                dataBase.close();
             }
-            cursor.close();
-            bw.write(Lib.AND + Lib.N);
-            cursor = db.query(DataBase.PARAGRAPH, null, null, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                a = cursor.getColumnIndex(DataBase.ID);
-                b = cursor.getColumnIndex(DataBase.PARAGRAPH);
-                do {
-                    bw.write(String.valueOf(cursor.getInt(a)));
-                    bw.write(Lib.N);
-                    bw.write(cursor.getString(b));
-                    bw.write(Lib.N);
-                    bw.flush();
-                } while (cursor.moveToNext());
-            }
-            bw.close();
             if (m == 12) {
                 m = 1;
                 y++;
