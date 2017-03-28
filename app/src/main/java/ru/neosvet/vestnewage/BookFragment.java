@@ -212,12 +212,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                                 , null, null, DataBase.LINK);
                     }
                     cursor.moveToFirst();
-                }
+                } else // в случае списков с сайта Откровений надо просто перейти к следующей записи
+                    cursor.moveToNext();
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
                 int iLink = cursor.getColumnIndex(DataBase.LINK);
                 do {
                     s = cursor.getString(iLink);
-                    if (s == null) continue; // need? why?
                     if (s.contains("2004") || s.contains("pred"))
                         t = cursor.getString(iTitle);
                     else {
@@ -273,7 +273,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0);
-                if (s == null) continue; // need? why?
                 if ((s.contains(Lib.POEMS) && bKat) ||
                         (!s.contains(Lib.POEMS) && !bKat)) {
                     cursor.close();
