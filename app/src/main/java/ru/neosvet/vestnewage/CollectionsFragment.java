@@ -429,6 +429,7 @@ public class CollectionsFragment extends Fragment {
                     saveChange();
                     Intent marker = new Intent(act, MarkerActivity.class);
                     marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
+                    marker.putExtra(DataBase.LINK, adMarker.getItem(iSel).getData());
                     act.startActivityForResult(marker, MARKER_REQUEST);
                 }
             }

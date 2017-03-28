@@ -237,7 +237,6 @@ public class MarkerActivity extends AppCompatActivity {
                     DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)}
                     , null, null, null);
             cursor.moveToFirst();
-            link = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
             etDes.setText(cursor.getString(cursor.getColumnIndex(DataBase.DESCTRIPTION)));
             String s = cursor.getString(cursor.getColumnIndex(DataBase.PLACE));
             if (s.contains("%")) {
