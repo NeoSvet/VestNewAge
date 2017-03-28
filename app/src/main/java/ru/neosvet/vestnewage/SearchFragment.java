@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -46,7 +45,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings;
     private LinearLayout mainLayout;
-    private CheckBox cbSearchInResults;
     private ListView lvResult;
     private Button bStart, bEnd;
     private Spinner sMode;
@@ -95,7 +93,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         outState.putSerializable(Lib.TASK, task);
         outState.putLong(START, dStart.getTime());
         outState.putLong(END, dEnd.getTime());
-        outState.putBoolean(SEARCH, cbSearchInResults.isChecked());
         outState.putBoolean(SETTINGS, pSettings.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }
@@ -126,7 +123,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
             }
             dStart = new Date(state.getLong(START));
             dEnd = new Date(state.getLong(END));
-            cbSearchInResults.setChecked(state.getBoolean(SEARCH));
             if (state.getBoolean(SETTINGS)) {
                 visSettings();
                 dialog = state.getInt(Lib.DIALOG);
@@ -179,7 +175,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         fabOk = container.findViewById(R.id.fabOk);
         bStart = (Button) container.findViewById(R.id.bStartRange);
         bEnd = (Button) container.findViewById(R.id.bEndRange);
-        cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
         sMode = (Spinner) container.findViewById(R.id.sMode);
         ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, R.layout.spinner_button,
