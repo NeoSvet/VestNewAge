@@ -115,8 +115,7 @@ public class CollectionsFragment extends Fragment {
                 adMarker.addItem(new MarkItem(getTitle(link), cursor.getInt(iID), link));
                 adMarker.getItem(k).setPlace(place);
                 adMarker.getItem(k).setDes(
-                        cursor.getString(iDes) + Lib.N
-                                + getPlace(link, place));
+                        cursor.getString(iDes) + Lib.N + getPlace(link, place));
                 k++;
             }
             cursor.close();
@@ -217,11 +216,11 @@ public class CollectionsFragment extends Fragment {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        // java.lang.IllegalStateException: Fragment CollectionsFragment{138a01e4} not attached to Activity ?
         if (p.contains("%"))
-            p = getResources().getString(R.string.sel_pos) + p;
-        else {
-            p = getResources().getString(R.string.sel_par) + p.replace(",", ", ");
-        }
+            p = act.getResources().getString(R.string.sel_pos) + p;
+        else
+            p = act.getResources().getString(R.string.sel_par) + p.replace(",", ", ");
         return p;
     }
 
