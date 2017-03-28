@@ -128,7 +128,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                         cv.put(DataBase.TIME, time);
                         db.insert(DataBase.TITLE, null, cv);
                     } else {
-                        cv.put(DataBase.ID, Integer.parseInt(s) - 1);
+                        cv.put(DataBase.ID, Integer.parseInt(s));
                         cv.put(DataBase.PARAGRAPH, br.readLine());
                         db.insert(DataBase.PARAGRAPH, null, cv);
                     }
