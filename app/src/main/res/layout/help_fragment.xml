@@ -9,8 +9,8 @@
     <TextView
         android:id="@+id/tvHelp"
         style="@style/Label"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/oval"

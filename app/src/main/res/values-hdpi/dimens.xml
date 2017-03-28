@@ -4,4 +4,5 @@
     <dimen name="cell_size">42dp</dimen>
     <dimen name="title_div">36dp</dimen>
     <dimen name="menu_width">290dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
 </resources>
