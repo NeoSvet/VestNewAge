@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String s = getIntent().getStringExtra(DataBase.LINK);
                 if (s != null) {
                     frSearch.setString(s);
-                    frSearch.setPage(getIntent().getIntExtra(DataBase.PLACE, 1));
+                    frSearch.setPage(getIntent().getIntExtra(DataBase.SEARCH, 1));
                     frSearch.setMode(tab);
                 }
                 fragmentTransaction.replace(R.id.my_fragment, frSearch);
