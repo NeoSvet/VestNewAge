@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import ru.neosvet.vestnewage.R;
 
 public class DataBase extends SQLiteOpenHelper {
-    public static final String PARAGRAPH = "par",
+    public static final String PARAGRAPH = "par", SEARCH = "search",
             JOURNAL = "journal", MARKERS = "markers", LIKE = " LIKE ?",
             Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
             LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
@@ -47,9 +47,15 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
+        } else if (name.equals(SEARCH)) {
+            db.execSQL("create table if not exists " + SEARCH + " ("
+                    + LINK + " text primary key,"
+                    + TITLE + " text,"
+                    + ID + " integer," //number for sorting
+                    + DESCTRIPTION + " text);");
         } else if (name.equals(JOURNAL)) {
             db.execSQL("create table if not exists " + JOURNAL + " ("
-                    + ID + " text primary key," // date&id TITLE
+                    + ID + " text primary key," // date&id TITLE || date&id TITLE&rnd_place
                     + TIME + " integer);");
         } else if (name.equals(MARKERS)) {
             db.execSQL("create table " + MARKERS + " ("
