@@ -28,6 +28,7 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
+    public static final int MAX_ON_PAGE = 20;
     public static final String SITE = "http://blagayavest.info/", N = "\n", NN = "\n\n",
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",

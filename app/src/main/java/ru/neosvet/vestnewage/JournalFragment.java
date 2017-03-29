@@ -26,7 +26,6 @@ import ru.neosvet.utils.Lib;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";
-    private final int MAX = 20;
     private DataBase dbJournal;
     private ListAdapter adJournal;
     private MainActivity act;
@@ -119,7 +118,7 @@ public class JournalFragment extends Fragment {
                     dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
                             new String[]{curJ.getString(iID)});
                 }
-            } while (curJ.moveToNext() && i < MAX);
+            } while (curJ.moveToNext() && i < Lib.MAX_ON_PAGE);
             if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
@@ -152,7 +151,7 @@ public class JournalFragment extends Fragment {
                 if (offset == 0) {
                     tip.show();
                 } else {
-                    offset -= MAX;
+                    offset -= Lib.MAX_ON_PAGE;
                     adJournal.clear();
                     createList();
                 }
@@ -164,7 +163,7 @@ public class JournalFragment extends Fragment {
                 if (boolFinish) {
                     tip.show();
                 } else {
-                    offset += MAX;
+                    offset += Lib.MAX_ON_PAGE;
                     adJournal.clear();
                     createList();
                 }
