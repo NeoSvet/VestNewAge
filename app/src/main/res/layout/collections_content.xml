@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="ru.neosvet.vestnewage.CollectionsFragment"
-    tools:showIn="@layout/fragment_collections">
+    tools:showIn="@layout/collections_fragment">
 
     <ListView
         android:id="@+id/lvMarker"
