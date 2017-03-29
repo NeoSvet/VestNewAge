@@ -187,7 +187,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 n = 0;
                 while (line.indexOf(Lib.HREF, n) > -1) {
                     n = line.indexOf(Lib.HREF, n) + 7;
-                    s = line.substring(n, line.indexOf("'", n)); //)-5
+                    s = line.substring(n, line.indexOf("'", n));
                     i = s.indexOf(".") + 1;
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
