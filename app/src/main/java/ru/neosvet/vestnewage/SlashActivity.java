@@ -149,20 +149,28 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.TAB, 1);
             } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
                 link = data.getQuery();
-                int mode = link.lastIndexOf("=") + 1;
-                mode = Integer.parseInt(link.substring(mode, mode + 1));
-                 /* <option selected="" value="0">в Посланиях</option> 0
-                <option value="5">в Катренах</option> 1
-                <option value="1">в заголовках</option> 2
-                <option value="2">по всему Сайту</option> 3
-                <option value="3">по дате</option> 4
-                <!-- <option  value="4">в цитатах</option> -->*/
-                if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
-                else if (mode > 0) mode++; // поэтому остальное смещается
+                int page = 1;
+                if (link.contains("start")) {
+                    page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                    link = link.substring(0, link.lastIndexOf("&"));
+                }
+                int mode = 5;
+                if (link.contains("where")) {
+                    Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                    link = link.substring(0, link.lastIndexOf("&"));
+                    /* <option selected="" value="0">в Посланиях</option> 0
+                       <option value="5">в Катренах</option> 1
+                       <option value="1">в заголовках</option> 2
+                       <option value="2">по всему Сайту</option> 3
+                       <option value="3">по дате</option> 4
+                       <!-- <option  value="4">в цитатах</option> -->*/
+                    if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
+                    else if (mode > 0) mode++; // поэтому остальное смещается
+                }
+                main.putExtra(DataBase.PLACE, page);
                 main.putExtra(MainActivity.TAB, mode);
-                link = link.substring(link.indexOf("=") + 1, link.indexOf(Lib.AND));
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_search);
-                main.putExtra(DataBase.LINK, link);
+                main.putExtra(DataBase.LINK, link.substring(link.indexOf("=") + 1));
             }
         }
     }
