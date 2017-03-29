@@ -5,4 +5,6 @@
     <dimen name="title_div">36dp</dimen>
     <dimen name="menu_width">290dp</dimen>
     <dimen name="fab_size">56dp</dimen>
+    <dimen name="date_table_width">280dp</dimen>
+    <dimen name="date_cell_width">90dp</dimen>
 </resources>
