@@ -7,9 +7,7 @@ import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
@@ -85,7 +83,9 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     protected String doInBackground(Integer... params) {
         try {
             if (params[0] == 3)
-                return downloadOtrk();
+                return downloadOtrk(true);
+            if (params[0] == 1 && params[1] == 1) //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+                downloadOtrk(false);
             return downloadData(params[0] == 0);
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,14 +93,16 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         return "";
     }
 
-    private String downloadOtrk() throws Exception {
-        msg = act.getResources().getString(R.string.start);
-        publishProgress(true);
+    private String downloadOtrk(boolean boolDi) throws Exception {
+        if (boolDi) {
+            msg = act.getResources().getString(R.string.start);
+            publishProgress(true);
+        }
         final String path = act.lib.getDBFolder() + "/";
         File f;
         String s;
         long l;
-        BufferedInputStream in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/list"));
+        BufferedInputStream in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/list.txt"));
         //list format:
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
@@ -124,12 +126,12 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         ContentValues cv;
         boolean boolTitle;
         final long time = System.currentTimeMillis();
-        f = new File(act.getFilesDir() + "/list.txt");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(f));
         while (y < 16 && boolStart) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
-            msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
-            publishProgress(false);
+            if (boolDi) {
+                msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
+                publishProgress(false);
+            }
             f = new File(path + name);
             if (!f.exists()) {
                 dataBase = new DataBase(act, name);
@@ -156,8 +158,6 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 }
                 br.close();
                 dataBase.close();
-                bw.write(f.getName() + " " + f.length() + Lib.N);
-                bw.flush();
             }
             if (m == 12) {
                 m = 1;
@@ -166,7 +166,6 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 m++;
             prog++;
         }
-        bw.close();
         return name + (boolStart ? 1 : 0);
     }
 

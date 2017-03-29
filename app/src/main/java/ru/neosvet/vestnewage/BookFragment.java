@@ -482,7 +482,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new BookTask(this);
-        task.execute(tab);
+        task.execute(tab, (boolOtkr ? 1 : 0));
         act.status.setLoad(true);
     }
 
