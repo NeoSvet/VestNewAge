@@ -107,4 +107,71 @@
         android:visibility="gone"
         app:srcCompat="@drawable/ok" />
 
+    <LinearLayout
+        android:id="@+id/pStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvStatus"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="30"
+            android:paddingLeft="5dp"
+            android:text="@string/search" />
+
+        <ImageButton
+            android:id="@+id/bStop"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/close" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pPages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <HorizontalScrollView
+            android:id="@+id/scrollPage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="30">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rvPages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </HorizontalScrollView>
+
+        <ImageButton
+            android:id="@+id/bSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/settings" />
+    </LinearLayout>
+
 </android.support.design.widget.CoordinatorLayout>

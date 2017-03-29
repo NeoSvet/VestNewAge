@@ -10,7 +10,7 @@
         style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="@color/colorPrimary"
         android:hint="@string/string_for_search"
         android:imeOptions="actionSearch"
@@ -27,6 +27,7 @@
     <ListView
         android:id="@+id/lvResult"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/cell_size" />
 
 </LinearLayout>

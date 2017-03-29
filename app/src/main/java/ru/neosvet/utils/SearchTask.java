@@ -1,6 +1,6 @@
 package ru.neosvet.utils;
 
-import android.content.DialogInterface;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -10,23 +10,19 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import ru.neosvet.ui.ListItem;
-import ru.neosvet.ui.ProgressDialog;
 import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.SearchFragment;
 
-public class SearchTask extends AsyncTask<String, String, Boolean> implements Serializable {
+public class SearchTask extends AsyncTask<String, Long, Boolean> implements Serializable {
     private transient SearchFragment frm;
     private transient MainActivity act;
-    private transient ProgressDialog di;
     private boolean boolStart = true;
-    private String msg;
-    List<ListItem> data = new ArrayList<ListItem>();
+    //    private String msg;
+    private DataBase dbSearch;
+    private SQLiteDatabase dbS;
 
     public SearchTask(SearchFragment frm) {
         setFrm(frm);
@@ -37,42 +33,27 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
         act = (MainActivity) frm.getActivity();
     }
 
+    public void stop() {
+        boolStart = false;
+    }
+
     @Override
-    protected void onProgressUpdate(String... values) {
+    protected void onProgressUpdate(Long... values) {
         super.onProgressUpdate(values);
-        msg = values[0];
-        di.setMessage(msg);
+        if (frm != null)
+            frm.updateStatus(values[0]);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        msg = act.getResources().getString(R.string.start);
-        showD();
-    }
-
-    private void showD() {
-        di = new ProgressDialog(act, 0);
-        di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                boolStart = false;
-            }
-        });
-        di.show();
-        di.setTitle(act.getResources().getString(R.string.search));
-        di.setMessage(msg);
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        if (di != null)
-            di.dismiss();
-        if (frm != null) {
-            if (!result) data.clear();
-            frm.finishSearch(data);
-        }
+        if (frm != null)
+            frm.showResult(result);
     }
 
     @Override
@@ -84,10 +65,11 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                     list.add(f.getName());
                 if (!boolStart) return true;
             }
-            if (list.size() == 0) {
-                //empty list
+            if (list.size() == 0) //empty list
                 return false;
-            }
+            dbSearch = new DataBase(act, DataBase.SEARCH);
+            dbS = dbSearch.getWritableDatabase();
+            dbS.delete(DataBase.SEARCH, null, null);
             int sy, sm, ey, em, step, mode;
             mode = Integer.parseInt(params[1]);
             String s = params[2]; // начальная дата
@@ -110,11 +92,9 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
             while (boolStart) {
                 d = new Date(sy, sm, 1);
                 if (list.contains(df.format(d))) {
-                    publishProgress(act.getResources().getStringArray(R.array.months)
-                            [d.getMonth()] + " " + (2000 + d.getYear()));
+                    publishProgress(d.getTime());
                     searchList(df.format(d), s, mode, step == -1);
                 }
-//                if (data.size() > 15) break; tut
                 if (sy == ey && sm == em)
                     break;
                 sm += step;
@@ -126,6 +106,7 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                     sy--;
                 }
             }
+            dbSearch.close();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,6 +116,8 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
 
     private void searchList(String name, String s, int mode, boolean boolDesc) {
         DataBase dataBase = new DataBase(act, name);
+        int n = Integer.parseInt(name.substring(3)) * 650 +
+                Integer.parseInt(name.substring(0, 2)) * 50;
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
@@ -151,19 +134,19 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                     DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + s + "%"}
                     , null, null, null);
         }
-        final int size = data.size();
         if (curSearch.moveToFirst()) {
             int iPar = curSearch.getColumnIndex(DataBase.PARAGRAPH);
             int iID = curSearch.getColumnIndex(DataBase.ID);
             String t;
-            int i = size - 1, id = -1;
+            ContentValues cv = null;
+            int id = -1;
             Cursor curTitle;
-            ListItem item;
             boolean boolAdd = true;
+            StringBuilder des = null;
             do {
                 if (id == curSearch.getInt(iID) && boolAdd) {
-                    data.get(i).setDes(data.get(i).getDes()
-                            + Lib.NN + act.lib.withOutTags(curSearch.getString(iPar)));
+                    des.append(Lib.NN);
+                    des.append(act.lib.withOutTags(curSearch.getString(iPar)));
                 } else {
                     id = curSearch.getInt(iID);
                     curTitle = db.query(DataBase.TITLE, null,
@@ -178,42 +161,33 @@ public class SearchTask extends AsyncTask<String, String, Boolean> implements Se
                             boolAdd = s.contains(Lib.POEMS);
                         if (boolAdd) {
                             t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
-                            item = new ListItem(t, s);
+                            if (cv != null) {
+                                if (des != null) {
+                                    cv.put(DataBase.DESCTRIPTION, des.toString());
+                                    des = null;
+                                }
+                                dbS.insert(DataBase.SEARCH, null, cv);
+                                cv = null;
+                            }
+                            cv = new ContentValues();
+                            cv.put(DataBase.TITLE, t);
+                            cv.put(DataBase.LINK, s);
+                            cv.put(DataBase.ID, n);
+                            n++;
                             if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
-                                item.setDes(act.lib.withOutTags(curSearch.getString(iPar)));
-                            data.add(item);
-                            i++;
+                                des = new StringBuilder(act.lib.withOutTags(curSearch.getString(iPar)));
                         }
                     }
                     curTitle.close();
                 }
             } while (curSearch.moveToNext());
+            if (cv != null) {
+                if (des != null)
+                    cv.put(DataBase.DESCTRIPTION, des.toString());
+                dbS.insert(DataBase.SEARCH, null, cv);
+            }
         }
         curSearch.close();
         dataBase.close();
-        // сортировка списка:
-        if (data.size() > size) {
-            String s1, s2;
-            String[] m;
-            for (int a = size; a < data.size(); a++) {
-                s1 = getDateLink(data.get(a).getLink());
-                for (int b = a + 1; b < data.size(); b++) {
-                    s2 = getDateLink(data.get(b).getLink());
-                    if (s1.equals(s2)) continue;
-                    m = new String[]{s1, s2};
-                    Arrays.sort(m);
-                    if ((!boolDesc && m[0].equals(s2)) ||
-                            (boolDesc && m[0].equals(s1))) {
-                        data.add(a, data.get(b));
-                        data.remove(b + 1);
-                        s1 = s2;
-                    }
-                }
-            }
-        }
-    }
-
-    private String getDateLink(String link) {
-        return link.substring(link.indexOf(".", link.lastIndexOf("/")) - 2, link.lastIndexOf("."));
     }
 }
