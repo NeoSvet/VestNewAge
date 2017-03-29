@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
+    private SearchFragment frSearch;
     private boolean boolLoad = false, boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frBook);
                 break;
             case R.id.nav_search:
-                SearchFragment frSearch = new SearchFragment();
+                frSearch = new SearchFragment();
                 String s = getIntent().getStringExtra(DataBase.LINK);
                 if (s != null) {
                     frSearch.setString(s);
@@ -297,9 +298,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (frCabinet != null) {
             if (frCabinet.onBackPressed())
                 exit();
-        } else {
+        } else if (frSearch != null) {
+            frSearch.onDestroy(); //сохранение "истории поиска"
             exit();
-        }
+        } else
+            exit();
     }
 
     private void exit() {
