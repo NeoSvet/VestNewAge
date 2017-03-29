@@ -50,7 +50,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     private Spinner sMode;
     private AutoCompleteTextView etSearch;
     private ArrayAdapter<String> adSearch;
-    List<String> liSearch = new ArrayList<String>();
     private SearchTask task = null;
     private Date dStart, dEnd;
     private ListAdapter adResults;
@@ -151,13 +150,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
     @Override
     public void onDestroy() {
         final File f = new File(act.getFilesDir() + File.separator + SEARCH);
-        if (liSearch.size() == 0) {
+        if (adSearch.getCount() == 0) {
             if (f.exists()) f.delete();
         } else {
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-                for (int i = 0; i < liSearch.size(); i++) {
-                    bw.write(liSearch.get(i) + Lib.N);
+                for (int i = 0; i < adSearch.getCount(); i++) {
+                    bw.write(adSearch.getItem(i) + Lib.N);
                     bw.flush();
                 }
                 bw.close();
@@ -190,6 +189,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
 
     private void setViews() {
         final File f = new File(act.getFilesDir() + File.separator + SEARCH);
+        List<String> liSearch = new ArrayList<String>();
         if (f.exists()) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(f));
@@ -246,7 +246,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         container.findViewById(R.id.bClearSearch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                liSearch.clear();
+                adSearch.clear();
                 adSearch.notifyDataSetChanged();
             }
         });
@@ -327,8 +327,15 @@ public class SearchFragment extends Fragment implements DateDialog.Result {
         DateFormat df = new SimpleDateFormat("MM.yy");
         task.execute(s, String.valueOf(sMode.getSelectedItemPosition()),
                 df.format(dStart), df.format(dEnd));
-        if (!liSearch.contains(s)) {
-            liSearch.add(s);
+        boolean b = true;
+        for (int i = 0; i < adSearch.getCount(); i++) {
+            if(adSearch.getItem(i).equals(s)) {
+                b = false;
+                break;
+            }
+        }
+        if(b) {
+            adSearch.add(s);
             adSearch.notifyDataSetChanged();
         }
     }
