@@ -163,7 +163,7 @@ public class DateDialog extends Dialog {
 
         @Override
         public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(act).inflate(R.layout.item_month, parent, false);
+            View view = LayoutInflater.from(act).inflate(R.layout.item_date, parent, false);
             return new MonthAdapter.ViewHolder(view);
         }
 
