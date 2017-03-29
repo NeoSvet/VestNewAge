@@ -7,7 +7,9 @@ import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
@@ -94,22 +96,41 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     private String downloadOtrk() throws Exception {
         msg = act.getResources().getString(R.string.start);
         publishProgress(true);
-        int m = 8, y = 4;
-        String name = "01.16";
+        final String path = act.lib.getDBFolder() + "/";
         File f;
         String s;
-        BufferedInputStream in;
-        BufferedReader br;
+        long l;
+        BufferedInputStream in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/list"));
+        //list format:
+        //01.05 delete [time] - при необходимости список обновить
+        //02.05 [length] - проверка целостности
+        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        while ((s = br.readLine()) != null) {
+            f = new File(path + s.substring(0, s.indexOf(" ")));
+            if (f.exists()) {
+                l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
+                if (s.contains("delete")) {
+                    if (f.lastModified() < l) f.delete();
+                } else {
+                    if (f.length() < l) f.delete();
+                }
+            }
+        }
+        br.close();
+        int m = 8, y = 4;
+        String name = "01.16";
         DataBase dataBase;
         SQLiteDatabase db;
         ContentValues cv;
         boolean boolTitle;
         final long time = System.currentTimeMillis();
+        f = new File(act.getFilesDir() + "/list.txt");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(f));
         while (y < 16 && boolStart) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
             publishProgress(false);
-            f = new File(act.lib.getDBFolder() + "/" + name);
+            f = new File(path + name);
             if (!f.exists()) {
                 dataBase = new DataBase(act, name);
                 db = dataBase.getWritableDatabase();
@@ -135,6 +156,8 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 }
                 br.close();
                 dataBase.close();
+                bw.write(f.getName() + " " + f.length() + Lib.N);
+                bw.flush();
             }
             if (m == 12) {
                 m = 1;
@@ -143,6 +166,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 m++;
             prog++;
         }
+        bw.close();
         return name + (boolStart ? 1 : 0);
     }
 
