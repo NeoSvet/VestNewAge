@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -102,8 +103,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
-            if (task != null) {
+            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
                 fabRefresh.setVisibility(View.GONE);
+                fabRndMenu.setVisibility(View.GONE);
                 task.setFrm(this);
                 act.status.setLoad(true);
             } else {
@@ -116,11 +118,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 }
             }
         }
-        if (tab == 1) {
-            tabHost.setCurrentTab(0);
-            tabHost.setCurrentTab(1);
-        } else
-            tabHost.setCurrentTab(tab);
+        tabHost.setCurrentTab(tab);
+        openList(true);
     }
 
     private void initTabs() {
@@ -174,13 +173,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 d = dPos;
                 bKat = false;
             }
-
             if (!existsList(d, bKat)) {
                 if (boolLoad)
                     startLoad();
                 return;
             }
-
             adBook.clear();
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                     + "\n" + (d.getYear() + 1900));
@@ -394,9 +391,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (act.status.onClick())
+                if (act.status.onClick()) {
                     fabRefresh.setVisibility(View.VISIBLE);
-                else if (act.status.isTime())
+                    fabRndMenu.setVisibility(View.VISIBLE);
+                } else if (act.status.isTime())
                     startLoad();
             }
         });
@@ -481,6 +479,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void startLoad() {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
+        fabRndMenu.setVisibility(View.GONE);
         task = new BookTask(this);
         task.execute(tab, (boolOtkr ? 1 : 0));
         act.status.setLoad(true);
@@ -505,6 +504,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 d.setYear(100);
             }
             fabRefresh.setVisibility(View.VISIBLE);
+            fabRndMenu.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             if (d.getYear() == 100 || !existsList(d, tab == 0)) {
                 // 100 - year in default date

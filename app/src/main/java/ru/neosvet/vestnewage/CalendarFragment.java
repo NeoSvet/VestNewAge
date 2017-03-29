@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -106,7 +107,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             act.setFrCalendar(this);
             dCurrent = new Date(state.getLong(CURRENT_DATE));
             task = (CalendarTask) state.getSerializable(Lib.TASK);
-            if (task != null) {
+            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
                 task.setFrm(this);
                 setStatus(true);
             }

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -130,7 +131,10 @@ public class BrowserActivity extends AppCompatActivity
             loader = (LoaderTask) state.getSerializable(Lib.TASK);
             link = state.getString(DataBase.LINK);
             dbPage = new DataBase(this, link);
-            if (loader == null) {
+            if (loader != null  && loader.getStatus() == AsyncTask.Status.RUNNING) {
+                loader.setAct(this);
+                status.setLoad(true);
+            } else {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);
                 final Handler h = new Handler() {
@@ -150,9 +154,6 @@ public class BrowserActivity extends AppCompatActivity
                     }
                 });
                 t.start();
-            } else {
-                loader.setAct(this);
-                status.setLoad(true);
             }
             iPlace = state.getInt(DataBase.PLACE, 0);
         }

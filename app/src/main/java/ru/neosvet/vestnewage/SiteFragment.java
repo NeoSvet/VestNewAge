@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
@@ -61,7 +62,7 @@ public class SiteFragment extends Fragment {
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (SiteTask) state.getSerializable(Lib.TASK);
-            if (task != null) {
+            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
                 fabRefresh.setVisibility(View.GONE);
                 act.status.setLoad(true);
                 task.setFrm(this);

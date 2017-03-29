@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -57,7 +58,7 @@ public class SummaryFragment extends Fragment {
     private void restoreActivityState(Bundle state) {
         if (state != null) {
             task = (SummaryTask) state.getSerializable(Lib.TASK);
-            if (task != null) {
+            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
                 act.status.setLoad(true);
                 task.setFrm(this);
             }

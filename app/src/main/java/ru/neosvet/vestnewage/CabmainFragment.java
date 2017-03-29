@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage;
 import android.app.Fragment;
 import android.app.Service;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -66,7 +67,7 @@ public class CabmainFragment extends Fragment {
         } else {
             cookie = state.getString(Lib.COOKIE);
             task = (CabTask) state.getSerializable(Lib.TASK);
-            if (task != null) {
+            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
                 task.setFrm(this);
                 act.status.setLoad(true);
             }

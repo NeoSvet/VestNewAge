@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             cur_id = savedInstanceState.getInt(CUR_ID);
             loader = (LoaderTask) savedInstanceState.getSerializable(LOADER);
-            if (loader != null)
+            if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING)
                 loader.setAct(this);
         }
         initInterface();
