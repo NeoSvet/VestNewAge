@@ -333,7 +333,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (boolNotClick) return;
-                BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), "");
+                BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), null);
             }
         });
         lvBook.setOnTouchListener(new View.OnTouchListener() {

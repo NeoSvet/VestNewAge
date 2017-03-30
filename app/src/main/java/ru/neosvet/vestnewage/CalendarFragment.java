@@ -452,7 +452,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void openLink(String link) {
-        BrowserActivity.openReader(act, link, "");
+        BrowserActivity.openReader(act, link, null);
         adNoread.clear();
     }
 

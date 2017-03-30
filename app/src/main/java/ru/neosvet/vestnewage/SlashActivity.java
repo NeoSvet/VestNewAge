@@ -133,14 +133,14 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
                 main.putExtra(MainActivity.TAB, 2);
             } else if (link.contains("html")) {
-                BrowserActivity.openReader(this, link.substring(1), "");
+                BrowserActivity.openReader(this, link.substring(1), null);
             } else if (data.getQuery() != null && data.getQuery().contains("date")) {
                 String s = data.getQuery().substring(5);
                 String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
                 link = link.substring(1) + s.substring(0, s.indexOf("-"))
                         + "." + (m.length() == 1 ? "0" : "") + m
                         + "." + s.substring(s.lastIndexOf("-") + 3) + ".html";
-                BrowserActivity.openReader(this, link, "");
+                BrowserActivity.openReader(this, link, null);
             } else if (link.contains("/poems")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 0);
