@@ -133,6 +133,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             if (string != null) {
                 etSearch.setText(string);
                 startSearch();
+            } else {
+                f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
+                if (f.exists()) {
+                    adResults.addItem(new ListItem(
+                            getResources().getString(R.string.results_last_search),
+                            Lib.LINK));
+                    adResults.notifyDataSetChanged();
+                }
             }
         } else {
             dStart = new Date(state.getLong(START));
@@ -264,15 +272,19 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         etSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focus) {
-                if(focus)
+                if (focus)
                     etSearch.showDropDown();
             }
         });
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
-                        act.lib.withOutTags(adResults.getItem(pos).getDes()));
+                if (adResults.getItem(pos).getLink().equals(Lib.LINK)) {
+                    fabSettings.setVisibility(View.GONE);
+                    showResult(true);
+                } else
+                    BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
+                            act.lib.withOutTags(adResults.getItem(pos).getDes()));
             }
         });
         fabSettings.setOnClickListener(this);

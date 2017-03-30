@@ -154,6 +154,7 @@
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапозон для поиска:</string>
     <string name="change_range">Поменять местами</string>
+    <string name="results_last_search">Показать результаты предыдущего поиска</string>
 
     <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
 </resources>
