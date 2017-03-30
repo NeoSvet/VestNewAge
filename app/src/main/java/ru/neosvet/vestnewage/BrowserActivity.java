@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage;
 
 import android.app.Activity;
+import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,6 +20,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,7 +28,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedWriter;
@@ -39,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.WebClient;
@@ -57,15 +65,17 @@ public class BrowserActivity extends AppCompatActivity
     private boolean bNomenu, bTheme, bTwo = false, boolBack = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
+    private SoftKeyboard softKeyboard;
     private LoaderTask loader = null;
     private WebView wvBrowser;
     private DataBase dbPage, dbJournal;
     private TextView tvPromTime, tvPlace;
+    private EditText etSearch;
     private StatusBar status;
-    private View fabMenu, pSearch;
+    private View fabMenu, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = Lib.LINK;
+    private String link = Lib.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -74,13 +84,14 @@ public class BrowserActivity extends AppCompatActivity
     private Tip tip;
 
 
-    public static void openReader(Context context, String link, String place) {
+    public static void openReader(Context context, String link, @Nullable String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
         if (link.contains(Lib.LINK))
             intent.putExtra(DataBase.LINK, link.substring(Lib.LINK.length()));
         else
             intent.putExtra(DataBase.LINK, link);
-        intent.putExtra(DataBase.PLACE, place);
+        if (place != null)
+            intent.putExtra(DataBase.PLACE, place);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -121,17 +132,20 @@ public class BrowserActivity extends AppCompatActivity
             outState.putString(DataBase.LINK, link);
         outState.putInt(DataBase.PLACE, iPlace);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
+        outState.putString(DataBase.SEARCH, string);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
             openLink(getIntent().getStringExtra(DataBase.LINK));
+            if (getIntent().hasExtra(DataBase.PLACE))
+                iPlace = 0;
         } else {
             loader = (LoaderTask) state.getSerializable(Lib.TASK);
             link = state.getString(DataBase.LINK);
             dbPage = new DataBase(this, link);
-            if (loader != null  && loader.getStatus() == AsyncTask.Status.RUNNING) {
+            if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING) {
                 loader.setAct(this);
                 status.setLoad(true);
             } else {
@@ -155,62 +169,47 @@ public class BrowserActivity extends AppCompatActivity
                 });
                 t.start();
             }
-            iPlace = state.getInt(DataBase.PLACE, 0);
+            iPlace = state.getInt(DataBase.PLACE);
+            string = state.getString(DataBase.SEARCH);
+            if (string != null) {
+                etSearch.setText(string);
+                findText(string);
+                pSearch.setVisibility(View.VISIBLE);
+                fabMenu.setVisibility(View.GONE);
+            }
         }
         miTheme.setVisible(!link.contains(PNG));
     }
 
     private void initPlace() {
+        if (iPlace == -1) return;
         String p = getIntent().getStringExtra(DataBase.PLACE);
-        if (p.length() == 0)
-            return;
-        if (iPlace == -1)
-            iPlace = 0;
         fabMenu.setVisibility(View.GONE);
         tvPlace = (TextView) findViewById(R.id.tvPlace);
-        View bPrev = findViewById(R.id.bPrev);
-        View bNext = findViewById(R.id.bNext);
+        tvPlace.setVisibility(View.VISIBLE);
+        etSearch.setVisibility(View.GONE);
         if (p.contains(Lib.NN)) {
             place = p.split(Lib.NN);
-            bPrev.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (iPlace > 0) {
-                        iPlace--;
-                        setPlace();
-                    } else
-                        tip.show();
-                }
-            });
-            bNext.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (iPlace < place.length - 1) {
-                        iPlace++;
-                        setPlace();
-                    } else
-                        tip.show();
-                }
-            });
         } else {
             place = new String[]{p};
             bPrev.setVisibility(View.GONE);
             bNext.setVisibility(View.GONE);
         }
-        findViewById(R.id.bClose).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeSearch();
-            }
-        });
         pSearch.setVisibility(View.VISIBLE);
     }
 
     private void closeSearch() {
         tip.hide();
-        iPlace = -1;
-        place = null;
-        getIntent().putExtra(DataBase.PLACE, "");
+        if (tvPlace != null) {
+            bPrev.setVisibility(View.VISIBLE);
+            bNext.setVisibility(View.VISIBLE);
+            tvPlace.setVisibility(View.GONE);
+            tvPlace = null;
+            etSearch.setVisibility(View.VISIBLE);
+            iPlace = -1;
+            place = null;
+        } else
+            string = null;
         pSearch.setVisibility(View.GONE);
         if (!bNomenu) {
             fabMenu.setVisibility(View.VISIBLE);
@@ -223,6 +222,10 @@ public class BrowserActivity extends AppCompatActivity
         if (iPlace == -1) return;
         String s = place[iPlace];
         tvPlace.setText(s.replace(Lib.N, " "));
+        findText(s);
+    }
+
+    private void findText(String s) {
         if (android.os.Build.VERSION.SDK_INT > 15)
             wvBrowser.findAllAsync(s);
         else {
@@ -262,16 +265,22 @@ public class BrowserActivity extends AppCompatActivity
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         tip = new Tip(this, findViewById(R.id.tvFinish));
         pSearch = findViewById(R.id.pSearch);
+        etSearch = (EditText) findViewById(R.id.etSearch);
+        bPrev = findViewById(R.id.bPrev);
+        bNext = findViewById(R.id.bNext);
         tvPromTime = (TextView) findViewById(R.id.tvPromTime);
         status = new StatusBar(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
         prom = new Prom(this);
+        InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
+        LinearLayout mainLayout = (LinearLayout) findViewById(R.id.content_browser);
+        softKeyboard = new SoftKeyboard(mainLayout, im);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
         miRefresh = navMenu.getMenu().getItem(0);
-        miNomenu = navMenu.getMenu().getItem(3);
-        miTheme = navMenu.getMenu().getItem(4);
+        miNomenu = navMenu.getMenu().getItem(4);
+        miTheme = navMenu.getMenu().getItem(5);
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -316,7 +325,7 @@ public class BrowserActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (iPlace > -1) {
+        } else if (pSearch.getVisibility() == View.VISIBLE) {
             closeSearch();
         } else if (history.size() > 0) {
             onBackBrowser();
@@ -343,7 +352,7 @@ public class BrowserActivity extends AppCompatActivity
                         tvPromTime.startAnimation(anMin);
                 } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
                         event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    if (!bNomenu && iPlace == -1) {
+                    if (!bNomenu && pSearch.getVisibility() == View.GONE) {
                         fabMenu.setVisibility(View.VISIBLE);
                         fabMenu.startAnimation(anMax);
                     }
@@ -367,6 +376,54 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 drawerMenu.openDrawer(Gravity.LEFT);
+            }
+        });
+        etSearch.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                        || keyCode == EditorInfo.IME_ACTION_SEARCH) {
+                    if (etSearch.length() > 0) {
+                        string = etSearch.getText().toString();
+                        softKeyboard.closeSoftKeyboard();
+                        findText(string);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        bPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (tvPlace == null) {
+                    softKeyboard.closeSoftKeyboard();
+                    wvBrowser.findNext(false);
+                } else if (iPlace > 0) {
+                    iPlace--;
+                    setPlace();
+                } else
+                    tip.show();
+            }
+        });
+        bNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (tvPlace == null) {
+                    softKeyboard.closeSoftKeyboard();
+                    wvBrowser.findNext(true);
+                } else if (iPlace < place.length - 1) {
+                    iPlace++;
+                    setPlace();
+                } else
+                    tip.show();
+            }
+        });
+        findViewById(R.id.bClose).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                softKeyboard.closeSoftKeyboard();
+                closeSearch();
             }
         });
         if (bTheme)
@@ -422,6 +479,16 @@ public class BrowserActivity extends AppCompatActivity
                 fabMenu.setVisibility(View.GONE);
             else
                 fabMenu.setVisibility(View.VISIBLE);
+        } else if (id == R.id.nav_search) {
+            fabMenu.setVisibility(View.GONE);
+            pSearch.setVisibility(View.VISIBLE);
+            etSearch.post(new Runnable() {
+                @Override
+                public void run() {
+                    etSearch.requestFocus();
+                }
+            });
+            softKeyboard.openSoftKeyboard();
         } else if (id == R.id.nav_marker) {
             Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
             marker.putExtra(DataBase.LINK, link);

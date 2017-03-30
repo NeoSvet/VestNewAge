@@ -27,6 +27,21 @@
             android:scaleType="fitXY"
             android:src="@drawable/close" />
 
+        <EditText
+            android:id="@+id/etSearch"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:hint="@string/string_for_search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:padding="5dp"
+            android:textColorHint="@color/light_gray" />
+
         <TextView
             android:id="@+id/tvPlace"
             style="@style/Label"
@@ -35,7 +50,8 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:maxLines="1"
-            android:padding="5dp" />
+            android:padding="5dp"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/bPrev"

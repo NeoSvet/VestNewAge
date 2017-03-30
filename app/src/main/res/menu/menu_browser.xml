@@ -12,6 +12,11 @@
         android:title="@string/in_markers" />
 
     <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/search"
+        android:title="@string/search" />
+
+    <item
         android:id="@+id/nav_scale"
         android:icon="@drawable/one_one"
         android:title="@string/reset_scale" />
