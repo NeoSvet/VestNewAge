@@ -346,7 +346,7 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (!bNomenu && iPlace == -1)
+                    if (!bNomenu && pSearch.getVisibility() == View.GONE)
                         fabMenu.startAnimation(anMin);
                     if (prom.isProm())
                         tvPromTime.startAnimation(anMin);
