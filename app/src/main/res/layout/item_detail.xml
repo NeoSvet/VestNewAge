@@ -15,7 +15,7 @@
         android:paddingRight="15dp"
         android:textColor="@color/colorAccentLight" />
 
-    <TextView
+    <ru.neosvet.ui.HtmlTextView
         android:id="@+id/des_item"
         style="@style/Des"
         android:layout_width="match_parent"

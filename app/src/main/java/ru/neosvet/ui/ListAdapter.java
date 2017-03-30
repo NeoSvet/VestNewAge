@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.utils.Lib;
 
 public class ListAdapter extends BaseAdapter {
     private Context context;
@@ -68,7 +67,7 @@ public class ListAdapter extends BaseAdapter {
         } else {
             convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
-            tv.setText(data.get(position).getDes().replace("<br>", Lib.N));
+            tv.setText(android.text.Html.fromHtml(data.get(position).getDes()));
             if (data.get(position).getLink().equals("@"))
                 tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         }
