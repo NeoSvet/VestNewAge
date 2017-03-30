@@ -67,9 +67,11 @@ public class CabmainFragment extends Fragment {
         } else {
             cookie = state.getString(Lib.COOKIE);
             task = (CabTask) state.getSerializable(Lib.TASK);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                task.setFrm(this);
-                act.status.setLoad(true);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.setFrm(this);
+                    act.status.setLoad(true);
+                } else task = null;
             }
             mode_list = state.getByte(PANEL);
             if (mode_list > LOGIN) {

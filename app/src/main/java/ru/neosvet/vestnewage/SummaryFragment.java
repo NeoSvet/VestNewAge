@@ -58,9 +58,11 @@ public class SummaryFragment extends Fragment {
     private void restoreActivityState(Bundle state) {
         if (state != null) {
             task = (SummaryTask) state.getSerializable(Lib.TASK);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                act.status.setLoad(true);
-                task.setFrm(this);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    act.status.setLoad(true);
+                    task.setFrm(this);
+                } else task = null;
             }
         }
         File f = new File(act.getFilesDir() + RSS);

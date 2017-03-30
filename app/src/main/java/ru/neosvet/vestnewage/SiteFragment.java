@@ -62,10 +62,12 @@ public class SiteFragment extends Fragment {
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (SiteTask) state.getSerializable(Lib.TASK);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                fabRefresh.setVisibility(View.GONE);
-                act.status.setLoad(true);
-                task.setFrm(this);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    fabRefresh.setVisibility(View.GONE);
+                    act.status.setLoad(true);
+                    task.setFrm(this);
+                } else task = null;
             }
         }
         if (tab == 1) {

@@ -146,8 +146,10 @@ public class BrowserActivity extends AppCompatActivity
             link = state.getString(DataBase.LINK);
             dbPage = new DataBase(this, link);
             if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING) {
-                loader.setAct(this);
-                status.setLoad(true);
+                if (loader.getStatus() == AsyncTask.Status.RUNNING) {
+                    loader.setAct(this);
+                    status.setLoad(true);
+                } else loader = null;
             } else {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);

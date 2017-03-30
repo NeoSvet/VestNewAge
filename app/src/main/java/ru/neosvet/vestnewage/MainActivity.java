@@ -78,8 +78,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             cur_id = savedInstanceState.getInt(CUR_ID);
             loader = (LoaderTask) savedInstanceState.getSerializable(LOADER);
-            if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING)
-                loader.setAct(this);
+            if (loader != null)
+                if (loader.getStatus() == AsyncTask.Status.RUNNING)
+                    loader.setAct(this);
+                else loader = null;
         }
         initInterface();
         prom = new Prom(this);

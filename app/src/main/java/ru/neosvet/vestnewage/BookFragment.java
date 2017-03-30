@@ -103,11 +103,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Lib.TASK);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                fabRefresh.setVisibility(View.GONE);
-                fabRndMenu.setVisibility(View.GONE);
-                task.setFrm(this);
-                act.status.setLoad(true);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    fabRefresh.setVisibility(View.GONE);
+                    fabRndMenu.setVisibility(View.GONE);
+                    task.setFrm(this);
+                    act.status.setLoad(true);
+                } else task = null;
             } else {
                 dialog = state.getString(Lib.DIALOG);
                 if (dialog.length() == 1)

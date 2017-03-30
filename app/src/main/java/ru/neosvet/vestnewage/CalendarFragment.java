@@ -107,9 +107,11 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             act.setFrCalendar(this);
             dCurrent = new Date(state.getLong(CURRENT_DATE));
             task = (CalendarTask) state.getSerializable(Lib.TASK);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                task.setFrm(this);
-                setStatus(true);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.setFrm(this);
+                    setStatus(true);
+                } else task = null;
             }
             if (state.getBoolean(Lib.NOREAD, false)) {
                 pCalendar.setVisibility(View.GONE);

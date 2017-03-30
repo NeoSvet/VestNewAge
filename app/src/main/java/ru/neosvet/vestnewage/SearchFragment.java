@@ -147,11 +147,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             dEnd = new Date(state.getLong(END));
             task = (SearchTask) state.getSerializable(Lib.TASK);
             page = state.getInt(DataBase.SEARCH, -1);
-            if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
-                task.setFrm(this);
-                pStatus.setVisibility(View.VISIBLE);
-                fabSettings.setVisibility(View.GONE);
-                etSearch.setEnabled(false);
+            if (task != null) {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.setFrm(this);
+                    pStatus.setVisibility(View.VISIBLE);
+                    fabSettings.setVisibility(View.GONE);
+                    etSearch.setEnabled(false);
+                } else task = null;
             } else if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
                 showResult(true);
@@ -279,6 +281,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (task != null) return;
                 if (adResults.getItem(pos).getLink().equals(Lib.LINK)) {
                     fabSettings.setVisibility(View.GONE);
                     showResult(true);
