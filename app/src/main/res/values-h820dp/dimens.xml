@@ -13,4 +13,5 @@
     <integer name="screen_mode">2</integer>
     <integer name="height_list">600</integer>
     <dimen name="menu_width">350dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
 </resources>
