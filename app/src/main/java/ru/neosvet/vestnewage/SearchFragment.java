@@ -261,6 +261,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 return false;
             }
         });
+        etSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean focus) {
+                if (focus)
+                    etSearch.showDropDown();
+            }
+        });
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
