@@ -170,6 +170,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         fabOk.setVisibility(View.VISIBLE);
         mainLayout.setVisibility(View.GONE);
         pSettings.setVisibility(View.VISIBLE);
+        softKeyboard.closeSoftKeyboard();
         pPages.setVisibility(View.GONE);
     }
 
