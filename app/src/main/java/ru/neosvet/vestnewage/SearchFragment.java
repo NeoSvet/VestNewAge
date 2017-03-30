@@ -264,7 +264,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         etSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focus) {
-                if (focus)
+                if(focus)
                     etSearch.showDropDown();
             }
         });
@@ -272,7 +272,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
-                        adResults.getItem(pos).getDes());
+                        act.lib.withOutTags(adResults.getItem(pos).getDes()));
             }
         });
         fabSettings.setOnClickListener(this);

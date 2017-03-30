@@ -87,13 +87,13 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             DateFormat df = new SimpleDateFormat("MM.yy");
             if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
-                searchList("00.00", s, mode, step == -1);
+                searchList("00.00", s, mode);
             }
             while (boolStart) {
                 d = new Date(sy, sm, 1);
                 if (list.contains(df.format(d))) {
                     publishProgress(d.getTime());
-                    searchList(df.format(d), s, mode, step == -1);
+                    searchList(df.format(d), s, mode);
                 }
                 if (sy == ey && sm == em)
                     break;
@@ -114,7 +114,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
         return false;
     }
 
-    private void searchList(String name, String s, int mode, boolean boolDesc) {
+    private void searchList(String name, final String find, int mode) {
         DataBase dataBase = new DataBase(act, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
@@ -122,22 +122,22 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
             curSearch = db.query(DataBase.TITLE, null,
-                    DataBase.TITLE + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    DataBase.TITLE + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         } else if (mode == 4) { //Искать по дате - ищем по ссылкам
             curSearch = db.query(DataBase.TITLE, null,
-                    DataBase.LINK + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    DataBase.LINK + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
             // фильтрация по 0 и 1 будет позже
             curSearch = db.query(DataBase.PARAGRAPH, null,
-                    DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + s + "%"}
+                    DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         }
         if (curSearch.moveToFirst()) {
             int iPar = curSearch.getColumnIndex(DataBase.PARAGRAPH);
             int iID = curSearch.getColumnIndex(DataBase.ID);
-            String t;
+            String t, s;
             ContentValues cv = null;
             int id = -1;
             Cursor curTitle;
@@ -145,8 +145,8 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             StringBuilder des = null;
             do {
                 if (id == curSearch.getInt(iID) && boolAdd) {
-                    des.append(Lib.NN);
-                    des.append(act.lib.withOutTags(curSearch.getString(iPar)));
+                    des.append("<br><br>");
+                    des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
                     curTitle = db.query(DataBase.TITLE, null,
@@ -175,7 +175,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                             cv.put(DataBase.ID, n);
                             n++;
                             if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
-                                des = new StringBuilder(act.lib.withOutTags(curSearch.getString(iPar)));
+                                des = new StringBuilder(getDes(curSearch.getString(iPar), find));
                         }
                     }
                     curTitle.close();
@@ -189,5 +189,19 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
         }
         curSearch.close();
         dataBase.close();
+    }
+
+    private String getDes(String d, String sel) {
+        d = act.lib.withOutTags(d);
+        StringBuilder b = new StringBuilder(d);
+        d = d.toLowerCase();
+        sel = sel.toLowerCase();
+        int i = -1, x = 0;
+        while ((i = d.indexOf(sel, i + 1)) > -1) {
+            b.insert(i + x + sel.length(), "</b></font>");
+            b.insert(i + x, "<font color='#99ccff'><b>");
+            x += 36;
+        }
+        return b.toString();
     }
 }
