@@ -36,7 +36,7 @@
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
     <string name="list_is_empty">Список за этот месяц пуст!</string>
-    <string name="alert_download_otkr">Загрузить Послания за 2004-2015 года с сайта «Откровения людям Нового века»?\nСуммарный объём данных для загрузки: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
+    <string name="alert_download_otkr">Загрузить Послания за 2004-2015 года с сайта «Откровения людям Нового века»?\nОбъём данных для загрузки: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
