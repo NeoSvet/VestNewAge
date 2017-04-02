@@ -63,7 +63,7 @@ public class SlashActivity extends AppCompatActivity {
             public void run() {
                 // удаляем материалы в виде страниц:
                 File dir = getFilesDir();
-                if ((new File(dir + "/list")).exists()) {
+                if ((new File(dir + "/poems")).exists()) {
                     for (File d : dir.listFiles()) {
                         if (d.isDirectory() && !d.getName().equals("instant-run")) {
                             // instant-run не трогаем, т.к. это системная папка
