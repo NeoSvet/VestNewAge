@@ -11,7 +11,7 @@
     <LinearLayout
         android:id="@+id/pSearch"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/panel_height"
         android:background="@drawable/starsky_bg"
         android:orientation="horizontal"
         android:padding="5dp"
@@ -19,8 +19,9 @@
 
         <ImageButton
             android:id="@+id/bClose"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
             android:layout_marginRight="5dp"
             android:background="@drawable/button"
             android:padding="5dp"
@@ -55,8 +56,9 @@
 
         <ImageButton
             android:id="@+id/bPrev"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
             android:layout_marginRight="5dp"
             android:background="@drawable/button"
             android:padding="5dp"
@@ -65,8 +67,9 @@
 
         <ImageButton
             android:id="@+id/bNext"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
             android:background="@drawable/button"
             android:padding="5dp"
             android:scaleType="fitXY"

@@ -16,16 +16,16 @@
         <Button
             android:id="@+id/bStart"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
             android:gravity="center"
             android:text="&lt;" />
 
         <Button
             android:id="@+id/bMinus"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:gravity="center"
@@ -41,8 +41,8 @@
         <Button
             android:id="@+id/bPlus"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:gravity="center"
@@ -51,8 +51,8 @@
         <Button
             android:id="@+id/bEnd"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
             android:gravity="center"
             android:text="&gt;" />
 
@@ -69,7 +69,7 @@
         android:id="@+id/bOk"
         style="@style/Button"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/string_size"
         android:layout_gravity="right"
         android:layout_margin="6dp"
         android:paddingLeft="10dp"

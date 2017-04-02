@@ -63,8 +63,8 @@
         <Button
             android:id="@+id/bMinus"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/cell_size"
+            android:layout_height="@dimen/cell_size"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="10dp"
             android:layout_marginRight="10dp"
@@ -75,8 +75,8 @@
         <Button
             android:id="@+id/bPlus"
             style="@style/Button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/cell_size"
+            android:layout_height="@dimen/cell_size"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"
