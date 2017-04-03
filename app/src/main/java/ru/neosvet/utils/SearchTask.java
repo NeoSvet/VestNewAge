@@ -23,6 +23,8 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
     //    private String msg;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
+    private String str;
+    private int mode, count1 = 0, count2 = 0;
 
     public SearchTask(SearchFragment frm) {
         setFrm(frm);
@@ -53,7 +55,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
         if (frm != null)
-            frm.showResult(result);
+            frm.putResult(mode, str, count1, count2);
     }
 
     @Override
@@ -69,31 +71,36 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 return false;
             dbSearch = new DataBase(act, DataBase.SEARCH);
             dbS = dbSearch.getWritableDatabase();
-            dbS.delete(DataBase.SEARCH, null, null);
-            int sy, sm, ey, em, step, mode;
+            int sy, sm, ey, em, step;
             mode = Integer.parseInt(params[1]);
-            String s = params[2]; // начальная дата
-            sm = Integer.parseInt(s.substring(0, 2)) - 1;
-            sy = Integer.parseInt(s.substring(3, 5));
-            s = params[3]; // конечная дата
-            em = Integer.parseInt(s.substring(0, 2)) - 1;
-            ey = Integer.parseInt(s.substring(3, 5));
-            s = params[0]; // строка для поиска
+            str = params[2]; // начальная дата
+            sm = Integer.parseInt(str.substring(0, 2)) - 1;
+            sy = Integer.parseInt(str.substring(3, 5));
+            str = params[3]; // конечная дата
+            em = Integer.parseInt(str.substring(0, 2)) - 1;
+            ey = Integer.parseInt(str.substring(3, 5));
+            str = params[0]; // строка для поиска
             if ((sy == ey && sm <= em) || sy < ey)
                 step = 1;
             else
                 step = -1;
+            if (mode == 6) { // поиск в результатах
+                searchInResults(params[0], step == -1);
+                dbSearch.close();
+                return true;
+            }
+            dbS.delete(DataBase.SEARCH, null, null);
             Date d;
             DateFormat df = new SimpleDateFormat("MM.yy");
             if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
-                searchList("00.00", s, mode);
+                searchList("00.00", str, mode);
             }
             while (boolStart) {
                 d = new Date(sy, sm, 1);
                 if (list.contains(df.format(d))) {
                     publishProgress(d.getTime());
-                    searchList(df.format(d), s, mode);
+                    searchList(df.format(d), str, mode);
                 }
                 if (sy == ey && sm == em)
                     break;
@@ -114,7 +121,68 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
         return false;
     }
 
-    private void searchList(String name, final String find, int mode) {
+    private void searchInResults(String find, boolean boolDesc) throws Exception {
+        List<String> title = new ArrayList<String>();
+        List<String> link = new ArrayList<String>();
+        List<String> id = new ArrayList<String>();
+        Cursor curSearch = dbS.query(DataBase.SEARCH,
+                null, null, null, null, null,
+                DataBase.ID + (boolDesc ? DataBase.DESC : ""));
+        if (curSearch.moveToFirst()) {
+            int iTitle = curSearch.getColumnIndex(DataBase.TITLE);
+            int iLink = curSearch.getColumnIndex(DataBase.LINK);
+            int iID = curSearch.getColumnIndex(DataBase.ID);
+            do {
+                title.add(curSearch.getString(iTitle));
+                link.add(curSearch.getString(iLink));
+                id.add(String.valueOf(curSearch.getInt(iID)));
+            } while (curSearch.moveToNext());
+        }
+        curSearch.close();
+        DataBase dataBase = null;
+        SQLiteDatabase db = null;
+        Cursor cursor;
+        String name1, name2 = "";
+        ContentValues cv;
+        StringBuilder des;
+        for (int i = 0; i < title.size(); i++) {
+            name1 = DataBase.getDatePage(link.get(i));
+            if (!name1.equals(name2)) {
+                if (dataBase != null)
+                    dataBase.close();
+                dataBase = new DataBase(act, name1);
+                db = dataBase.getWritableDatabase();
+            }
+            cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                    DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
+                    new String[]{String.valueOf(dataBase.getPageId(link.get(i))), "%" + find + "%"},
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                cv = new ContentValues();
+                cv.put(DataBase.TITLE, title.get(i));
+                cv.put(DataBase.LINK, link.get(i));
+                des = new StringBuilder(getDes(cursor.getString(0), find));
+                count2++;
+                while (cursor.moveToNext()) {
+                    des.append("<br><br>");
+                    des.append(getDes(cursor.getString(0), find));
+                }
+                cv.put(DataBase.DESCTRIPTION, des.toString());
+                dbS.update(DataBase.SEARCH, cv, DataBase.ID +
+                        DataBase.Q, new String[]{id.get(i)});
+            } else
+                dbS.delete(DataBase.SEARCH, DataBase.ID +
+                        DataBase.Q, new String[]{id.get(i)});
+            cursor.close();
+        }
+        if (dataBase != null)
+            dataBase.close();
+        title.clear();
+        link.clear();
+        id.clear();
+    }
+
+    private void searchList(String name, final String find, int mode) throws Exception {
         DataBase dataBase = new DataBase(act, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
@@ -174,6 +242,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                             cv.put(DataBase.LINK, s);
                             cv.put(DataBase.ID, n);
                             n++;
+                            count2++;
                             if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
                                 des = new StringBuilder(getDes(curSearch.getString(iPar), find));
                         }
@@ -201,6 +270,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             b.insert(i + x + sel.length(), "</b></font>");
             b.insert(i + x, "<font color='#99ccff'><b>");
             x += 36;
+            count1++;
         }
         return b.toString();
     }
