@@ -5,18 +5,113 @@
     android:background="@drawable/starsky_bg"
     android:orientation="vertical">
 
-    <AutoCompleteTextView
-        android:id="@+id/etSearch"
-        style="@style/Label"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="@color/colorPrimary"
-        android:hint="@string/string_for_search"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:padding="5dp"
-        android:textColorHint="@color/light_gray" />
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageButton
+            android:id="@+id/bShow"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/bottom"
+            android:visibility="gone" />
+
+
+        <AutoCompleteTextView
+            android:id="@+id/etSearch"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:hint="@string/string_for_search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:padding="5dp"
+            android:textColorHint="@color/light_gray" />
+
+        <ImageButton
+            android:id="@+id/bSearch"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/button"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/search" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/pAdditionSet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorAccent" />
+
+        <LinearLayout
+            android:id="@+id/bHide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dp"
+            android:background="@drawable/press"
+            android:orientation="horizontal"
+            android:paddingRight="5dp">
+
+            <ImageView
+                android:layout_width="@dimen/string_size"
+                android:layout_height="@dimen/string_size"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/button"
+                android:padding="5dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/top" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/hide" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/cbSearchInResults"
+            style="@style/CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/press"
+            android:checked="false"
+            android:text="@string/search_in_results" />
+
+        <TextView
+            android:id="@+id/tvLabel"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bHide"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp" />
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
