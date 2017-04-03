@@ -475,7 +475,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         task = null;
         if (count1 > 0) {
             pAdditionSet.setVisibility(View.VISIBLE);
-            pPages.setVisibility(View.VISIBLE);
             cbSearchInResults.setChecked(true);
             String s;
             if (mode == 6)
@@ -516,6 +515,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     });
             builder.create().show();
         } else {
+            pPages.setVisibility(View.VISIBLE);
             int max = cursor.getCount() / Lib.MAX_ON_PAGE;
             if (cursor.getCount() % Lib.MAX_ON_PAGE > 0) max++;
             GridLayoutManager layoutManager = new GridLayoutManager(act, max);
