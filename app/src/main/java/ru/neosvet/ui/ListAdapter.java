@@ -67,7 +67,10 @@ public class ListAdapter extends BaseAdapter {
         } else {
             convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
-            tv.setText(android.text.Html.fromHtml(data.get(position).getDes()));
+            if (data.get(position).getDes().contains("<"))
+                tv.setText(android.text.Html.fromHtml(data.get(position).getDes()));
+            else
+                tv.setText(data.get(position).getDes());
             if (data.get(position).getLink().equals("@"))
                 tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         }
@@ -76,7 +79,7 @@ public class ListAdapter extends BaseAdapter {
         tv.setText(data.get(position).getTitle());
         if (data.get(position).getLink().equals("@") && b)
             tv.setTextColor(context.getResources().getColor(R.color.light_gray));
-        if(data.get(position).isSelect())
+        if (data.get(position).isSelect())
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
         else
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
