@@ -143,14 +143,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             if (string != null) {
                 etSearch.setText(string);
                 startSearch();
-            } else {
-                f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
-                if (f.exists()) {
-                    adResults.addItem(new ListItem(
-                            getResources().getString(R.string.results_last_search),
-                            Lib.LINK));
-                    adResults.notifyDataSetChanged();
-                }
             }
         } else {
             dStart = new Date(state.getLong(START));
@@ -190,6 +182,15 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         }
         bStart.setText(formatDate(dStart));
         bEnd.setText(formatDate(dEnd));
+        if (adResults.getCount() == 0 && task == null) {
+            f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
+            if (f.exists()) {
+                adResults.addItem(new ListItem(
+                        getResources().getString(R.string.results_last_search),
+                        Lib.LINK));
+                adResults.notifyDataSetChanged();
+            }
+        }
     }
 
     private void visSettings() {
