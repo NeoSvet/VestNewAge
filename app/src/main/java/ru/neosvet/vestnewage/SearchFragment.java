@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage;
 import android.app.Fragment;
 import android.app.Service;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -21,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -51,16 +54,17 @@ import ru.neosvet.utils.SearchTask;
 
 
 public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
-    private final String START = "start", END = "end", SETTINGS = "s";
+    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l";
     private final DateFormat df = new SimpleDateFormat(" yyyy");
     private MainActivity act;
-    private View container, fabSettings, fabOk, pSettings, pPages, pStatus;
+    private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
+    private CheckBox cbSearchInResults;
     private HorizontalScrollView scroll;
     private CalendarAdapter adPages;
     private RecyclerView rvPages;
     private LinearLayout mainLayout;
     private ListView lvResult;
-    private TextView tvStatus;
+    private TextView tvStatus, tvLabel;
     private Button bStart, bEnd;
     private Spinner sMode;
     private AutoCompleteTextView etSearch;
@@ -72,6 +76,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
     private boolean boolScrollToFirst = false;
 
     public void setString(String s) {
@@ -108,6 +114,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         outState.putLong(START, dStart.getTime());
         outState.putLong(END, dEnd.getTime());
         outState.putInt(DataBase.SEARCH, page);
+        if (page > -1) {
+            outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
+            outState.putString(LABEL, tvLabel.getText().toString());
+        }
         outState.putBoolean(SETTINGS, pSettings.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }
@@ -154,16 +164,23 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     fabSettings.setVisibility(View.GONE);
                     etSearch.setEnabled(false);
                 } else task = null;
-            } else if (page > -1) {
+            }
+            if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
-                showResult(true);
+                showResult();
+                tvLabel.setText(state.getString(LABEL));
+                if (state.getBoolean(ADDITION))
+                    pAdditionSet.setVisibility(View.VISIBLE);
+                else
+                    bShow.setVisibility(View.VISIBLE);
                 scroll.postDelayed(new Runnable() {
                     public void run() {
                         scroll.smoothScrollTo((int) (page *
                                 getResources().getDimension(R.dimen.cell_size)), 0);
                     }
                 }, 100L);
-            } else if (state.getBoolean(SETTINGS)) {
+            }
+            if (state.getBoolean(SETTINGS)) {
                 visSettings();
                 dialog = state.getInt(Lib.DIALOG);
                 if (dialog > -1)
@@ -190,29 +207,12 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 + df.format(d);
     }
 
-    @Override
-    public void onDestroy() {
-        final File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
-        if (adSearch.getCount() == 0) {
-            if (f.exists()) f.delete();
-        } else {
-            try {
-                BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-                for (int i = 0; i < adSearch.getCount(); i++) {
-                    bw.write(adSearch.getItem(i) + Lib.N);
-                    bw.flush();
-                }
-                bw.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        super.onDestroy();
-    }
-
     private void initViews() {
+        pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+        editor = pref.edit();
         mainLayout = (LinearLayout) container.findViewById(R.id.content_search);
         pSettings = container.findViewById(R.id.pSettings);
+        pAdditionSet = container.findViewById(R.id.pAdditionSet);
         fabSettings = container.findViewById(R.id.fabSettings);
         fabOk = container.findViewById(R.id.fabOk);
         scroll = (HorizontalScrollView) container.findViewById(R.id.scrollPage);
@@ -221,7 +221,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         bEnd = (Button) container.findViewById(R.id.bEndRange);
         pStatus = container.findViewById(R.id.pStatus);
         pPages = container.findViewById(R.id.pPages);
+        bShow = container.findViewById(R.id.bShow);
         tvStatus = (TextView) container.findViewById(R.id.tvStatus);
+        cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
+        tvLabel = (TextView) container.findViewById(R.id.tvLabel);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
         sMode = (Spinner) container.findViewById(R.id.sMode);
         ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, R.layout.spinner_button,
@@ -258,33 +261,36 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
                 if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
                         || keyCode == EditorInfo.IME_ACTION_SEARCH) {
-                    if (etSearch.length() < 3)
-                        Lib.showToast(act, getResources().getString(R.string.low_sym_for_search));
-                    else {
-                        pPages.setVisibility(View.GONE);
-                        page = 0;
-                        startSearch();
-                    }
-
+                    enterSearch();
                     return true;
                 }
                 return false;
             }
         });
-        etSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        etSearch.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onFocusChange(View view, boolean focus) {
-                if (focus)
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
                     etSearch.showDropDown();
+                return false;
+            }
+        });
+        container.findViewById(R.id.bSearch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enterSearch();
             }
         });
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (task != null) return;
-                if (adResults.getItem(pos).getLink().equals(Lib.LINK)) {
+                if (adResults.getItem(pos).getLink().equals(Lib.LINK)) { //results_last_search
                     fabSettings.setVisibility(View.GONE);
-                    showResult(true);
+                    bShow.setVisibility(View.VISIBLE);
+                    page = 0;
+                    showResult();
+                    tvLabel.setText(pref.getString(LABEL, ""));
                 } else
                     BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
                             act.lib.withOutTags(adResults.getItem(pos).getDes()));
@@ -316,6 +322,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             public void onClick(View view) {
                 adSearch.clear();
                 adSearch.notifyDataSetChanged();
+                File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+                if (f.exists()) f.delete();
             }
         });
         bStart.setOnClickListener(new View.OnClickListener() {
@@ -362,10 +370,35 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     public void onItemClick(View view, final int pos) {
                         if (page != pos) {
                             page = pos;
-                            showResult(true);
+                            showResult();
                         }
                     }
                 }));
+        bShow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bShow.setVisibility(View.GONE);
+                pAdditionSet.setVisibility(View.VISIBLE);
+            }
+        });
+        container.findViewById(R.id.bHide).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bShow.setVisibility(View.VISIBLE);
+                pAdditionSet.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void enterSearch() {
+        etSearch.dismissDropDown();
+        if (etSearch.length() < 3)
+            Lib.showToast(act, getResources().getString(R.string.low_sym_for_search));
+        else {
+            pPages.setVisibility(View.GONE);
+            page = 0;
+            startSearch();
+        }
     }
 
     private void showDatePicker(int id) {
@@ -406,7 +439,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         final String s = etSearch.getText().toString();
         task = new SearchTask(SearchFragment.this);
         DateFormat df = new SimpleDateFormat("MM.yy");
-        task.execute(s, String.valueOf(sMode.getSelectedItemPosition()),
+        int mode;
+        if (cbSearchInResults.isChecked()) {
+            mode = 6;
+            tvStatus.setText(getResources().getString(R.string.search));
+        } else
+            mode = sMode.getSelectedItemPosition();
+        task.execute(s, String.valueOf(mode),
                 df.format(dStart), df.format(dEnd));
         boolean b = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
@@ -418,20 +457,54 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         if (b) {
             adSearch.add(s);
             adSearch.notifyDataSetChanged();
+            File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+            try {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
+                bw.write(s + Lib.N);
+                bw.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void showResult(boolean suc) {
+    public void putResult(int mode, String str, int count1, int count2) {
+        page = 0;
         etSearch.setEnabled(true);
         pStatus.setVisibility(View.GONE);
         task = null;
+        if (count1 > 0) {
+            pAdditionSet.setVisibility(View.VISIBLE);
+            pPages.setVisibility(View.VISIBLE);
+            cbSearchInResults.setChecked(true);
+            String s;
+            if (mode == 6)
+                s = getResources().getString(R.string.search_in_results);
+            else
+                s = getResources().getStringArray(R.array.search_mode)[mode];
+            tvLabel.setText(
+                    getResources().getString(R.string.you_search)
+                            .replace("w1", s.substring(s.indexOf(" ") + 1))
+                            .replace("w2", str)
+                            + Lib.N + getResources().getString(R.string.found_in)
+                            .replace("n1", String.valueOf(count1))
+                            .replace("n2", String.valueOf(count2)));
+            editor.putString(LABEL, tvLabel.getText().toString());
+            editor.apply();
+        }
+        showResult();
+    }
+
+    private void showResult() {
         adResults.clear();
         adResults.notifyDataSetChanged();
         DataBase dataBase = new DataBase(act, DataBase.SEARCH);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.SEARCH, null, null, null, null, null,
                 DataBase.ID + (dStart.getTime() > dEnd.getTime() ? DataBase.DESC : ""));
-        if (!suc || cursor.getCount() == 0) {
+        if (cursor.getCount() == 0) {
+            bShow.setVisibility(View.GONE);
+            pAdditionSet.setVisibility(View.GONE);
             fabSettings.setVisibility(View.VISIBLE);
             AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
             builder.setMessage(getResources().getString(R.string.alert_search));
@@ -443,8 +516,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     });
             builder.create().show();
         } else {
-            if (page == -1) page = 0;
-            pPages.setVisibility(View.VISIBLE);
             int max = cursor.getCount() / Lib.MAX_ON_PAGE;
             if (cursor.getCount() % Lib.MAX_ON_PAGE > 0) max++;
             GridLayoutManager layoutManager = new GridLayoutManager(act, max);
