@@ -79,6 +79,7 @@
     <string name="sel_col">Выбраны подборки:&#160;</string>
     <string name="sel_par">Выбраны абзацы №№:&#160;</string>
     <string name="par_n">Абзацы №№&#160;</string>
+    <string name="long_press_for_mark">Долгое нажатие - чтобы добавить в закладки</string>
     <!--SiteFragment-->
     <string name="news">Объявления</string>
     <string name="media">Видео и пресса</string>
@@ -155,6 +156,7 @@
     <string name="range_for_search">Диапазон для поиска:</string>
     <string name="change_range">Поменять местами</string>
     <string name="you_search">Вы искали w1 “w2”.</string>
+    <string name="search_for">Поиск по</string>
     <string name="found_in">Найдено n1 соответствий в n2 материалах.</string>
     <string name="hide">Скрыть</string>
     <string name="search_in_results">Искать в результатах</string>

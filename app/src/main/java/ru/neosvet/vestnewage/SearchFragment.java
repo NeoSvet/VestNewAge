@@ -292,9 +292,21 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     page = 0;
                     showResult();
                     tvLabel.setText(pref.getString(LABEL, ""));
-                } else
+                } else {
+                    Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
                     BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
-                            act.lib.withOutTags(adResults.getItem(pos).getDes()));
+                            Lib.withOutTags(adResults.getItem(pos).getDes()));
+                }
+            }
+        });
+        lvResult.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                String des = tvLabel.getText().toString();
+                des = getResources().getString(R.string.search_for) +
+                        des.substring(des.indexOf("“") - 1, des.indexOf(Lib.N) - 1);
+                MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
+                return true;
             }
         });
         fabSettings.setOnClickListener(this);

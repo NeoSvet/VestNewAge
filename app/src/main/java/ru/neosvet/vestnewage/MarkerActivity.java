@@ -2,11 +2,14 @@ package ru.neosvet.vestnewage;
 
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -51,6 +54,47 @@ public class MarkerActivity extends AppCompatActivity {
     private int id, heightList, k_par;
     private byte modeList = 0;
     private boolean boolPosVis = false;
+
+    public static void addMarker(Context context, String link, @Nullable String par, final String des) {
+        Intent marker = new Intent(context, MarkerActivity.class);
+        link = link.substring(Lib.LINK.length());
+        marker.putExtra(DataBase.LINK, link);
+        if (par != null) {
+            par = Lib.withOutTags(par);
+            DataBase dataBase = new DataBase(context, DataBase.getDatePage(link));
+            SQLiteDatabase db = dataBase.getWritableDatabase();
+            Cursor cursor = db.query(DataBase.PARAGRAPH,
+                    new String[]{DataBase.PARAGRAPH},
+                    DataBase.ID + DataBase.Q,
+                    new String[]{String.valueOf(dataBase.getPageId(link))},
+                    null, null, null);
+            StringBuilder s = new StringBuilder();
+            if (cursor.moveToFirst()) {
+                int n = 0;
+                if (des.equals(context.getResources().getString(R.string.search_for)))
+                    n = 1;
+                do {
+                    if (par.contains(Lib.withOutTags(cursor.getString(0)))) {
+                        s.append(String.valueOf(n));
+                        s.append(", ");
+                    }
+                    n++;
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            dataBase.close();
+            if (s.length() > 0) {
+                s.delete(s.length() - 2, s.length());
+                if (s.indexOf(",") > 0) {
+                    marker.putExtra(DataBase.PARAGRAPH, s.toString());
+                    marker.putExtra(DataBase.ID, -2); //метка о том, что в PARAGRAPH указан список
+                } else
+                    marker.putExtra(DataBase.PARAGRAPH, Integer.parseInt(s.toString()));
+            }
+        }
+        marker.putExtra(DataBase.DESCTRIPTION, des);
+        context.startActivity(marker);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,18 +258,29 @@ public class MarkerActivity extends AppCompatActivity {
                 pPos.setVisibility(View.VISIBLE);
                 boolPosVis = true;
             }
-        } else if (id == -1) { //add marker mode
-            DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+        } else if (id < 0) { //add marker mode
             tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
-            adPage.getItem(0).setCheck(true);
-            etDes.setText(df.format(new Date()));
+            adCol.getItem(0).setCheck(true);
+            if (getIntent().hasExtra(DataBase.DESCTRIPTION))
+                etDes.setText(getIntent().getStringExtra(DataBase.DESCTRIPTION));
+            else {
+                DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
+                etDes.setText(df.format(new Date()));
+            }
             rPar.setChecked(true);
-            int par = getIntent().getIntExtra(DataBase.PARAGRAPH, -1);
-            if (par == -1)
-                tvSel.setText(getResources().getString(R.string.page_entirely));
-            else { // случайный стих
-                adPage.getItem(par).setCheck(true);
-                tvSel.setText(getResources().getString(R.string.sel_par) + (par + 1));
+            if (id == -1) {
+                int par = getIntent().getIntExtra(DataBase.PARAGRAPH, -1);
+                if (par == -1)
+                    tvSel.setText(getResources().getString(R.string.page_entirely));
+                else { // случайный стих
+                    adPage.getItem(par).setCheck(true);
+                    tvSel.setText(getResources().getString(R.string.sel_par) + (par + 1));
+                }
+            } else { // id==-2 если в PARAGRAPH список (см addMarker)
+                String s = getResources().getString(R.string.sel_par) +
+                        getIntent().getStringExtra(DataBase.PARAGRAPH);
+                tvSel.setText(s);
+                setPageList(s);
             }
             sel = getResources().getString(R.string.sel_pos) +
                     String.format("%.1f", getIntent().getFloatExtra(DataBase.PLACE, 0f)) + "%";

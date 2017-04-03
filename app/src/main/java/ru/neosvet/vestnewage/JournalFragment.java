@@ -106,7 +106,7 @@ public class JournalFragment extends Fragment {
                                     new String[]{id[1]}, null, null, null);
                             s = getResources().getString(R.string.rnd_stih);
                             if (cursor.moveToPosition(Integer.parseInt(id[2])))
-                                s += ":" + Lib.N + act.lib.withOutTags(cursor.getString(0));
+                                s += ":" + Lib.N + Lib.withOutTags(cursor.getString(0));
                         }
                         item.setDes(item.getDes() + Lib.N + s);
                     }
@@ -197,10 +197,29 @@ public class JournalFragment extends Fragment {
                 if (s.contains(getResources().getString(R.string.rnd_stih))) {
                     s = s.substring(s.indexOf(Lib.N, s.indexOf(
                             getResources().getString(R.string.rnd_stih))) + 1);
+                    Lib.showToast(act,getResources().getString(R.string.long_press_for_mark));
                 } else
                     s = "";
                 BrowserActivity.openReader(act, link, s);
                 adJournal.clear();
+            }
+        });
+        lvJournal.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                String des = adJournal.getItem(pos).getDes();
+                String par = null;
+                int i = des.indexOf(getResources().getString(R.string.rnd_stih));
+                if (i > -1 && i < des.lastIndexOf(Lib.N)) {
+                    par = des.substring(des.indexOf(Lib.N, i) + 1);
+                    i = des.indexOf("«");
+                    des = des.substring(i, des.indexOf(Lib.N, i) - 1);
+                } else if (des.contains("«")) {
+                    des = des.substring(des.indexOf("«"));
+                } else
+                    des = des.substring(des.indexOf("(") + 1, des.indexOf(")"));
+                MarkerActivity.addMarker(act, adJournal.getItem(pos).getLink(), par, des);
+                return true;
             }
         });
         lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -220,7 +239,9 @@ public class JournalFragment extends Fragment {
             }
         });
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
-        anMin.setAnimationListener(new Animation.AnimationListener() {
+        anMin.setAnimationListener(new Animation.AnimationListener()
+
+        {
             @Override
             public void onAnimationStart(Animation animation) {
 
@@ -239,7 +260,9 @@ public class JournalFragment extends Fragment {
             }
         });
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
-        lvJournal.setOnTouchListener(new View.OnTouchListener() {
+        lvJournal.setOnTouchListener(new View.OnTouchListener()
+
+        {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (adJournal.getCount() == 0)
