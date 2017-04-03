@@ -665,13 +665,13 @@ public class BrowserActivity extends AppCompatActivity
                     bw.write("Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + "<br>");
+                    bw.write(df.format(d) + Lib.BR);
                 } else {
                     bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
                     bw.write("<br>Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + "<br>");
+                    bw.write(df.format(d) + Lib.BR);
                     df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
                     bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
                 }

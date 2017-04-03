@@ -164,7 +164,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 des = new StringBuilder(getDes(cursor.getString(0), find));
                 count2++;
                 while (cursor.moveToNext()) {
-                    des.append("<br><br>");
+                    des.append(Lib.BR + Lib.BR);
                     des.append(getDes(cursor.getString(0), find));
                 }
                 cv.put(DataBase.DESCTRIPTION, des.toString());
@@ -213,7 +213,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             StringBuilder des = null;
             do {
                 if (id == curSearch.getInt(iID) && boolAdd) {
-                    des.append("<br><br>");
+                    des.append(Lib.BR + Lib.BR);
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
@@ -261,7 +261,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
     }
 
     private String getDes(String d, String sel) {
-        d = act.lib.withOutTags(d);
+        d = Lib.withOutTags(d);
         StringBuilder b = new StringBuilder(d);
         d = d.toLowerCase();
         sel = sel.toLowerCase();
@@ -272,6 +272,6 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             x += 36;
             count1++;
         }
-        return b.toString();
+        return b.toString().replace(Lib.N, Lib.BR);
     }
 }

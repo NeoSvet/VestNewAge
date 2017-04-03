@@ -196,7 +196,7 @@ public class CollectionsFragment extends Fragment {
                 if (cursor.moveToFirst()) {
                     do {
                         if (p.contains(DataBase.closeList(String.valueOf(i)))) {
-                            b.append(act.lib.withOutTags(cursor.getString(0)));
+                            b.append(Lib.withOutTags(cursor.getString(0)));
                             b.append(Lib.N);
                             b.append(Lib.N);
                         }

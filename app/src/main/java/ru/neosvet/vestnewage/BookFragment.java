@@ -651,7 +651,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                         n--; //исключаем подпись
                     n = g.nextInt(n);
                     if (curPar.moveToPosition(n)) { //если случайный стих найден
-                        s = act.lib.withOutTags(curPar.getString(0));
+                        s = Lib.withOutTags(curPar.getString(0));
                     } else {
                         s = "";
                         n = -1;

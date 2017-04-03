@@ -425,7 +425,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!bSinglePage && dataBase.existsPage(link))
             return;
         String line, s = link;
-        final String par = "</p>", nl = "<br>";
+        final String par = "</p>";
         if (link.contains("#")) s = s.substring(0, s.indexOf("#"));
         InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + s + Lib.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
@@ -440,7 +440,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 } else if (line.contains("<")) {
                     line = line.trim();
                     if (line.length() < 7) continue;
-                    line = line.replace("<br />", nl).replace("color", "cvet");
+                    line = line.replace("<br />", Lib.BR).replace("color", "cvet");
                     if (line.contains("<p")) {
                         while (!line.contains(par)) {
                             line += br.readLine();
@@ -469,7 +469,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             s = br.readLine();
                         }
                         while (line.indexOf(par) < line.lastIndexOf(par)) {
-                            line = line.substring(0, line.indexOf(par)) + nl +
+                            line = line.substring(0, line.indexOf(par)) + Lib.BR +
                                     line.substring(line.indexOf("\">", line.indexOf(par)) + 2);
                         }
                     } else {
@@ -508,7 +508,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 cv.put(DataBase.TIME, System.currentTimeMillis());
                 if (id == 0) { // id не найден, материала нет - добавляем
                     line = line.replace("&ldquo;", "“").replace("&rdquo;", "”");
-                    line = lib.withOutTags(line);
+                    line = Lib.withOutTags(line);
 
                     cv.put(DataBase.LINK, link);
                     if (line.contains(dataBase.getName())) {

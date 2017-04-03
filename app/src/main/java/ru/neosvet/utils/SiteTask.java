@@ -109,18 +109,18 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                     setDes(d);
                     d = "";
                     if (line.contains("h3")) {
-                        line = act.lib.withOutTags(line);
+                        line = Lib.withOutTags(line);
                         if (line.length() > 5) {
                             data.add(new ListItem(line));
                             addLink("", "@");
                         }
                     } else
-                        data.add(new ListItem(act.lib.withOutTags(line), true));
+                        data.add(new ListItem(Lib.withOutTags(line), true));
                 } else if (line.contains("href")) {
                     m = line.split("<br />");
                     for (i = 0; i < m.length; i++) {
                         n = 0;
-                        line = act.lib.withOutTags(m[i]);
+                        line = Lib.withOutTags(m[i]);
                         if (line.length() < 5 || line.contains(">>")) continue;
                         setDes(d);
                         d = "";
@@ -131,15 +131,15 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                                 s = m[i].substring(n, m[i].indexOf(">", n) - 1);
                                 if (s.contains("..")) s = s.substring(2);
                                 n = m[i].indexOf(">", n) + 1;
-                                addLink(act.lib.withOutTags(m[i].substring(n, m[i].indexOf("<", n))), s);
+                                addLink(Lib.withOutTags(m[i].substring(n, m[i].indexOf("<", n))), s);
                             } // links
                         } else
                             addLink("", "@");
                     } // lines
                 } else if (line.contains("<p")) {
-                    line = act.lib.withOutTags(line).replace(Lib.N, "<br>");
+                    line = Lib.withOutTags(line).replace(Lib.N, Lib.BR);
                     if (line.length() > 5) {
-                        d += line + "<br>";
+                        d += line + Lib.BR;
                     }
                 } else {
                     if (line.contains("page-title"))

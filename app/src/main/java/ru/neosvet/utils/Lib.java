@@ -32,7 +32,7 @@ public class Lib {
     public static final String SITE = "http://blagayavest.info/", N = "\n", NN = "\n\n",
             TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
             TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
-            LIGHT = "/style/light.css", DARK = "/style/dark.css", AND = "&",
+            LIGHT = "/style/light.css", DARK = "/style/dark.css", AND = "&", BR = "<br>",
             PRINT = "?styletpl=print", HREF = "href", DIALOG = "dialog",
             KV_OPEN = "“", KV_CLOSE = "”", POEMS = "poems";
     private Context context;
@@ -214,9 +214,9 @@ public class Lib {
         return false;
     }
 
-    public String withOutTags(String s) {
+    public static String withOutTags(String s) {
         int i;
-        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace("<br>", N)
+        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace(BR, N)
                 .replace("&laquo;", "«").replace("&raquo;", "»").replace(N + " ", N)
                 .replace("&ndash;", "–").replace("&nbsp;", " ");
 

@@ -116,7 +116,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         in.close();
         conn.disconnect();
         if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
-            s = s.replace("<br>", Lib.N);
+            s = s.replace(Lib.BR, Lib.N);
             if (s.contains(" ("))
                 s = s.substring(0, s.indexOf(" ("));
             else

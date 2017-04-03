@@ -134,7 +134,7 @@ public class DataBase extends SQLiteOpenHelper {
         Lib lib = new Lib(ctxt);
         if (cursor.moveToFirst()) {
             do {
-                pageCon.append(lib.withOutTags(cursor.getString(0)));
+                pageCon.append(Lib.withOutTags(cursor.getString(0)));
                 pageCon.append(Lib.N);
                 pageCon.append(Lib.N);
             } while (cursor.moveToNext());
