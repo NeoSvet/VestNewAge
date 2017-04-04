@@ -206,6 +206,7 @@ public class BrowserActivity extends AppCompatActivity
             bPrev.setVisibility(View.VISIBLE);
             bNext.setVisibility(View.VISIBLE);
             tvPlace.setVisibility(View.GONE);
+            tvPlace.setText("");
             tvPlace = null;
             etSearch.setVisibility(View.VISIBLE);
             iPlace = -1;
@@ -482,6 +483,8 @@ public class BrowserActivity extends AppCompatActivity
             else
                 fabMenu.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_search) {
+            if (pSearch.getVisibility() == View.VISIBLE)
+                closeSearch();
             fabMenu.setVisibility(View.GONE);
             pSearch.setVisibility(View.VISIBLE);
             etSearch.post(new Runnable() {
