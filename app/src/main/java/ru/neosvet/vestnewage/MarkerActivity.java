@@ -55,9 +55,10 @@ public class MarkerActivity extends AppCompatActivity {
     private byte modeList = 0;
     private boolean boolPosVis = false;
 
-    public static void addMarker(Context context, String link, @Nullable String par, final String des) {
+    public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
-        link = link.substring(Lib.LINK.length());
+        if (link.contains(Lib.LINK))
+            link = link.substring(Lib.LINK.length());
         marker.putExtra(DataBase.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
@@ -71,7 +72,7 @@ public class MarkerActivity extends AppCompatActivity {
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;
-                if (des.equals(context.getResources().getString(R.string.search_for)))
+                if (des != null && des.equals(context.getResources().getString(R.string.search_for)))
                     n = 1;
                 do {
                     if (par.contains(Lib.withOutTags(cursor.getString(0)))) {
@@ -92,7 +93,8 @@ public class MarkerActivity extends AppCompatActivity {
                     marker.putExtra(DataBase.PARAGRAPH, Integer.parseInt(s.toString()));
             }
         }
-        marker.putExtra(DataBase.DESCTRIPTION, des);
+        if (des != null)
+            marker.putExtra(DataBase.DESCTRIPTION, des);
         context.startActivity(marker);
     }
 
