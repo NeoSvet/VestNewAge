@@ -23,11 +23,6 @@ import ru.neosvet.utils.SummaryTask;
 
 public class SummaryFragment extends Fragment {
     public static final String RSS = "/rss";
-    private boolean boolLoad = false;
-
-    public void setLoad(boolean boolLoad) {
-        this.boolLoad = boolLoad;
-    }
 
     private ListView lvSummary;
     private ListAdapter adSummary;
@@ -66,14 +61,13 @@ public class SummaryFragment extends Fragment {
             }
         }
         File f = new File(act.getFilesDir() + RSS);
-        if (f.exists() && !boolLoad) {
+        if (f.exists()) {
             if (act.status.checkTime(f.lastModified()))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
             createList(true);
         } else {
-            boolLoad = false;
             startLoad();
         }
     }

@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
     private SearchFragment frSearch;
-    private boolean boolLoad = false, boolExit = false;
+    private boolean boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
     private final String LOADER = "loader";
@@ -60,21 +60,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (savedInstanceState == null) {
             SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
             Intent intent = getIntent();
-            boolLoad = intent.getBooleanExtra(SummaryFragment.RSS, false);
             tab = intent.getIntExtra(TAB, 0);
-            if (boolLoad) {
-                setFragment(R.id.nav_rss);
-            } else {
-                if (pref.getBoolean(Lib.FIRST, true)) {
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putBoolean(Lib.FIRST, false);
-                    editor.apply();
-                    tab = -1;
-                    setFragment(R.id.nav_help);
-                    boolFirst = true;
-                } else
-                    setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
-            }
+            if (pref.getBoolean(Lib.FIRST, true)) {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean(Lib.FIRST, false);
+                editor.apply();
+                tab = -1;
+                setFragment(R.id.nav_help);
+                boolFirst = true;
+            } else
+                setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
         } else {
             cur_id = savedInstanceState.getInt(CUR_ID);
             loader = (LoaderTask) savedInstanceState.getSerializable(LOADER);
@@ -102,8 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initInterface() {
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
-            if (!boolLoad)
-                setMenuFragment();
+            setMenuFragment();
         } else {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
@@ -195,10 +189,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frCalendar = null;
         switch (id) {
             case R.id.nav_rss:
-                SummaryFragment frSummary = new SummaryFragment();
-                frSummary.setLoad(boolLoad);
-                fragmentTransaction.replace(R.id.my_fragment, frSummary);
-                boolLoad = false;
+                fragmentTransaction.replace(R.id.my_fragment, new SummaryFragment());
                 break;
             case R.id.nav_main:
                 SiteFragment frSite = new SiteFragment();
