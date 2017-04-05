@@ -77,15 +77,23 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
         while ((line = br.readLine()) != null) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
-                bw.write(withOutTag(br.readLine()) + Lib.N); //title
-                bw.write(Lib.LINK + withOutTag(br.readLine()).substring(Lib.SITE.length()) + Lib.N); //link
-                bw.write(withOutTag(br.readLine()) + Lib.N); //des
-                bw.write(Long.toString(Date.parse(withOutTag(br.readLine()))) + Lib.N); //time
+                bw.write(withOutTag(br.readLine())); //title
+                bw.write(Lib.N);
+                line = withOutTag(br.readLine()); //link
+                if (line.contains(Lib.SITE))
+                    bw.write(Lib.LINK + line.substring(Lib.SITE.length()));
+                else
+                    bw.write(line);
+                bw.write(Lib.N);
+                bw.write(withOutTag(br.readLine())); //des
+                bw.write(Lib.N);
+                bw.write(Date.parse(withOutTag(br.readLine())) + Lib.N); //time
                 bw.flush();
             }
         }
-        br.close();
         bw.close();
+        br.close();
+        in.close();
     }
 
 //    private void updateBook() throws Exception {
