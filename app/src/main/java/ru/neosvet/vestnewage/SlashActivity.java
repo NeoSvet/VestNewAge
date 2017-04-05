@@ -61,51 +61,54 @@ public class SlashActivity extends AppCompatActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                // удаляем материалы в виде страниц:
-                File dir = getFilesDir();
-                if ((new File(dir + "/poems")).exists()) {
-                    for (File d : dir.listFiles()) {
-                        if (d.isDirectory() && !d.getName().equals("instant-run")) {
-                            // instant-run не трогаем, т.к. это системная папка
-                            if (d.listFiles() != null) // если папка не пуста
-                                for (File f : d.listFiles())
-                                    f.delete();
-                            d.delete();
+                try {
+                    // удаляем материалы в виде страниц:
+                    File dir = getFilesDir();
+                    if ((new File(dir + "/poems")).exists()) {
+                        for (File d : dir.listFiles()) {
+                            if (d.isDirectory() && !d.getName().equals("instant-run")) {
+                                // instant-run не трогаем, т.к. это системная папка
+                                if (d.listFiles() != null) // если папка не пуста
+                                    for (File f : d.listFiles())
+                                        f.delete();
+                                d.delete();
+                            }
                         }
-                    }
-                    // перенос таблицы подборок в базу закладок
-                    DataBase dbCol = new DataBase(SlashActivity.this, DataBase.COLLECTIONS);
-                    SQLiteDatabase dbC = dbCol.getWritableDatabase();
-                    DataBase dbMar = new DataBase(SlashActivity.this, DataBase.MARKERS);
-                    SQLiteDatabase dbM = dbMar.getWritableDatabase();
-                    Cursor cursor = dbC.query(DataBase.COLLECTIONS, null, null, null, null, null, null);
-                    if (cursor.moveToFirst()) {
-                        int iMarker = cursor.getColumnIndex(DataBase.MARKERS);
-                        int iPlace = cursor.getColumnIndex(DataBase.PLACE);
-                        int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                        // первую подборку - "вне подборок" вставлять не надо, надо лишь обновить:
-                        ContentValues cv = new ContentValues();
-                        cv.put(DataBase.MARKERS, cursor.getString(iMarker));
-                        dbM.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                                new String[]{"1"});
-                        // остальные вставляем:
-                        while (cursor.moveToNext()) {
-                            cv = new ContentValues();
-                            cv.put(DataBase.PLACE, cursor.getInt(iPlace));
+                        // перенос таблицы подборок в базу закладок
+                        DataBase dbCol = new DataBase(SlashActivity.this, DataBase.COLLECTIONS);
+                        SQLiteDatabase dbC = dbCol.getWritableDatabase();
+                        DataBase dbMar = new DataBase(SlashActivity.this, DataBase.MARKERS);
+                        SQLiteDatabase dbM = dbMar.getWritableDatabase();
+                        Cursor cursor = dbC.query(DataBase.COLLECTIONS, null, null, null, null, null, null);
+                        if (cursor.moveToFirst()) {
+                            int iMarker = cursor.getColumnIndex(DataBase.MARKERS);
+                            int iPlace = cursor.getColumnIndex(DataBase.PLACE);
+                            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                            // первую подборку - "вне подборок" вставлять не надо, надо лишь обновить:
+                            ContentValues cv = new ContentValues();
                             cv.put(DataBase.MARKERS, cursor.getString(iMarker));
-                            cv.put(DataBase.TITLE, cursor.getString(iTitle));
-                            dbM.insert(DataBase.COLLECTIONS, null, cv);
+                            dbM.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                                    new String[]{"1"});
+                            // остальные вставляем:
+                            while (cursor.moveToNext()) {
+                                cv = new ContentValues();
+                                cv.put(DataBase.PLACE, cursor.getInt(iPlace));
+                                cv.put(DataBase.MARKERS, cursor.getString(iMarker));
+                                cv.put(DataBase.TITLE, cursor.getString(iTitle));
+                                dbM.insert(DataBase.COLLECTIONS, null, cv);
+                            }
+                        }
+                        cursor.close();
+                        dbMar.close();
+                        // удаление базы журнала старого образца и базы подборок:
+                        dir = lib.getDBFolder();
+                        for (File f : dir.listFiles()) {
+                            if (f.getName().contains(DataBase.COLLECTIONS) ||
+                                    f.getName().indexOf(DataBase.JOURNAL) == 0)
+                                f.delete();
                         }
                     }
-                    cursor.close();
-                    dbMar.close();
-                    // удаление базы журнала старого образца и базы подборок:
-                    dir = lib.getDBFolder();
-                    for (File f : dir.listFiles()) {
-                        if (f.getName().contains(DataBase.COLLECTIONS) ||
-                                f.getName().indexOf(DataBase.JOURNAL) == 0)
-                            f.delete();
-                    }
+                } catch (Exception e) {
                 }
             }
         });

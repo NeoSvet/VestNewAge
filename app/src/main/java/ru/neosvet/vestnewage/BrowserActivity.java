@@ -701,23 +701,30 @@ public class BrowserActivity extends AppCompatActivity
                 ContentValues cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
                 String id = dbPage.getDatePage(link) + Lib.AND + dbPage.getPageId(link);
-
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
-                int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
-                if (i == 0) {// no update
-                    cv.put(DataBase.ID, id);
-                    db.insert(DataBase.JOURNAL, null, cv);
+                try {
+                    int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
+                    if (i == 0) {// no update
+                        cv.put(DataBase.ID, id);
+                        db.insert(DataBase.JOURNAL, null, cv);
+                    }
+                    Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
+                    i = cursor.getCount();
+                    cursor.moveToFirst();
+                    while (i > 100) {
+                        db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
+                                new String[]{cursor.getString(0)});
+                        cursor.moveToNext();
+                        i--;
+                    }
+                    cursor.close();
+                } catch (Exception e) {
+                    db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
+                    //создаем таблицу нового образца:
+                    db.execSQL("create table " + DataBase.JOURNAL + " ("
+                            + DataBase.ID + " text primary key,"
+                            + DataBase.TIME + " integer);");
                 }
-                Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
-                i = cursor.getCount();
-                cursor.moveToFirst();
-                while (i > 100) {
-                    db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
-                            new String[]{cursor.getString(0)});
-                    cursor.moveToNext();
-                    i--;
-                }
-                cursor.close();
                 dbJournal.close();
             }
         });
