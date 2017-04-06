@@ -111,7 +111,6 @@
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="on">за</string>
     <string name="secs">30 секунд</string>
-    <string name="prom_notif_alert">Будьте внимательны!\nУведомление может сработать с задержкой до 4 минут.\nПричины выясняю и исправляю&#8230; А может это лишь на моём смартфоне? Попробуйте!</string>
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
