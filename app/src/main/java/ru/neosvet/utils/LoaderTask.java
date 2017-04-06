@@ -320,7 +320,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void startTimer() {
-        Thread t = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             public void run() {
                 try {
                     while (boolStart && prog < max) {
@@ -331,8 +331,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     e.printStackTrace();
                 }
             }
-        });
-        t.start();
+        }).start();
     }
 
     private void downloadFile(String url, String file) {

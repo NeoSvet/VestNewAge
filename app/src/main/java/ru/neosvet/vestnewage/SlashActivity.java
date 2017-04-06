@@ -58,7 +58,7 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     private void adapterNewVersion() {
-        Thread t = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -111,8 +111,7 @@ public class SlashActivity extends AppCompatActivity {
                 } catch (Exception e) {
                 }
             }
-        });
-        t.start();
+        }).start();
     }
 
     private void parseUri(Uri data) {

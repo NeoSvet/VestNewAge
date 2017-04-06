@@ -159,7 +159,7 @@ public class BrowserActivity extends AppCompatActivity
                                 * (float) wvBrowser.getContentHeight()));
                     }
                 };
-                Thread t = new Thread(new Runnable() {
+                new Thread(new Runnable() {
                     public void run() {
                         try {
                             Thread.sleep(500);
@@ -168,8 +168,7 @@ public class BrowserActivity extends AppCompatActivity
                             e.printStackTrace();
                         }
                     }
-                });
-                t.start();
+                }).start();
             }
             iPlace = state.getInt(DataBase.PLACE);
             string = state.getString(DataBase.SEARCH);
@@ -695,7 +694,7 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void addJournal() {
-        Thread t = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 ContentValues cv = new ContentValues();
@@ -727,8 +726,7 @@ public class BrowserActivity extends AppCompatActivity
                 }
                 dbJournal.close();
             }
-        });
-        t.start();
+        }).start();
     }
 
     public void openInApps(String url) {
