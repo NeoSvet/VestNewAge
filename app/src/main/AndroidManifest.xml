@@ -85,6 +85,14 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".PromReceiver" />
+        <service android:name=".SummaryReceiver$Service"
+            android:process=":summary_check"
+            android:icon="@mipmap/ic_launcher"
+            android:label="SummaryCheck" />
+        <service android:name=".PromReceiver$Service"
+            android:process=":prom_timer"
+            android:icon="@mipmap/ic_launcher"
+            android:label="PromTimer" />
     </application>
 
 </manifest>
