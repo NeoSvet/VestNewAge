@@ -103,20 +103,20 @@ public class Lib {
             response = client.newCall(builderRequest.build()).execute();
 
             s = response.header("Set-" + COOKIE);
-            String[] m = s.split(";");
-            HttpCookie cookie;
-            s = null;
-            String t = null, n = null;
-            for (int i = 0; i < m.length; i++) {
-                cookie = HttpCookie.parse(m[i]).get(0);
-                if (m[i].contains(SESSION_ID))
-                    s = cookie.getValue();
-                else if (m[i].contains(TIME_LAST_VISIT))
-                    t = cookie.getValue();
-                else if (m[i].contains(NOREAD))
-                    n = cookie.getValue();
+            if (s != null) {
+                String[] m = s.split(";");
+                s = null;
+                String t = null, n = null;
+                for (int i = 0; i < m.length; i++) {
+                    if (m[i].contains(SESSION_ID))
+                        s = HttpCookie.parse(m[i]).get(0).getValue();
+                    else if (m[i].contains(TIME_LAST_VISIT))
+                        t = HttpCookie.parse(m[i]).get(0).getValue();
+                    else if (m[i].contains(NOREAD))
+                        n = HttpCookie.parse(m[i]).get(0).getValue();
+                }
+                setCookies(s, t, n);
             }
-            setCookies(s, t, n);
         } else {
             builderRequest.header("Referer", SITE);
             OkHttpClient client = builderClient.build();
