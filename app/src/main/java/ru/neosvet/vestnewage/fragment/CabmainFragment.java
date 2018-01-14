@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
@@ -37,6 +38,7 @@ public class CabmainFragment extends Fragment {
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
+    private TextView tvError;
     private EditText etEmail, etPassword;
     private View container, fabEnter, fabExit, pMain, divCab;
     private String cookie = "";
@@ -123,6 +125,7 @@ public class CabmainFragment extends Fragment {
         divCab = container.findViewById(R.id.divCab);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
+        tvError = (TextView) container.findViewById(R.id.tvError);
         etEmail = (EditText) container.findViewById(R.id.etEmail);
         etPassword = (EditText) container.findViewById(R.id.etPassword);
         cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
@@ -190,6 +193,7 @@ public class CabmainFragment extends Fragment {
     }
 
     private void loginList() {
+        tvError.setVisibility(View.GONE);
         for (int i = 0; i < getResources().getStringArray(R.array.cabinet_main).length; i += 2) {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_main)[i]),
                     getResources().getStringArray(R.array.cabinet_main)[i + 1]);
@@ -323,6 +327,18 @@ public class CabmainFragment extends Fragment {
     public void putResultTask(String result) {
         task = null;
         act.status.setLoad(false);
+        if (result.indexOf(Const.AND) == 0) {
+            mode_list = ENTER;
+            adMain.clear();
+            adMain.notifyDataSetChanged();
+            pMain.setVisibility(View.GONE);
+            divCab.setVisibility(View.GONE);
+            fabEnter.setVisibility(View.GONE);
+            fabExit.setVisibility(View.VISIBLE);
+            tvError.setText(result.substring(1));
+            tvError.setVisibility(View.VISIBLE);
+            return;
+        }
         if (result.equals(getResources().getString(R.string.load_fail))) {
             Lib.showToast(act, result);
             return;

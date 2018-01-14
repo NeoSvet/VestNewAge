@@ -87,7 +87,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         if (s.length() == 2) { // ok
             return getListWord(cookie, true);
         } else { // incorrect password
-            return s;
+            return Const.AND + s;
         }
     }
 
