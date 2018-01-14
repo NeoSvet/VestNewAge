@@ -2,20 +2,19 @@ package ru.neosvet.utils;
 
 import android.os.AsyncTask;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import ru.neosvet.vestnewage.CabmainFragment;
 import ru.neosvet.vestnewage.MainActivity;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.CabmainFragment;
 
 public class CabTask extends AsyncTask<String, Integer, String> implements Serializable {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/",
@@ -56,37 +55,36 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String subLogin(String email, String pass) throws Exception {
-        URL url = new URL(HOST);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(PING);
-        conn.setReadTimeout(PING);
-        conn.setRequestProperty(USER_AGENT, act.getPackageName());
-        String cookie = conn.getHeaderField("Set-" + COOKIE);
+        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+        builderClient.connectTimeout(PING, TimeUnit.SECONDS);
+        builderClient.readTimeout(PING, TimeUnit.SECONDS);
+        builderClient.writeTimeout(PING, TimeUnit.SECONDS);
+
+        Request.Builder builderRequest = new Request.Builder();
+        builderRequest.url(HOST);
+        builderRequest.header(USER_AGENT, act.getPackageName());
+        OkHttpClient client = builderClient.build();
+        Response response = client.newCall(builderRequest.build()).execute();
+
+        String cookie = response.header("Set-" + COOKIE);
         cookie = cookie.substring(0, cookie.indexOf(";"));
         frm.setCookie(cookie);
-        conn.disconnect();
-        url = new URL(HOST + "auth.php");
-        conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(PING);
-        conn.setReadTimeout(PING);
-        conn.setRequestMethod("POST");
-        String s = "user=" + email + "&pass=" + pass;
-        conn.setRequestProperty("Content-Length", Integer.toString(s.length()));
-        conn.setRequestProperty(USER_AGENT, act.getPackageName());
-        conn.setRequestProperty(COOKIE, cookie);
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, ENCODING));
-        bw.write(s);
-        bw.close();
-        os.close();
-        InputStream in = new BufferedInputStream(conn.getInputStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
-        s = br.readLine();
+        response.close();
+
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("user", email)
+                .addFormDataPart("pass", pass)
+                .build();
+        builderRequest.url(HOST + "auth.php");
+        builderRequest.post(requestBody);
+        builderRequest.addHeader(COOKIE, cookie);
+
+        response = client.newCall(builderRequest.build()).execute();
+        BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
+        String s = br.readLine();
         br.close();
-        in.close();
-        conn.disconnect();
+
         if (s.length() == 2) { // ok
             return getListWord(cookie, true);
         } else { // incorrect password
@@ -95,15 +93,22 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String getListWord(String cookie, boolean boolOne) throws Exception {
+        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+        builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+
+        Request.Builder builderRequest = new Request.Builder();
+        builderRequest.url(HOST + "edinenie/anketa.html");
+        builderRequest.header(USER_AGENT, act.getPackageName());
+        builderRequest.addHeader(COOKIE, cookie);
+
+        OkHttpClient client = builderClient.build();
+        Response response = client.newCall(builderRequest.build()).execute();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                response.body().byteStream(), ENCODING), 1000);
         StringBuilder list = new StringBuilder();
-        URL url = new URL(HOST + "edinenie/anketa.html");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(PING);
-        conn.setReadTimeout(PING);
-        conn.setRequestProperty(USER_AGENT, act.getPackageName());
-        conn.setRequestProperty(COOKIE, cookie);
-        InputStream in = new BufferedInputStream(conn.getInputStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
         String s = br.readLine();
         while (!s.contains("lt_box") && !s.contains("name=\"keyw")) { //!s.contains("fd_box") &&
             s = br.readLine();
@@ -113,8 +118,6 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
             }
         }
         br.close();
-        in.close();
-        conn.disconnect();
         if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
             s = s.replace(Lib.BR, Lib.N);
             if (s.contains(" ("))
@@ -146,28 +149,31 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String sendWord(String email, String cookie, int index) throws Exception {
-        URL url = new URL(HOST + "savedata.php");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(PING);
-        conn.setReadTimeout(PING);
-        conn.setRequestMethod("POST");
-        String s = "keyw=" + (index + 1) + "&login=" + email + "&hash=";
-        conn.setRequestProperty("Content-Length", Integer.toString(s.length()));
-        conn.setRequestProperty(USER_AGENT, act.getPackageName());
-        conn.setRequestProperty(COOKIE, cookie);
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, ENCODING));
-        bw.write(s);
-        bw.close();
-        os.close();
-        InputStream in = new BufferedInputStream(conn.getInputStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, ENCODING), 1000);
-        s = br.readLine();
+        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+        builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+
+        Request.Builder builderRequest = new Request.Builder();
+        builderRequest.url(HOST + "savedata.php");
+        builderRequest.header(USER_AGENT, act.getPackageName());
+        builderRequest.addHeader(COOKIE, cookie);
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("keyw", String.valueOf(index + 1))
+                .addFormDataPart("login", email)
+                .addFormDataPart("hash", "")
+                .build();
+        builderRequest.post(requestBody);
+
+        OkHttpClient client = builderClient.build();
+        Response response = client.newCall(builderRequest.build()).execute();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                response.body().byteStream(), ENCODING), 1000);
+        String s = br.readLine();
         br.close();
-        in.close();
-        conn.disconnect();
+
         if (s == null) { //no error
             return "ok" + index;
         } else {

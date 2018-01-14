@@ -12,27 +12,26 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    public static final int MAX_ON_PAGE = 15;
-    public static final String SITE = "http://blagayavest.info/", N = "\n", NN = "\n\n",
-            TASK = "task", COOKIE = "Cookie", SESSION_ID = "PHPSESSID", FIRST = "first",
-            TIME_LAST_VISIT = "time_last_visit", NOREAD = "noread", LINK = "<link>",
-            LIGHT = "/style/light.css", DARK = "/style/dark.css", AND = "&", BR = "<br>",
+    public static final int MAX_ON_PAGE = 15, TIMEOUT = 10;
+    public static final String SITE = "http://blagayavest.info/", SITE2 = "http://medicina.softlan.lclients.ru/",
+            N = "\n", NN = "\n\n", TASK = "task", COOKIE = "Cookie",
+            SESSION_ID = "PHPSESSID", FIRST = "first", TIME_LAST_VISIT = "time_last_visit",
+            NOREAD = "noread", LINK = "<link>", LIGHT = "/style/light.css",
+            DARK = "/style/dark.css", AND = "&", BR = "<br>",
             PRINT = "?styletpl=print", HREF = "href", DIALOG = "dialog",
             KV_OPEN = "“", KV_CLOSE = "”", POEMS = "poems";
     private Context context;
@@ -87,33 +86,43 @@ public class Lib {
     }
 
     public InputStream getStream(String url) throws Exception {
-        DefaultHttpClient client = new DefaultHttpClient();
-        HttpGet req = new HttpGet(url);
-        HttpEntity entity;
-        HttpResponse res;
-        req.setHeader("User-Agent", context.getPackageName());
+        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+        builderClient.connectTimeout(TIMEOUT, TimeUnit.SECONDS);
+        builderClient.readTimeout(TIMEOUT, TimeUnit.SECONDS);
+        builderClient.writeTimeout(TIMEOUT, TimeUnit.SECONDS);
+
+        Request.Builder builderRequest = new Request.Builder();
+        builderRequest.url(url);
+        builderRequest.header("User-Agent", context.getPackageName());
+        Response response;
+
         if (url.contains(SITE) && !url.contains(PRINT)) {
             String s = getCookies(false);
-            if (!s.equals(""))
-                req.setHeader(COOKIE, s);
-            res = client.execute(req);
-            entity = res.getEntity();
-            List<Cookie> cookies = client.getCookieStore().getCookies();
-            if (!cookies.isEmpty()) {
-                if (cookies.size() == 2) {
-                    setCookies(null, cookies.get(0).getValue(),
-                            cookies.get(1).getValue());
-                } else if (cookies.size() == 3) {
-                    setCookies(cookies.get(0).getValue(),
-                            cookies.get(1).getValue(), cookies.get(2).getValue());
-                }
+            builderRequest.addHeader(COOKIE, s);
+            OkHttpClient client = builderClient.build();
+            response = client.newCall(builderRequest.build()).execute();
+
+            s = response.header("Set-" + COOKIE);
+            String[] m = s.split(";");
+            HttpCookie cookie;
+            s = null;
+            String t = null, n = null;
+            for (int i = 0; i < m.length; i++) {
+                cookie = HttpCookie.parse(m[i]).get(0);
+                if (m[i].contains(SESSION_ID))
+                    s = cookie.getValue();
+                else if (m[i].contains(TIME_LAST_VISIT))
+                    t = cookie.getValue();
+                else if (m[i].contains(NOREAD))
+                    n = cookie.getValue();
             }
+            setCookies(s, t, n);
         } else {
-            req.setHeader("Referer", SITE);
-            res = client.execute(req);
-            entity = res.getEntity();
+            builderRequest.header("Referer", SITE);
+            OkHttpClient client = builderClient.build();
+            response = client.newCall(builderRequest.build()).execute();
         }
-        return entity.getContent();
+        return response.body().byteStream();
     }
 
     public File getDBFolder() {

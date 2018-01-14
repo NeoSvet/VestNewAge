@@ -14,20 +14,16 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.utils.Lib;
 
 public class SummaryReceiver extends WakefulBroadcastReceiver {
@@ -70,14 +66,19 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
             final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
             try {
-                DefaultHttpClient client = new DefaultHttpClient();
-                HttpGet req = new HttpGet(Lib.SITE + "rss/");
-                HttpResponse res = client.execute(req);
-                HttpEntity entity = res.getEntity();
-                BufferedReader br;
+                OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+                builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+                builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+                builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+
+                Request.Builder builderRequest = new Request.Builder();
+                builderRequest.url(Lib.SITE + "rss/");
+                builderRequest.header("User-Agent", context.getPackageName());
+                OkHttpClient client = builderClient.build();
+                Response response = client.newCall(builderRequest.build()).execute();
+
                 String s, title, link, des;
-                InputStream in = new BufferedInputStream(entity.getContent());
-                br = new BufferedReader(new InputStreamReader(in), 1000);
+                BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
                 s = br.readLine();
                 while (!s.contains("item"))
                     s = br.readLine();
@@ -92,7 +93,6 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                     t = f.lastModified();
                 if (t > Date.parse(withOutTag(s))) { //список в загрузке не нуждается
                     br.close();
-                    in.close();
                     return;
                 }
                 final Uri notif_uri = Uri.parse(link);
@@ -119,7 +119,6 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 } while (s != null);
                 bw.close();
                 br.close();
-                in.close();
 
                 Intent app = new Intent(context, SlashActivity.class);
                 app.setData(notif_uri);

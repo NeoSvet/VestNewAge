@@ -3,10 +3,6 @@ package ru.neosvet.utils;
 import android.app.Activity;
 import android.os.AsyncTask;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,7 +16,11 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.vestnewage.CalendarFragment;
 import ru.neosvet.vestnewage.MainActivity;
@@ -159,15 +159,23 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             JSONObject json, jsonI;
             JSONArray jsonA;
             String r, s;
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpGet rget = new HttpGet(Lib.SITE + "?json&year="
+            OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
+            builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+            builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+            builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+
+            Request.Builder builderRequest = new Request.Builder();
+            builderRequest.url(Lib.SITE + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1));
+            builderRequest.header("User-Agent", act.getPackageName());
+
+            OkHttpClient client = builderClient.build();
+            Response response = client.newCall(builderRequest.build()).execute();
+
             final String poemOutDict = "poemOutDict";
-            HttpResponse res = client.execute(rget);
             if (isCancelled())
                 return;
-            r = EntityUtils.toString(res.getEntity());
-            json = new JSONObject(r);
+            json = new JSONObject(response.body().string());
             int n;
             for (int i = 0; i < json.names().length(); i++) {
                 s = json.names().get(i).toString();
