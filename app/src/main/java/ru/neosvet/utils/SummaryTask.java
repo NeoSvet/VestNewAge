@@ -75,12 +75,15 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(act.getFilesDir() + SummaryFragment.RSS));
         while ((line = br.readLine()) != null) {
+            Lib.LOG(line);
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine())); //title
                 bw.write(Lib.N);
                 line = withOutTag(br.readLine()); //link
-                if (line.contains(Lib.SITE))
+                if (line.contains(Lib.SITE2))
+                    bw.write(Lib.LINK + line.substring(Lib.SITE2.length()));
+                else if (line.contains(Lib.SITE))
                     bw.write(Lib.LINK + line.substring(Lib.SITE.length()));
                 else
                     bw.write(line);
@@ -93,6 +96,5 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
         }
         bw.close();
         br.close();
-        in.close();
     }
 }
