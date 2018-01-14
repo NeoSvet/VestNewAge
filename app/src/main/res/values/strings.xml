@@ -84,6 +84,7 @@
     <string name="news">Объявления</string>
     <string name="media">Видео и пресса</string>
     <string name="to_load">Загрузить</string>
+    <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->
     <string name="anketa_failed">Анкета загружена неверно</string>
     <string name="selected">Выбрано:</string>

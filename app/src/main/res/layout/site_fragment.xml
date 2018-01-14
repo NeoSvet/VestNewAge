@@ -6,6 +6,18 @@
 
     <include layout="@layout/site_content" />
 
+    <TextView
+        android:id="@+id/tvEmptySite"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/field"
+        android:gravity="center"
+        android:padding="15dp"
+        android:text="@string/empty_site"
+        android:visibility="gone" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabRefresh"
         android:layout_width="wrap_content"

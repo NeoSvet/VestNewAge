@@ -34,7 +34,7 @@ public class SiteFragment extends Fragment {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
-    private View container, fabRefresh;
+    private View container, fabRefresh, tvEmptySite;
     private Animation anMin, anMax;
     private SiteTask task = null;
     private TabHost tabHost;
@@ -131,6 +131,7 @@ public class SiteFragment extends Fragment {
     }
 
     private void initViews() {
+        tvEmptySite = container.findViewById(R.id.tvEmptySite);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
         anMin.setAnimationListener(new Animation.AnimationListener() {
@@ -323,6 +324,11 @@ public class SiteFragment extends Fragment {
             if (boolLoad)
                 startLoad(tabHost.getCurrentTabTag());
         }
+
+        if (adMain.getCount() == 0)
+            tvEmptySite.setVisibility(View.VISIBLE);
+        else
+            tvEmptySite.setVisibility(View.GONE);
     }
 
     private void openPage(String url) {
