@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingTop="?attr/actionBarSize"
-    tools:context="ru.neosvet.vestnewage.MarkerActivity"
+    tools:context="ru.neosvet.vestnewage.activity.MarkerActivity"
     tools:showIn="@layout/marker_activity">
 
     <ScrollView

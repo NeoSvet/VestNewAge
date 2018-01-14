@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,6 +18,7 @@ import android.webkit.WebViewClient;
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 
 public class CabpageActivity extends AppCompatActivity {
     private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =

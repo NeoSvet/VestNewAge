@@ -13,8 +13,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.PromReceiver;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.R;
 
 public class Prom {

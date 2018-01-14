@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.receiver;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -25,6 +25,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
 public class SummaryReceiver extends WakefulBroadcastReceiver {
     private static final int notif_id = 111;

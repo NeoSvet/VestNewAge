@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -22,7 +22,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
-import ru.neosvet.utils.CalendarTask;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.CalendarTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 

@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.widget.ListView;
 
 import ru.neosvet.ui.MenuAdapter;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.R;
 
 public class MenuFragment extends Fragment {
     private static final String SELECT = "select";

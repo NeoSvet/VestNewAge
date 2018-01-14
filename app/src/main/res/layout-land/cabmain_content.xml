@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
     android:orientation="horizontal"
-    tools:context=".CabmainFragment"
+    tools:context=".fragment.CabmainFragment"
     tools:showIn="@layout/cabmain_fragment">
 
     <ListView

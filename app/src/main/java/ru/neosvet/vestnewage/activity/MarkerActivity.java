@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.activity;
 
 import android.app.Service;
 import android.content.ContentValues;
@@ -35,6 +35,7 @@ import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 
 public class MarkerActivity extends AppCompatActivity {
     private final String PAGE = "page", COL = "col";

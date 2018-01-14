@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -22,9 +22,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.vestnewage.CalendarFragment;
-import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.SlashActivity;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.activity.SlashActivity;
 
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
     private transient CalendarFragment frm;

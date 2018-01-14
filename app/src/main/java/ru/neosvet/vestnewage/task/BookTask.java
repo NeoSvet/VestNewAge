@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.ui.ProgressDialog;
-import ru.neosvet.vestnewage.BookFragment;
-import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
 
 public class BookTask extends AsyncTask<Integer, Boolean, String> implements Serializable {

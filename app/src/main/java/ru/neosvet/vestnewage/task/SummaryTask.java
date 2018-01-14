@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.os.AsyncTask;
 
@@ -11,9 +11,10 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Date;
 
-import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.SummaryFragment;
-import ru.neosvet.vestnewage.SummaryReceiver;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 
 public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Serializable {
     private transient SummaryFragment frm;

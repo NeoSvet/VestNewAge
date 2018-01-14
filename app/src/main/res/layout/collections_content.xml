@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="ru.neosvet.vestnewage.CollectionsFragment"
+    tools:context="ru.neosvet.vestnewage.fragment.CollectionsFragment"
     tools:showIn="@layout/collections_fragment">
 
     <ListView

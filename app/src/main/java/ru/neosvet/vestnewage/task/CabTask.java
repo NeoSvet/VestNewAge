@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.os.AsyncTask;
 
@@ -12,8 +12,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import ru.neosvet.vestnewage.CabmainFragment;
-import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.fragment.CabmainFragment;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
 
 public class CabTask extends AsyncTask<String, Integer, String> implements Serializable {

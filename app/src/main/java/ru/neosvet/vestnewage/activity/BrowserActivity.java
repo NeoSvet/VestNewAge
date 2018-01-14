@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.activity;
 
 import android.app.Activity;
 import android.app.Service;
@@ -52,7 +52,8 @@ import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.LoaderTask;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.LoaderTask;
 import ru.neosvet.utils.Prom;
 
 public class BrowserActivity extends AppCompatActivity

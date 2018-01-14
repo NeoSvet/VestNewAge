@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -37,7 +37,10 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
-import ru.neosvet.utils.CalendarTask;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.CalendarTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 

@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -26,6 +26,11 @@ import ru.neosvet.ui.MarkAdapter;
 import ru.neosvet.ui.MarkItem;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.activity.PresentationActivity;
+import ru.neosvet.vestnewage.R;
 
 public class CollectionsFragment extends Fragment {
     private final String SEL = "sel", RENAME = "rename";

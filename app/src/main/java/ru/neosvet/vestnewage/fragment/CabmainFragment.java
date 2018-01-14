@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.app.Service;
@@ -23,7 +23,10 @@ import android.widget.ListView;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
-import ru.neosvet.utils.CabTask;
+import ru.neosvet.vestnewage.activity.CabpageActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.CabTask;
 import ru.neosvet.utils.Lib;
 
 public class CabmainFragment extends Fragment {

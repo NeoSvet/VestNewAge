@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.content.SharedPreferences;
@@ -9,6 +9,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.receiver.PromReceiver;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 
 import static android.content.Context.MODE_PRIVATE;
 

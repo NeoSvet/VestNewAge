@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.SearchFragment;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.fragment.SearchFragment;
 
 public class SearchTask extends AsyncTask<String, Long, Boolean> implements Serializable {
     private transient SearchFragment frm;

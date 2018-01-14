@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -25,7 +25,10 @@ import java.io.FileReader;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.SiteTask;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.SiteTask;
 
 public class SiteFragment extends Fragment {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";

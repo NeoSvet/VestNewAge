@@ -7,7 +7,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
 

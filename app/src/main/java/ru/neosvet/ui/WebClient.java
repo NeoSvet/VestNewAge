@@ -9,7 +9,7 @@ import android.webkit.WebViewClient;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.vestnewage.BrowserActivity;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
 
 public class WebClient extends WebViewClient {
     private final String files = "file";

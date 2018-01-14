@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SlashActivity"
+            android:name=".activity.SlashActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -62,34 +62,34 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".BrowserActivity"
+            android:name=".activity.BrowserActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".MarkerActivity"
+            android:name=".activity.MarkerActivity"
             android:label="@string/marker"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".PresentationActivity"
+            android:name=".activity.PresentationActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".CabpageActivity"
+            android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <receiver android:name=".SummaryReceiver">
+        <receiver android:name=".receiver.SummaryReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".PromReceiver" />
-        <service android:name=".SummaryReceiver$Service"
+        <receiver android:name=".receiver.PromReceiver" />
+        <service android:name=".receiver.SummaryReceiver$Service"
             android:process=":summary_check"
             android:icon="@mipmap/ic_launcher"
             android:label="SummaryCheck" />
-        <service android:name=".PromReceiver$Service"
+        <service android:name=".receiver.PromReceiver$Service"
             android:process=":prom_timer"
             android:icon="@mipmap/ic_launcher"
             android:label="PromTimer" />

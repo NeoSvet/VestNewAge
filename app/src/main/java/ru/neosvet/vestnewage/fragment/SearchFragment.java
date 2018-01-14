@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.app.Service;
@@ -50,7 +50,11 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.SearchTask;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.SearchTask;
 
 
 public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {

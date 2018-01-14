@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
-    tools:context="ru.neosvet.vestnewage.SlashActivity"
+    tools:context="ru.neosvet.vestnewage.activity.SlashActivity"
     tools:showIn="@layout/slash_activity">
 
     <ImageView

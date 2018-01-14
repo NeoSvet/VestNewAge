@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -19,7 +19,10 @@ import java.io.FileReader;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.SummaryTask;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.task.SummaryTask;
 
 public class SummaryFragment extends Fragment {
     public static final String RSS = "/rss";

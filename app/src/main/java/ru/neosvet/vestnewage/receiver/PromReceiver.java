@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.receiver;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -18,6 +18,9 @@ import java.util.Date;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
 
 
 public class PromReceiver extends WakefulBroadcastReceiver {

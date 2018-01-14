@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -25,12 +25,14 @@ import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.ProgressDialog;
-import ru.neosvet.vestnewage.BrowserActivity;
-import ru.neosvet.vestnewage.CalendarFragment;
-import ru.neosvet.vestnewage.MainActivity;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.SiteFragment;
-import ru.neosvet.vestnewage.SummaryFragment;
+import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     private int max = 1;

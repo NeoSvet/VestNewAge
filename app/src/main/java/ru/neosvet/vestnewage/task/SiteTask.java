@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.task;
 
 import android.os.AsyncTask;
 
@@ -13,8 +13,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.MainActivity;
-import ru.neosvet.vestnewage.SiteFragment;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.ui.ListItem;
 
 public class SiteTask extends AsyncTask<String, Void, String> implements Serializable {

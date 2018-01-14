@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage;
+package ru.neosvet.vestnewage.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -25,7 +25,19 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.LoaderTask;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.fragment.CabmainFragment;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.fragment.CollectionsFragment;
+import ru.neosvet.vestnewage.fragment.HelpFragment;
+import ru.neosvet.vestnewage.fragment.JournalFragment;
+import ru.neosvet.vestnewage.fragment.MenuFragment;
+import ru.neosvet.vestnewage.fragment.SearchFragment;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.task.LoaderTask;
 import ru.neosvet.utils.Prom;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
