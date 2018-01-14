@@ -48,12 +48,13 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.SearchTask;
 
 
@@ -111,10 +112,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(Lib.DIALOG, dialog);
+        outState.putInt(Const.DIALOG, dialog);
         if (dialog > -1)
             dateDialog.dismiss();
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         outState.putLong(START, dStart.getTime());
         outState.putLong(END, dEnd.getTime());
         outState.putInt(DataBase.SEARCH, page);
@@ -151,7 +152,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         } else {
             dStart = new Date(state.getLong(START));
             dEnd = new Date(state.getLong(END));
-            task = (SearchTask) state.getSerializable(Lib.TASK);
+            task = (SearchTask) state.getSerializable(Const.TASK);
             page = state.getInt(DataBase.SEARCH, -1);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
@@ -178,7 +179,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             }
             if (state.getBoolean(SETTINGS)) {
                 visSettings();
-                dialog = state.getInt(Lib.DIALOG);
+                dialog = state.getInt(Const.DIALOG);
                 if (dialog > -1)
                     showDatePicker(dialog);
             }
@@ -191,7 +192,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
-                        Lib.LINK));
+                        Const.LINK));
                 adResults.notifyDataSetChanged();
             }
         }
@@ -290,7 +291,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (task != null) return;
-                if (adResults.getItem(pos).getLink().equals(Lib.LINK)) { //results_last_search
+                if (adResults.getItem(pos).getLink().equals(Const.LINK)) { //results_last_search
                     fabSettings.setVisibility(View.GONE);
                     bShow.setVisibility(View.VISIBLE);
                     page = 0;
@@ -308,7 +309,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 String des = tvLabel.getText().toString();
                 des = getResources().getString(R.string.search_for) +
-                        des.substring(des.indexOf("“") - 1, des.indexOf(Lib.N) - 1);
+                        des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1);
                 MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
                 return true;
             }
@@ -477,7 +478,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
-                bw.write(s + Lib.N);
+                bw.write(s + Const.N);
                 bw.close();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -502,7 +503,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     getResources().getString(R.string.you_search)
                             .replace("w1", s.substring(s.indexOf(" ") + 1))
                             .replace("w2", str)
-                            + Lib.N + getResources().getString(R.string.found_in)
+                            + Const.N + getResources().getString(R.string.found_in)
                             .replace("n1", String.valueOf(count1))
                             .replace("n2", String.valueOf(count2)));
             editor.putString(LABEL, tvLabel.getText().toString());
@@ -533,8 +534,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             builder.create().show();
         } else {
             pPages.setVisibility(View.VISIBLE);
-            int max = cursor.getCount() / Lib.MAX_ON_PAGE;
-            if (cursor.getCount() % Lib.MAX_ON_PAGE > 0) max++;
+            int max = cursor.getCount() / Const.MAX_ON_PAGE;
+            if (cursor.getCount() % Const.MAX_ON_PAGE > 0) max++;
             GridLayoutManager layoutManager = new GridLayoutManager(act, max);
             if (adPages != null) adPages.clear();
             adPages = new CalendarAdapter();
@@ -542,9 +543,9 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             for (int i = 1; i < max + 1; i++) {
                 adPages.addItem(new CalendarItem(act, i, android.R.color.white));
             }
-            adPages.getItem(page).addLink(Lib.LINK);
+            adPages.getItem(page).addLink(Const.LINK);
             rvPages.setAdapter(adPages);
-            if (cursor.moveToPosition(page * Lib.MAX_ON_PAGE)) {
+            if (cursor.moveToPosition(page * Const.MAX_ON_PAGE)) {
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
                 int iLink = cursor.getColumnIndex(DataBase.LINK);
                 int iDes = cursor.getColumnIndex(DataBase.DESCTRIPTION);
@@ -556,7 +557,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     if (s != null)
                         item.setDes(s);
                     adResults.addItem(item);
-                } while (cursor.moveToNext() && adResults.getCount() < Lib.MAX_ON_PAGE);
+                } while (cursor.moveToNext() && adResults.getCount() < Const.MAX_ON_PAGE);
                 adResults.notifyDataSetChanged();
                 if (lvResult.getFirstVisiblePosition() > 0) {
                     boolScrollToFirst = true;

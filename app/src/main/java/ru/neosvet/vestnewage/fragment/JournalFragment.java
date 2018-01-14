@@ -21,12 +21,13 @@ import java.util.Date;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.Tip;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
-import ru.neosvet.vestnewage.R;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";
@@ -85,7 +86,7 @@ public class JournalFragment extends Fragment {
             if (offset > 0)
                 curJ.moveToPosition(offset);
             do {
-                id = curJ.getString(iID).split(Lib.AND);
+                id = curJ.getString(iID).split(Const.AND);
                 dataBase = new DataBase(act, id[0]);
                 db = dataBase.getWritableDatabase();
                 cursor = db.query(DataBase.TITLE, null, DataBase.ID + DataBase.Q,
@@ -98,7 +99,7 @@ public class JournalFragment extends Fragment {
                     item.setDes(act.lib.getDiffDate(now, t) + "\n(" + df.format(new Date(t)) + ")");
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
-                            if (s.contains(Lib.POEMS))
+                            if (s.contains(Const.POEMS))
                                 s = getResources().getString(R.string.rnd_kat);
                             else
                                 s = getResources().getString(R.string.rnd_pos);
@@ -110,9 +111,9 @@ public class JournalFragment extends Fragment {
                                     new String[]{id[1]}, null, null, null);
                             s = getResources().getString(R.string.rnd_stih);
                             if (cursor.moveToPosition(Integer.parseInt(id[2])))
-                                s += ":" + Lib.N + Lib.withOutTags(cursor.getString(0));
+                                s += ":" + Const.N + Lib.withOutTags(cursor.getString(0));
                         }
-                        item.setDes(item.getDes() + Lib.N + s);
+                        item.setDes(item.getDes() + Const.N + s);
                     }
                     cursor.close();
                     dataBase.close();
@@ -122,7 +123,7 @@ public class JournalFragment extends Fragment {
                     dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
                             new String[]{curJ.getString(iID)});
                 }
-            } while (curJ.moveToNext() && i < Lib.MAX_ON_PAGE);
+            } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE);
             if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
@@ -155,7 +156,7 @@ public class JournalFragment extends Fragment {
                 if (offset == 0) {
                     tip.show();
                 } else {
-                    offset -= Lib.MAX_ON_PAGE;
+                    offset -= Const.MAX_ON_PAGE;
                     adJournal.clear();
                     createList();
                 }
@@ -167,7 +168,7 @@ public class JournalFragment extends Fragment {
                 if (boolFinish) {
                     tip.show();
                 } else {
-                    offset += Lib.MAX_ON_PAGE;
+                    offset += Const.MAX_ON_PAGE;
                     adJournal.clear();
                     createList();
                 }
@@ -199,7 +200,7 @@ public class JournalFragment extends Fragment {
                 String link = adJournal.getItem(pos).getLink();
                 String s = adJournal.getItem(pos).getDes();
                 if (s.contains(getResources().getString(R.string.rnd_stih))) {
-                    s = s.substring(s.indexOf(Lib.N, s.indexOf(
+                    s = s.substring(s.indexOf(Const.N, s.indexOf(
                             getResources().getString(R.string.rnd_stih))) + 1);
                     Lib.showToast(act,getResources().getString(R.string.long_press_for_mark));
                 } else
@@ -214,10 +215,10 @@ public class JournalFragment extends Fragment {
                 String des = adJournal.getItem(pos).getDes();
                 String par = null;
                 int i = des.indexOf(getResources().getString(R.string.rnd_stih));
-                if (i > -1 && i < des.lastIndexOf(Lib.N)) {
-                    par = des.substring(des.indexOf(Lib.N, i) + 1);
+                if (i > -1 && i < des.lastIndexOf(Const.N)) {
+                    par = des.substring(des.indexOf(Const.N, i) + 1);
                     i = des.indexOf("«");
-                    des = des.substring(i, des.indexOf(Lib.N, i) - 1);
+                    des = des.substring(i, des.indexOf(Const.N, i) - 1);
                 } else if (des.contains("«")) {
                     des = des.substring(des.indexOf("«"));
                 } else

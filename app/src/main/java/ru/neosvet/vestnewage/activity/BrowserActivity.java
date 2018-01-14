@@ -50,11 +50,12 @@ import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.WebClient;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.LoaderTask;
-import ru.neosvet.utils.Prom;
 
 public class BrowserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -76,7 +77,7 @@ public class BrowserActivity extends AppCompatActivity
     private View fabMenu, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = Lib.LINK, string = null;
+    private String link = Const.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -87,8 +88,8 @@ public class BrowserActivity extends AppCompatActivity
 
     public static void openReader(Context context, String link, @Nullable String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
-        if (link.contains(Lib.LINK))
-            intent.putExtra(DataBase.LINK, link.substring(Lib.LINK.length()));
+        if (link.contains(Const.LINK))
+            intent.putExtra(DataBase.LINK, link.substring(Const.LINK.length()));
         else
             intent.putExtra(DataBase.LINK, link);
         if (place != null)
@@ -126,7 +127,7 @@ public class BrowserActivity extends AppCompatActivity
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Lib.TASK, loader);
+        outState.putSerializable(Const.TASK, loader);
         if (link.contains(PNG))
             outState.putString(DataBase.LINK, history.get(0));
         else
@@ -143,7 +144,7 @@ public class BrowserActivity extends AppCompatActivity
             if (getIntent().hasExtra(DataBase.PLACE))
                 iPlace = 0;
         } else {
-            loader = (LoaderTask) state.getSerializable(Lib.TASK);
+            loader = (LoaderTask) state.getSerializable(Const.TASK);
             link = state.getString(DataBase.LINK);
             dbPage = new DataBase(this, link);
             if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING) {
@@ -190,8 +191,8 @@ public class BrowserActivity extends AppCompatActivity
         tvPlace = (TextView) findViewById(R.id.tvPlace);
         tvPlace.setVisibility(View.VISIBLE);
         etSearch.setVisibility(View.GONE);
-        if (p.contains(Lib.NN)) {
-            place = p.split(Lib.NN);
+        if (p.contains(Const.NN)) {
+            place = p.split(Const.NN);
         } else {
             place = new String[]{p};
             bPrev.setVisibility(View.GONE);
@@ -224,7 +225,7 @@ public class BrowserActivity extends AppCompatActivity
     public void setPlace() {
         if (iPlace == -1) return;
         String s = place[iPlace];
-        tvPlace.setText(s.replace(Lib.N, " "));
+        tvPlace.setText(s.replace(Const.N, " "));
         findText(s);
     }
 
@@ -232,8 +233,8 @@ public class BrowserActivity extends AppCompatActivity
         if (android.os.Build.VERSION.SDK_INT > 15)
             wvBrowser.findAllAsync(s);
         else {
-            if (s.contains(Lib.N))
-                s = s.substring(0, s.indexOf(Lib.N));
+            if (s.contains(Const.N))
+                s = s.substring(0, s.indexOf(Const.N));
             wvBrowser.findAll(s);
             try {
                 //Can't use getMethod() as it's a private method
@@ -462,7 +463,7 @@ public class BrowserActivity extends AppCompatActivity
             else
                 downloadFile(getFile());
         } else {
-            lib.openInApps(Lib.SITE + link, null);
+            lib.openInApps(Const.SITE + link, null);
             onBackBrowser();
         }
     }
@@ -533,9 +534,9 @@ public class BrowserActivity extends AppCompatActivity
     private void restoreStyle() {
         final File fStyle = lib.getFile(STYLE);
         if (fStyle.exists()) {
-            final File fDark = lib.getFile(Lib.DARK);
+            final File fDark = lib.getFile(Const.DARK);
             if (fDark.exists())
-                fStyle.renameTo(lib.getFile(Lib.LIGHT));
+                fStyle.renameTo(lib.getFile(Const.LIGHT));
             else
                 fStyle.renameTo(fDark);
         }
@@ -552,7 +553,7 @@ public class BrowserActivity extends AppCompatActivity
             if (!url.contains(PAGE)) {
                 if (boolBack)
                     boolBack = false;
-                else if (!link.equals(Lib.LINK))
+                else if (!link.equals(Const.LINK))
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);
@@ -591,13 +592,13 @@ public class BrowserActivity extends AppCompatActivity
     private void downloadFile(File f) {
         loader = new LoaderTask(this);
         status.setLoad(true);
-        loader.execute(Lib.SITE + link, f.toString());
+        loader.execute(Const.SITE + link, f.toString());
     }
 
     public void openPage(boolean newPage) {
         status.setLoad(false);
-        final File fLight = lib.getFile(Lib.LIGHT);
-        final File fDark = lib.getFile(Lib.DARK);
+        final File fLight = lib.getFile(Const.LIGHT);
+        final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
             loader = new LoaderTask(this);
             status.setCrash(false);
@@ -659,7 +660,7 @@ public class BrowserActivity extends AppCompatActivity
                 if (cursor.moveToFirst()) {
                     do {
                         bw.write(cursor.getString(0));
-                        bw.write(Lib.N);
+                        bw.write(Const.N);
                         bw.flush();
                     } while (cursor.moveToNext());
                 }
@@ -672,13 +673,13 @@ public class BrowserActivity extends AppCompatActivity
                     bw.write("Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + Lib.BR);
+                    bw.write(df.format(d) + Const.BR);
                 } else {
-                    bw.write(getResources().getString(R.string.page) + " " + Lib.SITE + link);
+                    bw.write(getResources().getString(R.string.page) + " " + Const.SITE + link);
                     bw.write("<br>Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + Lib.BR);
+                    bw.write(df.format(d) + Const.BR);
                     df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
                     bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
                 }
@@ -700,7 +701,7 @@ public class BrowserActivity extends AppCompatActivity
             public void run() {
                 ContentValues cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
-                String id = dbPage.getDatePage(link) + Lib.AND + dbPage.getPageId(link);
+                String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
                 try {
                     int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});

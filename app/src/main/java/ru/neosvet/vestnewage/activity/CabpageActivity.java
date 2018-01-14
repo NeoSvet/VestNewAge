@@ -16,6 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import ru.neosvet.ui.StatusBar;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -31,7 +32,7 @@ public class CabpageActivity extends AppCompatActivity {
     public static void openPage(Context context, String link, String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
         intent.putExtra(DataBase.LINK, link);
-        intent.putExtra(Lib.COOKIE, cookie);
+        intent.putExtra(Const.COOKIE, cookie);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -42,7 +43,7 @@ public class CabpageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cabpage_activity);
         initView();
-        String cookie = getIntent().getStringExtra(Lib.COOKIE);
+        String cookie = getIntent().getStringExtra(Const.COOKIE);
         if (cookie != null) {
             CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvBrowser.getContext());
             CookieManager cookieManager = CookieManager.getInstance();

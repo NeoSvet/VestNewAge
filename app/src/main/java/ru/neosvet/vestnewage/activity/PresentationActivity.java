@@ -11,8 +11,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class PresentationActivity extends AppCompatActivity {
@@ -31,7 +31,7 @@ public class PresentationActivity extends AppCompatActivity {
     public static void startPresentation(Context context, int id, boolean boolFirst) {
         Intent intent = new Intent(context, PresentationActivity.class);
         intent.putExtra(DataBase.ID, id);
-        intent.putExtra(Lib.FIRST,boolFirst);
+        intent.putExtra(Const.FIRST,boolFirst);
         context.startActivity(intent);
     }
 
@@ -49,7 +49,7 @@ public class PresentationActivity extends AppCompatActivity {
             return;
         }
         sid = "p" + id;
-        if (getIntent().getBooleanExtra(Lib.FIRST, false)) {
+        if (getIntent().getBooleanExtra(Const.FIRST, false)) {
             SharedPreferences pref = getSharedPreferences(NAME_PREF, MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putBoolean(sid, true);

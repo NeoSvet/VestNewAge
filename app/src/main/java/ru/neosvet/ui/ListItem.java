@@ -3,7 +3,7 @@ package ru.neosvet.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Const;
 
 public class ListItem {
     private String title, des = null;
@@ -79,9 +79,9 @@ public class ListItem {
     }
 
     public void addLink(String link) {
-        if (!link.contains(Lib.LINK)) {
+        if (!link.contains(Const.LINK)) {
             if (link.length() > 1 && !link.contains(":"))
-                link = Lib.LINK + link;
+                link = Const.LINK + link;
         }
         links.add(link);
     }

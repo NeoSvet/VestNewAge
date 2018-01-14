@@ -18,9 +18,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.HelpAdapter;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class HelpFragment extends Fragment {
     private final String N_LOG = "n", HELP = "help";
@@ -68,7 +68,7 @@ public class HelpFragment extends Fragment {
                 mHelp = new boolean[COUNT];
         } else {
             n_log = state.getInt(N_LOG);
-            mHelp = state.getBooleanArray(Lib.LINK);
+            mHelp = state.getBooleanArray(Const.LINK);
             adHelp.notifyDataSetChanged();
             if (!state.getBoolean(HELP)) {
                 lvHelp.setVisibility(View.GONE);
@@ -88,7 +88,7 @@ public class HelpFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(N_LOG, n_log);
-        outState.putBooleanArray(Lib.LINK, mHelp);
+        outState.putBooleanArray(Const.LINK, mHelp);
         outState.putBoolean(HELP, lvHelp.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }
@@ -213,7 +213,7 @@ public class HelpFragment extends Fragment {
         ivNext.setEnabled(n > 0);
         int k = getResources().getStringArray(R.array.changelog).length;
         ivPrev.setEnabled(n < k - 1);
-        tvChangelogTitle.setText(getResources().getString(R.string.changelog) + Lib.N
+        tvChangelogTitle.setText(getResources().getString(R.string.changelog) + Const.N
                 + getResources().getString(R.string.publication) + (k - n));
         tvChangelog.setText(getResources().getStringArray(R.array.changelog)[n]);
         n_log = n;

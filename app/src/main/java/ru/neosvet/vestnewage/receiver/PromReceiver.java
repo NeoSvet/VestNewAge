@@ -16,7 +16,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 import java.util.Date;
 
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -85,7 +85,7 @@ public class PromReceiver extends WakefulBroadcastReceiver {
             boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
             boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
             intent = new Intent(context, SlashActivity.class);
-            intent.setData(Uri.parse(Lib.SITE + "Posyl-na-Edinenie.html"));
+            intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

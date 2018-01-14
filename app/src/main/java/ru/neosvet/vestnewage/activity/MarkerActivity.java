@@ -33,6 +33,7 @@ import java.util.Date;
 import ru.neosvet.ui.CheckAdapter;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -58,8 +59,8 @@ public class MarkerActivity extends AppCompatActivity {
 
     public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
-        if (link.contains(Lib.LINK))
-            link = link.substring(Lib.LINK.length());
+        if (link.contains(Const.LINK))
+            link = link.substring(Const.LINK.length());
         marker.putExtra(DataBase.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
@@ -340,16 +341,16 @@ public class MarkerActivity extends AppCompatActivity {
         adPage.clear();
         if (pageCon == null) // страница не загружена...
             return;
-        String[] m = pageCon.split(Lib.NN);
+        String[] m = pageCon.split(Const.NN);
         int i;
         ((TextView) findViewById(R.id.tvTitle)).setText(m[0]);
         for (i = 0; i < m.length; i++) {
             adPage.addItem(m[i]);
         }
-        i = pageCon.indexOf(Lib.N);
+        i = pageCon.indexOf(Const.N);
         while (i > -1) {
             k_par++;
-            i = pageCon.indexOf(Lib.N, i + 1);
+            i = pageCon.indexOf(Const.N, i + 1);
         }
     }
 
@@ -755,12 +756,12 @@ public class MarkerActivity extends AppCompatActivity {
         do {
             k--;
             u = i;
-            i = pageCon.indexOf(Lib.N, u + 1);
+            i = pageCon.indexOf(Const.N, u + 1);
         } while (k > 1 && i > -1);
         if (i > -1)
-            i = pageCon.indexOf(Lib.N, i + 1);
+            i = pageCon.indexOf(Const.N, i + 1);
         if (i > -1)
-            i = pageCon.indexOf(Lib.N, i + 1);
+            i = pageCon.indexOf(Const.N, i + 1);
         if (i > -1)
             tvPos.setText(pageCon.substring(u, i).trim());
         else

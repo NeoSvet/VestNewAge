@@ -25,12 +25,13 @@ import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.ProgressDialog;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.fragment.CalendarFragment;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
@@ -163,9 +164,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (p == -1 || p == R.id.nav_main) {
             SiteTask t4 = new SiteTask((MainActivity) act);
             String[] url = new String[]{
-                    Lib.SITE,
-                    Lib.SITE + "novosti.html",
-                    Lib.SITE + "media.html"
+                    Const.SITE,
+                    Const.SITE + "novosti.html",
+                    Const.SITE + "media.html"
             };
             String[] file = new String[]{
                     getFile(SiteFragment.MAIN).toString(),
@@ -356,12 +357,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadStyle(boolean bReplaceStyle) throws Exception {
-        final File fLight = lib.getFile(Lib.LIGHT);
-        final File fDark = getFile(Lib.DARK);
+        final File fLight = lib.getFile(Const.LIGHT);
+        final File fDark = getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
             String line = "";
             int i;
-            InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + "org/otk/tpl/otk/css/style-print.css"));
+            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "org/otk/tpl/otk/css/style-print.css"));
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
             BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
@@ -369,7 +370,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 br.readLine();
             }
             while ((line = br.readLine()) != null) {
-                bwLight.write(line + Lib.N);
+                bwLight.write(line + Const.N);
                 if (line.contains("#000")) {
                     line = line.replace("000000", "000").replace("#000", "#fff");
                 } else
@@ -380,15 +381,15 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     line = br.readLine();
                 }
                 line = line.replace("333333", "333").replace("#333", "#ccc");
-                bwDark.write(line + Lib.N);
+                bwDark.write(line + Const.N);
                 if (line.contains("body")) {
                     line = "    padding-left: 5px;\n    padding-right: 5px;";
-                    bwLight.write(line + Lib.N);
-                    bwDark.write(line + Lib.N);
+                    bwLight.write(line + Const.N);
+                    bwDark.write(line + Const.N);
                 } else if (line.contains("print2")) {
                     line = br.readLine().replace("8pt/9pt", "12pt");
-                    bwLight.write(line + Lib.N);
-                    bwDark.write(line + Lib.N);
+                    bwLight.write(line + Const.N);
+                    bwDark.write(line + Const.N);
                 }
                 bwLight.flush();
                 bwDark.flush();
@@ -405,11 +406,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         String s;
         int k = 0;
         while ((s = br.readLine()) != null && boolStart) {
-            if (s.contains(Lib.LINK)) {
+            if (s.contains(Const.LINK)) {
                 if (count)
                     k++;
                 else {
-                    s = s.substring(Lib.LINK.length());
+                    s = s.substring(Const.LINK.length());
                     if (!s.contains(".html")) s += ".html";
                     downloadPage(s, false);
                     prog++;
@@ -428,7 +429,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) s = s.substring(0, s.indexOf("#"));
-        InputStream in = new BufferedInputStream(lib.getStream(Lib.SITE + s + Lib.PRINT));
+        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + s + Const.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
@@ -441,7 +442,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 } else if (line.contains("<")) {
                     line = line.trim();
                     if (line.length() < 7) continue;
-                    line = line.replace("<br />", Lib.BR).replace("color", "cvet");
+                    line = line.replace("<br />", Const.BR).replace("color", "cvet");
                     if (line.contains("<p")) {
                         while (!line.contains(par)) {
                             line += br.readLine();
@@ -470,7 +471,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             s = br.readLine();
                         }
                         while (line.indexOf(par) < line.lastIndexOf(par)) {
-                            line = line.substring(0, line.indexOf(par)) + Lib.BR +
+                            line = line.substring(0, line.indexOf(par)) + Const.BR +
                                     line.substring(line.indexOf("\">", line.indexOf(par)) + 2);
                         }
                     } else {
@@ -514,8 +515,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     cv.put(DataBase.LINK, link);
                     if (line.contains(dataBase.getName())) {
                         line = line.substring(9);
-                        if (line.contains(Lib.KV_OPEN))
-                            line = line.substring(line.indexOf(Lib.KV_OPEN) + 1, line.length() - 1);
+                        if (line.contains(Const.KV_OPEN))
+                            line = line.substring(line.indexOf(Const.KV_OPEN) + 1, line.length() - 1);
                     }
                     cv.put(DataBase.TITLE, line);
                     id = (int) db.insert(DataBase.TITLE, null, cv);
@@ -563,7 +564,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
     private void checkNoreadList(String link) {
         try {
-            File file = new File(act.getFilesDir() + File.separator + Lib.NOREAD);
+            File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
             if (file.exists()) {
                 boolean b = false;
                 String t, l;
@@ -583,7 +584,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 }
                 br.close();
                 if (b) {
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(act.openFileOutput(Lib.NOREAD, act.MODE_PRIVATE)));
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(act.openFileOutput(Const.NOREAD, act.MODE_PRIVATE)));
                     bw.write(f.toString());
                     bw.close();
                 }

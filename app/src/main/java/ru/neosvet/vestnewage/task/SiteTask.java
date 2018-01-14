@@ -13,10 +13,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.ui.ListItem;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
-import ru.neosvet.ui.ListItem;
 
 public class SiteTask extends AsyncTask<String, Void, String> implements Serializable {
     private transient SiteFragment frm;
@@ -72,19 +73,19 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
         int j;
         for (int i = 0; i < data.size(); i++) {
 //                if(item.getLink().equals("")) return null;
-            bw.write(data.get(i).getTitle() + Lib.N);
-            bw.write(data.get(i).getDes() + Lib.N);
+            bw.write(data.get(i).getTitle() + Const.N);
+            bw.write(data.get(i).getDes() + Const.N);
             if (data.get(i).getCount() == 1)
-                bw.write(data.get(i).getLink() + Lib.N);
+                bw.write(data.get(i).getLink() + Const.N);
             else if (data.get(i).getCount() == 0)
-                bw.write("@" + Lib.N);
+                bw.write("@" + Const.N);
             else {
                 for (j = 0; j < data.get(i).getCount(); j++) {
-                    bw.write(data.get(i).getLink(j) + Lib.N);
-                    bw.write(data.get(i).getHead(j) + Lib.N);
+                    bw.write(data.get(i).getLink(j) + Const.N);
+                    bw.write(data.get(i).getHead(j) + Const.N);
                 }
             }
-            bw.write(SiteFragment.END + Lib.N);
+            bw.write(SiteFragment.END + Const.N);
             bw.flush();
         }
         bw.close();
@@ -93,7 +94,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
 
     public void downloadList(String url) throws Exception {
         String line;
-        url += Lib.PRINT;
+        url += Const.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean b = false;
@@ -106,7 +107,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
             }
             if (b) {
                 if (line.contains("<h")) {
-                    if (line.contains(Lib.AND)) continue;
+                    if (line.contains(Const.AND)) continue;
                     setDes(d);
                     d = "";
                     if (line.contains("h3")) {
@@ -126,8 +127,8 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                         setDes(d);
                         d = "";
                         data.add(new ListItem(line));
-                        if (m[i].contains(Lib.HREF)) {
-                            while ((n = m[i].indexOf(Lib.HREF, n)) > 0) {
+                        if (m[i].contains(Const.HREF)) {
+                            while ((n = m[i].indexOf(Const.HREF, n)) > 0) {
                                 n += 6;
                                 s = m[i].substring(n, m[i].indexOf(">", n) - 1);
                                 if (s.contains("..")) s = s.substring(2);
@@ -138,9 +139,9 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                             addLink("", "@");
                     } // lines
                 } else if (line.contains("<p")) {
-                    line = Lib.withOutTags(line).replace(Lib.N, Lib.BR);
+                    line = Lib.withOutTags(line).replace(Const.N, Const.BR);
                     if (line.length() > 5) {
-                        d += line + Lib.BR;
+                        d += line + Const.BR;
                     }
                 } else {
                     if (line.contains("page-title"))
@@ -159,7 +160,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
         }
         if (link.contains("files") || link.contains(".mp3") || link.contains(".wma")
                 || link.lastIndexOf("/") == link.length() - 1)
-            link = Lib.SITE + link.substring(1);
+            link = Const.SITE + link.substring(1);
 //        if (link.contains(Lib.HTML) && !link.contains("http"))
 //            link = link.substring(0, link.length() - 5);
         if (link.indexOf("/") == 0)

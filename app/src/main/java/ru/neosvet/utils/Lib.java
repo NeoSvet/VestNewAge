@@ -26,14 +26,6 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    public static final int MAX_ON_PAGE = 15, TIMEOUT = 10;
-    public static final String SITE = "http://blagayavest.info/", SITE2 = "http://medicina.softlan.lclients.ru/",
-            N = "\n", NN = "\n\n", TASK = "task", COOKIE = "Cookie",
-            SESSION_ID = "PHPSESSID", FIRST = "first", TIME_LAST_VISIT = "time_last_visit",
-            NOREAD = "noread", LINK = "<link>", LIGHT = "/style/light.css",
-            DARK = "/style/dark.css", AND = "&", BR = "<br>",
-            PRINT = "?styletpl=print", HREF = "href", DIALOG = "dialog",
-            KV_OPEN = "“", KV_CLOSE = "”", POEMS = "poems";
     private Context context;
 
     public Lib(Context context) {
@@ -41,12 +33,12 @@ public class Lib {
     }
 
     public void setCookies(String s, String t, String n) {
-        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         if (s != null)
-            editor.putString(SESSION_ID, s);
-        editor.putString(TIME_LAST_VISIT, t);
-        editor.putString(NOREAD, n);
+            editor.putString(Const.SESSION_ID, s);
+        editor.putString(Const.TIME_LAST_VISIT, t);
+        editor.putString(Const.NOREAD, n);
         editor.apply();
     }
 
@@ -54,20 +46,20 @@ public class Lib {
 //        return SESSION_ID + "=vs50e3l2soiopvmsbk24rvkmu2; "
 //                + TIME_LAST_VISIT + "=16.12.2016+14%3A50%3A22; "
 //                + NOREAD + "=a%3A1%3A%7Bi%3A0%3Ba%3A2%3A%7Bs%3A2%3A%22id%22%3Bi%3A1398%3Bs%3A4%3A%22link%22%3Bs%3A14%3A%22poems%2F15.12.16%22%3B%7D%7D";
-        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
-        if (pref.getString(SESSION_ID, "").equals(""))
+        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
+        if (pref.getString(Const.SESSION_ID, "").equals(""))
             return "";
         else if (boolNoreadOnly)
-            return pref.getString(NOREAD, "");
+            return pref.getString(Const.NOREAD, "");
         else
-            return SESSION_ID + "=" + pref.getString(SESSION_ID, "") + "; "
-                    + TIME_LAST_VISIT + "=" + pref.getString(TIME_LAST_VISIT, "")
-                    + "; " + NOREAD + "=" + pref.getString(NOREAD, "");
+            return Const.SESSION_ID + "=" + pref.getString(Const.SESSION_ID, "") + "; "
+                    + Const.TIME_LAST_VISIT + "=" + pref.getString(Const.TIME_LAST_VISIT, "")
+                    + "; " + Const.NOREAD + "=" + pref.getString(Const.NOREAD, "");
     }
 
     public long getTimeLastVisit() {
-        SharedPreferences pref = context.getSharedPreferences(COOKIE, context.MODE_PRIVATE);
-        String s = pref.getString(TIME_LAST_VISIT, "");
+        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
+        String s = pref.getString(Const.TIME_LAST_VISIT, "");
         if (s.equals(""))
             return 0;
         s = s.replace("%3A", ":").replace("+", " ");
@@ -87,38 +79,38 @@ public class Lib {
 
     public InputStream getStream(String url) throws Exception {
         OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-        builderClient.connectTimeout(TIMEOUT, TimeUnit.SECONDS);
-        builderClient.readTimeout(TIMEOUT, TimeUnit.SECONDS);
-        builderClient.writeTimeout(TIMEOUT, TimeUnit.SECONDS);
+        builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+        builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
 
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(url);
-        builderRequest.header("User-Agent", context.getPackageName());
+        builderRequest.header(Const.USER_AGENT, context.getPackageName());
         Response response;
 
-        if (url.contains(SITE) && !url.contains(PRINT)) {
+        if (url.contains(Const.SITE) && !url.contains(Const.PRINT)) {
             String s = getCookies(false);
-            builderRequest.addHeader(COOKIE, s);
+            builderRequest.addHeader(Const.COOKIE, s);
             OkHttpClient client = builderClient.build();
             response = client.newCall(builderRequest.build()).execute();
 
-            s = response.header("Set-" + COOKIE);
+            s = response.header(Const.SET_COOKIE);
             if (s != null) {
                 String[] m = s.split(";");
                 s = null;
                 String t = null, n = null;
                 for (int i = 0; i < m.length; i++) {
-                    if (m[i].contains(SESSION_ID))
+                    if (m[i].contains(Const.SESSION_ID))
                         s = HttpCookie.parse(m[i]).get(0).getValue();
-                    else if (m[i].contains(TIME_LAST_VISIT))
+                    else if (m[i].contains(Const.TIME_LAST_VISIT))
                         t = HttpCookie.parse(m[i]).get(0).getValue();
-                    else if (m[i].contains(NOREAD))
+                    else if (m[i].contains(Const.NOREAD))
                         n = HttpCookie.parse(m[i]).get(0).getValue();
                 }
                 setCookies(s, t, n);
             }
         } else {
-            builderRequest.header("Referer", SITE);
+            builderRequest.header("Referer", Const.SITE);
             OkHttpClient client = builderClient.build();
             response = client.newCall(builderRequest.build()).execute();
         }
@@ -225,8 +217,8 @@ public class Lib {
 
     public static String withOutTags(String s) {
         int i;
-        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace(BR, N)
-                .replace("&laquo;", "«").replace("&raquo;", "»").replace(N + " ", N)
+        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace(Const.BR, Const.N)
+                .replace("&laquo;", "«").replace("&raquo;", "»").replace(Const.N + " ", Const.N)
                 .replace("&ndash;", "–").replace("&nbsp;", " ");
 
         while ((i = s.indexOf("<")) > -1) {

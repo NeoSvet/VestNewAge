@@ -119,8 +119,8 @@ public class DataBase extends SQLiteOpenHelper {
                 dataBase.close();
                 return pageCon.toString();
             }
-            pageCon.append(Lib.N);
-            pageCon.append(Lib.N);
+            pageCon.append(Const.N);
+            pageCon.append(Const.N);
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
         } else { // страница не загружена...
             cursor.close();
@@ -135,8 +135,8 @@ public class DataBase extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 pageCon.append(Lib.withOutTags(cursor.getString(0)));
-                pageCon.append(Lib.N);
-                pageCon.append(Lib.N);
+                pageCon.append(Const.N);
+                pageCon.append(Const.N);
             } while (cursor.moveToNext());
         } else { // страница не загружена...
             cursor.close();
@@ -183,9 +183,9 @@ public class DataBase extends SQLiteOpenHelper {
             String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
             if (s.contains("_")) s = s.substring(0, s.indexOf("_"));
             if (s.contains("#")) s = s.substring(0, s.indexOf("#"));
-            if (link.contains(Lib.POEMS)) {
+            if (link.contains(Const.POEMS)) {
                 s += " " + context.getResources().getString(R.string.katren)
-                        + " " + Lib.KV_OPEN + title + Lib.KV_CLOSE;
+                        + " " + Const.KV_OPEN + title + Const.KV_CLOSE;
             } else
                 s += " " + title;
             return s;

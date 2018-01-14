@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -71,13 +71,13 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
             try {
                 OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-                builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
-                builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
-                builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+                builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+                builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+                builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
 
                 Request.Builder builderRequest = new Request.Builder();
-                builderRequest.url(Lib.SITE + "rss/");
-                builderRequest.header("User-Agent", context.getPackageName());
+                builderRequest.url(Const.SITE + "rss/");
+                builderRequest.header(Const.USER_AGENT, context.getPackageName());
                 OkHttpClient client = builderClient.build();
                 Response response = client.newCall(builderRequest.build()).execute();
 
@@ -104,15 +104,15 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f));
                 do {
                     bw.write(withOutTag(title));
-                    bw.write(Lib.N);
-                    if (link.contains(Lib.SITE))
-                        bw.write(Lib.LINK + link.substring(Lib.SITE.length()));
+                    bw.write(Const.N);
+                    if (link.contains(Const.SITE))
+                        bw.write(Const.LINK + link.substring(Const.SITE.length()));
                     else
                         bw.write(link);
-                    bw.write(Lib.N);
+                    bw.write(Const.N);
                     bw.write(withOutTag(des));
-                    bw.write(Lib.N);
-                    bw.write(Date.parse(withOutTag(s)) + Lib.N); //time
+                    bw.write(Const.N);
+                    bw.write(Date.parse(withOutTag(s)) + Const.N); //time
                     bw.flush();
                     s = br.readLine(); //</item><item> or </channel>
                     if (s.contains("</channel>")) break;

@@ -18,10 +18,10 @@ import java.io.FileReader;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.SummaryTask;
 
 public class SummaryFragment extends Fragment {
@@ -49,13 +49,13 @@ public class SummaryFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state != null) {
-            task = (SummaryTask) state.getSerializable(Lib.TASK);
+            task = (SummaryTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     act.status.setLoad(true);
@@ -154,7 +154,7 @@ public class SummaryFragment extends Fragment {
                 p = br.readLine();
                 adSummary.getItem(i).setDes(
                         act.lib.getDiffDate(now, Long.parseLong(p))
-                                + Lib.N + t);
+                                + Const.N + t);
                 i++;
             }
             br.close();

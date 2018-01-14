@@ -22,11 +22,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.ListItem;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
 
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
     private transient CalendarFragment frm;
@@ -109,9 +109,9 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             s = br.readLine();
             if (Long.parseLong(s) > Long.parseLong(t)) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                bw.write(System.currentTimeMillis() + Lib.N);
+                bw.write(System.currentTimeMillis() + Const.N);
                 while ((s = br.readLine()) != null) {
-                    bw.write(s + Lib.N);
+                    bw.write(s + Const.N);
                     bw.flush();
                 }
                 bw.close();
@@ -126,10 +126,10 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         BufferedReader br;
         if (act instanceof MainActivity) {
             br = new BufferedReader(new InputStreamReader
-                    (((MainActivity) act).lib.getStream(Lib.SITE)));
+                    (((MainActivity) act).lib.getStream(Const.SITE)));
         } else {
             br = new BufferedReader(new InputStreamReader
-                    (((SlashActivity) act).lib.getStream(Lib.SITE)));
+                    (((SlashActivity) act).lib.getStream(Const.SITE)));
         }
         if (isCancelled())
             return;
@@ -137,7 +137,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         while ((s = br.readLine()) != null) {
             if (s.contains("clear-unread")) break;
             if (s.contains("menuitem")) {
-                int i = s.indexOf(Lib.HREF) + 7;
+                int i = s.indexOf(Const.HREF) + 7;
                 String link = s.substring(i, s.indexOf("\"", i));
                 i = s.indexOf(DataBase.TITLE) + 7;
                 s = s.substring(i, s.indexOf("\"", i)).replace("(", " (");
@@ -146,10 +146,10 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         }
 
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                act.openFileOutput(Lib.NOREAD, act.MODE_PRIVATE)));
+                act.openFileOutput(Const.NOREAD, act.MODE_PRIVATE)));
         for (int i = 0; i < data.size(); i++) {
-            bw.write(data.get(i).getTitle() + Lib.N);
-            bw.write(data.get(i).getLink() + Lib.N);
+            bw.write(data.get(i).getTitle() + Const.N);
+            bw.write(data.get(i).getLink() + Const.N);
             bw.flush();
         }
         bw.close();
@@ -162,14 +162,14 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             JSONArray jsonA;
             String r, s;
             OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-            builderClient.connectTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
-            builderClient.readTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
-            builderClient.writeTimeout(Lib.TIMEOUT, TimeUnit.SECONDS);
+            builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+            builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+            builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
 
             Request.Builder builderRequest = new Request.Builder();
-            builderRequest.url(Lib.SITE + "?json&year="
+            builderRequest.url(Const.SITE + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1));
-            builderRequest.header("User-Agent", act.getPackageName());
+            builderRequest.header(Const.USER_AGENT, act.getPackageName());
 
             OkHttpClient client = builderClient.build();
             Response response = client.newCall(builderRequest.build()).execute();
@@ -216,11 +216,11 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             file = new File(file.toString() + File.separator + month + "." + year);
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             for (int i = 0; i < data.size(); i++) {
-                bw.write(data.get(i).getTitle() + Lib.N);
+                bw.write(data.get(i).getTitle() + Const.N);
                 for (int j = 0; j < data.get(i).getCount(); j++) {
-                    bw.write(data.get(i).getLink(j) + Lib.N);
+                    bw.write(data.get(i).getLink(j) + Const.N);
                 }
-                bw.write(Lib.N);
+                bw.write(Const.N);
                 bw.flush();
             }
             bw.close();

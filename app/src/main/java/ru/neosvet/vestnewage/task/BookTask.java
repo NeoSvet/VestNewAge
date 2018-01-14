@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.ui.ProgressDialog;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.fragment.BookFragment;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.fragment.BookFragment;
 
 public class BookTask extends AsyncTask<Integer, Boolean, String> implements Serializable {
     private transient BookFragment frm;
@@ -142,7 +142,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
                 br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
                 while ((s = br.readLine()) != null) {
-                    if (s.equals(Lib.AND)) {
+                    if (s.equals(Const.AND)) {
                         boolTitle = false;
                         s = br.readLine();
                     }
@@ -172,7 +172,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     }
 
     public String downloadData(boolean boolKat) throws Exception {
-        String url = Lib.SITE + (boolKat ? Lib.POEMS : "tolkovaniya") + Lib.PRINT;
+        String url = Const.SITE + (boolKat ? Const.POEMS : "tolkovaniya") + Const.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean b = false;
@@ -183,12 +183,12 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 b = line.contains("h2");//razdel
             else if (line.contains("clear"))
                 break;
-            else if (line.contains(Lib.HREF)) {
+            else if (line.contains(Const.HREF)) {
                 if (line.contains("years"))
                     line = line.substring(0, line.indexOf("years"));
                 n = 0;
-                while (line.indexOf(Lib.HREF, n) > -1) {
-                    n = line.indexOf(Lib.HREF, n) + 7;
+                while (line.indexOf(Const.HREF, n) > -1) {
+                    n = line.indexOf(Const.HREF, n) + 7;
                     s = line.substring(n, line.indexOf("'", n));
                     i = s.indexOf(".") + 1;
                     date2 = s.substring(i, i + 5);

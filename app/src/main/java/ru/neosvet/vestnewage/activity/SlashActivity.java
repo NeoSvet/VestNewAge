@@ -22,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.CalendarTask;
 import ru.neosvet.utils.DataBase;
@@ -119,12 +120,12 @@ public class SlashActivity extends AppCompatActivity {
         String link;
         if (data.getHost().contains("vk.com")) {
             link = data.getQuery().substring(3);
-            if (!link.contains(Lib.SITE)) {
+            if (!link.contains(Const.SITE)) {
                 lib.openInApps(link, null);
                 finish();
                 return;
             }
-            link = link.substring(Lib.SITE.length() - 1);
+            link = link.substring(Const.SITE.length() - 1);
         } else
             link = data.getPath();
         if (link != null) {
@@ -186,7 +187,7 @@ public class SlashActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         outState.putInt(MainActivity.TAB, iNew);
         super.onSaveInstanceState(outState);
     }
@@ -195,7 +196,7 @@ public class SlashActivity extends AppCompatActivity {
         if (state != null) {
             boolAnim = false;
             iNew = state.getInt(MainActivity.TAB, 0);
-            task = (CalendarTask) state.getSerializable(Lib.TASK);
+            task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 task.setAct(this);
                 setStatus();

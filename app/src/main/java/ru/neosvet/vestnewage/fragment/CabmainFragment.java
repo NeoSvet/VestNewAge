@@ -23,6 +23,7 @@ import android.widget.ListView;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
@@ -68,8 +69,8 @@ public class CabmainFragment extends Fragment {
             }
             loginList();
         } else {
-            cookie = state.getString(Lib.COOKIE);
-            task = (CabTask) state.getSerializable(Lib.TASK);
+            cookie = state.getString(Const.COOKIE);
+            task = (CabTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     task.setFrm(this);
@@ -84,7 +85,7 @@ public class CabmainFragment extends Fragment {
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
-            for (String t : state.getStringArray(Lib.LINK)) {
+            for (String t : state.getStringArray(Const.LINK)) {
                 if (t.contains("#")) {
                     d = t.substring(t.indexOf("#") + 1);
                     t = t.substring(0, t.indexOf("#"));
@@ -99,8 +100,8 @@ public class CabmainFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString(Lib.COOKIE, cookie);
-        outState.putSerializable(Lib.TASK, task);
+        outState.putString(Const.COOKIE, cookie);
+        outState.putSerializable(Const.TASK, task);
         outState.putByte(PANEL, mode_list);
         String[] m = new String[adMain.getCount()];
         String d;
@@ -108,7 +109,7 @@ public class CabmainFragment extends Fragment {
             d = adMain.getItem(i).getDes();
             m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
         }
-        outState.putStringArray(Lib.LINK, m);
+        outState.putStringArray(Const.LINK, m);
         super.onSaveInstanceState(outState);
     }
 
@@ -329,7 +330,7 @@ public class CabmainFragment extends Fragment {
         mode_list++;
         if (mode_list == WORDS) {
             adMain.clear();
-            String[] m = result.split(Lib.N);
+            String[] m = result.split(Const.N);
             for (int i = 0; i < m.length; i++) {
                 adMain.addItem(new ListItem(m[i]));
             }

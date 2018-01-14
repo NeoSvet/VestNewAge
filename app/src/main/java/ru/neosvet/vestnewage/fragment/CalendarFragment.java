@@ -37,12 +37,12 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.CalendarTask;
-import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 
 public class CalendarFragment extends Fragment implements DateDialog.Result {
     public static final String CURRENT_DATE = "current_date", ADS = "ads", CALENDAR = "/calendar/";
@@ -91,14 +91,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(Lib.DIALOG, dialog);
+        outState.putInt(Const.DIALOG, dialog);
         if (dialog == -1)
             dateDialog.dismiss();
         else if (dialog > -1)
             alert.dismiss();
-        outState.putBoolean(Lib.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
+        outState.putBoolean(Const.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
@@ -109,14 +109,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         } else {
             act.setFrCalendar(this);
             dCurrent = new Date(state.getLong(CURRENT_DATE));
-            task = (CalendarTask) state.getSerializable(Lib.TASK);
+            task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     task.setFrm(this);
                     setStatus(true);
                 } else task = null;
             }
-            if (state.getBoolean(Lib.NOREAD, false)) {
+            if (state.getBoolean(Const.NOREAD, false)) {
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
@@ -127,7 +127,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 lvNoread.requestLayout();
                 lvNoread.setVisibility(View.VISIBLE);
             }
-            dialog = state.getInt(Lib.DIALOG);
+            dialog = state.getInt(Const.DIALOG);
             if (dialog == -1)
                 showDatePicker();
             else if (dialog > -1) {
@@ -391,7 +391,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                             String s;
                             for (int i = 0; i < 5; i++) {
                                 if (i < k) {
-                                    s = adCalendar.getItem(pos).getLink(i).substring(Lib.LINK.length());
+                                    s = adCalendar.getItem(pos).getLink(i).substring(Const.LINK.length());
                                     if (!s.contains("/"))
                                         popupMenu.getMenu().getItem(i).setTitle(
                                                 getResources().getString(R.string.prom_for_soul_unite));
@@ -595,7 +595,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void createNoreadList(boolean boolLoad) {
         try {
-            File file = new File(act.getFilesDir() + File.separator + Lib.NOREAD);
+            File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
             if (file.exists()) {
                 String s;
                 BufferedReader br = new BufferedReader(new FileReader(file));
@@ -635,7 +635,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                         t = s.substring(3);
                         s = br.readLine();
                         while (!s.equals(end)) {
-                            t += Lib.N + s;
+                            t += Const.N + s;
                             s = br.readLine();
                         }
                         adNoread.getItem(0).addHead(t);

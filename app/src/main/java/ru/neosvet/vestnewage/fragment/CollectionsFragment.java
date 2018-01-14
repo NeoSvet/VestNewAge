@@ -24,13 +24,14 @@ import android.widget.TextView;
 
 import ru.neosvet.ui.MarkAdapter;
 import ru.neosvet.ui.MarkItem;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.activity.PresentationActivity;
-import ru.neosvet.vestnewage.R;
 
 public class CollectionsFragment extends Fragment {
     private final String SEL = "sel", RENAME = "rename";
@@ -58,7 +59,7 @@ public class CollectionsFragment extends Fragment {
             sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
             iSel = savedInstanceState.getInt(SEL, -1);
             sName = savedInstanceState.getString(RENAME, null);
-            boolDelete = savedInstanceState.getBoolean(Lib.DIALOG, false);
+            boolDelete = savedInstanceState.getBoolean(Const.DIALOG, false);
         }
 
         if (sCol == null)
@@ -83,7 +84,7 @@ public class CollectionsFragment extends Fragment {
         outState.putString(DataBase.COLLECTIONS, sCol);
         outState.putInt(SEL, iSel);
         outState.putString(RENAME, sName);
-        outState.putBoolean(Lib.DIALOG, boolDelete);
+        outState.putBoolean(Const.DIALOG, boolDelete);
         super.onSaveInstanceState(outState);
     }
 
@@ -93,12 +94,12 @@ public class CollectionsFragment extends Fragment {
         fabEdit.setVisibility(View.GONE);
         fabHelp.setVisibility(View.GONE);
         adMarker.clear();
-        act.setTitle(sCol.substring(0, sCol.indexOf(Lib.N)));
+        act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         SQLiteDatabase db = dbMarker.getWritableDatabase();
         int iID, iPlace, iLink, iDes;
         String[] mId;
-        String link = sCol.substring(sCol.indexOf(Lib.N) + 1);
+        String link = sCol.substring(sCol.indexOf(Const.N) + 1);
         if (link.contains(",")) {
             mId = link.split(",");
         } else
@@ -120,7 +121,7 @@ public class CollectionsFragment extends Fragment {
                 adMarker.addItem(new MarkItem(getTitle(link), cursor.getInt(iID), link));
                 adMarker.getItem(k).setPlace(place);
                 adMarker.getItem(k).setDes(
-                        cursor.getString(iDes) + Lib.N + getPlace(link, place));
+                        cursor.getString(iDes) + Const.N + getPlace(link, place));
                 k++;
             }
             cursor.close();
@@ -142,13 +143,13 @@ public class CollectionsFragment extends Fragment {
         try {
             StringBuilder b = new StringBuilder();
             if (p.contains("%")) {
-                b.append(Lib.N);
+                b.append(Const.N);
                 b.append(DataBase.getContentPage(act, link, false));
                 int k = 5; // имитация нижнего "колонтитула" страницы
-                int i = b.indexOf(Lib.N);
+                int i = b.indexOf(Const.N);
                 while (i > -1) {
                     k++;
-                    i = b.indexOf(Lib.N, i + 1);
+                    i = b.indexOf(Const.N, i + 1);
                 }
                 float f = Float.parseFloat(p.substring(0, p.length() - 1).replace(",", ".")) / 100f;
                 k = (int) ((float) k * f) + 1;
@@ -157,27 +158,27 @@ public class CollectionsFragment extends Fragment {
                 do {
                     k--;
                     u = i;
-                    i = b.indexOf(Lib.N, u + 1);
+                    i = b.indexOf(Const.N, u + 1);
                 } while (k > 1 && i > -1);
-                if (b.substring(u + 1, u + 2).equals(Lib.N))
+                if (b.substring(u + 1, u + 2).equals(Const.N))
                     u++;
                 if (i > -1)
-                    i = b.indexOf(Lib.N, i + 1);
+                    i = b.indexOf(Const.N, i + 1);
                 if (i > -1)
-                    i = b.indexOf(Lib.N, i + 1);
+                    i = b.indexOf(Const.N, i + 1);
                 b.delete(0, u + 1);
                 i -= u;
                 if (i > -1) {
-                    if (b.substring(i - 1, i).equals(Lib.N))
+                    if (b.substring(i - 1, i).equals(Const.N))
                         i--;
                     b.delete(i - 1, b.length());
                 }
-                b.insert(0, getResources().getString(R.string.pos_n) + p + ":" + Lib.N);
+                b.insert(0, getResources().getString(R.string.pos_n) + p + ":" + Const.N);
             } else {
                 b.append(getResources().getString(R.string.par_n));
                 b.append(p.replace(",", ", "));
                 b.append(":");
-                b.append(Lib.N);
+                b.append(Const.N);
                 p = DataBase.closeList(p);
 
                 DataBase dataBase = new DataBase(act, link);
@@ -202,8 +203,8 @@ public class CollectionsFragment extends Fragment {
                     do {
                         if (p.contains(DataBase.closeList(String.valueOf(i)))) {
                             b.append(Lib.withOutTags(cursor.getString(0)));
-                            b.append(Lib.N);
-                            b.append(Lib.N);
+                            b.append(Const.N);
+                            b.append(Const.N);
                         }
                         i++;
                     } while (cursor.moveToNext());
@@ -336,7 +337,7 @@ public class CollectionsFragment extends Fragment {
                     adMarker.notifyDataSetChanged();
                 } else if (sCol == null) {
                     sCol = adMarker.getItem(pos).getTitle()
-                            + Lib.N + adMarker.getItem(pos).getData();
+                            + Const.N + adMarker.getItem(pos).getData();
                     loadMarList();
                 } else {
                     String p;
@@ -344,7 +345,7 @@ public class CollectionsFragment extends Fragment {
                         p = "";
                     else {
                         p = adMarker.getItem(pos).getDes();
-                        p = p.substring(p.indexOf(Lib.N, p.indexOf(Lib.N) + 1) + 1);
+                        p = p.substring(p.indexOf(Const.N, p.indexOf(Const.N) + 1) + 1);
                     }
                     BrowserActivity.openReader(act, adMarker.getItem(pos).getData(), p);
                 }
@@ -607,8 +608,8 @@ public class CollectionsFragment extends Fragment {
                 final String t = getListId();
                 cv.put(DataBase.MARKERS, t);
                 db.update(DataBase.COLLECTIONS, cv, DataBase.TITLE + DataBase.Q,
-                        new String[]{sCol.substring(0, sCol.indexOf(Lib.N))});
-                sCol = sCol.substring(0, sCol.indexOf(Lib.N) + 1) + t;
+                        new String[]{sCol.substring(0, sCol.indexOf(Const.N))});
+                sCol = sCol.substring(0, sCol.indexOf(Const.N) + 1) + t;
             }
             dbMarker.close();
             boolChange = false;
@@ -728,16 +729,16 @@ public class CollectionsFragment extends Fragment {
 
     public void putResult(int resultCode) {
         if (resultCode == 1) {
-            sCol = sCol.substring(0, sCol.indexOf(Lib.N));
+            sCol = sCol.substring(0, sCol.indexOf(Const.N));
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
             SQLiteDatabase db = dbMarker.getWritableDatabase();
             Cursor cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
                     DataBase.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)}
                     , null, null, null);
             if (cursor.moveToFirst())
-                sCol += Lib.N + cursor.getString(0); //список закладок в подборке
+                sCol += Const.N + cursor.getString(0); //список закладок в подборке
             else
-                sCol += Lib.N;
+                sCol += Const.N;
             cursor.close();
             dbMarker.close();
 

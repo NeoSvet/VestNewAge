@@ -37,13 +37,14 @@ import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.Tip;
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.BookTask;
-import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 
 public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
     private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
@@ -88,13 +89,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString(Lib.DIALOG, dialog);
+        outState.putString(Const.DIALOG, dialog);
         if (dialog.length() == 1)
             dateDialog.dismiss();
         else if (dialog.length() > 1)
             alertRnd.dismiss();
         outState.putInt(CURRENT_TAB, tab);
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
@@ -106,7 +107,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         boolOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
-            task = (BookTask) state.getSerializable(Lib.TASK);
+            task = (BookTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     fabRefresh.setVisibility(View.GONE);
@@ -115,11 +116,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     act.status.setLoad(true);
                 } else task = null;
             } else {
-                dialog = state.getString(Lib.DIALOG);
+                dialog = state.getString(Const.DIALOG);
                 if (dialog.length() == 1)
                     showDatePicker();
                 else if (dialog.length() > 1) {
-                    String[] m = dialog.split(Lib.AND);
+                    String[] m = dialog.split(Const.AND);
                     showRndAlert(m[0], m[1], m[2], m[3], Integer.parseInt(m[4]));
                 }
             }
@@ -206,12 +207,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     if (bKat) { // катрены
                         cursor = db.query(DataBase.TITLE, null,
                                 DataBase.LINK + DataBase.LIKE,
-                                new String[]{"%" + Lib.POEMS + "%"}
+                                new String[]{"%" + Const.POEMS + "%"}
                                 , null, null, DataBase.LINK);
                     } else { // послания
                         cursor = db.query(DataBase.TITLE, null,
                                 DataBase.LINK + " NOT" + DataBase.LIKE,
-                                new String[]{"%" + Lib.POEMS + "%"}
+                                new String[]{"%" + Const.POEMS + "%"}
                                 , null, null, DataBase.LINK);
                     }
                     cursor.moveToFirst();
@@ -276,8 +277,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0);
-                if ((s.contains(Lib.POEMS) && bKat) ||
-                        (!s.contains(Lib.POEMS) && !bKat)) {
+                if ((s.contains(Const.POEMS) && bKat) ||
+                        (!s.contains(Const.POEMS) && !bKat)) {
                     cursor.close();
                     return true;
                 }
@@ -622,13 +623,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             title = getResources().getString(R.string.rnd_kat);
             curTitle = db.query(DataBase.TITLE, null,
                     DataBase.LINK + DataBase.LIKE,
-                    new String[]{"%" + Lib.POEMS + "%"}
+                    new String[]{"%" + Const.POEMS + "%"}
                     , null, null, null);
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
             title = getResources().getString(R.string.rnd_pos);
             curTitle = db.query(DataBase.TITLE, null,
                     DataBase.LINK + " NOT" + DataBase.LIKE,
-                    new String[]{"%" + Lib.POEMS + "%"}
+                    new String[]{"%" + Const.POEMS + "%"}
                     , null, null, null);
         } else { //случайных стих
             curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
@@ -677,12 +678,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 msg = s;
             }
             curTitle.close();
-            dialog = title + Lib.AND + link + Lib.AND + msg + Lib.AND + s + Lib.AND + n;
+            dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
             showRndAlert(title, link, msg, s, n);
             //добавляем в журнал:
             ContentValues cv = new ContentValues();
             cv.put(DataBase.TIME, System.currentTimeMillis());
-            String id = dataBase.getDatePage(link) + Lib.AND + dataBase.getPageId(link) + Lib.AND + n;
+            String id = dataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n;
             DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
             db = dbJournal.getWritableDatabase();
             cv.put(DataBase.ID, id);

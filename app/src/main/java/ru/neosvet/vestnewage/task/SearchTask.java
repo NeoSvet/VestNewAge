@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -166,7 +167,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 des = new StringBuilder(getDes(cursor.getString(0), find));
                 count2++;
                 while (cursor.moveToNext()) {
-                    des.append(Lib.BR + Lib.BR);
+                    des.append(Const.BR + Const.BR);
                     des.append(getDes(cursor.getString(0), find));
                 }
                 cv.put(DataBase.DESCTRIPTION, des.toString());
@@ -215,7 +216,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             StringBuilder des = null;
             do {
                 if (id == curSearch.getInt(iID) && boolAdd) {
-                    des.append(Lib.BR + Lib.BR);
+                    des.append(Const.BR + Const.BR);
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
@@ -226,9 +227,9 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                     if (curTitle.moveToFirst()) {
                         s = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
                         if (mode == 0) //Искать в Посланиях
-                            boolAdd = !s.contains(Lib.POEMS);
+                            boolAdd = !s.contains(Const.POEMS);
                         else if (mode == 1) //Искать в Катренах
-                            boolAdd = s.contains(Lib.POEMS);
+                            boolAdd = s.contains(Const.POEMS);
                         if (boolAdd) {
                             t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
                             if (cv != null) {
@@ -274,6 +275,6 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             x += 36;
             count1++;
         }
-        return b.toString().replace(Lib.N, Lib.BR);
+        return b.toString().replace(Const.N, Const.BR);
     }
 }

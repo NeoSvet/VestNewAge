@@ -24,10 +24,10 @@ import java.io.FileReader;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.SiteTask;
 
 public class SiteFragment extends Fragment {
@@ -57,14 +57,14 @@ public class SiteFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_TAB, tabHost.getCurrentTab());
-        outState.putSerializable(Lib.TASK, task);
+        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
-            task = (SiteTask) state.getSerializable(Lib.TASK);
+            task = (SiteTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     fabRefresh.setVisibility(View.GONE);
@@ -333,7 +333,7 @@ public class SiteFragment extends Fragment {
 
     private void openPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(Lib.SITE)) {
+            if (url.contains(Const.SITE)) {
                 act.lib.openInApps(url, getResources().getString(R.string.to_load));
             } else {
                 act.lib.openInApps(url, null);
@@ -345,7 +345,7 @@ public class SiteFragment extends Fragment {
 
     private void startLoad(String name) {
         act.status.setCrash(false);
-        String url = Lib.SITE;
+        String url = Const.SITE;
         switch (name) {
             case NEWS:
                 url += "novosti.html";

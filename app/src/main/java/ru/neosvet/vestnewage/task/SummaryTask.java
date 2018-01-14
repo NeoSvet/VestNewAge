@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Date;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
@@ -72,7 +73,7 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     public void downloadList() throws Exception {
         SummaryReceiver.cancelNotif(act);
         String line;
-        InputStream in = new BufferedInputStream(act.lib.getStream(Lib.SITE + "rss/"));
+        InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/"));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(act.getFilesDir() + SummaryFragment.RSS));
         while ((line = br.readLine()) != null) {
@@ -80,18 +81,18 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine())); //title
-                bw.write(Lib.N);
+                bw.write(Const.N);
                 line = withOutTag(br.readLine()); //link
-                if (line.contains(Lib.SITE2))
-                    bw.write(Lib.LINK + line.substring(Lib.SITE2.length()));
-                else if (line.contains(Lib.SITE))
-                    bw.write(Lib.LINK + line.substring(Lib.SITE.length()));
+                if (line.contains(Const.SITE2))
+                    bw.write(Const.LINK + line.substring(Const.SITE2.length()));
+                else if (line.contains(Const.SITE))
+                    bw.write(Const.LINK + line.substring(Const.SITE.length()));
                 else
                     bw.write(line);
-                bw.write(Lib.N);
+                bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
-                bw.write(Lib.N);
-                bw.write(Date.parse(withOutTag(br.readLine())) + Lib.N); //time
+                bw.write(Const.N);
+                bw.write(Date.parse(withOutTag(br.readLine())) + Const.N); //time
                 bw.flush();
             }
         }

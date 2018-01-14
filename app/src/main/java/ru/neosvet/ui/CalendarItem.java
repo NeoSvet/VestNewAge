@@ -6,8 +6,8 @@ import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.utils.Lib;
 
 public class CalendarItem {
     private Context context;
@@ -28,7 +28,7 @@ public class CalendarItem {
     public void setProm() {
         bold = true;
         color = context.getResources().getColor(R.color.colorAccentLight);
-        links.add(Lib.LINK + "Posyl-na-Edinenie");
+        links.add(Const.LINK + "Posyl-na-Edinenie");
     }
 
     public void clear() {

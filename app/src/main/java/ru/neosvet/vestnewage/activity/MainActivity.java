@@ -23,6 +23,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -73,9 +74,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
             Intent intent = getIntent();
             tab = intent.getIntExtra(TAB, 0);
-            if (pref.getBoolean(Lib.FIRST, true)) {
+            if (pref.getBoolean(Const.FIRST, true)) {
                 SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean(Lib.FIRST, false);
+                editor.putBoolean(Const.FIRST, false);
                 editor.apply();
                 tab = -1;
                 setFragment(R.id.nav_help);
@@ -125,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    lib.openInApps(Lib.SITE.substring(0, Lib.SITE.length() - 1), null);
-//                    startActivity(Intent.createChooser(lib.openInApps(Lib.SITE),
+                    lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+//                    startActivity(Intent.createChooser(lib.openInApps(Const.SITE),
 //                            getResources().getString(R.string.open)));
                 }
             });

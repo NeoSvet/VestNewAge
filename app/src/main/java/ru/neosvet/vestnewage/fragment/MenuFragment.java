@@ -9,9 +9,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import ru.neosvet.ui.MenuAdapter;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class MenuFragment extends Fragment {
     private static final String SELECT = "select";
@@ -41,8 +41,8 @@ public class MenuFragment extends Fragment {
         this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                act.lib.openInApps(Lib.SITE.substring(0, Lib.SITE.length() - 1), null);
-//                startActivity(Intent.createChooser(act.lib.openInApps(Lib.SITE),
+                act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+//                startActivity(Intent.createChooser(act.lib.openInApps(Const.SITE),
 //                        getResources().getString(R.string.open)));
             }
         });
