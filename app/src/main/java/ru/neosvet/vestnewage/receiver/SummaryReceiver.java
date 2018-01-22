@@ -65,7 +65,6 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             final Context context = getApplicationContext();
             SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             final int p = pref.getInt(SettingsFragment.TIME, -1);
-            Lib.LOG("SummaryReceiver: " + p);
             if (p == -1)
                 return;
             try {
