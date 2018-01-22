@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -16,24 +17,24 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.io.File;
-import java.net.URLDecoder;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.task.CalendarTask;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.receiver.SummaryReceiver;
+import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class SlashActivity extends AppCompatActivity {
     private Intent main;
     private StatusBar status;
     private boolean boolAnim;
     private CalendarTask task = null;
-    private int iNew = 0;
     public Lib lib;
 
     @Override
@@ -64,6 +65,16 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
+                    //from old version (code 8 and below)
+                    SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
+                    if(!pref.getString(Const.NOREAD, "").equals("")) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString(Const.NOREAD, "");
+                        editor.apply();
+                        File file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                        if (file.exists())
+                            file.delete();
+                    }
                     // удаляем материалы в виде страниц:
                     File dir = getFilesDir();
                     if ((new File(dir + "/poems")).exists()) {
@@ -188,14 +199,12 @@ public class SlashActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(Const.TASK, task);
-        outState.putInt(MainActivity.TAB, iNew);
         super.onSaveInstanceState(outState);
     }
 
     private void initTask(Bundle state) {
         if (state != null) {
             boolAnim = false;
-            iNew = state.getInt(MainActivity.TAB, 0);
             task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 task.setAct(this);
@@ -204,26 +213,19 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
         boolAnim = true;
-        if (System.currentTimeMillis() - lib.getTimeLastVisit() > 3600000) {
-            try {
-                String s = lib.getCookies(true);
-                //a:3:{i:0;a:2:{s:2:
-                if (s.length() > 10) {
-                    s = URLDecoder.decode(s, "UTF-8").substring(2);
-                    s = s.substring(0, s.indexOf(":"));
-                    iNew = Integer.parseInt(s);
-                }
-            } catch (Exception ex) {
+        Date dCurrent = new Date();
+        File file = new File(getFilesDir() + CalendarFragment.FOLDER +
+                dCurrent.getMonth() + "." + dCurrent.getYear());
+        if (file.exists())
+            if (System.currentTimeMillis() - file.lastModified() > 3600000) {
+                task = new CalendarTask(this);
+                Date d = new Date();
+                task.execute(d.getYear(), d.getMonth(), 1);
             }
-            task = new CalendarTask(this);
-            Date d = new Date();
-            task.execute(d.getYear(), d.getMonth(), 1);
-        }
     }
 
     public void finishLoad() {
         main.putExtra(MainActivity.CUR_ID, R.id.nav_calendar);
-        main.putExtra(MainActivity.TAB, iNew + 1);
         task = null;
         if (!boolAnim) {
             startActivity(main);
