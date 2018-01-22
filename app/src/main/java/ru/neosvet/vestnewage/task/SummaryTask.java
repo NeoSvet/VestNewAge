@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
@@ -73,11 +72,10 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     public void downloadList() throws Exception {
         SummaryReceiver.cancelNotif(act);
         String line;
-        InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/"));
+        InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(act.getFilesDir() + SummaryFragment.RSS));
         while ((line = br.readLine()) != null) {
-            Lib.LOG(line);
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine())); //title

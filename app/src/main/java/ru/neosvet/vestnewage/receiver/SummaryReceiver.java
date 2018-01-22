@@ -19,12 +19,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -65,65 +65,19 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             final Context context = getApplicationContext();
             SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             final int p = pref.getInt(SettingsFragment.TIME, -1);
+            Lib.LOG("SummaryReceiver: " + p);
             if (p == -1)
                 return;
-            final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
-            final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
             try {
-                OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-                builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-                builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-                builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-
-                Request.Builder builderRequest = new Request.Builder();
-                builderRequest.url(Const.SITE + "rss/");
-                builderRequest.header(Const.USER_AGENT, context.getPackageName());
-                OkHttpClient client = builderClient.build();
-                Response response = client.newCall(builderRequest.build()).execute();
-
-                String s, title, link, des;
-                BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
-                s = br.readLine();
-                while (!s.contains("item"))
-                    s = br.readLine();
-                title = br.readLine();
-                link = withOutTag(br.readLine());
-                des = br.readLine();
-                s = br.readLine();
+                String[] result = checkSummary(context);
                 setReceiver(context, p); //настраиваем следующую проверку
-                File f = new File(context.getFilesDir() + SummaryFragment.RSS);
-                long t = 0;
-                if (f.exists())
-                    t = f.lastModified();
-                if (t > Date.parse(withOutTag(s))) { //список в загрузке не нуждается
-                    br.close();
-                    return;
-                }
-                final Uri notif_uri = Uri.parse(link);
-                final String notif_text = context.getResources().getString(R.string.appeared_new) + withOutTag(title);
-                BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-                do {
-                    bw.write(withOutTag(title));
-                    bw.write(Const.N);
-                    if (link.contains(Const.SITE))
-                        bw.write(Const.LINK + link.substring(Const.SITE.length()));
-                    else
-                        bw.write(link);
-                    bw.write(Const.N);
-                    bw.write(withOutTag(des));
-                    bw.write(Const.N);
-                    bw.write(Date.parse(withOutTag(s)) + Const.N); //time
-                    bw.flush();
-                    s = br.readLine(); //</item><item> or </channel>
-                    if (s.contains("</channel>")) break;
-                    title = br.readLine();
-                    link = withOutTag(br.readLine());
-                    des = br.readLine();
-                    s = br.readLine(); //time
-                } while (s != null);
-                bw.close();
-                br.close();
 
+                if (result == null) return;
+
+                final String notif_text = context.getResources().getString(R.string.appeared_new) + withOutTag(result[0]);
+                final Uri notif_uri = Uri.parse(result[1]);
+                final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
+                final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
                 Intent app = new Intent(context, SlashActivity.class);
                 app.setData(notif_uri);
                 PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -151,9 +105,70 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             SummaryReceiver.completeWakefulIntent(intent);
         }
 
+        private String[] checkSummary(Context context) throws Exception {
+            Request.Builder builderRequest = new Request.Builder();
+            builderRequest.url(Const.SITE + "rss/?" + System.currentTimeMillis());
+            builderRequest.header(Const.USER_AGENT, context.getPackageName());
+            OkHttpClient client = Lib.createHttpClient();
+            Response response = client.newCall(builderRequest.build()).execute();
+
+            String s, title, link, des;
+            BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
+            s = br.readLine();
+            while (!s.contains("item"))
+                s = br.readLine();
+            title = withOutTag(br.readLine());
+            link = parseLink(br.readLine());
+            des = withOutTag(br.readLine());
+            s = withOutTag(br.readLine());
+
+            File fRSS = new File(context.getFilesDir() + SummaryFragment.RSS);
+            long t = 0;
+            if (fRSS.exists())
+                t = fRSS.lastModified();
+            if (t > Date.parse(s)) { //список в загрузке не нуждается
+                br.close();
+                return null;
+            }
+            String[] result = new String[]{title, link};
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(fRSS));
+            do {
+                bw.write(title);
+                bw.write(Const.N);
+                if (link.contains(Const.SITE))
+                    bw.write(Const.LINK + link.substring(Const.SITE.length()));
+                else
+                    bw.write(link);
+                bw.write(Const.N);
+                bw.write(des);
+                bw.write(Const.N);
+                bw.write(Date.parse(s) + Const.N); //time
+                bw.flush();
+                s = br.readLine(); //</item><item> or </channel>
+                if (s.contains("</channel>")) break;
+                title = withOutTag(br.readLine());
+                link = parseLink(br.readLine());
+                des = withOutTag(br.readLine());
+                s = withOutTag(br.readLine()); //time
+            } while (s != null);
+            bw.close();
+            br.close();
+            return result;
+        }
+
         private String withOutTag(String s) {
             int i = s.indexOf(">") + 1;
             s = s.substring(i, s.indexOf("<", i));
+            return s;
+        }
+
+        private String parseLink(String s) {
+            s = withOutTag(s);
+            if (s.contains(Const.SITE2))
+                s = s.substring(Const.SITE2.length());
+            else if (s.contains(Const.SITE))
+                s = s.substring(Const.SITE.length());
             return s;
         }
     }
