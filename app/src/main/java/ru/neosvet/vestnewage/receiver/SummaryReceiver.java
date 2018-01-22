@@ -136,10 +136,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             do {
                 bw.write(title);
                 bw.write(Const.N);
-                if (link.contains(Const.SITE))
-                    bw.write(Const.LINK + link.substring(Const.SITE.length()));
-                else
-                    bw.write(link);
+                bw.write(link);
                 bw.write(Const.N);
                 bw.write(des);
                 bw.write(Const.N);
