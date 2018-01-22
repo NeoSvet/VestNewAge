@@ -599,18 +599,23 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void createNoreadList(boolean boolLoad) {
         try {
-            String s;
+            String t, s;
+            int n;
             File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
             boolean bNewNoread = false;
             if (file.exists()) {
                 bNewNoread = (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 while ((s = br.readLine()) != null) {
-                    if (!s.contains(File.separator)) continue;
-                    //Lib.LOG("noread: "+s);
-                    adNoread.addItem(new ListItem(
-                            s.substring(s.lastIndexOf(File.separator) + 1),
-                            s + ".html"));
+                    t = s.substring(s.lastIndexOf(File.separator) + 1);
+                    if (t.contains("_")) {
+                        n = t.indexOf("_");
+                        t = t.substring(0, n) + " (" + t.substring(n + 1) + ")";
+                    }
+                    if (s.contains(Const.POEMS))
+                        t = getResources().getString(R.string.katren) + " " +
+                                getResources().getString(R.string.from) + " " + t;
+                    adNoread.insertItem(0, new ListItem(t, s + ".html"));
                 }
                 br.close();
             }
@@ -618,8 +623,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             file = new File(act.getFilesDir() + File.separator + ADS);
             if (file.exists()) {
                 bNewAds = (System.currentTimeMillis() - file.lastModified() < 10000);
-                String t;
-                int n;
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
                 final String end = "<e>";

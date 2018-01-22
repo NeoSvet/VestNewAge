@@ -174,7 +174,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             File fCalendar = new File(act.getFilesDir() + CalendarFragment.FOLDER);
             fCalendar.mkdir();
             fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
-            BufferedWriter bwCalendar = new BufferedWriter(new FileWriter(fCalendar));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
 
             DataBase dbMonth = new DataBase(act, fCalendar.getName());
             File fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
@@ -183,28 +183,30 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             if (fNoread.exists())
                 tNoread = fNoread.lastModified();
             dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
-            BufferedWriter bwNoread = new BufferedWriter(new FileWriter(fNoread, true));
-
+            StringBuilder sNoread = new StringBuilder();
             for (int i = 0; i < data.size(); i++) {
-                bwCalendar.write(data.get(i).getTitle());
-                bwCalendar.write(Const.N);
+                bw.write(data.get(i).getTitle());
+                bw.write(Const.N);
                 dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
                 for (int j = 0; j < data.get(i).getCount(); j++) {
-                    bwCalendar.write(data.get(i).getLink(j));
-                    bwCalendar.write(Const.N);
+                    bw.write(data.get(i).getLink(j));
+                    bw.write(Const.N);
                     if (tNoread < dItem.getTime())
                         if (!dbMonth.existsPage(data.get(i).getLink(j))) {
-                            bwNoread.write(data.get(i).getLink(j).substring(Const.LINK.length()));
-                            bwNoread.write(Const.N);
-                            bwNoread.flush();
+                            sNoread.insert(0, Const.N);
+                            sNoread.insert(0, data.get(i).getLink(j).substring(Const.LINK.length()));
                         }
                 }
-                bwCalendar.write(Const.N);
-                bwCalendar.flush();
+                bw.write(Const.N);
+                bw.flush();
             }
-            bwCalendar.close();
-            bwNoread.close();
+            bw.close();
             data.clear();
+            if (sNoread.length() > 0) {
+                bw = new BufferedWriter(new FileWriter(fNoread, true));
+                bw.write(sNoread.toString());
+                bw.close();
+            }
         } catch (org.json.JSONException e) {
         }
     }
