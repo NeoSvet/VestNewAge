@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -13,6 +12,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -54,15 +54,10 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String subLogin(String email, String pass) throws Exception {
-        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-        builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST);
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
-        OkHttpClient client = builderClient.build();
+        OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
         String cookie = response.header(Const.SET_COOKIE);
@@ -92,17 +87,12 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String getListWord(String cookie, boolean boolOne) throws Exception {
-        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-        builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST + "edinenie/anketa.html");
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
         builderRequest.addHeader(Const.COOKIE, cookie);
 
-        OkHttpClient client = builderClient.build();
+        OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -148,11 +138,6 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String sendWord(String email, String cookie, int index) throws Exception {
-        OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-        builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST + "savedata.php");
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
@@ -165,7 +150,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
                 .build();
         builderRequest.post(requestBody);
 
-        OkHttpClient client = builderClient.build();
+        OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(

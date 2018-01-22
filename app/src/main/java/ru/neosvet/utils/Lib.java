@@ -35,24 +35,24 @@ public class Lib {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
-    public InputStream getStream(String url) throws Exception {
+    public static OkHttpClient createHttpClient() {
         OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
         builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
         builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
         builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+        return builderClient.build();
+    }
 
+    public InputStream getStream(String url) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(url);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
-        Response response;
-
         builderRequest.header("Referer", Const.SITE);
-        OkHttpClient client = builderClient.build();
-        response = client.newCall(builderRequest.build()).execute();
+        OkHttpClient client = createHttpClient();
+        Response response = client.newCall(builderRequest.build()).execute();
 
         return response.body().byteStream();
     }
-
 
     public File getDBFolder() {
         String s = context.getFilesDir().toString();
