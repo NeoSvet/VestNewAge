@@ -139,7 +139,7 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
                             addLink("", "@");
                     } // lines
                 } else if (line.contains("<p")) {
-                    line = Lib.withOutTags(line).replace(Const.N, Const.BR);
+                    line = Lib.withOutTags(line).replace("</p>", Const.BR).replace(Const.N, "");
                     if (line.length() > 5) {
                         d += line + Const.BR;
                     }
