@@ -186,14 +186,16 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             BufferedWriter bwNoread = new BufferedWriter(new FileWriter(fNoread, true));
 
             for (int i = 0; i < data.size(); i++) {
-                bwCalendar.write(data.get(i).getTitle() + Const.N);
+                bwCalendar.write(data.get(i).getTitle());
+                bwCalendar.write(Const.N);
                 dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
                 for (int j = 0; j < data.get(i).getCount(); j++) {
-                    bwCalendar.write(data.get(i).getLink(j) + Const.N);
+                    bwCalendar.write(data.get(i).getLink(j));
+                    bwCalendar.write(Const.N);
                     if (tNoread < dItem.getTime())
                         if (!dbMonth.existsPage(data.get(i).getLink(j))) {
-                            bwNoread.write(data.get(i).getLink(j)
-                                    .substring(Const.LINK.length()) + Const.N);
+                            bwNoread.write(data.get(i).getLink(j).substring(Const.LINK.length()));
+                            bwNoread.write(Const.N);
                             bwNoread.flush();
                         }
                 }
