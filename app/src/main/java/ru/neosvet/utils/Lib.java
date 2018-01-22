@@ -6,7 +6,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -14,10 +13,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.HttpCookie;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -32,45 +27,8 @@ public class Lib {
         this.context = context;
     }
 
-    public void setCookies(String s, String t, String n) {
-        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        if (s != null)
-            editor.putString(Const.SESSION_ID, s);
-        editor.putString(Const.TIME_LAST_VISIT, t);
-        editor.putString(Const.NOREAD, n);
-        editor.apply();
-    }
-
-    public String getCookies(boolean boolNoreadOnly) {
-//        return SESSION_ID + "=vs50e3l2soiopvmsbk24rvkmu2; "
-//                + TIME_LAST_VISIT + "=16.12.2016+14%3A50%3A22; "
-//                + NOREAD + "=a%3A1%3A%7Bi%3A0%3Ba%3A2%3A%7Bs%3A2%3A%22id%22%3Bi%3A1398%3Bs%3A4%3A%22link%22%3Bs%3A14%3A%22poems%2F15.12.16%22%3B%7D%7D";
-        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
-        if (pref.getString(Const.SESSION_ID, "").equals(""))
-            return "";
-        else if (boolNoreadOnly)
-            return pref.getString(Const.NOREAD, "");
-        else
-            return Const.SESSION_ID + "=" + pref.getString(Const.SESSION_ID, "") + "; "
-                    + Const.TIME_LAST_VISIT + "=" + pref.getString(Const.TIME_LAST_VISIT, "")
-                    + "; " + Const.NOREAD + "=" + pref.getString(Const.NOREAD, "");
-    }
-
-    public long getTimeLastVisit() {
-        SharedPreferences pref = context.getSharedPreferences(Const.COOKIE, context.MODE_PRIVATE);
-        String s = pref.getString(Const.TIME_LAST_VISIT, "");
-        if (s.equals(""))
-            return 0;
-        s = s.replace("%3A", ":").replace("+", " ");
-        try {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            Date d = df.parse(s);
-            return d.getTime();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
+    public static void LOG(String msg) {
+        Log.d("tag", msg);
     }
 
     public static void showToast(Context context, String msg) {
@@ -88,34 +46,13 @@ public class Lib {
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         Response response;
 
-        if (url.contains(Const.SITE) && !url.contains(Const.PRINT)) {
-            String s = getCookies(false);
-            builderRequest.addHeader(Const.COOKIE, s);
-            OkHttpClient client = builderClient.build();
-            response = client.newCall(builderRequest.build()).execute();
+        builderRequest.header("Referer", Const.SITE);
+        OkHttpClient client = builderClient.build();
+        response = client.newCall(builderRequest.build()).execute();
 
-            s = response.header(Const.SET_COOKIE);
-            if (s != null) {
-                String[] m = s.split(";");
-                s = null;
-                String t = null, n = null;
-                for (int i = 0; i < m.length; i++) {
-                    if (m[i].contains(Const.SESSION_ID))
-                        s = HttpCookie.parse(m[i]).get(0).getValue();
-                    else if (m[i].contains(Const.TIME_LAST_VISIT))
-                        t = HttpCookie.parse(m[i]).get(0).getValue();
-                    else if (m[i].contains(Const.NOREAD))
-                        n = HttpCookie.parse(m[i]).get(0).getValue();
-                }
-                setCookies(s, t, n);
-            }
-        } else {
-            builderRequest.header("Referer", Const.SITE);
-            OkHttpClient client = builderClient.build();
-            response = client.newCall(builderRequest.build()).execute();
-        }
         return response.body().byteStream();
     }
+
 
     public File getDBFolder() {
         String s = context.getFilesDir().toString();
@@ -129,10 +66,6 @@ public class Lib {
             file.mkdirs();
         file = new File(context.getFilesDir() + link);
         return file;
-    }
-
-    public static void LOG(String msg) {
-        Log.d("tag", msg);
     }
 
     public void openInApps(String url, String titleChooser) {
