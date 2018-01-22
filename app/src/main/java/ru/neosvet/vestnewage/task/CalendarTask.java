@@ -12,11 +12,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,6 +23,7 @@ import okhttp3.Response;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
@@ -74,10 +74,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
     protected Boolean doInBackground(Integer... params) {
         try {
             // calendar
-            downloadCalendar(params[0], params[1]);
-            if (params[2] == 1) { // noread
-                downloadNoread();
-            }
+            downloadCalendar(params[0], params[1], params[2] == 1);
             downloadAds(); //ads
             return true;
         } catch (Exception e) {
@@ -122,56 +119,18 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         }
     }
 
-    private void downloadNoread() throws Exception {
-        BufferedReader br;
-        if (act instanceof MainActivity) {
-            br = new BufferedReader(new InputStreamReader
-                    (((MainActivity) act).lib.getStream(Const.SITE)));
-        } else {
-            br = new BufferedReader(new InputStreamReader
-                    (((SlashActivity) act).lib.getStream(Const.SITE)));
-        }
-        if (isCancelled())
-            return;
-        String s;
-        while ((s = br.readLine()) != null) {
-            if (s.contains("clear-unread")) break;
-            if (s.contains("menuitem")) {
-                int i = s.indexOf(Const.HREF) + 7;
-                String link = s.substring(i, s.indexOf("\"", i));
-                i = s.indexOf(DataBase.TITLE) + 7;
-                s = s.substring(i, s.indexOf("\"", i)).replace("(", " (");
-                data.add(new ListItem(s, link));
-            }
-        }
-
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                act.openFileOutput(Const.NOREAD, act.MODE_PRIVATE)));
-        for (int i = 0; i < data.size(); i++) {
-            bw.write(data.get(i).getTitle() + Const.N);
-            bw.write(data.get(i).getLink() + Const.N);
-            bw.flush();
-        }
-        bw.close();
-        data.clear();
-    }
-
-    public void downloadCalendar(int year, int month) throws Exception {
+    public void downloadCalendar(int year, int month, boolean boolNoread) throws Exception {
         try {
             JSONObject json, jsonI;
             JSONArray jsonA;
             String r, s;
-            OkHttpClient.Builder builderClient = new OkHttpClient.Builder();
-            builderClient.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-            builderClient.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-            builderClient.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
 
             Request.Builder builderRequest = new Request.Builder();
             builderRequest.url(Const.SITE + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1));
             builderRequest.header(Const.USER_AGENT, act.getPackageName());
 
-            OkHttpClient client = builderClient.build();
+            OkHttpClient client = Lib.createHttpClient();
             Response response = client.newCall(builderRequest.build()).execute();
 
             final String poemOutDict = "poemOutDict";
@@ -211,19 +170,38 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             }
             if (isCancelled())
                 return;
-            File file = new File(act.getFilesDir() + CalendarFragment.CALENDAR);
-            file.mkdir();
-            file = new File(file.toString() + File.separator + month + "." + year);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+
+            File fCalendar = new File(act.getFilesDir() + CalendarFragment.FOLDER);
+            fCalendar.mkdir();
+            fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
+            BufferedWriter bwCalendar = new BufferedWriter(new FileWriter(fCalendar));
+
+            DataBase dbMonth = new DataBase(act, fCalendar.getName());
+            File fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
+            Date dItem;
+            long tNoread = 0;
+            if (fNoread.exists())
+                tNoread = fNoread.lastModified();
+            dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
+            BufferedWriter bwNoread = new BufferedWriter(new FileWriter(fNoread, true));
+
             for (int i = 0; i < data.size(); i++) {
-                bw.write(data.get(i).getTitle() + Const.N);
+                bwCalendar.write(data.get(i).getTitle() + Const.N);
+                dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
                 for (int j = 0; j < data.get(i).getCount(); j++) {
-                    bw.write(data.get(i).getLink(j) + Const.N);
+                    bwCalendar.write(data.get(i).getLink(j) + Const.N);
+                    if (tNoread < dItem.getTime())
+                        if (!dbMonth.existsPage(data.get(i).getLink(j))) {
+                            bwNoread.write(data.get(i).getLink(j)
+                                    .substring(Const.LINK.length()) + Const.N);
+                            bwNoread.flush();
+                        }
                 }
-                bw.write(Const.N);
-                bw.flush();
+                bwCalendar.write(Const.N);
+                bwCalendar.flush();
             }
-            bw.close();
+            bwCalendar.close();
+            bwNoread.close();
             data.clear();
         } catch (org.json.JSONException e) {
         }

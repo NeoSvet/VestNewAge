@@ -45,7 +45,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class CalendarFragment extends Fragment implements DateDialog.Result {
-    public static final String CURRENT_DATE = "current_date", ADS = "ads", CALENDAR = "/calendar/";
+    public static final String CURRENT_DATE = "current_date", ADS = "ads", FOLDER = "/calendar/";
     private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -207,19 +207,25 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             public void onClick(View view) {
                 closeNoread();
                 tvNew.setText("0");
-                act.lib.setCookies("", "", "");
-                File file = new File(act.getFilesDir() + File.separator + ADS);
-                if (file.exists()) {
-                    try {
-                        BufferedReader br = new BufferedReader(new FileReader(file));
-                        String t = br.readLine();
-                        br.close();
-                        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                        bw.write(t);
+                File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
+                BufferedWriter bw;
+                try {
+                    if (file.exists()) {
+                        bw = new BufferedWriter(new FileWriter(file));
+                        bw.write(""); // затираем файл списка непрочитанного
                         bw.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+                    file = new File(act.getFilesDir() + File.separator + ADS);
+                    if (file.exists()) {
+                        BufferedReader br = new BufferedReader(new FileReader(file));
+                        String t = br.readLine(); // читаем время последней загрузки объявлений
+                        br.close();
+                        bw = new BufferedWriter(new FileWriter(file));
+                        bw.write(t); // затираем файл объявлений, оставляем лишь время загрузки
+                        bw.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -532,7 +538,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         try {
             if (task != null)
                 return;
-            File file = new File(act.getFilesDir() + CALENDAR +
+            File file = new File(act.getFilesDir() + FOLDER +
                     dCurrent.getMonth() + "." + dCurrent.getYear());
             if (!file.exists()) {
                 if (boolLoad)
@@ -540,9 +546,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             } else {
                 if (boolLoad) {
                     if (isCurMonth()) {
-                        long t = act.lib.getTimeLastVisit();
-                        if (t > 0)
-                            act.status.checkTime(t);
+                        act.status.checkTime(file.lastModified());
                     }
                     if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
                             (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
@@ -595,22 +599,27 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void createNoreadList(boolean boolLoad) {
         try {
+            String s;
             File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
+            boolean bNewNoread = false;
             if (file.exists()) {
-                String s;
+                bNewNoread = (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 while ((s = br.readLine()) != null) {
-                    adNoread.addItem(new ListItem(s, br.readLine()));
+                    if (!s.contains(File.separator)) continue;
+                    //Lib.LOG("noread: "+s);
+                    adNoread.addItem(new ListItem(
+                            s.substring(s.lastIndexOf(File.separator) + 1),
+                            s + ".html"));
                 }
                 br.close();
             }
             boolean bNewAds = false;
             file = new File(act.getFilesDir() + File.separator + ADS);
-            String s;
-            int n;
             if (file.exists()) {
                 bNewAds = (System.currentTimeMillis() - file.lastModified() < 10000);
                 String t;
+                int n;
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
                 final String end = "<e>";
@@ -647,10 +656,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             }
             adNoread.notifyDataSetChanged();
             s = tvNew.getText().toString();
-            n = adNoread.getCount();
-            tvNew.setText(Integer.toString(n));
-            if (!s.contains(".")) {
-                if (bNewAds || (n > Integer.parseInt(s) && n > 0) || n > 19) {
+            tvNew.setText(Integer.toString(adNoread.getCount()));
+            if (!s.contains(".") && adNoread.getCount() > 0) {
+                if (bNewAds || bNewNoread) {
                     tvNew.clearAnimation();
                     tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
                 }

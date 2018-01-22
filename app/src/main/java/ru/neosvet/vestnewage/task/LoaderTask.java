@@ -189,7 +189,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 if (y == max_y - 1)
                     max_m = d.getMonth() + 1;
                 for (int m = 0; m < max_m && boolStart; m++) {
-                    t2.downloadCalendar(y, m);
+                    t2.downloadCalendar(y, m, false);
                     prog++;
                 }
             }
@@ -230,7 +230,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     break;
                 case R.id.nav_calendar:
                     d = new File[]{
-                            getFile(CalendarFragment.CALENDAR)
+                            getFile(CalendarFragment.FOLDER)
                     };
                     break;
                 default:
@@ -542,8 +542,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         br.close();
         dataBase.close();
-        if (bSinglePage)
-            checkNoreadList(link);
     }
 
     private void sendCounter(String line) {
@@ -559,38 +557,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     }
                 }
             }).start();
-        }
-    }
-
-    private void checkNoreadList(String link) {
-        try {
-            File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-            if (file.exists()) {
-                boolean b = false;
-                String t, l;
-                final String N = "\n";
-                StringBuilder f = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(act.openFileInput(file.getName())));
-                while ((t = br.readLine()) != null) {
-                    l = br.readLine();
-                    if (l.contains(link)) {
-                        b = true;
-                    } else {
-                        f.append(t);
-                        f.append(N);
-                        f.append(l);
-                        f.append(N);
-                    }
-                }
-                br.close();
-                if (b) {
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(act.openFileOutput(Const.NOREAD, act.MODE_PRIVATE)));
-                    bw.write(f.toString());
-                    bw.close();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

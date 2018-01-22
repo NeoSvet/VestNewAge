@@ -211,8 +211,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_calendar:
                 frCalendar = new CalendarFragment();
-                if (tab > 0)
-                    frCalendar.setNew(tab - 1);
                 fragmentTransaction.replace(R.id.my_fragment, frCalendar);
                 break;
             case R.id.nav_book:

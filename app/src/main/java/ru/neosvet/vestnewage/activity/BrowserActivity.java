@@ -35,8 +35,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -693,6 +695,32 @@ public class BrowserActivity extends AppCompatActivity
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void checkNoread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                    BufferedReader br = new BufferedReader(new FileReader(file));
+                    StringBuilder list = new StringBuilder();
+                    String line, s = link.substring(0, link.lastIndexOf("."));
+                    while ((line = br.readLine()) != null) {
+                        if (!s.equals(line)) {
+                            list.append(line);
+                            list.append(Const.N);
+                        }
+                    }
+                    br.close();
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                    bw.write(list.toString());
+                    bw.close();
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
     public void addJournal() {
