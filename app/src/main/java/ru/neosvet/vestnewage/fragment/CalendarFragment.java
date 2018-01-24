@@ -658,9 +658,12 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 br.close();
             }
             adNoread.notifyDataSetChanged();
-            s = tvNew.getText().toString();
+            if (tvNew.getText().toString().contains("."))
+                n = adNoread.getCount();
+            else
+                n = Integer.parseInt(tvNew.getText().toString());
             tvNew.setText(Integer.toString(adNoread.getCount()));
-            if (!s.contains(".") && adNoread.getCount() > 0) {
+            if (adNoread.getCount() > n) {
                 if (bNewAds || bNewNoread) {
                     tvNew.clearAnimation();
                     tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
