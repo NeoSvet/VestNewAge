@@ -160,7 +160,7 @@ public class SlashActivity extends AppCompatActivity {
                 String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
                 link = link.substring(1) + s.substring(0, s.indexOf("-"))
                         + "." + (m.length() == 1 ? "0" : "") + m
-                        + "." + s.substring(s.lastIndexOf("-") + 3) + ".html";
+                        + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML;
                 BrowserActivity.openReader(this, link, null);
             } else if (link.contains("/poems")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
