@@ -48,10 +48,10 @@ public class CalendarItem {
         if (links.get(i).contains("#")) {
             String link = links.get(i);
             link = link.substring(0, link.indexOf("#"))
-                    + ".html" + link.substring(link.indexOf("#"));
+                    + Const.HTML + link.substring(link.indexOf("#"));
             return link;
         }
-        return links.get(i) + ".html";
+        return links.get(i) + Const.HTML;
     }
 
     public int getCount() {

@@ -405,12 +405,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     k++;
                 else {
                     s = s.substring(Const.LINK.length());
-                    if (!s.contains(".html")) {
+                    if (!s.contains(Const.HTML)) {
                         if (s.contains("#"))
                             s = s.substring(0, s.indexOf("#")) +
-                                    ".html" + s.substring(s.indexOf("#"));
+                                    Const.HTML + s.substring(s.indexOf("#"));
                         else
-                            s += ".html";
+                            s += Const.HTML;
                     }
                     downloadPage(s, false);
                     prog++;

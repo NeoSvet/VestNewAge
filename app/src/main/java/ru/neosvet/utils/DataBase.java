@@ -23,7 +23,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     private static String configName(String name) {
-        if (name.contains(".html"))
+        if (name.contains(Const.HTML))
             name = getDatePage(name);
         return name;
     }

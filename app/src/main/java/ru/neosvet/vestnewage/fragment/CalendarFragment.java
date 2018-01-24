@@ -615,7 +615,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     if (s.contains(Const.POEMS))
                         t = getResources().getString(R.string.katren) + " " +
                                 getResources().getString(R.string.from) + " " + t;
-                    adNoread.insertItem(0, new ListItem(t, s + ".html"));
+                    adNoread.insertItem(0, new ListItem(t, s + Const.HTML));
                 }
                 br.close();
             }
