@@ -39,6 +39,7 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -663,11 +664,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             else
                 n = Integer.parseInt(tvNew.getText().toString());
             tvNew.setText(Integer.toString(adNoread.getCount()));
-            if (adNoread.getCount() > n) {
-                if (bNewAds || bNewNoread) {
-                    tvNew.clearAnimation();
-                    tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-                }
+            if (adNoread.getCount() > n || bNewAds || bNewNoread) {
+                tvNew.clearAnimation();
+                tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
             }
         } catch (Exception e) {
             e.printStackTrace();
