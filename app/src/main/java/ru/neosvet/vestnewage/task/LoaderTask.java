@@ -218,9 +218,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         } else { // download it
             switch (p) {
                 case R.id.nav_rss:
-                    d = new File[]{
-                            getFile(SummaryFragment.RSS)
-                    };
+                    d = new File[]{getFile(SummaryFragment.RSS)};
                     break;
                 case R.id.nav_main:
                     d = new File[]{
@@ -229,14 +227,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     };
                     break;
                 case R.id.nav_calendar:
-                    d = new File[]{
-                            getFile(CalendarFragment.FOLDER)
-                    };
+                    d = getFile(CalendarFragment.FOLDER).listFiles();
                     break;
-                default:
-                    d = new File[]{
-                            null
-                    };
+                default: //R.id.nav_book:
+                    d = new File[]{null};
                     break;
             }
         }
@@ -411,7 +405,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     k++;
                 else {
                     s = s.substring(Const.LINK.length());
-                    if (!s.contains(".html")) s += ".html";
+                    if (!s.contains(".html")) {
+                        if (s.contains("#"))
+                            s = s.substring(0, s.indexOf("#")) +
+                                    ".html" + s.substring(s.indexOf("#"));
+                        else
+                            s += ".html";
+                    }
                     downloadPage(s, false);
                     prog++;
                 }
