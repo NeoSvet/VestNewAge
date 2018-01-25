@@ -50,9 +50,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (values.length == 1) { //set max
             max = values[0];
             showD();
-        } else
+        } else {
             di.setProgress(prog);
-
+            di.setMessage(msg);
+        }
     }
 
     public void setAct(Activity act) {
@@ -422,6 +423,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadPage(String link, boolean bSinglePage) throws Exception {
+        msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         DataBase dataBase = new DataBase(act, link);
         if (!bSinglePage && dataBase.existsPage(link))
