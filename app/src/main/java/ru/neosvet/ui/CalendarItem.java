@@ -101,9 +101,4 @@ public class CalendarItem {
         else
             return Integer.toString(num);
     }
-
-    public boolean isCur() {
-        return cur;
-    }
-
 }
