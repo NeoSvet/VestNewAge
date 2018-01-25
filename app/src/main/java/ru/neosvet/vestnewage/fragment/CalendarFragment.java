@@ -39,7 +39,6 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -603,9 +602,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             String t, s;
             int n;
             File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-            boolean bNewNoread = false;
+            boolean bNew = false;
             if (file.exists()) {
-                bNewNoread = (System.currentTimeMillis() - file.lastModified() < 10000);
+                bNew = (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 while ((s = br.readLine()) != null) {
                     t = s.substring(s.lastIndexOf(File.separator) + 1);
@@ -620,10 +619,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 }
                 br.close();
             }
-            boolean bNewAds = false;
             file = new File(act.getFilesDir() + File.separator + ADS);
             if (file.exists()) {
-                bNewAds = (System.currentTimeMillis() - file.lastModified() < 10000);
+                bNew = bNew || (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
                 final String end = "<e>";
@@ -659,12 +657,11 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 br.close();
             }
             adNoread.notifyDataSetChanged();
-            if (tvNew.getText().toString().contains("."))
-                n = adNoread.getCount();
-            else
-                n = Integer.parseInt(tvNew.getText().toString());
+
+            if (!tvNew.getText().toString().contains("."))
+                bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
             tvNew.setText(Integer.toString(adNoread.getCount()));
-            if (adNoread.getCount() > n || bNewAds || bNewNoread) {
+            if (bNew) {
                 tvNew.clearAnimation();
                 tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
             }
