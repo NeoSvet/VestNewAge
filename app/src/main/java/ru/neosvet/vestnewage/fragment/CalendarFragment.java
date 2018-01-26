@@ -658,7 +658,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             }
             adNoread.notifyDataSetChanged();
 
-            if (!tvNew.getText().toString().contains("."))
+            if (adNoread.getCount() == 0)
+                bNew = false;
+            else if (!tvNew.getText().toString().contains("."))
                 bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
             tvNew.setText(Integer.toString(adNoread.getCount()));
             if (bNew) {
