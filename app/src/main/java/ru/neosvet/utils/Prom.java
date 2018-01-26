@@ -28,15 +28,15 @@ public class Prom {
         this.context = context;
         if (context instanceof Activity) {
             Date today = getMoscowDate();
-            if (today.getDay() == 3) { // wednesday
-                if (today.getHours() >= PromReceiver.hour_prom)
-                    return;
-                Activity act = (Activity) context;
-                tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
-                tvPromTime.setVisibility(View.VISIBLE);
-                lib = new Lib(context);
-                setViews();
-            }
+            if (today.getDay() != 3)  // is not wednesday
+                return;
+            if (today.getHours() >= PromReceiver.hour_prom) // today prom was been
+                return;
+            Activity act = (Activity) context;
+            tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
+            tvPromTime.setVisibility(View.VISIBLE);
+            lib = new Lib(context);
+            setViews();
         } else
             lib = new Lib(context);
     }
