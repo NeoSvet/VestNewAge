@@ -73,7 +73,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
 
                 if (result == null) return;
 
-                final String notif_text = context.getResources().getString(R.string.appeared_new) + withOutTag(result[0]);
+                final String notif_text = context.getResources().getString(R.string.appeared_new) + result[0];
                 final Uri notif_uri = Uri.parse(result[1]);
                 final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
                 final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
@@ -129,7 +129,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 br.close();
                 return null;
             }
-            String[] result = new String[]{title, link};
+            String[] result = new String[]{title, Const.SITE + link};
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(fRSS));
             do {
