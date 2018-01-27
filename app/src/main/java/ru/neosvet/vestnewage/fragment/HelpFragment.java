@@ -133,7 +133,7 @@ public class HelpFragment extends Fragment {
         container.findViewById(R.id.bWriteMail).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                act.lib.openInApps("mailto:neosvet333@gmail.com", null);
+                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»", null);
             }
         });
         container.findViewById(R.id.bAppLink).setOnClickListener(new View.OnClickListener() {
