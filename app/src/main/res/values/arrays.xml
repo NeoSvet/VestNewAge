@@ -13,7 +13,6 @@
         <item>день</item>
         <item>&#160;дней</item>
         <item>&#160;дня</item>
-        <item>&#160;назад</item>
     </string-array>
     <string-array name="cabinet_main">
         <item>Восстановить доступ</item>

@@ -96,7 +96,9 @@ public class JournalFragment extends Fragment {
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
-                    item.setDes(act.lib.getDiffDate(now, t) + "\n(" + df.format(new Date(t)) + ")");
+                    item.setDes(act.lib.getDiffDate(now, t) +
+                            getResources().getString(R.string.back)
+                            + "\n(" + df.format(new Date(t)) + ")");
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
                             if (s.contains(Const.POEMS))
@@ -202,7 +204,7 @@ public class JournalFragment extends Fragment {
                 if (s.contains(getResources().getString(R.string.rnd_stih))) {
                     s = s.substring(s.indexOf(Const.N, s.indexOf(
                             getResources().getString(R.string.rnd_stih))) + 1);
-                    Lib.showToast(act,getResources().getString(R.string.long_press_for_mark));
+                    Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
                 } else
                     s = "";
                 BrowserActivity.openReader(act, link, s);

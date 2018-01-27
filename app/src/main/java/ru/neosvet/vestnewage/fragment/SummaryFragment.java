@@ -154,6 +154,7 @@ public class SummaryFragment extends Fragment {
                 p = br.readLine();
                 adSummary.getItem(i).setDes(
                         act.lib.getDiffDate(now, Long.parseLong(p))
+                                + getResources().getString(R.string.back)
                                 + Const.N + t);
                 i++;
             }

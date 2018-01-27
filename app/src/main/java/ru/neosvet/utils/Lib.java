@@ -91,45 +91,45 @@ public class Lib {
         Toast.makeText(context, context.getResources().getText(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
 
-    public String getDiffDate(long now, long t) {
-        t = (now - t) / 1000;
+    public String getDiffDate(long t1, long t2) {
+        t2 = (t1 - t2) / 1000;
         int k;
-        if (t < 60) {
-            if (t == 0)
-                t = 1;
+        if (t2 < 60) {
+            if (t2 == 0)
+                t2 = 1;
             k = 0;
         } else {
-            t = t / 60;
-            if (t < 60)
+            t2 = t2 / 60;
+            if (t2 < 60)
                 k = 3;
             else {
-                t = t / 60;
-                if (t < 24)
+                t2 = t2 / 60;
+                if (t2 < 24)
                     k = 6;
                 else {
-                    t = t / 24;
+                    t2 = t2 / 24;
                     k = 9;
                 }
             }
         }
         String time;
-        if (t > 4 && t < 21)
-            time = t + context.getResources().getStringArray(R.array.time)[1 + k];
+        if (t2 > 4 && t2 < 21)
+            time = t2 + context.getResources().getStringArray(R.array.time)[1 + k];
         else {
-            if (t == 1)
+            if (t2 == 1)
                 time = context.getResources().getStringArray(R.array.time)[k];
             else {
-                int n = (int) t % 10;
+                int n = (int) t2 % 10;
                 if (n == 1)
-                    time = t + " " + context.getResources().getStringArray(R.array.time)[k];
+                    time = t2 + " " + context.getResources().getStringArray(R.array.time)[k];
                 else if (n > 1 && n < 5)
-                    time = t + context.getResources().getStringArray(R.array.time)[2 + k];
+                    time = t2 + context.getResources().getStringArray(R.array.time)[2 + k];
                 else
-                    time = t + context.getResources().getStringArray(R.array.time)[1 + k];
+                    time = t2 + context.getResources().getStringArray(R.array.time)[1 + k];
             }
         }
 
-        return time + context.getResources().getStringArray(R.array.time)[12];
+        return time;
     }
 
     public boolean verifyStoragePermissions(int code) {
