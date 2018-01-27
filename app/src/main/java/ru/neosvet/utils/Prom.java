@@ -28,8 +28,6 @@ public class Prom {
         this.context = context;
         if (context instanceof Activity) {
             Date today = getMoscowDate();
-            if (today.getDay() != 3)  // is not wednesday
-                return;
             if (today.getHours() >= PromReceiver.hour_prom) // today prom was been
                 return;
             Activity act = (Activity) context;

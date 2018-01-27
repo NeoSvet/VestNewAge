@@ -507,9 +507,13 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             }
         }
         n = 1;
+        Date today = new Date();
+        int n_today = 0;
+        if (today.getMonth() == m)
+            n_today = today.getDate();
         while (d.getMonth() == m) {
             adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.white));
-            if (d.getDay() == 3) // wednesday
+            if (d.getDate() == n_today)
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
             n++;
             d.setDate(n);
