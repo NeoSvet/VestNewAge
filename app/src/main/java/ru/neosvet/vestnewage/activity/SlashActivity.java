@@ -25,9 +25,9 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
-import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class SlashActivity extends AppCompatActivity {
@@ -58,6 +58,9 @@ public class SlashActivity extends AppCompatActivity {
             parseUri(data);
 
         adapterNewVersion();
+
+        Prom prom = new Prom(this);
+        prom.synchronTime();
     }
 
     private void adapterNewVersion() {

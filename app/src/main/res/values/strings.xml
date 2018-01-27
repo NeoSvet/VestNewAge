@@ -124,6 +124,10 @@
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
+    <string name="your_clock">Ваши часы&#160;</string>
+    <string name="time_more">торопятся на&#160;</string>
+    <string name="time_less">отстают на&#160;</string>
+    <string name="correct_time">Поправьте и перезапустите приложение</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
