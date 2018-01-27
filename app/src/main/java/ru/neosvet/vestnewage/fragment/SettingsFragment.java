@@ -21,7 +21,7 @@ public class SettingsFragment extends Fragment {
     public static final String SUMMARY = "Summary", PROM = "Prom",
             TIME = "time", SOUND = "sound", VIBR = "vibr";
     private MainActivity act;
-    private View container, tvCheck;
+    private View container;
     private CheckBox cbCheckAuto, cbCheckSound, cbCheckVibr, cbPromNotif, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
@@ -54,13 +54,11 @@ public class SettingsFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                 if (check) {
                     setCheckTime();
-                    tvCheck.setVisibility(View.VISIBLE);
                     sbCheckTime.setVisibility(View.VISIBLE);
                     cbCheckSound.setVisibility(View.VISIBLE);
                     cbCheckVibr.setVisibility(View.VISIBLE);
                 } else {
                     cbCheckAuto.setText(getResources().getString(R.string.auto_check));
-                    tvCheck.setVisibility(View.GONE);
                     sbCheckTime.setVisibility(View.GONE);
                     cbCheckSound.setVisibility(View.GONE);
                     cbCheckVibr.setVisibility(View.GONE);
@@ -159,7 +157,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initViews() {
-        tvCheck = container.findViewById(R.id.tvCheck);
         cbCheckAuto = (CheckBox) container.findViewById(R.id.cbCheckAuto);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
         cbCheckVibr = (CheckBox) container.findViewById(R.id.cbCheckVibr);
@@ -168,7 +165,6 @@ public class SettingsFragment extends Fragment {
         int p = pref.getInt(TIME, -1);
         if (p > -1) {
             cbCheckAuto.setChecked(true);
-            tvCheck.setVisibility(View.VISIBLE);
             sbCheckTime.setVisibility(View.VISIBLE);
             cbCheckSound.setVisibility(View.VISIBLE);
             cbCheckVibr.setVisibility(View.VISIBLE);

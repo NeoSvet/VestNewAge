@@ -108,7 +108,6 @@
     <string name="auto_check">Автоматическая проверка сводки сайта</string>
     <string name="each_one">каждый час        </string>
     <string name="each_more">каждые</string>
-    <string name="check_on_connect">Так же проверка будет производиться при подключении к интернету.</string>
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="on">за</string>
     <string name="secs">30 секунд</string>

@@ -35,15 +35,6 @@
                 android:thumb="@drawable/sb_thumb"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/tvCheck"
-                style="@style/Label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="@string/check_on_connect"
-                android:visibility="gone" />
-
             <CheckBox
                 android:id="@+id/cbCheckSound"
                 style="@style/CheckBox"
