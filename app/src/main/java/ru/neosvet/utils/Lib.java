@@ -28,7 +28,7 @@ public class Lib {
     }
 
     public static void LOG(String msg) {
-        Log.d("tag", msg);
+        Log.d("neotag", msg);
     }
 
     public static void showToast(Context context, String msg) {
