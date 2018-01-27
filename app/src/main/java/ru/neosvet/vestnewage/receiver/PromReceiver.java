@@ -24,7 +24,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 
 
 public class PromReceiver extends WakefulBroadcastReceiver {
-    public static final int notif_id = 222, hour_prom = 11;
+    public static final int notif_id = 222;
 
     public static void setReceiver(Context context, int p, boolean boolNext) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -45,24 +45,14 @@ public class PromReceiver extends WakefulBroadcastReceiver {
     private static Date getPromDate(int q, boolean boolNext) {
         Date d = new Date();
         int m = d.getHours() * 60 + d.getMinutes() + q;
-        // int p = 11 * 60 - d.getTimezoneOffset() - 180;
-        int p = hour_prom * 60 - d.getTimezoneOffset() - 180;
+        int p = Prom.hour_prom * 60 - d.getTimezoneOffset() - 180;
         if (boolNext)
             d.setDate(d.getDate() + 1);
         int n = d.getDate();
         if (m > p)
             d.setDate(++n);
-
-//        while (d.getDay() != 3) tut uncomment // wednesday
-//            d.setDate(++n); tut uncomment
-
-//        if (d.getTimezoneOffset() == -180) {
-//            d.setHours(hour_prom);
-//            d.setMinutes(-q);
-//        } else {
         d.setHours(0);
         d.setMinutes(p - q);
-//        }
         if (q > 0)
             d.setSeconds(-3);
         else

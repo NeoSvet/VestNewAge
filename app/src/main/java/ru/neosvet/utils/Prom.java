@@ -13,11 +13,11 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class Prom {
+    public static final int hour_prom = 11;
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -28,7 +28,7 @@ public class Prom {
         this.context = context;
         if (context instanceof Activity) {
             Date today = getMoscowDate();
-            if (today.getHours() >= PromReceiver.hour_prom) // today prom was been
+            if (today.getHours() >= hour_prom) // today prom was been
                 return;
             Activity act = (Activity) context;
             tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
@@ -161,7 +161,7 @@ public class Prom {
     public String getPromText() {
         Date d = getMoscowDate();
         long now = d.getTime();
-        d.setHours(PromReceiver.hour_prom); // prom time
+        d.setHours(hour_prom); // prom time
         d.setMinutes(0);
         d.setSeconds(0);
         String t = lib.getDiffDate(d.getTime(), now);
