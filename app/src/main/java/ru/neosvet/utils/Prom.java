@@ -237,9 +237,9 @@ public class Prom {
             @Override
             public void run() {
                 try {
-//                    long timecheck = pref.getLong(TIMECHECK, 0);
-//                    if (System.currentTimeMillis() - timecheck < 86400000)
-//                        return;
+                    long timecheck = pref.getLong(TIMECHECK, 0);
+                    if (System.currentTimeMillis() - timecheck < 86400000)
+                        return;
                     Date d = getMoscowDate();
                     long now = d.getTime();
                     d.setHours(hour_prom); // prom time
@@ -282,6 +282,7 @@ public class Prom {
     private void showNotifDiffDate(Date d, int correct) {
         PendingIntent piSettings = PendingIntent.getActivity(context, 0,
                 new Intent(Settings.ACTION_DATE_SETTINGS), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Date d1 = (Date) d.clone();
         d1.setSeconds(correct);
@@ -299,7 +300,7 @@ public class Prom {
                 .setContentText(context.getResources().getString(R.string.correct_time))
                 .setTicker(context.getResources().getString(R.string.correct_time))
                 .setWhen(System.currentTimeMillis())
-                .setFullScreenIntent(piSettings, true)
+                .setFullScreenIntent(piEmpty, false)
                 .setContentIntent(piSettings)
                 .setAutoCancel(true);
         nm.notify(notif_id, mBuilder.build());
