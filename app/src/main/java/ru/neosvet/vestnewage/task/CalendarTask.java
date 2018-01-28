@@ -176,36 +176,46 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
             BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
 
-            DataBase dbMonth = new DataBase(act, fCalendar.getName());
-            File fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-            Date dItem;
+            DataBase dbPages = null;
+            File fNoread = null;
             long tNoread = 0;
-            if (fNoread.exists())
-                tNoread = fNoread.lastModified();
-            dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
             StringBuilder sNoread = new StringBuilder();
+            Date dItem = null;
+            if (boolNoread) {
+                dbPages = new DataBase(act, fCalendar.getName());
+                dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
+                fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
+                if (fNoread.exists())
+                    tNoread = fNoread.lastModified();
+            }
+
             for (int i = 0; i < data.size(); i++) {
                 bw.write(data.get(i).getTitle());
                 bw.write(Const.N);
-                dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
+                if (boolNoread)
+                    dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
                 for (int j = 0; j < data.get(i).getCount(); j++) {
                     bw.write(data.get(i).getLink(j));
                     bw.write(Const.N);
-                    if (tNoread < dItem.getTime())
-                        if (!dbMonth.existsPage(data.get(i).getLink(j))) {
-                            sNoread.insert(0, Const.N);
-                            sNoread.insert(0, data.get(i).getLink(j).substring(Const.LINK.length()));
-                        }
+                    if (boolNoread)
+                        if (tNoread < dItem.getTime())
+                            if (!dbPages.existsPage(data.get(i).getLink(j))) {
+                                sNoread.insert(0, Const.N);
+                                sNoread.insert(0, data.get(i).getLink(j).substring(Const.LINK.length()));
+                            }
                 }
                 bw.write(Const.N);
                 bw.flush();
             }
             bw.close();
             data.clear();
-            if (sNoread.length() > 0) {
-                bw = new BufferedWriter(new FileWriter(fNoread, true));
-                bw.write(sNoread.toString());
-                bw.close();
+            if (boolNoread) {
+                dbPages.close();
+                if (sNoread.length() > 0) {
+                    bw = new BufferedWriter(new FileWriter(fNoread, true));
+                    bw.write(sNoread.toString());
+                    bw.close();
+                }
             }
         } catch (org.json.JSONException e) {
         }
