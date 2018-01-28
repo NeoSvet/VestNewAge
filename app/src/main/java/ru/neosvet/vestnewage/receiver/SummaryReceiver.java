@@ -60,6 +60,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
 
     public static class Service extends IntentService {
         private Context context;
+
         public Service() {
             super("Summary");
         }
@@ -133,12 +134,12 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 br.close();
                 return null;
             }
-            String[] result = new String[]{title, Const.SITE + link};
+            String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
             DataBase dbPages = new DataBase(context, link);
-            BufferedWriter bwRSS = new BufferedWriter(new FileWriter(file));
-            file =  new File(context.getFilesDir() + File.separator + Const.NOREAD);
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            file = new File(context.getFilesDir() + File.separator + Const.NOREAD);
             String noread = "";
-            if(file.exists()) {
+            if (file.exists()) {
                 StringBuilder sb = new StringBuilder();
                 BufferedReader brNoread = new BufferedReader(new FileReader(file));
                 while ((noread = brNoread.readLine()) != null) {
@@ -148,23 +149,23 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 }
                 noread = sb.toString();
             }
-            BufferedWriter bwNoread = new BufferedWriter(new FileWriter(file,true));
+            StringBuilder sNoread = new StringBuilder();
             do {
-                if(!dbPages.existsPage(link)) {
+                if (!dbPages.existsPage(link)) {
                     downloadPage(link);
-                    if(!noread.contains(link)) {
-                        bwNoread.write(link.substring(0, link.lastIndexOf(".")));
-                        bwNoread.write(Const.N);
+                    if (!noread.contains(link)) {
+                        sNoread.insert(0, Const.N);
+                        sNoread.insert(0, link.substring(0, link.lastIndexOf(".")));
                     }
                 }
-                bwRSS.write(title);
-                bwRSS.write(Const.N);
-                bwRSS.write(link);
-                bwRSS.write(Const.N);
-                bwRSS.write(des);
-                bwRSS.write(Const.N);
-                bwRSS.write(Date.parse(s) + Const.N); //time
-                bwRSS.flush();
+                bw.write(title);
+                bw.write(Const.N);
+                bw.write(link);
+                bw.write(Const.N);
+                bw.write(des);
+                bw.write(Const.N);
+                bw.write(Date.parse(s) + Const.N); //time
+                bw.flush();
                 s = br.readLine(); //</item><item> or </channel>
                 if (s.contains("</channel>")) break;
                 title = withOutTag(br.readLine());
@@ -176,10 +177,12 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                     dbPages = new DataBase(context, link);
                 }
             } while (s != null);
-            bwRSS.close();
-            bwNoread.close();
+            bw.close();
             br.close();
             dbPages.close();
+            bw = new BufferedWriter(new FileWriter(file, true));
+            bw.write(sNoread.toString());
+            bw.close();
             return result;
         }
 
