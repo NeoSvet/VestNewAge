@@ -17,6 +17,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
 
@@ -24,11 +25,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryReceiver extends WakefulBroadcastReceiver {
     private static final int notif_id = 111;
@@ -56,19 +59,20 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
     }
 
     public static class Service extends IntentService {
+        private Context context;
         public Service() {
             super("Summary");
         }
 
         @Override
         protected void onHandleIntent(final Intent intent) {
-            final Context context = getApplicationContext();
+            context = getApplicationContext();
             SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             final int p = pref.getInt(SettingsFragment.TIME, -1);
             if (p == -1)
                 return;
             try {
-                String[] result = checkSummary(context);
+                String[] result = checkSummary();
                 setReceiver(context, p); //настраиваем следующую проверку
 
                 if (result == null) return;
@@ -104,7 +108,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             SummaryReceiver.completeWakefulIntent(intent);
         }
 
-        private String[] checkSummary(Context context) throws Exception {
+        private String[] checkSummary() throws Exception {
             Request.Builder builderRequest = new Request.Builder();
             builderRequest.url(Const.SITE + "rss/?" + System.currentTimeMillis());
             builderRequest.header(Const.USER_AGENT, context.getPackageName());
@@ -121,36 +125,67 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             des = withOutTag(br.readLine());
             s = withOutTag(br.readLine());
 
-            File fRSS = new File(context.getFilesDir() + SummaryFragment.RSS);
+            File file = new File(context.getFilesDir() + SummaryFragment.RSS);
             long t = 0;
-            if (fRSS.exists())
-                t = fRSS.lastModified();
+            if (file.exists())
+                t = file.lastModified();
             if (t > Date.parse(s)) { //список в загрузке не нуждается
                 br.close();
                 return null;
             }
             String[] result = new String[]{title, Const.SITE + link};
-
-            BufferedWriter bw = new BufferedWriter(new FileWriter(fRSS));
+            DataBase dbPages = new DataBase(context, link);
+            BufferedWriter bwRSS = new BufferedWriter(new FileWriter(file));
+            file =  new File(context.getFilesDir() + File.separator + Const.NOREAD);
+            String noread = "";
+            if(file.exists()) {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader brNoread = new BufferedReader(new FileReader(file));
+                while ((noread = brNoread.readLine()) != null) {
+                    sb.append(noread);
+                    sb.append(Const.HTML);
+                    sb.append(Const.N);
+                }
+                noread = sb.toString();
+            }
+            BufferedWriter bwNoread = new BufferedWriter(new FileWriter(file,true));
             do {
-                bw.write(title);
-                bw.write(Const.N);
-                bw.write(link);
-                bw.write(Const.N);
-                bw.write(des);
-                bw.write(Const.N);
-                bw.write(Date.parse(s) + Const.N); //time
-                bw.flush();
+                if(!dbPages.existsPage(link)) {
+                    downloadPage(link);
+                    if(!noread.contains(link)) {
+                        bwNoread.write(link.substring(0, link.lastIndexOf(".")));
+                        bwNoread.write(Const.N);
+                    }
+                }
+                bwRSS.write(title);
+                bwRSS.write(Const.N);
+                bwRSS.write(link);
+                bwRSS.write(Const.N);
+                bwRSS.write(des);
+                bwRSS.write(Const.N);
+                bwRSS.write(Date.parse(s) + Const.N); //time
+                bwRSS.flush();
                 s = br.readLine(); //</item><item> or </channel>
                 if (s.contains("</channel>")) break;
                 title = withOutTag(br.readLine());
                 link = parseLink(br.readLine());
                 des = withOutTag(br.readLine());
                 s = withOutTag(br.readLine()); //time
+                if (!dbPages.getName().equals(DataBase.getDatePage(link))) {
+                    dbPages.close();
+                    dbPages = new DataBase(context, link);
+                }
             } while (s != null);
-            bw.close();
+            bwRSS.close();
+            bwNoread.close();
             br.close();
+            dbPages.close();
             return result;
+        }
+
+        private void downloadPage(String link) {
+            LoaderTask loader = new LoaderTask(context);
+            loader.execute(link, DataBase.LINK);
         }
 
         private String withOutTag(String s) {

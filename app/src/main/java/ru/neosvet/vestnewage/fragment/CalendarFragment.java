@@ -664,8 +664,17 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
             if (adNoread.getCount() == 0)
                 bNew = false;
-            else if (!tvNew.getText().toString().contains("."))
-                bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
+            else {
+                if (!tvNew.getText().toString().contains("."))
+                    bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
+                if (!bNew) {
+                    file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
+                    long time = file.lastModified();
+                    file = new File(act.getFilesDir() + SummaryFragment.RSS);
+                    if (Math.abs(time - file.lastModified()) < 2000)
+                        bNew = true;
+                }
+            }
             tvNew.setText(Integer.toString(adNoread.getCount()));
             if (bNew) {
                 tvNew.clearAnimation();

@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.task;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -37,7 +38,7 @@ import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     private int max = 1;
-    private transient Activity act;
+    private transient Context act;
     private transient Lib lib;
     private transient ProgressDialog di;
     private int prog = 0;
@@ -64,7 +65,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
     }
 
-    public LoaderTask(Activity act) {
+    public LoaderTask(Context act) {
         this.act = act;
         lib = new Lib(act);
     }
@@ -98,7 +99,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         super.onPostExecute(result);
         if (act instanceof BrowserActivity) {
             ((BrowserActivity) act).finishLoad(result);
-        } else {
+        } else if (act instanceof MainActivity) {
             di.dismiss();
             if (boolStart) {
                 ((MainActivity) act).finishAllLoad(result, boolAll);
@@ -114,10 +115,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected Boolean doInBackground(String... params) {
         try {
-            if (params.length < 2) {
+            if (params.length < 2) { // download all or section
                 startTimer();
                 int p = -1;
-                if (params.length == 1) {
+                if (params.length == 1) { // download section
                     p = Integer.parseInt(params[0]);
                     boolAll = false;
                 }
@@ -125,12 +126,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadAll(p);
                 return true;
             }
+            // download file or page
             String link = params[0];
-            if (link.contains(".png"))
+            if (link.contains(".png")) // download file
                 downloadFile(link, params[1]);
             else {
-                downloadStyle(params.length == 3);
-                if (!link.equals(""))
+                downloadStyle(params.length == 3); // if download/replce style
+                if (!link.equals("")) // download page
                     downloadPage(link, true);
             }
             return true;
@@ -184,7 +186,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
         if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
-            CalendarTask t2 = new CalendarTask(act);
+            CalendarTask t2 = new CalendarTask((Activity)act);
             int max_y = d.getYear() + 1, max_m = 12;
             for (int y = 116; y < max_y && boolStart; y++) {
                 if (y == max_y - 1)
