@@ -671,8 +671,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
                     long time = file.lastModified();
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
-                    if (Math.abs(time - file.lastModified()) < 2000)
+                    if (Math.abs(time - file.lastModified()) < 2000) {
                         bNew = true;
+                        file.setLastModified(time - 2500);
+                    }
                 }
             }
             tvNew.setText(Integer.toString(adNoread.getCount()));
