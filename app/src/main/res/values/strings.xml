@@ -141,6 +141,7 @@
     <string name="crash">Сбой</string>
     <!--SummaryReceiver-->
     <string name="appeared_new">Новое:&#160;</string>
+    <string name="appeared_new_some">Имеются новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>

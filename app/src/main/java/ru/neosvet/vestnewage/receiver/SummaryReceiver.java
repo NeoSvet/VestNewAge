@@ -78,7 +78,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
 
                 if (result == null) return;
 
-                final String notif_text = context.getResources().getString(R.string.appeared_new) + result[0];
+                final String notif_text = result[0];
                 final Uri notif_uri = Uri.parse(result[1]);
                 final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
                 final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
@@ -134,6 +134,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 br.close();
                 return null;
             }
+            int count_new = 1;
             String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
             DataBase dbPages = new DataBase(context, link);
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -152,6 +153,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             StringBuilder sNoread = new StringBuilder();
             do {
                 if (!dbPages.existsPage(link)) {
+                    count_new++;
                     downloadPage(link);
                     if (!noread.contains(link)) {
                         sNoread.insert(0, Const.N);
@@ -183,6 +185,9 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             bw = new BufferedWriter(new FileWriter(file, true));
             bw.write(sNoread.toString());
             bw.close();
+            if (count_new > 1) {
+                result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
+            }
             return result;
         }
 
