@@ -174,31 +174,30 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             File fCalendar = new File(act.getFilesDir() + CalendarFragment.FOLDER);
             fCalendar.mkdir();
             fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
-
+            StringBuilder sCalendar = new StringBuilder();
             DataBase dbPages = null;
             File fNoread = null;
-            long tNoread = 0;
             StringBuilder sNoread = new StringBuilder();
-            Date dItem = null;
             if (boolNoread) {
+                BufferedReader br = new BufferedReader(new FileReader(fCalendar));
+                while ((s = br.readLine()) != null) {
+                    sCalendar.append(s);
+                    sCalendar.append(Const.N);
+                }
+                br.close();
                 dbPages = new DataBase(act, fCalendar.getName());
-                dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
                 fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-                if (fNoread.exists())
-                    tNoread = fNoread.lastModified();
             }
+            BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
 
             for (int i = 0; i < data.size(); i++) {
                 bw.write(data.get(i).getTitle());
                 bw.write(Const.N);
-                if (boolNoread)
-                    dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
                 for (int j = 0; j < data.get(i).getCount(); j++) {
                     bw.write(data.get(i).getLink(j));
                     bw.write(Const.N);
                     if (boolNoread)
-                        if (tNoread < dItem.getTime())
+                        if (sCalendar.indexOf(data.get(i).getLink(j)) == -1)
                             if (!dbPages.existsPage(data.get(i).getLink(j))) {
                                 sNoread.insert(0, Const.N);
                                 sNoread.insert(0, data.get(i).getLink(j).substring(Const.LINK.length()));
