@@ -367,17 +367,17 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 br.readLine();
             }
             while ((line = br.readLine()) != null) {
-                bwLight.write(line + Const.N);
-                if (line.contains("#000")) {
-                    line = line.replace("000000", "000").replace("#000", "#fff");
-                } else
-                    line = line.replace("#fff", "#000");
                 if (line.contains("P B {")) { //correct bold
                     br.readLine(); //font-weight:600;
                     br.readLine(); //}
                     line = br.readLine();
                 }
                 line = line.replace("333333", "333").replace("#333", "#ccc");
+                bwLight.write(line + Const.N);
+                if (line.contains("#000")) {
+                    line = line.replace("000000", "000").replace("#000", "#fff");
+                } else
+                    line = line.replace("#fff", "#000");
                 bwDark.write(line + Const.N);
                 if (line.contains("body")) {
                     line = "    padding-left: 5px;\n    padding-right: 5px;";
