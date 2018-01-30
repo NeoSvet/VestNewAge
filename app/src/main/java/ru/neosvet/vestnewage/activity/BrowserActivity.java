@@ -259,7 +259,7 @@ public class BrowserActivity extends AppCompatActivity
         status.setCrash(false);
         status.setLoad(true);
         if (bReplaceStyle)
-            loader.execute(link, DataBase.LINK, "");
+            loader.execute(link + "?" + System.currentTimeMillis(), DataBase.LINK, "");
         else
             loader.execute(link, DataBase.LINK);
     }

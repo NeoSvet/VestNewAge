@@ -186,7 +186,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
         if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
-            CalendarTask t2 = new CalendarTask((Activity)act);
+            CalendarTask t2 = new CalendarTask((Activity) act);
             int max_y = d.getYear() + 1, max_m = 12;
             for (int y = 116; y < max_y && boolStart; y++) {
                 if (y == max_y - 1)
@@ -425,14 +425,20 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadPage(String link, boolean bSinglePage) throws Exception {
-        msg = link;
+        if (link.contains("?"))
+            msg = link.substring(0, link.indexOf("?"));
+        else
+            msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        DataBase dataBase = new DataBase(act, link);
-        if (!bSinglePage && dataBase.existsPage(link))
+        DataBase dataBase = new DataBase(act, msg);
+        if (!bSinglePage && dataBase.existsPage(msg))
             return;
         String line, s = link;
         final String par = "</p>";
-        if (link.contains("#")) s = s.substring(0, s.indexOf("#"));
+        if (link.contains("#")) {
+            s = s.substring(0, s.indexOf("#"));
+            if (link.contains("?")) s += link.substring(link.indexOf("?"));
+        }
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + s + Const.PRINT));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
