@@ -17,7 +17,6 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import java.util.Date;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -33,7 +32,7 @@ public class PromReceiver extends WakefulBroadcastReceiver {
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(piProm);
         if (p > -1) {
-            am.set(AlarmManager.RTC_WAKEUP, getNextPromDate(p).getTime(), piProm); //System.currentTimeMillis()+3000
+            am.set(AlarmManager.RTC_WAKEUP, getPromDate(p, boolNext).getTime(), piProm); //System.currentTimeMillis()+3000
         }
     }
 
@@ -43,13 +42,18 @@ public class PromReceiver extends WakefulBroadcastReceiver {
         startWakefulService(context, service);
     }
 
-    private static Date getNextPromDate(int p) {
+    private static Date getPromDate(int q, boolean boolNext) {
         Date d = new Date();
-        int m = Prom.hour_prom * 60 - d.getTimezoneOffset() - 180;
-        d.setDate(d.getDate() + 1); //next day
+        int m = d.getHours() * 60 + d.getMinutes() + q;
+        int p = Prom.hour_prom * 60 - d.getTimezoneOffset() - 180;
+        if (boolNext)
+            d.setDate(d.getDate() + 1);
+        int n = d.getDate();
+        if (m > p)
+            d.setDate(++n);
         d.setHours(0);
-        d.setMinutes(m - p);
-        if (p > 0)
+        d.setMinutes(p - q);
+        if (q > 0)
             d.setSeconds(-3);
         else
             d.setSeconds(-30);
