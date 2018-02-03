@@ -82,7 +82,7 @@ public class Noread {
 
     public void clearList() {
         Cursor cursor = db.query(NAME, null, null,
-                null, null, null, DataBase.TIME);
+                null, null, null, null);
         if (cursor.moveToFirst()) {
             int iLink = cursor.getColumnIndex(DataBase.LINK);
             int iTime = cursor.getColumnIndex(DataBase.TIME);
