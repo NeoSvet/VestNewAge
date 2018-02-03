@@ -68,7 +68,7 @@ public class SlashActivity extends AppCompatActivity {
             adapterNewVersion();
 
         Prom prom = new Prom(this);
-        prom.synchronTime();
+        prom.synchronTime(false);
     }
 
     private void getProtected() {

@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
+import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.R;
@@ -21,7 +22,7 @@ public class SettingsFragment extends Fragment {
     public static final String SUMMARY = "Summary", PROM = "Prom",
             TIME = "time", SOUND = "sound", VIBR = "vibr";
     private MainActivity act;
-    private View container;
+    private View container, bSyncTime;
     private CheckBox cbCheckAuto, cbCheckSound, cbCheckVibr, cbPromNotif, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
@@ -128,6 +129,14 @@ public class SettingsFragment extends Fragment {
                 saveProm();
             }
         });
+        bSyncTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Prom prom = new Prom(act.getApplicationContext());
+                prom.synchronTime(true);
+                bSyncTime.setEnabled(false);
+            }
+        });
     }
 
     private void saveSummary() {
@@ -153,7 +162,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbPromSound.isChecked());
         editor.putBoolean(VIBR, cbPromVibr.isChecked());
         editor.apply();
-        PromReceiver.setReceiver(act, p, false);
+        PromReceiver.setReceiver(act, p);
     }
 
     private void initViews() {
@@ -190,6 +199,7 @@ public class SettingsFragment extends Fragment {
         }
         cbPromSound.setChecked(pref.getBoolean(SOUND, false));
         cbPromVibr.setChecked(pref.getBoolean(VIBR, true));
+        bSyncTime = container.findViewById(R.id.bSyncTime);
     }
 
     private void setCheckTime() {

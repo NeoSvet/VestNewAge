@@ -112,6 +112,7 @@
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="on">за</string>
     <string name="secs">30 секунд</string>
+    <string name="sync_time">Сверить время с сайтом</string>
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
@@ -124,10 +125,6 @@
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
-    <string name="your_clock">Ваши часы&#160;</string>
-    <string name="time_more">торопятся на&#160;</string>
-    <string name="time_less">отстают на&#160;</string>
-    <string name="correct_time">Поправьте и перезапустите приложение</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>

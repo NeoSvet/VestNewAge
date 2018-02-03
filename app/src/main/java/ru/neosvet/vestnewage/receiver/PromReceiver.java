@@ -17,6 +17,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import java.util.Date;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -26,38 +27,29 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 public class PromReceiver extends WakefulBroadcastReceiver {
     public static final int notif_id = 222;
 
-    public static void setReceiver(Context context, int p, boolean boolNext) {
+    public static void setReceiver(Context context, int p) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, PromReceiver.class);
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(piProm);
         if (p > -1) {
-            am.set(AlarmManager.RTC_WAKEUP, getPromDate(p, boolNext).getTime(), piProm); //System.currentTimeMillis()+3000
+            Prom prom = new Prom(context);
+            Date d = prom.getPromDate();
+            d.setMinutes(d.getMinutes() - p);
+            if (p > 0)
+                d.setSeconds(d.getSeconds() - 3);
+            else
+                d.setSeconds(d.getSeconds() - 30);
+            if (d.getTime() < System.currentTimeMillis())
+                d.setHours(d.getHours() + 24);
+            am.set(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
         }
     }
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
+    public void onReceive(Context context, Intent intent) {
         Intent service = new Intent(context, Service.class);
         startWakefulService(context, service);
-    }
-
-    private static Date getPromDate(int q, boolean boolNext) {
-        Date d = new Date();
-        int m = d.getHours() * 60 + d.getMinutes() + q;
-        int p = Prom.hour_prom * 60 - d.getTimezoneOffset() - 180;
-        if (boolNext)
-            d.setDate(d.getDate() + 1);
-        int n = d.getDate();
-        if (m > p)
-            d.setDate(++n);
-        d.setHours(0);
-        d.setMinutes(p - q);
-        if (q > 0)
-            d.setSeconds(-3);
-        else
-            d.setSeconds(-30);
-        return d;
     }
 
     public static class Service extends IntentService {
@@ -100,7 +92,7 @@ public class PromReceiver extends WakefulBroadcastReceiver {
             if (boolVibr)
                 mBuilder.setVibrate(new long[]{500, 1500});
             nm.notify(notif_id, mBuilder.build());
-            setReceiver(context, p, true);
+            setReceiver(context, p);
             PromReceiver.completeWakefulIntent(intent);
         }
     }

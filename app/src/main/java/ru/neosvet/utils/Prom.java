@@ -1,15 +1,10 @@
 package ru.neosvet.utils;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,7 +26,7 @@ import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
     public static final int notif_id = 333, hour_prom = 11;
-    private static final String CORRECT = "correct", TIMECHECK = "timecheck";
+    private static final String TIMEPROM = "timeprom";
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -46,8 +41,8 @@ public class Prom {
         if (context instanceof SlashActivity)
             return;
         if (context instanceof Activity) {
-            Date today = getMoscowDate();
-            if (today.getHours() >= hour_prom) // today prom was been
+            long t = getPromDate().getTime() - System.currentTimeMillis();
+            if (t > 39600000) // today prom was been (>11 hours)
                 return;
             Activity act = (Activity) context;
             tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
@@ -128,6 +123,27 @@ public class Prom {
         return tvPromTime != null;
     }
 
+    public Date getPromDate() {
+        long timeprom = pref.getLong(TIMEPROM, 0);
+        long now;
+        if (timeprom > 0) {
+            now = System.currentTimeMillis();
+            while (timeprom < now)
+                timeprom += 86400000; //+24 hours
+        } else {
+            Date d = getMoscowDate();
+            now = d.getTime();
+            d.setHours(hour_prom); // prom time
+            d.setMinutes(0);
+            d.setSeconds(0);
+            timeprom = d.getTime();
+            if (timeprom < now)
+                timeprom += 86400000; //+24 hours
+            timeprom = System.currentTimeMillis() + timeprom - now;
+        }
+        return new Date(timeprom);
+    }
+
     private Date getMoscowDate() {
         Date d = new Date();
         // Moscow getTimezoneOffset == -180
@@ -176,16 +192,11 @@ public class Prom {
     }
 
     public String getPromText() {
-        Date d = getMoscowDate();
-        long now = d.getTime();
-        d.setHours(hour_prom); // prom time
-        d.setMinutes(0);
-        d.setSeconds(pref.getInt(CORRECT, 0));
-        String t = lib.getDiffDate(d.getTime(), now);
+        String t = lib.getDiffDate(getPromDate().getTime(), System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        d = new Date();
+        Date d = new Date();
         for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
             if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
                 if (i < 3) {
@@ -232,22 +243,18 @@ public class Prom {
         return t;
     }
 
-    public void synchronTime() {
+    public void synchronTime(boolean boolRefresh) {
+        if (!boolRefresh) {
+            if (pref.getLong(TIMEPROM, 0) > 0)
+                return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    long timecheck = pref.getLong(TIMECHECK, 0);
-                    if (System.currentTimeMillis() - timecheck < 86400000)
-                        return;
-                    Date d = getMoscowDate();
-                    long now = d.getTime();
-                    d.setHours(hour_prom); // prom time
-                    d.setMinutes(0);
-                    d.setSeconds(0);
-                    int timeleft1 = (int) ((d.getTime() - now) / 1000);
-                    if (timeleft1 < 0)
-                        return;
+
+                    long timeprom = System.currentTimeMillis();
+                    timeprom -= timeprom % 1000;
                     InputStream in = new BufferedInputStream(lib.getStream(Const.SITE));
                     BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
                     String line;
@@ -259,51 +266,21 @@ public class Prom {
                     }
                     br.close();
                     if (line != null) {
-                        int timeleft2 = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
-                        int correct = timeleft2 - timeleft1;
-                        if (correct != pref.getInt(CORRECT, 0))
-                            PromReceiver.setReceiver(context,
-                                    pref.getInt(SettingsFragment.TIME, -1), false);
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putInt(CORRECT, correct);
-                        if (Math.abs(correct) > 60) {
-                            showNotifDiffDate(d, correct);
-                        } else {
-                            editor.putLong(TIMECHECK, System.currentTimeMillis());
+                        int timeleft = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
+                        timeprom += timeleft * 1000;
+                        Date d = new Date(timeprom);
+                        if (timeprom != pref.getLong(TIMEPROM, 0)) {
+                            int t = pref.getInt(SettingsFragment.TIME, -1);
+                            if (t > -1)
+                                PromReceiver.setReceiver(context, t);
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putLong(TIMEPROM, timeprom);
+                            editor.apply();
                         }
-                        editor.apply();
                     }
                 } catch (Exception e) {
                 }
             }
         }).start();
     }
-
-    private void showNotifDiffDate(Date d, int correct) {
-        PendingIntent piSettings = PendingIntent.getActivity(context, 0,
-                new Intent(Settings.ACTION_DATE_SETTINGS), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Date d1 = (Date) d.clone();
-        d1.setSeconds(correct);
-        StringBuilder title = new StringBuilder(context.getResources().getString(R.string.your_clock));
-        if (correct > 0) {
-            title.append(context.getResources().getString(R.string.time_more));
-            title.append(lib.getDiffDate(d1.getTime(), d.getTime()));
-        } else {
-            title.append(context.getResources().getString(R.string.time_less));
-            title.append(lib.getDiffDate(d.getTime(), d1.getTime()));
-        }
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.star)
-                .setContentTitle(title.toString())
-                .setContentText(context.getResources().getString(R.string.correct_time))
-                .setTicker(context.getResources().getString(R.string.correct_time))
-                .setWhen(System.currentTimeMillis())
-                .setFullScreenIntent(piEmpty, false)
-                .setContentIntent(piSettings)
-                .setAutoCancel(true);
-        nm.notify(notif_id, mBuilder.build());
-    }
-
 }
