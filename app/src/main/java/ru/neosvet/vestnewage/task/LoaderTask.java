@@ -352,9 +352,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         try {
             File f = new File(file);
             //if(f.exists()) f.delete();
+            builderRequest.url(url);
+            Response response = client.newCall(builderRequest.build()).execute();
+            InputStream in = new BufferedInputStream(response.body().byteStream());
             OutputStream out = new FileOutputStream(f, false);
             byte[] buf = new byte[1024];
-            InputStream in = new BufferedInputStream(lib.getStream(url));
             int i;
             while ((i = in.read(buf)) > 0) {
                 out.write(buf, 0, i);
