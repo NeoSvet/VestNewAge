@@ -57,7 +57,8 @@ public class SlashActivity extends AppCompatActivity {
         if (data != null)
             parseUri(data);
 
-        adapterNewVersion();
+        if (lib.getPreviosVer() < 10)
+            adapterNewVersion();
 
         Prom prom = new Prom(this);
         prom.synchronTime();
@@ -70,7 +71,7 @@ public class SlashActivity extends AppCompatActivity {
                 try {
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
-                    if(!pref.getString(Const.NOREAD, "").equals("")) {
+                    if (!pref.getString(Const.NOREAD, "").equals("")) {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putString(Const.NOREAD, "");
                         editor.apply();

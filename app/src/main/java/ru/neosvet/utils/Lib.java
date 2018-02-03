@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -21,6 +22,7 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
+    private final String MAIN = "main", VER = "ver";
     private Context context;
 
     public Lib(Context context) {
@@ -33,6 +35,19 @@ public class Lib {
 
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    }
+
+    public int getPreviosVer() {
+        SharedPreferences pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
+        int v = pref.getInt(VER, 0);
+        try {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt(VER, context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode);
+            editor.apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return v;
     }
 
     public static OkHttpClient createHttpClient() {
