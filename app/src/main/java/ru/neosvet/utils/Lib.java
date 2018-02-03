@@ -109,7 +109,7 @@ public class Lib {
                 Intent app = new Intent(context, SlashActivity.class);
                 app.setData(Uri.parse(url));
                 context.startActivity(app);
-                throw new Exception();
+                throw new Exception("Fail protect");
             }
             response = client.newCall(builderRequest.build()).execute();
         }
