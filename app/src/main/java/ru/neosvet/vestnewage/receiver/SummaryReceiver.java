@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
@@ -22,7 +23,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.concurrent.TimeoutException;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -105,6 +108,10 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 nm.notify(notif_id, mBuilder.build());
             } catch (Exception e) {
                 e.printStackTrace();
+                if (Build.VERSION.SDK_INT > 23) { // Android 7+
+                    if (e instanceof UnknownHostException || e instanceof TimeoutException)
+                        setReceiver(context, p);
+                }
             }
             SummaryReceiver.completeWakefulIntent(intent);
         }
