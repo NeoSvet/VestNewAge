@@ -177,7 +177,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             Noread noread = null;
             Date dItem = null;
             if (boolNoread) {
-                dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
+                dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
                 noread = new Noread(act);
             }
 
