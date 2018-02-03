@@ -14,16 +14,16 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Date;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -110,14 +110,11 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
         }
 
         private String[] checkSummary() throws Exception {
-            Request.Builder builderRequest = new Request.Builder();
-            builderRequest.url(Const.SITE + "rss/?" + System.currentTimeMillis());
-            builderRequest.header(Const.USER_AGENT, context.getPackageName());
-            OkHttpClient client = Lib.createHttpClient();
-            Response response = client.newCall(builderRequest.build()).execute();
-
+            Lib lib = new Lib(context);
+            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
+                    + "rss/?" + System.currentTimeMillis()));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s, title, link, des;
-            BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
             s = br.readLine();
             while (!s.contains("item"))
                 s = br.readLine();
