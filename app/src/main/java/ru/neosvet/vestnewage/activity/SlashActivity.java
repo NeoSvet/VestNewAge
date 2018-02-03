@@ -89,13 +89,16 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
+                    File file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                    if(file.exists())
+                        file.delete();
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
                     if (!pref.getString(Const.NOREAD, "").equals("")) {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putString(Const.NOREAD, "");
                         editor.apply();
-                        File file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                        file = new File(getFilesDir() + File.separator + Const.NOREAD);
                         if (file.exists())
                             file.delete();
                     }

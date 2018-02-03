@@ -19,7 +19,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -128,7 +128,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             title = withOutTag(br.readLine());
             link = parseLink(br.readLine());
             des = withOutTag(br.readLine());
-            s = withOutTag(br.readLine());
+            s = withOutTag(br.readLine()); //time
 
             File file = new File(context.getFilesDir() + SummaryFragment.RSS);
             long t = 0;
@@ -140,29 +140,14 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             }
             int count_new = 1;
             String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
-            DataBase dbPages = new DataBase(context, link);
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            file = new File(context.getFilesDir() + File.separator + Const.NOREAD);
-            String noread = "";
-            if (file.exists()) {
-                StringBuilder sb = new StringBuilder();
-                BufferedReader brNoread = new BufferedReader(new FileReader(file));
-                while ((noread = brNoread.readLine()) != null) {
-                    sb.append(noread);
-                    sb.append(Const.HTML);
-                    sb.append(Const.N);
-                }
-                noread = sb.toString();
-            }
-            StringBuilder sNoread = new StringBuilder();
+            Noread noread = new Noread(context);
+            Date d;
             do {
-                if (!dbPages.existsPage(link)) {
+                d = new Date(Date.parse(s));
+                if (!noread.addLink(link, d)) { //!existsPage
                     count_new++;
                     downloadPage(link);
-                    if (!noread.contains(link)) {
-                        sNoread.insert(0, Const.N);
-                        sNoread.insert(0, link.substring(0, link.lastIndexOf(".")));
-                    }
                 }
                 bw.write(title);
                 bw.write(Const.N);
@@ -170,7 +155,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 bw.write(Const.N);
                 bw.write(des);
                 bw.write(Const.N);
-                bw.write(Date.parse(s) + Const.N); //time
+                bw.write(d.getTime() + Const.N); //time
                 bw.flush();
                 s = br.readLine(); //</item><item> or </channel>
                 if (s.contains("</channel>")) break;
@@ -178,17 +163,10 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 link = parseLink(br.readLine());
                 des = withOutTag(br.readLine());
                 s = withOutTag(br.readLine()); //time
-                if (!dbPages.getName().equals(DataBase.getDatePage(link))) {
-                    dbPages.close();
-                    dbPages = new DataBase(context, link);
-                }
             } while (s != null);
             bw.close();
             br.close();
-            dbPages.close();
-            bw = new BufferedWriter(new FileWriter(file, true));
-            bw.write(sNoread.toString());
-            bw.close();
+            noread.close();
             if (count_new > 1) {
                 result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
             }

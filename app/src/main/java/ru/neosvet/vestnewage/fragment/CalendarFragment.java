@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,6 +40,7 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -207,20 +209,15 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             public void onClick(View view) {
                 closeNoread();
                 tvNew.setText("0");
-                File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-                BufferedWriter bw;
                 try {
-                    if (file.exists()) {
-                        bw = new BufferedWriter(new FileWriter(file));
-                        bw.write(""); // затираем файл списка непрочитанного
-                        bw.close();
-                    }
-                    file = new File(act.getFilesDir() + File.separator + ADS);
+                    Noread noread = new Noread(act);
+                    noread.clearList();
+                    File file = new File(act.getFilesDir() + File.separator + ADS);
                     if (file.exists()) {
                         BufferedReader br = new BufferedReader(new FileReader(file));
                         String t = br.readLine(); // читаем время последней загрузки объявлений
                         br.close();
-                        bw = new BufferedWriter(new FileWriter(file));
+                        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
                         bw.write(t); // затираем файл объявлений, оставляем лишь время загрузки
                         bw.close();
                     }
@@ -605,12 +602,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         try {
             String t, s;
             int n;
-            File file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
             boolean bNew = false;
-            if (file.exists()) {
-                bNew = (System.currentTimeMillis() - file.lastModified() < 10000);
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                while ((s = br.readLine()) != null) {
+            Noread noread = new Noread(act);
+            long time = noread.lastModified();
+            if (time > 0) {
+                bNew = (System.currentTimeMillis() - time < 10000);
+                List<String> links = noread.getList();
+                for (int i = 0; i < links.size(); i++) {
+                    s = links.get(i);
                     t = s.substring(s.lastIndexOf(File.separator) + 1);
                     if (t.contains("_")) {
                         n = t.indexOf("_");
@@ -619,11 +618,11 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     if (s.contains(Const.POEMS))
                         t = getResources().getString(R.string.katren) + " " +
                                 getResources().getString(R.string.from) + " " + t;
-                    adNoread.insertItem(0, new ListItem(t, s + Const.HTML));
+                    adNoread.addItem(new ListItem(t, s + Const.HTML));
                 }
-                br.close();
+                links.clear();
             }
-            file = new File(act.getFilesDir() + File.separator + ADS);
+            File file = new File(act.getFilesDir() + File.separator + ADS);
             if (file.exists()) {
                 bNew = bNew || (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
@@ -668,8 +667,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 if (!tvNew.getText().toString().contains("."))
                     bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
                 if (!bNew) {
-                    file = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-                    long time = file.lastModified();
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
                     if (Math.abs(time - file.lastModified()) < 2000) {
                         bNew = true;

@@ -16,12 +16,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
@@ -171,23 +173,13 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             File fCalendar = new File(act.getFilesDir() + CalendarFragment.FOLDER);
             fCalendar.mkdir();
             fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
-            StringBuilder sCalendar = new StringBuilder();
-            DataBase dbPages = null;
-            File fNoread = null;
-            StringBuilder sNoread = new StringBuilder();
-            if (boolNoread) {
-                if(fCalendar.exists()) {
-                    br = new BufferedReader(new FileReader(fCalendar));
-                    while ((s = br.readLine()) != null) {
-                        sCalendar.append(s);
-                        sCalendar.append(Const.N);
-                    }
-                    br.close();
-                }
-                dbPages = new DataBase(act, fCalendar.getName());
-                fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
-            }
             BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
+            Noread noread = null;
+            Date dItem = null;
+            if (boolNoread) {
+                dItem = new Date("01/" + (month < 9 ? "0" : "") + (month + 1) + "/" + (year + 1900));
+                noread = new Noread(act);
+            }
 
             for (int i = 0; i < data.size(); i++) {
                 bw.write(data.get(i).getTitle());
@@ -195,26 +187,18 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                 for (int j = 0; j < data.get(i).getCount(); j++) {
                     bw.write(data.get(i).getLink(j));
                     bw.write(Const.N);
-                    if (boolNoread)
-                        if (sCalendar.indexOf(data.get(i).getLink(j)) == -1)
-                            if (!dbPages.existsPage(data.get(i).getLink(j))) {
-                                sNoread.insert(0, Const.N);
-                                sNoread.insert(0, data.get(i).getLink(j).substring(Const.LINK.length()));
-                            }
+                    if (boolNoread) {
+                        dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
+                        noread.addLink(data.get(i).getLink(j).replace(Const.LINK, ""), dItem);
+                    }
                 }
                 bw.write(Const.N);
                 bw.flush();
             }
             bw.close();
             data.clear();
-            if (boolNoread) {
-                dbPages.close();
-                if (sNoread.length() > 0) {
-                    bw = new BufferedWriter(new FileWriter(fNoread, true));
-                    bw.write(sNoread.toString());
-                    bw.close();
-                }
-            }
+            if (boolNoread)
+                noread.close();
         } catch (org.json.JSONException e) {
         }
     }
