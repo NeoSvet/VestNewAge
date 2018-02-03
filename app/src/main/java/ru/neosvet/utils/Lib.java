@@ -8,18 +8,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.SlashActivity;
 
 public class Lib {
     private final String MAIN = "main", VER = "ver";
@@ -86,7 +92,27 @@ public class Lib {
             builderRequest.addHeader(Const.COOKIE, getProtected());
         }
         OkHttpClient client = createHttpClient();
-        Response response = client.newCall(builderRequest.build()).execute();
+        Response response;
+        try {
+            response = client.newCall(builderRequest.build()).execute();
+        } catch (UnknownHostException e) {
+            builderRequest.url(url.replace(Const.SITE, Const.SITE2));
+            response = client.newCall(builderRequest.build()).execute();
+        }
+        if (url.contains(Const.SITE)) {
+            InputStream in = new BufferedInputStream(response.body().byteStream());
+            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+            String s = br.readLine();
+            br.close();
+            if(s.contains("aes.js")) {
+                setProtected("");
+                Intent app = new Intent(context, SlashActivity.class);
+                app.setData(Uri.parse(url));
+                context.startActivity(app);
+                throw new Exception();
+            }
+            response = client.newCall(builderRequest.build()).execute();
+        }
 
         return response.body().byteStream();
     }
