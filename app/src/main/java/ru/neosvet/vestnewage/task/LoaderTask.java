@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -19,12 +20,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.ui.ProgressDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -32,6 +37,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
@@ -41,8 +47,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private transient Context act;
     private transient Lib lib;
     private transient ProgressDialog di;
+    private transient Request.Builder builderRequest;
+    private transient OkHttpClient client;
     private int prog = 0;
-    private String msg;
+    private String msg, site;
     private boolean boolStart = true, boolAll = true;
 
     @Override
@@ -61,6 +69,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         this.act = act;
         lib = new Lib(act);
         if (boolStart) {
+            try {
+                initClient();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             showD();
         }
     }
@@ -115,6 +128,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected Boolean doInBackground(String... params) {
         try {
+            initClient();
             if (params.length < 2) { // download all or section
                 startTimer();
                 int p = -1;
@@ -359,8 +373,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
             String line = "";
             int i;
-            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "org/otk/tpl/otk/css/style-print.css"));
-            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+
+            builderRequest.url(site + "org/otk/tpl/otk/css/style-print.css");
+            Response response = client.newCall(builderRequest.build()).execute();
+            BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
+
             BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
             BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
             for (i = 0; i < 7; i++) {
@@ -439,8 +456,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + s + Const.PRINT));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        builderRequest.url(site + s + Const.PRINT);
+        Response response = client.newCall(builderRequest.build()).execute();
+        BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         boolean b = false;
@@ -562,11 +580,41 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             new Thread(new Runnable() {
                 public void run() {
                     try {
-                        lib.getStream(link_counter);
+                        builderRequest.url(link_counter);
+                        Response response = client.newCall(builderRequest.build()).execute();
+                        response.close();
                     } catch (Exception ex) {
                     }
                 }
             }).start();
+        }
+    }
+
+    private void initClient() throws Exception {
+        builderRequest = new Request.Builder();
+        builderRequest.url(Const.SITE);
+        builderRequest.header(Const.USER_AGENT, act.getPackageName());
+        builderRequest.header("Referer", Const.SITE);
+        builderRequest.addHeader(Const.COOKIE, lib.getProtected());
+        client = lib.createHttpClient();
+        Response response;
+        try {
+            response = client.newCall(builderRequest.build()).execute();
+            site = Const.SITE;
+        } catch (UnknownHostException ex) {
+            builderRequest.url(Const.SITE2);
+            response = client.newCall(builderRequest.build()).execute();
+            site = Const.SITE2;
+        }
+        InputStream in = new BufferedInputStream(response.body().byteStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        String s = br.readLine();
+        br.close();
+        if (s.contains("aes.js")) {
+            lib.setProtected("");
+            Intent app = new Intent(act, SlashActivity.class);
+            act.startActivity(app);
+            throw new Exception("Fail protect");
         }
     }
 }
