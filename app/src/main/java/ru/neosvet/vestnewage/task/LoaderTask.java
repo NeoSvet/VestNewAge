@@ -442,13 +442,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadPage(String link, boolean bSinglePage) throws Exception {
-        if (link.contains("?"))
-            msg = link.substring(0, link.indexOf("?"));
-        else
-            msg = link;
+        msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        DataBase dataBase = new DataBase(act, msg);
-        if (!bSinglePage && dataBase.existsPage(msg))
+        DataBase dataBase = new DataBase(act, link);
+        if (!bSinglePage && dataBase.existsPage(link))
             return;
         String line, s = link;
         final String par = "</p>";
