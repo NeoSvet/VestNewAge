@@ -6,20 +6,18 @@ import android.os.AsyncTask;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -31,6 +29,7 @@ import ru.neosvet.vestnewage.fragment.CalendarFragment;
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
     private transient CalendarFragment frm;
     private transient Activity act;
+    private transient Lib lib;
     List<ListItem> data = new ArrayList<ListItem>();
 
     public CalendarTask(CalendarFragment frm) {
@@ -39,15 +38,18 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
 
     public CalendarTask(Activity act) {
         this.act = act;
+        lib = new Lib(act);
     }
 
     public void setFrm(CalendarFragment frm) {
         this.frm = frm;
         act = frm.getActivity();
+        lib = new Lib(act);
     }
 
     public void setAct(Activity act) {
         this.act = act;
+        lib = new Lib(act);
     }
 
     @Override
@@ -95,11 +97,9 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             }
             String s = "http://neosvet.ucoz.ru/ads_vna.txt";
             if (act instanceof MainActivity) {
-                br = new BufferedReader(new InputStreamReader
-                        (((MainActivity) act).lib.getStream(s)));
+                br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
             } else {
-                br = new BufferedReader(new InputStreamReader
-                        (((SlashActivity) act).lib.getStream(s)));
+                br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
             }
             if (isCancelled())
                 return;
@@ -124,19 +124,16 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             JSONObject json, jsonI;
             JSONArray jsonA;
             String r, s;
-
-            Request.Builder builderRequest = new Request.Builder();
-            builderRequest.url(Const.SITE + "?json&year="
-                    + (year + 1900) + "&month=" + (month + 1));
-            builderRequest.header(Const.USER_AGENT, act.getPackageName());
-
-            OkHttpClient client = Lib.createHttpClient();
-            Response response = client.newCall(builderRequest.build()).execute();
-
-            final String poemOutDict = "poemOutDict";
+            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
+                    + (year + 1900) + "&month=" + (month + 1)));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+            s = br.readLine();
+            br.close();
             if (isCancelled())
                 return;
-            json = new JSONObject(response.body().string());
+
+            final String poemOutDict = "poemOutDict";
+            json = new JSONObject(s);
             int n;
             for (int i = 0; i < json.names().length(); i++) {
                 s = json.names().get(i).toString();
@@ -179,12 +176,14 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             File fNoread = null;
             StringBuilder sNoread = new StringBuilder();
             if (boolNoread) {
-                BufferedReader br = new BufferedReader(new FileReader(fCalendar));
-                while ((s = br.readLine()) != null) {
-                    sCalendar.append(s);
-                    sCalendar.append(Const.N);
+                if(fCalendar.exists()) {
+                    br = new BufferedReader(new FileReader(fCalendar));
+                    while ((s = br.readLine()) != null) {
+                        sCalendar.append(s);
+                        sCalendar.append(Const.N);
+                    }
+                    br.close();
                 }
-                br.close();
                 dbPages = new DataBase(act, fCalendar.getName());
                 fNoread = new File(act.getFilesDir() + File.separator + Const.NOREAD);
             }
