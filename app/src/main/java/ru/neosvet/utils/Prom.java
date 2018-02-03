@@ -252,7 +252,6 @@ public class Prom {
             @Override
             public void run() {
                 try {
-
                     long timeprom = System.currentTimeMillis();
                     timeprom -= timeprom % 1000;
                     InputStream in = new BufferedInputStream(lib.getStream(Const.SITE));
