@@ -267,7 +267,6 @@ public class Prom {
                     if (line != null) {
                         int timeleft = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
                         timeprom += timeleft * 1000;
-                        Date d = new Date(timeprom);
                         if (timeprom != pref.getLong(TIMEPROM, 0)) {
                             int t = pref.getInt(SettingsFragment.TIME, -1);
                             if (t > -1)
