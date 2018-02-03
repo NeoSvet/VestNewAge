@@ -52,8 +52,9 @@ public class Noread {
 
     public void deleteLink(String link) {
         link = link.replace(Const.HTML, "");
-        db.delete(NAME, DataBase.LINK + DataBase.Q, new String[]{link});
-        time = System.currentTimeMillis();
+        if (db.delete(NAME, DataBase.LINK
+                + DataBase.Q, new String[]{link}) > 0)
+            time = System.currentTimeMillis();
         close();
     }
 
