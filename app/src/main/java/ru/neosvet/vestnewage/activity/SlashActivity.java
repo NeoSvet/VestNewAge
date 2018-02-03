@@ -29,6 +29,7 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
@@ -89,16 +90,16 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    File file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                    File file = new File(getFilesDir() + File.separator + Noread.NAME);
                     if(file.exists())
                         file.delete();
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
-                    if (!pref.getString(Const.NOREAD, "").equals("")) {
+                    if (!pref.getString(Noread.NAME, "").equals("")) {
                         SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(Const.NOREAD, "");
+                        editor.putString(Noread.NAME, "");
                         editor.apply();
-                        file = new File(getFilesDir() + File.separator + Const.NOREAD);
+                        file = new File(getFilesDir() + File.separator + Noread.NAME);
                         if (file.exists())
                             file.delete();
                     }

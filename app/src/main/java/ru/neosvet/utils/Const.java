@@ -10,5 +10,5 @@ public interface Const {
     String LINK = "<link>", N = "\n", NN = "\n\n", AND = "&", BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", HTML = ".html", PRINT = "?styletpl=print";
     String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie";
-    String TASK = "task", HREF = "href", DIALOG = "dialog", POEMS = "poems", NOREAD = "noread", FIRST = "first";
+    String TASK = "task", HREF = "href", DIALOG = "dialog", POEMS = "poems", FIRST = "first";
 }

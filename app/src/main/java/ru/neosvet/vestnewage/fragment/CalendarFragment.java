@@ -98,7 +98,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dateDialog.dismiss();
         else if (dialog > -1)
             alert.dismiss();
-        outState.putBoolean(Const.NOREAD, (lvNoread.getVisibility() == View.VISIBLE));
+        outState.putBoolean(Noread.NAME, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
@@ -118,7 +118,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     setStatus(true);
                 } else task = null;
             }
-            if (state.getBoolean(Const.NOREAD, false)) {
+            if (state.getBoolean(Noread.NAME, false)) {
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);

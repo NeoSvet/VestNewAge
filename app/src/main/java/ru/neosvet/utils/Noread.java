@@ -15,6 +15,7 @@ import java.util.List;
  */
 
 public class Noread {
+    public static final String NAME = "noread";
     private Context context;
     private DataBase dbNoread, dbPages;
     private SQLiteDatabase db;
@@ -22,7 +23,7 @@ public class Noread {
 
     public Noread(Context context) {
         this.context = context;
-        dbNoread = new DataBase(context, Const.NOREAD);
+        dbNoread = new DataBase(context, NAME);
         db = dbNoread.getWritableDatabase();
     }
 
@@ -36,7 +37,7 @@ public class Noread {
         }
         if (dbPages.existsPage(link)) return true; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
-        Cursor cursor = db.query(Const.NOREAD, new String[]{DataBase.LINK},
+        Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean b = cursor.moveToFirst();
         cursor.close();
@@ -44,21 +45,21 @@ public class Noread {
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, date.getTime());
         cv.put(DataBase.LINK, link);
-        db.insert(Const.NOREAD, null, cv);
+        db.insert(NAME, null, cv);
         time = System.currentTimeMillis();
         return false;
     }
 
     public void deleteLink(String link) {
         link = link.replace(Const.HTML, "");
-        db.delete(Const.NOREAD, DataBase.LINK + DataBase.Q, new String[]{link});
+        db.delete(NAME, DataBase.LINK + DataBase.Q, new String[]{link});
         time = System.currentTimeMillis();
         close();
     }
 
     public List<String> getList() {
         List<String> links = new ArrayList<String>();
-        Cursor cursor = db.query(Const.NOREAD, null, null,
+        Cursor cursor = db.query(NAME, null, null,
                 null, null, null, DataBase.TIME);
         if (cursor.moveToFirst()) {
             int iLink = cursor.getColumnIndex(DataBase.LINK);
@@ -74,12 +75,12 @@ public class Noread {
     }
 
     public long lastModified() {
-        SharedPreferences pref = context.getSharedPreferences(Const.NOREAD, Context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
         return pref.getLong(DataBase.TIME, 0);
     }
 
     public void clearList() {
-        Cursor cursor = db.query(Const.NOREAD, null, null,
+        Cursor cursor = db.query(NAME, null, null,
                 null, null, null, DataBase.TIME);
         if (cursor.moveToFirst()) {
             int iLink = cursor.getColumnIndex(DataBase.LINK);
@@ -89,7 +90,7 @@ public class Noread {
                 if (cursor.getLong(iTime) > 0) {
                     cv = new ContentValues();
                     cv.put(DataBase.TIME, 0);
-                    db.update(Const.NOREAD, cv, DataBase.LINK + DataBase.Q,
+                    db.update(NAME, cv, DataBase.LINK + DataBase.Q,
                             new String[]{cursor.getString(iLink)});
                 }
             } while (cursor.moveToNext());
@@ -104,7 +105,7 @@ public class Noread {
         db.close();
         dbNoread.close();
         if (time > 0) {
-            SharedPreferences pref = context.getSharedPreferences(Const.NOREAD, Context.MODE_PRIVATE);
+            SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putLong(DataBase.TIME, time);
             editor.apply();
