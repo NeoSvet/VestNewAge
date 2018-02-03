@@ -443,7 +443,10 @@ public class BrowserActivity extends AppCompatActivity
         status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                status.onClick();
+                if (status.isTime())
+                    downloadPage(true);
+                else
+                    status.onClick();
             }
         });
     }
@@ -641,6 +644,8 @@ public class BrowserActivity extends AppCompatActivity
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                     s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
                     d = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
+                        status.checkTime(d.getTime() + 2592000000L);
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
                     bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
                     bw.flush();
