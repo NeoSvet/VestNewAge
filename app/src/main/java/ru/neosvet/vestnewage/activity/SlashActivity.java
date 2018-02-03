@@ -42,6 +42,7 @@ public class SlashActivity extends AppCompatActivity {
     private CalendarTask task = null;
     public Lib lib;
     private CookieManager cookieManager;
+    boolean boolReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,8 @@ public class SlashActivity extends AppCompatActivity {
 
         Prom prom = new Prom(this);
         prom.synchronTime(false);
+
+        boolReady = true;
     }
 
     private void getProtected() {
@@ -91,7 +94,7 @@ public class SlashActivity extends AppCompatActivity {
             public void run() {
                 try {
                     File file = new File(getFilesDir() + File.separator + Noread.NAME);
-                    if(file.exists())
+                    if (file.exists())
                         file.delete();
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
@@ -281,7 +284,7 @@ public class SlashActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (task == null) {
+                if (boolReady && task == null) {
                     startActivity(main);
                     finish();
                 } else {
