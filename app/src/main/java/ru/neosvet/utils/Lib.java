@@ -48,6 +48,7 @@ public class Lib {
         builderRequest.url(url);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
+        builderRequest.addHeader(Const.COOKIE, "Protected2=0c4ad6af19e2906c1245ae026fb9eeb7;");
         OkHttpClient client = createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
