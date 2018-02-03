@@ -375,11 +375,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
             String line = "";
             int i;
-
-            builderRequest.url(site + "org/otk/tpl/otk/css/style-print.css");
+            builderRequest.url(Const.SITE2 + "org/otk/tpl/otk/css/style-print.css");
             Response response = client.newCall(builderRequest.build()).execute();
             BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
-
             BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
             BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
             for (i = 0; i < 7; i++) {
