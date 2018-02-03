@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.R;
 public class Lib {
     private final String MAIN = "main", VER = "ver";
     private Context context;
+    private SharedPreferences pref = null;
 
     public Lib(Context context) {
         this.context = context;
@@ -37,17 +38,35 @@ public class Lib {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
+    public void setProtected(String value) {
+        if (pref == null)
+            pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(Const.COOKIE, value);
+        editor.apply();
+    }
+
+    public String getProtected() {
+        if (pref == null)
+            pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
+        return pref.getString(Const.COOKIE, "");
+    }
+
     public int getPreviosVer() {
-        SharedPreferences pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
-        int v = pref.getInt(VER, 0);
+        if (pref == null)
+            pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
+        int prev = pref.getInt(VER, 0);
         try {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt(VER, context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode);
-            editor.apply();
+            int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
+            if (prev < cur) {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt(VER, cur);
+                editor.apply();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return v;
+        return prev;
     }
 
     public static OkHttpClient createHttpClient() {
@@ -62,8 +81,10 @@ public class Lib {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(url);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
-        builderRequest.header("Referer", Const.SITE);
-        builderRequest.addHeader(Const.COOKIE, "Protected2=0c4ad6af19e2906c1245ae026fb9eeb7;");
+        if (url.contains(Const.SITE)) {
+            builderRequest.header("Referer", Const.SITE);
+            builderRequest.addHeader(Const.COOKIE, getProtected());
+        }
         OkHttpClient client = createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 

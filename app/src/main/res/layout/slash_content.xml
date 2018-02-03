@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_slash"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
+    android:orientation="vertical"
     tools:context="ru.neosvet.vestnewage.activity.SlashActivity"
     tools:showIn="@layout/slash_activity">
 
@@ -15,4 +15,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:src="@drawable/big_star" />
+
+    <WebView
+        android:id="@+id/wvProtected"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </LinearLayout>

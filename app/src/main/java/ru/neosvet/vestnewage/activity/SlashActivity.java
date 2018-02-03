@@ -15,6 +15,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import java.io.File;
 import java.util.Date;
@@ -36,6 +40,7 @@ public class SlashActivity extends AppCompatActivity {
     private boolean boolAnim;
     private CalendarTask task = null;
     public Lib lib;
+    private CookieManager cookieManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +62,26 @@ public class SlashActivity extends AppCompatActivity {
         if (data != null)
             parseUri(data);
 
+        getProtected();
+
         if (lib.getPreviosVer() < 10)
             adapterNewVersion();
 
         Prom prom = new Prom(this);
         prom.synchronTime();
+    }
+
+    private void getProtected() {
+        if (lib.getProtected().length() > 0)
+            return;
+        WebView wvProtected = (WebView) findViewById(R.id.wvProtected);
+        CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvProtected.getContext());
+        cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieSyncManager.getInstance().sync();
+        wvProtected.getSettings().setJavaScriptEnabled(true);
+        wvProtected.setWebViewClient(new wvClient());
+        wvProtected.loadUrl(Const.SITE);
     }
 
     private void adapterNewVersion() {
@@ -297,6 +317,12 @@ public class SlashActivity extends AppCompatActivity {
             }
         }, 10);
 
+    }
+
+    private class wvClient extends WebViewClient {
+        public void onPageFinished(WebView view, String url) {
+            lib.setProtected(cookieManager.getCookie(Const.SITE));
+        }
     }
 
 //    @Override
