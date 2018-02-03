@@ -38,11 +38,11 @@ import ru.neosvet.vestnewage.task.CalendarTask;
 public class SlashActivity extends AppCompatActivity {
     private Intent main;
     private StatusBar status;
-    private boolean boolAnim;
+    private boolean boolAnim = true;
     private CalendarTask task = null;
     public Lib lib;
     private CookieManager cookieManager;
-    boolean boolReady = false;
+    boolean boolProtected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,29 +55,31 @@ public class SlashActivity extends AppCompatActivity {
         main = new Intent(getApplicationContext(), MainActivity.class);
         status = new StatusBar(this, findViewById(R.id.pStatus));
         lib = new Lib(this);
-        Uri data = getIntent().getData();
-        if (data == null)
-            initTask(savedInstanceState);
-        else
-            boolAnim = true;
-        initAnimation();
-        if (data != null)
-            parseUri(data);
 
-        getProtected();
+        initAnimation();
+        if (getProtected()) {
+            boolProtected = true;
+            initData(savedInstanceState);
+
+            Prom prom = new Prom(this);
+            prom.synchronTime(false);
+        }
 
         if (lib.getPreviosVer() < 10)
             adapterNewVersion();
-
-        Prom prom = new Prom(this);
-        prom.synchronTime(false);
-
-        boolReady = true;
     }
 
-    private void getProtected() {
+    private void initData(Bundle state) {
+        Uri data = getIntent().getData();
+        if (data == null)
+            initTask(state);
+        else
+            parseUri(data);
+    }
+
+    private boolean getProtected() {
         if (lib.getProtected().length() > 0)
-            return;
+            return true;
         WebView wvProtected = (WebView) findViewById(R.id.wvProtected);
         CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvProtected.getContext());
         cookieManager = CookieManager.getInstance();
@@ -86,6 +88,7 @@ public class SlashActivity extends AppCompatActivity {
         wvProtected.getSettings().setJavaScriptEnabled(true);
         wvProtected.setWebViewClient(new wvClient());
         wvProtected.loadUrl(Const.SITE);
+        return false;
     }
 
     private void adapterNewVersion() {
@@ -235,7 +238,6 @@ public class SlashActivity extends AppCompatActivity {
 
     private void initTask(Bundle state) {
         if (state != null) {
-            boolAnim = false;
             task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 task.setAct(this);
@@ -243,7 +245,6 @@ public class SlashActivity extends AppCompatActivity {
             }
             return;
         }
-        boolAnim = true;
         Date dCurrent = new Date();
         File file = new File(getFilesDir() + CalendarFragment.FOLDER +
                 dCurrent.getMonth() + "." + dCurrent.getYear());
@@ -258,7 +259,7 @@ public class SlashActivity extends AppCompatActivity {
     public void finishLoad() {
         main.putExtra(MainActivity.CUR_ID, R.id.nav_calendar);
         task = null;
-        if (!boolAnim) {
+        if (!boolAnim && boolProtected) {
             startActivity(main);
             finish();
         }
@@ -274,8 +275,6 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     private void initAnimation() {
-        if (!boolAnim)
-            return;
         Animation anStar = AnimationUtils.loadAnimation(this, R.anim.flash);
         anStar.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -284,7 +283,8 @@ public class SlashActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (boolReady && task == null) {
+                boolAnim = false;
+                if (boolProtected && task == null) {
                     startActivity(main);
                     finish();
                 } else {
@@ -301,7 +301,6 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     private void setStatus() {
-        boolAnim = false;
         status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -328,7 +327,20 @@ public class SlashActivity extends AppCompatActivity {
 
     private class wvClient extends WebViewClient {
         public void onPageFinished(WebView view, String url) {
+            if(!boolProtected) {
+                boolProtected = true;
+                return;
+            }
             lib.setProtected(cookieManager.getCookie(Const.SITE));
+            view.stopLoading();
+
+            Prom prom = new Prom(SlashActivity.this);
+            prom.synchronTime(false);
+            if (!boolAnim && task == null) {
+                initData(null);
+                startActivity(main);
+                finish();
+            }
         }
     }
 
