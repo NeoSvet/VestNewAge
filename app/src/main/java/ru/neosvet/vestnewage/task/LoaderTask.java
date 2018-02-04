@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -16,11 +15,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +34,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
@@ -50,7 +46,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private transient Request.Builder builderRequest;
     private transient OkHttpClient client;
     private int prog = 0;
-    private String msg, site;
+    private String msg;
     private boolean boolStart = true, boolAll = true;
 
     @Override
@@ -141,7 +137,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 return true;
             }
             // download file or page
-            String link = params[0];
+            String link = params[0].replace(Const.SITE, Const.SITE2);
             if (link.contains(".png")) // download file
                 downloadFile(link, params[1]);
             else {
@@ -181,9 +177,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (p == -1 || p == R.id.nav_main) {
             SiteTask t4 = new SiteTask((MainActivity) act);
             String[] url = new String[]{
-                    Const.SITE,
-                    Const.SITE + "novosti.html",
-                    Const.SITE + "media.html"
+                    Const.SITE2,
+                    Const.SITE2 + "novosti.html",
+                    Const.SITE2 + "media.html"
             };
             String[] file = new String[]{
                     getFile(SiteFragment.MAIN).toString(),
@@ -453,7 +449,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
-        builderRequest.url(site + s + Const.PRINT);
+        builderRequest.url(Const.SITE2 + s + Const.PRINT);
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -589,29 +585,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
     private void initClient() throws Exception {
         builderRequest = new Request.Builder();
-        builderRequest.url(Const.SITE);
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
         builderRequest.header("Referer", Const.SITE);
-        builderRequest.addHeader(Const.COOKIE, lib.getProtected());
         client = lib.createHttpClient();
-        Response response;
-        try {
-            response = client.newCall(builderRequest.build()).execute();
-            site = Const.SITE;
-        } catch (UnknownHostException ex) {
-            builderRequest.url(Const.SITE2);
-            response = client.newCall(builderRequest.build()).execute();
-            site = Const.SITE2;
-        }
-        InputStream in = new BufferedInputStream(response.body().byteStream());
-        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        String s = br.readLine();
-        br.close();
-        if (s.contains("aes.js")) {
-            lib.setProtected("");
-            Intent app = new Intent(act, SlashActivity.class);
-            act.startActivity(app);
-            throw new Exception("Fail protect");
-        }
     }
 }

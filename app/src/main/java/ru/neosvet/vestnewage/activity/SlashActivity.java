@@ -15,10 +15,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import java.io.File;
 import java.util.Date;
@@ -41,8 +37,6 @@ public class SlashActivity extends AppCompatActivity {
     private boolean boolAnim = true;
     private CalendarTask task = null;
     public Lib lib;
-    private CookieManager cookieManager;
-    boolean boolProtected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +51,10 @@ public class SlashActivity extends AppCompatActivity {
         lib = new Lib(this);
 
         initAnimation();
-        if (getProtected()) {
-            boolProtected = true;
-            initData(savedInstanceState);
+        initData(savedInstanceState);
 
-            Prom prom = new Prom(this);
-            prom.synchronTime(false);
-        }
+        Prom prom = new Prom(this);
+        prom.synchronTime(false);
 
         if (lib.getPreviosVer() < 10)
             adapterNewVersion();
@@ -75,20 +66,6 @@ public class SlashActivity extends AppCompatActivity {
             initTask(state);
         else
             parseUri(data);
-    }
-
-    private boolean getProtected() {
-        if (lib.getProtected().length() > 0)
-            return true;
-        WebView wvProtected = (WebView) findViewById(R.id.wvProtected);
-        CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvProtected.getContext());
-        cookieManager = CookieManager.getInstance();
-        cookieManager.setAcceptCookie(true);
-        cookieSyncManager.getInstance().sync();
-        wvProtected.getSettings().setJavaScriptEnabled(true);
-        wvProtected.setWebViewClient(new wvClient());
-        wvProtected.loadUrl(Const.SITE);
-        return false;
     }
 
     private void adapterNewVersion() {
@@ -259,7 +236,7 @@ public class SlashActivity extends AppCompatActivity {
     public void finishLoad() {
         main.putExtra(MainActivity.CUR_ID, R.id.nav_calendar);
         task = null;
-        if (!boolAnim && boolProtected) {
+        if (!boolAnim) {
             startActivity(main);
             finish();
         }
@@ -284,7 +261,7 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 boolAnim = false;
-                if (boolProtected && task == null) {
+                if (task == null) {
                     startActivity(main);
                     finish();
                 } else {
@@ -323,25 +300,6 @@ public class SlashActivity extends AppCompatActivity {
             }
         }, 10);
 
-    }
-
-    private class wvClient extends WebViewClient {
-        public void onPageFinished(WebView view, String url) {
-            if(!boolProtected) {
-                boolProtected = true;
-                return;
-            }
-            lib.setProtected(cookieManager.getCookie(Const.SITE));
-            view.stopLoading();
-
-            Prom prom = new Prom(SlashActivity.this);
-            prom.synchronTime(false);
-            if (!boolAnim && task == null) {
-                initData(null);
-                startActivity(main);
-                finish();
-            }
-        }
     }
 
 //    @Override

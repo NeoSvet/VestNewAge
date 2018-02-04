@@ -118,7 +118,7 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
 
         private String[] checkSummary() throws Exception {
             Lib lib = new Lib(context);
-            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
+            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE2
                     + "rss/?" + System.currentTimeMillis()));
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s, title, link, des;
