@@ -22,9 +22,7 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    private final String MAIN = "main", VER = "ver";
     private Context context;
-    private SharedPreferences pref = null;
 
     public Lib(Context context) {
         this.context = context;
@@ -39,14 +37,13 @@ public class Lib {
     }
 
     public int getPreviosVer() {
-        if (pref == null)
-            pref = context.getSharedPreferences(MAIN, context.MODE_PRIVATE);
-        int prev = pref.getInt(VER, 0);
+        SharedPreferences pref = context.getSharedPreferences("main", context.MODE_PRIVATE);
+        int prev = pref.getInt("ver", 0);
         try {
             int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
             if (prev < cur) {
                 SharedPreferences.Editor editor = pref.edit();
-                editor.putInt(VER, cur);
+                editor.putInt("ver", cur);
                 editor.apply();
             }
         } catch (Exception e) {
