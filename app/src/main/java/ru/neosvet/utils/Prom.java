@@ -252,8 +252,6 @@ public class Prom {
             @Override
             public void run() {
                 try {
-                    long timeprom = System.currentTimeMillis();
-                    timeprom -= timeprom % 1000;
                     InputStream in = new BufferedInputStream(lib.getStream(Const.SITE));
                     BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
                     String line;
@@ -265,6 +263,8 @@ public class Prom {
                     }
                     br.close();
                     if (line != null) {
+                        long timeprom = System.currentTimeMillis();
+                        timeprom -= timeprom % 1000;
                         int timeleft = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
                         timeprom += timeleft * 1000;
                         if (timeprom != pref.getLong(TIMEPROM, 0)) {
