@@ -134,14 +134,14 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 br.close();
                 return null;
             }
-            int count_new = 1;
+            int count_new = 0;
             String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             Noread noread = new Noread(context);
             Date d;
             do {
                 d = new Date(Date.parse(s));
-                if (!noread.addLink(link, d)) { //!existsPage
+                if (noread.addLink(link, d)) {
                     count_new++;
                     downloadPage(link);
                 }

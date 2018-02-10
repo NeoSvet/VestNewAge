@@ -27,7 +27,7 @@ public class Noread {
         db = dbNoread.getWritableDatabase();
     }
 
-    public boolean addLink(String link, Date date) { //return existsPage
+    public boolean addLink(String link, Date date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
             dbPages = new DataBase(context, link);
@@ -35,19 +35,19 @@ public class Noread {
             dbPages.close();
             dbPages = new DataBase(context, link);
         }
-        if (dbPages.existsPage(link)) return true; // скаченную страницу игнорируем
+        if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
         Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean b = cursor.moveToFirst();
         cursor.close();
-        if (b) return false; // уже есть в списке непрочитанного
+        if (b) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, date.getTime());
         cv.put(DataBase.LINK, link);
         db.insert(NAME, null, cv);
         time = System.currentTimeMillis();
-        return false;
+        return true;
     }
 
     public void deleteLink(String link) {
