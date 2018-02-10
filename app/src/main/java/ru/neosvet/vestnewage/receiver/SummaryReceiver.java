@@ -139,12 +139,14 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             Noread noread = new Noread(context);
             Date d;
+            byte page_status;
             do {
                 d = new Date(Date.parse(s));
-                if (!noread.addLink(link, d)) { //!existsPage
-                    count_new++;
+                page_status = noread.addLink(link, d);
+                if (page_status != Noread.DOWNLOADED)
                     downloadPage(link);
-                }
+                if (page_status == Noread.NOTHING)
+                    count_new++;
                 bw.write(title);
                 bw.write(Const.N);
                 bw.write(link);

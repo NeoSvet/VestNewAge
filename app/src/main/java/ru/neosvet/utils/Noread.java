@@ -15,6 +15,7 @@ import java.util.List;
  */
 
 public class Noread {
+    public static final byte NOTHING = 0, DOWNLOADED = 1, NOREAD = 2;
     public static final String NAME = "noread";
     private Context context;
     private DataBase dbNoread, dbPages;
@@ -27,7 +28,7 @@ public class Noread {
         db = dbNoread.getWritableDatabase();
     }
 
-    public boolean addLink(String link, Date date) { //return existsPage
+    public byte addLink(String link, Date date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
             dbPages = new DataBase(context, link);
@@ -35,19 +36,19 @@ public class Noread {
             dbPages.close();
             dbPages = new DataBase(context, link);
         }
-        if (dbPages.existsPage(link)) return true; // скаченную страницу игнорируем
+        if (dbPages.existsPage(link)) return DOWNLOADED; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
         Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean b = cursor.moveToFirst();
         cursor.close();
-        if (b) return false; // уже есть в списке непрочитанного
+        if (b) return NOREAD; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, date.getTime());
         cv.put(DataBase.LINK, link);
         db.insert(NAME, null, cv);
         time = System.currentTimeMillis();
-        return false;
+        return NOTHING; // и не скачена и отсуствует в списке непрочитанного
     }
 
     public void deleteLink(String link) {
