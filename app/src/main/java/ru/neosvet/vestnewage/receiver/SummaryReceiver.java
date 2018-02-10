@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.concurrent.TimeoutException;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -108,10 +106,8 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
                 nm.notify(notif_id, mBuilder.build());
             } catch (Exception e) {
                 e.printStackTrace();
-                if (Build.VERSION.SDK_INT > 23) { // Android 7+
-                    if (e instanceof UnknownHostException || e instanceof TimeoutException)
-                        setReceiver(context, p);
-                }
+                if (Build.VERSION.SDK_INT > 23) // Android 7+
+                    setReceiver(context, p);
             }
             SummaryReceiver.completeWakefulIntent(intent);
         }
