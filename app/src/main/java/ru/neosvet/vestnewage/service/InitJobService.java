@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import ru.neosvet.utils.Prom;
 
@@ -74,7 +73,7 @@ public class InitJobService extends JobService {
                 d.setHours(d.getHours() + 24);
             long latency = d.getTime() - System.currentTimeMillis();
             exerciseJobBuilder.setMinimumLatency(latency);
-            exerciseJobBuilder.setOverrideDeadline(TimeUnit.SECONDS.toMillis(5));
+            exerciseJobBuilder.setOverrideDeadline(latency + 5000);
             exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
