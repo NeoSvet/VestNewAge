@@ -324,6 +324,5 @@ public class Prom {
             mBuilder.setVibrate(new long[]{500, 1500});
         nm.notify(notif_id, mBuilder.build());
         InitJobService.setProm(context, p);
-        //PromReceiver.completeWakefulIntent(intent);
     }
 }

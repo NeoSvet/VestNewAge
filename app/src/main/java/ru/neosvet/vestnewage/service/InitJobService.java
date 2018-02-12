@@ -48,8 +48,6 @@ public class InitJobService extends JobService {
         jobScheduler.cancel(ID_SUMMARY);
         if (p > -1) {
             p = (p + 1) * 600000;
-            //exerciseJobBuilder.setMinimumLatency(p);
-            //exerciseJobBuilder.setOverrideDeadline(TimeUnit.SECONDS.toMillis(5));
             exerciseJobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
             exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
@@ -80,7 +78,6 @@ public class InitJobService extends JobService {
             exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
-            //exerciseJobBuilder.setPeriodic(p); // periodic for retry
             jobScheduler.schedule(exerciseJobBuilder.build());
         }
     }
