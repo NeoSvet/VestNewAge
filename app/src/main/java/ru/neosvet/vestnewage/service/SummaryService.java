@@ -51,6 +51,7 @@ public class SummaryService extends IntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         context = getApplicationContext();
+        Lib.showNotif(context, "Start summary service", notif_id + 1);
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
@@ -59,7 +60,10 @@ public class SummaryService extends IntentService {
             String[] result = checkSummary();
             //InitJobService.setSummary(context, p); //настраиваем следующую проверку
 
-            if (result == null) return;
+            if (result == null) {
+                Lib.showNotif(context, "No updates", notif_id);
+                return;
+            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
@@ -92,7 +96,7 @@ public class SummaryService extends IntentService {
 //                InitJobService.setSummary(context, p);
         }
         //TODO: jobFinished();
-     //   SummaryReceiver.completeWakefulIntent(intent);
+        //   SummaryReceiver.completeWakefulIntent(intent);
     }
 
     private String[] checkSummary() throws Exception {
