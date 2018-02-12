@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
@@ -30,7 +29,6 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
-import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 /**
@@ -39,6 +37,12 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryService extends IntentService {
     private Context context;
+    public static final int notif_id = 111;
+
+    public static void cancelNotif(Context context) {
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(notif_id);
+    }
 
     public SummaryService() {
         super("Summary");
@@ -53,7 +57,7 @@ public class SummaryService extends IntentService {
             return;
         try {
             String[] result = checkSummary();
-            SummaryReceiver.setReceiver(context, p); //настраиваем следующую проверку
+            //InitJobService.setSummary(context, p); //настраиваем следующую проверку
 
             if (result == null) return;
 
@@ -81,13 +85,14 @@ public class SummaryService extends IntentService {
                 mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
             if (boolVibr)
                 mBuilder.setVibrate(new long[]{500, 1500});
-            nm.notify(SummaryReceiver.notif_id, mBuilder.build());
+            nm.notify(notif_id, mBuilder.build());
         } catch (Exception e) {
             e.printStackTrace();
-            if (Build.VERSION.SDK_INT > 23) // Android 7+
-                SummaryReceiver.setReceiver(context, p);
+//            if (Build.VERSION.SDK_INT > 23) // Android 7+
+//                InitJobService.setSummary(context, p);
         }
-        SummaryReceiver.completeWakefulIntent(intent);
+        //TODO: jobFinished();
+     //   SummaryReceiver.completeWakefulIntent(intent);
     }
 
     private String[] checkSummary() throws Exception {

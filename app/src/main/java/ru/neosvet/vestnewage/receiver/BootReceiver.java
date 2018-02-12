@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.service.InitJobService;
 
 /**
  * Created by NeoSvet on 10.02.2018.
@@ -17,10 +18,10 @@ public class BootReceiver extends BroadcastReceiver {
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, context.MODE_PRIVATE);
         int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
-            SummaryReceiver.setReceiver(context, 0); // or p?
+            InitJobService.setSummary(context, p);
         pref = context.getSharedPreferences(SettingsFragment.PROM, context.MODE_PRIVATE);
         p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
-            PromReceiver.setReceiver(context, p);
+            InitJobService.setProm(context, p);
     }
 }

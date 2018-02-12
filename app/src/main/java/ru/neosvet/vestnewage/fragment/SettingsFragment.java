@@ -12,9 +12,8 @@ import android.widget.SeekBar;
 
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.receiver.SummaryReceiver;
+import ru.neosvet.vestnewage.service.InitJobService;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -149,7 +148,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbCheckSound.isChecked());
         editor.putBoolean(VIBR, cbCheckVibr.isChecked());
         editor.apply();
-        SummaryReceiver.setReceiver(act, p);
+        InitJobService.setSummary(act, p);
     }
 
     private void saveProm() {
@@ -162,7 +161,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbPromSound.isChecked());
         editor.putBoolean(VIBR, cbPromVibr.isChecked());
         editor.apply();
-        PromReceiver.setReceiver(act, p);
+        InitJobService.setProm(act, p);
     }
 
     private void initViews() {

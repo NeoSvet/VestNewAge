@@ -1,10 +1,18 @@
 package ru.neosvet.utils;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -22,10 +30,10 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
+import ru.neosvet.vestnewage.service.InitJobService;
 
 public class Prom {
-    public static final int notif_id = 333, hour_prom = 11;
+    public static final int notif_id = 222, hour_prom = 11;
     private static final String TIMEPROM = "timeprom";
     private Context context;
     private TextView tvPromTime = null;
@@ -270,7 +278,7 @@ public class Prom {
                         if (timeprom != pref.getLong(TIMEPROM, 0)) {
                             int t = pref.getInt(SettingsFragment.TIME, -1);
                             if (t > -1)
-                                PromReceiver.setReceiver(context, t);
+                                InitJobService.setProm(context, t);
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putLong(TIMEPROM, timeprom);
                             editor.apply();
@@ -280,5 +288,42 @@ public class Prom {
                 }
             }
         }).start();
+    }
+
+    public void showNotif() {
+        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, context.MODE_PRIVATE);
+        final int p = pref.getInt(SettingsFragment.TIME, -1);
+        if (p == -1)
+            return;
+        boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
+        boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
+        Intent intent = new Intent(context, SlashActivity.class);
+        intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Prom prom = new Prom(context);
+        String msg = prom.getPromText();
+        if (msg.contains("-")) {
+            msg = context.getResources().getString(R.string.prom);
+        }
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.star)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle(context.getResources().getString(R.string.prom_for_soul_unite))
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis() + 3000)
+                .setFullScreenIntent(piEmpty, true)
+                .setContentIntent(piProm)
+                .setLights(Color.GREEN, 1000, 1000)
+                .setAutoCancel(true);
+        if (boolSound)
+            mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        if (boolVibr)
+            mBuilder.setVibrate(new long[]{500, 1500});
+        nm.notify(notif_id, mBuilder.build());
+        InitJobService.setProm(context, p);
+        //PromReceiver.completeWakefulIntent(intent);
     }
 }

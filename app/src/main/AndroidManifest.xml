@@ -88,20 +88,17 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.SummaryReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".receiver.PromReceiver" />
+
+        <service
+            android:name=".service.InitJobService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
         <service android:name=".service.SummaryService"
             android:process=":summary_check"
             android:icon="@mipmap/ic_launcher"
             android:label="SummaryCheck" />
-        <service android:name=".service.PromService"
-            android:process=":prom_timer"
-            android:icon="@mipmap/ic_launcher"
-            android:label="PromTimer" />
     </application>
 
 </manifest>

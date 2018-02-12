@@ -14,7 +14,7 @@ import java.util.Date;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
-import ru.neosvet.vestnewage.receiver.SummaryReceiver;
+import ru.neosvet.vestnewage.service.SummaryService;
 
 public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Serializable {
     private transient SummaryFragment frm;
@@ -70,7 +70,7 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     }
 
     public void downloadList() throws Exception {
-        SummaryReceiver.cancelNotif(act);
+        SummaryService.cancelNotif(act);
         String line;
         InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
