@@ -10,6 +10,7 @@ import android.content.Intent;
 
 import java.util.Date;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 
 /**
@@ -18,16 +19,15 @@ import ru.neosvet.utils.Prom;
 
 public class InitJobService extends JobService {
     public static final int ID_PROM = 1, ID_SUMMARY = 2;
+
     @Override
     public boolean onStartJob(JobParameters param) {
         Context context = getApplicationContext();
-        if(param.getJobId() == ID_PROM)
-        {
+        if (param.getJobId() == ID_PROM) {
             Prom prom = new Prom(context);
             prom.showNotif();
             return false;
-        }
-        else // ID_SUMMARY
+        } else // ID_SUMMARY
         {
             Intent intent = new Intent(context, SummaryService.class);
             context.startService(intent);
@@ -78,6 +78,7 @@ public class InitJobService extends JobService {
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
             jobScheduler.schedule(exerciseJobBuilder.build());
+            Lib.showNotif(context, "Set prom notif to " + d.toLocaleString(), Prom.notif_id);
         }
     }
 }
