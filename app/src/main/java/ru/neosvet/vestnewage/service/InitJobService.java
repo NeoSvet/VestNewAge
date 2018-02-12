@@ -51,6 +51,7 @@ public class InitJobService extends JobService {
             //exerciseJobBuilder.setMinimumLatency(p);
             //exerciseJobBuilder.setOverrideDeadline(TimeUnit.SECONDS.toMillis(5));
             exerciseJobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+            exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
             exerciseJobBuilder.setPeriodic(p); // periodic for retry
@@ -76,6 +77,7 @@ public class InitJobService extends JobService {
             long latency = d.getTime() - System.currentTimeMillis();
             exerciseJobBuilder.setMinimumLatency(latency);
             exerciseJobBuilder.setOverrideDeadline(TimeUnit.SECONDS.toMillis(5));
+            exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
             //exerciseJobBuilder.setPeriodic(p); // periodic for retry
