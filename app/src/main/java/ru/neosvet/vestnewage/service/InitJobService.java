@@ -4,9 +4,12 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Date;
 
@@ -19,6 +22,7 @@ import ru.neosvet.utils.Prom;
 
 public class InitJobService extends JobService {
     public static final int ID_PROM = 1, ID_SUMMARY = 2;
+    public static final String ACTION_FINISHED = "actionFinished";
 
     @Override
     public boolean onStartJob(JobParameters param) {
@@ -30,8 +34,22 @@ public class InitJobService extends JobService {
         } else {// ID_SUMMARY
             Intent intent = new Intent(context, SummaryService.class);
             context.startService(intent);
+            initFinishReceiver(param);
             return true;
         }
+    }
+
+    private void initFinishReceiver(final JobParameters param) {
+        BroadcastReceiver finishedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                context.unregisterReceiver(this);
+                jobFinished(param, false);
+                Lib.showNotif(context, "jobFinished", param.getJobId());
+            }
+        };
+        IntentFilter filter = new IntentFilter(ACTION_FINISHED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(finishedReceiver, filter);
     }
 
     @Override

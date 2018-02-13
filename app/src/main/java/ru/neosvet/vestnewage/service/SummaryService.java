@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -91,7 +92,8 @@ public class SummaryService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //TODO: jobFinished();
+        Intent finish = new Intent(InitJobService.ACTION_FINISHED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(finish);
     }
 
     private String[] checkSummary() throws Exception {
