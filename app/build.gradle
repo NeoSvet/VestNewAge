@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "ru.neosvet.vestnewage"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 20
         versionCode 13
         versionName "2.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
