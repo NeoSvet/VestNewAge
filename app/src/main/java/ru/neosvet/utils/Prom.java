@@ -306,6 +306,7 @@ public class Prom {
         if (msg.contains("-")) {
             msg = context.getResources().getString(R.string.prom);
         }
+        PendingIntent piCancel = Notification.getCancelPromNotif(context);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.star)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
@@ -315,6 +316,7 @@ public class Prom {
                 .setWhen(System.currentTimeMillis() + 3000)
                 .setFullScreenIntent(piEmpty, true)
                 .setContentIntent(piProm)
+                .addAction(0, context.getResources().getString(R.string.accept), piCancel)
                 .setLights(Color.GREEN, 1000, 1000)
                 .setAutoCancel(true);
         if (boolSound)

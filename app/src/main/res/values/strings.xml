@@ -125,6 +125,7 @@
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
+    <string name="accept">Принято</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
@@ -136,10 +137,11 @@
     <!--StatusBar-->
     <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
     <string name="crash">Сбой</string>
-    <!--SummaryReceiver-->
+    <!--SummaryNotif-->
     <string name="appeared_new">Новое:&#160;</string>
     <string name="appeared_new_some">Имеются новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
+    <string name="postpone">Отложить</string>
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>

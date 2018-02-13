@@ -26,6 +26,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Notification;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -54,11 +55,16 @@ public class SummaryService extends IntentService {
         context = getApplicationContext();
         Lib.showNotif(context, "Start summary service", notif_id);
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-        final int p = pref.getInt(SettingsFragment.TIME, -1);
-        if (p == -1)
-            return;
         try {
-            String[] result = checkSummary();
+            String[] result;
+            if (intent.hasExtra(DataBase.LINK)) {
+                result = new String[]{intent.getStringExtra(DataBase.DESCTRIPTION),
+                        intent.getStringExtra(DataBase.LINK)};
+            } else {
+                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
+                    return;
+                result = checkSummary();
+            }
             if (result == null) {
                 Lib.showNotif(context, "No updates", notif_id);
                 return;
@@ -72,6 +78,7 @@ public class SummaryService extends IntentService {
             app.setData(notif_uri);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent piPostpone = Notification.getPostponeSummaryNotif(context, result[0], result[1]);
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                     .setSmallIcon(R.drawable.star)
@@ -82,6 +89,7 @@ public class SummaryService extends IntentService {
                     .setWhen(System.currentTimeMillis())
                     .setFullScreenIntent(piEmpty, true)
                     .setContentIntent(piSummary)
+                    .addAction(0, context.getResources().getString(R.string.postpone), piPostpone)
                     .setLights(Color.GREEN, 1000, 1000)
                     .setAutoCancel(true);
             if (boolSound)
