@@ -9,7 +9,6 @@ import android.content.Intent;
 import java.util.Date;
 
 import ru.neosvet.utils.Prom;
-import ru.neosvet.vestnewage.service.PromService;
 
 
 public class PromReceiver extends BroadcastReceiver {
@@ -36,7 +35,7 @@ public class PromReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent service = new Intent(context, PromService.class);
-        context.startService(service);
+        Prom prom = new Prom(context);
+        prom.showNotif();
     }
 }

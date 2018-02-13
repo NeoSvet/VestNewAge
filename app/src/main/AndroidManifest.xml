@@ -98,10 +98,6 @@
             android:process=":summary_check"
             android:icon="@mipmap/ic_launcher"
             android:label="SummaryCheck" />
-        <service android:name=".service.PromService"
-            android:process=":prom_timer"
-            android:icon="@mipmap/ic_launcher"
-            android:label="PromTimer" />
     </application>
 
 </manifest>
