@@ -184,7 +184,6 @@ public class SoftKeyboard implements View.OnFocusChangeListener {
                         try {
                             wait(500);
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
