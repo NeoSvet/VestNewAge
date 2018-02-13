@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import ru.neosvet.vestnewage.service.InitJobService;
+import ru.neosvet.vestnewage.service.SummaryService;
 
 /**
  * Created by NeoSvet on 13.02.2018.
@@ -20,10 +21,11 @@ public class Notification extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int mode = getIntent().getIntExtra(MODE, -1);
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (mode == InitJobService.ID_PROM) {
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.cancel(InitJobService.ID_PROM);
+            manager.cancel(Prom.notif_id);
         } else if (mode == InitJobService.ID_SUMMARY) {
+            manager.cancel(SummaryService.notif_id);
             String des = getIntent().getStringExtra(DataBase.DESCTRIPTION);
             String link = getIntent().getStringExtra(DataBase.LINK);
             InitJobService.setSummaryPostpone(this, des, link);
