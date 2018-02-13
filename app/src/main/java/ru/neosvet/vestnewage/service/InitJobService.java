@@ -27,8 +27,7 @@ public class InitJobService extends JobService {
             Prom prom = new Prom(context);
             prom.showNotif();
             return false;
-        } else // ID_SUMMARY
-        {
+        } else {// ID_SUMMARY
             Intent intent = new Intent(context, SummaryService.class);
             context.startService(intent);
             return true;
@@ -78,7 +77,7 @@ public class InitJobService extends JobService {
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
             jobScheduler.schedule(exerciseJobBuilder.build());
-            Lib.showNotif(context, "Set prom notif to " + d.toLocaleString(), Prom.notif_id);
+            Lib.showNotif(context, "Set prom notif to " + d.toLocaleString(), Prom.notif_id + 1);
         }
     }
 }
