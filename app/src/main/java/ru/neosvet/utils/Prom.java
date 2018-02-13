@@ -302,8 +302,7 @@ public class Prom {
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Prom prom = new Prom(context);
-        String msg = prom.getPromText();
+        String msg = getPromText();
         if (msg.contains("-")) {
             msg = context.getResources().getString(R.string.prom);
         }
