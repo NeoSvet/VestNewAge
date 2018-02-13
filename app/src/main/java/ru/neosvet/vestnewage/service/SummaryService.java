@@ -84,10 +84,7 @@ public class SummaryService extends IntentService {
             nm.notify(SummaryReceiver.notif_id, mBuilder.build());
         } catch (Exception e) {
             e.printStackTrace();
-            if (Build.VERSION.SDK_INT > 23) // Android 7+
-                SummaryReceiver.setReceiver(context, p);
         }
-        SummaryReceiver.completeWakefulIntent(intent);
     }
 
     private String[] checkSummary() throws Exception {

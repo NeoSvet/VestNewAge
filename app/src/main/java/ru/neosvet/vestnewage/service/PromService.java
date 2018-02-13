@@ -64,6 +64,5 @@ public class PromService extends IntentService {
             mBuilder.setVibrate(new long[]{500, 1500});
         nm.notify(PromReceiver.notif_id, mBuilder.build());
         PromReceiver.setReceiver(context, p);
-        PromReceiver.completeWakefulIntent(intent);
     }
 }

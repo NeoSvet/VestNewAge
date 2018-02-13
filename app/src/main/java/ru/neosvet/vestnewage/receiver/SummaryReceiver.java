@@ -3,13 +3,13 @@ package ru.neosvet.vestnewage.receiver;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.WakefulBroadcastReceiver;
 
 import ru.neosvet.vestnewage.service.SummaryService;
 
-public class SummaryReceiver extends WakefulBroadcastReceiver {
+public class SummaryReceiver extends BroadcastReceiver {
     public static final int notif_id = 111;
 
     public static void cancelNotif(Context context) {
@@ -31,6 +31,6 @@ public class SummaryReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent service = new Intent(context, SummaryService.class);
-        startWakefulService(context, service);
+        context.startService(service);
     }
 }
