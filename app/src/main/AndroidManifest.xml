@@ -78,6 +78,9 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="ru.neosvet.utils.Notification"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
             android:name=".service.InitJobService"
