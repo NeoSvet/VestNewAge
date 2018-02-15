@@ -40,7 +40,7 @@ import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     private int max = 1;
-    private transient Context act;
+    private transient Context context;
     private transient Lib lib;
     private transient ProgressDialog di;
     private transient Request.Builder builderRequest;
@@ -62,7 +62,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     public void setAct(Activity act) {
-        this.act = act;
+        this.context = act;
         lib = new Lib(act);
         if (boolStart) {
             try {
@@ -74,16 +74,16 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
     }
 
-    public LoaderTask(Context act) {
-        this.act = act;
-        lib = new Lib(act);
+    public LoaderTask(Context context) {
+        this.context = context;
+        lib = new Lib(context);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (act instanceof MainActivity) {
-            msg = act.getResources().getString(R.string.start);
+        if (context instanceof MainActivity) {
+            msg = context.getResources().getString(R.string.start);
             showD();
         }
     }
@@ -91,7 +91,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void showD() {
         if (di != null)
             di.dismiss();
-        di = new ProgressDialog(act, max);
+        di = new ProgressDialog(context, max);
         di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -106,19 +106,19 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        if (act instanceof BrowserActivity) {
-            ((BrowserActivity) act).finishLoad(result);
-        } else if (act instanceof MainActivity) {
+        if (context instanceof BrowserActivity) {
+            ((BrowserActivity) context).finishLoad(result);
+        } else if (context instanceof MainActivity) {
             di.dismiss();
             if (boolStart) {
-                ((MainActivity) act).finishAllLoad(result, boolAll);
+                ((MainActivity) context).finishAllLoad(result, boolAll);
                 boolStart = false;
             }
         }
     }
 
     private File getFile(String name) {
-        return new File(act.getFilesDir() + name);
+        return new File(context.getFilesDir() + name);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void refreshLists(int p) throws Exception {
-        msg = act.getResources().getString(R.string.download_list);
+        msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
         if (p == -1 || p == R.id.nav_book) k = 1;
@@ -168,14 +168,14 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         publishProgress(k);
         //загрузка списков
         if (p == -1 || p == R.id.nav_rss) {
-            SummaryTask t1 = new SummaryTask((MainActivity) act);
+            SummaryTask t1 = new SummaryTask((MainActivity) context);
             t1.downloadList();
             prog++;
         }
         if (!boolStart) return;
 
         if (p == -1 || p == R.id.nav_main) {
-            SiteTask t4 = new SiteTask((MainActivity) act);
+            SiteTask t4 = new SiteTask((MainActivity) context);
             String[] url = new String[]{
                     Const.SITE2,
                     Const.SITE2 + "novosti.html",
@@ -196,7 +196,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
         if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
-            CalendarTask t2 = new CalendarTask((Activity) act);
+            CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;
             for (int y = 116; y < max_y && boolStart; y++) {
                 if (y == max_y - 1)
@@ -210,7 +210,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!boolStart) return;
 
         if (p == -1 || p == R.id.nav_book) {
-            BookTask t3 = new BookTask((MainActivity) act);
+            BookTask t3 = new BookTask((MainActivity) context);
             t3.downloadData(true);
             t3.downloadData(false);
             prog++;
@@ -219,7 +219,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
     private void downloadAll(int p) throws Exception {
         prog = 0;
-        msg = act.getResources().getString(R.string.download_materials);
+        msg = context.getResources().getString(R.string.download_materials);
         if (!boolStart) return;
         File[] d;
         if (p == -1) { //download all
@@ -304,7 +304,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private int countBookList(String name) throws Exception {
-        DataBase dataBase = new DataBase(act, name);
+        DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
         int k = curTitle.getCount();
@@ -314,7 +314,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void downloadBookList(String name) throws Exception {
-        DataBase dataBase = new DataBase(act, name);
+        DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
                 null, null, null, null, null);
@@ -440,7 +440,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadPage(String link, boolean bSinglePage) throws Exception {
         msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        DataBase dataBase = new DataBase(act, link);
+        DataBase dataBase = new DataBase(context, link);
         if (!bSinglePage && dataBase.existsPage(link))
             return;
         String line, s = link;
@@ -480,7 +480,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                                     line.indexOf("\"", 65));
                         s = "<a href=\"https://vimeo.com/" +
                                 s + "\">" +
-                                act.getResources().getString
+                                context.getResources().getString
                                         (R.string.video_on_vimeo) + "</a>";
                         if (line.contains("center"))
                             line = "<center>" + s + "</center>";
@@ -585,7 +585,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
     private void initClient() throws Exception {
         builderRequest = new Request.Builder();
-        builderRequest.header(Const.USER_AGENT, act.getPackageName());
+        builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
         client = lib.createHttpClient();
     }
