@@ -24,7 +24,7 @@ public class Notification extends Activity {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (mode == InitJobService.ID_PROM) {
             manager.cancel(Prom.notif_id);
-        } else if (mode == InitJobService.ID_SUMMARY) {
+        } else if (mode == InitJobService.ID_SUMMARY_POSTPONE) {
             manager.cancel(SummaryService.notif_id);
             String des = getIntent().getStringExtra(DataBase.DESCTRIPTION);
             String link = getIntent().getStringExtra(DataBase.LINK);
@@ -35,7 +35,7 @@ public class Notification extends Activity {
 
     public static PendingIntent getCancelPromNotif(Context context) {
         Intent intent = new Intent(context, Notification.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, InitJobService.ID_PROM);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
@@ -43,8 +43,8 @@ public class Notification extends Activity {
 
     public static PendingIntent getPostponeSummaryNotif(Context context, String des, String link) {
         Intent intent = new Intent(context, Notification.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra(MODE, InitJobService.ID_SUMMARY);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(MODE, InitJobService.ID_SUMMARY_POSTPONE);
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);

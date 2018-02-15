@@ -14,7 +14,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Date;
 
-import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
@@ -24,7 +23,7 @@ import ru.neosvet.utils.Prom;
  */
 
 public class InitJobService extends JobService {
-    public static final int ID_PROM = 1, ID_SUMMARY = 2;
+    public static final int ID_PROM = 1, ID_SUMMARY = 2, ID_SUMMARY_POSTPONE = 3;
     public static final String ACTION_FINISHED = "actionFinished";
 
     @Override
@@ -36,7 +35,7 @@ public class InitJobService extends JobService {
             return false;
         } else { // ID_SUMMARY
             Intent intent = new Intent(context, SummaryService.class);
-            if (param.getJobId() != ID_SUMMARY) {// ID_SUMMARY+1 - postpone notif
+            if (param.getJobId() == ID_SUMMARY_POSTPONE) {
                 PersistableBundle extras = param.getExtras();
                 intent.putExtra(DataBase.DESCTRIPTION, extras.getString(DataBase.DESCTRIPTION));
                 intent.putExtra(DataBase.LINK, extras.getString(DataBase.LINK));
@@ -84,7 +83,7 @@ public class InitJobService extends JobService {
 
     public static void setSummaryPostpone(Context context, String des, String link) {
         ComponentName jobService = new ComponentName(context, InitJobService.class);
-        JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(ID_SUMMARY + 1, jobService);
+        JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(ID_SUMMARY_POSTPONE, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         long latency = 600000; // 10 min
         PersistableBundle extras = new PersistableBundle();
