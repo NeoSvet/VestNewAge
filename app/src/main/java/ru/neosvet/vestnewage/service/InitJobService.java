@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PersistableBundle;
-import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Date;
 
@@ -24,7 +23,7 @@ import ru.neosvet.utils.Prom;
 
 public class InitJobService extends JobService {
     public static final int ID_PROM = 1, ID_SUMMARY = 2, ID_SUMMARY_POSTPONE = 3;
-    public static final String ACTION_FINISHED = "actionFinished";
+    public static final String ACTION_FINISHED = "NeoActionFinished";
 
     @Override
     public boolean onStartJob(JobParameters param) {
@@ -56,7 +55,7 @@ public class InitJobService extends JobService {
             }
         };
         IntentFilter filter = new IntentFilter(ACTION_FINISHED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(finishedReceiver, filter);
+        registerReceiver(finishedReceiver, filter);
     }
 
     @Override
