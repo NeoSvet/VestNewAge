@@ -97,6 +97,7 @@ public class SummaryService extends IntentService {
                 mBuilder.setVibrate(new long[]{500, 1500});
             nm.notify(notif_id, mBuilder.build());
         } catch (Exception e) {
+            Lib.showNotif(context, "Error: " + e.getLocalizedMessage(), 999);
             e.printStackTrace();
         }
         Intent finish = new Intent(InitJobService.ACTION_FINISHED);
