@@ -131,11 +131,13 @@ public class SummaryService extends IntentService {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         Noread noread = new Noread(context);
         Date d;
+        LoaderTask loader = new LoaderTask(context);
+        loader.initClient();
         do {
             d = new Date(Date.parse(s));
             if (noread.addLink(link, d)) {
                 count_new++;
-                downloadPage(link);
+                loader.downloadPage(link, true);
             }
             bw.write(title);
             bw.write(Const.N);
@@ -159,11 +161,6 @@ public class SummaryService extends IntentService {
             result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
         }
         return result;
-    }
-
-    private void downloadPage(String link) {
-        LoaderTask loader = new LoaderTask(context);
-        loader.execute(link, DataBase.LINK);
     }
 
     private String withOutTag(String s) {

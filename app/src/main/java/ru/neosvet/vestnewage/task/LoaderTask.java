@@ -437,7 +437,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         return k;
     }
 
-    private void downloadPage(String link, boolean bSinglePage) throws Exception {
+    public void downloadPage(String link, boolean bSinglePage) throws Exception {
         msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         DataBase dataBase = new DataBase(context, link);
@@ -583,7 +583,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
     }
 
-    private void initClient() throws Exception {
+    public void initClient() throws Exception {
         builderRequest = new Request.Builder();
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
