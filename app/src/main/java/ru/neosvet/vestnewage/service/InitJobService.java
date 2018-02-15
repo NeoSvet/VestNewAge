@@ -51,7 +51,7 @@ public class InitJobService extends JobService {
             public void onReceive(Context context, Intent intent) {
                 context.unregisterReceiver(this);
                 jobFinished(param, false);
-                Lib.showNotif(context, "jobFinished", param.getJobId());
+                Lib.showNotif(context, "jobFinished", 666);
             }
         };
         IntentFilter filter = new IntentFilter(ACTION_FINISHED);
@@ -60,6 +60,7 @@ public class InitJobService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters param) {
+        Lib.showNotif(getApplicationContext(), "onStopJob", 888);
         return false; //remove job from scheduler
     }
 
@@ -70,7 +71,6 @@ public class InitJobService extends JobService {
         jobScheduler.cancel(ID_SUMMARY);
         if (p > -1) {
             p = (p + 1) * 600000;
-            Lib.showNotif(context, "Check summary per mins: " + (p / 60000), 777);
             exerciseJobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
             exerciseJobBuilder.setPersisted(true); // save job after reboot
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
@@ -119,7 +119,6 @@ public class InitJobService extends JobService {
             exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
             exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging
             jobScheduler.schedule(exerciseJobBuilder.build());
-            Lib.showNotif(context, "Set prom notif to " + d.toLocaleString(), Prom.notif_id + 1);
         }
     }
 }
