@@ -37,6 +37,7 @@ import ru.neosvet.vestnewage.task.LoaderTask;
  */
 
 public class SummaryService extends IntentService {
+    private final static String CHECK_TIME = "check_time";
     private Context context;
 
     public SummaryService() {
@@ -50,9 +51,19 @@ public class SummaryService extends IntentService {
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
             return;
+        long check_time = pref.getLong(CHECK_TIME, 0);
+        long mills = (p + 1) * 600000;
+        if(check_time < System.currentTimeMillis() - mills) {
+            Lib.showNotif(context, "Early for check", SummaryReceiver.notif_id);
+            return;
+        }
         try {
             String[] result = checkSummary();
             SummaryReceiver.setReceiver(context, p); //настраиваем следующую проверку
+
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putLong(CHECK_TIME, System.currentTimeMillis());
+            editor.apply();
 
             if (result == null) {
                 Lib.showNotif(context, "No updates", SummaryReceiver.notif_id);
