@@ -212,6 +212,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 try {
                     Noread noread = new Noread(act);
                     noread.clearList();
+                    noread.setBadge();
                     File file = new File(act.getFilesDir() + File.separator + ADS);
                     if (file.exists()) {
                         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -604,6 +605,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             int n;
             boolean bNew = false;
             Noread noread = new Noread(act);
+            noread.setBadge();
             long time = noread.lastModified();
             if (time > 0) {
                 bNew = (System.currentTimeMillis() - time < 10000);
