@@ -101,7 +101,6 @@ public class Noread {
             } while (cursor.moveToNext());
             time = System.currentTimeMillis();
         }
-        close();
     }
 
     public void close() {
