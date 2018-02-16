@@ -213,6 +213,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     Noread noread = new Noread(act);
                     noread.clearList();
                     noread.setBadge();
+                    noread.close();
                     File file = new File(act.getFilesDir() + File.separator + ADS);
                     if (file.exists()) {
                         BufferedReader br = new BufferedReader(new FileReader(file));
