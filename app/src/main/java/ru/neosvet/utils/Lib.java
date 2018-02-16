@@ -2,6 +2,8 @@ package ru.neosvet.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,6 +33,20 @@ public class Lib {
 
     public static void LOG(String msg) {
         Log.d("neotag", msg);
+    }
+
+    public static void showNotif(Context context, String msg, int id) {
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.star)
+                .setContentTitle("Debug notif")
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(piEmpty)
+                .setAutoCancel(true);
+        nm.notify(id, mBuilder.build());
     }
 
     public static void showToast(Context context, String msg) {

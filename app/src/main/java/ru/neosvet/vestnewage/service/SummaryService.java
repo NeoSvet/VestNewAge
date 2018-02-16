@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
@@ -55,7 +54,10 @@ public class SummaryService extends IntentService {
             String[] result = checkSummary();
             SummaryReceiver.setReceiver(context, p); //настраиваем следующую проверку
 
-            if (result == null) return;
+            if (result == null) {
+                Lib.showNotif(context, "No updates", SummaryReceiver.notif_id);
+                return;
+            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);

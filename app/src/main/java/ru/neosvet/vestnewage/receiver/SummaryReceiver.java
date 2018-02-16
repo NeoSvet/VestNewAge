@@ -7,6 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.Date;
+
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.service.SummaryService;
 
 public class SummaryReceiver extends BroadcastReceiver {
@@ -24,6 +27,8 @@ public class SummaryReceiver extends BroadcastReceiver {
         am.cancel(piCheck);
         if (p > -1) {
             p = (p + 1) * 600000;
+            Date d = new Date(p + System.currentTimeMillis());
+            Lib.showNotif(context, "Set summary notif to " + d.toLocaleString(), notif_id + 1);
             am.set(AlarmManager.RTC_WAKEUP, p + System.currentTimeMillis(), piCheck);
         }
     }
