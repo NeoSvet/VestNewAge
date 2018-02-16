@@ -53,7 +53,7 @@ public class SummaryService extends IntentService {
             return;
         long check_time = pref.getLong(CHECK_TIME, 0);
         long mills = (p + 1) * 600000;
-        if(check_time < System.currentTimeMillis() - mills) {
+        if(check_time - System.currentTimeMillis() < mills){
             Lib.showNotif(context, "Early for check", SummaryReceiver.notif_id);
             return;
         }
