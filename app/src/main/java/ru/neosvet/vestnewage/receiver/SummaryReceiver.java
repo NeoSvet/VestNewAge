@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.service.SummaryService;
 
 public class SummaryReceiver extends BroadcastReceiver {
@@ -30,6 +31,7 @@ public class SummaryReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Lib.LOG("onReceive"); //TODO run check by CONNECTIVITY_CHANGE on Android 4.4
         Intent service = new Intent(context, SummaryService.class);
         context.startService(service);
     }
