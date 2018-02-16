@@ -150,6 +150,7 @@ public class SummaryService extends IntentService {
         } while (s != null);
         bw.close();
         br.close();
+        noread.setBadge();
         noread.close();
         if (count_new > 1) {
             result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};

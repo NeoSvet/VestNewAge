@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import me.leolin.shortcutbadger.ShortcutBadger;
+
 /**
  * Created by NeoSvet on 03.02.2018.
  */
@@ -53,8 +55,10 @@ public class Noread {
     public void deleteLink(String link) {
         link = link.replace(Const.HTML, "");
         if (db.delete(NAME, DataBase.LINK
-                + DataBase.Q, new String[]{link}) > 0)
+                + DataBase.Q, new String[]{link}) > 0) {
             time = System.currentTimeMillis();
+            setBadge();
+        }
         close();
     }
 
@@ -111,5 +115,15 @@ public class Noread {
             editor.putLong(DataBase.TIME, time);
             editor.apply();
         }
+    }
+
+    public void setBadge() {
+        Cursor cursor = db.query(NAME, null, DataBase.TIME + " > ?",
+                new String[]{"0"}, null, null, null);
+        if (cursor.getCount() == 0)
+            ShortcutBadger.removeCount(context);
+        else
+            ShortcutBadger.applyCount(context, cursor.getCount());
+        cursor.close();
     }
 }
