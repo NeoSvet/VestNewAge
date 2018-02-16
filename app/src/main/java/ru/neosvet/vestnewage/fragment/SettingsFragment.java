@@ -11,8 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import ru.neosvet.utils.Prom;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.service.InitJobService;
 
 import static android.content.Context.MODE_PRIVATE;

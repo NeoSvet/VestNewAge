@@ -6,7 +6,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.service.InitJobService;
 import ru.neosvet.vestnewage.service.SummaryService;
 
@@ -49,5 +51,19 @@ public class Notification extends Activity {
         intent.putExtra(DataBase.LINK, link);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
+    }
+
+    public static void show(Context context, String msg, int id) {
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.star)
+                .setContentTitle("Debug notif")
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(piEmpty)
+                .setAutoCancel(true);
+        nm.notify(id, mBuilder.build());
     }
 }
