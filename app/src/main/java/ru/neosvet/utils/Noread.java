@@ -2,15 +2,16 @@ package ru.neosvet.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import me.leolin.shortcutbadger.ShortcutBadger;
 
 /**
  * Created by NeoSvet on 03.02.2018.
@@ -118,12 +119,32 @@ public class Noread {
     }
 
     public void setBadge() {
+        String launcherClassName = getLauncherClassName();
+        if (launcherClassName == null) {
+            return;
+        }
         Cursor cursor = db.query(NAME, null, DataBase.TIME + " > ?",
                 new String[]{"0"}, null, null, null);
-        if (cursor.getCount() == 0)
-            ShortcutBadger.removeCount(context);
-        else
-            ShortcutBadger.applyCount(context, cursor.getCount());
+        Intent intent = new Intent("android.intent.action.BADGE_COUNT_UPDATE");
+        intent.putExtra("badge_count", cursor.getCount());
+        intent.putExtra("badge_count_package_name", context.getPackageName());
+        intent.putExtra("badge_count_class_name", launcherClassName);
         cursor.close();
+        context.sendBroadcast(intent);
+    }
+
+    private String getLauncherClassName() {
+        PackageManager pm = context.getPackageManager();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent, 0);
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            String pkgName = resolveInfo.activityInfo.applicationInfo.packageName;
+            if (pkgName.equalsIgnoreCase(context.getPackageName())) {
+                String className = resolveInfo.activityInfo.name;
+                return className;
+            }
+        }
+        return null;
     }
 }
