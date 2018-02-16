@@ -8,7 +8,6 @@ import android.content.Intent;
 
 import java.util.Date;
 
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 
 
@@ -31,7 +30,6 @@ public class PromReceiver extends BroadcastReceiver {
             if (d.getTime() < System.currentTimeMillis())
                 d.setHours(d.getHours() + 24);
             am.set(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
-            Lib.showNotif(context, "Set prom notif to " + d.toLocaleString(), notif_id + 1);
         }
     }
 

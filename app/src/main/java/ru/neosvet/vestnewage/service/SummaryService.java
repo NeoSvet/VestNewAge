@@ -53,10 +53,8 @@ public class SummaryService extends IntentService {
             return;
         long check_time = pref.getLong(CHECK_TIME, 0);
         long mills = (p + 1) * 600000;
-        if(check_time - System.currentTimeMillis() < mills){
-            Lib.showNotif(context, "Early for check", SummaryReceiver.notif_id);
+        if(check_time - System.currentTimeMillis() < mills)
             return;
-        }
         try {
             String[] result = checkSummary();
             SummaryReceiver.setReceiver(context, p); //настраиваем следующую проверку
@@ -65,10 +63,8 @@ public class SummaryService extends IntentService {
             editor.putLong(CHECK_TIME, System.currentTimeMillis());
             editor.apply();
 
-            if (result == null) {
-                Lib.showNotif(context, "No updates", SummaryReceiver.notif_id);
+            if (result == null)
                 return;
-            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
