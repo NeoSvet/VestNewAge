@@ -7,7 +7,7 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 14
+        versionCode 16
         versionName "2.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
