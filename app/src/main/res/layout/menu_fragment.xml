@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg">
 
@@ -12,11 +12,13 @@
 
     <ListView
         android:id="@+id/lvMenu"
-        android:layout_width="318dp"
+        android:layout_width="@dimen/menu_fragment_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="201dp" />
+        android:layout_marginTop="@dimen/menu_fragment_top"
+        android:paddingLeft="@dimen/menu_fragment_left" />
 
     <View
+        android:id="@+id/divMenu"
         android:layout_width="2dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"

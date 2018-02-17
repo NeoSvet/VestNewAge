@@ -26,6 +26,7 @@ import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -39,19 +40,18 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.task.LoaderTask;
-import ru.neosvet.utils.Prom;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    public static boolean boolFirst = false;
+    private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
+    private final String LOADER = "loader";
+    public static final String MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
+    public static boolean isFirst = false, isMenu;
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
     private SearchFragment frSearch;
-    private boolean boolExit = false;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
-    private final String LOADER = "loader";
-    public static final String CUR_ID = "cur_id", TAB = "tab";
     public Lib lib = new Lib(this);
     private Tip menuDownload;
     private NavigationView navigationView;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View bDownloadIt;
     public StatusBar status;
     private Prom prom;
-    private int cur_id, tab = 0;
+    private int cur_id, tab = 0, statusBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +70,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         status = new StatusBar(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
 
+        SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
+        isMenu = pref.getBoolean(MENU_MODE, false);
         if (savedInstanceState == null) {
-            SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
             Intent intent = getIntent();
             tab = intent.getIntExtra(TAB, 0);
             if (pref.getBoolean(Const.FIRST, true)) {
@@ -80,9 +81,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.apply();
                 tab = -1;
                 setFragment(R.id.nav_help);
-                boolFirst = true;
-            } else
-                setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
+                isFirst = true;
+            } else {
+                if (isMenu)
+                    setFragment(intent.getIntExtra(CUR_ID, R.id.menu_fragment));
+                else
+                    setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
+            }
         } else {
             cur_id = savedInstanceState.getInt(CUR_ID);
             loader = (LoaderTask) savedInstanceState.getSerializable(LOADER);
@@ -108,12 +113,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initInterface() {
+        findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                menuDownload.hide();
+                loader = new LoaderTask(MainActivity.this);
+                loader.execute();
+            }
+        });
+        bDownloadIt = findViewById(R.id.bDownloadIt);
+        bDownloadIt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                menuDownload.hide();
+                loader = new LoaderTask(MainActivity.this);
+                loader.execute(String.valueOf(cur_id));
+            }
+        });
+
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
             setMenuFragment();
-        } else {
+        }else{
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            if(isMenu) return;
             drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -132,23 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
-        findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                menuDownload.hide();
-                loader = new LoaderTask(MainActivity.this);
-                loader.execute();
-            }
-        });
-        bDownloadIt = findViewById(R.id.bDownloadIt);
-        bDownloadIt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                menuDownload.hide();
-                loader = new LoaderTask(MainActivity.this);
-                loader.execute(String.valueOf(cur_id));
-            }
-        });
     }
 
     private void setMenuFragment() {
@@ -191,8 +198,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setFragment(int id) {
+        statusBack = STATUS_PAGE;
         if (cur_id != id)
-            boolFirst = false;
+            isFirst = false;
         menuDownload.hide();
         cur_id = id;
         if (navigationView != null) //tut
@@ -201,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
         frCalendar = null;
         switch (id) {
+            case R.id.menu_fragment:
+                statusBack = STATUS_MENU;
+                fragmentTransaction.replace(R.id.my_fragment, new MenuFragment());
+                break;
             case R.id.nav_rss:
                 fragmentTransaction.replace(R.id.my_fragment, new SummaryFragment());
                 break;
@@ -289,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (boolFirst) {
+        } else if (isFirst) {
             setFragment(R.id.nav_calendar);
             if (drawer == null)
                 setMenuFragment();
@@ -310,15 +322,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void exit() {
-        if (boolExit) {
+        if (statusBack == STATUS_EXIT) {
             super.onBackPressed();
-        } else {
-            boolExit = true;
+        } else if (statusBack == STATUS_PAGE && isMenu) {
+            statusBack = STATUS_MENU;
+            setFragment(R.id.menu_fragment);
+        } else { //  statusBack == STATUS_MENU;
+            statusBack = STATUS_EXIT;
             Lib.showToast(this, getResources().getString(R.string.click_for_exit));
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    boolExit = false;
+                    if (statusBack == STATUS_EXIT)
+                        statusBack = STATUS_MENU;
                 }
             }, 3000);
         }

@@ -23,4 +23,7 @@
     <dimen name="calendar_margin_top">8dp</dimen>
     <integer name="height_list">350</integer>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="menu_fragment_width">-1dp</dimen>
+    <dimen name="menu_fragment_top">0dp</dimen>
+    <dimen name="menu_fragment_left">10dp</dimen>
 </resources>

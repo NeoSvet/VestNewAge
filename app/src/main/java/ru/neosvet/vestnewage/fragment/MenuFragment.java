@@ -22,6 +22,7 @@ public class MenuFragment extends Fragment {
     private View container;
     private MenuAdapter adMenu;
     private int iSelect = 2;
+    private boolean isFullScreen = false;
 
     public void setSelect(int id) {
         for (int i = 0; i < mMenu.length; i++) {
@@ -38,14 +39,25 @@ public class MenuFragment extends Fragment {
         this.container = inflater.inflate(R.layout.menu_fragment, container, false);
         act = (MainActivity) getActivity();
 
-        this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+        int i;
+        if (getResources().getInteger(R.integer.screen_mode) ==
+                getResources().getInteger(R.integer.screen_tablet_land)) {
+            this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                startActivity(Intent.createChooser(act.lib.openInApps(Const.SITE),
 //                        getResources().getString(R.string.open)));
-            }
-        });
+                }
+            });
+            i = 0;
+        } else {
+            act.setTitle(getResources().getString(R.string.app_name));
+            this.container.findViewById(R.id.ivHeadMenu).setVisibility(View.GONE);
+            this.container.findViewById(R.id.divMenu).setVisibility(View.GONE);
+            isFullScreen = true;
+            i = 1;
+        }
 
         ListView lvMenu = (ListView) this.container.findViewById(R.id.lvMenu);
         adMenu = new MenuAdapter(act);
@@ -56,31 +68,33 @@ public class MenuFragment extends Fragment {
         int[] mTitle = new int[]{R.string.download_title, R.string.rss, R.string.main,
                 R.string.calendar, R.string.book, R.string.search, R.string.markers,
                 R.string.journal, R.string.cabinet, R.string.settings, R.string.help};
-        for (int i = 0; i < mImage.length; i++) {
+        for (; i < mImage.length; i++) {
             adMenu.addItem(mImage[i], act.getResources().getString(mTitle[i]));
         }
 
         lvMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (pos == 0) {
+                if (pos == 0 && !isFullScreen) {
                     act.showDownloadMenu();
                     return;
                 }
                 if (adMenu.getItem(pos).isSelect()) return;
-                iSelect = pos - 1;
+                iSelect = pos - (isFullScreen ? 0 : 1);
+                act.setFragment(mMenu[iSelect]);
+                if (isFullScreen) return;
                 for (int i = 0; i < adMenu.getCount(); i++) {
                     adMenu.getItem(i).setSelect(false);
                 }
                 adMenu.getItem(pos).setSelect(true);
                 adMenu.notifyDataSetChanged();
-                act.setFragment(mMenu[iSelect]);
             }
         });
-        if (savedInstanceState != null) {
-            iSelect = savedInstanceState.getInt(SELECT);
+        if (!isFullScreen) {
+            if (savedInstanceState != null)
+                iSelect = savedInstanceState.getInt(SELECT);
+            adMenu.getItem(iSelect + 1).setSelect(true);
         }
-        adMenu.getItem(iSelect + 1).setSelect(true);
         adMenu.notifyDataSetChanged();
 
         return this.container;
