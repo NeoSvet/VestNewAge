@@ -125,6 +125,9 @@
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
+    <string name="prom_in_hour">Посыл через %.1f ч.</string>
+    <string name="prom_in_minute">Посыл через %.1f мин.</string>
+    <string name="sync_error">Синхронизация не удалась</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>

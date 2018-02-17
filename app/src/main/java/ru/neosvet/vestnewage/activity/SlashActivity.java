@@ -54,7 +54,7 @@ public class SlashActivity extends AppCompatActivity {
         initData(savedInstanceState);
 
         Prom prom = new Prom(this);
-        prom.synchronTime(false);
+        prom.synchronTime(null);
 
         if (lib.getPreviosVer() < 10)
             adapterNewVersion();
