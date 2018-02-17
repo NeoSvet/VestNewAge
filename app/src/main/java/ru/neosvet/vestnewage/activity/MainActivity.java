@@ -316,7 +316,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (frCabinet.onBackPressed())
                 exit();
         } else if (frSearch != null) {
-            frSearch.onDestroy(); //сохранение "истории поиска"
+            if (!isMenu)
+                frSearch.onDestroy(); //сохранение "истории поиска"
             exit();
         } else
             exit();
