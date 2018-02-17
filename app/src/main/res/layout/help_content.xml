@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="10dp"
-                android:text="@string/publication" />
+                android:text="@string/version" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

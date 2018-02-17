@@ -102,8 +102,8 @@ public class HelpFragment extends Fragment {
     private void initViews() {
         TextView tv = (TextView) container.findViewById(R.id.tvNumVer);
         try {
-            tv.setText(getResources().getString(R.string.current_publication) +
-                    act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode);
+            tv.setText(getResources().getString(R.string.current_version) +
+                    act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,9 +219,11 @@ public class HelpFragment extends Fragment {
         ivNext.setEnabled(n > 0);
         int k = getResources().getStringArray(R.array.changelog).length;
         ivPrev.setEnabled(n < k - 1);
+        String s = getResources().getStringArray(R.array.changelog)[n];
         tvChangelogTitle.setText(getResources().getString(R.string.changelog) + Const.N
-                + getResources().getString(R.string.publication) + (k - n));
-        tvChangelog.setText(getResources().getStringArray(R.array.changelog)[n]);
+                + getResources().getString(R.string.version)
+                + s.substring(0, s.indexOf(Const.N)));
+        tvChangelog.setText(s.substring(s.indexOf(Const.N) + 1));
         n_log = n;
     }
 
