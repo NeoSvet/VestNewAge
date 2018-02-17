@@ -46,7 +46,6 @@ public class SummaryService extends IntentService {
 
     @Override
     protected void onHandleIntent(final Intent intent) {
-        Lib.LOG("Start check");
         context = getApplicationContext();
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         final int p = pref.getInt(SettingsFragment.TIME, -1);
@@ -54,10 +53,8 @@ public class SummaryService extends IntentService {
             return;
         long check_time = pref.getLong(CHECK_TIME, 0);
         long mills = (p + 1) * 600000;
-        if(check_time - System.currentTimeMillis() < mills){
-            Lib.LOG("Early for check");
+        if(check_time - System.currentTimeMillis() < mills)
             return;
-        }
         try {
             String[] result = checkSummary();
             SummaryReceiver.setReceiver(context, p); //настраиваем следующую проверку
@@ -66,10 +63,8 @@ public class SummaryService extends IntentService {
             editor.putLong(CHECK_TIME, System.currentTimeMillis());
             editor.apply();
 
-            if (result == null) {
-                Lib.LOG("No updates");
+            if (result == null)
                 return;
-            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
