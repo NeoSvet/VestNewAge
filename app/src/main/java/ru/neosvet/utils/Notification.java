@@ -3,14 +3,10 @@ package ru.neosvet.utils;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.service.InitJobService;
 import ru.neosvet.vestnewage.service.SummaryService;
 
@@ -20,20 +16,21 @@ import ru.neosvet.vestnewage.service.SummaryService;
 
 public class Notification extends Activity {
     public static final String MODE = "mode";
-    public static final int COPY = 33;
+    //public static final int COPY = 33;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int mode = getIntent().getIntExtra(MODE, -1);
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (mode == COPY) {
-            String text = getIntent().getStringExtra(DataBase.DESCTRIPTION);
-            ClipboardManager clipboard = (ClipboardManager)
-                    getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(text, text);
-            clipboard.setPrimaryClip(clip);
-        } else if (mode == InitJobService.ID_PROM) {
+//        if (mode == COPY) {
+//            String text = getIntent().getStringExtra(DataBase.DESCTRIPTION);
+//            ClipboardManager clipboard = (ClipboardManager)
+//                    getSystemService(Context.CLIPBOARD_SERVICE);
+//            ClipData clip = ClipData.newPlainText(text, text);
+//            clipboard.setPrimaryClip(clip);
+//        } else
+            if (mode == InitJobService.ID_PROM) {
             manager.cancel(Prom.notif_id);
         } else if (mode == InitJobService.ID_SUMMARY_POSTPONE) {
             manager.cancel(SummaryService.notif_id);
@@ -62,20 +59,20 @@ public class Notification extends Activity {
         return pendingIntent;
     }
 
-    public static void show(Context context, String msg, int id) {
-        Intent copy = new Intent(context, Notification.class);
-        copy.putExtra(MODE, COPY);
-        copy.putExtra(DataBase.DESCTRIPTION, msg);
-        PendingIntent piCopy = PendingIntent.getActivity(context, 0, copy, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.star)
-                .setContentTitle("Debug notif")
-                .setContentText(msg)
-                .setTicker(msg)
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(piCopy)
-                .setAutoCancel(true);
-        nm.notify(id, mBuilder.build());
-    }
+//    public static void show(Context context, String msg, int id) {
+//        Intent copy = new Intent(context, Notification.class);
+//        copy.putExtra(MODE, COPY);
+//        copy.putExtra(DataBase.DESCTRIPTION, msg);
+//        PendingIntent piCopy = PendingIntent.getActivity(context, 0, copy, PendingIntent.FLAG_UPDATE_CURRENT);
+//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+//                .setSmallIcon(R.drawable.star)
+//                .setContentTitle("Debug notif")
+//                .setContentText(msg)
+//                .setTicker(msg)
+//                .setWhen(System.currentTimeMillis())
+//                .setContentIntent(piCopy)
+//                .setAutoCancel(true);
+//        nm.notify(id, mBuilder.build());
+//    }
 }
