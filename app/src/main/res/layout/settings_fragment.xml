@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="20dp"
-                android:max="23"
+                android:max="8"
                 android:progress="0"
                 android:progressDrawable="@drawable/progress_bar"
                 android:thumb="@drawable/sb_thumb"
