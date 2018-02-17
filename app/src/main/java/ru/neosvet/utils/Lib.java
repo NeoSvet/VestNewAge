@@ -1,14 +1,10 @@
 package ru.neosvet.utils;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -149,22 +145,6 @@ public class Lib {
         }
 
         return time;
-    }
-
-    public boolean verifyStoragePermissions(int code) {
-        //http://stackoverflow.com/questions/38989050/android-6-0-write-to-external-sd-card
-        int permission = ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    }, code);
-            return true;
-        }
-        return false;
     }
 
     public static String withOutTags(String s) {
