@@ -41,19 +41,20 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setViews() {
-        cbMenuMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), MODE_PRIVATE);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean(MainActivity.MENU_MODE, check);
-                editor.apply();
-                Intent main = new Intent(act, MainActivity.class);
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
-                act.startActivity(main);
-                act.finish();
-            }
-        });
+        if (cbMenuMode.getVisibility() == View.VISIBLE)
+            cbMenuMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                    SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean(MainActivity.MENU_MODE, check);
+                    editor.apply();
+                    Intent main = new Intent(act, MainActivity.class);
+                    main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+                    act.startActivity(main);
+                    act.finish();
+                }
+            });
         cbCheckSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
@@ -206,7 +207,12 @@ public class SettingsFragment extends Fragment {
 
     private void initViews() {
         cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
-        cbMenuMode.setChecked(MainActivity.isMenu);
+        if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
+            cbMenuMode.setChecked(MainActivity.isMenu);
+        } else { // else tablet
+            cbMenuMode.setVisibility(View.GONE);
+            container.findViewById(R.id.divMenuMode).setVisibility(View.GONE);
+        }
 
         cbCheckAuto = (CheckBox) container.findViewById(R.id.cbCheckAuto);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);

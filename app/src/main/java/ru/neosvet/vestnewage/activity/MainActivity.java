@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     private final String LOADER = "loader";
     public static final String MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
-    public static boolean isFirst = false, isMenu;
+    public static boolean isFirst = false, isMenu = false;
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
 
         SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
-        isMenu = pref.getBoolean(MENU_MODE, false);
+        if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
+            isMenu = pref.getBoolean(MENU_MODE, false);
         if (savedInstanceState == null) {
             Intent intent = getIntent();
             tab = intent.getIntExtra(TAB, 0);
@@ -134,10 +135,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
             setMenuFragment();
-        }else{
+        } else {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
-            if(isMenu) return;
+            if (isMenu) return;
             drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
