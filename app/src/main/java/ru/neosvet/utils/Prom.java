@@ -251,8 +251,8 @@ public class Prom {
         return t;
     }
 
-    public void synchronTime(boolean boolRefresh) {
-        if (!boolRefresh) {
+    public void synchronTime(final Handler action) {
+        if (action == null) {
             if (pref.getLong(TIMEPROM, 0) > 0)
                 return;
         }
@@ -283,9 +283,15 @@ public class Prom {
                             editor.putLong(TIMEPROM, timeprom);
                             editor.apply();
                         }
+                        if (action != null)
+                            action.sendEmptyMessage(timeleft);
+                        return;
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                if (action != null)
+                    action.sendEmptyMessage(-1);
             }
         }).start();
     }

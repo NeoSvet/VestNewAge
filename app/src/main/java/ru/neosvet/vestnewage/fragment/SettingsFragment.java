@@ -3,6 +3,8 @@ package ru.neosvet.vestnewage.fragment;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -132,8 +135,28 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Prom prom = new Prom(act.getApplicationContext());
-                prom.synchronTime(true);
+                Handler action = new Handler(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message message) {
+                        int timeleft = message.what;
+                        if (timeleft == -1) {
+                            Lib.showToast(act, getResources().getString(R.string.sync_error));
+                            bSyncTime.setEnabled(true);
+                            return false;
+                        }
+                        float f = ((float) timeleft) / 60f;
+                        if (f < 60f)
+                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
+                        else {
+                            f = f / 60f;
+                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_hour), f));
+                        }
+                        return false;
+                    }
+                });
+                prom.synchronTime(action);
                 bSyncTime.setEnabled(false);
+
             }
         });
     }
