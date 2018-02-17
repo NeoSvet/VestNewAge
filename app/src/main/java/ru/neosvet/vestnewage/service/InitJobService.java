@@ -14,8 +14,9 @@ import android.os.PersistableBundle;
 import java.util.Date;
 
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Notification;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
+import ru.neosvet.vestnewage.R;
 
 /**
  * Created by NeoSvet on 12.02.2018.
@@ -51,7 +52,6 @@ public class InitJobService extends JobService {
             public void onReceive(Context context, Intent intent) {
                 context.unregisterReceiver(this);
                 jobFinished(param, false);
-                Notification.show(context, "jobFinished", 666);
             }
         };
         IntentFilter filter = new IntentFilter(ACTION_FINISHED);
@@ -60,7 +60,6 @@ public class InitJobService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters param) {
-        Notification.show(getApplicationContext(), "onStopJob", 888);
         return false; //remove job from scheduler
     }
 
@@ -81,6 +80,7 @@ public class InitJobService extends JobService {
     }
 
     public static void setSummaryPostpone(Context context, String des, String link) {
+        Lib.showToast(context, context.getResources().getString(R.string.postpone_alert));
         ComponentName jobService = new ComponentName(context, InitJobService.class);
         JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(ID_SUMMARY_POSTPONE, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
