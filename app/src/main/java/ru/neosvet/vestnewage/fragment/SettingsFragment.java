@@ -142,8 +142,11 @@ public class SettingsFragment extends Fragment {
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = -1;
-        if (cbCheckAuto.isChecked())
+        if (cbCheckAuto.isChecked()) {
             p = sbCheckTime.getProgress();
+            if (p > 5)
+                p += (p - 5) * 5;
+        }
         editor.putInt(TIME, p);
         editor.putBoolean(SOUND, cbCheckSound.isChecked());
         editor.putBoolean(VIBR, cbCheckVibr.isChecked());
@@ -205,13 +208,8 @@ public class SettingsFragment extends Fragment {
         int p = sbCheckTime.getProgress() + 1;
         boolean bH = false;
         if (p > 5) {
-            if (p % 6 > 0) {
-                p += 5 - p % 6;
-                sbCheckTime.setProgress(p);
-                return;
-            }
             bH = true;
-            p = p / 6;
+            p -= 5;
         } else
             p *= 10;
         StringBuilder t = new StringBuilder(getResources().getString(R.string.auto_check));
