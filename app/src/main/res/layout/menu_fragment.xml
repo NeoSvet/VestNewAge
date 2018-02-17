@@ -14,8 +14,7 @@
         android:id="@+id/lvMenu"
         android:layout_width="@dimen/menu_fragment_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/menu_fragment_top"
-        android:paddingLeft="@dimen/menu_fragment_left" />
+        android:layout_marginTop="@dimen/menu_fragment_top" />
 
     <View
         android:id="@+id/divMenu"
