@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,6 +41,7 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.MultiWindowSupport;
 import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
@@ -84,6 +86,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         setViews();
         initCalendar();
         restoreActivityState(savedInstanceState);
+        if (Build.VERSION.SDK_INT > 23) {
+            if (act.isInMultiWindowMode())
+                MultiWindowSupport.resizeFloatTextView(tvNew, true);
+        }
         return this.container;
     }
 
@@ -715,5 +721,12 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             return;
         dCurrent = date;
         createCalendar(0);
+    }
+
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
+
+        MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
     }
 }

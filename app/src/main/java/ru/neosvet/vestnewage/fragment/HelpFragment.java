@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,6 +20,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.HelpAdapter;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.MultiWindowSupport;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
@@ -53,6 +55,10 @@ public class HelpFragment extends Fragment {
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
+        if (Build.VERSION.SDK_INT > 23) {
+            if (act.isInMultiWindowMode())
+                MultiWindowSupport.resizeFloatTextView(tvHelp, true);
+        }
         return this.container;
     }
 
@@ -217,5 +223,12 @@ public class HelpFragment extends Fragment {
                 + getResources().getString(R.string.publication) + (k - n));
         tvChangelog.setText(getResources().getStringArray(R.array.changelog)[n]);
         n_log = n;
+    }
+
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
+
+        MultiWindowSupport.resizeFloatTextView(tvHelp, isInMultiWindowMode);
     }
 }
