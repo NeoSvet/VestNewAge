@@ -7,6 +7,9 @@
     <string name="download_title">Загрузить&#8230;</string>
     <string name="download_all">Загрузить все материалы</string>
     <string name="download_it">Загрузить весь данный раздел</string>
+    <!--New option-->
+    <string name="new_option">Появилась новая опция!</string>
+    <string name="new_option_menu">«Меню на весь экран»</string>
     <!--Lib-->
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
