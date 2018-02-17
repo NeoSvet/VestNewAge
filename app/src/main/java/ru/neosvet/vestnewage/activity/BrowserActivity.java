@@ -571,8 +571,6 @@ public class BrowserActivity extends AppCompatActivity
 
     private void openFile() {
         status.setLoad(false);
-        if(android.os.Build.VERSION.SDK_INT > 22)
-            return;
         File f = getFile();
         if (f.exists()) {
             try {
