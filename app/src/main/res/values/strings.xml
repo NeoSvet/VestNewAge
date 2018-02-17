@@ -151,8 +151,8 @@
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений:</string>
-    <string name="current_publication">Текущая публикация: №</string>
-    <string name="publication">Публикация №</string>
+    <string name="current_version">Текущая версия:&#160;</string>
+    <string name="version">Версия&#160;</string>
     <string name="write_to_dev">Написать разработчику</string>
     <!--PresentationActivity-->
     <string name="next">Далее</string>
