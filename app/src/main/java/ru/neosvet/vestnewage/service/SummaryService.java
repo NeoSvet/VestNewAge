@@ -52,6 +52,7 @@ public class SummaryService extends IntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         context = getApplicationContext();
+        Notification.show(context, "Start summary service", notif_id);
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         try {
             String[] result;
@@ -63,8 +64,10 @@ public class SummaryService extends IntentService {
                     return;
                 result = checkSummary();
             }
-            if (result == null)
+            if (result == null) {
+                Notification.show(context, "No updates", notif_id);
                 return;
+            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
@@ -94,6 +97,7 @@ public class SummaryService extends IntentService {
                 mBuilder.setVibrate(new long[]{500, 1500});
             nm.notify(notif_id, mBuilder.build());
         } catch (Exception e) {
+            Notification.show(context, "Error: " + e.getLocalizedMessage(), 999);
             e.printStackTrace();
         }
         Intent finish = new Intent(InitJobService.ACTION_FINISHED);
