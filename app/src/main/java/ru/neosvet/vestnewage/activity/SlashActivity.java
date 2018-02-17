@@ -1,6 +1,9 @@
 package ru.neosvet.vestnewage.activity;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -9,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -56,8 +60,30 @@ public class SlashActivity extends AppCompatActivity {
         Prom prom = new Prom(this);
         prom.synchronTime(null);
 
-        if (lib.getPreviosVer() < 10)
+        int ver = lib.getPreviosVer();
+        if (ver < 10)
             adapterNewVersion();
+        if (ver == 0) return;
+        if (ver < 13)
+            notifNewOption(getResources().getString(R.string.new_option_menu));
+    }
+
+    private void notifNewOption(String msg) {
+        Intent main = new Intent(this, MainActivity.class);
+        main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.star)
+                .setContentTitle(getResources().getString(R.string.new_option))
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(piMain)
+                .setFullScreenIntent(piEmpty, true)
+                .setAutoCancel(true);
+        nm.notify(999, mBuilder.build());
     }
 
     private void initData(Bundle state) {
