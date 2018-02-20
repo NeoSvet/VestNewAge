@@ -98,6 +98,7 @@ public class SummaryService extends IntentService {
             nm.notify(notif_id, mBuilder.build());
         } catch (Exception e) {
             Notification.show(context, "Error: " + e.getLocalizedMessage(), 999);
+            InitJobService.setSummary(context, pref.getInt(SettingsFragment.TIME, 0));
             e.printStackTrace();
         }
         Intent finish = new Intent(InitJobService.ACTION_FINISHED);
