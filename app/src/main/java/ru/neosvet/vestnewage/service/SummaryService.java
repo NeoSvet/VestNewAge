@@ -63,8 +63,11 @@ public class SummaryService extends IntentService {
                     return;
                 result = checkSummary();
             }
-            if (result == null)
+            if (result == null) { // no updates
+                Intent finish = new Intent(InitJobService.ACTION_FINISHED);
+                context.sendBroadcast(finish);
                 return;
+            }
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
