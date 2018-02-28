@@ -101,7 +101,7 @@ public class InitJobService extends JobService {
         ComponentName jobService = new ComponentName(context, InitJobService.class);
         JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(ID_PROM, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.cancel(ID_SUMMARY);
+        jobScheduler.cancel(ID_PROM);
         if (p > -1) {
             Prom prom = new Prom(context);
             Date d = prom.getPromDate();
