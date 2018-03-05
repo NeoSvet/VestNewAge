@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import ru.neosvet.utils.Lib;
@@ -22,10 +23,13 @@ import ru.neosvet.vestnewage.service.InitJobService;
 import static android.content.Context.MODE_PRIVATE;
 
 public class SettingsFragment extends Fragment {
-    public static final String SUMMARY = "Summary", PROM = "Prom",
+    public static final String PANELS = "panels", SUMMARY = "Summary", PROM = "Prom",
             TIME = "time", SOUND = "sound", VIBR = "vibr";
+    private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
     private MainActivity act;
-    private View container, bSyncTime;
+    private View container, bSyncTime, pBase, pCheck, pProm;
+    private ImageView imgBase, imgCheck, imgProm;
+    private boolean[] bPanels;
     private CheckBox cbMenuMode, cbCheckAuto, cbCheckSound, cbCheckVibr, cbPromNotif, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
@@ -37,10 +41,78 @@ public class SettingsFragment extends Fragment {
         act.setTitle(getResources().getString(R.string.settings));
         initViews();
         setViews();
+        restoreActivityState(savedInstanceState);
         return this.container;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBooleanArray(PANELS, bPanels);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void restoreActivityState(Bundle state) {
+        if (state == null) {
+            bPanels = new boolean[]{false, false, false};
+            return;
+        }
+        bPanels = state.getBooleanArray(PANELS);
+        if (bPanels[PANEL_BASE]) {
+            pBase.setVisibility(View.VISIBLE);
+            imgBase.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+        }
+        if (bPanels[PANEL_CHECK]) {
+            pCheck.setVisibility(View.VISIBLE);
+            imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+        }
+        if (bPanels[PANEL_PROM]) {
+            pProm.setVisibility(View.VISIBLE);
+            imgProm.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+        }
+    }
+
     private void setViews() {
+        imgBase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bPanels[PANEL_BASE]) { //if open
+                    pBase.setVisibility(View.GONE);
+                    imgBase.setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                } else { //if close
+                    pBase.setVisibility(View.VISIBLE);
+                    imgBase.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                }
+                bPanels[PANEL_BASE] = !bPanels[PANEL_BASE];
+            }
+        });
+        imgCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bPanels[PANEL_CHECK]) { //if open
+                    pCheck.setVisibility(View.GONE);
+                    imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                } else { //if close
+                    pCheck.setVisibility(View.VISIBLE);
+                    imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                }
+                bPanels[PANEL_CHECK] = !bPanels[PANEL_CHECK];
+            }
+        });
+        imgProm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bPanels[PANEL_PROM]) { //if open
+                    pProm.setVisibility(View.GONE);
+                    imgProm.setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                } else { //if close
+                    pProm.setVisibility(View.VISIBLE);
+                    imgProm.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                }
+                bPanels[PANEL_PROM] = !bPanels[PANEL_PROM];
+            }
+        });
+
+
         if (cbMenuMode.getVisibility() == View.VISIBLE)
             cbMenuMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -211,8 +283,14 @@ public class SettingsFragment extends Fragment {
             cbMenuMode.setChecked(MainActivity.isMenu);
         } else { // else tablet
             cbMenuMode.setVisibility(View.GONE);
-            container.findViewById(R.id.divMenuMode).setVisibility(View.GONE);
         }
+
+        imgBase = (ImageView) container.findViewById(R.id.imgBase);
+        imgCheck = (ImageView) container.findViewById(R.id.imgCheck);
+        imgProm = (ImageView) container.findViewById(R.id.imgProm);
+        pBase = container.findViewById(R.id.pBase);
+        pCheck = container.findViewById(R.id.pCheck);
+        pProm = container.findViewById(R.id.pProm);
 
         cbCheckAuto = (CheckBox) container.findViewById(R.id.cbCheckAuto);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
