@@ -106,6 +106,9 @@
     <string name="copyright">©</string>
     <string name="downloaded">Загружено:</string>
     <!--SettingsFragment-->
+    <string name="base">Основное</string>
+    <string name="notif_new">Уведомление о новом</string>
+    <string name="notif_prom">Уведомление о Посыле</string>
     <string name="menu_on_full_screen">Меню на весь экран</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
