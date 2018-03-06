@@ -42,25 +42,50 @@
             android:layout_height="2dp"
             android:background="@color/colorAccentLight" />
 
-        <CheckBox
-            android:id="@+id/cbCheckAuto"
-            style="@style/CheckBox"
+        <TextView
+            android:id="@+id/tvCheck"
+            style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="@string/auto_check" />
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/check_summary" />
 
         <SeekBar
             android:id="@+id/sbCheckTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="5dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:max="8"
+            android:max="9"
             android:progress="0"
             android:progressDrawable="@drawable/progress_bar"
             android:thumb="@drawable/sb_thumb" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/often" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="@string/less" />
+        </RelativeLayout>
 
         <CheckBox
             android:id="@+id/cbCheckSound"
