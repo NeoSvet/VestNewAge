@@ -29,7 +29,7 @@ public class SettingsFragment extends Fragment {
     private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
     private MainActivity act;
     private TextView tvCheck, tvPromNotif;
-    private View container, bSyncTime, pBase, pCheck, pProm;
+    private View container, bSyncTime, pBase, pCheck, pProm, tvCheckOff, tvPromOff;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
     private CheckBox cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
@@ -260,6 +260,7 @@ public class SettingsFragment extends Fragment {
         pProm = container.findViewById(R.id.pProm);
 
         tvCheck = (TextView) container.findViewById(R.id.tvCheck);
+        tvCheckOff = container.findViewById(R.id.tvCheckOff);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
         cbCheckVibr = (CheckBox) container.findViewById(R.id.cbCheckVibr);
         sbCheckTime = (SeekBar) container.findViewById(R.id.sbCheckTime);
@@ -273,6 +274,7 @@ public class SettingsFragment extends Fragment {
         cbCheckVibr.setChecked(pref.getBoolean(VIBR, true));
 
         tvPromNotif = (TextView) container.findViewById(R.id.tvPromNotif);
+        tvPromOff = container.findViewById(R.id.tvPromOff);
         cbPromSound = (CheckBox) container.findViewById(R.id.cbPromSound);
         cbPromVibr = (CheckBox) container.findViewById(R.id.cbPromVibr);
         sbPromTime = (SeekBar) container.findViewById(R.id.sbPromTime);
@@ -291,10 +293,12 @@ public class SettingsFragment extends Fragment {
         StringBuilder t = new StringBuilder(getResources().getString(R.string.check_summary));
         t.append(" ");
         if (sbCheckTime.getProgress() == sbCheckTime.getMax()) {
+            tvCheckOff.setVisibility(View.GONE);
             t.append(getResources().getString(R.string.turn_off));
             tvCheck.setText(t);
             return;
         }
+        tvCheckOff.setVisibility(View.VISIBLE);
         int p = sbCheckTime.getProgress() + 1;
         boolean bH = false;
         if (p > 5) {
@@ -320,9 +324,11 @@ public class SettingsFragment extends Fragment {
     private void setPromTime() {
         int p = sbPromTime.getProgress();
         if (p == sbPromTime.getMax()) {
+            tvPromOff.setVisibility(View.GONE);
             tvPromNotif.setText(getResources().getString(R.string.prom_notif_off));
             return;
         }
+        tvPromOff.setVisibility(View.VISIBLE);
         StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
         t.append(" ");
         t.append(getResources().getString(R.string.on));
