@@ -56,7 +56,7 @@ public class SettingsFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            bPanels = new boolean[]{false, false, false};
+            bPanels = new boolean[]{true, false, false};
             return;
         }
         bPanels = state.getBooleanArray(PANELS);
