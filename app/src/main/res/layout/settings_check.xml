@@ -53,18 +53,6 @@
             android:layout_marginTop="20dp"
             android:text="@string/check_summary" />
 
-        <SeekBar
-            android:id="@+id/sbCheckTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:max="9"
-            android:progress="0"
-            android:progressDrawable="@drawable/progress_bar"
-            android:thumb="@drawable/sb_thumb" />
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,11 +60,31 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp">
 
+            <SeekBar
+                android:id="@+id/sbCheckTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="5dp"
+                android:max="9"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_bar"
+                android:thumb="@drawable/sb_thumb" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/off" />
+
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
+                android:layout_below="@id/sbCheckTime"
                 android:text="@string/often" />
 
             <TextView
@@ -84,6 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_below="@id/sbCheckTime"
                 android:text="@string/less" />
         </RelativeLayout>
 
