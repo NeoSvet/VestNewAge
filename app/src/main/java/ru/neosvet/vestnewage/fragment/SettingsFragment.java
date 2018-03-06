@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
@@ -27,10 +28,11 @@ public class SettingsFragment extends Fragment {
             TIME = "time", SOUND = "sound", VIBR = "vibr";
     private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
     private MainActivity act;
+    private TextView tvCheck, tvPromNotif;
     private View container, bSyncTime, pBase, pCheck, pProm;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
-    private CheckBox cbMenuMode, cbCheckAuto, cbCheckSound, cbCheckVibr, cbPromNotif, cbPromSound, cbPromVibr;
+    private CheckBox cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
     @Override
@@ -139,23 +141,6 @@ public class SettingsFragment extends Fragment {
                 saveSummary();
             }
         });
-        cbCheckAuto.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                if (check) {
-                    setCheckTime();
-                    sbCheckTime.setVisibility(View.VISIBLE);
-                    cbCheckSound.setVisibility(View.VISIBLE);
-                    cbCheckVibr.setVisibility(View.VISIBLE);
-                } else {
-                    cbCheckAuto.setText(getResources().getString(R.string.auto_check));
-                    sbCheckTime.setVisibility(View.GONE);
-                    cbCheckSound.setVisibility(View.GONE);
-                    cbCheckVibr.setVisibility(View.GONE);
-                }
-                saveSummary();
-            }
-        });
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -182,23 +167,6 @@ public class SettingsFragment extends Fragment {
         cbPromVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                saveProm();
-            }
-        });
-        cbPromNotif.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                if (check) {
-                    setPromTime();
-                    sbPromTime.setVisibility(View.VISIBLE);
-                    cbPromSound.setVisibility(View.VISIBLE);
-                    cbPromVibr.setVisibility(View.VISIBLE);
-                } else {
-                    cbPromNotif.setText(getResources().getString(R.string.prom_notif));
-                    sbPromTime.setVisibility(View.GONE);
-                    cbPromSound.setVisibility(View.GONE);
-                    cbPromVibr.setVisibility(View.GONE);
-                }
                 saveProm();
             }
         });
@@ -251,12 +219,11 @@ public class SettingsFragment extends Fragment {
     private void saveSummary() {
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        int p = -1;
-        if (cbCheckAuto.isChecked()) {
-            p = sbCheckTime.getProgress();
+        int p = sbCheckTime.getProgress();
+        if (p < sbCheckTime.getMax()) {
             if (p > 5)
                 p += (p - 5) * 5;
-        }
+        } else p = -1;
         editor.putInt(TIME, p);
         editor.putBoolean(SOUND, cbCheckSound.isChecked());
         editor.putBoolean(VIBR, cbCheckVibr.isChecked());
@@ -267,9 +234,9 @@ public class SettingsFragment extends Fragment {
     private void saveProm() {
         SharedPreferences pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        int p = -1;
-        if (cbPromNotif.isChecked())
-            p = sbPromTime.getProgress();
+        int p = sbPromTime.getProgress();
+        if (p == sbPromTime.getMax())
+            p = -1;
         editor.putInt(TIME, p);
         editor.putBoolean(SOUND, cbPromSound.isChecked());
         editor.putBoolean(VIBR, cbPromVibr.isChecked());
@@ -292,43 +259,42 @@ public class SettingsFragment extends Fragment {
         pCheck = container.findViewById(R.id.pCheck);
         pProm = container.findViewById(R.id.pProm);
 
-        cbCheckAuto = (CheckBox) container.findViewById(R.id.cbCheckAuto);
+        tvCheck = (TextView) container.findViewById(R.id.tvCheck);
         cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
         cbCheckVibr = (CheckBox) container.findViewById(R.id.cbCheckVibr);
         sbCheckTime = (SeekBar) container.findViewById(R.id.sbCheckTime);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(TIME, -1);
-        if (p > -1) {
-            cbCheckAuto.setChecked(true);
-            sbCheckTime.setVisibility(View.VISIBLE);
-            cbCheckSound.setVisibility(View.VISIBLE);
-            cbCheckVibr.setVisibility(View.VISIBLE);
-            sbCheckTime.setProgress(p);
-            setCheckTime();
-        }
+        if (p == -1)
+            p = sbCheckTime.getMax();
+        sbCheckTime.setProgress(p);
+        setCheckTime();
         cbCheckSound.setChecked(pref.getBoolean(SOUND, false));
         cbCheckVibr.setChecked(pref.getBoolean(VIBR, true));
 
-        cbPromNotif = (CheckBox) container.findViewById(R.id.cbPromNotif);
+        tvPromNotif = (TextView) container.findViewById(R.id.tvPromNotif);
         cbPromSound = (CheckBox) container.findViewById(R.id.cbPromSound);
         cbPromVibr = (CheckBox) container.findViewById(R.id.cbPromVibr);
         sbPromTime = (SeekBar) container.findViewById(R.id.sbPromTime);
         pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
         p = pref.getInt(TIME, -1);
-        if (p > -1) {
-            cbPromNotif.setChecked(true);
-            sbPromTime.setVisibility(View.VISIBLE);
-            cbPromSound.setVisibility(View.VISIBLE);
-            cbPromVibr.setVisibility(View.VISIBLE);
-            sbPromTime.setProgress(p);
-            setPromTime();
-        }
+        if (p == -1)
+            p = sbPromTime.getMax();
+        sbPromTime.setProgress(p);
+        setPromTime();
         cbPromSound.setChecked(pref.getBoolean(SOUND, false));
         cbPromVibr.setChecked(pref.getBoolean(VIBR, true));
         bSyncTime = container.findViewById(R.id.bSyncTime);
     }
 
     private void setCheckTime() {
+        StringBuilder t = new StringBuilder(getResources().getString(R.string.check_summary));
+        t.append(" ");
+        if (sbCheckTime.getProgress() == sbCheckTime.getMax()) {
+            t.append(getResources().getString(R.string.turn_off));
+            tvCheck.setText(t);
+            return;
+        }
         int p = sbCheckTime.getProgress() + 1;
         boolean bH = false;
         if (p > 5) {
@@ -336,8 +302,6 @@ public class SettingsFragment extends Fragment {
             p -= 5;
         } else
             p *= 10;
-        StringBuilder t = new StringBuilder(getResources().getString(R.string.auto_check));
-        t.append(" ");
         if (p == 1)
             t.append(getResources().getString(R.string.each_one));
         else {
@@ -350,11 +314,15 @@ public class SettingsFragment extends Fragment {
             else
                 t.append(getResources().getString(R.string.minutes));
         }
-        cbCheckAuto.setText(t);
+        tvCheck.setText(t);
     }
 
     private void setPromTime() {
         int p = sbPromTime.getProgress();
+        if (p == sbPromTime.getMax()) {
+            tvPromNotif.setText(getResources().getString(R.string.prom_notif_off));
+            return;
+        }
         StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
         t.append(" ");
         t.append(getResources().getString(R.string.on));
@@ -381,6 +349,6 @@ public class SettingsFragment extends Fragment {
                 }
             }
         }
-        cbPromNotif.setText(t);
+        tvPromNotif.setText(t);
     }
 }
