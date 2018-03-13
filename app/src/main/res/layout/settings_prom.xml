@@ -71,6 +71,16 @@
                 android:thumb="@drawable/sb_thumb" />
 
             <TextView
+                android:id="@+id/tvPromOn"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="2dp"
+                android:text="@string/on" />
+
+            <TextView
                 android:id="@+id/tvPromOff"
                 style="@style/Label"
                 android:layout_width="wrap_content"
