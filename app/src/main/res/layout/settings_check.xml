@@ -72,6 +72,16 @@
                 android:thumb="@drawable/sb_thumb" />
 
             <TextView
+                android:id="@+id/tvCheckOn"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="2dp"
+                android:text="@string/on" />
+
+            <TextView
                 android:id="@+id/tvCheckOff"
                 style="@style/Label"
                 android:layout_width="wrap_content"
