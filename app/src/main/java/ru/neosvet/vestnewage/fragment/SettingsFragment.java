@@ -331,13 +331,13 @@ public class SettingsFragment extends Fragment {
         tvPromOff.setVisibility(View.VISIBLE);
         StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
         t.append(" ");
-        t.append(getResources().getString(R.string.on));
+        t.append(getResources().getString(R.string.in));
         t.append(" ");
         if (p == 0) {
             t.append(getResources().getString(R.string.secs));
 //            t.append(getResources().getString(R.string.at_moment_prom));
         } else {
-//            t.append(getResources().getString(R.string.on));
+//            t.append(getResources().getString(R.string.in));
 //            t.append(" ");
             if (p > 4 && p < 21)
                 t.append(p + " " + getResources().getStringArray(R.array.time)[4]);

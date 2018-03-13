@@ -121,7 +121,7 @@
     <string name="each_more">каждые</string>
     <string name="prom_notif">Уведомлять о Посыле</string>
     <string name="prom_notif_off">Не уведомлять о Посыле</string>
-    <string name="on">за</string>
+    <string name="in">за</string>
     <string name="secs">30 секунд</string>
     <string name="often">чаще</string>
     <string name="less">реже</string>
