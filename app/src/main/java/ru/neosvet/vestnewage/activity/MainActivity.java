@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final String LOADER = "loader";
     public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
     public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
+    private MenuFragment frMenu;
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
@@ -150,10 +151,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        if (getResources().getInteger(R.integer.screen_mode) ==
+        if (getResources().getInteger(R.integer.screen_mode) !=
                 getResources().getInteger(R.integer.screen_tablet_land)) {
-            setMenuFragment();
-        } else {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             if (isMenuMode) return;
@@ -178,10 +177,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setMenuFragment() {
-        FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
-        MenuFragment mf = new MenuFragment();
-        mf.setSelect(cur_id);
-        fragmentTransaction.replace(R.id.menu_fragment, mf).commit();
+        if (frMenu == null) {
+            FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
+            frMenu = new MenuFragment();
+            frMenu.setSelect(cur_id);
+            fragmentTransaction.replace(R.id.menu_fragment, frMenu).commit();
+        } else
+            frMenu.setSelect(cur_id);
     }
 
     @Override
@@ -222,7 +224,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isFirst = false;
         menuDownload.hide();
         cur_id = id;
-        if (navigationView != null) //tut
+        if (navigationView == null)
+            setMenuFragment();
+        else
             navigationView.setCheckedItem(id);
         status.setCrash(false);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
@@ -325,8 +329,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFirst) {
             setFragment(R.id.nav_calendar);
-            if (drawer == null)
-                setMenuFragment();
         } else if (frCalendar != null) {
             if (frCalendar.onBackPressed())
                 exit();
