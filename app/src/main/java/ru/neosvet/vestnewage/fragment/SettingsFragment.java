@@ -77,7 +77,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setViews() {
-        imgBase.setOnClickListener(new View.OnClickListener() {
+        container.findViewById(R.id.bBase).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (bPanels[PANEL_BASE]) { //if open
@@ -90,7 +90,7 @@ public class SettingsFragment extends Fragment {
                 bPanels[PANEL_BASE] = !bPanels[PANEL_BASE];
             }
         });
-        imgCheck.setOnClickListener(new View.OnClickListener() {
+        container.findViewById(R.id.bCheck).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (bPanels[PANEL_CHECK]) { //if open
@@ -103,7 +103,7 @@ public class SettingsFragment extends Fragment {
                 bPanels[PANEL_CHECK] = !bPanels[PANEL_CHECK];
             }
         });
-        imgProm.setOnClickListener(new View.OnClickListener() {
+        container.findViewById(R.id.bProm).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (bPanels[PANEL_PROM]) { //if open
