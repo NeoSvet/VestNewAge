@@ -35,7 +35,7 @@ public class SettingsFragment extends Fragment {
     private View pProm, tvPromOn, tvPromOff;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
-    private CheckBox cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
+    private CheckBox cbCountToMenu, cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
     @Override
@@ -117,19 +117,19 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-
+        cbCountToMenu.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                setBaseCheckBox(MainActivity.COUNT_IN_MENU, check);
+                MainActivity.isCountInMenu = check;
+            }
+        });
         if (cbMenuMode.getVisibility() == View.VISIBLE)
             cbMenuMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), MODE_PRIVATE);
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putBoolean(MainActivity.MENU_MODE, check);
-                    editor.apply();
-                    Intent main = new Intent(act, MainActivity.class);
-                    main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
-                    act.startActivity(main);
-                    act.finish();
+                    setBaseCheckBox(MainActivity.MENU_MODE, check);
+                    MainActivity.isMenuMode = check;
                 }
             });
         cbCheckSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -192,7 +192,7 @@ public class SettingsFragment extends Fragment {
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Prom prom = new Prom(act.getApplicationContext());
+                Prom prom = new Prom(act.getApplicationContext(), null);
                 Handler action = new Handler(new Handler.Callback() {
                     @Override
                     public boolean handleMessage(Message message) {
@@ -217,6 +217,17 @@ public class SettingsFragment extends Fragment {
 
             }
         });
+    }
+
+    private void setBaseCheckBox(String name, boolean check) {
+        SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean(name, check);
+        editor.apply();
+        Intent main = new Intent(act, MainActivity.class);
+        main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+        act.startActivity(main);
+        act.finish();
     }
 
     private void saveSummary() {
@@ -248,9 +259,11 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initViews() {
+        cbCountToMenu = (CheckBox) container.findViewById(R.id.cbCountToMenu);
+        cbCountToMenu.setChecked(MainActivity.isCountInMenu);
         cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
-            cbMenuMode.setChecked(MainActivity.isMenu);
+            cbMenuMode.setChecked(MainActivity.isMenuMode);
         } else { // else tablet
             cbMenuMode.setVisibility(View.GONE);
         }

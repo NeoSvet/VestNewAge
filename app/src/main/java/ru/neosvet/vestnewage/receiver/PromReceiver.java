@@ -20,7 +20,7 @@ public class PromReceiver extends BroadcastReceiver {
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(piProm);
         if (p > -1) {
-            Prom prom = new Prom(context);
+            Prom prom = new Prom(context, null);
             Date d = prom.getPromDate();
             d.setMinutes(d.getMinutes() - p);
             if (p > 0)
@@ -35,7 +35,7 @@ public class PromReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Prom prom = new Prom(context);
+        Prom prom = new Prom(context, null);
         prom.showNotif();
     }
 }

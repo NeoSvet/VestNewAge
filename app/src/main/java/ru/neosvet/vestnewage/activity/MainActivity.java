@@ -44,8 +44,8 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     private final String LOADER = "loader";
-    public static final String MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
-    public static boolean isFirst = false, isMenu = false;
+    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
+    public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
     private CalendarFragment frCalendar;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
@@ -69,10 +69,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         myFragmentManager = getFragmentManager();
         status = new StatusBar(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
+        initInterface();
 
         SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
+        boolean isTablet = false;
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
-            isMenu = pref.getBoolean(MENU_MODE, false);
+            isMenuMode = pref.getBoolean(MENU_MODE, false);
+        else
+            isTablet = true;
+
+        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, false);
+        if (isTablet) {
+            if (!isCountInMenu)
+                prom = new Prom(this, findViewById(R.id.tvPromTime));
+        } else if (!isCountInMenu || isMenuMode) {
+            prom = new Prom(this, findViewById(R.id.tvPromTime));
+        } else {
+            prom = new Prom(this, navigationView.getHeaderView(0)
+                    .findViewById(R.id.tvPromTimeInMenu));
+        }
+
         if (savedInstanceState == null) {
             Intent intent = getIntent();
             tab = intent.getIntExtra(TAB, 0);
@@ -84,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(R.id.nav_help);
                 isFirst = true;
             } else {
-                if (isMenu)
+                if (isMenuMode)
                     setFragment(intent.getIntExtra(CUR_ID, R.id.menu_fragment));
                 else
                     setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
@@ -97,8 +113,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     loader.setAct(this);
                 else loader = null;
         }
-        initInterface();
-        prom = new Prom(this);
+    }
+
+    public void setProm(View textView) {
+        prom = new Prom(this, textView);
     }
 
     @Override
@@ -138,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
-            if (isMenu) return;
+            if (isMenuMode) return;
             drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -209,10 +227,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         status.setCrash(false);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
         frCalendar = null;
+        if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
+            prom.hide();
         switch (id) {
             case R.id.menu_fragment:
                 statusBack = STATUS_MENU;
                 fragmentTransaction.replace(R.id.my_fragment, new MenuFragment());
+                if (isCountInMenu) prom.show();
                 break;
             case R.id.nav_rss:
                 fragmentTransaction.replace(R.id.my_fragment, new SummaryFragment());
@@ -316,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (frCabinet.onBackPressed())
                 exit();
         } else if (frSearch != null) {
-            if (!isMenu)
+            if (!isMenuMode)
                 frSearch.onDestroy(); //сохранение "истории поиска"
             exit();
         } else
@@ -326,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void exit() {
         if (statusBack == STATUS_EXIT) {
             super.onBackPressed();
-        } else if (statusBack == STATUS_PAGE && isMenu) {
+        } else if (statusBack == STATUS_PAGE && isMenuMode) {
             statusBack = STATUS_MENU;
             setFragment(R.id.menu_fragment);
         } else { //  statusBack == STATUS_MENU;

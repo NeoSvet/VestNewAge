@@ -72,10 +72,10 @@ public class BrowserActivity extends AppCompatActivity
     private LoaderTask loader = null;
     private WebView wvBrowser;
     private DataBase dbPage, dbJournal;
-    private TextView tvPromTime, tvPlace;
+    private TextView tvPlace;
     private EditText etSearch;
     private StatusBar status;
-    private View fabMenu, pSearch, bPrev, bNext;
+    private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = Const.LINK, string = null;
@@ -267,17 +267,6 @@ public class BrowserActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.GONE);
-        wvBrowser = (WebView) findViewById(R.id.wvBrowser);
-        tip = new Tip(this, findViewById(R.id.tvFinish));
-        pSearch = findViewById(R.id.pSearch);
-        etSearch = (EditText) findViewById(R.id.etSearch);
-        bPrev = findViewById(R.id.bPrev);
-        bNext = findViewById(R.id.bNext);
-        tvPromTime = (TextView) findViewById(R.id.tvPromTime);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
-        fabMenu = findViewById(R.id.fabMenu);
-        dbJournal = new DataBase(this, DataBase.JOURNAL);
-        prom = new Prom(this);
         InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.content_browser);
         softKeyboard = new SoftKeyboard(mainLayout, im);
@@ -286,6 +275,27 @@ public class BrowserActivity extends AppCompatActivity
         miRefresh = navMenu.getMenu().getItem(0);
         miNomenu = navMenu.getMenu().getItem(4);
         miTheme = navMenu.getMenu().getItem(5);
+
+        wvBrowser = (WebView) findViewById(R.id.wvBrowser);
+        tip = new Tip(this, findViewById(R.id.tvFinish));
+        pSearch = findViewById(R.id.pSearch);
+        etSearch = (EditText) findViewById(R.id.etSearch);
+        bPrev = findViewById(R.id.bPrev);
+        bNext = findViewById(R.id.bNext);
+        tvPromTime = findViewById(R.id.tvPromTime);
+        status = new StatusBar(this, findViewById(R.id.pStatus));
+        fabMenu = findViewById(R.id.fabMenu);
+        dbJournal = new DataBase(this, DataBase.JOURNAL);
+
+        String main = MainActivity.class.getName();
+        main = main.substring(main.indexOf("act"));
+        SharedPreferences prMain = getSharedPreferences(main, MODE_PRIVATE);
+        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, false))
+            prom = new Prom(this, navMenu.getHeaderView(0)
+                    .findViewById(R.id.tvPromTimeInMenu));
+        else
+            prom = new Prom(this, tvPromTime);
+
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);

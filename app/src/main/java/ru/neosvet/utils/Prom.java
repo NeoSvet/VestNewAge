@@ -1,6 +1,5 @@
 package ru.neosvet.utils;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -42,18 +41,15 @@ public class Prom {
     private Lib lib;
     private SharedPreferences pref;
 
-    public Prom(Context context) {
+    public Prom(Context context, View textView) {
         this.context = context;
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), context.MODE_PRIVATE);
         lib = new Lib(context);
-        if (context instanceof SlashActivity)
-            return;
-        if (context instanceof Activity) {
-            long t = getPromDate().getTime() - System.currentTimeMillis();
-            if (t > 39600000) // today prom was been (>11 hours)
-                return;
-            Activity act = (Activity) context;
-            tvPromTime = (TextView) act.findViewById(R.id.tvPromTime);
+        if (textView != null) {
+//            long t = getPromDate().getTime() - System.currentTimeMillis();
+//            if (t > 39600000) // today prom was been (>11 hours)
+//                return;
+            tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
         }
@@ -68,6 +64,18 @@ public class Prom {
     public void resume() {
         if (isProm()) {
             setPromTime();
+        }
+    }
+
+    public void hide() {
+        stop();
+        tvPromTime.setVisibility(View.GONE);
+    }
+
+    public void show() {
+        if (isProm()) {
+            setPromTime();
+            tvPromTime.setVisibility(View.VISIBLE);
         }
     }
 

@@ -50,6 +50,8 @@ public class MenuFragment extends Fragment {
 //                        getResources().getString(R.string.open)));
                 }
             });
+            if (MainActivity.isCountInMenu)
+                act.setProm(this.container.findViewById(R.id.tvPromTimeInMenu));
             i = 0;
         } else {
             act.setTitle(getResources().getString(R.string.app_name));
