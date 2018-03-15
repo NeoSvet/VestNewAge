@@ -10,6 +10,20 @@
         android:layout_height="201dp"
         android:src="@drawable/side_nav_bar" />
 
+    <TextView
+        android:id="@+id/tvPromTimeInMenu"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/ivHeadMenu"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="12dp"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="3"
+        android:visibility="gone" />
+
     <ListView
         android:id="@+id/lvMenu"
         android:layout_width="@dimen/menu_fragment_width"
