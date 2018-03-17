@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
 
         SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         boolean isTablet = false;
@@ -73,6 +72,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isMenuMode = pref.getBoolean(MENU_MODE, false);
         else
             isTablet = true;
+
+        if(isMenuMode)
+            setContentView(R.layout.main_activity_nomenu);
+        else
+            setContentView(R.layout.main_activity);
 
         myFragmentManager = getFragmentManager();
         status = new StatusBar(this, findViewById(R.id.pStatus));
