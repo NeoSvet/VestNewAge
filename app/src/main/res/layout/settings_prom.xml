@@ -10,8 +10,10 @@
         android:background="@color/colorAccentLight" />
 
     <LinearLayout
+        android:id="@+id/bProm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/press"
         android:orientation="horizontal"
         android:padding="10dp">
 
@@ -42,25 +44,72 @@
             android:layout_height="2dp"
             android:background="@color/colorAccentLight" />
 
-        <CheckBox
-            android:id="@+id/cbPromNotif"
-            style="@style/CheckBox"
+        <TextView
+            android:id="@+id/tvPromNotif"
+            style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
             android:text="@string/prom_notif" />
 
-        <SeekBar
-            android:id="@+id/sbPromTime"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:max="60"
-            android:progress="0"
-            android:progressDrawable="@drawable/progress_bar"
-            android:thumb="@drawable/sb_thumb" />
+            android:layout_marginRight="20dp">
+
+            <SeekBar
+                android:id="@+id/sbPromTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:max="61"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_bar"
+                android:thumb="@drawable/sb_thumb" />
+
+            <TextView
+                android:id="@+id/tvPromOn"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/on" />
+
+            <TextView
+                android:id="@+id/tvPromOff"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/off" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/sbPromTime"
+                android:text="@string/prom" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/sbPromTime"
+                android:text="@string/advance" />
+        </RelativeLayout>
 
         <CheckBox
             android:id="@+id/cbPromSound"

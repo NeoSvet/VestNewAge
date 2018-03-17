@@ -30,7 +30,7 @@ public class InitJobService extends JobService {
     public boolean onStartJob(JobParameters param) {
         Context context = getApplicationContext();
         if (param.getJobId() == ID_PROM) {
-            Prom prom = new Prom(context);
+            Prom prom = new Prom(context, null);
             prom.showNotif();
             return false;
         } else { // ID_SUMMARY
@@ -103,7 +103,7 @@ public class InitJobService extends JobService {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(ID_PROM);
         if (p > -1) {
-            Prom prom = new Prom(context);
+            Prom prom = new Prom(context, null);
             Date d = prom.getPromDate();
             d.setMinutes(d.getMinutes() - p);
             if (p > 0)

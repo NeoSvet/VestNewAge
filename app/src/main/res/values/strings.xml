@@ -109,16 +109,24 @@
     <string name="base">Основное</string>
     <string name="notif_new">Уведомление о новом</string>
     <string name="notif_prom">Уведомление о Посыле</string>
+    <string name="counting_to_menu">Переместить отсчёт времени до Посыла в меню</string>
     <string name="menu_on_full_screen">Меню на весь экран</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
     <string name="minutes">минут</string>
-    <string name="auto_check">Автоматическая проверка сводки сайта</string>
+    <string name="advance">заранее</string>
+    <string name="turn_off">отключена</string>
+    <string name="off">выкл</string>
+    <string name="on">вкл</string>
+    <string name="check_summary">Проверка сводки</string>
     <string name="each_one">каждый час        </string>
     <string name="each_more">каждые</string>
     <string name="prom_notif">Уведомлять о Посыле</string>
-    <string name="on">за</string>
+    <string name="prom_notif_off">Не уведомлять о Посыле</string>
+    <string name="in">за</string>
     <string name="secs">30 секунд</string>
+    <string name="often">чаще</string>
+    <string name="less">реже</string>
     <string name="sync_time">Сверить время с сайтом</string>
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
@@ -128,7 +136,7 @@
     <string name="finish_list">Список закончился</string>
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
-    <string name="prom">Посыл!</string>
+    <string name="prom">Посыл</string>
     <string name="seconde">секунда</string>
     <string name="minute">минута</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>

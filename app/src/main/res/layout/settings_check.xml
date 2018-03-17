@@ -10,8 +10,10 @@
         android:background="@color/colorAccentLight" />
 
     <LinearLayout
+        android:id="@+id/bCheck"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/press"
         android:orientation="horizontal"
         android:padding="10dp">
 
@@ -42,25 +44,73 @@
             android:layout_height="2dp"
             android:background="@color/colorAccentLight" />
 
-        <CheckBox
-            android:id="@+id/cbCheckAuto"
-            style="@style/CheckBox"
+        <TextView
+            android:id="@+id/tvCheck"
+            style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="@string/auto_check" />
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/check_summary" />
 
-        <SeekBar
-            android:id="@+id/sbCheckTime"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:max="8"
-            android:progress="0"
-            android:progressDrawable="@drawable/progress_bar"
-            android:thumb="@drawable/sb_thumb" />
+            android:layout_marginRight="20dp">
+
+            <SeekBar
+                android:id="@+id/sbCheckTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="5dp"
+                android:max="9"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_bar"
+                android:thumb="@drawable/sb_thumb" />
+
+            <TextView
+                android:id="@+id/tvCheckOn"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/on" />
+
+            <TextView
+                android:id="@+id/tvCheckOff"
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="2dp"
+                android:text="@string/off" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/sbCheckTime"
+                android:text="@string/often" />
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/sbCheckTime"
+                android:text="@string/less" />
+        </RelativeLayout>
 
         <CheckBox
             android:id="@+id/cbCheckSound"

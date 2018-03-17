@@ -57,7 +57,7 @@ public class SlashActivity extends AppCompatActivity {
         initAnimation();
         initData(savedInstanceState);
 
-        Prom prom = new Prom(this);
+        Prom prom = new Prom(this, null);
         prom.synchronTime(null);
 
         int ver = lib.getPreviosVer();

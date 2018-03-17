@@ -10,8 +10,10 @@
         android:background="@color/colorAccentLight" />
 
     <LinearLayout
+        android:id="@+id/bBase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/press"
         android:orientation="horizontal"
         android:padding="10dp">
 
@@ -34,8 +36,7 @@
         android:id="@+id/pBase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:orientation="vertical">
 
         <View
             android:layout_width="match_parent"
@@ -43,11 +44,21 @@
             android:background="@color/colorAccentLight" />
 
         <CheckBox
-            android:id="@+id/cbMenuMode"
+            android:id="@+id/cbCountToMenu"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
+            android:text="@string/counting_to_menu" />
+
+        <CheckBox
+            android:id="@+id/cbMenuMode"
+            style="@style/CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:text="@string/menu_on_full_screen" />
 
         <Button
