@@ -67,17 +67,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        myFragmentManager = getFragmentManager();
-        status = new StatusBar(this, findViewById(R.id.pStatus));
-        menuDownload = new Tip(this, findViewById(R.id.pDownload));
-        initInterface();
-
         SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         boolean isTablet = false;
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
             isMenuMode = pref.getBoolean(MENU_MODE, false);
         else
             isTablet = true;
+
+        myFragmentManager = getFragmentManager();
+        status = new StatusBar(this, findViewById(R.id.pStatus));
+        menuDownload = new Tip(this, findViewById(R.id.pDownload));
+        initInterface();
 
         isCountInMenu = pref.getBoolean(COUNT_IN_MENU, false);
         if (isTablet) {
