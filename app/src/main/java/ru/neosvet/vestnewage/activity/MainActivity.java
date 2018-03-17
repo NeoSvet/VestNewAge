@@ -224,9 +224,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isFirst = false;
         menuDownload.hide();
         cur_id = id;
-        if (navigationView == null)
-            setMenuFragment();
-        else
+        if (navigationView == null) {
+            if (!isMenuMode)
+                setMenuFragment();
+        } else
             navigationView.setCheckedItem(id);
         status.setCrash(false);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
