@@ -282,7 +282,6 @@ public class BrowserActivity extends AppCompatActivity
         etSearch = (EditText) findViewById(R.id.etSearch);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);
-        tvPromTime = findViewById(R.id.tvPromTime);
         status = new StatusBar(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
@@ -293,8 +292,10 @@ public class BrowserActivity extends AppCompatActivity
         if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, false))
             prom = new Prom(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
-        else
+        else {
+            tvPromTime = findViewById(R.id.tvPromTime);
             prom = new Prom(this, tvPromTime);
+        }
 
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -323,7 +324,7 @@ public class BrowserActivity extends AppCompatActivity
             public void onAnimationEnd(Animation animation) {
                 if (!bNomenu)
                     fabMenu.setVisibility(View.GONE);
-                if (prom.isProm())
+                if (prom.isProm() && tvPromTime != null)
                     tvPromTime.setVisibility(View.GONE);
             }
 
@@ -363,7 +364,7 @@ public class BrowserActivity extends AppCompatActivity
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     if (!bNomenu && pSearch.getVisibility() == View.GONE)
                         fabMenu.startAnimation(anMin);
-                    if (prom.isProm())
+                    if (prom.isProm() && tvPromTime != null)
                         tvPromTime.startAnimation(anMin);
                 } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
                         event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
@@ -371,7 +372,7 @@ public class BrowserActivity extends AppCompatActivity
                         fabMenu.setVisibility(View.VISIBLE);
                         fabMenu.startAnimation(anMax);
                     }
-                    if (prom.isProm()) {
+                    if (prom.isProm() && tvPromTime != null) {
                         tvPromTime.setVisibility(View.VISIBLE);
                         tvPromTime.startAnimation(anMax);
                     }
