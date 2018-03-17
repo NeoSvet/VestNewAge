@@ -1,6 +1,5 @@
 package ru.neosvet.utils;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -70,13 +69,15 @@ public class Prom {
 
     public void hide() {
         stop();
-        tvPromTime.setVisibility(View.GONE);
+        if (tvPromTime != null)
+            tvPromTime.setVisibility(View.GONE);
     }
 
     public void show() {
         if (isProm()) {
             setPromTime();
-            tvPromTime.setVisibility(View.VISIBLE);
+            if (tvPromTime != null)
+                tvPromTime.setVisibility(View.VISIBLE);
         }
     }
 
