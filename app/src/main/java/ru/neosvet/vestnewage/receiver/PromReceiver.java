@@ -12,7 +12,6 @@ import ru.neosvet.utils.Prom;
 
 
 public class PromReceiver extends BroadcastReceiver {
-    public static final int notif_id = 222;
 
     public static void setReceiver(Context context, int p) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
