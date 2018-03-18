@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
-import ru.neosvet.vestnewage.service.InitJobService;
+import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
     public static final int notif_id = 222, hour_prom = 11;
@@ -288,7 +288,7 @@ public class Prom {
                         if (timeprom != pref.getLong(TIMEPROM, 0)) {
                             int t = pref.getInt(SettingsFragment.TIME, -1);
                             if (t > -1)
-                                InitJobService.setProm(context, t);
+                                PromReceiver.setReceiver(context, t);
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putLong(TIMEPROM, timeprom);
                             editor.apply();
@@ -340,6 +340,6 @@ public class Prom {
         if (boolVibr)
             mBuilder.setVibrate(new long[]{500, 1500});
         nm.notify(notif_id, mBuilder.build());
-        InitJobService.setProm(context, p);
+        PromReceiver.setReceiver(context, p);
     }
 }

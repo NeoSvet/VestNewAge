@@ -23,14 +23,7 @@ public class Notification extends Activity {
         super.onCreate(savedInstanceState);
         int mode = getIntent().getIntExtra(MODE, -1);
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//        if (mode == COPY) {
-//            String text = getIntent().getStringExtra(DataBase.DESCTRIPTION);
-//            ClipboardManager clipboard = (ClipboardManager)
-//                    getSystemService(Context.CLIPBOARD_SERVICE);
-//            ClipData clip = ClipData.newPlainText(text, text);
-//            clipboard.setPrimaryClip(clip);
-//        } else
-        if (mode == InitJobService.ID_PROM) {
+        if (mode == Prom.notif_id) {
             manager.cancel(Prom.notif_id);
         } else if (mode == InitJobService.ID_SUMMARY_POSTPONE) {
             manager.cancel(SummaryService.notif_id);
@@ -44,7 +37,7 @@ public class Notification extends Activity {
     public static PendingIntent getCancelPromNotif(Context context) {
         Intent intent = new Intent(context, Notification.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MODE, InitJobService.ID_PROM);
+        intent.putExtra(MODE, Prom.notif_id);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
@@ -58,21 +51,4 @@ public class Notification extends Activity {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
-
-//    public static void show(Context context, String msg, int id) {
-//        Intent copy = new Intent(context, Notification.class);
-//        copy.putExtra(MODE, COPY);
-//        copy.putExtra(DataBase.DESCTRIPTION, msg);
-//        PendingIntent piCopy = PendingIntent.getActivity(context, 0, copy, PendingIntent.FLAG_UPDATE_CURRENT);
-//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-//                .setSmallIcon(R.drawable.star)
-//                .setContentTitle("Debug notif")
-//                .setContentText(msg)
-//                .setTicker(msg)
-//                .setWhen(System.currentTimeMillis())
-//                .setContentIntent(piCopy)
-//                .setAutoCancel(true);
-//        nm.notify(id, mBuilder.build());
-//    }
 }

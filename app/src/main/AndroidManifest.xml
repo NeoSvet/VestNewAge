@@ -84,6 +84,15 @@
             android:name="ru.neosvet.utils.Notification"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receiver.PromReceiver" />
         <service
             android:name=".service.InitJobService"
             android:enabled="true"

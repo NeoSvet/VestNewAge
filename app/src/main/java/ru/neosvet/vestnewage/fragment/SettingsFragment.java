@@ -19,6 +19,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.service.InitJobService;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -254,7 +255,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbPromSound.isChecked());
         editor.putBoolean(VIBR, cbPromVibr.isChecked());
         editor.apply();
-        InitJobService.setProm(act, p);
+        PromReceiver.setReceiver(act, p);
     }
 
     private void initViews() {
