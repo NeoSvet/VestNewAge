@@ -21,7 +21,7 @@ public class PromReceiver extends BroadcastReceiver {
         if (p > -1) {
             Prom prom = new Prom(context, null);
             Date d = prom.getPromDate();
-            d.setMinutes(d.getMinutes() - p);//+
+            d.setMinutes(d.getMinutes() - p);
             if (p > 0)
                 d.setSeconds(d.getSeconds() - 3);
             else
