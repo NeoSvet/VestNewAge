@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import java.util.Date;
 
@@ -28,7 +29,10 @@ public class PromReceiver extends BroadcastReceiver {
                 d.setSeconds(d.getSeconds() - 30);
             if (d.getTime() < System.currentTimeMillis())
                 d.setHours(d.getHours() + 24);
-            am.set(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+                am.setExact(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
+            else
+                am.set(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
         }
     }
 
