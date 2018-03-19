@@ -66,6 +66,8 @@ public class SlashActivity extends AppCompatActivity {
         if (ver == 0) return;
         if (ver < 13)
             notifNewOption(getResources().getString(R.string.new_option_menu));
+        if (ver < 19)
+            notifNewOption(getResources().getString(R.string.new_option_counting));
     }
 
     private void notifNewOption(String msg) {
