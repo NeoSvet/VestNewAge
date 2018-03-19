@@ -33,6 +33,9 @@ import ru.neosvet.utils.Noread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.receiver.PromReceiver;
+import ru.neosvet.vestnewage.service.InitJobService;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class SlashActivity extends AppCompatActivity {
@@ -66,8 +69,21 @@ public class SlashActivity extends AppCompatActivity {
         if (ver == 0) return;
         if (ver < 13)
             notifNewOption(getResources().getString(R.string.new_option_menu));
-        if (ver < 19)
+        if (ver < 19) {
             notifNewOption(getResources().getString(R.string.new_option_counting));
+            rebuildNotif();
+        }
+    }
+
+    private void rebuildNotif() {
+        SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+        int p = pref.getInt(SettingsFragment.TIME, -1);
+        if (p > -1)
+            InitJobService.setSummary(this, p);
+        pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
+        p = pref.getInt(SettingsFragment.TIME, -1);
+        if (p > -1)
+            PromReceiver.setReceiver(this, p);
     }
 
     private void notifNewOption(String msg) {
