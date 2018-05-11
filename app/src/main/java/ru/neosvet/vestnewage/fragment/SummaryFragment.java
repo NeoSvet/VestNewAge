@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
@@ -71,7 +72,7 @@ public class SummaryFragment extends Fragment {
                 fabRefresh.setVisibility(View.VISIBLE);
             createList(true);
         } else {
-            startLoad();
+            startLoad(false);
         }
     }
 
@@ -104,7 +105,14 @@ public class SummaryFragment extends Fragment {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startLoad();
+                startRefresh();
+            }
+        });
+        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                showRefreshAlert();
+                return false;
             }
         });
         act.status.setClick(new View.OnClickListener() {
@@ -113,7 +121,7 @@ public class SummaryFragment extends Fragment {
                 if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
-                    startLoad();
+                    startRefresh();
             }
         });
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -141,6 +149,37 @@ public class SummaryFragment extends Fragment {
         });
     }
 
+    private void startRefresh() {
+        int value = act.getRefMode(MainActivity.SUMMARY_REFMODE);
+        if (value == Const.NULL)
+            showRefreshAlert();
+        else
+            startLoad(value == Const.TRUE);
+    }
+
+    private void showRefreshAlert() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.renewal));
+        dialog.setMessage(getResources().getString(R.string.refresh_alert));
+        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.setRefMode(MainActivity.SUMMARY_REFMODE, Const.FALSE);
+                startLoad(false);
+                dialog.dismiss();
+            }
+        });
+        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.setRefMode(MainActivity.SUMMARY_REFMODE, Const.TRUE);
+                startLoad(true);
+                dialog.dismiss();
+            }
+        });
+        dialog.show(null);
+    }
+
     private void createList(boolean boolLoad) {
         try {
             adSummary.clear();
@@ -164,11 +203,15 @@ public class SummaryFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
-                startLoad();
+                startLoad(false);
         }
     }
 
-    private void startLoad() {
+    private void startLoad(boolean load_new) {
+        if (load_new) {
+            act.startLoadIt(R.id.nav_rss);
+            return;
+        }
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new SummaryTask(this);

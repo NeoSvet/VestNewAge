@@ -230,7 +230,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startLoad();
+                startRefresh();
+            }
+        });
+        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                showRefreshAlert();
+                return false;
             }
         });
         act.status.setClick(new View.OnClickListener() {
@@ -240,9 +247,40 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     tvNew.setVisibility(View.VISIBLE);
                     fabRefresh.setVisibility(View.VISIBLE);
                 } else if (act.status.isTime())
-                    startLoad();
+                    startRefresh();
             }
         });
+    }
+
+    private void startRefresh() {
+        int value = act.getRefMode(MainActivity.CALENDAR_REFMODE);
+        if (value == Const.NULL)
+            showRefreshAlert();
+        else
+            startLoad(value == Const.TRUE);
+    }
+
+    private void showRefreshAlert() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.renewal));
+        dialog.setMessage(getResources().getString(R.string.refresh_alert));
+        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.setRefMode(MainActivity.CALENDAR_REFMODE, Const.FALSE);
+                startLoad(false);
+                dialog.dismiss();
+            }
+        });
+        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.setRefMode(MainActivity.CALENDAR_REFMODE, Const.TRUE);
+                startLoad(true);
+                dialog.dismiss();
+            }
+        });
+        dialog.show(null);
     }
 
     private void showAd(final String link, String des) {
@@ -536,7 +574,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     dCurrent.getMonth() + "." + dCurrent.getYear());
             if (!file.exists()) {
                 if (boolLoad)
-                    startLoad();
+                    startLoad(false);
             } else {
                 if (boolLoad) {
                     if (isCurMonth()) {
@@ -567,11 +605,15 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
-                startLoad();
+                startLoad(false);
         }
     }
 
-    private void startLoad() {
+    private void startLoad(boolean load_new) {
+        if (load_new) {
+            act.startLoadIt(R.id.rvMonth);
+            return;
+        }
         setStatus(true);
         task = new CalendarTask(this);
         if (isCurMonth()) adNoread.clear();
@@ -676,7 +718,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad && isCurMonth())
-                startLoad();
+                startLoad(false);
         }
     }
 
