@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -33,6 +32,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
@@ -56,7 +56,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
     private TextView tvDate;
     private DateDialog dateDialog;
-    private AlertDialog alertRnd;
+    private CustomDialog alertRnd;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
@@ -694,25 +694,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void showRndAlert(String title, final String link, String msg, final String place, final int par) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(title);
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setText(msg);
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(R.string.in_markers));
-        button.setVisibility(View.VISIBLE);
-        alertRnd = builder.create();
-        alertRnd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                dialog = "";
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
+        alertRnd = new CustomDialog(act);
+        alertRnd.setTitle(title);
+        alertRnd.setMessage(msg);
+        alertRnd.setLeftButton(getResources().getString(R.string.in_markers), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent marker = new Intent(act, MarkerActivity.class);
@@ -722,15 +707,18 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 alertRnd.dismiss();
             }
         });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(R.string.open));
-        button.setOnClickListener(new View.OnClickListener() {
+        alertRnd.setRightButton(getResources().getString(R.string.open), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BrowserActivity.openReader(act, link, place);
                 alertRnd.dismiss();
             }
         });
-        alertRnd.show();
+        alertRnd.show(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialog = "";
+            }
+        });
     }
 }
