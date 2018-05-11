@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,6 +32,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.CalendarAdapter;
 import ru.neosvet.ui.CalendarItem;
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
@@ -61,7 +60,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private ListAdapter adNoread;
     private MainActivity act;
     private DateDialog dateDialog;
-    private AlertDialog alert;
+    private CustomDialog alert;
     private Animation anShow, anHide;
     private int dialog = -2;
     private boolean boolShow = false;
@@ -253,33 +252,19 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void showAd(final String link, String des) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(getResources().getString(R.string.ad));
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setText(des);
-        Button button = (Button) dialogView.findViewById(R.id.rightButton);
-        alert = builder.create();
-        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                dialog = -2;
-            }
-        });
+        alert = new CustomDialog(act);
+        alert.setTitle(getResources().getString(R.string.ad));
+        alert.setMessage(des);
+
         if (link.equals("")) { // only des
-            button.setText(getResources().getString(android.R.string.ok));
-            button.setOnClickListener(new View.OnClickListener() {
+            alert.setRightButton(getResources().getString(android.R.string.ok), new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     alert.dismiss();
                 }
             });
         } else {
-            button.setText(getResources().getString(R.string.open_link));
-            button.setOnClickListener(new View.OnClickListener() {
+            alert.setRightButton(getResources().getString(R.string.open_link), new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     act.lib.openInApps(link, null);
@@ -287,7 +272,13 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 }
             });
         }
-        alert.show();
+
+        alert.show(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialog = -2;
+            }
+        });
     }
 
     private void closeNoread() {

@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.MarkAdapter;
 import ru.neosvet.ui.MarkItem;
 import ru.neosvet.utils.Const;
@@ -456,57 +457,36 @@ public class CollectionsFragment extends Fragment {
 
     private void deleteDialog() {
         lvMarker.smoothScrollToPosition(iSel);
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(getResources().getString(R.string.delete));
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setText(adMarker.getItem(iSel).getTitle());
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(R.string.no));
-        button.setVisibility(View.VISIBLE);
-        final AlertDialog dialog = builder.create();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                boolDelete = false;
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.delete));
+        dialog.setMessage(adMarker.getItem(iSel).getTitle());
+        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
             }
         });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(R.string.yes));
-        button.setOnClickListener(new View.OnClickListener() {
+        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 deleteElement();
                 dialog.dismiss();
             }
         });
-        dialog.show();
+        dialog.show(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                boolDelete = false;
+            }
+        });
     }
 
     private void renameDialog(String old_name) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(getResources().getString(R.string.new_name));
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setVisibility(View.GONE);
-        final EditText input = (EditText) dialogView.findViewById(R.id.input);
-        input.setVisibility(View.VISIBLE);
         sName = old_name;
-        input.setText(old_name);
-        input.setSelection(old_name.length());
-        input.addTextChangedListener(new TextWatcher() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.new_name));
+        dialog.setMessage(null);
+        dialog.setInputText(sName, new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
@@ -519,35 +499,29 @@ public class CollectionsFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                sName = input.getText().toString();
+                sName = dialog.getInputText();
             }
         });
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(android.R.string.no));
-        button.setVisibility(View.VISIBLE);
-        final AlertDialog dialog = builder.create();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+        dialog.setLeftButton(getResources().getString(android.R.string.no), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        dialog.setRightButton(getResources().getString(android.R.string.yes), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                renameCol(dialog.getInputText());
+                dialog.dismiss();
+            }
+        });
+        dialog.show(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 sName = null;
             }
         });
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(android.R.string.yes));
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                renameCol(input.getText().toString());
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
     }
 
     private void renameCol(String name) {
