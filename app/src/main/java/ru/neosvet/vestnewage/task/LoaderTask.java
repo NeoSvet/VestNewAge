@@ -136,6 +136,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadAll(p);
                 return true;
             }
+            if (params[0].equals(Const.DOWNLOAD_MONTH)) {
+                startDownloadMonth(Long.parseLong(params[1]));
+                return true;
+            }
             // download file or page
             String link = params[0].replace(Const.SITE, Const.SITE2);
             if (link.contains(".png")) // download file
@@ -152,12 +156,21 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         return false;
     }
 
+    private void startDownloadMonth(long time) throws Exception {
+        startTimer();
+        msg = context.getResources().getString(R.string.load);
+        Date d = new Date(time);
+        CalendarTask t = new CalendarTask((Activity) context);
+        t.downloadCalendar(d.getYear(), d.getMonth(), false);
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        publishProgress(countBookList(df.format(d)));
+        downloadBookList(df.format(d));
+    }
+
     private void refreshLists(int p) throws Exception {
         msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
-        if (p == R.id.rvMonth)
-            k = 1;
         if (p == -1 || p == R.id.nav_book) k = 1;
         if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
@@ -196,11 +209,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         if (!boolStart) return;
 
-        if (p == R.id.rvMonth) {
-            Date d = new Date();
-            CalendarTask t2 = new CalendarTask((Activity) context);
-            t2.downloadCalendar(d.getYear(), d.getMonth(), false);
-        } else if (p == -1 || p == R.id.nav_calendar) {
+        if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;

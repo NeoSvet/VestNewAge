@@ -617,7 +617,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void startLoad(boolean load_new) {
         if (load_new) {
-            act.startLoadIt(R.id.rvMonth);
+            act.startLoadMonth(dCurrent.getTime());
             return;
         }
         setStatus(true);

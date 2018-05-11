@@ -186,6 +186,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         loader.execute(String.valueOf(cur_id));
     }
 
+    public void startLoadMonth(long time) {
+        loader = new LoaderTask(MainActivity.this);
+        loader.execute(Const.DOWNLOAD_MONTH, String.valueOf(time));
+    }
+
     private void setMenuFragment() {
         if (frMenu == null) {
             FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
