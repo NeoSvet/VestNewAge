@@ -156,6 +156,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
+        if (p == R.id.rvMonth)
+            k = 1;
         if (p == -1 || p == R.id.nav_book) k = 1;
         if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
@@ -194,7 +196,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         if (!boolStart) return;
 
-        if (p == -1 || p == R.id.nav_calendar) {
+        if (p == R.id.rvMonth) {
+            Date d = new Date();
+            CalendarTask t2 = new CalendarTask((Activity) context);
+            t2.downloadCalendar(d.getYear(), d.getMonth(), false);
+        } else if (p == -1 || p == R.id.nav_calendar) {
             Date d = new Date();
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;

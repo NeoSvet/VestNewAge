@@ -13,6 +13,9 @@
     <string name="no">Нет</string>
     <string name="new_name">Новое название</string>
     <string name="open_link">Открыть ссылку</string>
+    <string name="renewal">Обновление</string>
+    <string name="refresh_alert">После обновления списка загрузить новые материалы?\n\n
+    Чтобы вызвать это вопрос повторно, нажмите на «Обновить» и удерживайте, пока не появится окно.</string>
     <!--New option-->
     <string name="new_option">Появилась новая опция!</string>
     <string name="new_option_menu">«Меню на весь экран» (для смартфонов)</string>

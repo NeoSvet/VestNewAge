@@ -44,7 +44,8 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     private final String LOADER = "loader";
-    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
+    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab",
+            CALENDAR_REFMODE = "cal_ref_mode", SUMMARY_REFMODE = "sum_ref_mode";
     public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
     private MenuFragment frMenu;
     private CalendarFragment frCalendar;
@@ -60,13 +61,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View bDownloadIt;
     public StatusBar status;
     private Prom prom;
+    private SharedPreferences pref;
     private int cur_id, tab = 0, statusBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
+        pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         boolean isTablet = false;
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
             isMenuMode = pref.getBoolean(MENU_MODE, false);
@@ -150,8 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                loader = new LoaderTask(MainActivity.this);
-                loader.execute(String.valueOf(cur_id));
+                startLoadIt(cur_id);
             }
         });
 
@@ -178,6 +179,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
+    }
+
+    public void startLoadIt(int cur_id) {
+        loader = new LoaderTask(MainActivity.this);
+        loader.execute(String.valueOf(cur_id));
     }
 
     private void setMenuFragment() {
@@ -380,11 +386,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuDownload.isShow())
             menuDownload.hide();
         else {
-            if (cur_id == R.id.nav_rss || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar || cur_id == R.id.nav_book)
+            if (cur_id == R.id.nav_main || cur_id == R.id.nav_calendar || cur_id == R.id.nav_book)
                 bDownloadIt.setVisibility(View.VISIBLE);
             else
                 bDownloadIt.setVisibility(View.GONE);
             menuDownload.show();
         }
+    }
+
+    public void setRefMode(String name, int value) {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(name, value);
+        editor.apply();
+    }
+
+    public int getRefMode(String name) {
+        return pref.getInt(name, Const.NULL);
     }
 }
