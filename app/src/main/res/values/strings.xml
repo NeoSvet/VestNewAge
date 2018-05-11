@@ -7,6 +7,12 @@
     <string name="download_title">Загрузить&#8230;</string>
     <string name="download_all">Загрузить все материалы</string>
     <string name="download_it">Загрузить весь данный раздел</string>
+    <!--Dialog-->
+    <string name="delete">Удалить?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="new_name">Новое название</string>
+    <string name="open_link">Открыть ссылку</string>
     <!--New option-->
     <string name="new_option">Появилась новая опция!</string>
     <string name="new_option_menu">«Меню на весь экран» (для смартфонов)</string>
@@ -31,7 +37,6 @@
     <string name="empty_list">Список пуст</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="no_list">Список ещё не загружен</string>
-    <string name="open_link">Открыть ссылку</string>
     <string name="link1">Первая ссылка</string>
     <string name="link2">Вторая ссылка</string>
     <string name="link3">Третья ссылка</string>
@@ -57,11 +62,7 @@
     <string name="dark">Темное</string>
     <!--CollectionsFragment-->
     <string name="not_found_page">Страница не найдена</string>
-    <string name="delete">Удалить?</string>
-    <string name="yes">Да</string>
-    <string name="no">Нет</string>
     <string name="collections">Подборки</string>
-    <string name="new_name">Новое название</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
     <string name="nothing_edit">Редактировать нечего!</string>
