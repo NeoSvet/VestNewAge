@@ -13,12 +13,11 @@ public class CalendarItem {
     private Context context;
     private int num, color;
     private List<String> links = new ArrayList<String>();
-    private boolean bold = false, cur, kat = false, pos = false;
+    private boolean bold = false, kat = false, pos = false;
 
     public CalendarItem(Context context, int num, int id_color) {
         this.context = context;
         this.num = num;
-        cur = id_color == android.R.color.white;
 
         color = context.getResources().getColor(id_color);
         if (num < 1)
