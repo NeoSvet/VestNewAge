@@ -1,10 +1,14 @@
 package ru.neosvet.vestnewage.task;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +16,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -61,12 +66,42 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     protected Boolean doInBackground(Void... params) {
         try {
             downloadList();
-//            updateBook();
+            updateBook();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void updateBook() throws Exception {
+        File file = new File(act.getFilesDir() + SummaryFragment.RSS);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String title, link, name;
+        DataBase dataBase = null;
+        SQLiteDatabase db = null;
+        ContentValues cv;
+        while ((title = br.readLine()) != null) {
+            link = br.readLine();
+            link = link.substring(Const.LINK.length());
+            br.readLine(); //des
+            name = DataBase.getDatePage(link);
+            if (dataBase == null || !dataBase.getName().equals(name)) {
+                if (dataBase != null)
+                    dataBase.close();
+                dataBase = new DataBase(act, name);
+                db = dataBase.getWritableDatabase();
+            }
+            if (!dataBase.existsPage(link)) {
+                cv = new ContentValues();
+                cv.put(DataBase.TITLE, title);
+                cv.put(DataBase.LINK, link);
+                db.insert(DataBase.TITLE, null, cv);
+            }
+        }
+        br.close();
+        if (dataBase != null)
+            dataBase.close();
     }
 
     public void downloadList() throws Exception {
