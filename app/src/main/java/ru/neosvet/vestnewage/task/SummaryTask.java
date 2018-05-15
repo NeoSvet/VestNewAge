@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.task;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
@@ -81,10 +82,12 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
         DataBase dataBase = null;
         SQLiteDatabase db = null;
         ContentValues cv;
+        Cursor cursor;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             link = link.substring(Const.LINK.length());
             br.readLine(); //des
+            br.readLine(); //time
             name = DataBase.getDatePage(link);
             if (dataBase == null || !dataBase.getName().equals(name)) {
                 if (dataBase != null)
@@ -92,12 +95,16 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
                 dataBase = new DataBase(act, name);
                 db = dataBase.getWritableDatabase();
             }
-            if (!dataBase.existsPage(link)) {
+            cursor = db.query(DataBase.TITLE, null,
+                    DataBase.LINK + DataBase.Q, new String[]{link},
+                    null, null, null);
+            if (!cursor.moveToFirst()) {
                 cv = new ContentValues();
                 cv.put(DataBase.TITLE, title);
                 cv.put(DataBase.LINK, link);
                 db.insert(DataBase.TITLE, null, cv);
             }
+            cursor.close();
         }
         br.close();
         if (dataBase != null)
