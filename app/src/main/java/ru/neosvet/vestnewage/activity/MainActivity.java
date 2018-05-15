@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         initInterface();
 
-        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, false);
+        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
         if (isTablet) {
             if (!isCountInMenu)
                 prom = new Prom(this, findViewById(R.id.tvPromTime));
