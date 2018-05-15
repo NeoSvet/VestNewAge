@@ -2,6 +2,8 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +26,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -46,7 +50,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class CalendarFragment extends Fragment implements DateDialog.Result {
-    public static final String CURRENT_DATE = "current_date", ADS = "ads", FOLDER = "/calendar/";
+    public static final String CURRENT_DATE = "current_date", ADS = "ads";
     private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -570,42 +574,59 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         try {
             if (task != null)
                 return;
-            File file = new File(act.getFilesDir() + FOLDER +
-                    dCurrent.getMonth() + "." + dCurrent.getYear());
-            if (!file.exists()) {
-                if (boolLoad)
-                    startLoad(false);
-            } else {
+
+            DateFormat df = new SimpleDateFormat("MM.yy");
+            DataBase dataBase = new DataBase(act, df.format(dCurrent));
+            SQLiteDatabase db = dataBase.getWritableDatabase();
+            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            boolean boolEmpty = true;
+            if (cursor.moveToFirst()) {
                 if (boolLoad) {
-                    if (isCurMonth()) {
-                        act.status.checkTime(file.lastModified());
-                    }
-                    if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
-                            (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-                        Date d = new Date(file.lastModified());
-                        if (d.getMonth() != today_m)
-                            act.status.checkTime(file.lastModified());
-                    }
+                    checkTime(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                 }
+
+                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                int iLink = cursor.getColumnIndex(DataBase.LINK);
                 int i;
-                String s;
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                while ((s = br.readLine()) != null) {
-                    i = adCalendar.indexOf(Integer.parseInt(s));
-                    s = br.readLine();
-                    while (s != null && !s.equals("")) {
-                        if (i > -1)
-                            adCalendar.getItem(i).addLink(s);
-                        s = br.readLine();
+                String title, link;
+                while (cursor.moveToNext()) {
+                    title = cursor.getString(iTitle);
+                    link = cursor.getString(iLink);
+                    i = link.lastIndexOf("/") + 1;
+                    i = Integer.parseInt(link.substring(i, i + 2));
+                    i = adCalendar.indexOf(i);
+                    adCalendar.getItem(i).addLink(link);
+                    if (title.contains("/"))
+                        adCalendar.getItem(i).addTitle(title);
+                    else {
+                        title = dataBase.getPageTitle(title, link);
+                        adCalendar.getItem(i).addTitle(title.substring(title.indexOf(" ") + 1));
                     }
+                    boolEmpty = false;
                 }
-                br.close();
             }
+            cursor.close();
+            dataBase.close();
             adCalendar.notifyDataSetChanged();
+
+            if (boolEmpty) startLoad(false);
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
                 startLoad(false);
+        }
+    }
+
+    private void checkTime(long time) {
+        if (isCurMonth()) {
+            act.status.checkTime(time);
+            return;
+        }
+        if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
+                (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
+            Date d = new Date(time);
+            if (d.getMonth() != today_m)
+                act.status.checkTime(time);
         }
     }
 

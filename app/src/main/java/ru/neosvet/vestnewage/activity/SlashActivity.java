@@ -21,6 +21,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -32,7 +34,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Noread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
@@ -66,6 +67,8 @@ public class SlashActivity extends AppCompatActivity {
         int ver = lib.getPreviosVer();
         if (ver < 10)
             adapterNewVersion();
+        if (ver < 21)
+            adapterNewVersion2();
         if (ver == 0) return;
         if (ver < 13)
             notifNewOption(getResources().getString(R.string.new_option_menu));
@@ -73,6 +76,23 @@ public class SlashActivity extends AppCompatActivity {
             notifNewOption(getResources().getString(R.string.new_option_counting));
             rebuildNotif();
         }
+    }
+
+    private void adapterNewVersion2() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File folder = new File(getFilesDir() + "/calendar/");
+                    if (folder.exists()) {
+                        for (File file : folder.listFiles())
+                            file.delete();
+                        folder.delete();
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
     private void rebuildNotif() {
@@ -267,14 +287,18 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
         Date dCurrent = new Date();
-        File file = new File(getFilesDir() + CalendarFragment.FOLDER +
-                dCurrent.getMonth() + "." + dCurrent.getYear());
-        if (file.exists())
-            if (System.currentTimeMillis() - file.lastModified() > 3600000) {
-                task = new CalendarTask(this);
-                Date d = new Date();
-                task.execute(d.getYear(), d.getMonth(), 1);
-            }
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        DataBase dataBase = new DataBase(SlashActivity.this, df.format(dCurrent));
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        long time = 0;
+        if (cursor.moveToFirst())
+            time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
+        if (System.currentTimeMillis() - time > 3600000) {
+            task = new CalendarTask(this);
+            Date d = new Date();
+            task.execute(d.getYear(), d.getMonth(), 1);
+        }
     }
 
     public void finishLoad() {
