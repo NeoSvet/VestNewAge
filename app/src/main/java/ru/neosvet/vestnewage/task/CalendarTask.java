@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.task;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -31,8 +33,10 @@ import ru.neosvet.vestnewage.fragment.CalendarFragment;
 public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
     private transient CalendarFragment frm;
     private transient Activity act;
+    private transient DataBase dataBase;
+    private transient SQLiteDatabase db;
     private transient Lib lib;
-    List<ListItem> data = new ArrayList<ListItem>();
+    private List<ListItem> data = new ArrayList<ListItem>();
 
     public CalendarTask(CalendarFragment frm) {
         setFrm(frm);
@@ -98,13 +102,14 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                 br.close();
             }
             String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-            if (act instanceof MainActivity) {
+            if (act instanceof MainActivity)
                 br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
-            } else {
+            else
                 br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
-            }
-            if (isCancelled())
+            if (isCancelled()) {
+                br.close();
                 return;
+            }
             s = br.readLine();
             if (Long.parseLong(s) > Long.parseLong(t)) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -123,18 +128,17 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
 
     public void downloadCalendar(int year, int month, boolean boolNoread) throws Exception {
         try {
-            JSONObject json, jsonI;
-            JSONArray jsonA;
-            String r, s;
             InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1)));
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-            s = br.readLine();
+            String s = br.readLine();
             br.close();
             if (isCancelled())
                 return;
 
-            final String poemOutDict = "poemOutDict";
+            JSONObject json, jsonI;
+            JSONArray jsonA;
+            String link;
             json = new JSONObject(s);
             int n;
             for (int i = 0; i < json.names().length(); i++) {
@@ -146,60 +150,52 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     jsonA = json.optJSONArray(s);
                     for (int j = 0; j < jsonA.length(); j++) {
                         jsonI = jsonA.getJSONObject(j);
-                        r = jsonI.getString(DataBase.LINK);
-                        jsonI = jsonI.getJSONObject("data");
-                        if (jsonI.has(poemOutDict)) {
-                            if (jsonI.getBoolean(poemOutDict))
-                                data.get(n).addLink(r);
-                            else addLink(n, r);
-                        } else
-                            addLink(n, r);
+                        link = jsonI.getString(DataBase.LINK) + Const.HTML;
+                        addLink(n, link);
                     }
                 } else { // один материал за день
-                    r = jsonI.getString(DataBase.LINK);
-                    data.get(n).addLink(r);
+                    link = jsonI.getString(DataBase.LINK) + Const.HTML;
+                    addLink(n, link);
                     jsonI = jsonI.getJSONObject("data");
                     if (jsonI != null) {
                         if (jsonI.has("title2")) {
                             if (!jsonI.getString("title2").equals(""))
-                                addLink(n, r + "#2");
+                                addLink(n, link + "#2");
                         }
                     }
                 }
             }
-            if (isCancelled())
+            db.close();
+            if (isCancelled()) {
+                data.clear();
                 return;
-
-            File fCalendar = new File(act.getFilesDir() + CalendarFragment.FOLDER);
-            fCalendar.mkdir();
-            fCalendar = new File(fCalendar.toString() + File.separator + month + "." + year);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(fCalendar));
-            Noread noread = null;
-            Date dItem = null;
-            if (boolNoread) {
-                dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
-                noread = new Noread(act);
             }
 
-            for (int i = 0; i < data.size(); i++) {
-                bw.write(data.get(i).getTitle());
-                bw.write(Const.N);
-                for (int j = 0; j < data.get(i).getCount(); j++) {
-                    bw.write(data.get(i).getLink(j));
-                    bw.write(Const.N);
-                    if (boolNoread) {
+            if (boolNoread) {
+                Date dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
+                Noread noread = new Noread(act);
+                for (int i = 0; i < data.size(); i++) {
+                    for (int j = 0; j < data.get(i).getCount(); j++) {
                         dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
-                        noread.addLink(data.get(i).getLink(j).replace(Const.LINK, ""), dItem);
+                        noread.addLink(data.get(i).getLink(j), dItem);
                     }
                 }
-                bw.write(Const.N);
-                bw.flush();
-            }
-            bw.close();
-            data.clear();
-            if (boolNoread)
                 noread.close();
+            }
+            data.clear();
         } catch (org.json.JSONException e) {
+        }
+    }
+
+    private void initDatebase(String link) {
+        if (dataBase != null) return;
+        dataBase = new DataBase(act, link);
+        db = dataBase.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(DataBase.TIME, System.currentTimeMillis());
+        if (db.update(DataBase.TITLE, cv,
+                DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
+            db.insert(DataBase.TITLE, null, cv);
         }
     }
 
@@ -212,5 +208,16 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
             }
         }
         data.get(n).addLink(link);
+        initDatebase(link);
+        ContentValues cv = new ContentValues();
+        cv.put(DataBase.TITLE, link);
+        // пытаемся обновить запись:
+        if (db.update(DataBase.TITLE, cv,
+                DataBase.LINK + DataBase.Q,
+                new String[]{link}) == 0) {
+            // обновить не получилось, добавляем:
+            cv.put(DataBase.LINK, link);
+            db.insert(DataBase.TITLE, null, cv);
+        }
     }
 }

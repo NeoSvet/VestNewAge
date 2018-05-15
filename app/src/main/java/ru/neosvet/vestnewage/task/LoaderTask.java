@@ -254,10 +254,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             getFile(SiteFragment.MEDIA)
                     };
                     break;
-                case R.id.nav_calendar:
-                    d = getFile(CalendarFragment.FOLDER).listFiles();
-                    break;
-                default: //R.id.nav_book:
+                default: //R.id.nav_book || R.id.nav_calendar:
                     d = new File[]{null};
                     break;
             }
@@ -493,8 +490,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                         else
                             s = line.substring(line.indexOf("video/") + 6,
                                     line.indexOf("\"", 65));
-                        s = "<a href=\"https://vimeo.com/" +
-                                s + "\">" +
+                        s = "<a href=\"https://vimeo.com/" + s + "\">" +
                                 context.getResources().getString
                                         (R.string.video_on_vimeo) + "</a>";
                         if (line.contains("center"))
@@ -537,31 +533,28 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                             id--;
                     }
                 }
-                Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID},
+                Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID, DataBase.TITLE},
                         DataBase.LINK + DataBase.Q, new String[]{link}
                         , null, null, null);
-                if (cursor.moveToFirst())
+                s="";
+                if (cursor.moveToFirst()) {
                     id = cursor.getInt(0);
+                    s = cursor.getString(1);
+                }
                 cv = new ContentValues();
                 cv.put(DataBase.TIME, System.currentTimeMillis());
                 if (id == 0) { // id не найден, материала нет - добавляем
-                    line = line.replace("&ldquo;", "“").replace("&rdquo;", "”");
-                    line = Lib.withOutTags(line);
-
+                    cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
                     cv.put(DataBase.LINK, link);
-                    if (line.contains(dataBase.getName())) {
-                        line = line.substring(9);
-                        if (line.contains(Const.KV_OPEN))
-                            line = line.substring(line.indexOf(Const.KV_OPEN) + 1, line.length() - 1);
-                    }
-                    cv.put(DataBase.TITLE, line);
-                    id = (int) db.insert(DataBase.TITLE, null, cv);
+                    id = (int)db.insert(DataBase.TITLE, null, cv);
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
                     cv.put(DataBase.TIME, System.currentTimeMillis());
                     db.update(DataBase.TITLE, cv, DataBase.ID +
                             DataBase.Q, new String[]{"1"});
                 } else { // id найден, значит материал есть
+                    if(s.contains("/")) // в заголовке ссылка, необходимо заменить
+                        cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
                     //обновляем дату загрузки материала
                     db.update(DataBase.TITLE, cv, DataBase.ID +
                             DataBase.Q, new String[]{String.valueOf(id)});
@@ -578,6 +571,17 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         br.close();
         dataBase.close();
+    }
+
+    private String getTitle(String line, String name) {
+        line = line.replace("&ldquo;", "“").replace("&rdquo;", "”");
+        line = Lib.withOutTags(line);
+        if (line.contains(name)) {
+            line = line.substring(9);
+            if (line.contains(Const.KV_OPEN))
+                line = line.substring(line.indexOf(Const.KV_OPEN) + 1, line.length() - 1);
+        }
+        return line;
     }
 
     private void sendCounter(String line) {
