@@ -289,7 +289,7 @@ public class BrowserActivity extends AppCompatActivity
         String main = MainActivity.class.getName();
         main = main.substring(main.indexOf("act"));
         SharedPreferences prMain = getSharedPreferences(main, MODE_PRIVATE);
-        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, false))
+        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, true))
             prom = new Prom(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         else {
@@ -636,7 +636,6 @@ public class BrowserActivity extends AppCompatActivity
             else
                 fDark.renameTo(fStyle);
         }
-
         try {
             File file = new File(getFilesDir() + PAGE);
             String s;
