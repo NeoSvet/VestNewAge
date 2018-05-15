@@ -186,28 +186,19 @@ public class SiteFragment extends Fragment {
                     }
                 } else {
                     PopupMenu pMenu = new PopupMenu(act, view);
-                    pMenu.inflate(R.menu.menu_links);
-                    for (int i = 0; i < 5; i++) {
-                        if (i < adMain.getItem(pos).getCount())
-                            pMenu.getMenu().getItem(i).setTitle(adMain.getItem(pos).getHead(i));
-                        else
-                            pMenu.getMenu().getItem(i).setVisible(false);
+                    for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
+                        pMenu.getMenu().add(adMain.getItem(pos).getHead(i));
                     }
                     pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
-                            int index;
-                            if (item.getItemId() == R.id.link1)
-                                index = 0;
-                            else if (item.getItemId() == R.id.link2)
-                                index = 1;
-                            else if (item.getItemId() == R.id.link3)
-                                index = 2;
-                            else if (item.getItemId() == R.id.link4)
-                                index = 3;
-                            else
-                                index = 4;
-                            openPage(adMain.getItem(pos).getLink(index));
+                            String title = item.getTitle().toString();
+                            for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
+                                if (adMain.getItem(pos).getHead(i).equals(title)) {
+                                    openPage(adMain.getItem(pos).getLink(i));
+                                    break;
+                                }
+                            }
                             return true;
                         }
                     });

@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.R;
 public class CalendarItem {
     private Context context;
     private int num, color;
+    private List<String> titles = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private boolean bold = false, kat = false, pos = false;
 
@@ -27,7 +28,8 @@ public class CalendarItem {
     public void setProm() {
         bold = true;
         color = context.getResources().getColor(R.color.colorAccentLight);
-        links.add(Const.LINK + "Posyl-na-Edinenie");
+        links.add("Posyl-na-Edinenie.html");
+        titles.add(context.getResources().getString(R.string.prom_for_soul_unite));
     }
 
     public void clear() {
@@ -43,18 +45,20 @@ public class CalendarItem {
         }
     }
 
+    public String getTitle(int i) {
+        return titles.get(i);
+    }
+
     public String getLink(int i) {
-        if (links.get(i).contains("#")) {
-            String link = links.get(i);
-            link = link.substring(0, link.indexOf("#"))
-                    + Const.HTML + link.substring(link.indexOf("#"));
-            return link;
-        }
-        return links.get(i) + Const.HTML;
+        return links.get(i);
     }
 
     public int getCount() {
         return links.size();
+    }
+
+    public void addTitle(String title) {
+        titles.add(title);
     }
 
     public void addLink(String link) {

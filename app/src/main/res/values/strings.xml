@@ -40,11 +40,6 @@
     <string name="empty_list">Список пуст</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="no_list">Список ещё не загружен</string>
-    <string name="link1">Первая ссылка</string>
-    <string name="link2">Вторая ссылка</string>
-    <string name="link3">Третья ссылка</string>
-    <string name="link4">Четвертая ссылка</string>
-    <string name="link5">Пятая ссылка</string>
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
