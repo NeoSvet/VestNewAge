@@ -1,11 +1,12 @@
 package ru.neosvet.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
 
-public class ListItem {
+public class ListItem implements Serializable {
     private String title, des = null;
     private List<String> heads = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();

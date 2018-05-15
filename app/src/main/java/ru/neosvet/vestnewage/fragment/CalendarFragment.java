@@ -423,52 +423,24 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                         if (k == 1) {
                             openLink(adCalendar.getItem(pos).getLink(0));
                         } else if (k > 1) {
-                            PopupMenu popupMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
-                            popupMenu.inflate(R.menu.menu_links);
-
-                            String s;
-                            for (int i = 0; i < 5; i++) {
-                                if (i < k) {
-                                    s = adCalendar.getItem(pos).getLink(i).substring(Const.LINK.length());
-                                    if (!s.contains("/"))
-                                        popupMenu.getMenu().getItem(i).setTitle(
-                                                getResources().getString(R.string.prom_for_soul_unite));
-                                    else {
-                                        s = DataBase.getContentPage(act, s, true);
-                                        if (s != null)
-                                            popupMenu.getMenu().getItem(i).setTitle(
-                                                    s.substring(s.indexOf(" ") + 1));
-                                    }
-                                } else {
-                                    popupMenu.getMenu().getItem(i).setVisible(false);
-                                }
+                            PopupMenu pMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
+                            for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
+                                pMenu.getMenu().add(adCalendar.getItem(pos).getTitle(i));
                             }
-                            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                                 @Override
                                 public boolean onMenuItemClick(MenuItem item) {
-                                    int index;
-                                    switch (item.getItemId()) {
-                                        case R.id.link1:
-                                            index = 0;
+                                    String title = item.getTitle().toString();
+                                    for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
+                                        if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
+                                            openLink(adCalendar.getItem(pos).getLink(i));
                                             break;
-                                        case R.id.link2:
-                                            index = 1;
-                                            break;
-                                        case R.id.link3:
-                                            index = 2;
-                                            break;
-                                        case R.id.link4:
-                                            index = 3;
-                                            break;
-                                        default:
-                                            index = 4;
-                                            break;
+                                        }
                                     }
-                                    openLink(adCalendar.getItem(pos).getLink(index));
                                     return true;
                                 }
                             });
-                            popupMenu.show();
+                            pMenu.show();
                         }
                     }
                 })
