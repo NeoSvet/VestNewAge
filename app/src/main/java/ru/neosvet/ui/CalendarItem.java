@@ -13,7 +13,7 @@ public class CalendarItem {
     private int num, color;
     private List<String> titles = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private boolean bold = false, kat = false, pos = false;
+    private boolean bold = false, katren = false, poslanie = false;
 
     public CalendarItem(Context context, int num, int id_color) {
         this.context = context;
@@ -31,22 +31,22 @@ public class CalendarItem {
         titles.add(context.getResources().getString(R.string.prom_for_soul_unite));
     }
 
-    public void clear(boolean isOnlyTitle) {
+    public void clear(boolean onlyTitle) {
         if (titles.size() > 0) {
             if (!bold) {
                 titles.clear();
-                if (!isOnlyTitle)
+                if (!onlyTitle)
                     links.clear();
             } else {
                 while (titles.size() > 1) {
                     titles.remove(1);
-                    if (!isOnlyTitle)
+                    if (!onlyTitle)
                         links.remove(1);
                 }
             }
-            if (!isOnlyTitle) {
-                kat = false;
-                pos = false;
+            if (!onlyTitle) {
+                katren = false;
+                poslanie = false;
             }
         }
     }
@@ -69,19 +69,19 @@ public class CalendarItem {
 
     public void addLink(String link) {
         if (link.contains("poems"))
-            kat = true;
+            katren = true;
         else
-            pos = true;
+            poslanie = true;
         links.add(link);
     }
 
     public Drawable getBG() {
         int bg;
-        if (kat && pos)
+        if (katren && poslanie)
             bg = R.drawable.cell_bg_kp;
-        else if (kat)
+        else if (katren)
             bg = R.drawable.cell_bg_k;
-        else if (pos)
+        else if (poslanie)
             bg = R.drawable.cell_bg_p;
         else
             bg = R.drawable.cell_bg_n;

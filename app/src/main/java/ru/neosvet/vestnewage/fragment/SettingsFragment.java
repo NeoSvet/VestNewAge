@@ -146,7 +146,7 @@ public class SettingsFragment extends Fragment {
         });
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setCheckTime();
             }
 
@@ -175,7 +175,7 @@ public class SettingsFragment extends Fragment {
         });
         sbPromTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setPromTime();
             }
 

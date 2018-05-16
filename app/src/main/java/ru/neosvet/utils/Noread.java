@@ -41,9 +41,9 @@ public class Noread {
         link = link.replace(Const.HTML, "");
         Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
-        boolean b = cursor.moveToFirst();
+        boolean exists = cursor.moveToFirst();
         cursor.close();
-        if (b) return true; // уже есть в списке непрочитанного
+        if (exists) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, date.getTime());
         cv.put(DataBase.LINK, link);

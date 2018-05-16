@@ -68,8 +68,8 @@ public class SummaryService extends IntentService {
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
-            final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
-            final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
+            final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+            final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
             Intent app = new Intent(context, SlashActivity.class);
             app.setData(notif_uri);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -86,9 +86,9 @@ public class SummaryService extends IntentService {
                     .setContentIntent(piSummary)
                     .setLights(Color.GREEN, 1000, 1000)
                     .setAutoCancel(true);
-            if (boolSound)
+            if (sound)
                 mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-            if (boolVibr)
+            if (vibration)
                 mBuilder.setVibrate(new long[]{500, 1500});
             nm.notify(SummaryReceiver.notif_id, mBuilder.build());
         } catch (Exception e) {

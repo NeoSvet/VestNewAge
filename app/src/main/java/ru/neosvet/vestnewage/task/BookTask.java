@@ -26,10 +26,10 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     private transient MainActivity act;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private transient ProgressDialog di;
+    private transient ProgressDialog dialog;
     private int prog = 0;
     private String msg = null;
-    private boolean boolStart = true;
+    private boolean start = true;
 
     public BookTask(BookFragment frm) {
         setFrm(frm);
@@ -49,8 +49,8 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        if (di != null)
-            di.dismiss();
+        if (dialog != null)
+            dialog.dismiss();
         if (frm != null) {
             frm.finishLoad(result);
         }
@@ -65,19 +65,19 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
     protected void onProgressUpdate(Boolean... values) {
         super.onProgressUpdate(values);
         if (values[0]) {
-            di = new ProgressDialog(act, 137);
-            di.setOnCancelListener(new ProgressDialog.OnCancelListener() {
+            dialog = new ProgressDialog(act, 137);
+            dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
-                    boolStart = false;
+                    start = false;
                 }
             });
-            di.show();
-            di.setMessage(msg);
-            di.setProgress(prog);
+            dialog.show();
+            dialog.setMessage(msg);
+            dialog.setProgress(prog);
         } else {
-            di.setMessage(msg);
-            di.setProgress(prog);
+            dialog.setMessage(msg);
+            dialog.setProgress(prog);
         }
     }
 
@@ -95,8 +95,8 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         return "";
     }
 
-    private String downloadOtrk(boolean boolDi) throws Exception {
-        if (boolDi) {
+    private String downloadOtrk(boolean withDialog) throws Exception {
+        if (withDialog) {
             msg = act.getResources().getString(R.string.start);
             publishProgress(true);
         }
@@ -126,11 +126,11 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         DataBase dataBase;
         SQLiteDatabase db;
         ContentValues cv;
-        boolean boolTitle;
+        boolean isTitle;
         final long time = System.currentTimeMillis();
-        while (y < 16 && boolStart) {
+        while (y < 16 && start) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
-            if (boolDi) {
+            if (withDialog) {
                 msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
                 publishProgress(false);
             }
@@ -138,16 +138,16 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
             if (!f.exists()) {
                 dataBase = new DataBase(act, name);
                 db = dataBase.getWritableDatabase();
-                boolTitle = true;
+                isTitle = true;
                 in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
                 br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
                 while ((s = br.readLine()) != null) {
                     if (s.equals(Const.AND)) {
-                        boolTitle = false;
+                        isTitle = false;
                         s = br.readLine();
                     }
                     cv = new ContentValues();
-                    if (boolTitle) {
+                    if (isTitle) {
                         cv.put(DataBase.LINK, s);
                         cv.put(DataBase.TITLE, br.readLine());
                         cv.put(DataBase.TIME, time);
@@ -168,19 +168,19 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 m++;
             prog++;
         }
-        return name + (boolStart ? 1 : 0);
+        return name + (start ? 1 : 0);
     }
 
-    public String downloadData(boolean boolKat) throws Exception {
-        String url = Const.SITE + (boolKat ? Const.POEMS : "tolkovaniya") + Const.PRINT;
+    public String downloadData(boolean katren) throws Exception {
+        String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        boolean b = false;
+        boolean begin = false;
         int i, n;
         String line, t, s, date1 = "", date2;
         while ((line = br.readLine()) != null) {
-            if (!b)
-                b = line.contains("h2");//razdel
+            if (!begin)
+                begin = line.contains("h2");//razdel
             else if (line.contains("clear"))
                 break;
             else if (line.contains(Const.HREF)) {

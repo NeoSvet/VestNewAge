@@ -18,7 +18,7 @@ public class StatusBar {
     private TextView tv;
     private ImageView iv;
     private Animation anMin, anMax;
-    private boolean crash = false, stop = true, time = false, vis;
+    private boolean crash = false, stop = true, time = false, visible;
 
     public StatusBar(Context context, View p) {
         this.context = context;
@@ -66,21 +66,21 @@ public class StatusBar {
         }
     }
 
-    public boolean isVis() {
-        return vis;
+    public boolean isVisible() {
+        return visible;
     }
 
-    public void setLoad(boolean boolStart) {
-        stop = !boolStart;
-        if (boolStart) {
+    public void setLoad(boolean start) {
+        stop = !start;
+        if (start) {
             crash = false;
             time = false;
             panel.setVisibility(View.VISIBLE);
-            vis = true;
+            visible = true;
             iv.startAnimation(anRotate);
         } else {
             panel.setVisibility(View.GONE);
-            vis = false;
+            visible = false;
             iv.clearAnimation();
         }
     }
@@ -97,7 +97,7 @@ public class StatusBar {
         } else {
             restoreText();
             panel.setVisibility(View.GONE);
-            vis = false;
+            visible = false;
             panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_norm));
             iv.setImageResource(R.drawable.refresh);
         }
@@ -109,12 +109,12 @@ public class StatusBar {
         if (System.currentTimeMillis() - t > 86400000) {
             time = true;
             panel.setVisibility(View.VISIBLE);
-            vis = true;
+            visible = true;
             tv.setText(context.getResources().getString(R.string.refresh) + "?");
             return true;
         } else {
             time = false;
-            vis = false;
+            visible = false;
             panel.setVisibility(View.GONE);
             restoreText();
         }
@@ -155,25 +155,17 @@ public class StatusBar {
         return stop;
     }
 
-    //    public void setVisible(boolean boolVis) {
-//        if (boolVis) {
-//            if (vis)
-//                panel.setVisibility(View.VISIBLE);
-//        } else
-//            panel.setVisibility(View.GONE);
-//    }
-
     public boolean startMin() {
-        if (vis)
+        if (visible)
             panel.startAnimation(anMin);
-        return vis;
+        return visible;
     }
 
     public boolean startMax() {
-        if (vis) {
+        if (visible) {
             panel.setVisibility(View.VISIBLE);
             panel.startAnimation(anMax);
         }
-        return vis;
+        return visible;
     }
 }

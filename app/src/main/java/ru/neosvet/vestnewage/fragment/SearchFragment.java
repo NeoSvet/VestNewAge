@@ -83,7 +83,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private String string;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
-    private boolean boolScrollToFirst = false;
+    private boolean scrollToFirst = false;
 
     public void setString(String s) {
         string = s;
@@ -370,11 +370,11 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         lvResult.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                if (scrollState == SCROLL_STATE_IDLE && scrollToFirst) {
                     if (lvResult.getFirstVisiblePosition() > 0)
                         lvResult.smoothScrollToPosition(0);
                     else
-                        boolScrollToFirst = false;
+                        scrollToFirst = false;
                 }
             }
 
@@ -466,14 +466,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             mode = sMode.getSelectedItemPosition();
         task.execute(s, String.valueOf(mode),
                 df.format(dStart), df.format(dEnd));
-        boolean b = true;
+        boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
             if (adSearch.getItem(i).equals(s)) {
-                b = false;
+                needAdd = false;
                 break;
             }
         }
-        if (b) {
+        if (needAdd) {
             adSearch.add(s);
             adSearch.notifyDataSetChanged();
             File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
@@ -561,7 +561,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 } while (cursor.moveToNext() && adResults.getCount() < Const.MAX_ON_PAGE);
                 adResults.notifyDataSetChanged();
                 if (lvResult.getFirstVisiblePosition() > 0) {
-                    boolScrollToFirst = true;
+                    scrollToFirst = true;
                     lvResult.smoothScrollToPosition(0);
                 }
             }

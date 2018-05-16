@@ -86,7 +86,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         }
     }
 
-    private String getListWord(String cookie, boolean boolOne) throws Exception {
+    private String getListWord(String cookie, boolean returnSelectWord) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST + "edinenie/anketa.html");
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
@@ -122,13 +122,13 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
             for (int i = 0; i < m.length; i++) {
                 if (m[i].contains("selected")) {
                     m[i] = m[i].substring(m[i].indexOf(">") + 1);
-                    if (boolOne)
+                    if (returnSelectWord)
                         return act.getResources().getString(R.string.selected) + " " + m[i];
                 }
                 list.append(m[i]);
                 list.append(Const.N);
             }
-            if (boolOne)
+            if (returnSelectWord)
                 return act.getResources().getString(R.string.select_status);
             list.delete(list.length() - 1, list.length());
             return list.toString();

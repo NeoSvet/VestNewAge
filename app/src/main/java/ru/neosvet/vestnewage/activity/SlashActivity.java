@@ -42,7 +42,7 @@ import ru.neosvet.vestnewage.task.CalendarTask;
 public class SlashActivity extends AppCompatActivity {
     private Intent main;
     private StatusBar status;
-    private boolean boolAnim = true;
+    private boolean animation = true;
     private CalendarTask task = null;
     public Lib lib;
 
@@ -304,7 +304,7 @@ public class SlashActivity extends AppCompatActivity {
     public void finishLoad() {
         main.putExtra(MainActivity.CUR_ID, R.id.nav_calendar);
         task = null;
-        if (!boolAnim) {
+        if (!animation) {
             startActivity(main);
             finish();
         }
@@ -328,7 +328,7 @@ public class SlashActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                boolAnim = false;
+                SlashActivity.this.animation = false;
                 if (task == null) {
                     startActivity(main);
                     finish();

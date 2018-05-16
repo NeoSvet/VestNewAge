@@ -52,13 +52,13 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     }
 
     public int indexOf(int d) {
-        boolean b = false;
+        boolean begin = false;
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i).getNum() == 1) {
-                if (b) return -1;
-                b = true;
+                if (begin) return -1;
+                begin = true;
             }
-            if (b && data.get(i).getNum() == d) {
+            if (begin && data.get(i).getNum() == d) {
                 return i;
             }
         }

@@ -27,7 +27,7 @@ public class CabpageActivity extends AppCompatActivity {
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
-    private boolean bTwo = false;
+    private boolean twoPointers = false;
 
     public static void openPage(Context context, String link, String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
@@ -73,9 +73,9 @@ public class CabpageActivity extends AppCompatActivity {
                 @Override
                 public boolean onTouch(View view, MotionEvent event) {
                     if (event.getPointerCount() == 2) {
-                        bTwo = true;
-                    } else if (bTwo) {
-                        bTwo = false;
+                        twoPointers = true;
+                    } else if (twoPointers) {
+                        twoPointers = false;
                         wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
                     }
                     return false;

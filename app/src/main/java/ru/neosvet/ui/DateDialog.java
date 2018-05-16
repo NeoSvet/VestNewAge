@@ -25,7 +25,7 @@ public class DateDialog extends Dialog {
     private Result result;
     private MonthAdapter adMonth;
     private int min_year = 116, min_month = 0, max_year = 0, max_month = 0;
-    private boolean boolCancel = true;
+    private boolean cancel = true;
 
     public DateDialog(Activity act, Date date) {
         super(act);
@@ -126,7 +126,7 @@ public class DateDialog extends Dialog {
             public void onClick(View view) {
                 date.setMonth(adMonth.getSelect());
                 result.putDate(date);
-                boolCancel = false;
+                cancel = false;
                 DateDialog.this.dismiss();
             }
         });
@@ -148,7 +148,7 @@ public class DateDialog extends Dialog {
 
     @Override
     public void dismiss() {
-        if (boolCancel)
+        if (cancel)
             result.putDate(null);
         super.dismiss();
     }

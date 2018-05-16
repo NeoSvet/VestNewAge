@@ -184,7 +184,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
         }
     }
 
-    public void downloadCalendar(int year, int month, boolean boolNoread) throws Exception {
+    public void downloadCalendar(int year, int month, boolean updateNoread) throws Exception {
         try {
             InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1)));
@@ -229,7 +229,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
                 return;
             }
 
-            if (boolNoread) {
+            if (updateNoread) {
                 Date dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
                 Noread noread = new Noread(act);
                 for (int i = 0; i < data.size(); i++) {

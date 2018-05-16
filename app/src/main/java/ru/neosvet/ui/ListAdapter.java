@@ -60,12 +60,12 @@ public class ListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         //if (convertView == null) {
         TextView tv;
-        boolean b = false;
+        boolean isItemList = false;
         if (data.get(position).getLink().equals("#"))
             convertView = inflater.inflate(R.layout.item_title, null);
         else if (data.get(position).getDes().equals("")) {
             convertView = inflater.inflate(R.layout.item_list, null);
-            b = true;
+            isItemList = true;
         } else {
             convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
@@ -79,7 +79,7 @@ public class ListAdapter extends BaseAdapter {
         //}
         tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
-        if (data.get(position).getLink().equals("@") && b)
+        if (data.get(position).getLink().equals("@") && isItemList)
             tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         if (data.get(position).isSelect())
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));

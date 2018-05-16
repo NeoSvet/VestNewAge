@@ -14,14 +14,14 @@ import ru.neosvet.vestnewage.R;
 
 public class Tip {
     private View object;
-    private boolean boolShow = false;
+    private boolean show = false;
     private Animation anShow, anHide;
     private Timer timer;
 
     final Handler hHide = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            if (boolShow)
+            if (show)
                 object.startAnimation(anHide);
             return false;
         }
@@ -40,7 +40,7 @@ public class Tip {
             @Override
             public void onAnimationEnd(Animation animation) {
                 object.setVisibility(View.GONE);
-                boolShow = false;
+                show = false;
             }
 
             @Override
@@ -51,9 +51,9 @@ public class Tip {
     }
 
     public void show() {
-        if (boolShow)
+        if (show)
             return;
-        boolShow = true;
+        show = true;
         object.setVisibility(View.VISIBLE);
         object.startAnimation(anShow);
         timer = new Timer();
@@ -66,15 +66,15 @@ public class Tip {
     }
 
     public void hide() {
-        if (!boolShow)
+        if (!show)
             return;
         timer.cancel();
         object.clearAnimation();
         object.setVisibility(View.GONE);
-        boolShow = false;
+        show = false;
     }
 
     public boolean isShow() {
-        return boolShow;
+        return show;
     }
 }

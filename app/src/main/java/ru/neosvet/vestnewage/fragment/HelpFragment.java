@@ -26,7 +26,7 @@ public class HelpFragment extends Fragment {
     private final String N_LOG = "n", HELP = "help";
     private final int COUNT = 7;
     private MainActivity act;
-    private boolean boolAnim = false;
+    private boolean animation = false;
     private View container, ivPrev, ivNext, pInfo;
     private ListView lvHelp;
     private HelpAdapter adHelp;
@@ -39,7 +39,7 @@ public class HelpFragment extends Fragment {
         public boolean handleMessage(Message message) {
             tvHelp.setVisibility(View.VISIBLE);
             tvHelp.startAnimation(anMax);
-            boolAnim = false;
+            animation = false;
             return false;
         }
     });
@@ -105,7 +105,7 @@ public class HelpFragment extends Fragment {
         anMin.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                boolAnim = true;
+                HelpFragment.this.animation = true;
             }
 
             @Override
@@ -199,7 +199,7 @@ public class HelpFragment extends Fragment {
     }
 
     private void hideButton() {
-        if (boolAnim) return;
+        if (animation) return;
         tvHelp.startAnimation(anMin);
         new Timer().schedule(new TimerTask() {
             @Override

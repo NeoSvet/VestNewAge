@@ -3,7 +3,7 @@ package ru.neosvet.ui;
 public class MarkItem {
     private String title, data, des, place;
     private int id;
-    private boolean boolSelect = false;
+    private boolean select = false;
 
     public MarkItem(String title, int id, String data) {
         this.title = title;
@@ -53,10 +53,10 @@ public class MarkItem {
     }
 
     public boolean isSelect() {
-        return boolSelect;
+        return select;
     }
 
     public void setSelect(boolean select) {
-        boolSelect = select;
+        this.select = select;
     }
 }
