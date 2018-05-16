@@ -151,7 +151,11 @@ public class StatusBar {
         return time;
     }
 
-//    public void setVisible(boolean boolVis) {
+    public boolean isStop() {
+        return stop;
+    }
+
+    //    public void setVisible(boolean boolVis) {
 //        if (boolVis) {
 //            if (vis)
 //                panel.setVisibility(View.VISIBLE);

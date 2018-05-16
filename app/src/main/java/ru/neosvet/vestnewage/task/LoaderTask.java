@@ -34,9 +34,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
-import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     private int max = 1;
@@ -136,10 +134,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 downloadAll(p);
                 return true;
             }
-            if (params[0].equals(Const.DOWNLOAD_MONTH)) {
-                startDownloadMonth(Long.parseLong(params[1]));
-                return true;
-            }
             // download file or page
             String link = params[0].replace(Const.SITE, Const.SITE2);
             if (link.contains(".png")) // download file
@@ -154,17 +148,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void startDownloadMonth(long time) throws Exception {
-        startTimer();
-        msg = context.getResources().getString(R.string.load);
-        Date d = new Date(time);
-        CalendarTask t = new CalendarTask((Activity) context);
-        t.downloadCalendar(d.getYear(), d.getMonth(), false);
-        DateFormat df = new SimpleDateFormat("MM.yy");
-        publishProgress(countBookList(df.format(d)));
-        downloadBookList(df.format(d));
     }
 
     private void refreshLists(int p) throws Exception {
@@ -245,9 +228,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             };
         } else { // download it
             switch (p) {
-                case R.id.nav_rss:
-                    d = new File[]{getFile(SummaryFragment.RSS)};
-                    break;
                 case R.id.nav_main:
                     d = new File[]{
                             getFile(SiteFragment.MAIN),
@@ -377,7 +357,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
     }
 
-    private void downloadStyle(boolean bReplaceStyle) throws Exception {
+    public void downloadStyle(boolean bReplaceStyle) throws Exception {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || bReplaceStyle) {
@@ -433,13 +413,6 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     k++;
                 else {
                     s = s.substring(Const.LINK.length());
-                    if (!s.contains(Const.HTML)) {
-                        if (s.contains("#"))
-                            s = s.substring(0, s.indexOf("#")) +
-                                    Const.HTML + s.substring(s.indexOf("#"));
-                        else
-                            s += Const.HTML;
-                    }
                     downloadPage(s, false);
                     prog++;
                 }
@@ -449,12 +422,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         return k;
     }
 
-    public void downloadPage(String link, boolean bSinglePage) throws Exception {
+    public boolean downloadPage(String link, boolean bSinglePage) throws Exception {
         msg = link;
         // если bSinglePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         DataBase dataBase = new DataBase(context, link);
         if (!bSinglePage && dataBase.existsPage(link))
-            return;
+            return false;
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) {
@@ -536,7 +509,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID, DataBase.TITLE},
                         DataBase.LINK + DataBase.Q, new String[]{link}
                         , null, null, null);
-                s="";
+                s = "";
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(0);
                     s = cursor.getString(1);
@@ -546,14 +519,14 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 if (id == 0) { // id не найден, материала нет - добавляем
                     cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
                     cv.put(DataBase.LINK, link);
-                    id = (int)db.insert(DataBase.TITLE, null, cv);
+                    id = (int) db.insert(DataBase.TITLE, null, cv);
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
                     cv.put(DataBase.TIME, System.currentTimeMillis());
                     db.update(DataBase.TITLE, cv, DataBase.ID +
                             DataBase.Q, new String[]{"1"});
                 } else { // id найден, значит материал есть
-                    if(s.contains("/")) // в заголовке ссылка, необходимо заменить
+                    if (s.contains("/")) // в заголовке ссылка, необходимо заменить
                         cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
                     //обновляем дату загрузки материала
                     db.update(DataBase.TITLE, cv, DataBase.ID +
@@ -571,6 +544,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         br.close();
         dataBase.close();
+        return true;
     }
 
     private String getTitle(String line, String name) {
