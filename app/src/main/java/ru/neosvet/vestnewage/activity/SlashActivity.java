@@ -65,11 +65,11 @@ public class SlashActivity extends AppCompatActivity {
         prom.synchronTime(null);
 
         int ver = lib.getPreviosVer();
+        if (ver == 0) return;
         if (ver < 10)
             adapterNewVersion();
         if (ver < 21)
             adapterNewVersion2();
-        if (ver == 0) return;
         if (ver < 13)
             notifNewOption(getResources().getString(R.string.new_option_menu));
         if (ver < 19) {
