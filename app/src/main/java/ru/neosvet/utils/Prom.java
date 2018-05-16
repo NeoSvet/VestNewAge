@@ -311,8 +311,8 @@ public class Prom {
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
             return;
-        boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
-        boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
+        boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+        boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
         Intent intent = new Intent(context, SlashActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -335,9 +335,9 @@ public class Prom {
                 .addAction(0, context.getResources().getString(R.string.accept), piCancel)
                 .setLights(Color.GREEN, 1000, 1000)
                 .setAutoCancel(true);
-        if (boolSound)
+        if (sound)
             mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        if (boolVibr)
+        if (vibration)
             mBuilder.setVibrate(new long[]{500, 1500});
         nm.notify(notif_id, mBuilder.build());
         PromReceiver.setReceiver(context, p);

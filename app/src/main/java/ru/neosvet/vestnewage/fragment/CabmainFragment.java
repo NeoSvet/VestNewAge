@@ -140,7 +140,7 @@ public class CabmainFragment extends Fragment {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.status.isVis()) return;
+                if (act.status.isVisible()) return;
                 if (mode_list == LOGIN) { //до кабинета
                     String s;
                     switch (pos) {
@@ -205,12 +205,12 @@ public class CabmainFragment extends Fragment {
     private void setViews() {
         TextWatcher textWatcher = new TextWatcher() {
             public void afterTextChanged(Editable s) {
-                boolean b = false;
+                boolean ready = false;
                 if (etEmail.length() > 5 && etPassword.length() > 5) {
-                    b = (etEmail.getText().toString().contains("@")
+                    ready = (etEmail.getText().toString().contains("@")
                             && etEmail.getText().toString().contains("."));
                 }
-                if (b) { //ready to login
+                if (ready) { //ready to login
                     fabEnter.setVisibility(View.VISIBLE);
                 } else {
                     fabEnter.setVisibility(View.GONE);

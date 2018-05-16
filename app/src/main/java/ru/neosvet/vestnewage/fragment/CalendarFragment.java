@@ -44,7 +44,6 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MultiWindowSupport;
 import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.R;
@@ -68,7 +67,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private CustomDialog alert;
     private Animation anShow, anHide;
     private int dialog = -2;
-    private boolean boolShow = false;
+    private boolean show = false;
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -143,7 +142,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             if (dialog == -1)
                 showDatePicker();
             else if (dialog > -1) {
-                createNoreadList(false);
+                openNoreadList(false);
                 showAd(adNoread.getItem(dialog).getLink(),
                         adNoread.getItem(dialog).getHead(0));
             }
@@ -160,9 +159,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onClick(View view) {
                 if (tvNew.getText().toString().equals("0")) {
-                    if (boolShow)
+                    if (show)
                         return;
-                    boolShow = true;
+                    show = true;
                     tvEmpty.setVisibility(View.VISIBLE);
                     tvEmpty.startAnimation(anShow);
                     new Timer().schedule(new TimerTask() {
@@ -329,7 +328,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     public void onResume() {
         super.onResume();
         if (adNoread.getCount() == 0) {
-            createNoreadList(true);
+            openNoreadList(true);
             if (adNoread.getCount() == 0 && lvNoread.getVisibility() == View.VISIBLE) {
                 closeNoread();
             }
@@ -359,7 +358,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onAnimationEnd(Animation animation) {
                 tvEmpty.setVisibility(View.GONE);
-                boolShow = false;
+                show = false;
             }
 
             @Override
@@ -464,10 +463,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
     }
 
-    private void createCalendar(int v) {
+    private void createCalendar(int offsetMonth) {
         Date d = (Date) dCurrent.clone();
-        if (v != 0)
-            d.setMonth(d.getMonth() + v);
+        if (offsetMonth != 0)
+            d.setMonth(d.getMonth() + offsetMonth);
         tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                 + "\n" + (d.getYear() + 1900));
         adCalendar.clear();
@@ -521,7 +520,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         return dCurrent.getMonth() == today_m && dCurrent.getYear() == today_y;
     }
 
-    private void openCalendar(boolean boolLoad) {
+    private void openCalendar(boolean loadIfNeed) {
         try {
             if (task != null)
                 if (task.isLoadList())
@@ -531,9 +530,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             DataBase dataBase = new DataBase(act, df.format(dCurrent));
             SQLiteDatabase db = dataBase.getWritableDatabase();
             Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
-            boolean boolEmpty = true;
+            boolean empty = true;
             if (cursor.moveToFirst()) {
-                if (boolLoad) {
+                if (loadIfNeed) {
                     checkTime(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                 }
 
@@ -554,17 +553,18 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                         title = dataBase.getPageTitle(title, link);
                         adCalendar.getItem(i).addTitle(title.substring(title.indexOf(" ") + 1));
                     }
-                    boolEmpty = false;
+                    empty = false;
                 }
             }
             cursor.close();
             dataBase.close();
             adCalendar.notifyDataSetChanged();
 
-            if (boolEmpty) startLoad();
+            if (empty && loadIfNeed)
+                startLoad();
         } catch (Exception e) {
             e.printStackTrace();
-            if (boolLoad)
+            if (loadIfNeed)
                 startLoad();
         }
     }
@@ -602,19 +602,19 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         else
             act.status.setCrash(true);
         if (adNoread.getCount() == 0)
-            createNoreadList(false);
+            openNoreadList(false);
     }
 
-    private void createNoreadList(boolean boolLoad) {
+    private void openNoreadList(boolean loadIfNeed) {
         try {
             String t, s;
             int n;
-            boolean bNew = false;
+            boolean isNew = false;
             Noread noread = new Noread(act);
             noread.setBadge();
             long time = noread.lastModified();
             if (time > 0) {
-                bNew = (System.currentTimeMillis() - time < 10000);
+                isNew = (System.currentTimeMillis() - time < 10000);
                 List<String> links = noread.getList();
                 for (int i = 0; i < links.size(); i++) {
                     s = links.get(i);
@@ -632,7 +632,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             }
             File file = new File(act.getFilesDir() + File.separator + ADS);
             if (file.exists()) {
-                bNew = bNew || (System.currentTimeMillis() - file.lastModified() < 10000);
+                isNew = isNew || (System.currentTimeMillis() - file.lastModified() < 10000);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
                 final String end = "<e>";
@@ -670,34 +670,34 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             adNoread.notifyDataSetChanged();
 
             if (adNoread.getCount() == 0)
-                bNew = false;
+                isNew = false;
             else {
                 if (!tvNew.getText().toString().contains("."))
-                    bNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
-                if (!bNew) {
+                    isNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
+                if (!isNew) {
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
                     if (Math.abs(time - file.lastModified()) < 2000) {
-                        bNew = true;
+                        isNew = true;
                         file.setLastModified(time - 2500);
                     }
                 }
             }
             tvNew.setText(Integer.toString(adNoread.getCount()));
-            if (bNew) {
+            if (isNew) {
                 tvNew.clearAnimation();
                 tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (boolLoad && isCurMonth())
+            if (loadIfNeed && isCurMonth())
                 startLoad();
         }
     }
 
-    private void setStatus(boolean boolStart) {
+    private void setStatus(boolean load) {
         act.status.setCrash(false);
-        act.status.setLoad(boolStart);
-        if (boolStart) {
+        act.status.setLoad(load);
+        if (load) {
             tvNew.setVisibility(View.GONE);
             fabRefresh.setVisibility(View.GONE);
         } else {

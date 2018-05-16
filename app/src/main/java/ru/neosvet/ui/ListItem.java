@@ -4,13 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.utils.Const;
-
 public class ListItem implements Serializable {
     private String title, des = null;
     private List<String> heads = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private boolean boolSelect = false;
+    private boolean select = false;
 
     public ListItem(String title, String link) {
         this.title = title;
@@ -21,10 +19,10 @@ public class ListItem implements Serializable {
         this.title = title;
     }
 
-    public ListItem(String title, boolean boolTitle) {
+    public ListItem(String title, boolean onlyTitle) {
         this.title = title;
-        if (boolTitle)
-            this.isTitle();
+        if (onlyTitle)
+            links.add("#");
     }
 
     public void clear() {
@@ -62,10 +60,6 @@ public class ListItem implements Serializable {
         return links.get(index);
     }
 
-    public void isTitle() {
-        links.add("#");
-    }
-
     public void addLink(String head, String link) {
         heads.add(head);
         addLink(link);
@@ -87,6 +81,6 @@ public class ListItem implements Serializable {
     }
 
     public boolean isSelect() {
-        return boolSelect;
+        return select;
     }
 }

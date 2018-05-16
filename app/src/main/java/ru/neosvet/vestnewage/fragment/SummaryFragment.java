@@ -16,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
@@ -71,7 +70,7 @@ public class SummaryFragment extends Fragment {
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
-            createList(true, false);
+            openList(true, false);
         } else {
             startLoad();
         }
@@ -148,10 +147,11 @@ public class SummaryFragment extends Fragment {
         });
     }
 
-    public void createList(boolean boolLoad, boolean addOnlyExists) {
+    public void openList(boolean loadIfNeed, boolean addOnlyExists) {
         try {
             adSummary.clear();
-            BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
+            BufferedReader
+                    br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
@@ -182,7 +182,7 @@ public class SummaryFragment extends Fragment {
             lvSummary.smoothScrollToPosition(0);
         } catch (Exception e) {
             e.printStackTrace();
-            if (boolLoad)
+            if (loadIfNeed)
                 startLoad();
         }
     }

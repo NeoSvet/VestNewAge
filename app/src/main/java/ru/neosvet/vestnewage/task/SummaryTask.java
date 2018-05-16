@@ -21,7 +21,6 @@ import java.util.List;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -48,7 +47,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         super.onProgressUpdate(values);
         if (frm != null) {
             if (values.length == 1)
-                frm.createList(false, true);
+                frm.openList(false, true);
             else
                 frm.blinkItem(values);
         }
@@ -64,7 +63,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         super.onCancelled(result);
         if (frm != null) {
             frm.finishLoad(result);
-            frm.createList(false, false);
+            frm.openList(false, false);
         }
     }
 
