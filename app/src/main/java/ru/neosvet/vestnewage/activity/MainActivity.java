@@ -224,6 +224,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.frSummary = frSummary;
     }
 
+    public void setFrMenu(MenuFragment frMenu) {
+        this.frMenu = frMenu;
+    }
+
+    public void setFrCabinet(CabmainFragment frCabinet) {
+        this.frCabinet = frCabinet;
+    }
+
+    public void setFrSearch(SearchFragment frSearch) {
+        this.frSearch = frSearch;
+    }
+
     public void setFrCollections(CollectionsFragment frCollections) {
         this.frCollections = frCollections;
     }

@@ -71,6 +71,7 @@ public class CabmainFragment extends Fragment {
             }
             loginList();
         } else {
+            act.setFrCabinet(this);
             cookie = state.getString(Const.COOKIE);
             task = (CabTask) state.getSerializable(Const.TASK);
             if (task != null) {

@@ -150,6 +150,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 startSearch();
             }
         } else {
+            act.setFrSearch(this);
             dStart = new Date(state.getLong(START));
             dEnd = new Date(state.getLong(END));
             task = (SearchTask) state.getSerializable(Const.TASK);
