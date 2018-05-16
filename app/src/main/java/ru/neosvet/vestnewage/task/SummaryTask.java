@@ -14,15 +14,19 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.service.SummaryService;
 
-public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Serializable {
+public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Serializable {
     private transient SummaryFragment frm;
     private transient MainActivity act;
 
@@ -40,13 +44,28 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
+        if (frm != null) {
+            if (values.length == 1)
+                frm.createList(false, true);
+            else
+                frm.blinkItem(values);
+        }
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+    }
+
+    @Override
+    protected void onCancelled(Boolean result) {
+        super.onCancelled(result);
+        if (frm != null) {
+            frm.finishLoad(result);
+            frm.createList(false, false);
+        }
     }
 
     @Override
@@ -68,11 +87,59 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
         try {
             downloadList();
             updateBook();
+            if (isCancelled())
+                return true;
+            downloadPages();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void downloadPages() throws Exception {
+        File file = new File(act.getFilesDir() + SummaryFragment.RSS);
+        if (!file.exists()) return;
+        LoaderTask loader = new LoaderTask(act);
+        loader.initClient();
+        loader.downloadStyle(false);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String title, link, des, time, name;
+        DataBase dataBase = null;
+        List<ListItem> data = new ArrayList<ListItem>();
+        ListItem item;
+        while ((title = br.readLine()) != null) {
+            link = br.readLine();
+            link = link.substring(Const.LINK.length());
+            des = br.readLine();
+            time = br.readLine();
+            if (link.contains(":"))
+                continue;
+            name = DataBase.getDatePage(link);
+            if (dataBase == null || !dataBase.getName().equals(name)) {
+                if (dataBase != null)
+                    dataBase.close();
+                dataBase = new DataBase(act, name);
+            }
+            if (!dataBase.existsPage(link)) {
+                item = new ListItem(title, link);
+                item.setDes(des);
+                item.addHead(time);
+                data.add(item);
+            }
+        }
+        br.close();
+        if (dataBase != null)
+            dataBase.close();
+        for (int i = data.size() - 1; i > 0; i--) {
+            if (loader.downloadPage(data.get(i).getLink(), false)) {
+                publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
+                        data.get(i).getDes(), data.get(i).getHead(0));
+            }
+            if (isCancelled())
+                break;
+        }
+        data.clear();
     }
 
     private void updateBook() throws Exception {

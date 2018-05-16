@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.task;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
@@ -17,6 +18,8 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,12 +33,13 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
 
-public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements Serializable {
+public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implements Serializable {
     private transient CalendarFragment frm;
     private transient Activity act;
     private transient DataBase dataBase;
     private transient SQLiteDatabase db;
     private transient Lib lib;
+    private boolean loadList;
     private List<ListItem> data = new ArrayList<ListItem>();
 
     public CalendarTask(CalendarFragment frm) {
@@ -58,13 +62,32 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         lib = new Lib(act);
     }
 
+    public boolean isLoadList() {
+        return loadList;
+    }
+
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
+        if (frm != null) {
+            int n = values[0];
+            if (n == 0)
+                frm.updateCalendar();
+            else
+                frm.blinkDay(n);
+        }
+    }
+
+    @Override
+    protected void onCancelled(Boolean result) {
+        super.onCancelled(result);
+        if (frm != null)
+            frm.finishLoad(result);
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
+        super.onPostExecute(result);
         if (frm != null) {
             frm.finishLoad(result);
         } else if (act != null) {
@@ -81,14 +104,53 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
     @Override
     protected Boolean doInBackground(Integer... params) {
         try {
-            // calendar
+            loadList = true;
             downloadCalendar(params[0], params[1], params[2] == 1);
-            downloadAds(); //ads
+            if (isCancelled())
+                return true;
+            downloadAds();
+            if (isCancelled())
+                return true;
+            loadList = false;
+            publishProgress(0);
+            downloadMonth(params[0], params[1]);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void downloadMonth(int year, int month) throws Exception {
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        Date d = new Date(year, month, 1);
+        DataBase dataBase = new DataBase(act, df.format(d));
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+                null, null, null, null, null);
+        if (curTitle.moveToFirst()) {
+            // пропускаем первую запись - там только дата изменения списка
+            LoaderTask loader = new LoaderTask(act);
+            loader.initClient();
+            loader.downloadStyle(false);
+            int n;
+            String link;
+            while (curTitle.moveToNext()) {
+                link = curTitle.getString(0);
+                if (loader.downloadPage(link, false)) {
+                    n = link.lastIndexOf("/") + 1;
+                    n = Integer.parseInt(link.substring(n, n + 2));
+                    publishProgress(n);
+                }
+                if (isCancelled()) {
+                    curTitle.close();
+                    dataBase.close();
+                    return;
+                }
+            }
+        }
+        curTitle.close();
+        dataBase.close();
     }
 
     private void downloadAds() {
@@ -106,10 +168,6 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                 br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
             else
                 br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
-            if (isCancelled()) {
-                br.close();
-                return;
-            }
             s = br.readLine();
             if (Long.parseLong(s) > Long.parseLong(t)) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -165,7 +223,7 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
                     }
                 }
             }
-            db.close();
+            dataBase.close();
             if (isCancelled()) {
                 data.clear();
                 return;
@@ -210,13 +268,13 @@ public class CalendarTask extends AsyncTask<Integer, Void, Boolean> implements S
         data.get(n).addLink(link);
         initDatebase(link);
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.TITLE, link);
+        cv.put(DataBase.LINK, link);
         // пытаемся обновить запись:
         if (db.update(DataBase.TITLE, cv,
                 DataBase.LINK + DataBase.Q,
                 new String[]{link}) == 0) {
             // обновить не получилось, добавляем:
-            cv.put(DataBase.LINK, link);
+            cv.put(DataBase.TITLE, link);
             db.insert(DataBase.TITLE, null, cv);
         }
     }

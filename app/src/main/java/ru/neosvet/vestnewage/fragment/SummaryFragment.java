@@ -20,6 +20,7 @@ import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -27,7 +28,6 @@ import ru.neosvet.vestnewage.task.SummaryTask;
 
 public class SummaryFragment extends Fragment {
     public static final String RSS = "/rss";
-
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
@@ -56,6 +56,7 @@ public class SummaryFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state != null) {
+            act.setFrSummary(this);
             task = (SummaryTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
@@ -70,9 +71,9 @@ public class SummaryFragment extends Fragment {
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
-            createList(true);
+            createList(true, false);
         } else {
-            startLoad(false);
+            startLoad();
         }
     }
 
@@ -105,23 +106,21 @@ public class SummaryFragment extends Fragment {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startRefresh();
-            }
-        });
-        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                showRefreshAlert();
-                return false;
+                startLoad();
             }
         });
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (act.status.onClick())
+                if(!act.status.isStop()) {
+                    if (task != null)
+                        task.cancel(false);
+                    else
+                        act.status.setLoad(false);
+                } else if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
-                    startRefresh();
+                    startLoad();
             }
         });
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -149,52 +148,33 @@ public class SummaryFragment extends Fragment {
         });
     }
 
-    private void startRefresh() {
-        int value = act.getRefMode(MainActivity.SUMMARY_REFMODE);
-        if (value == Const.NULL)
-            showRefreshAlert();
-        else
-            startLoad(value == Const.TRUE);
-    }
-
-    private void showRefreshAlert() {
-        final CustomDialog dialog = new CustomDialog(act);
-        dialog.setTitle(getResources().getString(R.string.renewal));
-        dialog.setMessage(getResources().getString(R.string.refresh_alert));
-        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.setRefMode(MainActivity.SUMMARY_REFMODE, Const.FALSE);
-                startLoad(false);
-                dialog.dismiss();
-            }
-        });
-        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.setRefMode(MainActivity.SUMMARY_REFMODE, Const.TRUE);
-                startLoad(true);
-                dialog.dismiss();
-            }
-        });
-        dialog.show(null);
-    }
-
-    private void createList(boolean boolLoad) {
+    public void createList(boolean boolLoad, boolean addOnlyExists) {
         try {
             adSummary.clear();
             BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
-            String t, p;
+            String title, des, time, link, name;
             int i = 0;
+            DataBase dataBase = null;
             long now = System.currentTimeMillis();
-            while ((t = br.readLine()) != null) {
-                adSummary.addItem(new ListItem(t, br.readLine()));
-                t = br.readLine();
-                p = br.readLine();
+            while ((title = br.readLine()) != null) {
+                link = br.readLine();
+                des = br.readLine();
+                time = br.readLine();
+                if (addOnlyExists) {
+                    name = DataBase.getDatePage(link);
+                    if (dataBase == null || !dataBase.getName().equals(name)) {
+                        if (dataBase != null)
+                            dataBase.close();
+                        dataBase = new DataBase(act, name);
+                    }
+                    if (!dataBase.existsPage(link))
+                        continue;
+                }
+                adSummary.addItem(new ListItem(title, link));
                 adSummary.getItem(i).setDes(
-                        act.lib.getDiffDate(now, Long.parseLong(p))
+                        act.lib.getDiffDate(now, Long.parseLong(time))
                                 + getResources().getString(R.string.back)
-                                + Const.N + t);
+                                + Const.N + des);
                 i++;
             }
             br.close();
@@ -203,15 +183,11 @@ public class SummaryFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             if (boolLoad)
-                startLoad(false);
+                startLoad();
         }
     }
 
-    private void startLoad(boolean load_new) {
-        if (load_new) {
-            act.startLoadIt(R.id.nav_rss);
-            return;
-        }
+    private void startLoad() {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         task = new SummaryTask(this);
@@ -224,9 +200,27 @@ public class SummaryFragment extends Fragment {
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
-            createList(false);
         } else {
             act.status.setCrash(true);
         }
+    }
+
+    public void blinkItem(String[] item) {
+        adSummary.insertItem(0, new ListItem(item[0], item[1]));
+        adSummary.getItem(0).setDes(
+                getResources().getString(R.string.new_item) + Const.N +
+                        act.lib.getDiffDate(System.currentTimeMillis(), Long.parseLong(item[3]))
+                        + getResources().getString(R.string.back)
+                        + Const.N + item[2]);
+        adSummary.setAnimation(true);
+        adSummary.notifyDataSetChanged();
+    }
+
+    public boolean onBackPressed() {
+        if (task != null) {
+            task.cancel(false);
+            return false;
+        }
+        return true;
     }
 }

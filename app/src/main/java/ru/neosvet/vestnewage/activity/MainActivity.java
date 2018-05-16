@@ -44,11 +44,11 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     private final String LOADER = "loader";
-    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab",
-            CALENDAR_REFMODE = "cal_ref_mode", SUMMARY_REFMODE = "sum_ref_mode";
+    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
     public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
     private MenuFragment frMenu;
     private CalendarFragment frCalendar;
+    private SummaryFragment frSummary;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
     private SearchFragment frSearch;
@@ -152,7 +152,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                startLoadIt(cur_id);
+                loader = new LoaderTask(MainActivity.this);
+                loader.execute(String.valueOf(cur_id));
             }
         });
 
@@ -179,16 +180,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
-    }
-
-    public void startLoadIt(int cur_id) {
-        loader = new LoaderTask(MainActivity.this);
-        loader.execute(String.valueOf(cur_id));
-    }
-
-    public void startLoadMonth(long time) {
-        loader = new LoaderTask(MainActivity.this);
-        loader.execute(Const.DOWNLOAD_MONTH, String.valueOf(time));
     }
 
     private void setMenuFragment() {
@@ -229,6 +220,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.frCalendar = frCalendar;
     }
 
+    public void setFrSummary(SummaryFragment frSummary) {
+        this.frSummary = frSummary;
+    }
+
     public void setFrCollections(CollectionsFragment frCollections) {
         this.frCollections = frCollections;
     }
@@ -256,7 +251,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (isCountInMenu) prom.show();
                 break;
             case R.id.nav_rss:
-                fragmentTransaction.replace(R.id.my_fragment, new SummaryFragment());
+                frSummary = new SummaryFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frSummary);
                 break;
             case R.id.nav_main:
                 SiteFragment frSite = new SiteFragment();
@@ -348,6 +344,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (frCalendar != null) {
             if (frCalendar.onBackPressed())
                 exit();
+        } else if (frSummary != null) {
+            if (frSummary.onBackPressed())
+                exit();
         } else if (frCollections != null) {
             if (frCollections.onBackPressed())
                 exit();
@@ -397,15 +396,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bDownloadIt.setVisibility(View.GONE);
             menuDownload.show();
         }
-    }
-
-    public void setRefMode(String name, int value) {
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(name, value);
-        editor.apply();
-    }
-
-    public int getRefMode(String name) {
-        return pref.getInt(name, Const.NULL);
     }
 }

@@ -62,14 +62,6 @@ public class ListItem implements Serializable {
         return links.get(index);
     }
 
-    public boolean containsLink(String link) {
-        for (int i = 0; i < links.size(); i++) {
-            if (link.equals(links.get(i)))
-                return true;
-        }
-        return false;
-    }
-
     public void isTitle() {
         links.add("#");
     }
@@ -80,10 +72,6 @@ public class ListItem implements Serializable {
     }
 
     public void addLink(String link) {
-        if (!link.contains(Const.LINK)) {
-            if (link.length() > 1 && !link.contains(":"))
-                link = Const.LINK + link;
-        }
         links.add(link);
     }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ public class ListAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
     private List<ListItem> data = new ArrayList<ListItem>();
+    private boolean animation = false;
 
     public ListAdapter(Context context) {
         this.context = context;
@@ -83,7 +85,15 @@ public class ListAdapter extends BaseAdapter {
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
         else
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+        if (animation) {
+            convertView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
+            animation = false;
+        }
         return convertView;
+    }
+
+    public void setAnimation(boolean animation) {
+        this.animation = animation;
     }
 }
 

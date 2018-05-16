@@ -32,16 +32,23 @@ public class CalendarItem {
         titles.add(context.getResources().getString(R.string.prom_for_soul_unite));
     }
 
-    public void clear() {
-        if (links.size() > 0) {
-            if (links.get(0).contains("/"))
-                links.clear();
-            else {
-                while (links.size() > 1)
-                    links.remove(1);
+    public void clear(boolean isOnlyTitle) {
+        if (titles.size() > 0) {
+            if (!bold) {
+                titles.clear();
+                if (!isOnlyTitle)
+                    links.clear();
+            } else {
+                while (titles.size() > 1) {
+                    titles.remove(1);
+                    if (!isOnlyTitle)
+                        links.remove(1);
+                }
             }
-            kat = false;
-            pos = false;
+            if (!isOnlyTitle) {
+                kat = false;
+                pos = false;
+            }
         }
     }
 
