@@ -21,6 +21,8 @@ import java.util.List;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -103,10 +105,11 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         loader.initClient();
         loader.downloadStyle(false);
         BufferedReader br = new BufferedReader(new FileReader(file));
-        String title, link, des, time, name;
-        DataBase dataBase = null;
+        String title, link, des, time;
         List<ListItem> data = new ArrayList<ListItem>();
         ListItem item;
+        Noread noread = new Noread(act);
+        Date d;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             link = link.substring(Const.LINK.length());
@@ -114,13 +117,8 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
             time = br.readLine();
             if (link.contains(":"))
                 continue;
-            name = DataBase.getDatePage(link);
-            if (dataBase == null || !dataBase.getName().equals(name)) {
-                if (dataBase != null)
-                    dataBase.close();
-                dataBase = new DataBase(act, name);
-            }
-            if (!dataBase.existsPage(link)) {
+            d = new Date(Long.parseLong(time));
+            if (noread.addLink(link, d)) {
                 item = new ListItem(title, link);
                 item.setDes(des);
                 item.addHead(time);
@@ -128,9 +126,8 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
             }
         }
         br.close();
-        if (dataBase != null)
-            dataBase.close();
-        for (int i = data.size() - 1; i > 0; i--) {
+        noread.close();
+        for (int i = data.size() - 1; i > -1; i--) {
             if (loader.downloadPage(data.get(i).getLink(), false)) {
                 publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
                         data.get(i).getDes(), data.get(i).getHead(0));

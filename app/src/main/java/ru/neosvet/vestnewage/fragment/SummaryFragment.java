@@ -15,11 +15,15 @@ import android.widget.ListView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.Noread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -111,7 +115,7 @@ public class SummaryFragment extends Fragment {
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!act.status.isStop()) {
+                if (!act.status.isStop()) {
                     if (task != null)
                         task.cancel(false);
                     else
@@ -125,8 +129,14 @@ public class SummaryFragment extends Fragment {
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                String link = adSummary.getItem(pos).getLink();
-                BrowserActivity.openReader(act, link, null);
+                String s = adSummary.getItem(pos).getLink();
+                BrowserActivity.openReader(act, s, null);
+                s = adSummary.getItem(pos).getDes();
+                if (s.contains(getResources().getString(R.string.new_item))) {
+                    s = s.substring(getResources().getString(R.string.new_item).length() + 1);
+                    adSummary.getItem(pos).setDes(s);
+                }
+                adSummary.notifyDataSetChanged();
             }
         });
         lvSummary.setOnTouchListener(new View.OnTouchListener() {
@@ -150,14 +160,15 @@ public class SummaryFragment extends Fragment {
     public void openList(boolean loadIfNeed, boolean addOnlyExists) {
         try {
             adSummary.clear();
-            BufferedReader
-                    br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
+            BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
-            long now = System.currentTimeMillis();
+            Noread noread = new Noread(act);
+            List<String> links = noread.getList();
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
+                link = link.substring(Const.LINK.length());
                 des = br.readLine();
                 time = br.readLine();
                 if (addOnlyExists) {
@@ -171,10 +182,8 @@ public class SummaryFragment extends Fragment {
                         continue;
                 }
                 adSummary.addItem(new ListItem(title, link));
-                adSummary.getItem(i).setDes(
-                        act.lib.getDiffDate(now, Long.parseLong(time))
-                                + getResources().getString(R.string.back)
-                                + Const.N + des);
+                adSummary.getItem(i).setDes(prepareDes(des, time,
+                        links.contains(link.replace(Const.HTML, ""))));
                 i++;
             }
             br.close();
@@ -207,13 +216,16 @@ public class SummaryFragment extends Fragment {
 
     public void blinkItem(String[] item) {
         adSummary.insertItem(0, new ListItem(item[0], item[1]));
-        adSummary.getItem(0).setDes(
-                getResources().getString(R.string.new_item) + Const.N +
-                        act.lib.getDiffDate(System.currentTimeMillis(), Long.parseLong(item[3]))
-                        + getResources().getString(R.string.back)
-                        + Const.N + item[2]);
+        adSummary.getItem(0).setDes(prepareDes(item[2], item[3], true));
         adSummary.setAnimation(true);
         adSummary.notifyDataSetChanged();
+    }
+
+    private String prepareDes(String des, String time, boolean isNewItem) {
+        return (isNewItem ? getResources().getString(R.string.new_item) + Const.N : "") +
+                act.lib.getDiffDate(System.currentTimeMillis(), Long.parseLong(time))
+                + getResources().getString(R.string.back)
+                + Const.N + des;
     }
 
     public boolean onBackPressed() {
