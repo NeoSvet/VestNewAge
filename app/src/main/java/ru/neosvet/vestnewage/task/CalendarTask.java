@@ -186,7 +186,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
 
     public void downloadCalendar(int year, int month, boolean updateNoread) throws Exception {
         try {
-            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
+            InputStream in = new BufferedInputStream(lib.getStream(Const.SITE2 + "?json&year="
                     + (year + 1900) + "&month=" + (month + 1)));
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s = br.readLine();
@@ -224,6 +224,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
                 }
             }
             dataBase.close();
+            dataBase = null;
             if (isCancelled()) {
                 data.clear();
                 return;
@@ -258,6 +259,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     }
 
     private void addLink(int n, String link) {
+        Lib.LOG("add link: " + link);
         if (data.get(n).getCount() > 0) {
             String s = link.substring(link.lastIndexOf("/"));
             for (int i = 0; i < data.get(n).getCount(); i++) {
