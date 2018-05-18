@@ -17,14 +17,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -32,8 +31,8 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom = 11;
-    private static final String TIMEPROM = "timeprom";
+    public static final int notif_id = 222, hour_prom1 = 11, hour_prom2 = 14;
+    private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -140,24 +139,25 @@ public class Prom {
     }
 
     public Date getPromDate() {
-        long timeprom = pref.getLong(TIMEPROM, 0);
-        long now;
-        if (timeprom > 0) {
-            now = System.currentTimeMillis();
-            while (timeprom < now)
-                timeprom += 86400000; //+24 hours
-        } else {
-            Date d = getMoscowDate();
-            now = d.getTime();
-            d.setHours(hour_prom); // prom time
-            d.setMinutes(0);
-            d.setSeconds(0);
-            timeprom = d.getTime();
-            if (timeprom < now)
-                timeprom += 86400000; //+24 hours
-            timeprom = System.currentTimeMillis() + timeprom - now;
-        }
-        return new Date(timeprom);
+        Date d;
+        int timeDiff = pref.getInt(TIMEDIFF, 0);
+        if (timeDiff != 0)
+            d = new Date(System.currentTimeMillis() - timeDiff);
+        else
+            d = getMoscowDate();
+        long prom = 0;
+        if (d.getHours() >= hour_prom1) {
+            if (d.getHours() >= hour_prom2) {
+                d.setHours(hour_prom1);
+                prom = 86400000; //+24 hours
+            }
+        } else
+            d.setHours(hour_prom1);
+        d.setMinutes(0);
+        d.setSeconds(0);
+        prom += d.getTime();
+
+        return new Date(prom);
     }
 
     private Date getMoscowDate() {
@@ -261,40 +261,37 @@ public class Prom {
 
     public void synchronTime(final Handler action) {
         if (action == null) {
-            if (pref.getLong(TIMEPROM, 0) > 0)
+            if (pref.getInt(TIMEDIFF, 0) > 0)
                 return;
         }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    InputStream in = new BufferedInputStream(lib.getStream(Const.SITE));
-                    BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        if (line.contains("timeleft")) {
-                            line = br.readLine();
-                            break;
-                        }
+                    Request.Builder builderRequest = new Request.Builder();
+                    builderRequest.url(Const.SITE2);
+                    builderRequest.header(Const.USER_AGENT, context.getPackageName());
+                    OkHttpClient client = lib.createHttpClient();
+                    Response response = client.newCall(builderRequest.build()).execute();
+                    String s = response.headers().value(1);
+                    long timeServer = Date.parse(s);
+                    response.close();
+
+                    int timeDiff = (int) (System.currentTimeMillis() - timeServer);
+                    if (timeDiff != pref.getInt(TIMEDIFF, 0)) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putInt(TIMEDIFF, timeDiff);
+                        editor.apply();
+                        int t = pref.getInt(SettingsFragment.TIME, -1);
+                        if (t > -1)
+                            PromReceiver.setReceiver(context, t);
                     }
-                    br.close();
-                    if (line != null) {
-                        long timeprom = System.currentTimeMillis();
-                        timeprom -= timeprom % 1000;
-                        int timeleft = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
-                        timeprom += timeleft * 1000;
-                        if (timeprom != pref.getLong(TIMEPROM, 0)) {
-                            int t = pref.getInt(SettingsFragment.TIME, -1);
-                            if (t > -1)
-                                PromReceiver.setReceiver(context, t);
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putLong(TIMEPROM, timeprom);
-                            editor.apply();
-                        }
-                        if (action != null)
-                            action.sendEmptyMessage(timeleft);
-                        return;
+                    if (action != null) {
+                        Date d = getPromDate();
+                        timeDiff = (int) (d.getTime() - System.currentTimeMillis());
+                        action.sendEmptyMessage(timeDiff);
                     }
+                    return;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
