@@ -259,7 +259,6 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     }
 
     private void addLink(int n, String link) {
-        Lib.LOG("add link: " + link);
         if (data.get(n).getCount() > 0) {
             String s = link.substring(link.lastIndexOf("/"));
             for (int i = 0; i < data.get(n).getCount(); i++) {
