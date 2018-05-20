@@ -31,7 +31,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom1 = 11, hour_prom2 = 14;
+    public static final int notif_id = 222, hour_prom1 = 8, hour_prom2 = 11;
     private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -46,7 +46,7 @@ public class Prom {
         lib = new Lib(context);
         if (textView != null) {
             long t = getPromDate().getTime() - System.currentTimeMillis();
-            if (t > 39600000) // today prom was been (>11 hours)
+            if (t > 39600000) // today prom was been
                 return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
@@ -141,35 +141,20 @@ public class Prom {
     }
 
     public Date getPromDate() {
-        Date d;
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        if (timeDiff != 0)
-            d = new Date(System.currentTimeMillis() - timeDiff);
-        else
-            d = getMoscowDate();
-        long prom = 0;
-        if (d.getHours() >= hour_prom1) {
-            if (d.getHours() >= hour_prom2) {
-                d.setHours(hour_prom1);
-                prom = 86400000; //+24 hours
-            }
+        // Moscow getTimezoneOffset=-180
+        Date prom = new Date(System.currentTimeMillis() - timeDiff);
+        prom.setMinutes(prom.getTimezoneOffset()); //remove timezone
+        prom.setSeconds(0);
+        if (prom.getHours() >= hour_prom1) {
+            if (prom.getHours() >= hour_prom2) {
+                prom.setHours(hour_prom1 + 24);
+            } else
+                prom.setHours(hour_prom2);
         } else
-            d.setHours(hour_prom1);
-        d.setMinutes(0);
-        d.setSeconds(0);
-        prom += d.getTime();
-
-        return new Date(prom);
-    }
-
-    private Date getMoscowDate() {
-        Date d = new Date();
-        // Moscow getTimezoneOffset == -180
-        if (d.getTimezoneOffset() != -180) {
-            d.setMinutes(d.getMinutes() +
-                    d.getTimezoneOffset() + 180);
-        }
-        return d;
+            prom.setHours(hour_prom1);
+        prom.setMinutes(-prom.getTimezoneOffset()); //return timezone
+        return prom;
     }
 
     private void setPromTime() {
