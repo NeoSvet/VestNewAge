@@ -20,14 +20,16 @@ public class PromReceiver extends BroadcastReceiver {
         am.cancel(piProm);
         if (p > -1) {
             Prom prom = new Prom(context, null);
-            Date d = prom.getPromDate();
+            Date d = prom.getPromDate(false);
             d.setMinutes(d.getMinutes() - p);
+            if (d.getTime() < System.currentTimeMillis()) {
+                d = prom.getPromDate(true);
+                d.setMinutes(d.getMinutes() - p);
+            }
             if (p > 0)
                 d.setSeconds(d.getSeconds() - 3);
             else
                 d.setSeconds(d.getSeconds() - 30);
-            if (d.getTime() < System.currentTimeMillis())
-                d.setHours(d.getHours() + 24);
             AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(d.getTime(), piProm);
             am.setAlarmClock(alarmClockInfo, piProm);
         }

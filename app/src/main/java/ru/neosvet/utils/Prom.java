@@ -45,7 +45,7 @@ public class Prom {
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
-            long t = getPromDate().getTime() - System.currentTimeMillis();
+            long t = getPromDate(false).getTime() - System.currentTimeMillis();
             if (t > 39600000) // today prom was been
                 return;
             tvPromTime = (TextView) textView;
@@ -140,12 +140,18 @@ public class Prom {
         return tvPromTime != null;
     }
 
-    public Date getPromDate() {
+    public Date getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
         // Moscow getTimezoneOffset=-180
         Date prom = new Date(System.currentTimeMillis() - timeDiff);
         prom.setMinutes(prom.getTimezoneOffset()); //remove timezone
         prom.setSeconds(0);
+        if (next) {
+            if (prom.getHours() < hour_prom1)
+                prom.setHours(hour_prom1);
+            else if (prom.getHours() < hour_prom2)
+                prom.setHours(hour_prom2);
+        }
         if (prom.getHours() >= hour_prom1) {
             if (prom.getHours() >= hour_prom2) {
                 prom.setHours(hour_prom1 + 24);
@@ -195,7 +201,7 @@ public class Prom {
     }
 
     public String getPromText() {
-        String t = lib.getDiffDate(getPromDate().getTime(), System.currentTimeMillis());
+        String t = lib.getDiffDate(getPromDate(false).getTime(), System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
@@ -274,7 +280,7 @@ public class Prom {
                             PromReceiver.setReceiver(context, t);
                     }
                     if (action != null) {
-                        Date d = getPromDate();
+                        Date d = getPromDate(false);
                         timeDiff = (int) (d.getTime() - System.currentTimeMillis());
                         action.sendEmptyMessage(timeDiff);
                     }
