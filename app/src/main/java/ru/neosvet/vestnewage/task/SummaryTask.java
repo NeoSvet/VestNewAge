@@ -21,7 +21,7 @@ import java.util.List;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -107,8 +107,8 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         String title, link, des, time;
         List<ListItem> data = new ArrayList<ListItem>();
         ListItem item;
-        Noread noread = new Noread(act);
-        List<String> links = noread.getList();
+        Unread unread = new Unread(act);
+        List<String> links = unread.getList();
         Date d;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
@@ -118,7 +118,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
             if (link.contains(":"))
                 continue;
             d = new Date(Long.parseLong(time));
-            if (noread.addLink(link, d)) {
+            if (unread.addLink(link, d)) {
                 item = new ListItem(title, link);
                 item.setDes(des);
                 item.addHead(time);
@@ -127,7 +127,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 publishProgress(title, link, des, time);
         }
         br.close();
-        noread.close();
+        unread.close();
         for (int i = data.size() - 1; i > -1; i--) {
             if (loader.downloadPage(data.get(i).getLink(), false)) {
                 publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
