@@ -47,8 +47,8 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
-        } else if (name.equals(Noread.NAME)) {
-            db.execSQL("create table if not exists " + Noread.NAME + " ("
+        } else if (name.equals(Unread.NAME)) {
+            db.execSQL("create table if not exists " + Unread.NAME + " ("
                     + LINK + " text primary key,"
                     + TIME + " integer);");
         } else if (name.equals(SEARCH)) {

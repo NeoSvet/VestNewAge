@@ -28,7 +28,7 @@ import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
@@ -232,14 +232,14 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
 
             if (updateNoread) {
                 Date dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
-                Noread noread = new Noread(act);
+                Unread unread = new Unread(act);
                 for (int i = 0; i < data.size(); i++) {
                     for (int j = 0; j < data.get(i).getCount(); j++) {
                         dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
-                        noread.addLink(data.get(i).getLink(j), dItem);
+                        unread.addLink(data.get(i).getLink(j), dItem);
                     }
                 }
-                noread.close();
+                unread.close();
             }
             data.clear();
         } catch (org.json.JSONException e) {

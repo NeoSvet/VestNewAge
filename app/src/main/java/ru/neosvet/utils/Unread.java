@@ -16,14 +16,14 @@ import me.leolin.shortcutbadger.ShortcutBadger;
  * Created by NeoSvet on 03.02.2018.
  */
 
-public class Noread {
+public class Unread {
     public static final String NAME = "noread";
     private Context context;
     private DataBase dbNoread, dbPages;
     private SQLiteDatabase db;
     private long time = 0;
 
-    public Noread(Context context) {
+    public Unread(Context context) {
         this.context = context;
         dbNoread = new DataBase(context, NAME);
         db = dbNoread.getWritableDatabase();
