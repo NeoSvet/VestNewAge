@@ -610,6 +610,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             if (time > 0) {
                 isNew = (System.currentTimeMillis() - time < 10000);
                 List<String> links = noread.getList();
+                noread.close();
                 for (int i = 0; i < links.size(); i++) {
                     s = links.get(i);
                     t = s.substring(s.lastIndexOf(File.separator) + 1);

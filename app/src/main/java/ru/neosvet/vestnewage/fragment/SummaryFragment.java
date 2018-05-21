@@ -164,6 +164,7 @@ public class SummaryFragment extends Fragment {
             DataBase dataBase = null;
             Noread noread = new Noread(act);
             List<String> links = noread.getList();
+            noread.close();
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
                 link = link.substring(Const.LINK.length());
