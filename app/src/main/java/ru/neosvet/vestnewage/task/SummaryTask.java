@@ -108,6 +108,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         List<ListItem> data = new ArrayList<ListItem>();
         ListItem item;
         Noread noread = new Noread(act);
+        List<String> links = noread.getList();
         Date d;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
@@ -122,7 +123,8 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 item.setDes(des);
                 item.addHead(time);
                 data.add(item);
-            }
+            } else if(links.contains(link))
+                publishProgress(title, link, des, time);
         }
         br.close();
         noread.close();
