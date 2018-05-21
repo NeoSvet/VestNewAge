@@ -15,15 +15,13 @@ import android.widget.ListView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -164,9 +162,9 @@ public class SummaryFragment extends Fragment {
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
-            Noread noread = new Noread(act);
-            List<String> links = noread.getList();
-            noread.close();
+            Unread unread = new Unread(act);
+            List<String> links = unread.getList();
+            unread.close();
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
                 link = link.substring(Const.LINK.length());

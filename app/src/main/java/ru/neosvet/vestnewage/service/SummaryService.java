@@ -24,7 +24,7 @@ import java.util.Date;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.utils.Notification;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -128,13 +128,13 @@ public class SummaryService extends IntentService {
         int count_new = 0;
         String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        Noread noread = new Noread(context);
+        Unread unread = new Unread(context);
         Date d;
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();
         do {
             d = new Date(Date.parse(s));
-            if (noread.addLink(link, d)) {
+            if (unread.addLink(link, d)) {
                 count_new++;
                 loader.downloadPage(link, true);
             }
@@ -155,8 +155,8 @@ public class SummaryService extends IntentService {
         } while (s != null);
         bw.close();
         br.close();
-        noread.setBadge();
-        noread.close();
+        unread.setBadge();
+        unread.close();
         if (count_new > 1) {
             result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
         }

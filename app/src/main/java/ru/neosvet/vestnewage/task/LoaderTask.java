@@ -209,6 +209,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
         if (p == -1 || p == R.id.nav_book) {
             BookTask t3 = new BookTask((MainActivity) context);
+            //TODO: progress download list
             t3.downloadData(true);
             t3.downloadData(false);
             prog++;

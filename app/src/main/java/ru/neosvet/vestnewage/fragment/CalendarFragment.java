@@ -45,7 +45,7 @@ import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.MultiWindowSupport;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -107,7 +107,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dateDialog.dismiss();
         else if (dialog > -1)
             alert.dismiss();
-        outState.putBoolean(Noread.NAME, (lvNoread.getVisibility() == View.VISIBLE));
+        outState.putBoolean(Unread.NAME, (lvNoread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
@@ -127,7 +127,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     setStatus(true);
                 } else task = null;
             }
-            if (state.getBoolean(Noread.NAME, false)) {
+            if (state.getBoolean(Unread.NAME, false)) {
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
@@ -219,10 +219,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 closeNoread();
                 tvNew.setText("0");
                 try {
-                    Noread noread = new Noread(act);
-                    noread.clearList();
-                    noread.setBadge();
-                    noread.close();
+                    Unread unread = new Unread(act);
+                    unread.clearList();
+                    unread.setBadge();
+                    unread.close();
                     File file = new File(act.getFilesDir() + File.separator + ADS);
                     if (file.exists()) {
                         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -610,13 +610,13 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             String t, s;
             int n;
             boolean isNew = false;
-            Noread noread = new Noread(act);
-            noread.setBadge();
-            long time = noread.lastModified();
+            Unread unread = new Unread(act);
+            unread.setBadge();
+            long time = unread.lastModified();
             if (time > 0) {
                 isNew = (System.currentTimeMillis() - time < 10000);
-                List<String> links = noread.getList();
-                noread.close();
+                List<String> links = unread.getList();
+                unread.close();
                 for (int i = 0; i < links.size(); i++) {
                     s = links.get(i);
                     t = s.substring(s.lastIndexOf(File.separator) + 1);

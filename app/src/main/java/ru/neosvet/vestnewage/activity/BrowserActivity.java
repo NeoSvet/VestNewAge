@@ -53,7 +53,7 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.LoaderTask;
@@ -712,8 +712,8 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void checkNoread() {
-        Noread noread = new Noread(BrowserActivity.this);
-        noread.deleteLink(link);
+        Unread unread = new Unread(BrowserActivity.this);
+        unread.deleteLink(link);
     }
 
     public void addJournal() {
