@@ -74,8 +74,6 @@ public class Noread {
                     links.add(cursor.getString(iLink));
             } while (cursor.moveToNext());
         }
-        db.close();
-        dbNoread.close();
         return links;
     }
 
