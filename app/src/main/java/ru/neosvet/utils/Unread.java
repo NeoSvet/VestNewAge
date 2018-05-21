@@ -19,14 +19,14 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 public class Unread {
     public static final String NAME = "noread";
     private Context context;
-    private DataBase dbNoread, dbPages;
+    private DataBase dbUnread, dbPages;
     private SQLiteDatabase db;
     private long time = 0;
 
     public Unread(Context context) {
         this.context = context;
-        dbNoread = new DataBase(context, NAME);
-        db = dbNoread.getWritableDatabase();
+        dbUnread = new DataBase(context, NAME);
+        db = dbUnread.getWritableDatabase();
     }
 
     public boolean addLink(String link, Date date) {
@@ -105,7 +105,7 @@ public class Unread {
         if (dbPages != null)
             dbPages.close();
         db.close();
-        dbNoread.close();
+        dbUnread.close();
         if (time > 0) {
             SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();

@@ -712,8 +712,8 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     public void checkNoread() {
-        Unread unread = new Unread(BrowserActivity.this);
-        unread.deleteLink(link);
+        Noread noread = new Noread(BrowserActivity.this);
+        noread.deleteLink(link);
     }
 
     public void addJournal() {
