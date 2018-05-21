@@ -58,7 +58,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/lvNoread"
+        android:id="@+id/lvUnread"
         android:layout_width="@dimen/calendar_title"
         android:layout_height="300dp"
         android:layout_centerInParent="true"

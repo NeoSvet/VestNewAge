@@ -56,10 +56,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private RecyclerView rvCalendar;
     private Date dCurrent;
     private TextView tvDate, tvNew;
-    private ListView lvNoread;
+    private ListView lvUnread;
     private View container, tvEmpty, pCalendar, ivPrev, ivNext, fabRefresh, fabClose, fabClear;
     private CalendarTask task = null;
-    private ListAdapter adNoread;
+    private ListAdapter adUnread;
     private MainActivity act;
     private DateDialog dateDialog;
     private CustomDialog alert;
@@ -101,7 +101,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dateDialog.dismiss();
         else if (dialog > -1)
             alert.dismiss();
-        outState.putBoolean(Unread.NAME, (lvNoread.getVisibility() == View.VISIBLE));
+        outState.putBoolean(Unread.NAME, (lvUnread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
@@ -127,18 +127,18 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 fabRefresh.setVisibility(View.GONE);
                 fabClear.setVisibility(View.VISIBLE);
                 fabClose.setVisibility(View.VISIBLE);
-                lvNoread.getLayoutParams().height = (int) (getResources().getInteger(R.integer.height_list)
+                lvUnread.getLayoutParams().height = (int) (getResources().getInteger(R.integer.height_list)
                         * getResources().getDisplayMetrics().density);
-                lvNoread.requestLayout();
-                lvNoread.setVisibility(View.VISIBLE);
+                lvUnread.requestLayout();
+                lvUnread.setVisibility(View.VISIBLE);
             }
             dialog = state.getInt(Const.DIALOG);
             if (dialog == -1)
                 showDatePicker();
             else if (dialog > -1) {
-                openNoreadList(false);
-                showAd(adNoread.getItem(dialog).getLink(),
-                        adNoread.getItem(dialog).getHead(0));
+                openUnreadList(false);
+                showAd(adUnread.getItem(dialog).getLink(),
+                        adUnread.getItem(dialog).getHead(0));
             }
         }
         createCalendar(0);
@@ -167,50 +167,50 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     return;
                 }
                 if (tvNew.getText().toString().equals("...")) {
-                    adNoread.clear();
-                    adNoread.addItem(new ListItem(getResources().getString(R.string.no_list), ""));
+                    adUnread.clear();
+                    adUnread.addItem(new ListItem(getResources().getString(R.string.no_list), ""));
                 }
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
                 fabClear.setVisibility(View.VISIBLE);
                 fabClose.setVisibility(View.VISIBLE);
-                lvNoread.setVisibility(View.VISIBLE);
-                ResizeAnim anim = new ResizeAnim(lvNoread, false,
+                lvUnread.setVisibility(View.VISIBLE);
+                ResizeAnim anim = new ResizeAnim(lvUnread, false,
                         (int) (getResources().getInteger(R.integer.height_list)
                                 * getResources().getDisplayMetrics().density));
                 anim.setDuration(800);
-                lvNoread.clearAnimation();
-                lvNoread.startAnimation(anim);
+                lvUnread.clearAnimation();
+                lvUnread.startAnimation(anim);
             }
         });
-        lvNoread.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lvUnread.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (adNoread.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
-                    String link = adNoread.getItem(pos).getLink();
-                    String des = adNoread.getItem(pos).getHead(0);
+                if (adUnread.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
+                    String link = adUnread.getItem(pos).getLink();
+                    String des = adUnread.getItem(pos).getHead(0);
                     if (des.equals("")) // only link
                         act.lib.openInApps(link, null);
                     else {
                         dialog = pos;
                         showAd(link, des);
                     }
-                } else if (!adNoread.getItem(pos).getLink().equals("")) {
-                    openLink(adNoread.getItem(pos).getLink());
+                } else if (!adUnread.getItem(pos).getLink().equals("")) {
+                    openLink(adUnread.getItem(pos).getLink());
                 }
             }
         });
         fabClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                closeNoread();
+                closeUnread();
             }
         });
         fabClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                closeNoread();
+                closeUnread();
                 tvNew.setText("0");
                 try {
                     Unread unread = new Unread(act);
@@ -284,8 +284,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         });
     }
 
-    private void closeNoread() {
-        ResizeAnim anim = new ResizeAnim(lvNoread, false, 10);
+    private void closeUnread() {
+        ResizeAnim anim = new ResizeAnim(lvUnread, false, 10);
         anim.setDuration(600);
         anim.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -300,7 +300,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 fabRefresh.setVisibility(View.VISIBLE);
                 fabClear.setVisibility(View.GONE);
                 fabClose.setVisibility(View.GONE);
-                lvNoread.setVisibility(View.GONE);
+                lvUnread.setVisibility(View.GONE);
             }
 
             @Override
@@ -308,8 +308,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
             }
         });
-        lvNoread.clearAnimation();
-        lvNoread.startAnimation(anim);
+        lvUnread.clearAnimation();
+        lvUnread.startAnimation(anim);
     }
 
     public void clearDays() {
@@ -321,10 +321,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     @Override
     public void onResume() {
         super.onResume();
-        if (adNoread.getCount() == 0) {
-            openNoreadList(true);
-            if (adNoread.getCount() == 0 && lvNoread.getVisibility() == View.VISIBLE) {
-                closeNoread();
+        if (adUnread.getCount() == 0) {
+            openUnreadList(true);
+            if (adUnread.getCount() == 0 && lvUnread.getVisibility() == View.VISIBLE) {
+                closeUnread();
             }
         }
     }
@@ -338,9 +338,9 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         fabClose = container.findViewById(R.id.fabClose);
         fabClear = container.findViewById(R.id.fabClear);
         tvEmpty = container.findViewById(R.id.tvEmptyList);
-        lvNoread = (ListView) container.findViewById(R.id.lvNoread);
-        adNoread = new ListAdapter(act);
-        lvNoread.setAdapter(adNoread);
+        lvUnread = (ListView) container.findViewById(R.id.lvUnread);
+        adUnread = new ListAdapter(act);
+        lvUnread.setAdapter(adUnread);
         anShow = AnimationUtils.loadAnimation(act, R.anim.show);
         anHide = AnimationUtils.loadAnimation(act, R.anim.hide);
         anHide.setAnimationListener(new Animation.AnimationListener() {
@@ -368,8 +368,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             task.cancel(false);
             return false;
         }
-        if (lvNoread.getVisibility() == View.VISIBLE) {
-            closeNoread();
+        if (lvUnread.getVisibility() == View.VISIBLE) {
+            closeUnread();
             return false;
         }
         return true;
@@ -441,7 +441,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         if (task != null)
             task.cancel(false);
         BrowserActivity.openReader(act, link, null);
-        adNoread.clear();
+        adUnread.clear();
     }
 
     private void openMonth(int v) {
@@ -579,7 +579,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private void startLoad() {
         setStatus(true);
         task = new CalendarTask(this);
-        if (isCurMonth()) adNoread.clear();
+        if (isCurMonth()) adUnread.clear();
         int n = (isCurMonth() ? 1 : 0);
         task.execute(dCurrent.getYear(), dCurrent.getMonth(), n);
     }
@@ -595,11 +595,11 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             setStatus(false);
         else
             act.status.setCrash(true);
-        if (adNoread.getCount() == 0)
-            openNoreadList(false);
+        if (adUnread.getCount() == 0)
+            openUnreadList(false);
     }
 
-    private void openNoreadList(boolean loadIfNeed) {
+    private void openUnreadList(boolean loadIfNeed) {
         try {
             String t, s;
             int n;
@@ -621,7 +621,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     if (s.contains(Const.POEMS))
                         t = getResources().getString(R.string.katren) + " " +
                                 getResources().getString(R.string.from) + " " + t;
-                    adNoread.addItem(new ListItem(t, s + Const.HTML));
+                    adUnread.addItem(new ListItem(t, s + Const.HTML));
                 }
                 links.clear();
             }
@@ -633,16 +633,16 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 final String end = "<e>";
                 while ((s = br.readLine()) != null) {
                     if (s.contains("<t>")) {
-                        adNoread.insertItem(0, new ListItem(
+                        adUnread.insertItem(0, new ListItem(
                                 getResources().getString(R.string.ad)
                                         + ": " + s.substring(3)));
                     } else if (s.contains("<u>")) {
                         n = Integer.parseInt(s.substring(3));
                         if (n > act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode) {
-                            adNoread.insertItem(0, new ListItem(
+                            adUnread.insertItem(0, new ListItem(
                                     getResources().getString(R.string.ad) + ": " +
                                             getResources().getString(R.string.access_new_version)));
-                            adNoread.getItem(0).addLink(
+                            adUnread.getItem(0).addLink(
                                     getResources().getString(R.string.url_on_app));
                         } else {
                             while (!s.equals(end))
@@ -655,20 +655,20 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                             t += Const.N + s;
                             s = br.readLine();
                         }
-                        adNoread.getItem(0).addHead(t);
+                        adUnread.getItem(0).addHead(t);
                     } else if (s.contains("<l>")) {
-                        adNoread.getItem(0).addLink(s.substring(3));
+                        adUnread.getItem(0).addLink(s.substring(3));
                     }
                 }
                 br.close();
             }
-            adNoread.notifyDataSetChanged();
+            adUnread.notifyDataSetChanged();
 
-            if (adNoread.getCount() == 0)
+            if (adUnread.getCount() == 0)
                 isNew = false;
             else {
                 if (!tvNew.getText().toString().contains("."))
-                    isNew = adNoread.getCount() > Integer.parseInt(tvNew.getText().toString());
+                    isNew = adUnread.getCount() > Integer.parseInt(tvNew.getText().toString());
                 if (!isNew) {
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
                     if (Math.abs(time - file.lastModified()) < 2000) {
@@ -677,7 +677,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     }
                 }
             }
-            tvNew.setText(Integer.toString(adNoread.getCount()));
+            tvNew.setText(Integer.toString(adUnread.getCount()));
             if (isNew) {
                 tvNew.clearAnimation();
                 tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
