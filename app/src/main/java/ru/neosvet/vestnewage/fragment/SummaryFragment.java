@@ -170,7 +170,7 @@ public class SummaryFragment extends Fragment {
                 link = link.substring(Const.LINK.length());
                 des = br.readLine();
                 time = br.readLine();
-                if (addOnlyExists) {
+                if (addOnlyExists && !link.contains(":")) {
                     name = DataBase.getDatePage(link);
                     if (dataBase == null || !dataBase.getName().equals(name)) {
                         if (dataBase != null)
