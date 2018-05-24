@@ -47,7 +47,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
         if (frm != null) {
-            if (values.length == 1)
+            if (values.length == 0)
                 frm.openList(false, true);
             else
                 frm.blinkItem(values);
@@ -86,6 +86,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
     protected Boolean doInBackground(Void... params) {
         try {
             downloadList();
+            publishProgress();
             updateBook();
             if (isCancelled())
                 return true;
@@ -123,7 +124,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 item.setDes(des);
                 item.addHead(time);
                 data.add(item);
-            } else if(links.contains(link))
+            } else if (links.contains(link))
                 publishProgress(title, link, des, time);
         }
         br.close();
