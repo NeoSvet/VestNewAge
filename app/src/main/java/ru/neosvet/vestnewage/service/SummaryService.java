@@ -86,6 +86,8 @@ public class SummaryService extends IntentService {
                     .setContentIntent(piSummary)
                     .setLights(Color.GREEN, 1000, 1000)
                     .setAutoCancel(true);
+            if (result.length == 3)
+                mBuilder.setNumber(Integer.parseInt(result[2]));
             if (sound)
                 mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
             if (vibration)
@@ -151,7 +153,8 @@ public class SummaryService extends IntentService {
         unread.setBadge();
         unread.close();
         if (count_new > 1) {
-            result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
+            result = new String[]{context.getResources().getString(R.string.appeared_new_some),
+                    Const.SITE + SummaryFragment.RSS, Integer.toString(count_new)};
         }
         return result;
     }
