@@ -140,6 +140,8 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     downloadAll(p);
                     break;
                 case DOWNLOAD_YEAR:
+                    startTimer();
+                    downloadYear(Integer.parseInt(params[1]));
                     break;
                 case DOWNLOAD_FILE:
                     downloadFile(params[1].replace(Const.SITE, Const.SITE2), params[2]);
@@ -155,6 +157,64 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void downloadYear(int year) throws Exception {
+        msg = context.getResources().getString(R.string.download_list);
+        //refresh list:
+        Date d = new Date();
+        int m, k = 12;
+        if (year == d.getYear())
+            k -= d.getMonth() + 1;
+        publishProgress(k);
+        CalendarTask t2 = new CalendarTask((Activity) context);
+        for (m = 0; m < k && start; m++) {
+            t2.downloadCalendar(year, m, false);
+            prog++;
+        }
+        //open list:
+        List<String> list = new ArrayList<String>();
+        File dir = lib.getDBFolder();
+        File[] f = dir.listFiles();
+        int i;
+        for (i = 0; i < f.length && start; i++) {
+            if (f[i].getName().length() == 5)
+                list.add(f[i].getName());
+        }
+        int em = k;
+        k = 0;
+        m = 0;
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        //count pages:
+        while (start) {
+            d = new Date(year, m, 1);
+            for (i = 0; i < list.size(); i++) {
+                if (list.contains(df.format(d))) {
+                    k += countBookList(df.format(d));
+                    break;
+                }
+            }
+            if (m == em)
+                break;
+            m++;
+        }
+        //download:
+        prog = 0;
+        msg = context.getResources().getString(R.string.download_materials);
+        publishProgress(k);
+        m = 0;
+        while (start) {
+            d = new Date(year, m, 1);
+            for (i = 0; i < list.size(); i++) {
+                if (list.contains(df.format(d))) {
+                    downloadBookList(df.format(d));
+                    break;
+                }
+            }
+            if (m == em)
+                break;
+            m++;
+        }
     }
 
     private void refreshLists(int p) throws Exception {
