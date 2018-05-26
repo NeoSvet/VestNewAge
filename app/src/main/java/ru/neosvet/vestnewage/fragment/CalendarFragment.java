@@ -776,4 +776,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
         dataBase.close();
     }
+
+    public int getCurrentYear() {
+        return dCurrent.getYear();
+    }
 }
