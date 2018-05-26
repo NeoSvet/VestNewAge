@@ -65,6 +65,20 @@ public class SlashActivity extends AppCompatActivity {
         prom.synchronTime(null);
 
         int ver = lib.getPreviosVer();
+        if (ver < 21) {
+            SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+            int p = pref.getInt(SettingsFragment.TIME, -1);
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+            if (p == -1)
+                notifHelp(getResources().getString(R.string.new_option_notif), intent);
+            else {
+                pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
+                p = pref.getInt(SettingsFragment.TIME, -1);
+                if (p == -1)
+                    notifHelp(getResources().getString(R.string.new_option_notif), intent);
+            }
+        }
         if (ver == 0) return;
         if (ver < 10)
             adapterNewVersion();
@@ -104,6 +118,33 @@ public class SlashActivity extends AppCompatActivity {
         p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
             PromReceiver.setReceiver(this, p);
+    }
+
+    private void notifHelp(String msg, Intent intent) {
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String submsg = null;
+        if (msg.length() > 46) {
+            int i = 46;
+            while (!msg.substring(i, i + 1).equals(" "))
+                i--;
+            submsg = msg.substring(i + 1);
+            msg = msg.substring(0, i);
+        } else if (msg.length() > 39)
+            submsg = "";
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.star)
+                .setContentTitle(getResources().getString(R.string.are_you_know))
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(piMain)
+                .setFullScreenIntent(piEmpty, true)
+                .setAutoCancel(true);
+        if (submsg != null)
+            mBuilder.setSubText(submsg);
+        nm.notify(998, mBuilder.build());
     }
 
     private void notifNewOption(String msg) {

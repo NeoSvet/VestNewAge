@@ -18,6 +18,8 @@
     <string name="new_option">Появилась новая опция!</string>
     <string name="new_option_menu">«Меню на весь экран» (для смартфонов)</string>
     <string name="new_option_counting">«Переместить отсчёт времени до Посыла в меню»</string>
+    <string name="are_you_know">А вы знали?</string>
+    <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
     <!--Lib-->
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
