@@ -37,6 +37,8 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
+    public static final String DOWNLOAD_ALL = "all", DOWNLOAD_YEAR = "year", DOWNLOAD_ID = "id",
+            DOWNLOAD_PAGE = "page", DOWNLOAD_FILE = "file", DOWNLOAD_PAGE_WITH_STYLE = "style";
     private int max = 1;
     private transient Context context;
     private transient Lib lib;
@@ -123,25 +125,30 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     protected Boolean doInBackground(String... params) {
         try {
             initClient();
-            if (params.length < 2) { // download all or section
-                startTimer();
-                int p = -1;
-                if (params.length == 1) { // download section
-                    p = Integer.parseInt(params[0]);
+            String mode = params[0];
+            switch (mode) {
+                case DOWNLOAD_ALL:
+                    startTimer();
+                    refreshLists(-1);
+                    downloadAll(-1);
+                    break;
+                case DOWNLOAD_ID:
+                    startTimer();
+                    int p = Integer.parseInt(params[1]);
                     all = false;
-                }
-                refreshLists(p);
-                downloadAll(p);
-                return true;
-            }
-            // download file or page
-            String link = params[0].replace(Const.SITE, Const.SITE2);
-            if (link.contains(".png")) // download file
-                downloadFile(link, params[1]);
-            else {
-                downloadStyle(params.length == 3); // if download/replce style
-                if (!link.equals("")) // download page
-                    downloadPage(link, true);
+                    refreshLists(p);
+                    downloadAll(p);
+                    break;
+                case DOWNLOAD_YEAR:
+                    break;
+                case DOWNLOAD_FILE:
+                    downloadFile(params[1].replace(Const.SITE, Const.SITE2), params[2]);
+                    break;
+                default: // download file or page
+                    String link = params[1].replace(Const.SITE, Const.SITE2);
+                    downloadStyle(mode.equals(DOWNLOAD_PAGE_WITH_STYLE)); // if download/replce style
+                    if (!link.equals("")) // download page
+                        downloadPage(link, true);
             }
             return true;
         } catch (Exception e) {
@@ -155,7 +162,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         // подсчёт количества списков:
         int k = 0;
         if (p == -1 || p == R.id.nav_book) k = 1;
-        if (p == -1 || p == R.id.nav_calendar) {
+        if (p == -1) {
             Date d = new Date();
             k += (d.getYear() - 116) * 12 + d.getMonth() + 1;
             if (p == -1) k += 4;
@@ -192,7 +199,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         if (!start) return;
 
-        if (p == -1 || p == R.id.nav_calendar) {
+        if (p == -1) {
             Date d = new Date();
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;

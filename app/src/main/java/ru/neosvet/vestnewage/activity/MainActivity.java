@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
-                loader.execute();
+                loader.execute(LoaderTask.DOWNLOAD_ALL);
             }
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
@@ -155,9 +155,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
                 if (cur_id == R.id.nav_calendar) {
-                    loader.execute(String.valueOf(frCalendar.getCurrentYear()));
+                    loader.execute(LoaderTask.DOWNLOAD_YEAR, String.valueOf(frCalendar.getCurrentYear()));
                 } else
-                    loader.execute(String.valueOf(cur_id));
+                    loader.execute(LoaderTask.DOWNLOAD_ID, String.valueOf(cur_id));
             }
         });
 
