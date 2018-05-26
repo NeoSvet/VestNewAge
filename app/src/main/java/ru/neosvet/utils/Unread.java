@@ -74,6 +74,7 @@ public class Unread {
                     links.add(cursor.getString(iLink));
             } while (cursor.moveToNext());
         }
+        cursor.close();
         return links;
     }
 
@@ -99,6 +100,7 @@ public class Unread {
             } while (cursor.moveToNext());
             time = System.currentTimeMillis();
         }
+        cursor.close();
     }
 
     public void close() {
