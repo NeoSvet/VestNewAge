@@ -258,9 +258,9 @@ public class BrowserActivity extends AppCompatActivity
         status.setCrash(false);
         status.setLoad(true);
         if (replaceStyle)
-            loader.execute(link, DataBase.LINK, "");
+            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, link);
         else
-            loader.execute(link, DataBase.LINK);
+            loader.execute(LoaderTask.DOWNLOAD_PAGE, link);
     }
 
     private void initViews() {
@@ -605,7 +605,7 @@ public class BrowserActivity extends AppCompatActivity
     private void downloadFile(File f) {
         loader = new LoaderTask(this);
         status.setLoad(true);
-        loader.execute(Const.SITE + link, f.toString());
+        loader.execute(LoaderTask.DOWNLOAD_FILE, Const.SITE + link, f.toString());
     }
 
     public void openPage(boolean newPage) {
@@ -616,7 +616,7 @@ public class BrowserActivity extends AppCompatActivity
             loader = new LoaderTask(this);
             status.setCrash(false);
             status.setLoad(true);
-            loader.execute("", DataBase.LINK, "");
+            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, "");
             return;
         }
         final File fStyle = lib.getFile(STYLE);
