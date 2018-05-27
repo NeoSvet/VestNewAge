@@ -117,14 +117,14 @@ public class JournalFragment extends Fragment {
                         }
                         item.setDes(item.getDes() + Const.N + s);
                     }
-                    cursor.close();
-                    dataBase.close();
                     adJournal.addItem(item);
                     i++;
                 } else { //материал отсутствует в базе - удаляем запись о нём из журнала
                     dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
                             new String[]{curJ.getString(iID)});
                 }
+                cursor.close();
+                dataBase.close();
             } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE);
             if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);

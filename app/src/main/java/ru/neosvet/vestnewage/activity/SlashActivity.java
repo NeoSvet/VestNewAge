@@ -340,6 +340,8 @@ public class SlashActivity extends AppCompatActivity {
             Date d = new Date();
             task.execute(d.getYear(), d.getMonth(), 1);
         }
+        cursor.close();
+        dataBase.close();
     }
 
     public void finishLoad() {

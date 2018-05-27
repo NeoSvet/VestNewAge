@@ -326,8 +326,8 @@ public class MarkerActivity extends AppCompatActivity {
                     b.append(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
                     b.append(", ");
                 }
+                cursor.close();
             }
-            cursor.close();
             dbMarker.close();
             b.delete(b.length() - 2, b.length());
             setColList(b.toString());

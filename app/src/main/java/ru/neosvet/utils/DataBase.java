@@ -224,7 +224,6 @@ public class DataBase extends SQLiteOpenHelper {
             curPar.close();
         }
         curTitle.close();
-        this.close();
         return exists;
     }
 }
