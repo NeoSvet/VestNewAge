@@ -78,7 +78,7 @@ public class BrowserActivity extends AppCompatActivity
     private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = Const.LINK, string = null;
+    private String link = DataBase.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -89,10 +89,7 @@ public class BrowserActivity extends AppCompatActivity
 
     public static void openReader(Context context, String link, @Nullable String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
-        if (link.contains(Const.LINK))
-            intent.putExtra(DataBase.LINK, link.substring(Const.LINK.length()));
-        else
-            intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(DataBase.LINK, link);
         if (place != null)
             intent.putExtra(DataBase.PLACE, place);
         if (!(context instanceof Activity))
@@ -568,7 +565,7 @@ public class BrowserActivity extends AppCompatActivity
             if (!url.contains(PAGE)) {
                 if (back)
                     back = false;
-                else if (!link.equals(Const.LINK))
+                else if (!link.equals(DataBase.LINK)) //first value
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);

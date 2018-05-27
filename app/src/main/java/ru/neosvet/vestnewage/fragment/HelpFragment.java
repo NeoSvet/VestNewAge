@@ -25,7 +25,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class HelpFragment extends Fragment {
-    private final String N_LOG = "n", HELP = "help";
+    private final String N_LOG = "n", HELP = "help", PANELS = "panels";
     private final int COUNT = 7;
     private MainActivity act;
     private boolean animation = false;
@@ -74,7 +74,7 @@ public class HelpFragment extends Fragment {
                 mHelp = new boolean[COUNT];
         } else {
             n_log = state.getInt(N_LOG);
-            mHelp = state.getBooleanArray(Const.LINK);
+            mHelp = state.getBooleanArray(PANELS);
             adHelp.notifyDataSetChanged();
             if (!state.getBoolean(HELP)) {
                 lvHelp.setVisibility(View.GONE);
@@ -94,7 +94,7 @@ public class HelpFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(N_LOG, n_log);
-        outState.putBooleanArray(Const.LINK, mHelp);
+        outState.putBooleanArray(PANELS, mHelp);
         outState.putBoolean(HELP, lvHelp.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }

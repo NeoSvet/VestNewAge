@@ -59,8 +59,6 @@ public class MarkerActivity extends AppCompatActivity {
 
     public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
-        if (link.contains(Const.LINK))
-            link = link.substring(Const.LINK.length());
         marker.putExtra(DataBase.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
