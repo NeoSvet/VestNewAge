@@ -677,7 +677,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 title = msg;
                 msg = s;
             }
-            curTitle.close();
             dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
             showRndAlert(title, link, msg, s, n);
             //добавляем в журнал:
@@ -691,6 +690,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             dbJournal.close();
         } else
             Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+        curTitle.close();
     }
 
     private void showRndAlert(String title, final String link, String msg, final String place, final int par) {

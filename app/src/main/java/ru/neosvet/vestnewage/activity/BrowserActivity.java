@@ -665,6 +665,7 @@ public class BrowserActivity extends AppCompatActivity
                 } else {
                     //заголовка нет - значит нет и страницы
                     //сюда никогдане попадет, т.к. выше есть проверка existsPage
+                    cursor.close();
                     return;
                 }
                 cursor.close();
