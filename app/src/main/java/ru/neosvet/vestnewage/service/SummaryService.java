@@ -39,6 +39,12 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class SummaryService extends IntentService {
     private final static String CHECK_TIME = "check_time";
     private Context context;
+    public static final int notif_id = 111;
+
+    public static void cancelNotif(Context context) {
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(notif_id);
+    }
 
     public SummaryService() {
         super("Summary");
