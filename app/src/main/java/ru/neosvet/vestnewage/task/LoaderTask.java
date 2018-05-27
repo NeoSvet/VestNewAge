@@ -224,15 +224,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (p == -1 || p == R.id.nav_book) k = 1;
         if (p == -1) {
             Date d = new Date();
-            k += (d.getYear() - 116) * 12 + d.getMonth() + 1;
-            if (p == -1) k += 4;
-        } else if (p == R.id.nav_main)
+            k += (d.getYear() - 116) * 12 + d.getMonth() + 1; // calendar
+            k += 4; // main, news, media and rss
+        } else if (p == R.id.nav_main) // main, news, media
             k = 3;
-        else if (p == R.id.nav_rss)
-            k = 1;
         publishProgress(k);
         //загрузка списков
-        if (p == -1 || p == R.id.nav_rss) {
+        if (p == -1) {
             SummaryTask t1 = new SummaryTask((MainActivity) context);
             t1.downloadList();
             prog++;
@@ -295,17 +293,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     getFile(SiteFragment.MEDIA)
             };
         } else { // download it
-            switch (p) {
-                case R.id.nav_main:
-                    d = new File[]{
-                            getFile(SiteFragment.MAIN),
-                            getFile(SiteFragment.MEDIA)
-                    };
-                    break;
-                default: //R.id.nav_book || R.id.nav_calendar:
-                    d = new File[]{null};
-                    break;
-            }
+            if (p == R.id.nav_main) {
+                d = new File[]{
+                        getFile(SiteFragment.MAIN),
+                        getFile(SiteFragment.MEDIA)
+                };
+            } else //R.id.nav_book
+                d = new File[]{null};
         }
         // подсчёт количества страниц:
         int k = 0;
