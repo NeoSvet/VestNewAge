@@ -470,11 +470,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         String s;
         int k = 0;
         while ((s = br.readLine()) != null && start) {
-            if (s.contains(Const.LINK)) {
+            if (s.contains(Const.HTML)) {
                 if (count)
                     k++;
                 else {
-                    s = s.substring(Const.LINK.length());
                     downloadPage(s, false);
                     prog++;
                 }

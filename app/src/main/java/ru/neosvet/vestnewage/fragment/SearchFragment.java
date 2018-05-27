@@ -59,7 +59,8 @@ import ru.neosvet.vestnewage.task.SearchTask;
 
 
 public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
-    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l";
+    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
+            LAST_RESULTS = "r";
     private final DateFormat df = new SimpleDateFormat(" yyyy");
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
@@ -193,7 +194,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
-                        Const.LINK));
+                        LAST_RESULTS));
                 adResults.notifyDataSetChanged();
             }
         }
@@ -292,7 +293,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (task != null) return;
-                if (adResults.getItem(pos).getLink().equals(Const.LINK)) { //results_last_search
+                if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
                     fabSettings.setVisibility(View.GONE);
                     bShow.setVisibility(View.VISIBLE);
                     page = 0;
@@ -544,7 +545,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             for (int i = 1; i < max + 1; i++) {
                 adPages.addItem(new CalendarItem(act, i, android.R.color.white));
             }
-            adPages.getItem(page).addLink(Const.LINK);
+            adPages.getItem(page).addLink(Const.SITE); //add any link for mark (border) of current page
             rvPages.setAdapter(adPages);
             if (cursor.moveToPosition(page * Const.MAX_ON_PAGE)) {
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);

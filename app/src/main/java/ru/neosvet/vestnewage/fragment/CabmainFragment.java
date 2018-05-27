@@ -25,6 +25,7 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
@@ -88,7 +89,7 @@ public class CabmainFragment extends Fragment {
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
-            for (String t : state.getStringArray(Const.LINK)) {
+            for (String t : state.getStringArray(DataBase.LINK)) {
                 if (t.contains("#")) {
                     d = t.substring(t.indexOf("#") + 1);
                     t = t.substring(0, t.indexOf("#"));
@@ -112,7 +113,7 @@ public class CabmainFragment extends Fragment {
             d = adMain.getItem(i).getDes();
             m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
         }
-        outState.putStringArray(Const.LINK, m);
+        outState.putStringArray(DataBase.LINK, m);
         super.onSaveInstanceState(outState);
     }
 
