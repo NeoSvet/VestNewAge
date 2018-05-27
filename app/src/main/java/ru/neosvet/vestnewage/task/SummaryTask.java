@@ -113,7 +113,6 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         Date d;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
-            link = link.substring(Const.LINK.length());
             des = br.readLine();
             time = br.readLine();
             if (link.contains(":"))
@@ -150,7 +149,6 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         Cursor cursor;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
-            link = link.substring(Const.LINK.length());
             br.readLine(); //des
             br.readLine(); //time
             name = DataBase.getDatePage(link);
@@ -189,11 +187,10 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 bw.write(Const.N);
                 line = withOutTag(br.readLine()); //link
                 if (line.contains(Const.SITE2))
-                    bw.write(Const.LINK + line.substring(Const.SITE2.length()));
+                    line = line.substring(Const.SITE2.length());
                 else if (line.contains(Const.SITE))
-                    bw.write(Const.LINK + line.substring(Const.SITE.length()));
-                else
-                    bw.write(line);
+                    line = line.substring(Const.SITE.length());
+                bw.write(line);
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
                 bw.write(Const.N);

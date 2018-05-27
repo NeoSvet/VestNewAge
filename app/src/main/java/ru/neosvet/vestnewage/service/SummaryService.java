@@ -59,8 +59,8 @@ public class SummaryService extends IntentService {
                 result = new String[]{intent.getStringExtra(DataBase.DESCTRIPTION),
                         intent.getStringExtra(DataBase.LINK)};
             } else {
-                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
-                    return;
+//                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
+//                    return;
                 result = checkSummary();
             }
             if (result == null) { // no updates

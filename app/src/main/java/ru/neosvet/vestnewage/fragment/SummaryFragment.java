@@ -167,7 +167,6 @@ public class SummaryFragment extends Fragment {
             unread.close();
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
-                link = link.substring(Const.LINK.length());
                 des = br.readLine();
                 time = br.readLine();
                 if (addOnlyExists && !link.contains(":")) {
