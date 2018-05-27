@@ -135,7 +135,6 @@ public class DataBase extends SQLiteOpenHelper {
         cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                 DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                 null, null, null);
-        Lib lib = new Lib(ctxt);
         if (cursor.moveToFirst()) {
             do {
                 pageCon.append(Lib.withOutTags(cursor.getString(0)));
