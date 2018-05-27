@@ -29,7 +29,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
 
@@ -164,10 +163,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
                 br.close();
             }
             String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-            if (act instanceof MainActivity)
-                br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
-            else
-                br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
+            br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
             s = br.readLine();
             if (Long.parseLong(s) > Long.parseLong(t)) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
