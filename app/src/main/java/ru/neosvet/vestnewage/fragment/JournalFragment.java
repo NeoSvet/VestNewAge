@@ -206,7 +206,7 @@ public class JournalFragment extends Fragment {
                             getResources().getString(R.string.rnd_stih))) + 1);
                     Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
                 } else
-                    s = "";
+                    s = null;
                 BrowserActivity.openReader(act, link, s);
                 adJournal.clear();
             }
