@@ -107,7 +107,7 @@ public class SummaryService extends IntentService {
 
     private String[] checkSummary() throws Exception {
         Lib lib = new Lib(context);
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE2
+        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s, title, link, des;

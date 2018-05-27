@@ -240,9 +240,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (p == -1 || p == R.id.nav_main) {
             SiteTask t4 = new SiteTask((MainActivity) context);
             String[] url = new String[]{
-                    Const.SITE2,
-                    Const.SITE2 + "novosti.html",
-                    Const.SITE2 + "media.html"
+                    Const.SITE,
+                    Const.SITE + "novosti.html",
+                    Const.SITE + "media.html"
             };
             String[] file = new String[]{
                     getFile(SiteFragment.MAIN).toString(),
