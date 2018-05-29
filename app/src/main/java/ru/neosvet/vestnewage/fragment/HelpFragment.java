@@ -2,20 +2,11 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 import ru.neosvet.ui.HelpAdapter;
 import ru.neosvet.utils.Const;
@@ -23,26 +14,14 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class HelpFragment extends Fragment {
-    private final String N_LOG = "n", HELP = "help", PANELS = "panels";
-    private final int COUNT = 7;
+    private final String PANELS = "panels";
+    private final int COUNT = 8, FEEDBACK = 1;
+    private int FEEDBACK_COUNT = 3;
+    private boolean feedback = false;
     private MainActivity act;
-    private boolean animation = false;
-    private View container, ivPrev, ivNext, pInfo;
-    private ListView lvHelp;
+    private View container;
     private HelpAdapter adHelp;
-    private TextView tvChangelog, tvHelp, tvChangelogTitle;
     private boolean[] mHelp = null;
-    private int n_log;
-    private Animation anMin, anMax;
-    private Handler hShow = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            tvHelp.setVisibility(View.VISIBLE);
-            tvHelp.startAnimation(anMax);
-            animation = false;
-            return false;
-        }
-    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,20 +42,14 @@ public class HelpFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            n_log = 0;
             if (mHelp == null)
                 mHelp = new boolean[COUNT];
         } else {
-            n_log = state.getInt(N_LOG);
             mHelp = state.getBooleanArray(PANELS);
+            if (mHelp[FEEDBACK])
+                turnFeedback();
             adHelp.notifyDataSetChanged();
-            if (!state.getBoolean(HELP)) {
-                lvHelp.setVisibility(View.GONE);
-                pInfo.setVisibility(View.VISIBLE);
-                tvHelp.setText("?");
-            }
         }
-        changeLog(n_log);
         for (int i = 0; i < COUNT; i++) {
             adHelp.addItem(getResources().getStringArray(R.array.help_title)[i],
                     getResources().getStringArray(R.array.help_content)[i]);
@@ -87,137 +60,72 @@ public class HelpFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(N_LOG, n_log);
         outState.putBooleanArray(PANELS, mHelp);
-        outState.putBoolean(HELP, lvHelp.getVisibility() == View.VISIBLE);
         super.onSaveInstanceState(outState);
     }
 
-    private void initViews() {
-        TextView tv = (TextView) container.findViewById(R.id.tvNumVer);
-        try {
-            tv.setText(getResources().getString(R.string.current_version) +
-                    act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
-        anMin.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                HelpFragment.this.animation = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                tvHelp.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
-        tvChangelog = (TextView) container.findViewById(R.id.tvChangeLog);
-        tvHelp = (TextView) container.findViewById(R.id.tvHelp);
-        ivPrev = container.findViewById(R.id.ivPrev);
-        ivNext = container.findViewById(R.id.ivNext);
-        tvChangelogTitle = (TextView) container.findViewById(R.id.tvChangelogTitle);
-        pInfo = container.findViewById(R.id.pInfo);
-        lvHelp = (ListView) container.findViewById(R.id.lvHelp);
+    private void initList() {
         adHelp = new HelpAdapter(act);
-    }
-
-    private void setViews() {
-        container.findViewById(R.id.bWriteMail).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»", null);
-            }
-        });
-        container.findViewById(R.id.bAppLink).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.lib.copyAddress(getResources().getString(R.string.url_on_app));
-            }
-        });
-        tvHelp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (tvHelp.getText().equals("i")) {
-                    lvHelp.setVisibility(View.GONE);
-                    pInfo.setVisibility(View.VISIBLE);
-                    tvHelp.setText("?");
-                } else {
-                    lvHelp.setVisibility(View.VISIBLE);
-                    pInfo.setVisibility(View.GONE);
-                    tvHelp.setText("i");
-                }
-            }
-        });
-        ivPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeLog(n_log + 1);
-            }
-        });
-        ivNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeLog(n_log - 1);
-            }
-        });
+        ListView lvHelp = (ListView) container.findViewById(R.id.lvHelp);
         lvHelp.setAdapter(adHelp);
         lvHelp.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (adHelp.getItem(pos).getCount() == 0) {
-                    mHelp[pos] = true;
+                int i = pos;
+                if (feedback && pos > FEEDBACK) {
+                    if (pos <= FEEDBACK + FEEDBACK_COUNT) {
+                        onClickButton(pos - FEEDBACK - 1);
+                        return;
+                    } else
+                        i -= FEEDBACK_COUNT;
+                }
+                if (pos == FEEDBACK)
+                    turnFeedback();
+                else if (adHelp.getItem(pos).getCount() == 0) {
+                    mHelp[i] = true;
                     adHelp.getItem(pos).addLink("");
                 } else {
-                    mHelp[pos] = false;
+                    mHelp[i] = false;
                     adHelp.getItem(pos).clear();
                 }
                 adHelp.notifyDataSetChanged();
             }
         });
-        lvHelp.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-                    hideButton();
-                return false;
-            }
-        });
-        tvChangelog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hideButton();
-            }
-        });
     }
 
-    private void hideButton() {
-        if (animation) return;
-        tvHelp.startAnimation(anMin);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                hShow.sendEmptyMessage(0);
-            }
-        }, 1500);
+    private void onClickButton(int index) {
+        switch (index) {
+            case 0: //write_to_dev
+                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»", null);
+                break;
+            case 1: //link_on_app
+                act.lib.copyAddress(getResources().getString(R.string.url_on_app));
+                break;
+            case 2: //changelog
+                act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
+                break;
+            default: //version
+        }
     }
 
-    private void changeLog(int n) {
-        ivNext.setEnabled(n > 0);
-        int k = getResources().getStringArray(R.array.changelog).length;
-        ivPrev.setEnabled(n < k - 1);
-        String s = getResources().getStringArray(R.array.changelog)[n];
-        tvChangelogTitle.setText(getResources().getString(R.string.changelog) + Const.N
-                + getResources().getString(R.string.version)
-                + s.substring(0, s.indexOf(Const.N)));
-        tvChangelog.setText(s.substring(s.indexOf(Const.N) + 1));
-        n_log = n;
+    private void turnFeedback() {
+        feedback = !feedback;
+        if (feedback) {
+            adHelp.insertItem(FEEDBACK + 1, getResources().getString(R.string.write_to_dev), R.drawable.gm);
+            adHelp.insertItem(FEEDBACK + 2, getResources().getString(R.string.link_on_app), R.drawable.play_store);
+            adHelp.insertItem(FEEDBACK + 3, getResources().getString(R.string.changelog), R.drawable.journal);
+            try {
+                String title = getResources().getString(R.string.current_version) +
+                        act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName;
+                adHelp.insertItem(FEEDBACK + 4, title, 0);
+                FEEDBACK_COUNT = 4;
+            } catch (Exception e) {
+                FEEDBACK_COUNT = 3;
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = 0; i < FEEDBACK_COUNT; i++)
+                adHelp.removeItem(FEEDBACK + 1);
+        }
     }
 }
