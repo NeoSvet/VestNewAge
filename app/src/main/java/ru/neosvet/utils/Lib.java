@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -83,7 +84,7 @@ public class Lib {
         return file;
     }
 
-    public void openInApps(String url, String titleChooser) {
+    public void openInApps(String url, @Nullable String titleChooser) {
         try {
             Intent myIntent = new Intent(Intent.ACTION_VIEW);
             myIntent.setData(android.net.Uri.parse(url));

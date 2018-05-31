@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -563,7 +564,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     @Override
-    public void putDate(Date date) {
+    public void putDate(@Nullable Date date) {
         dialog = "";
         if (date == null) //cancel
             return;

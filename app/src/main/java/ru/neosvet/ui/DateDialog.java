@@ -3,6 +3,7 @@ package ru.neosvet.ui;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -154,7 +155,7 @@ public class DateDialog extends Dialog {
     }
 
     public interface Result {
-        void putDate(Date date);
+        void putDate(@Nullable Date date); // null for cancel
     }
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {

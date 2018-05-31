@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -709,7 +710,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     @Override
-    public void putDate(Date date) {
+    public void putDate(@Nullable Date date) {
         dialog = -2;
         if (date == null) // cancel
             return;
