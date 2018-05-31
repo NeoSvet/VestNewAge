@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -88,7 +89,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                 return downloadOtrk(true);
             if (params[0] == 1 && params[1] == 1) //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
                 downloadOtrk(false);
-            return downloadData(params[0] == 0);
+            return downloadData(params[0] == 0, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -171,7 +172,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         return name + (start ? 1 : 0);
     }
 
-    public String downloadData(boolean katren) throws Exception {
+    public String downloadData(boolean katren, @Nullable LoaderTask loader) throws Exception {
         String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
@@ -194,6 +195,8 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
+                        if (loader != null)
+                            loader.upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
