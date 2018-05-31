@@ -2,6 +2,7 @@ package ru.neosvet.ui;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -42,7 +43,7 @@ public class CustomDialog {
         tv.setText(title);
     }
 
-    public void setMessage(String msg) {
+    public void setMessage(@Nullable String msg) {
         TextView tv = (TextView) dialogView.findViewById(R.id.message);
         if (msg == null)
             tv.setVisibility(View.GONE);

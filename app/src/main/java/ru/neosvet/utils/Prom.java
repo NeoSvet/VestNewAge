@@ -11,6 +11,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
@@ -252,7 +253,7 @@ public class Prom {
         return t;
     }
 
-    public void synchronTime(final Handler action) {
+    public void synchronTime(@Nullable final Handler action) {
         if (action == null) {
             if (pref.getInt(TIMEDIFF, 0) > 0)
                 return;
