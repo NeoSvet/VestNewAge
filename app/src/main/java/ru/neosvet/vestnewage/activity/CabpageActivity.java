@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
@@ -29,7 +30,7 @@ public class CabpageActivity extends AppCompatActivity {
     private StatusBar status;
     private boolean twoPointers = false;
 
-    public static void openPage(Context context, String link, String cookie) {
+    public static void openPage(Context context, String link, @Nullable String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
         intent.putExtra(DataBase.LINK, link);
         intent.putExtra(Const.COOKIE, cookie);

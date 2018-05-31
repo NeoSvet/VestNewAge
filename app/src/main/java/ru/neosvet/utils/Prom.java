@@ -41,7 +41,7 @@ public class Prom {
     private Lib lib;
     private SharedPreferences pref;
 
-    public Prom(Context context, View textView) {
+    public Prom(Context context, @Nullable View textView) {
         this.context = context;
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), context.MODE_PRIVATE);
         lib = new Lib(context);
