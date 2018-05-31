@@ -9,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import ru.neosvet.ui.HelpAdapter;
-import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
@@ -29,8 +28,7 @@ public class HelpFragment extends Fragment {
         this.container = inflater.inflate(R.layout.help_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.help));
-        initViews();
-        setViews();
+        initList();
         restoreActivityState(savedInstanceState);
         return this.container;
     }
