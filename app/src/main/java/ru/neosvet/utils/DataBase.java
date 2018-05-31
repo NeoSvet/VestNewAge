@@ -47,8 +47,8 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
-        } else if (name.equals(Noread.NAME)) {
-            db.execSQL("create table if not exists " + Noread.NAME + " ("
+        } else if (name.equals(Unread.NAME)) {
+            db.execSQL("create table if not exists " + Unread.NAME + " ("
                     + LINK + " text primary key,"
                     + TIME + " integer);");
         } else if (name.equals(SEARCH)) {
@@ -107,7 +107,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     // для материалов в базах данных:
-    public static String getContentPage(Context ctxt, String link, boolean boolOnlyTitle) {
+    public static String getContentPage(Context ctxt, String link, boolean onlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, null,
@@ -118,7 +118,7 @@ public class DataBase extends SQLiteOpenHelper {
         StringBuilder pageCon = new StringBuilder();
         if (cursor.moveToFirst()) {
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link));
-            if (boolOnlyTitle) {
+            if (onlyTitle) {
                 cursor.close();
                 dataBase.close();
                 return pageCon.toString();
@@ -135,7 +135,6 @@ public class DataBase extends SQLiteOpenHelper {
         cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                 DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                 null, null, null);
-        Lib lib = new Lib(ctxt);
         if (cursor.moveToFirst()) {
             do {
                 pageCon.append(Lib.withOutTags(cursor.getString(0)));
@@ -215,17 +214,16 @@ public class DataBase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.ID},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
-        boolean b = false;
+        boolean exists = false;
         if (curTitle.moveToFirst()) {
             Cursor curPar = db.query(DataBase.PARAGRAPH, null,
                     DataBase.ID + DataBase.Q,
                     new String[]{String.valueOf(curTitle.getInt(0))}
                     , null, null, null);
-            b = curPar.moveToFirst();
+            exists = curPar.moveToFirst();
             curPar.close();
         }
         curTitle.close();
-        this.close();
-        return b;
+        return exists;
     }
 }

@@ -39,7 +39,7 @@ public class JournalFragment extends Fragment {
     private int offset = 0;
     private Animation anMin, anMax;
     private ListView lvJournal;
-    private boolean boolFinish = true, boolScrollToFirst = false;
+    private boolean finish = true, scrollToFirst = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,8 +50,8 @@ public class JournalFragment extends Fragment {
         initViews();
         if (savedInstanceState != null) {
             offset = savedInstanceState.getInt(OFFSET, 0);
-            boolFinish = savedInstanceState.getBoolean(FINISH, true);
-            if (offset > 0 || !boolFinish) {
+            finish = savedInstanceState.getBoolean(FINISH, true);
+            if (offset > 0 || !finish) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
             }
@@ -62,11 +62,11 @@ public class JournalFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(OFFSET, offset);
-        outState.putBoolean(FINISH, boolFinish);
+        outState.putBoolean(FINISH, finish);
         super.onSaveInstanceState(outState);
     }
 
-    private void createList() {
+    private void openList() {
         tip.hide();
         SQLiteDatabase dbJ = dbJournal.getWritableDatabase();
         Cursor curJ = dbJ.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
@@ -117,27 +117,27 @@ public class JournalFragment extends Fragment {
                         }
                         item.setDes(item.getDes() + Const.N + s);
                     }
-                    cursor.close();
-                    dataBase.close();
                     adJournal.addItem(item);
                     i++;
                 } else { //материал отсутствует в базе - удаляем запись о нём из журнала
                     dbJ.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
                             new String[]{curJ.getString(iID)});
                 }
+                cursor.close();
+                dataBase.close();
             } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE);
             if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
-                boolFinish = false;
+                finish = false;
             } else
-                boolFinish = true;
+                finish = true;
         }
         curJ.close();
         dbJ.close();
         adJournal.notifyDataSetChanged();
         if (lvJournal.getFirstVisiblePosition() > 0) {
-            boolScrollToFirst = true;
+            scrollToFirst = true;
             lvJournal.smoothScrollToPosition(0);
         }
         if (adJournal.getCount() == 0) {
@@ -160,19 +160,19 @@ public class JournalFragment extends Fragment {
                 } else {
                     offset -= Const.MAX_ON_PAGE;
                     adJournal.clear();
-                    createList();
+                    openList();
                 }
             }
         });
         fabNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (boolFinish) {
+                if (finish) {
                     tip.show();
                 } else {
                     offset += Const.MAX_ON_PAGE;
                     adJournal.clear();
-                    createList();
+                    openList();
                 }
             }
         });
@@ -188,7 +188,7 @@ public class JournalFragment extends Fragment {
                 adJournal.notifyDataSetChanged();
                 fabPrev.setVisibility(View.GONE);
                 fabNext.setVisibility(View.GONE);
-                boolFinish = true;
+                finish = true;
                 offset = 0;
             }
         });
@@ -206,7 +206,7 @@ public class JournalFragment extends Fragment {
                             getResources().getString(R.string.rnd_stih))) + 1);
                     Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
                 } else
-                    s = "";
+                    s = null;
                 BrowserActivity.openReader(act, link, s);
                 adJournal.clear();
             }
@@ -232,11 +232,11 @@ public class JournalFragment extends Fragment {
         lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                if (scrollState == SCROLL_STATE_IDLE && scrollToFirst) {
                     if (lvJournal.getFirstVisiblePosition() > 0)
                         lvJournal.smoothScrollToPosition(0);
                     else
-                        boolScrollToFirst = false;
+                        scrollToFirst = false;
                 }
             }
 
@@ -284,7 +284,7 @@ public class JournalFragment extends Fragment {
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     fabClear.setVisibility(View.VISIBLE);
                     fabClear.startAnimation(anMax);
-                    if (offset > 0 || !boolFinish) {
+                    if (offset > 0 || !finish) {
                         fabPrev.setVisibility(View.VISIBLE);
                         fabNext.setVisibility(View.VISIBLE);
                         fabPrev.startAnimation(anMax);
@@ -300,6 +300,6 @@ public class JournalFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (adJournal.getCount() == 0)
-            createList();
+            openList();
     }
 }

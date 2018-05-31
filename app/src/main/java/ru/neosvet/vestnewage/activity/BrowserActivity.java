@@ -53,7 +53,7 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.LoaderTask;
@@ -65,7 +65,7 @@ public class BrowserActivity extends AppCompatActivity
             STYLE = "/style/style.css", PAGE = "/page.html";
     private final int CODE_OPEN = 1;
     private List<String> history = new ArrayList<String>();
-    private boolean bNomenu, bTheme, bTwo = false, boolBack = false;
+    private boolean nomenu, lightTheme, twoPointers = false, back = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private SoftKeyboard softKeyboard;
@@ -78,7 +78,7 @@ public class BrowserActivity extends AppCompatActivity
     private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = Const.LINK, string = null;
+    private String link = DataBase.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
     private Prom prom;
@@ -89,10 +89,7 @@ public class BrowserActivity extends AppCompatActivity
 
     public static void openReader(Context context, String link, @Nullable String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
-        if (link.contains(Const.LINK))
-            intent.putExtra(DataBase.LINK, link.substring(Const.LINK.length()));
-        else
-            intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(DataBase.LINK, link);
         if (place != null)
             intent.putExtra(DataBase.PLACE, place);
         if (!(context instanceof Activity))
@@ -216,7 +213,7 @@ public class BrowserActivity extends AppCompatActivity
         } else
             string = null;
         pSearch.setVisibility(View.GONE);
-        if (!bNomenu) {
+        if (!nomenu) {
             fabMenu.setVisibility(View.VISIBLE);
             fabMenu.startAnimation(anMax);
         }
@@ -251,16 +248,16 @@ public class BrowserActivity extends AppCompatActivity
         }
     }
 
-    private void downloadPage(boolean bReplaceStyle) {
+    private void downloadPage(boolean replaceStyle) {
         wvBrowser.clearCache(true);
         restoreStyle();
         loader = new LoaderTask(this);
         status.setCrash(false);
         status.setLoad(true);
-        if (bReplaceStyle)
-            loader.execute(link, DataBase.LINK, "");
+        if (replaceStyle)
+            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, link);
         else
-            loader.execute(link, DataBase.LINK);
+            loader.execute(LoaderTask.DOWNLOAD_PAGE, link);
     }
 
     private void initViews() {
@@ -289,7 +286,7 @@ public class BrowserActivity extends AppCompatActivity
         String main = MainActivity.class.getName();
         main = main.substring(main.indexOf("act"));
         SharedPreferences prMain = getSharedPreferences(main, MODE_PRIVATE);
-        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, false))
+        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, true))
             prom = new Prom(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         else {
@@ -305,8 +302,8 @@ public class BrowserActivity extends AppCompatActivity
         lib = new Lib(this);
         pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         editor = pref.edit();
-        bTheme = pref.getInt(THEME, 0) == 0;
-        if (!bTheme) //dark
+        lightTheme = pref.getInt(THEME, 0) == 0;
+        if (!lightTheme) //dark
             findViewById(R.id.content_browser).setBackgroundColor(getResources().getColor(android.R.color.black));
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
@@ -322,7 +319,7 @@ public class BrowserActivity extends AppCompatActivity
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (!bNomenu)
+                if (!nomenu)
                     fabMenu.setVisibility(View.GONE);
                 if (prom.isProm() && tvPromTime != null)
                     tvPromTime.setVisibility(View.GONE);
@@ -351,7 +348,7 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     private void onBackBrowser() {
-        boolBack = true;
+        back = true;
         openLink(history.get(0));
         history.remove(0);
     }
@@ -362,13 +359,13 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (!bNomenu && pSearch.getVisibility() == View.GONE)
+                    if (!nomenu && pSearch.getVisibility() == View.GONE)
                         fabMenu.startAnimation(anMin);
                     if (prom.isProm() && tvPromTime != null)
                         tvPromTime.startAnimation(anMin);
                 } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
                         event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    if (!bNomenu && pSearch.getVisibility() == View.GONE) {
+                    if (!nomenu && pSearch.getVisibility() == View.GONE) {
                         fabMenu.setVisibility(View.VISIBLE);
                         fabMenu.startAnimation(anMax);
                     }
@@ -379,9 +376,9 @@ public class BrowserActivity extends AppCompatActivity
                 }
                 if (android.os.Build.VERSION.SDK_INT > 18) {
                     if (event.getPointerCount() == 2) {
-                        bTwo = true;
-                    } else if (bTwo) {
-                        bTwo = false;
+                        twoPointers = true;
+                    } else if (twoPointers) {
+                        twoPointers = false;
                         wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
                     }
                 }
@@ -442,13 +439,13 @@ public class BrowserActivity extends AppCompatActivity
                 closeSearch();
             }
         });
-        if (bTheme)
+        if (lightTheme)
             setCheckItem(miTheme.getSubMenu().getItem(0), true);
         else
             setCheckItem(miTheme.getSubMenu().getItem(1), true);
         if (pref.getBoolean(NOMENU, false)) {
-            bNomenu = true;
-            setCheckItem(miNomenu, bNomenu);
+            nomenu = true;
+            setCheckItem(miNomenu, nomenu);
             fabMenu.setVisibility(View.GONE);
         }
         status.setClick(new View.OnClickListener() {
@@ -491,10 +488,10 @@ public class BrowserActivity extends AppCompatActivity
             if (loader == null)
                 downloadPage(true);
         } else if (id == R.id.nav_nomenu) {
-            bNomenu = !bNomenu;
-            setCheckItem(item, bNomenu);
-            editor.putBoolean(NOMENU, bNomenu);
-            if (bNomenu)
+            nomenu = !nomenu;
+            setCheckItem(item, nomenu);
+            editor.putBoolean(NOMENU, nomenu);
+            if (nomenu)
                 fabMenu.setVisibility(View.GONE);
             else
                 fabMenu.setVisibility(View.VISIBLE);
@@ -522,13 +519,13 @@ public class BrowserActivity extends AppCompatActivity
         } else if (id == R.id.nav_scale) {
             wvBrowser.setInitialScale((int) (100f * getResources().getDisplayMetrics().density));
         } else if (id == R.id.nav_light || id == R.id.nav_dark) {
-            if ((id == R.id.nav_light && bTheme)
-                    || (id == R.id.nav_dark && !bTheme))
+            if ((id == R.id.nav_light && lightTheme)
+                    || (id == R.id.nav_dark && !lightTheme))
                 return true;
-            bTheme = !bTheme;
-            setCheckItem(miTheme.getSubMenu().getItem(0), bTheme);
-            setCheckItem(miTheme.getSubMenu().getItem(1), !bTheme);
-            editor.putInt(THEME, (bTheme ? 0 : 1));
+            lightTheme = !lightTheme;
+            setCheckItem(miTheme.getSubMenu().getItem(0), lightTheme);
+            setCheckItem(miTheme.getSubMenu().getItem(1), !lightTheme);
+            editor.putInt(THEME, (lightTheme ? 0 : 1));
             wvBrowser.clearCache(true);
             openPage(false);
         }
@@ -566,9 +563,9 @@ public class BrowserActivity extends AppCompatActivity
         }
         if (!link.equals(url)) {
             if (!url.contains(PAGE)) {
-                if (boolBack)
-                    boolBack = false;
-                else if (!link.equals(Const.LINK))
+                if (back)
+                    back = false;
+                else if (!link.equals(DataBase.LINK)) //first value
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);
@@ -605,7 +602,7 @@ public class BrowserActivity extends AppCompatActivity
     private void downloadFile(File f) {
         loader = new LoaderTask(this);
         status.setLoad(true);
-        loader.execute(Const.SITE + link, f.toString());
+        loader.execute(LoaderTask.DOWNLOAD_FILE, Const.SITE + link, f.toString());
     }
 
     public void openPage(boolean newPage) {
@@ -616,27 +613,26 @@ public class BrowserActivity extends AppCompatActivity
             loader = new LoaderTask(this);
             status.setCrash(false);
             status.setLoad(true);
-            loader.execute("", DataBase.LINK, "");
+            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, "");
             return;
         }
         final File fStyle = lib.getFile(STYLE);
-        boolean b = true;
+        boolean replace = true;
         if (fStyle.exists()) {
-            b = (fDark.exists() && !bTheme) || (fLight.exists() && bTheme);
-            if (b) {
+            replace = (fDark.exists() && !lightTheme) || (fLight.exists() && lightTheme);
+            if (replace) {
                 if (fDark.exists())
                     fStyle.renameTo(fLight);
                 else
                     fStyle.renameTo(fDark);
             }
         }
-        if (b) {
-            if (bTheme)
+        if (replace) {
+            if (lightTheme)
                 fLight.renameTo(fStyle);
             else
                 fDark.renameTo(fStyle);
         }
-
         try {
             File file = new File(getFilesDir() + PAGE);
             String s;
@@ -666,6 +662,7 @@ public class BrowserActivity extends AppCompatActivity
                 } else {
                     //заголовка нет - значит нет и страницы
                     //сюда никогдане попадет, т.к. выше есть проверка existsPage
+                    cursor.close();
                     return;
                 }
                 cursor.close();
@@ -710,9 +707,9 @@ public class BrowserActivity extends AppCompatActivity
         }
     }
 
-    public void checkNoread() {
-        Noread noread = new Noread(BrowserActivity.this);
-        noread.deleteLink(link);
+    public void checkUnread() {
+        Unread unread = new Unread(BrowserActivity.this);
+        unread.deleteLink(link);
     }
 
     public void addJournal() {

@@ -93,8 +93,10 @@ public class MenuFragment extends Fragment {
             }
         });
         if (!isFullScreen) {
-            if (savedInstanceState != null)
+            if (savedInstanceState != null) {
+                act.setFrMenu(this);
                 iSelect = savedInstanceState.getInt(SELECT);
+            }
             adMenu.getItem(iSelect + 1).setSelect(true);
         }
         adMenu.notifyDataSetChanged();

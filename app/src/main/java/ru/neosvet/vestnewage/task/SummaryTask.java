@@ -1,22 +1,32 @@
 package ru.neosvet.vestnewage.task;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 
-public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Serializable {
+public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Serializable {
     private transient SummaryFragment frm;
     private transient MainActivity act;
 
@@ -34,13 +44,28 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
+        if (frm != null) {
+            if (values.length == 0)
+                frm.openList(false, true);
+            else
+                frm.blinkItem(values);
+        }
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+    }
+
+    @Override
+    protected void onCancelled(Boolean result) {
+        super.onCancelled(result);
+        if (frm != null) {
+            frm.finishLoad(result);
+            frm.openList(false, false);
+        }
     }
 
     @Override
@@ -61,12 +86,92 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
     protected Boolean doInBackground(Void... params) {
         try {
             downloadList();
-//            updateBook();
+            publishProgress();
+            updateBook();
+            if (isCancelled())
+                return true;
+            downloadPages();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void downloadPages() throws Exception {
+        File file = new File(act.getFilesDir() + SummaryFragment.RSS);
+        if (!file.exists()) return;
+        LoaderTask loader = new LoaderTask(act);
+        loader.initClient();
+        loader.downloadStyle(false);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String title, link, des, time;
+        List<ListItem> data = new ArrayList<ListItem>();
+        ListItem item;
+        Unread unread = new Unread(act);
+        List<String> links = unread.getList();
+        Date d;
+        while ((title = br.readLine()) != null) {
+            link = br.readLine();
+            des = br.readLine();
+            time = br.readLine();
+            if (link.contains(":"))
+                continue;
+            d = new Date(Long.parseLong(time));
+            if (unread.addLink(link, d)) {
+                item = new ListItem(title, link);
+                item.setDes(des);
+                item.addHead(time);
+                data.add(item);
+            } else if (links.contains(link))
+                publishProgress(title, link, des, time);
+        }
+        br.close();
+        unread.close();
+        for (int i = data.size() - 1; i > -1; i--) {
+            if (loader.downloadPage(data.get(i).getLink(), false)) {
+                publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
+                        data.get(i).getDes(), data.get(i).getHead(0));
+            }
+            if (isCancelled())
+                break;
+        }
+        data.clear();
+    }
+
+    private void updateBook() throws Exception {
+        File file = new File(act.getFilesDir() + SummaryFragment.RSS);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String title, link, name;
+        DataBase dataBase = null;
+        SQLiteDatabase db = null;
+        ContentValues cv;
+        Cursor cursor;
+        while ((title = br.readLine()) != null) {
+            link = br.readLine();
+            br.readLine(); //des
+            br.readLine(); //time
+            name = DataBase.getDatePage(link);
+            if (dataBase == null || !dataBase.getName().equals(name)) {
+                if (dataBase != null)
+                    dataBase.close();
+                dataBase = new DataBase(act, name);
+                db = dataBase.getWritableDatabase();
+            }
+            cursor = db.query(DataBase.TITLE, null,
+                    DataBase.LINK + DataBase.Q, new String[]{link},
+                    null, null, null);
+            if (!cursor.moveToFirst()) {
+                cv = new ContentValues();
+                cv.put(DataBase.TITLE, title);
+                cv.put(DataBase.LINK, link);
+                db.insert(DataBase.TITLE, null, cv);
+            }
+            cursor.close();
+        }
+        br.close();
+        if (dataBase != null)
+            dataBase.close();
     }
 
     public void downloadList() throws Exception {
@@ -82,11 +187,10 @@ public class SummaryTask extends AsyncTask<Void, Void, Boolean> implements Seria
                 bw.write(Const.N);
                 line = withOutTag(br.readLine()); //link
                 if (line.contains(Const.SITE2))
-                    bw.write(Const.LINK + line.substring(Const.SITE2.length()));
+                    line = line.substring(Const.SITE2.length());
                 else if (line.contains(Const.SITE))
-                    bw.write(Const.LINK + line.substring(Const.SITE.length()));
-                else
-                    bw.write(line);
+                    line = line.substring(Const.SITE.length());
+                bw.write(line);
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
                 bw.write(Const.N);

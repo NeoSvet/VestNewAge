@@ -97,15 +97,15 @@ public class SiteTask extends AsyncTask<String, Void, String> implements Seriali
         url += Const.PRINT;
         InputStream in = new BufferedInputStream(act.lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        boolean b = false;
+        boolean begin = false;
         int i, n;
         String s, d = "";
         String[] m;
         while ((line = br.readLine()) != null) {
-            if (!b) {
-                b = line.contains("h2") || line.contains("h3");//razdel
+            if (!begin) {
+                begin = line.contains("h2") || line.contains("h3");//razdel
             }
-            if (b) {
+            if (begin) {
                 if (line.contains("<h")) {
                     if (line.contains(Const.AND)) continue;
                     setDes(d);

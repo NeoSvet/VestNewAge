@@ -40,7 +40,7 @@ public class SiteFragment extends Fragment {
     private TabHost tabHost;
     private ListView lvMain;
     private int x, y, tab = 0;
-    private boolean boolNotClick = false, boolScrollToFirst = false;
+    private boolean notClick = false, scrollToFirst = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -166,7 +166,7 @@ public class SiteFragment extends Fragment {
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
-                if (boolNotClick) return;
+                if (notClick) return;
                 if (adMain.getItem(pos).getCount() == 1) {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
@@ -186,28 +186,19 @@ public class SiteFragment extends Fragment {
                     }
                 } else {
                     PopupMenu pMenu = new PopupMenu(act, view);
-                    pMenu.inflate(R.menu.menu_links);
-                    for (int i = 0; i < 5; i++) {
-                        if (i < adMain.getItem(pos).getCount())
-                            pMenu.getMenu().getItem(i).setTitle(adMain.getItem(pos).getHead(i));
-                        else
-                            pMenu.getMenu().getItem(i).setVisible(false);
+                    for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
+                        pMenu.getMenu().add(adMain.getItem(pos).getHead(i));
                     }
                     pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
-                            int index;
-                            if (item.getItemId() == R.id.link1)
-                                index = 0;
-                            else if (item.getItemId() == R.id.link2)
-                                index = 1;
-                            else if (item.getItemId() == R.id.link3)
-                                index = 2;
-                            else if (item.getItemId() == R.id.link4)
-                                index = 3;
-                            else
-                                index = 4;
-                            openPage(adMain.getItem(pos).getLink(index));
+                            String title = item.getTitle().toString();
+                            for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
+                                if (adMain.getItem(pos).getHead(i).equals(title)) {
+                                    openPage(adMain.getItem(pos).getLink(i));
+                                    break;
+                                }
+                            }
                             return true;
                         }
                     });
@@ -227,18 +218,18 @@ public class SiteFragment extends Fragment {
                         break;
                     case MotionEvent.ACTION_UP:
                         final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
-                        boolNotClick = false;
+                        notClick = false;
                         if (r > (int) (30 * getResources().getDisplayMetrics().density))
                             if (r > Math.abs(y - (int) event.getY(0))) {
                                 int t = tabHost.getCurrentTab();
                                 if (x > x2) { // next
                                     if (t < 3)
                                         tabHost.setCurrentTab(t + 1);
-                                    boolNotClick = true;
+                                    notClick = true;
                                 } else if (x < x2) { // prev
                                     if (t > 0)
                                         tabHost.setCurrentTab(t - 1);
-                                    boolNotClick = true;
+                                    notClick = true;
                                 }
                             }
                     case MotionEvent.ACTION_CANCEL:
@@ -263,11 +254,11 @@ public class SiteFragment extends Fragment {
         lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                if (scrollState == SCROLL_STATE_IDLE && scrollToFirst) {
                     if (lvMain.getFirstVisiblePosition() > 0)
                         lvMain.smoothScrollToPosition(0);
                     else
-                        boolScrollToFirst = false;
+                        scrollToFirst = false;
                 }
             }
 
@@ -278,7 +269,7 @@ public class SiteFragment extends Fragment {
         });
     }
 
-    private void openList(File f, boolean boolLoad) {
+    private void openList(File f, boolean loadIfNeed) {
         try {
             adMain.clear();
             if (act.status.checkTime(f.lastModified()))
@@ -316,12 +307,12 @@ public class SiteFragment extends Fragment {
             br.close();
             adMain.notifyDataSetChanged();
             if (lvMain.getFirstVisiblePosition() > 0) {
-                boolScrollToFirst = true;
+                scrollToFirst = true;
                 lvMain.smoothScrollToPosition(0);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (boolLoad)
+            if (loadIfNeed)
                 startLoad(tabHost.getCurrentTabTag());
         }
 

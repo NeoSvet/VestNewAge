@@ -22,9 +22,8 @@ import java.io.InputStreamReader;
 import java.util.Date;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -39,6 +38,12 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class SummaryService extends IntentService {
     private final static String CHECK_TIME = "check_time";
     private Context context;
+    public static final int notif_id = 111;
+
+    public static void cancelNotif(Context context) {
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(notif_id);
+    }
 
     public SummaryService() {
         super("Summary");
@@ -68,8 +73,8 @@ public class SummaryService extends IntentService {
 
             final String notif_text = result[0];
             final Uri notif_uri = Uri.parse(result[1]);
-            final boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
-            final boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
+            final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+            final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
             Intent app = new Intent(context, SlashActivity.class);
             app.setData(notif_uri);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -86,9 +91,11 @@ public class SummaryService extends IntentService {
                     .setContentIntent(piSummary)
                     .setLights(Color.GREEN, 1000, 1000)
                     .setAutoCancel(true);
-            if (boolSound)
+            if (result.length == 3)
+                mBuilder.setNumber(Integer.parseInt(result[2]));
+            if (sound)
                 mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-            if (boolVibr)
+            if (vibration)
                 mBuilder.setVibrate(new long[]{500, 1500});
             nm.notify(SummaryReceiver.notif_id, mBuilder.build());
         } catch (Exception e) {
@@ -98,7 +105,7 @@ public class SummaryService extends IntentService {
 
     private String[] checkSummary() throws Exception {
         Lib lib = new Lib(context);
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE2
+        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s, title, link, des;
@@ -121,13 +128,15 @@ public class SummaryService extends IntentService {
         int count_new = 0;
         String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        Noread noread = new Noread(context);
+        Unread unread = new Unread(context);
         Date d;
+        LoaderTask loader = new LoaderTask(context);
+        loader.initClient();
         do {
             d = new Date(Date.parse(s));
-            if (noread.addLink(link, d)) {
+            if (unread.addLink(link, d)) {
                 count_new++;
-                downloadPage(link);
+                loader.downloadPage(link, true);
             }
             bw.write(title);
             bw.write(Const.N);
@@ -146,17 +155,13 @@ public class SummaryService extends IntentService {
         } while (s != null);
         bw.close();
         br.close();
-        noread.setBadge();
-        noread.close();
+        unread.setBadge();
+        unread.close();
         if (count_new > 1) {
-            result = new String[]{context.getResources().getString(R.string.appeared_new_some), Const.SITE + SummaryFragment.RSS};
+            result = new String[]{context.getResources().getString(R.string.appeared_new_some),
+                    Const.SITE + SummaryFragment.RSS, Integer.toString(count_new)};
         }
         return result;
-    }
-
-    private void downloadPage(String link) {
-        LoaderTask loader = new LoaderTask(context);
-        loader.execute(link, DataBase.LINK);
     }
 
     private String withOutTag(String s) {

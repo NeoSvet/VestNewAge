@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ public class ListAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
     private List<ListItem> data = new ArrayList<ListItem>();
+    private boolean animation = false;
 
     public ListAdapter(Context context) {
         this.context = context;
@@ -58,12 +60,12 @@ public class ListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         //if (convertView == null) {
         TextView tv;
-        boolean b = false;
+        boolean isItemList = false;
         if (data.get(position).getLink().equals("#"))
             convertView = inflater.inflate(R.layout.item_title, null);
         else if (data.get(position).getDes().equals("")) {
             convertView = inflater.inflate(R.layout.item_list, null);
-            b = true;
+            isItemList = true;
         } else {
             convertView = inflater.inflate(R.layout.item_detail, null);
             tv = (TextView) convertView.findViewById(R.id.des_item);
@@ -77,13 +79,21 @@ public class ListAdapter extends BaseAdapter {
         //}
         tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
-        if (data.get(position).getLink().equals("@") && b)
+        if (data.get(position).getLink().equals("@") && isItemList)
             tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         if (data.get(position).isSelect())
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
         else
             convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+        if (animation) {
+            convertView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
+            animation = false;
+        }
         return convertView;
+    }
+
+    public void setAnimation(boolean animation) {
+        this.animation = animation;
     }
 }
 

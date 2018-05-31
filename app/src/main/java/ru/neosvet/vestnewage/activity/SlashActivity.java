@@ -21,6 +21,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,10 +31,9 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Noread;
+import ru.neosvet.utils.Unread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.CalendarFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
@@ -41,7 +42,7 @@ import ru.neosvet.vestnewage.task.CalendarTask;
 public class SlashActivity extends AppCompatActivity {
     private Intent main;
     private StatusBar status;
-    private boolean boolAnim = true;
+    private boolean animation = true;
     private CalendarTask task = null;
     public Lib lib;
 
@@ -64,15 +65,48 @@ public class SlashActivity extends AppCompatActivity {
         prom.synchronTime(null);
 
         int ver = lib.getPreviosVer();
+        if (ver < 21) {
+            SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+            int p = pref.getInt(SettingsFragment.TIME, -1);
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+            if (p == -1)
+                notifHelp(getResources().getString(R.string.new_option_notif), intent);
+            else {
+                pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
+                p = pref.getInt(SettingsFragment.TIME, -1);
+                if (p == -1)
+                    notifHelp(getResources().getString(R.string.new_option_notif), intent);
+            }
+        }
+        if (ver == 0) return;
         if (ver < 10)
             adapterNewVersion();
-        if (ver == 0) return;
+        if (ver < 21)
+            adapterNewVersion2();
         if (ver < 13)
             notifNewOption(getResources().getString(R.string.new_option_menu));
         if (ver < 19) {
             notifNewOption(getResources().getString(R.string.new_option_counting));
             rebuildNotif();
         }
+    }
+
+    private void adapterNewVersion2() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File folder = new File(getFilesDir() + "/calendar/");
+                    if (folder.exists()) {
+                        for (File file : folder.listFiles())
+                            file.delete();
+                        folder.delete();
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
     private void rebuildNotif() {
@@ -84,6 +118,33 @@ public class SlashActivity extends AppCompatActivity {
         p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
             PromReceiver.setReceiver(this, p);
+    }
+
+    private void notifHelp(String msg, Intent intent) {
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String submsg = null;
+        if (msg.length() > 46) {
+            int i = 46;
+            while (!msg.substring(i, i + 1).equals(" "))
+                i--;
+            submsg = msg.substring(i + 1);
+            msg = msg.substring(0, i);
+        } else if (msg.length() > 39)
+            submsg = "";
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.star)
+                .setContentTitle(getResources().getString(R.string.are_you_know))
+                .setContentText(msg)
+                .setTicker(msg)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(piMain)
+                .setFullScreenIntent(piEmpty, true)
+                .setAutoCancel(true);
+        if (submsg != null)
+            mBuilder.setSubText(submsg);
+        nm.notify(998, mBuilder.build());
     }
 
     private void notifNewOption(String msg) {
@@ -117,16 +178,16 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    File file = new File(getFilesDir() + File.separator + Noread.NAME);
+                    File file = new File(getFilesDir() + File.separator + Unread.NAME);
                     if (file.exists())
                         file.delete();
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
-                    if (!pref.getString(Noread.NAME, "").equals("")) {
+                    if (!pref.getString(Unread.NAME, "").equals("")) {
                         SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(Noread.NAME, "");
+                        editor.putString(Unread.NAME, "");
                         editor.apply();
-                        file = new File(getFilesDir() + File.separator + Noread.NAME);
+                        file = new File(getFilesDir() + File.separator + Unread.NAME);
                         if (file.exists())
                             file.delete();
                     }
@@ -267,20 +328,26 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
         Date dCurrent = new Date();
-        File file = new File(getFilesDir() + CalendarFragment.FOLDER +
-                dCurrent.getMonth() + "." + dCurrent.getYear());
-        if (file.exists())
-            if (System.currentTimeMillis() - file.lastModified() > 3600000) {
-                task = new CalendarTask(this);
-                Date d = new Date();
-                task.execute(d.getYear(), d.getMonth(), 1);
-            }
+        DateFormat df = new SimpleDateFormat("MM.yy");
+        DataBase dataBase = new DataBase(SlashActivity.this, df.format(dCurrent));
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        long time = 0;
+        if (cursor.moveToFirst())
+            time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
+        if (System.currentTimeMillis() - time > 3600000) {
+            task = new CalendarTask(this);
+            Date d = new Date();
+            task.execute(d.getYear(), d.getMonth(), 1);
+        }
+        cursor.close();
+        dataBase.close();
     }
 
     public void finishLoad() {
         main.putExtra(MainActivity.CUR_ID, R.id.nav_calendar);
         task = null;
-        if (!boolAnim) {
+        if (!animation) {
             startActivity(main);
             finish();
         }
@@ -304,7 +371,7 @@ public class SlashActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                boolAnim = false;
+                SlashActivity.this.animation = false;
                 if (task == null) {
                     startActivity(main);
                     finish();

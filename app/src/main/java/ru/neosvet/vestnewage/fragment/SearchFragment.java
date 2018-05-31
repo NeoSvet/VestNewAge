@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -59,7 +60,8 @@ import ru.neosvet.vestnewage.task.SearchTask;
 
 
 public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
-    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l";
+    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
+            LAST_RESULTS = "r";
     private final DateFormat df = new SimpleDateFormat(" yyyy");
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
@@ -83,7 +85,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private String string;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
-    private boolean boolScrollToFirst = false;
+    private boolean scrollToFirst = false;
 
     public void setString(String s) {
         string = s;
@@ -150,6 +152,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 startSearch();
             }
         } else {
+            act.setFrSearch(this);
             dStart = new Date(state.getLong(START));
             dEnd = new Date(state.getLong(END));
             task = (SearchTask) state.getSerializable(Const.TASK);
@@ -192,7 +195,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
-                        Const.LINK));
+                        LAST_RESULTS));
                 adResults.notifyDataSetChanged();
             }
         }
@@ -291,7 +294,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (task != null) return;
-                if (adResults.getItem(pos).getLink().equals(Const.LINK)) { //results_last_search
+                if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
                     fabSettings.setVisibility(View.GONE);
                     bShow.setVisibility(View.VISIBLE);
                     page = 0;
@@ -369,11 +372,11 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         lvResult.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && boolScrollToFirst) {
+                if (scrollState == SCROLL_STATE_IDLE && scrollToFirst) {
                     if (lvResult.getFirstVisiblePosition() > 0)
                         lvResult.smoothScrollToPosition(0);
                     else
-                        boolScrollToFirst = false;
+                        scrollToFirst = false;
                 }
             }
 
@@ -434,7 +437,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     @Override
-    public void putDate(Date date) {
+    public void putDate(@Nullable Date date) {
         if (date == null) { // cancel
             dialog = -1;
             return;
@@ -465,14 +468,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             mode = sMode.getSelectedItemPosition();
         task.execute(s, String.valueOf(mode),
                 df.format(dStart), df.format(dEnd));
-        boolean b = true;
+        boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
             if (adSearch.getItem(i).equals(s)) {
-                b = false;
+                needAdd = false;
                 break;
             }
         }
-        if (b) {
+        if (needAdd) {
             adSearch.add(s);
             adSearch.notifyDataSetChanged();
             File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
@@ -543,7 +546,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             for (int i = 1; i < max + 1; i++) {
                 adPages.addItem(new CalendarItem(act, i, android.R.color.white));
             }
-            adPages.getItem(page).addLink(Const.LINK);
+            adPages.getItem(page).addLink(Const.SITE); //add any link for mark (border) of current page
             rvPages.setAdapter(adPages);
             if (cursor.moveToPosition(page * Const.MAX_ON_PAGE)) {
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
@@ -560,7 +563,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 } while (cursor.moveToNext() && adResults.getCount() < Const.MAX_ON_PAGE);
                 adResults.notifyDataSetChanged();
                 if (lvResult.getFirstVisiblePosition() > 0) {
-                    boolScrollToFirst = true;
+                    scrollToFirst = true;
                     lvResult.smoothScrollToPosition(0);
                 }
             }

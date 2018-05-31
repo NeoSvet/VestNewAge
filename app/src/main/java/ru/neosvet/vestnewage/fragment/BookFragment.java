@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,7 +20,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -33,6 +33,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.DateDialog;
 import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
@@ -56,15 +57,15 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
     private TextView tvDate;
     private DateDialog dateDialog;
-    private AlertDialog alertRnd;
+    private CustomDialog alertRnd;
     private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
     private int x, y, tab = 0;
     private Tip menuRnd;
     private String dialog = "";
-    private boolean boolNotClick = false, boolOtkr;
-    private Date dKat, dPos;
+    private boolean notClick = false, fromOtkr;
+    private Date dKatren, dPoslanie;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     final Handler hTimer = new Handler(new Handler.Callback() {
@@ -102,9 +103,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void restoreActivityState(Bundle state) {
         Date d = new Date();
         d.setYear(100);
-        dKat = new Date(pref.getLong(KAT, d.getTime()));
-        dPos = new Date(pref.getLong(POS, d.getTime()));
-        boolOtkr = pref.getBoolean(OTKR, false);
+        dKatren = new Date(pref.getLong(KAT, d.getTime()));
+        dPoslanie = new Date(pref.getLong(POS, d.getTime()));
+        fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
             task = (BookTask) state.getSerializable(Const.TASK);
@@ -169,31 +170,31 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         });
     }
 
-    private void openList(boolean boolLoad) {
+    private void openList(boolean loadIfNeed) {
         try {
             Date d;
-            boolean bKat;
+            boolean katren;
             if (tab == 0) {
-                d = dKat;
-                bKat = true;
+                d = dKatren;
+                katren = true;
             } else {
-                d = dPos;
-                bKat = false;
+                d = dPoslanie;
+                katren = false;
             }
-            if (!existsList(d, bKat)) {
-                if (boolLoad)
+            if (!existsList(d, katren)) {
+                if (loadIfNeed)
                     startLoad();
                 return;
             }
             adBook.clear();
             tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
                     + "\n" + (d.getYear() + 1900));
-            if (d.getMonth() == 0 && d.getYear() == 116 && !boolOtkr)
+            if (d.getMonth() == 0 && d.getYear() == 116 && !fromOtkr)
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(true);
             else
-                ivPrev.setEnabled(existsList(setDate(d, -1), bKat));
-            ivNext.setEnabled(existsList(setDate(d, 1), bKat));
+                ivPrev.setEnabled(existsList(setDate(d, -1), katren));
+            ivNext.setEnabled(existsList(setDate(d, 1), katren));
 
             DataBase dataBase = new DataBase(act, df.format(d));
             SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -204,7 +205,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                 if (d.getYear() > 115) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
-                    if (bKat) { // катрены
+                    if (katren) { // катрены
                         cursor = db.query(DataBase.TITLE, null,
                                 DataBase.LINK + DataBase.LIKE,
                                 new String[]{"%" + Const.POEMS + "%"}
@@ -241,7 +242,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             Date n = new Date();
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
                 //если выбранный месяц - текущий
-                bKat = act.status.checkTime(dModList.getTime());
+                katren = act.status.checkTime(dModList.getTime());
             } else {
                 //если выбранный месяц - предыдущий, то проверяем когда список был обновлен
                 if ((d.getMonth() == n.getMonth() - 1 && d.getYear() == n.getYear()) ||
@@ -249,11 +250,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     if (dModList.getMonth() != n.getMonth())
                         act.status.checkTime(dModList.getTime());
                     else
-                        bKat = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+                        katren = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
                 } else
-                    bKat = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
+                    katren = act.status.checkTime(System.currentTimeMillis()); //hide "ref?"
             }
-            if (bKat)
+            if (katren)
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
@@ -261,12 +262,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             lvBook.smoothScrollToPosition(0);
         } catch (Exception e) {
             e.printStackTrace();
-            if (boolLoad)
+            if (loadIfNeed)
                 startLoad();
         }
     }
 
-    private boolean existsList(Date d, boolean bKat) {
+    private boolean existsList(Date d, boolean katren) {
         if (d.getYear() == 100) return false; //def year
         DataBase dataBase = new DataBase(act, df.format(d));
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -277,8 +278,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0);
-                if ((s.contains(Const.POEMS) && bKat) ||
-                        (!s.contains(Const.POEMS) && !bKat)) {
+                if ((s.contains(Const.POEMS) && katren) ||
+                        (!s.contains(Const.POEMS) && !katren)) {
                     cursor.close();
                     return true;
                 }
@@ -291,8 +292,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     @Override
     public void onPause() {
         super.onPause();
-        editor.putLong(KAT, dKat.getTime());
-        editor.putLong(POS, dPos.getTime());
+        editor.putLong(KAT, dKatren.getTime());
+        editor.putLong(POS, dPoslanie.getTime());
         editor.apply();
     }
 
@@ -339,7 +340,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         lvBook.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
-                if (boolNotClick) return;
+                if (notClick) return;
                 BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), null);
             }
         });
@@ -358,17 +359,17 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                         break;
                     case MotionEvent.ACTION_UP:
                         final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
-                        boolNotClick = false;
+                        notClick = false;
                         if (r > (int) (30 * getResources().getDisplayMetrics().density))
                             if (r > Math.abs(y - (int) event.getY(0))) {
                                 if (x > x2) { // next
                                     if (ivNext.isEnabled())
                                         openMonth(1);
-                                    boolNotClick = true;
+                                    notClick = true;
                                 } else if (x < x2) { // prev
                                     if (ivPrev.isEnabled())
                                         openMonth(-1);
-                                    boolNotClick = true;
+                                    notClick = true;
                                 }
                             }
                     case MotionEvent.ACTION_CANCEL:
@@ -429,7 +430,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void openMonth(int v) {
         if (task == null) {
             if (v == -1 && tab == 1) {
-                if (dPos.getMonth() == 0 && dPos.getYear() == 116 && !boolOtkr) {
+                if (dPoslanie.getMonth() == 0 && dPoslanie.getYear() == 116 && !fromOtkr) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                     builder.setMessage(getResources().getString(R.string.alert_download_otkr));
                     builder.setNegativeButton(getResources().getString(R.string.no),
@@ -464,9 +465,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     private void setDate(int i) {
         if (tab == 0)
-            dKat = setDate(dKat, i);
+            dKatren = setDate(dKatren, i);
         else
-            dPos = setDate(dPos, i);
+            dPoslanie = setDate(dPoslanie, i);
     }
 
     private Date setDate(Date d, int i) {
@@ -488,7 +489,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         fabRefresh.setVisibility(View.GONE);
         fabRndMenu.setVisibility(View.GONE);
         task = new BookTask(this);
-        task.execute(tab, (boolOtkr ? 1 : 0));
+        task.execute(tab, (fromOtkr ? 1 : 0));
         act.status.setLoad(true);
     }
 
@@ -499,14 +500,14 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         if (result.length() > 0) {
             Date d;
             if (tab == 0)
-                d = dKat;
+                d = dKatren;
             else
-                d = dPos;
+                d = dPoslanie;
             if (result.length() == 6) { //значит была загрузка с сайта Откровений
                 if (result.substring(5).equals("0")) // загрузка не была завершена
                     return;
-                boolOtkr = true;
-                editor.putBoolean(OTKR, boolOtkr);
+                fromOtkr = true;
+                editor.putBoolean(OTKR, fromOtkr);
                 result = result.substring(0, 5);
                 d.setYear(100);
             }
@@ -519,9 +520,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
                 if (tab == 0)
-                    dKat = d;
+                    dKatren = d;
                 else
-                    dPos = d;
+                    dPoslanie = d;
             }
             if (existsList(d, tab == 0)) {
                 openList(false);
@@ -544,15 +545,15 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void showDatePicker() {
         Date d;
         if (tab == 0)
-            d = dKat;
+            d = dKatren;
         else
-            d = dPos;
+            d = dPoslanie;
         dateDialog = new DateDialog(act, d);
         dateDialog.setResult(BookFragment.this);
         if (tab == 0) { //katreny
             dateDialog.setMinMonth(1); //feb
         } else { //poslyania
-            if (boolOtkr) {
+            if (fromOtkr) {
                 dateDialog.setMinMonth(7); //aug
                 dateDialog.setMinYear(104); //2004
             }
@@ -563,14 +564,14 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     @Override
-    public void putDate(Date date) {
+    public void putDate(@Nullable Date date) {
         dialog = "";
         if (date == null) //cancel
             return;
         if (tab == 0)
-            dKat = date;
+            dKatren = date;
         else
-            dPos = date;
+            dPoslanie = date;
         openList(true);
     }
 
@@ -584,7 +585,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             m = 2;
             y = 16;
         } else {
-            if (boolOtkr) {
+            if (fromOtkr) {
                 m = 8;
                 y = 4;
             } else {
@@ -677,7 +678,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 title = msg;
                 msg = s;
             }
-            curTitle.close();
             dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
             showRndAlert(title, link, msg, s, n);
             //добавляем в журнал:
@@ -691,28 +691,14 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             dbJournal.close();
         } else
             Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+        curTitle.close();
     }
 
     private void showRndAlert(String title, final String link, String msg, final String place, final int par) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(title);
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setText(msg);
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(R.string.in_markers));
-        button.setVisibility(View.VISIBLE);
-        alertRnd = builder.create();
-        alertRnd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                dialog = "";
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
+        alertRnd = new CustomDialog(act);
+        alertRnd.setTitle(title);
+        alertRnd.setMessage(msg);
+        alertRnd.setLeftButton(getResources().getString(R.string.in_markers), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent marker = new Intent(act, MarkerActivity.class);
@@ -722,15 +708,18 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 alertRnd.dismiss();
             }
         });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(R.string.open));
-        button.setOnClickListener(new View.OnClickListener() {
+        alertRnd.setRightButton(getResources().getString(R.string.open), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BrowserActivity.openReader(act, link, place);
                 alertRnd.dismiss();
             }
         });
-        alertRnd.show();
+        alertRnd.show(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                dialog = "";
+            }
+        });
     }
 }

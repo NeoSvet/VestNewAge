@@ -25,6 +25,7 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
@@ -71,6 +72,7 @@ public class CabmainFragment extends Fragment {
             }
             loginList();
         } else {
+            act.setFrCabinet(this);
             cookie = state.getString(Const.COOKIE);
             task = (CabTask) state.getSerializable(Const.TASK);
             if (task != null) {
@@ -87,7 +89,7 @@ public class CabmainFragment extends Fragment {
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
-            for (String t : state.getStringArray(Const.LINK)) {
+            for (String t : state.getStringArray(DataBase.LINK)) {
                 if (t.contains("#")) {
                     d = t.substring(t.indexOf("#") + 1);
                     t = t.substring(0, t.indexOf("#"));
@@ -111,7 +113,7 @@ public class CabmainFragment extends Fragment {
             d = adMain.getItem(i).getDes();
             m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
         }
-        outState.putStringArray(Const.LINK, m);
+        outState.putStringArray(DataBase.LINK, m);
         super.onSaveInstanceState(outState);
     }
 
@@ -139,7 +141,7 @@ public class CabmainFragment extends Fragment {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.status.isVis()) return;
+                if (act.status.isVisible()) return;
                 if (mode_list == LOGIN) { //до кабинета
                     String s;
                     switch (pos) {
@@ -204,12 +206,12 @@ public class CabmainFragment extends Fragment {
     private void setViews() {
         TextWatcher textWatcher = new TextWatcher() {
             public void afterTextChanged(Editable s) {
-                boolean b = false;
+                boolean ready = false;
                 if (etEmail.length() > 5 && etPassword.length() > 5) {
-                    b = (etEmail.getText().toString().contains("@")
+                    ready = (etEmail.getText().toString().contains("@")
                             && etEmail.getText().toString().contains("."));
                 }
-                if (b) { //ready to login
+                if (ready) { //ready to login
                     fabEnter.setVisibility(View.VISIBLE);
                 } else {
                     fabEnter.setVisibility(View.GONE);

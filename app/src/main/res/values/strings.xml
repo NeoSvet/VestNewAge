@@ -6,11 +6,22 @@
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
     <string name="download_title">Загрузить&#8230;</string>
     <string name="download_all">Загрузить все материалы</string>
-    <string name="download_it">Загрузить весь данный раздел</string>
+    <string name="download_it_main">Загрузить все статьи</string>
+    <string name="download_it_book">Загрузить книгу с 2016 года</string>
+    <string name="download_it_calendar">Загрузить текущий год</string>
+    <string name="new_item">[Новое]</string>
+    <!--Dialog-->
+    <string name="delete">Удалить?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="new_name">Новое название</string>
+    <string name="open_link">Открыть ссылку</string>
     <!--New option-->
     <string name="new_option">Появилась новая опция!</string>
     <string name="new_option_menu">«Меню на весь экран» (для смартфонов)</string>
     <string name="new_option_counting">«Переместить отсчёт времени до Посыла в меню»</string>
+    <string name="are_you_know">А вы знали?</string>
+    <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
     <!--Lib-->
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
@@ -31,12 +42,6 @@
     <string name="empty_list">Список пуст</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="no_list">Список ещё не загружен</string>
-    <string name="open_link">Открыть ссылку</string>
-    <string name="link1">Первая ссылка</string>
-    <string name="link2">Вторая ссылка</string>
-    <string name="link3">Третья ссылка</string>
-    <string name="link4">Четвертая ссылка</string>
-    <string name="link5">Пятая ссылка</string>
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
@@ -57,11 +62,7 @@
     <string name="dark">Темное</string>
     <!--CollectionsFragment-->
     <string name="not_found_page">Страница не найдена</string>
-    <string name="delete">Удалить?</string>
-    <string name="yes">Да</string>
-    <string name="no">Нет</string>
     <string name="collections">Подборки</string>
-    <string name="new_name">Новое название</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
     <string name="nothing_edit">Редактировать нечего!</string>
@@ -162,9 +163,8 @@
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
-    <string name="changelog">Список изменений:</string>
+    <string name="changelog">Список изменений</string>
     <string name="current_version">Текущая версия:&#160;</string>
-    <string name="version">Версия&#160;</string>
     <string name="write_to_dev">Написать разработчику</string>
     <!--PresentationActivity-->
     <string name="next">Далее</string>

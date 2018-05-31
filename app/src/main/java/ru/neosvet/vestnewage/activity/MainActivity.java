@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
     private MenuFragment frMenu;
     private CalendarFragment frCalendar;
+    private SummaryFragment frSummary;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
     private SearchFragment frSearch;
@@ -57,23 +59,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Tip menuDownload;
     private NavigationView navigationView;
     private DrawerLayout drawer;
-    private View bDownloadIt;
+    private TextView bDownloadIt;
     public StatusBar status;
     private Prom prom;
+    private SharedPreferences pref;
     private int cur_id, tab = 0, statusBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
+        pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
         boolean isTablet = false;
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
             isMenuMode = pref.getBoolean(MENU_MODE, false);
         else
             isTablet = true;
 
-        if(isMenuMode)
+        if (isMenuMode)
             setContentView(R.layout.main_activity_nomenu);
         else
             setContentView(R.layout.main_activity);
@@ -83,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         initInterface();
 
-        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, false);
+        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
         if (isTablet) {
             if (!isCountInMenu)
                 prom = new Prom(this, findViewById(R.id.tvPromTime));
@@ -142,16 +145,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
-                loader.execute();
+                loader.execute(LoaderTask.DOWNLOAD_ALL);
             }
         });
-        bDownloadIt = findViewById(R.id.bDownloadIt);
+        bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
         bDownloadIt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
-                loader.execute(String.valueOf(cur_id));
+                if (cur_id == R.id.nav_calendar) {
+                    loader.execute(LoaderTask.DOWNLOAD_YEAR, String.valueOf(frCalendar.getCurrentYear()));
+                } else
+                    loader.execute(LoaderTask.DOWNLOAD_ID, String.valueOf(cur_id));
             }
         });
 
@@ -218,6 +224,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.frCalendar = frCalendar;
     }
 
+    public void setFrSummary(SummaryFragment frSummary) {
+        this.frSummary = frSummary;
+    }
+
+    public void setFrMenu(MenuFragment frMenu) {
+        this.frMenu = frMenu;
+    }
+
+    public void setFrCabinet(CabmainFragment frCabinet) {
+        this.frCabinet = frCabinet;
+    }
+
+    public void setFrSearch(SearchFragment frSearch) {
+        this.frSearch = frSearch;
+    }
+
     public void setFrCollections(CollectionsFragment frCollections) {
         this.frCollections = frCollections;
     }
@@ -245,7 +267,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (isCountInMenu) prom.show();
                 break;
             case R.id.nav_rss:
-                fragmentTransaction.replace(R.id.my_fragment, new SummaryFragment());
+                frSummary = new SummaryFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frSummary);
                 break;
             case R.id.nav_main:
                 SiteFragment frSite = new SiteFragment();
@@ -337,6 +360,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (frCalendar != null) {
             if (frCalendar.onBackPressed())
                 exit();
+        } else if (frSummary != null) {
+            if (frSummary.onBackPressed())
+                exit();
         } else if (frCollections != null) {
             if (frCollections.onBackPressed())
                 exit();
@@ -380,10 +406,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuDownload.isShow())
             menuDownload.hide();
         else {
-            if (cur_id == R.id.nav_rss || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar || cur_id == R.id.nav_book)
-                bDownloadIt.setVisibility(View.VISIBLE);
-            else
-                bDownloadIt.setVisibility(View.GONE);
+            switch (cur_id) {
+                case R.id.nav_main:
+                    bDownloadIt.setVisibility(View.VISIBLE);
+                    bDownloadIt.setText(getResources().getString(R.string.download_it_main));
+                    break;
+                case R.id.nav_calendar:
+                    bDownloadIt.setVisibility(View.VISIBLE);
+                    bDownloadIt.setText(getResources().getString(R.string.download_it_calendar));
+                    break;
+                case R.id.nav_book:
+                    bDownloadIt.setVisibility(View.VISIBLE);
+                    bDownloadIt.setText(getResources().getString(R.string.download_it_book));
+                    break;
+                default:
+                    bDownloadIt.setVisibility(View.GONE);
+            }
             menuDownload.show();
         }
     }

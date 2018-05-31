@@ -3,14 +3,14 @@ package ru.neosvet.ui;
 public class MenuItem {
     private String title;
     private int image;
-    private boolean boolSelect = false;
+    private boolean select = false;
 
     public boolean isSelect() {
-        return boolSelect;
+        return select;
     }
 
-    public void setSelect(boolean boolSelect) {
-        this.boolSelect = boolSelect;
+    public void setSelect(boolean select) {
+        this.select = select;
     }
 
     public int getImage() {

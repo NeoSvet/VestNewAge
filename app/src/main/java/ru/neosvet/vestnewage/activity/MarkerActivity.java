@@ -55,12 +55,10 @@ public class MarkerActivity extends AppCompatActivity {
     private SoftKeyboard softKeyboard;
     private int id, heightList, k_par;
     private byte modeList = 0;
-    private boolean boolPosVis = false;
+    private boolean posVisible = false;
 
     public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
-        if (link.contains(Const.LINK))
-            link = link.substring(Const.LINK.length());
         marker.putExtra(DataBase.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
@@ -260,7 +258,7 @@ public class MarkerActivity extends AppCompatActivity {
                 pPos.getLayoutParams().height = (int) (height_pos * density);
                 pPos.requestLayout();
                 pPos.setVisibility(View.VISIBLE);
-                boolPosVis = true;
+                posVisible = true;
             }
         } else if (id < 0) { //add marker mode
             tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
@@ -326,8 +324,8 @@ public class MarkerActivity extends AppCompatActivity {
                     b.append(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
                     b.append(", ");
                 }
+                cursor.close();
             }
-            cursor.close();
             dbMarker.close();
             b.delete(b.length() - 2, b.length());
             setColList(b.toString());
@@ -413,7 +411,7 @@ public class MarkerActivity extends AppCompatActivity {
                     float pos = Float.parseFloat(s.replace(",", "."));
                     sbPos.setProgress((int) (pos * 10));
                     setPosText(pos);
-                    boolPosVis = true;
+                    posVisible = true;
                     fabHelp.setVisibility(View.GONE);
                     pPos.setVisibility(View.VISIBLE);
                     ResizeAnim anim = new ResizeAnim(pPos, false,
@@ -426,8 +424,8 @@ public class MarkerActivity extends AppCompatActivity {
         });
         sbPos.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                float f = i / 10f;
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float f = progress / 10f;
                 tvPos.setText(String.format("%.1f", f) + "% \n" +
                         getResources().getString(R.string.stop_for_text));
 
@@ -462,7 +460,7 @@ public class MarkerActivity extends AppCompatActivity {
         fabOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (boolPosVis) {
+                if (posVisible) {
                     float pos = sbPos.getProgress() / 10f;
                     tvSel.setText(getResources().getString(R.string.sel_pos) +
                             String.format("%.1f", pos) + "%");
@@ -710,11 +708,11 @@ public class MarkerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (modeList > 0 || boolPosVis) {
+        if (modeList > 0 || posVisible) {
             View v;
-            if (boolPosVis) {
+            if (posVisible) {
                 v = pPos;
-                boolPosVis = false;
+                posVisible = false;
             } else {
                 v = lvList;
                 modeList = 0;

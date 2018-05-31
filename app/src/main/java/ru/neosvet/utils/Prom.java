@@ -11,20 +11,20 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -32,8 +32,8 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom = 11;
-    private static final String TIMEPROM = "timeprom";
+    public static final int notif_id = 222, hour_prom1 = 8, hour_prom2 = 11;
+    private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -41,13 +41,13 @@ public class Prom {
     private Lib lib;
     private SharedPreferences pref;
 
-    public Prom(Context context, View textView) {
+    public Prom(Context context, @Nullable View textView) {
         this.context = context;
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
-            long t = getPromDate().getTime() - System.currentTimeMillis();
-            if (t > 39600000) // today prom was been (>11 hours)
+            long t = getPromDate(false).getTime() - System.currentTimeMillis();
+            if (t > 39600000) // today prom was been
                 return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
@@ -139,35 +139,27 @@ public class Prom {
         return tvPromTime != null;
     }
 
-    public Date getPromDate() {
-        long timeprom = pref.getLong(TIMEPROM, 0);
-        long now;
-        if (timeprom > 0) {
-            now = System.currentTimeMillis();
-            while (timeprom < now)
-                timeprom += 86400000; //+24 hours
-        } else {
-            Date d = getMoscowDate();
-            now = d.getTime();
-            d.setHours(hour_prom); // prom time
-            d.setMinutes(0);
-            d.setSeconds(0);
-            timeprom = d.getTime();
-            if (timeprom < now)
-                timeprom += 86400000; //+24 hours
-            timeprom = System.currentTimeMillis() + timeprom - now;
+    public Date getPromDate(boolean next) {
+        int timeDiff = pref.getInt(TIMEDIFF, 0);
+        // Moscow getTimezoneOffset=-180
+        Date prom = new Date(System.currentTimeMillis() - timeDiff);
+        prom.setMinutes(prom.getTimezoneOffset()); //remove timezone
+        prom.setSeconds(0);
+        if (next) {
+            if (prom.getHours() < hour_prom1)
+                prom.setHours(hour_prom1);
+            else if (prom.getHours() < hour_prom2)
+                prom.setHours(hour_prom2);
         }
-        return new Date(timeprom);
-    }
-
-    private Date getMoscowDate() {
-        Date d = new Date();
-        // Moscow getTimezoneOffset == -180
-        if (d.getTimezoneOffset() != -180) {
-            d.setMinutes(d.getMinutes() +
-                    d.getTimezoneOffset() + 180);
-        }
-        return d;
+        if (prom.getHours() >= hour_prom1) {
+            if (prom.getHours() >= hour_prom2) {
+                prom.setHours(hour_prom1 + 24);
+            } else
+                prom.setHours(hour_prom2);
+        } else
+            prom.setHours(hour_prom1);
+        prom.setMinutes(-prom.getTimezoneOffset()); //return timezone
+        return prom;
     }
 
     private void setPromTime() {
@@ -208,7 +200,7 @@ public class Prom {
     }
 
     public String getPromText() {
-        String t = lib.getDiffDate(getPromDate().getTime(), System.currentTimeMillis());
+        String t = lib.getDiffDate(getPromDate(false).getTime(), System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
@@ -259,42 +251,39 @@ public class Prom {
         return t;
     }
 
-    public void synchronTime(final Handler action) {
+    public void synchronTime(@Nullable final Handler action) {
         if (action == null) {
-            if (pref.getLong(TIMEPROM, 0) > 0)
+            if (pref.getInt(TIMEDIFF, 0) > 0)
                 return;
         }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    InputStream in = new BufferedInputStream(lib.getStream(Const.SITE));
-                    BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        if (line.contains("timeleft")) {
-                            line = br.readLine();
-                            break;
-                        }
+                    Request.Builder builderRequest = new Request.Builder();
+                    builderRequest.url(Const.SITE2);
+                    builderRequest.header(Const.USER_AGENT, context.getPackageName());
+                    OkHttpClient client = lib.createHttpClient();
+                    Response response = client.newCall(builderRequest.build()).execute();
+                    String s = response.headers().value(1);
+                    long timeServer = Date.parse(s);
+                    response.close();
+
+                    int timeDiff = (int) (System.currentTimeMillis() - timeServer);
+                    if (timeDiff != pref.getInt(TIMEDIFF, 0)) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putInt(TIMEDIFF, timeDiff);
+                        editor.apply();
+                        int t = pref.getInt(SettingsFragment.TIME, -1);
+                        if (t > -1)
+                            PromReceiver.setReceiver(context, t);
                     }
-                    br.close();
-                    if (line != null) {
-                        long timeprom = System.currentTimeMillis();
-                        timeprom -= timeprom % 1000;
-                        int timeleft = Integer.parseInt(line.substring(line.indexOf("=") + 1, line.indexOf(";")));
-                        timeprom += timeleft * 1000;
-                        if (timeprom != pref.getLong(TIMEPROM, 0)) {
-                            int t = pref.getInt(SettingsFragment.TIME, -1);
-                            if (t > -1)
-                                PromReceiver.setReceiver(context, t);
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putLong(TIMEPROM, timeprom);
-                            editor.apply();
-                        }
-                        if (action != null)
-                            action.sendEmptyMessage(timeleft);
-                        return;
+                    if (action != null) {
+                        Date d = getPromDate(false);
+                        timeDiff = (int) (d.getTime() - System.currentTimeMillis());
+                        action.sendEmptyMessage(timeDiff);
                     }
+                    return;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -309,8 +298,8 @@ public class Prom {
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
             return;
-        boolean boolSound = pref.getBoolean(SettingsFragment.SOUND, false);
-        boolean boolVibr = pref.getBoolean(SettingsFragment.VIBR, true);
+        boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+        boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
         Intent intent = new Intent(context, SlashActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -331,9 +320,9 @@ public class Prom {
                 .setContentIntent(piProm)
                 .setLights(Color.GREEN, 1000, 1000)
                 .setAutoCancel(true);
-        if (boolSound)
+        if (sound)
             mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        if (boolVibr)
+        if (vibration)
             mBuilder.setVibrate(new long[]{500, 1500});
         nm.notify(notif_id, mBuilder.build());
         PromReceiver.setReceiver(context, p);

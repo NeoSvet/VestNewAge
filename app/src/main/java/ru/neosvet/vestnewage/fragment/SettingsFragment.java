@@ -146,7 +146,7 @@ public class SettingsFragment extends Fragment {
         });
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setCheckTime();
             }
 
@@ -175,7 +175,7 @@ public class SettingsFragment extends Fragment {
         });
         sbPromTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setPromTime();
             }
 
@@ -202,7 +202,7 @@ public class SettingsFragment extends Fragment {
                             bSyncTime.setEnabled(true);
                             return false;
                         }
-                        float f = ((float) timeleft) / 60f;
+                        float f = ((float) timeleft) / 60000f;
                         if (f < 60f)
                             Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
                         else {

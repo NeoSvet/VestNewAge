@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -17,11 +16,10 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.MarkAdapter;
 import ru.neosvet.ui.MarkItem;
 import ru.neosvet.utils.Const;
@@ -42,7 +40,7 @@ public class CollectionsFragment extends Fragment {
     private MainActivity act;
     private MarkAdapter adMarker;
     private int iSel = -1;
-    private boolean boolChange = false, boolDelete = false;
+    private boolean change = false, delete = false;
     private String sCol = null, sName = null;
     private Animation anMin, anMax;
 
@@ -59,7 +57,7 @@ public class CollectionsFragment extends Fragment {
             sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
             iSel = savedInstanceState.getInt(SEL, -1);
             sName = savedInstanceState.getString(RENAME, null);
-            boolDelete = savedInstanceState.getBoolean(Const.DIALOG, false);
+            delete = savedInstanceState.getBoolean(Const.DIALOG, false);
         }
 
         if (sCol == null)
@@ -71,7 +69,7 @@ public class CollectionsFragment extends Fragment {
             goToEdit();
             if (sName != null)
                 renameDialog(sName);
-            else if (boolDelete)
+            else if (delete)
                 deleteDialog();
         }
 
@@ -84,7 +82,7 @@ public class CollectionsFragment extends Fragment {
         outState.putString(DataBase.COLLECTIONS, sCol);
         outState.putInt(SEL, iSel);
         outState.putString(RENAME, sName);
-        outState.putBoolean(Const.DIALOG, boolDelete);
+        outState.putBoolean(Const.DIALOG, delete);
         super.onSaveInstanceState(outState);
     }
 
@@ -248,7 +246,7 @@ public class CollectionsFragment extends Fragment {
         SQLiteDatabase db = dbMarker.getWritableDatabase();
         Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.PLACE);
         String s;
-        boolean boolNull = false;
+        boolean isNull = false;
         if (cursor.moveToFirst()) {
             int iID = cursor.getColumnIndex(DataBase.ID);
             int iTitle = cursor.getColumnIndex(DataBase.TITLE);
@@ -256,7 +254,7 @@ public class CollectionsFragment extends Fragment {
             do {
                 s = cursor.getString(iMarkers);
                 if (s == null || s.equals("")) {
-                    boolNull = true;
+                    isNull = true;
                     s = "";
                 }
                 adMarker.addItem(new MarkItem(cursor.getString(iTitle), cursor.getInt(iID), s));
@@ -264,7 +262,7 @@ public class CollectionsFragment extends Fragment {
         }
         cursor.close();
         dbMarker.close();
-        if (boolNull && adMarker.getCount() == 1) {
+        if (isNull && adMarker.getCount() == 1) {
             adMarker.clear();
             tvEmpty.setText(getResources().getString(R.string.empty_collections));
             tvEmpty.setVisibility(View.VISIBLE);
@@ -399,7 +397,7 @@ public class CollectionsFragment extends Fragment {
                 if (sCol == null)
                     n = 1;
                 if (iSel > n) {
-                    boolChange = true;
+                    change = true;
                     n = iSel - 1;
                     MarkItem item = adMarker.getItem(n);
                     adMarker.removeAt(n);
@@ -414,7 +412,7 @@ public class CollectionsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (iSel < adMarker.getCount() - 1) {
-                    boolChange = true;
+                    change = true;
                     int n = iSel + 1;
                     MarkItem item = adMarker.getItem(n);
                     adMarker.removeAt(n);
@@ -442,7 +440,7 @@ public class CollectionsFragment extends Fragment {
         container.findViewById(R.id.bDelete).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolDelete = true;
+                delete = true;
                 deleteDialog();
             }
         });
@@ -456,57 +454,36 @@ public class CollectionsFragment extends Fragment {
 
     private void deleteDialog() {
         lvMarker.smoothScrollToPosition(iSel);
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(getResources().getString(R.string.delete));
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setText(adMarker.getItem(iSel).getTitle());
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(R.string.no));
-        button.setVisibility(View.VISIBLE);
-        final AlertDialog dialog = builder.create();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                boolDelete = false;
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.delete));
+        dialog.setMessage(adMarker.getItem(iSel).getTitle());
+        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
             }
         });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(R.string.yes));
-        button.setOnClickListener(new View.OnClickListener() {
+        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 deleteElement();
                 dialog.dismiss();
             }
         });
-        dialog.show();
+        dialog.show(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                delete = false;
+            }
+        });
     }
 
     private void renameDialog(String old_name) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        LayoutInflater inflater = act.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
-        tv.setText(getResources().getString(R.string.new_name));
-        tv = (TextView) dialogView.findViewById(R.id.message);
-        tv.setVisibility(View.GONE);
-        final EditText input = (EditText) dialogView.findViewById(R.id.input);
-        input.setVisibility(View.VISIBLE);
         sName = old_name;
-        input.setText(old_name);
-        input.setSelection(old_name.length());
-        input.addTextChangedListener(new TextWatcher() {
+        final CustomDialog dialog = new CustomDialog(act);
+        dialog.setTitle(getResources().getString(R.string.new_name));
+        dialog.setMessage(null);
+        dialog.setInputText(sName, new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
@@ -519,35 +496,29 @@ public class CollectionsFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                sName = input.getText().toString();
+                sName = dialog.getInputText();
             }
         });
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
-        button.setText(getResources().getString(android.R.string.no));
-        button.setVisibility(View.VISIBLE);
-        final AlertDialog dialog = builder.create();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+        dialog.setLeftButton(getResources().getString(android.R.string.no), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        dialog.setRightButton(getResources().getString(android.R.string.yes), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                renameCol(dialog.getInputText());
+                dialog.dismiss();
+            }
+        });
+        dialog.show(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 sName = null;
             }
         });
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        button = (Button) dialogView.findViewById(R.id.rightButton);
-        button.setText(getResources().getString(android.R.string.yes));
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                renameCol(input.getText().toString());
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
     }
 
     private void renameCol(String name) {
@@ -592,7 +563,7 @@ public class CollectionsFragment extends Fragment {
     }
 
     private void saveChange() {
-        if (boolChange) {
+        if (change) {
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
             SQLiteDatabase db = dbMarker.getWritableDatabase();
             ContentValues cv;
@@ -612,7 +583,7 @@ public class CollectionsFragment extends Fragment {
                 sCol = sCol.substring(0, sCol.indexOf(Const.N) + 1) + t;
             }
             dbMarker.close();
-            boolChange = false;
+            change = false;
         }
     }
 
@@ -717,7 +688,7 @@ public class CollectionsFragment extends Fragment {
     }
 
     private void unSelect() {
-        boolChange = false;
+        change = false;
         if (adMarker.getCount() > 0) {
             fabEdit.setVisibility(View.VISIBLE);
             fabHelp.setVisibility(View.VISIBLE);

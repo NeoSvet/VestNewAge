@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "ru.neosvet.vestnewage"
         minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 21
+        targetSdkVersion 25
+        versionCode 25
         versionName "2.8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

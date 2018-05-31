@@ -28,10 +28,10 @@ public class PresentationActivity extends AppCompatActivity {
         return !pref.getBoolean("p" + id, false);
     }
 
-    public static void startPresentation(Context context, int id, boolean boolFirst) {
+    public static void startPresentation(Context context, int id, boolean first) {
         Intent intent = new Intent(context, PresentationActivity.class);
         intent.putExtra(DataBase.ID, id);
-        intent.putExtra(Const.FIRST,boolFirst);
+        intent.putExtra(Const.FIRST, first);
         context.startActivity(intent);
     }
 

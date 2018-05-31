@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
@@ -27,9 +28,9 @@ public class CabpageActivity extends AppCompatActivity {
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusBar status;
-    private boolean bTwo = false;
+    private boolean twoPointers = false;
 
-    public static void openPage(Context context, String link, String cookie) {
+    public static void openPage(Context context, String link, @Nullable String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
         intent.putExtra(DataBase.LINK, link);
         intent.putExtra(Const.COOKIE, cookie);
@@ -73,9 +74,9 @@ public class CabpageActivity extends AppCompatActivity {
                 @Override
                 public boolean onTouch(View view, MotionEvent event) {
                     if (event.getPointerCount() == 2) {
-                        bTwo = true;
-                    } else if (bTwo) {
-                        bTwo = false;
+                        twoPointers = true;
+                    } else if (twoPointers) {
+                        twoPointers = false;
                         wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
                     }
                     return false;

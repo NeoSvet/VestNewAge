@@ -1,15 +1,14 @@
 package ru.neosvet.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.utils.Const;
-
-public class ListItem {
+public class ListItem implements Serializable {
     private String title, des = null;
     private List<String> heads = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private boolean boolSelect = false;
+    private boolean select = false;
 
     public ListItem(String title, String link) {
         this.title = title;
@@ -20,10 +19,10 @@ public class ListItem {
         this.title = title;
     }
 
-    public ListItem(String title, boolean boolTitle) {
+    public ListItem(String title, boolean onlyTitle) {
         this.title = title;
-        if (boolTitle)
-            this.isTitle();
+        if (onlyTitle)
+            links.add("#");
     }
 
     public void clear() {
@@ -61,28 +60,12 @@ public class ListItem {
         return links.get(index);
     }
 
-    public boolean containsLink(String link) {
-        for (int i = 0; i < links.size(); i++) {
-            if (link.equals(links.get(i)))
-                return true;
-        }
-        return false;
-    }
-
-    public void isTitle() {
-        links.add("#");
-    }
-
     public void addLink(String head, String link) {
         heads.add(head);
         addLink(link);
     }
 
     public void addLink(String link) {
-        if (!link.contains(Const.LINK)) {
-            if (link.length() > 1 && !link.contains(":"))
-                link = Const.LINK + link;
-        }
         links.add(link);
     }
 
@@ -98,6 +81,6 @@ public class ListItem {
     }
 
     public boolean isSelect() {
-        return boolSelect;
+        return select;
     }
 }

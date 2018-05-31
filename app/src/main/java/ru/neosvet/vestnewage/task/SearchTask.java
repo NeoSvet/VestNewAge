@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.fragment.SearchFragment;
 public class SearchTask extends AsyncTask<String, Long, Boolean> implements Serializable {
     private transient SearchFragment frm;
     private transient MainActivity act;
-    private boolean boolStart = true;
+    private boolean start = true;
     //    private String msg;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
@@ -39,7 +39,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
     }
 
     public void stop() {
-        boolStart = false;
+        start = false;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             for (File f : act.lib.getDBFolder().listFiles()) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
-                if (!boolStart) return true;
+                if (!start) return true;
             }
             if (list.size() == 0) //empty list
                 return false;
@@ -99,7 +99,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 //поиск по материалам (статьям)
                 searchList("00.00", str, mode);
             }
-            while (boolStart) {
+            while (start) {
                 d = new Date(sy, sm, 1);
                 if (list.contains(df.format(d))) {
                     publishProgress(d.getTime());
@@ -124,13 +124,13 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
         return false;
     }
 
-    private void searchInResults(String find, boolean boolDesc) throws Exception {
+    private void searchInResults(String find, boolean reverseOrder) throws Exception {
         List<String> title = new ArrayList<String>();
         List<String> link = new ArrayList<String>();
         List<String> id = new ArrayList<String>();
         Cursor curSearch = dbS.query(DataBase.SEARCH,
                 null, null, null, null, null,
-                DataBase.ID + (boolDesc ? DataBase.DESC : ""));
+                DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
         if (curSearch.moveToFirst()) {
             int iTitle = curSearch.getColumnIndex(DataBase.TITLE);
             int iLink = curSearch.getColumnIndex(DataBase.LINK);
@@ -212,10 +212,10 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
             ContentValues cv = null;
             int id = -1;
             Cursor curTitle;
-            boolean boolAdd = true;
+            boolean add = true;
             StringBuilder des = null;
             do {
-                if (id == curSearch.getInt(iID) && boolAdd) {
+                if (id == curSearch.getInt(iID) && add) {
                     des.append(Const.BR + Const.BR);
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
@@ -227,10 +227,10 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                     if (curTitle.moveToFirst()) {
                         s = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
                         if (mode == 0) //Искать в Посланиях
-                            boolAdd = !s.contains(Const.POEMS);
+                            add = !s.contains(Const.POEMS);
                         else if (mode == 1) //Искать в Катренах
-                            boolAdd = s.contains(Const.POEMS);
-                        if (boolAdd) {
+                            add = s.contains(Const.POEMS);
+                        if (add) {
                             t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
                             if (cv != null) {
                                 if (des != null) {

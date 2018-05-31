@@ -16,17 +16,17 @@ import me.leolin.shortcutbadger.ShortcutBadger;
  * Created by NeoSvet on 03.02.2018.
  */
 
-public class Noread {
+public class Unread {
     public static final String NAME = "noread";
     private Context context;
-    private DataBase dbNoread, dbPages;
+    private DataBase dbUnread, dbPages;
     private SQLiteDatabase db;
     private long time = 0;
 
-    public Noread(Context context) {
+    public Unread(Context context) {
         this.context = context;
-        dbNoread = new DataBase(context, NAME);
-        db = dbNoread.getWritableDatabase();
+        dbUnread = new DataBase(context, NAME);
+        db = dbUnread.getWritableDatabase();
     }
 
     public boolean addLink(String link, Date date) {
@@ -41,9 +41,9 @@ public class Noread {
         link = link.replace(Const.HTML, "");
         Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
                 DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
-        boolean b = cursor.moveToFirst();
+        boolean exists = cursor.moveToFirst();
         cursor.close();
-        if (b) return true; // уже есть в списке непрочитанного
+        if (exists) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
         cv.put(DataBase.TIME, date.getTime());
         cv.put(DataBase.LINK, link);
@@ -74,8 +74,7 @@ public class Noread {
                     links.add(cursor.getString(iLink));
             } while (cursor.moveToNext());
         }
-        db.close();
-        dbNoread.close();
+        cursor.close();
         return links;
     }
 
@@ -101,13 +100,14 @@ public class Noread {
             } while (cursor.moveToNext());
             time = System.currentTimeMillis();
         }
+        cursor.close();
     }
 
     public void close() {
         if (dbPages != null)
             dbPages.close();
         db.close();
-        dbNoread.close();
+        dbUnread.close();
         if (time > 0) {
             SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
