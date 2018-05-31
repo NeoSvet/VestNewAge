@@ -221,7 +221,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
-        if (p == -1 || p == R.id.nav_book) k = 1;
+        if (p == -1 || p == R.id.nav_book) {
+            Date d = new Date();
+            k = (d.getYear() - 116) * 12 + d.getMonth(); //poems
+            k += 9; // poslaniya (01.16-09.16)
+        }
         if (p == -1) {
             Date d = new Date();
             k += (d.getYear() - 116) * 12 + d.getMonth() + 1; // calendar
@@ -274,9 +278,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
 
         if (p == -1 || p == R.id.nav_book) {
             BookTask t3 = new BookTask((MainActivity) context);
-            //TODO: progress download list
-            t3.downloadData(true);
-            t3.downloadData(false);
+            t3.downloadData(true, this);
+            prog++;
+            t3.downloadData(false, this);
             prog++;
         }
     }
@@ -642,5 +646,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
         client = lib.createHttpClient();
+    }
+
+    public void upProg() {
+        prog++;
     }
 }
