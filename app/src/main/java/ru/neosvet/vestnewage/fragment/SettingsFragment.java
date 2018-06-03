@@ -35,7 +35,7 @@ public class SettingsFragment extends Fragment {
     private View pProm, tvPromOn, tvPromOff;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
-    private CheckBox cbCountToMenu, cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
+    private CheckBox cbCountFloat, cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
     private SeekBar sbCheckTime, sbPromTime;
 
     @Override
@@ -117,11 +117,11 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        cbCountToMenu.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cbCountFloat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setBaseCheckBox(MainActivity.COUNT_IN_MENU, check);
-                MainActivity.isCountInMenu = check;
+                setBaseCheckBox(MainActivity.COUNT_IN_MENU, !check);
+                MainActivity.isCountInMenu = !check;
             }
         });
         if (cbMenuMode.getVisibility() == View.VISIBLE)
@@ -259,8 +259,8 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initViews() {
-        cbCountToMenu = (CheckBox) container.findViewById(R.id.cbCountToMenu);
-        cbCountToMenu.setChecked(MainActivity.isCountInMenu);
+        cbCountFloat = (CheckBox) container.findViewById(R.id.cbCountFloat);
+        cbCountFloat.setChecked(!MainActivity.isCountInMenu);
         cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
             cbMenuMode.setChecked(MainActivity.isMenuMode);
