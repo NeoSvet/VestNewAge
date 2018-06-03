@@ -17,6 +17,5 @@
     <integer name="height_list">600</integer>
     <dimen name="menu_width">350dp</dimen>
     <dimen name="fab_size">56dp</dimen>
-    <dimen name="menu_fragment_width">318dp</dimen>
     <dimen name="menu_fragment_top">201dp</dimen>
 </resources>
