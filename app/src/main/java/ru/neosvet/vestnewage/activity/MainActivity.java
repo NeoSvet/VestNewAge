@@ -70,11 +70,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
-        boolean isTablet = false;
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
             isMenuMode = pref.getBoolean(MENU_MODE, false);
-        else
-            isTablet = true;
 
         if (isMenuMode)
             setContentView(R.layout.main_activity_nomenu);
@@ -87,17 +84,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initInterface();
 
         isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
-        if (isTablet) {
-            if (!isCountInMenu)
-                prom = new Prom(this, findViewById(R.id.tvPromTime));
-        } else if (!isCountInMenu || isMenuMode) {
+        if (!isCountInMenu || isMenuMode) {
             prom = new Prom(this, findViewById(R.id.tvPromTime));
-        } else {
+        } else if (navigationView != null) { //it is not tablet and land
             prom = new Prom(this, navigationView.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         }
 
-        if (savedInstanceState == null) {
+        restoreActivityState(savedInstanceState);
+    }
+
+    private void restoreActivityState(Bundle state) {
+        if (state == null) {
             Intent intent = getIntent();
             tab = intent.getIntExtra(TAB, 0);
             if (pref.getBoolean(Const.FIRST, true)) {
@@ -114,8 +112,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
             }
         } else {
-            cur_id = savedInstanceState.getInt(CUR_ID);
-            loader = (LoaderTask) savedInstanceState.getSerializable(LOADER);
+            cur_id = state.getInt(CUR_ID);
+            if (navigationView == null && !isMenuMode)
+                setMenuFragment();
+            loader = (LoaderTask) state.getSerializable(LOADER);
             if (loader != null)
                 if (loader.getStatus() == AsyncTask.Status.RUNNING)
                     loader.setAct(this);
@@ -136,7 +136,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        prom.resume();
+        if (prom != null)
+            prom.resume();
     }
 
     private void initInterface() {
