@@ -261,6 +261,8 @@ public class SettingsFragment extends Fragment {
     private void initViews() {
         cbCountFloat = (CheckBox) container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
+        if(MainActivity.isMenuMode)
+            cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
         cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
             cbMenuMode.setChecked(MainActivity.isMenuMode);
