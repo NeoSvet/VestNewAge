@@ -39,12 +39,12 @@
             android:background="@color/colorAccentLight" />
 
         <CheckBox
-            android:id="@+id/cbCountToMenu"
+            android:id="@+id/cbCountFloat"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="@string/counting_to_menu" />
+            android:text="@string/count_float" />
 
         <CheckBox
             android:id="@+id/cbMenuMode"
