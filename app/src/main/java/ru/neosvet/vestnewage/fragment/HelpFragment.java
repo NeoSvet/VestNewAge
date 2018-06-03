@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +15,8 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class HelpFragment extends Fragment {
     private final String PANELS = "panels";
-    private final int COUNT = 8, FEEDBACK = 1;
-    private int FEEDBACK_COUNT = 3;
+    private final int COUNT = 8, FEEDBACK = 1, FEEDBACK_COUNT = 3,
+            WRITE_TO_DEV = 1, LINK_ON_APP = 2, CHANGELOG = 3;
     private boolean feedback = false;
     private MainActivity act;
     private View container;
@@ -72,7 +73,7 @@ public class HelpFragment extends Fragment {
                 int i = pos;
                 if (feedback && pos > FEEDBACK) {
                     if (pos <= FEEDBACK + FEEDBACK_COUNT) {
-                        onClickButton(pos - FEEDBACK - 1);
+                        onClickButton(pos - FEEDBACK);
                         return;
                     } else
                         i -= FEEDBACK_COUNT;
@@ -93,32 +94,39 @@ public class HelpFragment extends Fragment {
 
     private void onClickButton(int index) {
         switch (index) {
-            case 0: //write_to_dev
-                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»", null);
+            case WRITE_TO_DEV:
+                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
+                        + getResources().getString(R.string.srv_info)
+                        + adHelp.getItem(FEEDBACK + CHANGELOG).getDes(), null);
                 break;
-            case 1: //link_on_app
+            case LINK_ON_APP:
                 act.lib.copyAddress(getResources().getString(R.string.url_on_app));
                 break;
-            case 2: //changelog
+            default: //CHANGELOG
                 act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
-                break;
-            default: //version
         }
     }
 
     private void turnFeedback() {
         feedback = !feedback;
         if (feedback) {
-            adHelp.insertItem(FEEDBACK + 1, getResources().getString(R.string.write_to_dev), R.drawable.gm);
-            adHelp.insertItem(FEEDBACK + 2, getResources().getString(R.string.link_on_app), R.drawable.play_store);
-            adHelp.insertItem(FEEDBACK + 3, getResources().getString(R.string.changelog), R.drawable.journal);
+            adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getResources().getString(R.string.write_to_dev), R.drawable.gm);
+            adHelp.insertItem(FEEDBACK + LINK_ON_APP, getResources().getString(R.string.link_on_app), R.drawable.play_store);
+            adHelp.insertItem(FEEDBACK + CHANGELOG, getResources().getString(R.string.changelog), 0);
             try {
-                String title = getResources().getString(R.string.current_version) +
-                        act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName;
-                adHelp.insertItem(FEEDBACK + 4, title, 0);
-                FEEDBACK_COUNT = 4;
+                StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));
+                des.append(act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName);
+                des.append(" (");
+                des.append(act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode);
+                des.append(")\n");
+                des.append(getResources().getString(R.string.system_version));
+                des.append(Build.VERSION.RELEASE);
+                des.append(" (");
+                des.append(Build.VERSION.SDK_INT);
+                des.append(")");
+                adHelp.getItem(FEEDBACK + CHANGELOG).setDes(des.toString());
+                adHelp.getItem(FEEDBACK + CHANGELOG).addLink("");
             } catch (Exception e) {
-                FEEDBACK_COUNT = 3;
                 e.printStackTrace();
             }
         } else {
