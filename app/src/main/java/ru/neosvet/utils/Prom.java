@@ -69,7 +69,8 @@ public class Prom {
 
     public void hide() {
         stop();
-        tvPromTime.setVisibility(View.GONE);
+        if (tvPromTime != null)
+            tvPromTime.setVisibility(View.GONE);
     }
 
     public void show() {
