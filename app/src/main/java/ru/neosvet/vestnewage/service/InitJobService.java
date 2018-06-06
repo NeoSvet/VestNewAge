@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.PersistableBundle;
 
 import ru.neosvet.utils.DataBase;
@@ -33,7 +34,10 @@ public class InitJobService extends JobService {
                 intent.putExtra(DataBase.DESCTRIPTION, extras.getString(DataBase.DESCTRIPTION));
                 intent.putExtra(DataBase.LINK, extras.getString(DataBase.LINK));
             }
-            context.startService(intent);
+            if (Build.VERSION.SDK_INT > 25) //if Oreo
+                SummaryService.enqueueWork(context, intent);
+            else
+                context.startService(intent);
             initFinishReceiver(param);
             return true; //not finish
         }
