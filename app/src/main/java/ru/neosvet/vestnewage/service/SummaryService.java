@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.service;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -10,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
@@ -36,7 +37,7 @@ import ru.neosvet.vestnewage.task.LoaderTask;
  * Created by NeoSvet on 10.02.2018.
  */
 
-public class SummaryService extends IntentService {
+public class SummaryService extends JobIntentService {
     private Context context;
     public static final int notif_id = 111;
 
@@ -45,12 +46,16 @@ public class SummaryService extends IntentService {
         nm.cancel(notif_id);
     }
 
-    public SummaryService() {
-        super("Summary");
+    static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, InitJobService.class, notif_id, work);
     }
 
+//    public SummaryService() {
+//        super("Summary");
+//    }
+
     @Override
-    protected void onHandleIntent(final Intent intent) {
+    protected void onHandleWork(@NonNull final Intent intent) {
         context = getApplicationContext();
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         try {
