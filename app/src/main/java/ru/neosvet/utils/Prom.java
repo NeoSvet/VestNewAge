@@ -1,18 +1,16 @@
 package ru.neosvet.utils;
 
-import android.app.NotificationManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -306,29 +304,25 @@ public class Prom {
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationHelper notifHelper = new NotificationHelper(context);
         String msg = getPromText();
         if (msg.contains("-")) {
             msg = context.getResources().getString(R.string.prom);
         }
         PendingIntent piCancel = NotificationResult.getCancelPromNotif(context);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.star)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setContentTitle(context.getResources().getString(R.string.prom_for_soul_unite))
-                .setContentText(msg)
-                .setTicker(msg)
-                .setWhen(System.currentTimeMillis() + 3000)
+
+        Notification.Builder notifBuilder = notifHelper.getNotification(
+                context.getResources().getString(R.string.prom_for_soul_unite),
+                msg, NotificationHelper.CHANNEL_PRIMARY);
+        notifBuilder.setContentIntent(piProm)
                 .setFullScreenIntent(piEmpty, true)
-                .setContentIntent(piProm)
                 .addAction(0, context.getResources().getString(R.string.accept), piCancel)
-                .setLights(Color.GREEN, 1000, 1000)
-                .setAutoCancel(true);
+                .setLights(Color.GREEN, 1000, 1000);
         if (sound)
-            mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         if (vibration)
-            mBuilder.setVibrate(new long[]{500, 1500});
-        nm.notify(notif_id, mBuilder.build());
+            notifBuilder.setVibrate(new long[]{500, 1500});
+        notifHelper.notify(notif_id, notifBuilder);
         PromReceiver.setReceiver(context, p);
     }
 }

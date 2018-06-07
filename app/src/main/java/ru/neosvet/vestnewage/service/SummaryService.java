@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.service;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -25,8 +26,9 @@ import java.util.Date;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.utils.Notification;
+import ru.neosvet.utils.NotificationResult;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -82,27 +84,22 @@ public class SummaryService extends JobIntentService {
             app.setData(notif_uri);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent piPostpone = Notification.getPostponeSummaryNotif(context, result[0], result[1]);
-            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(R.drawable.star)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                    .setContentTitle(context.getResources().getString(R.string.site_name))
-                    .setContentText(notif_text)
-                    .setTicker(notif_text)
-                    .setWhen(System.currentTimeMillis())
-                    .setFullScreenIntent(piEmpty, true)
+            PendingIntent piPostpone = NotificationResult.getPostponeSummaryNotif(context, result[0], result[1]);
+            NotificationHelper notifHelper = new NotificationHelper(context);
+            Notification.Builder notifBuilder = notifHelper.getNotification(
+                    context.getResources().getString(R.string.site_name),
+                    notif_text, NotificationHelper.CHANNEL_PRIMARY);
+            notifBuilder.setFullScreenIntent(piEmpty, true)
                     .setContentIntent(piSummary)
                     .addAction(0, context.getResources().getString(R.string.postpone), piPostpone)
-                    .setLights(Color.GREEN, 1000, 1000)
-                    .setAutoCancel(true);
+                    .setLights(Color.GREEN, 1000, 1000);
             if (result.length == 3)
-                mBuilder.setNumber(Integer.parseInt(result[2]));
+                notifBuilder.setNumber(Integer.parseInt(result[2]));
             if (sound)
-                mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
             if (vibration)
-                mBuilder.setVibrate(new long[]{500, 1500});
-            nm.notify(notif_id, mBuilder.build());
+                notifBuilder.setVibrate(new long[]{500, 1500});
+            notifHelper.notify(notif_id, notifBuilder);
         } catch (Exception e) {
             e.printStackTrace();
         }

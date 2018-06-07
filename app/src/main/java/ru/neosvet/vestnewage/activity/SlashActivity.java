@@ -1,9 +1,8 @@
 package ru.neosvet.vestnewage.activity;
 
-import android.app.NotificationManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -12,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -31,6 +29,7 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.Unread;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
@@ -40,11 +39,13 @@ import ru.neosvet.vestnewage.service.InitJobService;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class SlashActivity extends AppCompatActivity {
+    private int notif_id = 900;
     private Intent main;
     private StatusBar status;
     private boolean animation = true;
     private CalendarTask task = null;
     private Lib lib;
+    private NotificationHelper notifHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,7 @@ public class SlashActivity extends AppCompatActivity {
         Prom prom = new Prom(this, null);
         prom.synchronTime(null);
 
+        notifHelper = new NotificationHelper(SlashActivity.this);
         int ver = lib.getPreviosVer();
         if (ver < 21) {
             SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
@@ -71,12 +73,14 @@ public class SlashActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
             if (p == -1)
-                notifHelp(getResources().getString(R.string.new_option_notif), intent);
+                showNotif(getResources().getString(R.string.are_you_know),
+                        getResources().getString(R.string.new_option_notif), intent);
             else {
                 pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
                 p = pref.getInt(SettingsFragment.TIME, -1);
                 if (p == -1)
-                    notifHelp(getResources().getString(R.string.new_option_notif), intent);
+                    showNotif(getResources().getString(R.string.are_you_know),
+                            getResources().getString(R.string.new_option_notif), intent);
             }
         }
         if (ver == 0) return;
@@ -85,9 +89,11 @@ public class SlashActivity extends AppCompatActivity {
         if (ver < 21)
             adapterNewVersion2();
         if (ver < 13)
-            notifNewOption(getResources().getString(R.string.new_option_menu));
+            showNotif(getResources().getString(R.string.new_option),
+                    getResources().getString(R.string.new_option_menu), getSettingsIntent());
         if (ver < 19) {
-            notifNewOption(getResources().getString(R.string.new_option_counting));
+            showNotif(getResources().getString(R.string.new_option),
+                    getResources().getString(R.string.new_option_counting), getSettingsIntent());
             rebuildNotif();
         }
     }
@@ -120,49 +126,14 @@ public class SlashActivity extends AppCompatActivity {
             PromReceiver.setReceiver(this, p);
     }
 
-    private void notifHelp(String msg, Intent intent) {
+    private void showNotif(String title, String msg, Intent intent) {
         PendingIntent piMain = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        String submsg = null;
-        if (msg.length() > 46) {
-            int i = 46;
-            while (!msg.substring(i, i + 1).equals(" "))
-                i--;
-            submsg = msg.substring(i + 1);
-            msg = msg.substring(0, i);
-        } else if (msg.length() > 39)
-            submsg = "";
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.star)
-                .setContentTitle(getResources().getString(R.string.are_you_know))
-                .setContentText(msg)
-                .setTicker(msg)
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(piMain)
-                .setFullScreenIntent(piEmpty, true)
-                .setAutoCancel(true);
-        if (submsg != null)
-            mBuilder.setSubText(submsg);
-        nm.notify(998, mBuilder.build());
-    }
-
-    private void notifNewOption(String msg) {
-        Intent main = new Intent(this, MainActivity.class);
-        main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
-        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.star)
-                .setContentTitle(getResources().getString(R.string.new_option))
-                .setContentText(msg)
-                .setTicker(msg)
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(piMain)
-                .setFullScreenIntent(piEmpty, true)
-                .setAutoCancel(true);
-        nm.notify(999, mBuilder.build());
+        Notification.Builder notifBuilder = notifHelper.getNotification(
+                title, msg, NotificationHelper.CHANNEL_SECONDARY);
+        notifBuilder.setContentIntent(piMain).setFullScreenIntent(piEmpty, false);
+        notifBuilder.setGroup(NotificationHelper.CHANNEL_SECONDARY);
+        notifHelper.notify(++notif_id, notifBuilder);
     }
 
     private void initData(Bundle state) {
@@ -411,6 +382,12 @@ public class SlashActivity extends AppCompatActivity {
             }
         }, 10);
 
+    }
+
+    public Intent getSettingsIntent() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+        return intent;
     }
 
 //    @Override
