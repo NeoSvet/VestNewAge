@@ -81,7 +81,7 @@
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="ru.neosvet.utils.Notification"
+            android:name="ru.neosvet.utils.NotificationResult"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver
@@ -97,7 +97,7 @@
             android:name=".service.InitJobService"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE"></service>
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
         <service
             android:name=".service.SummaryService"
             android:icon="@mipmap/ic_launcher"

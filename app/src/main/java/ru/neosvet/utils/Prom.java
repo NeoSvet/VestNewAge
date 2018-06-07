@@ -311,7 +311,7 @@ public class Prom {
         if (msg.contains("-")) {
             msg = context.getResources().getString(R.string.prom);
         }
-        PendingIntent piCancel = Notification.getCancelPromNotif(context);
+        PendingIntent piCancel = NotificationResult.getCancelPromNotif(context);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.star)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))

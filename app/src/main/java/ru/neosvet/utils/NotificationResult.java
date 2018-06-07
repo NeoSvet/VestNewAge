@@ -14,9 +14,8 @@ import ru.neosvet.vestnewage.service.SummaryService;
  * Created by NeoSvet on 13.02.2018.
  */
 
-public class Notification extends Activity {
+public class NotificationResult extends Activity {
     public static final String MODE = "mode";
-//    public static final int COPY = 33;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +34,7 @@ public class Notification extends Activity {
     }
 
     public static PendingIntent getCancelPromNotif(Context context) {
-        Intent intent = new Intent(context, Notification.class);
+        Intent intent = new Intent(context, NotificationResult.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, Prom.notif_id);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -43,7 +42,7 @@ public class Notification extends Activity {
     }
 
     public static PendingIntent getPostponeSummaryNotif(Context context, String des, String link) {
-        Intent intent = new Intent(context, Notification.class);
+        Intent intent = new Intent(context, NotificationResult.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, InitJobService.ID_SUMMARY_POSTPONE);
         intent.putExtra(DataBase.DESCTRIPTION, des);

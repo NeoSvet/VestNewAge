@@ -44,7 +44,7 @@ public class SlashActivity extends AppCompatActivity {
     private StatusBar status;
     private boolean animation = true;
     private CalendarTask task = null;
-    public Lib lib;
+    private Lib lib;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
