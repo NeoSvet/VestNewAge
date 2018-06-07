@@ -34,7 +34,7 @@ public class InitJobService extends JobService {
                 intent.putExtra(DataBase.DESCTRIPTION, extras.getString(DataBase.DESCTRIPTION));
                 intent.putExtra(DataBase.LINK, extras.getString(DataBase.LINK));
             }
-            if (Build.VERSION.SDK_INT > 25) //if Oreo
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 SummaryService.enqueueWork(context, intent);
             else
                 context.startService(intent);
