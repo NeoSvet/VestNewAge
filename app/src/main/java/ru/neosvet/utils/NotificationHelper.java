@@ -24,6 +24,9 @@ import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.os.Build;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ru.neosvet.vestnewage.R;
 
 /**
@@ -32,7 +35,9 @@ import ru.neosvet.vestnewage.R;
 //@RequiresApi(26)
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
-    public static final String CHANNEL_PRIMARY = "primary", CHANNEL_SECONDARY = "second";
+    public static final String CHANNEL_PRIMARY = "primary", CHANNEL_SECONDARY = "second",
+            GROUP_TIPS = "ru.neosvet.vestnewage.TIPS";
+    private List<String> notifList;
 
     /**
      * Registers notification channels, which can be used later by individual notifications.
@@ -71,14 +76,44 @@ public class NotificationHelper extends ContextWrapper {
         Notification.Builder notifBuilder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             notifBuilder = new Notification.Builder(getApplicationContext(), channel);
-        else
+        else {
             notifBuilder = new Notification.Builder(getApplicationContext());
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                if (notifList == null)
+                    notifList = new ArrayList<>();
+                notifList.add(title + " " + body);
+            }
+        }
         notifBuilder.setContentTitle(title)
                 .setContentText(body)
                 .setSmallIcon(getSmallIcon())
                 .setAutoCancel(true);
         if (body.length() > 44)
             notifBuilder.setStyle(new Notification.BigTextStyle().bigText(body));
+        return notifBuilder;
+    }
+
+    public Notification.Builder getSummaryNotif(String title, String channel) {
+        Notification.Builder notifBuilder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            notifBuilder = new Notification.Builder(this, channel);
+        else
+            notifBuilder = new Notification.Builder(this);
+        Notification.InboxStyle style = new Notification.InboxStyle()
+                .setSummaryText(title);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            style.setBigContentTitle(getResources().getString(R.string.app_name));
+            if (notifList != null) {
+                for (int i = 0; i < notifList.size(); i++) {
+                    style.addLine(notifList.get(i));
+                }
+                notifList.clear();
+            }
+        }
+        notifBuilder.setContentTitle(getResources().getString(R.string.app_name))
+                .setSmallIcon(R.drawable.star)
+                .setStyle(style)
+                .setGroupSummary(true);
         return notifBuilder;
     }
 
