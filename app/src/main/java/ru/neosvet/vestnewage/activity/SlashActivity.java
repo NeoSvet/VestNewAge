@@ -69,7 +69,7 @@ public class SlashActivity extends AppCompatActivity {
 
         notifHelper = new NotificationHelper(SlashActivity.this);
         int ver = lib.getPreviosVer();
-        if (ver < 30) {
+        if (ver < 21) {
             SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(SettingsFragment.TIME, -1);
             Intent intent = new Intent(this, MainActivity.class);
