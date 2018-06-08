@@ -35,8 +35,8 @@ import ru.neosvet.vestnewage.R;
 //@RequiresApi(26)
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
-    public static final String CHANNEL_PRIMARY = "primary", CHANNEL_SECONDARY = "second",
-            GROUP_TIPS = "ru.neosvet.vestnewage.TIPS";
+    public static final String CHANNEL_NOTIFICATIONS = "notif", CHANNEL_TIPS = "tips",
+            GROUP_TIPS = "group_tips";
     private List<String> notifList;
 
     /**
@@ -48,14 +48,14 @@ public class NotificationHelper extends ContextWrapper {
         super(ctx);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel chan1 = new NotificationChannel(CHANNEL_PRIMARY,
-                    getString(R.string.channel_privary), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel chan1 = new NotificationChannel(CHANNEL_NOTIFICATIONS,
+                    getString(R.string.notifications), NotificationManager.IMPORTANCE_HIGH);
             chan1.setLightColor(Color.GREEN);
             chan1.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             getManager().createNotificationChannel(chan1);
 
-            NotificationChannel chan2 = new NotificationChannel(CHANNEL_SECONDARY,
-                    getString(R.string.channel_secondary), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel chan2 = new NotificationChannel(CHANNEL_TIPS,
+                    getString(R.string.tips), NotificationManager.IMPORTANCE_HIGH);
             chan2.setLightColor(Color.BLUE);
             chan2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             getManager().createNotificationChannel(chan2);

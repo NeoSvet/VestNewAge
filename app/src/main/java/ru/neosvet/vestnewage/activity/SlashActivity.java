@@ -69,7 +69,7 @@ public class SlashActivity extends AppCompatActivity {
 
         notifHelper = new NotificationHelper(SlashActivity.this);
         int ver = lib.getPreviosVer();
-        if (ver < 21) {
+        if (ver < 30) {
             SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(SettingsFragment.TIME, -1);
             Intent intent = new Intent(this, MainActivity.class);
@@ -105,8 +105,8 @@ public class SlashActivity extends AppCompatActivity {
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
         Notification.Builder notifBuilder = notifHelper.getSummaryNotif(
-                getResources().getString(R.string.channel_secondary),
-                NotificationHelper.CHANNEL_SECONDARY);
+                getResources().getString(R.string.tips),
+                NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             notifBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
@@ -143,10 +143,10 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     private void showNotifTip(String title, String msg, Intent intent) {
-        PendingIntent piMain = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification.Builder notifBuilder = notifHelper.getNotification(
-                title, msg, NotificationHelper.CHANNEL_SECONDARY);
-        notifBuilder.setContentIntent(piMain);
+                title, msg, NotificationHelper.CHANNEL_TIPS);
+        notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
         notifHelper.notify(++notif_id, notifBuilder);
     }
@@ -404,17 +404,4 @@ public class SlashActivity extends AppCompatActivity {
         intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
         return intent;
     }
-
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        super.onNewIntent(intent);
-//        Uri data = intent.getData();
-//        if(data !=null) {
-//            Lib lib = new Lib(this);
-//            lib.copyAddress("link2=" + data.toString());
-//            BrowserActivity.openActivity(this,data.getPath(),false);
-//        }
-//        Intent main = new Intent(getApplicationContext(), MainActivity.class);
-//        startActivity(main);
-//    }
 }

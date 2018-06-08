@@ -313,7 +313,7 @@ public class Prom {
 
         Notification.Builder notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.prom_for_soul_unite),
-                msg, NotificationHelper.CHANNEL_PRIMARY);
+                msg, NotificationHelper.CHANNEL_NOTIFICATIONS);
         notifBuilder.setContentIntent(piProm)
                 .setFullScreenIntent(piEmpty, true)
                 .addAction(0, context.getResources().getString(R.string.accept), piCancel)

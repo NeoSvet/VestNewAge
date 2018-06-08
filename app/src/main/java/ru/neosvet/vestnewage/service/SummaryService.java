@@ -86,7 +86,7 @@ public class SummaryService extends JobIntentService {
             NotificationHelper notifHelper = new NotificationHelper(context);
             Notification.Builder notifBuilder = notifHelper.getNotification(
                     context.getResources().getString(R.string.site_name),
-                    notif_text, NotificationHelper.CHANNEL_PRIMARY);
+                    notif_text, NotificationHelper.CHANNEL_NOTIFICATIONS);
             notifBuilder.setFullScreenIntent(piEmpty, true)
                     .setContentIntent(piSummary)
                     .addAction(0, context.getResources().getString(R.string.postpone), piPostpone)

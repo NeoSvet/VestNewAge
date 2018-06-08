@@ -26,8 +26,8 @@
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <!--NotificationHelper-->
-    <string name="channel_privary">Уведомления</string>
-    <string name="channel_secondary">Подсказки</string>
+    <string name="notifications">Уведомления</string>
+    <string name="tips">Подсказки</string>
     <!--Menu-->
     <string name="rss">Сводка</string>
     <string name="main">Главная</string>
