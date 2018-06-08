@@ -309,7 +309,7 @@ public class Prom {
         if (msg.contains("-")) {
             msg = context.getResources().getString(R.string.prom);
         }
-        PendingIntent piCancel = NotificationResult.getCancelPromNotif(context);
+        PendingIntent piCancel = NotificationHelper.getCancelPromNotif(context);
 
         Notification.Builder notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.prom_for_soul_unite),

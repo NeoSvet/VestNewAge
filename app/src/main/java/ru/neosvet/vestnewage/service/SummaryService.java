@@ -26,7 +26,6 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.utils.NotificationResult;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
@@ -82,7 +81,7 @@ public class SummaryService extends JobIntentService {
             app.setData(notif_uri);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent piPostpone = NotificationResult.getPostponeSummaryNotif(context, result[0], result[1]);
+            PendingIntent piPostpone = NotificationHelper.getPostponeSummaryNotif(context, result[0], result[1]);
             NotificationHelper notifHelper = new NotificationHelper(context);
             Notification.Builder notifBuilder = notifHelper.getNotification(
                     context.getResources().getString(R.string.site_name),

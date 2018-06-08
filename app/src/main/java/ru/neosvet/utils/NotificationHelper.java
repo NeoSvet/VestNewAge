@@ -1,51 +1,78 @@
-/*
- * Copyright 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ru.neosvet.utils;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.service.InitJobService;
+import ru.neosvet.vestnewage.service.SummaryService;
 
 /**
+ * Created by NeoSvet on 13.02.2018.
  * Helper class to manage notification channels, and create notifications.
  */
 //@RequiresApi(26)
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
     public static final String CHANNEL_NOTIFICATIONS = "notif", CHANNEL_TIPS = "tips",
-            GROUP_TIPS = "group_tips";
+            MODE = "mode", GROUP_TIPS = "group_tips";
     private List<String> notifList;
+
+    public static class Result extends Activity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            int mode = getIntent().getIntExtra(MODE, -1);
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (mode == Prom.notif_id) {
+                manager.cancel(Prom.notif_id);
+            } else if (mode == InitJobService.ID_SUMMARY_POSTPONE) {
+                manager.cancel(SummaryService.notif_id);
+                String des = getIntent().getStringExtra(DataBase.DESCTRIPTION);
+                String link = getIntent().getStringExtra(DataBase.LINK);
+                InitJobService.setSummaryPostpone(this, des, link);
+            }
+            finish();
+        }
+    }
+
+    public static PendingIntent getCancelPromNotif(Context context) {
+        Intent intent = new Intent(context, NotificationHelper.Result.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(MODE, Prom.notif_id);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return pendingIntent;
+    }
+
+    public static PendingIntent getPostponeSummaryNotif(Context context, String des, String link) {
+        Intent intent = new Intent(context, NotificationHelper.Result.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(MODE, InitJobService.ID_SUMMARY_POSTPONE);
+        intent.putExtra(DataBase.DESCTRIPTION, des);
+        intent.putExtra(DataBase.LINK, link);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return pendingIntent;
+    }
 
     /**
      * Registers notification channels, which can be used later by individual notifications.
      *
-     * @param ctx The application context
+     * @param context The application context
      */
-    public NotificationHelper(Context ctx) {
-        super(ctx);
+    public NotificationHelper(Context context) {
+        super(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan1 = new NotificationChannel(CHANNEL_NOTIFICATIONS,
@@ -86,7 +113,7 @@ public class NotificationHelper extends ContextWrapper {
         }
         notifBuilder.setContentTitle(title)
                 .setContentText(body)
-                .setSmallIcon(getSmallIcon())
+                .setSmallIcon(R.drawable.star)
                 .setAutoCancel(true);
         if (body.length() > 44)
             notifBuilder.setStyle(new Notification.BigTextStyle().bigText(body));
@@ -125,15 +152,6 @@ public class NotificationHelper extends ContextWrapper {
      */
     public void notify(int id, Notification.Builder notification) {
         getManager().notify(id, notification.build());
-    }
-
-    /**
-     * Get the small icon for this app
-     *
-     * @return The small icon resource id
-     */
-    private int getSmallIcon() {
-        return R.drawable.star;
     }
 
     /**

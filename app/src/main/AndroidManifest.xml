@@ -81,7 +81,7 @@
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="ru.neosvet.utils.NotificationResult"
+            android:name="ru.neosvet.utils.NotificationHelper$Result"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver
