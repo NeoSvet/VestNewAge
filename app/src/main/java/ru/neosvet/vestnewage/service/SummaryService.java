@@ -45,8 +45,8 @@ public class SummaryService extends JobIntentService {
         nm.cancel(notif_id);
     }
 
-    static void enqueueWork(Context context, Intent work) {
-        enqueueWork(context, InitJobService.class, notif_id, work);
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, SummaryService.class, notif_id, work);
     }
 
 //    public SummaryService() {
@@ -63,8 +63,8 @@ public class SummaryService extends JobIntentService {
                 result = new String[]{intent.getStringExtra(DataBase.DESCTRIPTION),
                         intent.getStringExtra(DataBase.LINK)};
             } else {
-//                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
-//                    return;
+                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
+                    return;
                 result = checkSummary();
             }
             if (result == null) { // no updates
