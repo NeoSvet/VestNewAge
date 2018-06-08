@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -96,10 +97,10 @@ public class NotificationHelper extends ContextWrapper {
      * changes.
      *
      * @param title the title of the notification
-     * @param body  the body text for the notification
+     * @param msg  the msg text for the notification
      * @return the builder as it keeps a reference to the notification (since API 24)
      */
-    public Notification.Builder getNotification(String title, String body, String channel) {
+    public Notification.Builder getNotification(String title, String msg, String channel) {
         Notification.Builder notifBuilder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             notifBuilder = new Notification.Builder(getApplicationContext(), channel);
@@ -108,15 +109,15 @@ public class NotificationHelper extends ContextWrapper {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 if (notifList == null)
                     notifList = new ArrayList<>();
-                notifList.add(title + " " + body);
+                notifList.add(title + " " + msg);
             }
         }
         notifBuilder.setContentTitle(title)
-                .setContentText(body)
+                .setContentText(msg)
                 .setSmallIcon(R.drawable.star)
                 .setAutoCancel(true);
-        if (body.length() > 44)
-            notifBuilder.setStyle(new Notification.BigTextStyle().bigText(body));
+        if (msg.length() > 44)
+            notifBuilder.setStyle(new Notification.BigTextStyle().bigText(msg));
         return notifBuilder;
     }
 
@@ -136,9 +137,12 @@ public class NotificationHelper extends ContextWrapper {
                 }
                 notifList.clear();
             }
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
         }
         notifBuilder.setContentTitle(getResources().getString(R.string.app_name))
                 .setSmallIcon(R.drawable.star)
+                .setContentText(title)
                 .setStyle(style)
                 .setGroupSummary(true);
         return notifBuilder;

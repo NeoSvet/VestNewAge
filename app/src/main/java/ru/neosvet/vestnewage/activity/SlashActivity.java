@@ -69,7 +69,7 @@ public class SlashActivity extends AppCompatActivity {
 
         notifHelper = new NotificationHelper(SlashActivity.this);
         int ver = lib.getPreviosVer();
-        if (ver < 21) {
+        if (ver < 30) {
             SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(SettingsFragment.TIME, -1);
             Intent intent = new Intent(this, MainActivity.class);
@@ -90,14 +90,14 @@ public class SlashActivity extends AppCompatActivity {
             adapterNewVersion();
         if (ver < 21)
             adapterNewVersion2();
-        if (ver < 13)
+//        if (ver < 13)
             showNotifTip(getResources().getString(R.string.new_option),
                     getResources().getString(R.string.new_option_menu), getSettingsIntent());
-        if (ver < 19) {
+//        if (ver < 19) {
             showNotifTip(getResources().getString(R.string.new_option),
                     getResources().getString(R.string.new_option_counting), getSettingsIntent());
-            rebuildNotif();
-        }
+//            rebuildNotif();
+//        }
 
         showSummaryNotif();
     }
@@ -148,6 +148,10 @@ public class SlashActivity extends AppCompatActivity {
                 title, msg, NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
+        }
         notifHelper.notify(++notif_id, notifBuilder);
     }
 
