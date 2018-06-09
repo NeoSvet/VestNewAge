@@ -115,6 +115,8 @@ public class SummaryService extends JobIntentService {
                 notifBuilder.setFullScreenIntent(piEmpty, true);
             } else {
                 notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + result.get(0));
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                    notifBuilder.setFullScreenIntent(piEmpty, true);
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);

@@ -111,7 +111,7 @@ public class SlashActivity extends AppCompatActivity {
                 title, msg, NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { // on N with setFullScreenIntent don't work summary group
             PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
@@ -128,6 +128,10 @@ public class SlashActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             notifBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
                     getSettingsIntent(), PendingIntent.FLAG_UPDATE_CURRENT));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
+        }
         notifHelper.notify(START_ID, notifBuilder);
     }
 
