@@ -66,6 +66,8 @@ public class SettingsFragment extends Fragment {
             return;
         }
         bPanels = state.getBooleanArray(PANELS);
+        if (bPanels == null)
+            bPanels = new boolean[]{true, false, false};
         if (bPanels[PANEL_BASE]) {
             pBase.setVisibility(View.VISIBLE);
             imgBase.setImageDrawable(getResources().getDrawable(R.drawable.minus));
@@ -308,19 +310,19 @@ public class SettingsFragment extends Fragment {
             cbMenuMode.setVisibility(View.GONE);
         }
 
-        imgBase = (ImageView) container.findViewById(R.id.imgBase);
-        imgCheck = (ImageView) container.findViewById(R.id.imgCheck);
-        imgProm = (ImageView) container.findViewById(R.id.imgProm);
+        imgBase = container.findViewById(R.id.imgBase);
+        imgCheck = container.findViewById(R.id.imgCheck);
+        imgProm = container.findViewById(R.id.imgProm);
         pBase = container.findViewById(R.id.pBase);
         pCheck = container.findViewById(R.id.pCheck);
         pProm = container.findViewById(R.id.pProm);
 
-        tvCheck = (TextView) container.findViewById(R.id.tvCheck);
+        tvCheck = container.findViewById(R.id.tvCheck);
         tvCheckOn = container.findViewById(R.id.tvCheckOn);
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
-        cbCheckSound = (CheckBox) container.findViewById(R.id.cbCheckSound);
-        cbCheckVibr = (CheckBox) container.findViewById(R.id.cbCheckVibr);
-        sbCheckTime = (SeekBar) container.findViewById(R.id.sbCheckTime);
+        cbCheckSound = container.findViewById(R.id.cbCheckSound);
+        cbCheckVibr = container.findViewById(R.id.cbCheckVibr);
+        sbCheckTime = container.findViewById(R.id.sbCheckTime);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(TIME, -1);
         if (p == -1)
@@ -330,12 +332,12 @@ public class SettingsFragment extends Fragment {
         cbCheckSound.setChecked(pref.getBoolean(SOUND, false));
         cbCheckVibr.setChecked(pref.getBoolean(VIBR, true));
 
-        tvPromNotif = (TextView) container.findViewById(R.id.tvPromNotif);
+        tvPromNotif = container.findViewById(R.id.tvPromNotif);
         tvPromOn = container.findViewById(R.id.tvPromOn);
         tvPromOff = container.findViewById(R.id.tvPromOff);
-        cbPromSound = (CheckBox) container.findViewById(R.id.cbPromSound);
-        cbPromVibr = (CheckBox) container.findViewById(R.id.cbPromVibr);
-        sbPromTime = (SeekBar) container.findViewById(R.id.sbPromTime);
+        cbPromSound = container.findViewById(R.id.cbPromSound);
+        cbPromVibr = container.findViewById(R.id.cbPromVibr);
+        sbPromTime = container.findViewById(R.id.sbPromTime);
         pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
         p = pref.getInt(TIME, -1);
         if (p == -1)
