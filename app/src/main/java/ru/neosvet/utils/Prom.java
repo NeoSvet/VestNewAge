@@ -31,7 +31,8 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom1 = 8, hour_prom2 = 11;
+    public static final int notif_id = 222;
+    private static final int hour_prom1 = 8, hour_prom2 = 11;
     private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -42,7 +43,7 @@ public class Prom {
 
     public Prom(Context context, @Nullable View textView) {
         this.context = context;
-        pref = context.getSharedPreferences(this.getClass().getSimpleName(), context.MODE_PRIVATE);
+        pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
             long t = getPromDate(false).getTime() - System.currentTimeMillis();
@@ -200,7 +201,7 @@ public class Prom {
         }
     }
 
-    public String getPromText() {
+    private String getPromText() {
         String t = lib.getDiffDate(getPromDate(false).getTime(), System.currentTimeMillis());
         if (t.contains("-"))
             return t;
@@ -264,7 +265,7 @@ public class Prom {
                     Request.Builder builderRequest = new Request.Builder();
                     builderRequest.url(Const.SITE2);
                     builderRequest.header(Const.USER_AGENT, context.getPackageName());
-                    OkHttpClient client = lib.createHttpClient();
+                    OkHttpClient client = Lib.createHttpClient();
                     Response response = client.newCall(builderRequest.build()).execute();
                     String s = response.headers().value(1);
                     long timeServer = Date.parse(s);
@@ -295,7 +296,7 @@ public class Prom {
     }
 
     public void showNotif() {
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
             return;
