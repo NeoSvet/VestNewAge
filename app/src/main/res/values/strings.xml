@@ -26,9 +26,7 @@
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <!--NotificationHelper-->
-    <string name="updates_site">Проверка обновлений</string>
     <string name="mute_notif">Беззвучные</string>
-    <string name="reminder_prom">Напоминания о Посыле</string>
     <string name="tips">Подсказки</string>
     <!--Menu-->
     <string name="rss">Сводка</string>
@@ -114,8 +112,8 @@
     <string name="downloaded">Загружено:</string>
     <!--SettingsFragment-->
     <string name="base">Основное</string>
-    <string name="notif_new">Уведомление о новом</string>
-    <string name="notif_prom">Уведомление о Посыле</string>
+    <string name="notif_new">Проверка обновлений</string>
+    <string name="notif_prom">Напоминание о Посыле</string>
     <string name="count_float">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="count_everywhere">Показывать отсчёт времени до Посыла везде</string>
     <string name="menu_on_full_screen">Меню на весь экран</string>
@@ -129,8 +127,8 @@
     <string name="check_summary">Проверка сводки</string>
     <string name="each_one">каждый час        </string>
     <string name="each_more">каждые</string>
-    <string name="prom_notif">Уведомлять о Посыле</string>
-    <string name="prom_notif_off">Не уведомлять о Посыле</string>
+    <string name="prom_notif">Напомнить о Посыле</string>
+    <string name="prom_notif_off">Не напоминать о Посыле</string>
     <string name="in">за</string>
     <string name="secs">30 секунд</string>
     <string name="often">чаще</string>
@@ -165,7 +163,7 @@
     <string name="crash">Сбой</string>
     <!--SummaryNotif-->
     <string name="appeared_new">Новое:&#160;</string>
-    <string name="appeared_new_some">Имеются новые материалы</string>
+    <string name="appeared_new_some">Новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
     <string name="postpone">Отложить</string>
     <string name="postpone_alert">Уведомление отложено на 10-20 минут</string>

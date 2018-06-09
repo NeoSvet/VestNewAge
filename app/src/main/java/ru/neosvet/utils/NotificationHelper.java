@@ -83,14 +83,14 @@ public class NotificationHelper extends ContextWrapper {
     @RequiresApi(26)
     private void createChannels() {
         NotificationChannel chSummary = new NotificationChannel(CHANNEL_SUMMARY,
-                getString(R.string.updates_site), NotificationManager.IMPORTANCE_HIGH);
+                getString(R.string.notif_new), NotificationManager.IMPORTANCE_HIGH);
         chSummary.enableLights(true);
         chSummary.setLightColor(Color.GREEN);
         chSummary.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         getManager().createNotificationChannel(chSummary);
 
         NotificationChannel chProm = new NotificationChannel(CHANNEL_PROM,
-                getString(R.string.reminder_prom), NotificationManager.IMPORTANCE_HIGH);
+                getString(R.string.notif_prom), NotificationManager.IMPORTANCE_HIGH);
         chSummary.enableLights(true);
         chProm.setLightColor(Color.RED);
         chProm.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
