@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -30,7 +31,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom1 = 8, hour_prom2 = 11;
+    public static final int notif_id = 222, hour_prom1 = 10, hour_prom2 = 11;
     private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -318,6 +319,12 @@ public class Prom {
                 .setFullScreenIntent(piEmpty, true)
                 .addAction(0, context.getResources().getString(R.string.accept), piCancel)
                 .setLights(Color.GREEN, 1000, 1000);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (p == 0)
+                notifBuilder.setTimeoutAfter(30000);
+            else
+                notifBuilder.setTimeoutAfter(p * 60000);
+        }
         if (sound)
             notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         if (vibration)
