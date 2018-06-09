@@ -28,7 +28,7 @@ import ru.neosvet.vestnewage.service.SummaryService;
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
     public static final String CHANNEL_NOTIFICATIONS = "notif", CHANNEL_TIPS = "tips",
-            MODE = "mode", GROUP_TIPS = "group_tips";
+            MODE = "mode", GROUP_NOTIFICATIONS = "group_notif", GROUP_TIPS = "group_tips";
     private List<String> notifList;
 
     public static class Result extends Activity {

@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 
@@ -19,7 +20,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -58,10 +61,11 @@ public class SummaryService extends JobIntentService {
         context = getApplicationContext();
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         try {
-            String[] result;
+            List<String> result;
             if (intent.hasExtra(DataBase.LINK)) {
-                result = new String[]{intent.getStringExtra(DataBase.DESCTRIPTION),
-                        intent.getStringExtra(DataBase.LINK)};
+                result = new ArrayList<>();
+                result.add(intent.getStringExtra(DataBase.DESCTRIPTION));
+                result.add(intent.getStringExtra(DataBase.LINK));
             } else {
                 if (pref.getInt(SettingsFragment.TIME, -1) == -1)
                     return;
@@ -73,25 +77,48 @@ public class SummaryService extends JobIntentService {
                 return;
             }
 
-            final String notif_text = result[0];
-            final Uri notif_uri = Uri.parse(result[1]);
+            String notif_text;
+            Uri notif_uri;
+            Intent app = new Intent(context, SlashActivity.class);
+            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent piSummary, piPostpone;
+            NotificationHelper notifHelper = new NotificationHelper(context);
+            Notification.Builder notifBuilder = null;
+
+            for (int i = 0; i < result.size(); i += 2) {
+                if (notifBuilder != null)
+                    notifHelper.notify(notif_id + i, notifBuilder);
+                notif_text = result.get(i);
+                notif_uri = Uri.parse(Const.SITE + result.get(i + 1));
+                app.setData(notif_uri);
+                piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
+                piPostpone = NotificationHelper.getPostponeSummaryNotif(context, result.get(i), notif_uri.toString());
+                notifBuilder = notifHelper.getNotification(
+                        context.getResources().getString(R.string.site_name),
+                        notif_text, NotificationHelper.CHANNEL_NOTIFICATIONS);
+                notifBuilder.setContentIntent(piSummary)
+                        .setGroup(NotificationHelper.GROUP_NOTIFICATIONS)
+                        .addAction(0, context.getResources().getString(R.string.postpone), piPostpone);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                    notifBuilder.setFullScreenIntent(piEmpty, true);
+            }
+            if (result.size() > 2) {
+                notifHelper.notify(notif_id + result.size(), notifBuilder);
+                notifBuilder = notifHelper.getSummaryNotif(
+                        context.getResources().getString(R.string.appeared_new_some),
+                        NotificationHelper.CHANNEL_NOTIFICATIONS);
+                app.setData(Uri.parse(Const.SITE + SummaryFragment.RSS));
+                piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
+                notifBuilder.setContentIntent(piSummary)
+                        .setGroup(NotificationHelper.GROUP_NOTIFICATIONS);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                    notifBuilder.setFullScreenIntent(piEmpty, true);
+            } else {
+                notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + result.get(0));
+            }
             final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
             final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
-            Intent app = new Intent(context, SlashActivity.class);
-            app.setData(notif_uri);
-            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent piPostpone = NotificationHelper.getPostponeSummaryNotif(context, result[0], result[1]);
-            NotificationHelper notifHelper = new NotificationHelper(context);
-            Notification.Builder notifBuilder = notifHelper.getNotification(
-                    context.getResources().getString(R.string.site_name),
-                    notif_text, NotificationHelper.CHANNEL_NOTIFICATIONS);
-            notifBuilder.setFullScreenIntent(piEmpty, true)
-                    .setContentIntent(piSummary)
-                    .addAction(0, context.getResources().getString(R.string.postpone), piPostpone)
-                    .setLights(Color.GREEN, 1000, 1000);
-            if (result.length == 3)
-                notifBuilder.setNumber(Integer.parseInt(result[2]));
+            notifBuilder.setLights(Color.GREEN, 1000, 1000);
             if (sound)
                 notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
             if (vibration)
@@ -104,7 +131,7 @@ public class SummaryService extends JobIntentService {
         context.sendBroadcast(finish);
     }
 
-    private String[] checkSummary() throws Exception {
+    private List<String> checkSummary() throws Exception {
         Lib lib = new Lib(context);
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
@@ -126,8 +153,7 @@ public class SummaryService extends JobIntentService {
             br.close();
             return null;
         }
-        int count_new = 0;
-        String[] result = new String[]{context.getResources().getString(R.string.appeared_new) + title, Const.SITE + link};
+        List<String> list = new ArrayList<>();
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         Unread unread = new Unread(context);
         Date d;
@@ -136,8 +162,9 @@ public class SummaryService extends JobIntentService {
         do {
             d = new Date(Date.parse(s));
             if (unread.addLink(link, d)) {
-                count_new++;
                 loader.downloadPage(link, true);
+                list.add(title);
+                list.add(link);
             }
             bw.write(title);
             bw.write(Const.N);
@@ -158,11 +185,7 @@ public class SummaryService extends JobIntentService {
         br.close();
         unread.setBadge();
         unread.close();
-        if (count_new > 1) {
-            result = new String[]{context.getResources().getString(R.string.appeared_new_some),
-                    Const.SITE + SummaryFragment.RSS, Integer.toString(count_new)};
-        }
-        return result;
+        return list;
     }
 
     private String withOutTag(String s) {
