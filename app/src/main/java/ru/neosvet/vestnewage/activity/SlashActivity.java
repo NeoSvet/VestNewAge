@@ -287,7 +287,7 @@ public class SlashActivity extends AppCompatActivity {
                 }
                 int mode = 5;
                 if (link.contains("where")) {
-                    Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                    mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
                     link = link.substring(0, link.lastIndexOf("&"));
                     /* <option selected="" value="0">в Посланиях</option> 0
                        <option value="5">в Катренах</option> 1
