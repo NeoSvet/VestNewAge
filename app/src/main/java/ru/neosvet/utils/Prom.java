@@ -31,7 +31,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class Prom {
-    public static final int notif_id = 222, hour_prom1 = 10, hour_prom2 = 11;
+    public static final int notif_id = 222, hour_prom1 = 8, hour_prom2 = 11;
     private static final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
