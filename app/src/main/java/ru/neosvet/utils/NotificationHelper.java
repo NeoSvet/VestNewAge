@@ -113,6 +113,7 @@ public class NotificationHelper extends ContextWrapper {
             }
         }
         notifBuilder.setContentTitle(title)
+                .setWhen(System.currentTimeMillis())
                 .setContentText(msg)
                 .setSmallIcon(R.drawable.star)
                 .setAutoCancel(true);
@@ -141,6 +142,7 @@ public class NotificationHelper extends ContextWrapper {
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
         notifBuilder.setContentTitle(getResources().getString(R.string.app_name))
+                .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.star)
                 .setContentText(title)
                 .setStyle(style)
