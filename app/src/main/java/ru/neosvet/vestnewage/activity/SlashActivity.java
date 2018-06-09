@@ -105,6 +105,20 @@ public class SlashActivity extends AppCompatActivity {
         showSummaryNotif();
     }
 
+    private void showNotifTip(String title, String msg, Intent intent) {
+        PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification.Builder notifBuilder = notifHelper.getNotification(
+                title, msg, NotificationHelper.CHANNEL_TIPS);
+        notifBuilder.setContentIntent(piStart);
+        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
+        }
+        notifBuilder.setSound(null);
+        notifHelper.notify(++notif_id, notifBuilder);
+    }
+
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
         Notification.Builder notifBuilder = notifHelper.getSummaryNotif(
@@ -143,20 +157,6 @@ public class SlashActivity extends AppCompatActivity {
         p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
             PromReceiver.setReceiver(this, p);
-    }
-
-    private void showNotifTip(String title, String msg, Intent intent) {
-        PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification.Builder notifBuilder = notifHelper.getNotification(
-                title, msg, NotificationHelper.CHANNEL_TIPS);
-        notifBuilder.setContentIntent(piStart);
-        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            notifBuilder.setFullScreenIntent(piEmpty, false);
-        }
-        notifBuilder.setSound(null);
-        notifHelper.notify(++notif_id, notifBuilder);
     }
 
     private void initData(Bundle state) {
