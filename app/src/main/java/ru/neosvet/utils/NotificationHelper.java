@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +24,11 @@ import ru.neosvet.vestnewage.service.SummaryService;
  * Created by NeoSvet on 13.02.2018.
  * Helper class to manage notification channels, and create notifications.
  */
-//@RequiresApi(26)
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
-    public static final String CHANNEL_NOTIFICATIONS = "notif", CHANNEL_TIPS = "tips",
-            MODE = "mode", GROUP_NOTIFICATIONS = "group_notif", GROUP_TIPS = "group_tips";
+    public static final String CHANNEL_SUMMARY = "summary", CHANNEL_MUTE = "mute",
+            CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
+            GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
     private List<String> notifList;
 
     public static class Result extends Activity {
@@ -73,20 +74,39 @@ public class NotificationHelper extends ContextWrapper {
      */
     public NotificationHelper(Context context) {
         super(context);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel chan1 = new NotificationChannel(CHANNEL_NOTIFICATIONS,
-                    getString(R.string.notifications), NotificationManager.IMPORTANCE_HIGH);
-            chan1.setLightColor(Color.GREEN);
-            chan1.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            getManager().createNotificationChannel(chan1);
-
-            NotificationChannel chan2 = new NotificationChannel(CHANNEL_TIPS,
-                    getString(R.string.tips), NotificationManager.IMPORTANCE_HIGH);
-            chan2.setLightColor(Color.BLUE);
-            chan2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            getManager().createNotificationChannel(chan2);
+            if (getManager().getNotificationChannels().size() == 0) // no channels
+                createChannels();
         }
+    }
+
+    @RequiresApi(26)
+    private void createChannels() {
+        NotificationChannel chSummary = new NotificationChannel(CHANNEL_SUMMARY,
+                getString(R.string.updates_site), NotificationManager.IMPORTANCE_HIGH);
+        chSummary.enableLights(true);
+        chSummary.setLightColor(Color.GREEN);
+        chSummary.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        getManager().createNotificationChannel(chSummary);
+
+        NotificationChannel chProm = new NotificationChannel(CHANNEL_PROM,
+                getString(R.string.reminder_prom), NotificationManager.IMPORTANCE_HIGH);
+        chSummary.enableLights(true);
+        chProm.setLightColor(Color.RED);
+        chProm.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        getManager().createNotificationChannel(chProm);
+
+        NotificationChannel chTips = new NotificationChannel(CHANNEL_TIPS,
+                getString(R.string.tips), NotificationManager.IMPORTANCE_HIGH);
+        chTips.setSound(null, null);
+        chTips.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        getManager().createNotificationChannel(chTips);
+
+        NotificationChannel chMute = new NotificationChannel(CHANNEL_MUTE,
+                getString(R.string.mute_notif), NotificationManager.IMPORTANCE_LOW);
+        chMute.setSound(null, null);
+        chMute.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        getManager().createNotificationChannel(chMute);
     }
 
     /**

@@ -26,7 +26,9 @@
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <!--NotificationHelper-->
-    <string name="notifications">Уведомления</string>
+    <string name="updates_site">Проверка обновлений</string>
+    <string name="mute_notif">Беззвучные</string>
+    <string name="reminder_prom">Напоминания о Посыле</string>
     <string name="tips">Подсказки</string>
     <!--Menu-->
     <string name="rss">Сводка</string>

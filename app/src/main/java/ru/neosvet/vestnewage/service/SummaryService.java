@@ -77,6 +77,7 @@ public class SummaryService extends JobIntentService {
                 return;
             }
 
+            boolean several = result.size() > 2;
             String notif_text;
             Uri notif_uri;
             Intent app = new Intent(context, SlashActivity.class);
@@ -94,25 +95,24 @@ public class SummaryService extends JobIntentService {
                 piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
                 piPostpone = NotificationHelper.getPostponeSummaryNotif(context, result.get(i), notif_uri.toString());
                 notifBuilder = notifHelper.getNotification(
-                        context.getResources().getString(R.string.site_name),
-                        notif_text, NotificationHelper.CHANNEL_NOTIFICATIONS);
+                        context.getResources().getString(R.string.site_name), notif_text,
+                        (several ? NotificationHelper.CHANNEL_MUTE : NotificationHelper.CHANNEL_SUMMARY));
                 notifBuilder.setContentIntent(piSummary)
-                        .setGroup(NotificationHelper.GROUP_NOTIFICATIONS)
+                        .setGroup(NotificationHelper.GROUP_SUMMARY)
                         .addAction(0, context.getResources().getString(R.string.postpone), piPostpone);
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
                     notifBuilder.setFullScreenIntent(piEmpty, true);
             }
-            if (result.size() > 2) {
+            if (several) {
                 notifHelper.notify(notif_id + result.size(), notifBuilder);
                 notifBuilder = notifHelper.getSummaryNotif(
                         context.getResources().getString(R.string.appeared_new_some),
-                        NotificationHelper.CHANNEL_NOTIFICATIONS);
+                        NotificationHelper.CHANNEL_SUMMARY);
                 app.setData(Uri.parse(Const.SITE + SummaryFragment.RSS));
                 piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
                 notifBuilder.setContentIntent(piSummary)
-                        .setGroup(NotificationHelper.GROUP_NOTIFICATIONS);
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-                    notifBuilder.setFullScreenIntent(piEmpty, true);
+                        .setGroup(NotificationHelper.GROUP_SUMMARY);
+                notifBuilder.setFullScreenIntent(piEmpty, true);
             } else {
                 notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + result.get(0));
             }
