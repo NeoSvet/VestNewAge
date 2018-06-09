@@ -3,9 +3,12 @@ package ru.neosvet.vestnewage.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -132,63 +136,6 @@ public class SettingsFragment extends Fragment {
                     MainActivity.isMenuMode = check;
                 }
             });
-        cbCheckSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                saveSummary();
-            }
-        });
-        cbCheckVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                saveSummary();
-            }
-        });
-        sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setCheckTime();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                saveSummary();
-            }
-        });
-
-        cbPromSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                saveProm();
-            }
-        });
-        cbPromVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                saveProm();
-            }
-        });
-        sbPromTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                setPromTime();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                saveProm();
-            }
-        });
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -215,6 +162,97 @@ public class SettingsFragment extends Fragment {
                 prom.synchronTime(action);
                 bSyncTime.setEnabled(false);
 
+            }
+        });
+
+        sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                setCheckTime();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                saveSummary();
+            }
+        });
+        sbPromTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                setPromTime();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                saveProm();
+            }
+        });
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            cbCheckSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                    saveSummary();
+                }
+            });
+            cbCheckVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                    saveSummary();
+                }
+            });
+            cbPromSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                    saveProm();
+                }
+            });
+            cbPromVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                    saveProm();
+                }
+            });
+        } else {
+            cbCheckSound.setVisibility(View.GONE);
+            cbCheckVibr.setVisibility(View.GONE);
+            cbPromSound.setVisibility(View.GONE);
+            cbPromVibr.setVisibility(View.GONE);
+            initButtonsSet();
+        }
+    }
+
+    @RequiresApi(26)
+    private void initButtonsSet() {
+        View bSet = container.findViewById(R.id.bCheckSet);
+        bSet.setVisibility(View.VISIBLE);
+        bSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_SUMMARY);
+                startActivity(intent);
+            }
+        });
+        bSet = container.findViewById(R.id.bPromSet);
+        bSet.setVisibility(View.VISIBLE);
+        bSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_PROM);
+                startActivity(intent);
             }
         });
     }
@@ -261,7 +299,7 @@ public class SettingsFragment extends Fragment {
     private void initViews() {
         cbCountFloat = (CheckBox) container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
-        if(MainActivity.isMenuMode)
+        if (MainActivity.isMenuMode)
             cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
         cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {

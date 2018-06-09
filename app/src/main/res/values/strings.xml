@@ -137,6 +137,7 @@
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>
+    <string name="set">Настроить</string>
     <!--JournalFragment-->
     <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
     <string name="finish_list">Список закончился</string>
