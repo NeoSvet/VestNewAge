@@ -85,7 +85,10 @@ public class SlashActivity extends AppCompatActivity {
                             getResources().getString(R.string.new_option_notif), intent);
             }
         }
-        if (ver == 0) return;
+        if (ver == 0) {
+            showSummaryNotif();
+            return;
+        }
         if (ver < 10)
             adapterNewVersion();
         if (ver < 21)
@@ -152,6 +155,7 @@ public class SlashActivity extends AppCompatActivity {
             PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
+        notifBuilder.setSound(null);
         notifHelper.notify(++notif_id, notifBuilder);
     }
 
