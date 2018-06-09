@@ -116,13 +116,15 @@ public class SummaryService extends JobIntentService {
             } else {
                 notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + result.get(0));
             }
-            final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
-            final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
-            notifBuilder.setLights(Color.GREEN, 1000, 1000);
-            if (sound)
-                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-            if (vibration)
-                notifBuilder.setVibrate(new long[]{500, 1500});
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+                final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
+                notifBuilder.setLights(Color.GREEN, 1000, 1000);
+                if (sound)
+                    notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                if (vibration)
+                    notifBuilder.setVibrate(new long[]{500, 1500});
+            }
             notifHelper.notify(notif_id, notifBuilder);
         } catch (Exception e) {
             e.printStackTrace();

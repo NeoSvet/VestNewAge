@@ -324,11 +324,12 @@ public class Prom {
                 notifBuilder.setTimeoutAfter(30000);
             else
                 notifBuilder.setTimeoutAfter(p * 60000);
+        } else {
+            if (sound)
+                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            if (vibration)
+                notifBuilder.setVibrate(new long[]{500, 1500});
         }
-        if (sound)
-            notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        if (vibration)
-            notifBuilder.setVibrate(new long[]{500, 1500});
         notifHelper.notify(notif_id, notifBuilder);
         PromReceiver.setReceiver(context, p);
     }
