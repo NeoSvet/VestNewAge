@@ -5,7 +5,7 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "ru.neosvet.vestnewage"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 27
         versionCode 29
         versionName "2.9"
