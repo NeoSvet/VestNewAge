@@ -113,6 +113,7 @@ public class NotificationHelper extends ContextWrapper {
         }
         notifBuilder.setContentTitle(title)
                 .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
                 .setContentText(msg)
                 .setSmallIcon(R.drawable.star)
                 .setAutoCancel(true);
@@ -138,10 +139,10 @@ public class NotificationHelper extends ContextWrapper {
                 notifList.clear();
             }
             PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            notifBuilder.setFullScreenIntent(piEmpty, false);
+            notifBuilder.setFullScreenIntent(piEmpty, false)
+                    .setWhen(System.currentTimeMillis()).setShowWhen(true);
         }
         notifBuilder.setContentTitle(getResources().getString(R.string.app_name))
-                .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.star)
                 .setContentText(title)
                 .setStyle(style)
