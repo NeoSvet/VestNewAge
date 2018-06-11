@@ -12,13 +12,12 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.service.InitJobService;
-import ru.neosvet.vestnewage.service.SummaryService;
 
 /**
  * Created by NeoSvet on 13.02.2018.
@@ -26,6 +25,8 @@ import ru.neosvet.vestnewage.service.SummaryService;
  */
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
+    public static final int NOTIF_SUMMARY = 111, ID_SUMMARY = 2, ID_SUMMARY_POSTPONE = 3;
+    public static final int NOTIF_PROM = 222, ID_ACCEPT = 1;
     public static final String CHANNEL_SUMMARY = "summary", CHANNEL_MUTE = "mute",
             CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
@@ -37,13 +38,13 @@ public class NotificationHelper extends ContextWrapper {
             super.onCreate(savedInstanceState);
             int mode = getIntent().getIntExtra(MODE, -1);
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if (mode == Prom.notif_id) {
-                manager.cancel(Prom.notif_id);
-            } else if (mode == InitJobService.ID_SUMMARY_POSTPONE) {
-                manager.cancel(SummaryService.notif_id);
-                String des = getIntent().getStringExtra(DataBase.DESCTRIPTION);
-                String link = getIntent().getStringExtra(DataBase.LINK);
-                InitJobService.setSummaryPostpone(this, des, link);
+            if (mode == ID_ACCEPT) {
+                manager.cancel(NOTIF_PROM);
+            } else if (mode == ID_SUMMARY_POSTPONE) {
+                manager.cancel(getIntent().getIntExtra(DataBase.ID, 0));
+                SummaryHelper.postpone(this,
+                        getIntent().getStringExtra(DataBase.DESCTRIPTION),
+                        getIntent().getStringExtra(DataBase.LINK));
             }
             finish();
         }
@@ -52,17 +53,18 @@ public class NotificationHelper extends ContextWrapper {
     public static PendingIntent getCancelPromNotif(Context context) {
         Intent intent = new Intent(context, NotificationHelper.Result.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MODE, Prom.notif_id);
+        intent.putExtra(MODE, ID_ACCEPT);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 
-    public static PendingIntent getPostponeSummaryNotif(Context context, String des, String link) {
+    public static PendingIntent getPostponeSummaryNotif(Context context, int id, String des, String link) {
         Intent intent = new Intent(context, NotificationHelper.Result.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(MODE, InitJobService.ID_SUMMARY_POSTPONE);
+        intent.putExtra(MODE, ID_SUMMARY_POSTPONE);
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(DataBase.ID, id);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
@@ -116,20 +118,16 @@ public class NotificationHelper extends ContextWrapper {
      * changes.
      *
      * @param title the title of the notification
-     * @param msg  the msg text for the notification
+     * @param msg   the msg text for the notification
      * @return the builder as it keeps a reference to the notification (since API 24)
      */
-    public Notification.Builder getNotification(String title, String msg, String channel) {
-        Notification.Builder notifBuilder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            notifBuilder = new Notification.Builder(getApplicationContext(), channel);
-        else {
-            notifBuilder = new Notification.Builder(getApplicationContext());
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                if (notifList == null)
-                    notifList = new ArrayList<>();
-                notifList.add(title + " " + msg);
-            }
+    public NotificationCompat.Builder getNotification(String title, String msg, String channel) {
+        NotificationCompat.Builder notifBuilder;
+        notifBuilder = new NotificationCompat.Builder(getApplicationContext(), channel);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            if (notifList == null)
+                notifList = new ArrayList<>();
+            notifList.add(title + " " + msg);
         }
         notifBuilder.setContentTitle(title)
                 .setWhen(System.currentTimeMillis())
@@ -138,17 +136,14 @@ public class NotificationHelper extends ContextWrapper {
                 .setSmallIcon(R.drawable.star)
                 .setAutoCancel(true);
         if (msg.length() > 44)
-            notifBuilder.setStyle(new Notification.BigTextStyle().bigText(msg));
+            notifBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
         return notifBuilder;
     }
 
-    public Notification.Builder getSummaryNotif(String title, String channel) {
-        Notification.Builder notifBuilder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            notifBuilder = new Notification.Builder(this, channel);
-        else
-            notifBuilder = new Notification.Builder(this);
-        Notification.InboxStyle style = new Notification.InboxStyle()
+    public NotificationCompat.Builder getSummaryNotif(String title, String channel) {
+        NotificationCompat.Builder notifBuilder;
+        notifBuilder = new NotificationCompat.Builder(this, channel);
+        NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle()
                 .setSummaryText(title);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             style.setBigContentTitle(getResources().getString(R.string.app_name));
@@ -176,7 +171,7 @@ public class NotificationHelper extends ContextWrapper {
      * @param id           The ID of the notification
      * @param notification The notification object
      */
-    public void notify(int id, Notification.Builder notification) {
+    public void notify(int id, NotificationCompat.Builder notification) {
         getManager().notify(id, notification.build());
     }
 

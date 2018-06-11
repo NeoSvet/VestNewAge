@@ -90,7 +90,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         setViews();
         initCalendar();
         restoreActivityState(savedInstanceState);
-        if (Build.VERSION.SDK_INT > 23) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (act.isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
         }
@@ -728,7 +728,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
 
-        MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
     }
 
     public void blinkDay(int d) {

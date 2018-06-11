@@ -53,8 +53,8 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.PromHelper;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
@@ -81,7 +81,7 @@ public class BrowserActivity extends AppCompatActivity
     private String link = DataBase.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
-    private Prom prom;
+    private PromHelper prom;
     private Animation anMin, anMax;
     private MenuItem miTheme, miNomenu, miRefresh;
     private Tip tip;
@@ -287,11 +287,11 @@ public class BrowserActivity extends AppCompatActivity
         main = main.substring(main.indexOf("act"));
         SharedPreferences prMain = getSharedPreferences(main, MODE_PRIVATE);
         if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, true))
-            prom = new Prom(this, navMenu.getHeaderView(0)
+            prom = new PromHelper(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         else {
             tvPromTime = findViewById(R.id.tvPromTime);
-            prom = new Prom(this, tvPromTime);
+            prom = new PromHelper(this, tvPromTime);
         }
 
         drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);

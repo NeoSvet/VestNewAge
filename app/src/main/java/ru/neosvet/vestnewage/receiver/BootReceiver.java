@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 
+import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 
 /**
@@ -18,5 +20,11 @@ public class BootReceiver extends BroadcastReceiver {
         int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
             PromReceiver.setReceiver(context, p);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            pref = context.getSharedPreferences(SettingsFragment.SUMMARY, context.MODE_PRIVATE);
+            p = pref.getInt(SettingsFragment.TIME, -1);
+            if (p > -1)
+                SummaryHelper.setReceiver(context, 0); // or p?
+        }
     }
 }

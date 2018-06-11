@@ -1,6 +1,5 @@
 package ru.neosvet.utils;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -30,10 +30,9 @@ import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
-public class Prom {
-    public static final int notif_id = 222;
+public class PromHelper {
     private static final int hour_prom1 = 8, hour_prom2 = 11;
-    private static final String TIMEDIFF = "timediff";
+    private final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -41,7 +40,7 @@ public class Prom {
     private Lib lib;
     private SharedPreferences pref;
 
-    public Prom(Context context, @Nullable View textView) {
+    public PromHelper(Context context, @Nullable View textView) {
         this.context = context;
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         lib = new Lib(context);
@@ -56,15 +55,13 @@ public class Prom {
     }
 
     public void stop() {
-        if (timer != null) {
+        if (timer != null)
             timer.cancel();
-        }
     }
 
     public void resume() {
-        if (isProm()) {
+        if (isProm())
             setPromTime();
-        }
     }
 
     public void hide() {
@@ -313,7 +310,7 @@ public class Prom {
         }
         PendingIntent piCancel = NotificationHelper.getCancelPromNotif(context);
 
-        Notification.Builder notifBuilder = notifHelper.getNotification(
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.prom_for_soul_unite),
                 msg, NotificationHelper.CHANNEL_PROM);
         notifBuilder.setContentIntent(piProm)
@@ -331,7 +328,7 @@ public class Prom {
             if (vibration)
                 notifBuilder.setVibrate(new long[]{500, 1500});
         }
-        notifHelper.notify(notif_id, notifBuilder);
+        notifHelper.notify(NotificationHelper.NOTIF_PROM, notifBuilder);
         PromReceiver.setReceiver(context, p);
     }
 }

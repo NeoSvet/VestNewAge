@@ -20,11 +20,11 @@ import android.widget.TextView;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
-import ru.neosvet.utils.Prom;
+import ru.neosvet.utils.PromHelper;
+import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
-import ru.neosvet.vestnewage.service.InitJobService;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -141,7 +141,7 @@ public class SettingsFragment extends Fragment {
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Prom prom = new Prom(act.getApplicationContext(), null);
+                PromHelper prom = new PromHelper(act.getApplicationContext(), null);
                 Handler action = new Handler(new Handler.Callback() {
                     @Override
                     public boolean handleMessage(Message message) {
@@ -282,7 +282,7 @@ public class SettingsFragment extends Fragment {
         editor.putBoolean(SOUND, cbCheckSound.isChecked());
         editor.putBoolean(VIBR, cbCheckVibr.isChecked());
         editor.apply();
-        InitJobService.setSummary(act, p);
+        SummaryHelper.setReceiver(act, p);
     }
 
     private void saveProm() {

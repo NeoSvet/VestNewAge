@@ -27,7 +27,7 @@ import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.Prom;
+import ru.neosvet.utils.PromHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private TextView bDownloadIt;
     public StatusBar status;
-    private Prom prom;
+    private PromHelper prom;
     private SharedPreferences pref;
     private int cur_id, tab = 0, statusBack;
 
@@ -85,9 +85,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
-            prom = new Prom(this, findViewById(R.id.tvPromTime));
+            prom = new PromHelper(this, findViewById(R.id.tvPromTime));
         } else if (navigationView != null) { //it is not tablet and land
-            prom = new Prom(this, navigationView.getHeaderView(0)
+            prom = new PromHelper(this, navigationView.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         }
 
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setProm(View textView) {
-        prom = new Prom(this, textView);
+        prom = new PromHelper(this, textView);
     }
 
     @Override

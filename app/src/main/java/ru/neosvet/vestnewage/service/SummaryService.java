@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.service;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -12,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
+import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -28,6 +28,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
+import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -41,15 +42,14 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryService extends JobIntentService {
     private Context context;
-    public static final int notif_id = 111;
 
     public static void cancelNotif(Context context) {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.cancel(notif_id);
+        nm.cancel(NotificationHelper.NOTIF_SUMMARY);
     }
 
     public static void enqueueWork(Context context, Intent work) {
-        enqueueWork(context, SummaryService.class, notif_id, work);
+        enqueueWork(context, SummaryService.class, NotificationHelper.NOTIF_SUMMARY, work);
     }
 
 //    public SummaryService() {
@@ -62,7 +62,7 @@ public class SummaryService extends JobIntentService {
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         try {
             List<String> result;
-            if (intent.hasExtra(DataBase.LINK)) {
+            if (intent.hasExtra(DataBase.LINK)) { // postpone
                 result = new ArrayList<>();
                 result.add(intent.getStringExtra(DataBase.DESCTRIPTION));
                 result.add(intent.getStringExtra(DataBase.LINK));
@@ -72,28 +72,29 @@ public class SummaryService extends JobIntentService {
                 result = checkSummary();
             }
             if (result == null) { // no updates
-                Intent finish = new Intent(InitJobService.ACTION_FINISHED);
-                context.sendBroadcast(finish);
+                SummaryHelper.serviceFinish(context);
                 return;
             }
 
             boolean several = result.size() > 2;
+            boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
             String notif_text;
             Uri notif_uri;
             Intent app = new Intent(context, SlashActivity.class);
             PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent piSummary, piPostpone;
+            NotificationCompat.Builder notifBuilder = null;
             NotificationHelper notifHelper = new NotificationHelper(context);
-            Notification.Builder notifBuilder = null;
-
             for (int i = 0; i < result.size(); i += 2) {
-                if (notifBuilder != null)
-                    notifHelper.notify(notif_id + i, notifBuilder);
+                if (notifBuilder != null && !notNotify)
+                    notifHelper.notify(NotificationHelper.NOTIF_SUMMARY + i, notifBuilder);
                 notif_text = result.get(i);
                 notif_uri = Uri.parse(Const.SITE + result.get(i + 1));
                 app.setData(notif_uri);
                 piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-                piPostpone = NotificationHelper.getPostponeSummaryNotif(context, result.get(i), notif_uri.toString());
+                piPostpone = NotificationHelper.getPostponeSummaryNotif(context,
+                        NotificationHelper.NOTIF_SUMMARY + i + 2,
+                        result.get(i), notif_uri.toString());
                 notifBuilder = notifHelper.getNotification(
                         context.getResources().getString(R.string.site_name), notif_text,
                         (several ? NotificationHelper.CHANNEL_MUTE : NotificationHelper.CHANNEL_SUMMARY));
@@ -104,7 +105,8 @@ public class SummaryService extends JobIntentService {
                     notifBuilder.setFullScreenIntent(piEmpty, true);
             }
             if (several) {
-                notifHelper.notify(notif_id + result.size(), notifBuilder);
+                if (!notNotify)
+                    notifHelper.notify(NotificationHelper.NOTIF_SUMMARY + result.size(), notifBuilder);
                 notifBuilder = notifHelper.getSummaryNotif(
                         context.getResources().getString(R.string.appeared_new_some),
                         NotificationHelper.CHANNEL_SUMMARY);
@@ -127,12 +129,11 @@ public class SummaryService extends JobIntentService {
                 if (vibration)
                     notifBuilder.setVibrate(new long[]{500, 1500});
             }
-            notifHelper.notify(notif_id, notifBuilder);
+            notifHelper.notify(NotificationHelper.NOTIF_SUMMARY, notifBuilder);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Intent finish = new Intent(InitJobService.ACTION_FINISHED);
-        context.sendBroadcast(finish);
+        SummaryHelper.serviceFinish(context);
     }
 
     private List<String> checkSummary() throws Exception {

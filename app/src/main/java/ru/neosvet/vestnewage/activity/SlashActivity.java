@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.activity;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -12,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -31,12 +31,12 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
+import ru.neosvet.utils.PromHelper;
+import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.utils.Prom;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
-import ru.neosvet.vestnewage.service.InitJobService;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class SlashActivity extends AppCompatActivity {
@@ -64,7 +64,7 @@ public class SlashActivity extends AppCompatActivity {
         initAnimation();
         initData(savedInstanceState);
 
-        Prom prom = new Prom(this, null);
+        PromHelper prom = new PromHelper(this, null);
         prom.synchronTime(null);
 
         notifHelper = new NotificationHelper(SlashActivity.this);
@@ -107,7 +107,7 @@ public class SlashActivity extends AppCompatActivity {
 
     private void showNotifTip(String title, String msg, Intent intent) {
         PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification.Builder notifBuilder = notifHelper.getNotification(
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 title, msg, NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
@@ -121,7 +121,7 @@ public class SlashActivity extends AppCompatActivity {
 
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
-        Notification.Builder notifBuilder = notifHelper.getSummaryNotif(
+        NotificationCompat.Builder notifBuilder = notifHelper.getSummaryNotif(
                 getResources().getString(R.string.tips),
                 NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
@@ -156,7 +156,7 @@ public class SlashActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
-            InitJobService.setSummary(this, p);
+            SummaryHelper.setReceiver(this, p);
         pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
         p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)

@@ -99,7 +99,7 @@
         </receiver>
         <receiver android:name=".receiver.PromReceiver" />
         <service
-            android:name=".service.InitJobService"
+            android:name="ru.neosvet.utils.SummaryHelper$InitJobService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
