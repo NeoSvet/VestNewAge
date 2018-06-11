@@ -5,10 +5,10 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "ru.neosvet.vestnewage"
-        minSdkVersion 26
+        minSdkVersion 21
         targetSdkVersion 27
-        versionCode 29
-        versionName "2.9"
+        versionCode 30
+        versionName "2.10"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
