@@ -579,8 +579,6 @@ public class BrowserActivity extends AppCompatActivity
 
     private void openFile() {
         status.setLoad(false);
-        if (lib.verifyStoragePermissions(CODE_OPEN))
-            return;
         File f = getFile();
         if (f.exists()) {
             try {
