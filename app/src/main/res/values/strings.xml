@@ -4,11 +4,11 @@
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="download_title">Загрузить&#8230;</string>
-    <string name="download_all">Загрузить все материалы</string>
-    <string name="download_it_main">Загрузить все статьи</string>
-    <string name="download_it_book">Загрузить книгу с 2016 года</string>
-    <string name="download_it_calendar">Загрузить текущий год</string>
+    <string name="download_title">Скачать&#8230;</string>
+    <string name="download_all">Скачать все материалы</string>
+    <string name="download_it_main">Скачать все статьи</string>
+    <string name="download_it_book">Скачать книгу с 2016 года</string>
+    <string name="download_it_calendar">Скачать текущий год</string>
     <string name="new_item">[Новое]</string>
     <!--Dialog-->
     <string name="delete">Удалить?</string>
@@ -49,7 +49,7 @@
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
     <string name="list_is_empty">Список за этот месяц пуст!</string>
-    <string name="alert_download_otkr">Загрузить Послания за 2004-2015 года?\nОбъём данных для загрузки: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
+    <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для загрузки: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
@@ -92,7 +92,7 @@
     <!--SiteFragment-->
     <string name="news">Объявления</string>
     <string name="media">Видео и пресса</string>
-    <string name="to_load">Загрузить</string>
+    <string name="to_load">Скачать</string>
     <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->
     <string name="anketa_failed">Анкета загружена неверно</string>
