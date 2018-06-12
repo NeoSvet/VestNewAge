@@ -62,7 +62,17 @@ public class SummaryService extends JobIntentService {
 
             boolean several = result.size() > 2;
             boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
-            for (int i = result.size() - 2; i > -1; i -= 2) {
+            int start, end, step;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                start = 0;
+                end = result.size();
+                step = 2;
+            } else {
+                start = result.size() - 2;
+                end = -2;
+                step = -2;
+            }
+            for (int i = start; i != end; i += step) {
                 if (summaryHelper.isNotification() && !notNotify)
                     summaryHelper.showNotification();
                 summaryHelper.createNotification(result.get(i), result.get(i + 1));
