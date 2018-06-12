@@ -188,17 +188,20 @@ public class SummaryHelper {
             Context context = getApplicationContext();
             if (param.getJobId() == NotificationHelper.ID_SUMMARY) {
                 Intent intent = new Intent(context, SummaryService.class);
-                if (param.getJobId() == NotificationHelper.ID_SUMMARY_POSTPONE) {
-                    PersistableBundle extras = param.getExtras();
-                    intent.putExtra(DataBase.DESCTRIPTION, extras.getString(DataBase.DESCTRIPTION));
-                    intent.putExtra(DataBase.LINK, extras.getString(DataBase.LINK));
-                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     SummaryService.enqueueWork(context, intent);
                 else
                     context.startService(intent);
                 initFinishReceiver(param);
                 return true; //not finish
+            } else if (param.getJobId() == NotificationHelper.ID_SUMMARY_POSTPONE) {
+                PersistableBundle extras = param.getExtras();
+                SummaryHelper summaryHelper = new SummaryHelper(context);
+                summaryHelper.createNotification(
+                        NotificationHelper.NOTIF_SUMMARY,
+                        extras.getString(DataBase.DESCTRIPTION),
+                        extras.getString(DataBase.LINK));
+                summaryHelper.showNotification();
             }
             return false; //finish
         }
