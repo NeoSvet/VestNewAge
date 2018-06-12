@@ -62,7 +62,7 @@ public class SummaryService extends JobIntentService {
 
             boolean several = result.size() > 2;
             boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
-            for (int i = 0; i < result.size(); i += 2) {
+            for (int i = result.size() - 2; i > -1; i -= 2) {
                 if (summaryHelper.isNotification() && !notNotify)
                     summaryHelper.showNotification();
                 summaryHelper.createNotification(result.get(i), result.get(i + 1));
@@ -135,6 +135,11 @@ public class SummaryService extends JobIntentService {
         } while (s != null);
         bw.close();
         br.close();
+        if (unread.addLink(link, d)) {
+            loader.downloadPage(link, true);
+            list.add(title);
+            list.add(link);
+        }
         unread.setBadge();
         unread.close();
         return list;
