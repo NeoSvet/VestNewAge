@@ -20,9 +20,9 @@ import android.os.PersistableBundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
+import ru.neosvet.ui.SetNotifDialog;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -94,11 +94,16 @@ public class SummaryHelper {
 
     public void setPreferences(SharedPreferences pref) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
-            boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
+            boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
+            boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
             notifBuilder.setLights(Color.GREEN, 1000, 1000);
-            if (sound)
-                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            if (sound) {
+                String uri = pref.getString(SetNotifDialog.URI, null);
+                if (uri == null)
+                    notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                else
+                    notifBuilder.setSound(Uri.parse(uri));
+            }
             if (vibration)
                 notifBuilder.setVibrate(new long[]{500, 1500});
         }

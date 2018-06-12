@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="270dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/field_rect"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <CheckBox
+        android:id="@+id/cbSound"
+        style="@style/CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:text="@string/notif_sound" />
+
+    <TextView
+        android:id="@+id/tvSound"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp" />
+
+    <TextView
+        android:id="@+id/tvLabel"
+        style="@style/Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:text="@string/select"
+        android:textSize="12sp" />
+
+    <LinearLayout
+        android:id="@+id/pButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/bStandard"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginRight="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/standard" />
+
+        <Button
+            android:id="@+id/bCustom"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/their" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/cbVibr"
+        style="@style/CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="@string/vibr" />
+
+    <Button
+        android:id="@+id/bOk"
+        style="@style/Button"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="right"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@android:string/ok" />
+
+</LinearLayout>

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.SetNotifDialog;
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
@@ -48,11 +49,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
     public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
     private MenuFragment frMenu;
-    private CalendarFragment frCalendar;
     private SummaryFragment frSummary;
+    private CalendarFragment frCalendar;
+    private SearchFragment frSearch;
     private CollectionsFragment frCollections;
     private CabmainFragment frCabinet;
-    private SearchFragment frSearch;
+    private SettingsFragment frSettings;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
     public Lib lib = new Lib(this);
@@ -307,7 +309,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frCabinet);
                 break;
             case R.id.nav_settings:
-                fragmentTransaction.replace(R.id.my_fragment, new SettingsFragment());
+                frSettings = new SettingsFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frSettings);
                 break;
             case R.id.nav_help:
                 if (tab == -1) { //first start
@@ -345,10 +348,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         if (frCollections != null) {
             if (requestCode == frCollections.MARKER_REQUEST)
                 frCollections.putResult(resultCode);
+        }
+        if (frSettings != null) {
+            if (resultCode == RESULT_OK)
+                if (requestCode == SetNotifDialog.RINGTONE)
+                    frSettings.putRingtone(data);
+                else if (requestCode == SetNotifDialog.CUSTOM)
+                    frSettings.putCustom(data);
         }
     }
 

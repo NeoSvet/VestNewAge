@@ -122,27 +122,6 @@
             android:layout_marginRight="20dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="@string/set"
-            android:visibility="gone" />
-
-        <CheckBox
-            android:id="@+id/cbCheckSound"
-            style="@style/CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="@string/notif_sound" />
-
-        <CheckBox
-            android:id="@+id/cbCheckVibr"
-            style="@style/CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="@string/vibr" />
+            android:text="@string/set_notif" />
     </LinearLayout>
 </LinearLayout>

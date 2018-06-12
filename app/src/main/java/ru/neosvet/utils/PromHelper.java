@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import ru.neosvet.ui.SetNotifDialog;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -297,8 +298,8 @@ public class PromHelper {
         final int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p == -1)
             return;
-        boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
-        boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
+        boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
+        boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
         Intent intent = new Intent(context, SlashActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -323,8 +324,13 @@ public class PromHelper {
             else
                 notifBuilder.setTimeoutAfter(p * 60000);
         } else {
-            if (sound)
-                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            if (sound) {
+                String uri = pref.getString(SetNotifDialog.URI, null);
+                if (uri == null)
+                    notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                else
+                    notifBuilder.setSound(Uri.parse(uri));
+            }
             if (vibration)
                 notifBuilder.setVibrate(new long[]{500, 1500});
         }

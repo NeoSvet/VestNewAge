@@ -3,10 +3,15 @@ package ru.neosvet.vestnewage.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
@@ -18,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import ru.neosvet.ui.SetNotifDialog;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.PromHelper;
@@ -29,17 +35,18 @@ import ru.neosvet.vestnewage.receiver.PromReceiver;
 import static android.content.Context.MODE_PRIVATE;
 
 public class SettingsFragment extends Fragment {
-    public static final String PANELS = "panels", SUMMARY = "Summary", PROM = "Prom",
-            TIME = "time", SOUND = "sound", VIBR = "vibr";
+    public static final String PANELS = "panels", TIME = "time",
+            SUMMARY = "Summary", PROM = "Prom";
     private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
     private MainActivity act;
+    private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View container, bSyncTime, pBase;
     private View pCheck, tvCheckOn, tvCheckOff;
     private View pProm, tvPromOn, tvPromOff;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
-    private CheckBox cbCountFloat, cbMenuMode, cbCheckSound, cbCheckVibr, cbPromSound, cbPromVibr;
+    private CheckBox cbCountFloat, cbMenuMode;
     private SeekBar sbCheckTime, sbPromTime;
 
     @Override
@@ -199,44 +206,34 @@ public class SettingsFragment extends Fragment {
                 saveProm();
             }
         });
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            cbCheckSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    saveSummary();
-                }
-            });
-            cbCheckVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    saveSummary();
-                }
-            });
-            cbPromSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    saveProm();
-                }
-            });
-            cbPromVibr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    saveProm();
-                }
-            });
-        } else {
-            cbCheckSound.setVisibility(View.GONE);
-            cbCheckVibr.setVisibility(View.GONE);
-            cbPromSound.setVisibility(View.GONE);
-            cbPromVibr.setVisibility(View.GONE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             initButtonsSet();
-        }
+        else
+            initButtonsSetNew();
+    }
+
+    private void initButtonsSet() {
+        View bSet = container.findViewById(R.id.bCheckSet);
+        bSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog = new SetNotifDialog(act, SUMMARY);
+                dialog.show();
+            }
+        });
+        bSet = container.findViewById(R.id.bPromSet);
+        bSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog = new SetNotifDialog(act, PROM);
+                dialog.show();
+            }
+        });
     }
 
     @RequiresApi(26)
-    private void initButtonsSet() {
+    private void initButtonsSetNew() {
         View bSet = container.findViewById(R.id.bCheckSet);
-        bSet.setVisibility(View.VISIBLE);
         bSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -247,7 +244,6 @@ public class SettingsFragment extends Fragment {
             }
         });
         bSet = container.findViewById(R.id.bPromSet);
-        bSet.setVisibility(View.VISIBLE);
         bSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -279,8 +275,6 @@ public class SettingsFragment extends Fragment {
                 p += (p - 5) * 5;
         } else p = -1;
         editor.putInt(TIME, p);
-        editor.putBoolean(SOUND, cbCheckSound.isChecked());
-        editor.putBoolean(VIBR, cbCheckVibr.isChecked());
         editor.apply();
         SummaryHelper.setReceiver(act, p);
     }
@@ -292,18 +286,16 @@ public class SettingsFragment extends Fragment {
         if (p == sbPromTime.getMax())
             p = -1;
         editor.putInt(TIME, p);
-        editor.putBoolean(SOUND, cbPromSound.isChecked());
-        editor.putBoolean(VIBR, cbPromVibr.isChecked());
         editor.apply();
         PromReceiver.setReceiver(act, p);
     }
 
     private void initViews() {
-        cbCountFloat = (CheckBox) container.findViewById(R.id.cbCountFloat);
+        cbCountFloat = container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
         if (MainActivity.isMenuMode)
             cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
-        cbMenuMode = (CheckBox) container.findViewById(R.id.cbMenuMode);
+        cbMenuMode = container.findViewById(R.id.cbMenuMode);
         if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
             cbMenuMode.setChecked(MainActivity.isMenuMode);
         } else { // else tablet
@@ -320,8 +312,6 @@ public class SettingsFragment extends Fragment {
         tvCheck = container.findViewById(R.id.tvCheck);
         tvCheckOn = container.findViewById(R.id.tvCheckOn);
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
-        cbCheckSound = container.findViewById(R.id.cbCheckSound);
-        cbCheckVibr = container.findViewById(R.id.cbCheckVibr);
         sbCheckTime = container.findViewById(R.id.sbCheckTime);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(TIME, -1);
@@ -329,14 +319,10 @@ public class SettingsFragment extends Fragment {
             p = sbCheckTime.getMax();
         sbCheckTime.setProgress(p);
         setCheckTime();
-        cbCheckSound.setChecked(pref.getBoolean(SOUND, false));
-        cbCheckVibr.setChecked(pref.getBoolean(VIBR, true));
 
         tvPromNotif = container.findViewById(R.id.tvPromNotif);
         tvPromOn = container.findViewById(R.id.tvPromOn);
         tvPromOff = container.findViewById(R.id.tvPromOff);
-        cbPromSound = container.findViewById(R.id.cbPromSound);
-        cbPromVibr = container.findViewById(R.id.cbPromVibr);
         sbPromTime = container.findViewById(R.id.sbPromTime);
         pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
         p = pref.getInt(TIME, -1);
@@ -344,8 +330,6 @@ public class SettingsFragment extends Fragment {
             p = sbPromTime.getMax();
         sbPromTime.setProgress(p);
         setPromTime();
-        cbPromSound.setChecked(pref.getBoolean(SOUND, false));
-        cbPromVibr.setChecked(pref.getBoolean(VIBR, true));
         bSyncTime = container.findViewById(R.id.bSyncTime);
     }
 
@@ -420,5 +404,33 @@ public class SettingsFragment extends Fragment {
             }
         }
         tvPromNotif.setText(t);
+    }
+
+    public void putRingtone(Intent data) {
+        if (data == null) return;
+        Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+        if (uri == null) return;
+        Ringtone ringTone = RingtoneManager.getRingtone(act, uri);
+        dialog.putRingtone(ringTone.getTitle(act), uri.toString());
+    }
+
+    public void putCustom(Intent data) {
+        if (data == null) return;
+        String path;
+        Cursor cursor = null;
+        try {
+            cursor = act.getContentResolver().query(data.getData(),
+                    new String[]{MediaStore.Images.Media.DATA},
+                    null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            cursor.moveToFirst();
+            path = cursor.getString(column_index);
+        } catch (Exception e) {
+            return;
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        dialog.putRingtone(path.substring(path.lastIndexOf("/") + 1), data.getData().toString());
     }
 }
