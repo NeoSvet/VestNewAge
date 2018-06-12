@@ -11,11 +11,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 import ru.neosvet.vestnewage.service.SummaryService;
 
@@ -23,6 +31,80 @@ import ru.neosvet.vestnewage.service.SummaryService;
  * Created by NeoSvet on 11.06.2018.
  */
 public class SummaryHelper {
+    private Context context;
+    private NotificationHelper notifHelper;
+    private Intent intent;
+    private PendingIntent piEmpty;
+    private int notif_id;
+    private NotificationCompat.Builder notifBuilder;
+
+
+    public SummaryHelper(Context context) {
+        this.context = context;
+        notifHelper = new NotificationHelper(context);
+        intent = new Intent(context, SlashActivity.class);
+        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public void createNotification(int id, String text, String link) {
+        if (!link.contains("://"))
+            link = Const.SITE + link;
+        notif_id = id;
+        intent.setData(Uri.parse(link));
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(id, text, link);
+        notifBuilder = notifHelper.getNotification(
+                context.getResources().getString(R.string.site_name), text,
+                NotificationHelper.CHANNEL_SUMMARY);
+        notifBuilder.setContentIntent(piSummary)
+                .setGroup(NotificationHelper.GROUP_SUMMARY)
+                .addAction(0, context.getResources().getString(R.string.postpone), piPostpone);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            notifBuilder.setFullScreenIntent(piEmpty, true);
+    }
+
+    public boolean isNotification() {
+        return notifBuilder != null;
+    }
+
+    public void muteNotification() {
+        notifBuilder.setChannelId(NotificationHelper.CHANNEL_MUTE);
+    }
+
+    public void showNotification() {
+        notifHelper.notify(notif_id, notifBuilder);
+    }
+
+    public void groupNotification() {
+        notif_id = NotificationHelper.NOTIF_SUMMARY;
+        notifBuilder = notifHelper.getSummaryNotif(
+                context.getResources().getString(R.string.appeared_new_some),
+                NotificationHelper.CHANNEL_SUMMARY);
+        intent.setData(Uri.parse(Const.SITE + SummaryFragment.RSS));
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notifBuilder.setContentIntent(piSummary)
+                .setGroup(NotificationHelper.GROUP_SUMMARY);
+        notifBuilder.setFullScreenIntent(piEmpty, true);
+    }
+
+    public void singleNotification(String text) {
+        notif_id = NotificationHelper.NOTIF_SUMMARY;
+        notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + text);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            notifBuilder.setFullScreenIntent(piEmpty, true);
+    }
+
+    public void setPreferences(SharedPreferences pref) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
+            boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
+            notifBuilder.setLights(Color.GREEN, 1000, 1000);
+            if (sound)
+                notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            if (vibration)
+                notifBuilder.setVibrate(new long[]{500, 1500});
+        }
+    }
 
     public static void postpone(Context context, String des, String link) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)

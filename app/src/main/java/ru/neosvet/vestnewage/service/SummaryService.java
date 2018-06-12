@@ -1,17 +1,12 @@
 package ru.neosvet.vestnewage.service;
 
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
-import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -30,8 +25,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.utils.Unread;
-import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.task.LoaderTask;
@@ -60,6 +53,7 @@ public class SummaryService extends JobIntentService {
     protected void onHandleWork(@NonNull final Intent intent) {
         context = getApplicationContext();
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+        SummaryHelper summaryHelper = new SummaryHelper(context);
         try {
             List<String> result;
             if (intent.hasExtra(DataBase.LINK)) { // postpone
@@ -78,58 +72,24 @@ public class SummaryService extends JobIntentService {
 
             boolean several = result.size() > 2;
             boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
-            String notif_text;
-            Uri notif_uri;
-            Intent app = new Intent(context, SlashActivity.class);
-            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent piSummary, piPostpone;
-            NotificationCompat.Builder notifBuilder = null;
-            NotificationHelper notifHelper = new NotificationHelper(context);
             for (int i = 0; i < result.size(); i += 2) {
-                if (notifBuilder != null && !notNotify)
-                    notifHelper.notify(NotificationHelper.NOTIF_SUMMARY + i, notifBuilder);
-                notif_text = result.get(i);
-                notif_uri = Uri.parse(Const.SITE + result.get(i + 1));
-                app.setData(notif_uri);
-                piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-                piPostpone = notifHelper.getPostponeSummaryNotif(
-                        NotificationHelper.NOTIF_SUMMARY + i + 2,
-                        result.get(i), notif_uri.toString());
-                notifBuilder = notifHelper.getNotification(
-                        context.getResources().getString(R.string.site_name), notif_text,
-                        (several ? NotificationHelper.CHANNEL_MUTE : NotificationHelper.CHANNEL_SUMMARY));
-                notifBuilder.setContentIntent(piSummary)
-                        .setGroup(NotificationHelper.GROUP_SUMMARY)
-                        .addAction(0, context.getResources().getString(R.string.postpone), piPostpone);
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-                    notifBuilder.setFullScreenIntent(piEmpty, true);
+                if (summaryHelper.isNotification() && !notNotify)
+                    summaryHelper.showNotification();
+                summaryHelper.createNotification(
+                        NotificationHelper.NOTIF_SUMMARY + i + 1,
+                        //NOTIF_SUMMARY reserve for final notif, because +1
+                        result.get(i), result.get(i + 1));
+                if(several)
+                    summaryHelper.muteNotification();
             }
             if (several) {
                 if (!notNotify)
-                    notifHelper.notify(NotificationHelper.NOTIF_SUMMARY + result.size(), notifBuilder);
-                notifBuilder = notifHelper.getSummaryNotif(
-                        context.getResources().getString(R.string.appeared_new_some),
-                        NotificationHelper.CHANNEL_SUMMARY);
-                app.setData(Uri.parse(Const.SITE + SummaryFragment.RSS));
-                piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-                notifBuilder.setContentIntent(piSummary)
-                        .setGroup(NotificationHelper.GROUP_SUMMARY);
-                notifBuilder.setFullScreenIntent(piEmpty, true);
-            } else {
-                notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + result.get(0));
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-                    notifBuilder.setFullScreenIntent(piEmpty, true);
-            }
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                final boolean sound = pref.getBoolean(SettingsFragment.SOUND, false);
-                final boolean vibration = pref.getBoolean(SettingsFragment.VIBR, true);
-                notifBuilder.setLights(Color.GREEN, 1000, 1000);
-                if (sound)
-                    notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-                if (vibration)
-                    notifBuilder.setVibrate(new long[]{500, 1500});
-            }
-            notifHelper.notify(NotificationHelper.NOTIF_SUMMARY, notifBuilder);
+                    summaryHelper.showNotification();
+                summaryHelper.groupNotification();
+            } else
+                summaryHelper.singleNotification(result.get(0));
+            summaryHelper.setPreferences(pref);
+            summaryHelper.showNotification();
         } catch (Exception e) {
             e.printStackTrace();
         }
