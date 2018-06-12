@@ -113,7 +113,7 @@ public class SummaryHelper {
             setSummaryPostpone(context, des, link);
     }
 
-    public static void serviceFinish(Context context) {
+    public void serviceFinish() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Intent finish = new Intent(InitJobService.ACTION_FINISHED);
             context.sendBroadcast(finish);

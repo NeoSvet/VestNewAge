@@ -66,7 +66,7 @@ public class SummaryService extends JobIntentService {
                 result = checkSummary();
             }
             if (result == null) { // no updates
-                SummaryHelper.serviceFinish(context);
+                summaryHelper.serviceFinish();
                 return;
             }
 
@@ -93,7 +93,7 @@ public class SummaryService extends JobIntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        SummaryHelper.serviceFinish(context);
+        summaryHelper.serviceFinish();
     }
 
     private List<String> checkSummary() throws Exception {
