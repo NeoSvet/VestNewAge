@@ -35,7 +35,7 @@ public class SummaryHelper {
     private NotificationHelper notifHelper;
     private Intent intent;
     private PendingIntent piEmpty;
-    private int notif_id;
+    private int notif_id = NotificationHelper.NOTIF_SUMMARY;
     private NotificationCompat.Builder notifBuilder;
 
 
@@ -46,13 +46,12 @@ public class SummaryHelper {
         piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    public void createNotification(int id, String text, String link) {
+    public void createNotification(String text, String link) {
         if (!link.contains("://"))
             link = Const.SITE + link;
-        notif_id = id;
         intent.setData(Uri.parse(link));
         PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(id, text, link);
+        PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(notif_id, text, link);
         notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.site_name), text,
                 NotificationHelper.CHANNEL_SUMMARY);
@@ -73,10 +72,10 @@ public class SummaryHelper {
 
     public void showNotification() {
         notifHelper.notify(notif_id, notifBuilder);
+        notif_id++;
     }
 
     public void groupNotification() {
-        notif_id = NotificationHelper.NOTIF_SUMMARY;
         notifBuilder = notifHelper.getSummaryNotif(
                 context.getResources().getString(R.string.appeared_new_some),
                 NotificationHelper.CHANNEL_SUMMARY);
@@ -88,7 +87,6 @@ public class SummaryHelper {
     }
 
     public void singleNotification(String text) {
-        notif_id = NotificationHelper.NOTIF_SUMMARY;
         notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + text);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             notifBuilder.setFullScreenIntent(piEmpty, true);
@@ -198,7 +196,6 @@ public class SummaryHelper {
                 PersistableBundle extras = param.getExtras();
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.createNotification(
-                        NotificationHelper.NOTIF_SUMMARY,
                         extras.getString(DataBase.DESCTRIPTION),
                         extras.getString(DataBase.LINK));
                 summaryHelper.showNotification();

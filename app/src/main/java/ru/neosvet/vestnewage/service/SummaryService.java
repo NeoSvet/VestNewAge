@@ -65,11 +65,8 @@ public class SummaryService extends JobIntentService {
             for (int i = 0; i < result.size(); i += 2) {
                 if (summaryHelper.isNotification() && !notNotify)
                     summaryHelper.showNotification();
-                summaryHelper.createNotification(
-                        NotificationHelper.NOTIF_SUMMARY + i + 1,
-                        //NOTIF_SUMMARY reserve for final notif, because +1
-                        result.get(i), result.get(i + 1));
-                if(several)
+                summaryHelper.createNotification(result.get(i), result.get(i + 1));
+                if (several)
                     summaryHelper.muteNotification();
             }
             if (several) {
