@@ -50,22 +50,22 @@ public class NotificationHelper extends ContextWrapper {
         }
     }
 
-    public static PendingIntent getCancelPromNotif(Context context) {
-        Intent intent = new Intent(context, NotificationHelper.Result.class);
+    public PendingIntent getCancelPromNotif() {
+        Intent intent = new Intent(this, NotificationHelper.Result.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, ID_ACCEPT);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 
-    public static PendingIntent getPostponeSummaryNotif(Context context, int id, String des, String link) {
-        Intent intent = new Intent(context, NotificationHelper.Result.class);
+    public PendingIntent getPostponeSummaryNotif(int id, String des, String link) {
+        Intent intent = new Intent(this, NotificationHelper.Result.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, ID_SUMMARY_POSTPONE);
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
         intent.putExtra(DataBase.ID, id);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 

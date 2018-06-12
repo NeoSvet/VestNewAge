@@ -92,7 +92,7 @@ public class SummaryService extends JobIntentService {
                 notif_uri = Uri.parse(Const.SITE + result.get(i + 1));
                 app.setData(notif_uri);
                 piSummary = PendingIntent.getActivity(context, 0, app, PendingIntent.FLAG_UPDATE_CURRENT);
-                piPostpone = NotificationHelper.getPostponeSummaryNotif(context,
+                piPostpone = notifHelper.getPostponeSummaryNotif(
                         NotificationHelper.NOTIF_SUMMARY + i + 2,
                         result.get(i), notif_uri.toString());
                 notifBuilder = notifHelper.getNotification(
