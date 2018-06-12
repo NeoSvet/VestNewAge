@@ -91,7 +91,7 @@ public class SetNotifDialog extends Dialog {
                 String data = uri;
                 if (data == null)
                     data = Environment.getExternalStorageDirectory().getAbsolutePath();
-                intent.setDataAndType(android.net.Uri.parse(data), "audio/mp3");
+                intent.setDataAndType(android.net.Uri.parse(data), "audio/*");
                 act.startActivityForResult(intent, CUSTOM);
             }
         });
