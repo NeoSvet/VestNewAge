@@ -21,10 +21,10 @@ import java.util.List;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.NotificationHelper;
 import ru.neosvet.utils.Unread;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
-import ru.neosvet.vestnewage.service.SummaryService;
 
 public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Serializable {
     private transient SummaryFragment frm;
@@ -175,7 +175,8 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
     }
 
     public void downloadList() throws Exception {
-        SummaryService.cancelNotif(act);
+        NotificationHelper notifHelper = new NotificationHelper(act);
+        notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         String line;
         InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);

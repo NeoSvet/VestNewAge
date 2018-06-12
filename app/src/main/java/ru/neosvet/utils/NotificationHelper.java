@@ -37,11 +37,11 @@ public class NotificationHelper extends ContextWrapper {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             int mode = getIntent().getIntExtra(MODE, -1);
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationHelper notifHelper = new NotificationHelper(this);
             if (mode == ID_ACCEPT) {
-                manager.cancel(NOTIF_PROM);
+                notifHelper.cancel(NOTIF_PROM);
             } else if (mode == ID_SUMMARY_POSTPONE) {
-                manager.cancel(getIntent().getIntExtra(DataBase.ID, 0));
+                notifHelper.cancel(getIntent().getIntExtra(DataBase.ID, 0));
                 SummaryHelper.postpone(this,
                         getIntent().getStringExtra(DataBase.DESCTRIPTION),
                         getIntent().getStringExtra(DataBase.LINK));
@@ -80,6 +80,10 @@ public class NotificationHelper extends ContextWrapper {
             if (getManager().getNotificationChannels().size() == 0) // no channels
                 createChannels();
         }
+    }
+
+    public void cancel(int id) {
+        getManager().cancel(id);
     }
 
     @RequiresApi(26)

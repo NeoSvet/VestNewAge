@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.service;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,11 +34,6 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryService extends JobIntentService {
     private Context context;
-
-    public static void cancelNotif(Context context) {
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.cancel(NotificationHelper.NOTIF_SUMMARY);
-    }
 
     public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, SummaryService.class, NotificationHelper.NOTIF_SUMMARY, work);
