@@ -39,10 +39,6 @@ public class SummaryService extends JobIntentService {
         enqueueWork(context, SummaryService.class, NotificationHelper.NOTIF_SUMMARY, work);
     }
 
-//    public SummaryService() {
-//        super("Summary");
-//    }
-
     @Override
     protected void onHandleWork(@NonNull final Intent intent) {
         context = getApplicationContext();
