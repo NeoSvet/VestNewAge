@@ -65,7 +65,7 @@ public class NotificationHelper extends ContextWrapper {
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
         intent.putExtra(DataBase.ID, id);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 
