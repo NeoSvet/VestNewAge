@@ -36,8 +36,8 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.CustomDialog;
 import ru.neosvet.ui.DateDialog;
-import ru.neosvet.ui.ListAdapter;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;

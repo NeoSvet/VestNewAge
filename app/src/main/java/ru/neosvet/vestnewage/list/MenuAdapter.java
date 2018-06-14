@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 import android.content.Context;
 import android.view.LayoutInflater;

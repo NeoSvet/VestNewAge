@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 import java.io.Serializable;
 import java.util.ArrayList;

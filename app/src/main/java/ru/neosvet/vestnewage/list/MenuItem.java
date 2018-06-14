@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 public class MenuItem {
     private String title;

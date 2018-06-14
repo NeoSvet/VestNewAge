@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;

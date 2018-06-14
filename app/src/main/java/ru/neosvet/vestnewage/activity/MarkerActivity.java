@@ -30,7 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.neosvet.ui.CheckAdapter;
+import ru.neosvet.vestnewage.list.CheckAdapter;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;

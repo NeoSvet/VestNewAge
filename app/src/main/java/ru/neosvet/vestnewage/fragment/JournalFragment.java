@@ -18,8 +18,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.neosvet.ui.ListAdapter;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;

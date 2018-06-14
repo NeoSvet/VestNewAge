@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 public class MarkItem {
     private String title, data, des, place;

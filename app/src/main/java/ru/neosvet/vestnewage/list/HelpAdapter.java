@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.list.ListItem;
 
 public class HelpAdapter extends BaseAdapter {
     private final String BUTTON = "b";

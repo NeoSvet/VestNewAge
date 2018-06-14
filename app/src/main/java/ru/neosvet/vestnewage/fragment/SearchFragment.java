@@ -43,11 +43,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ru.neosvet.ui.CalendarAdapter;
-import ru.neosvet.ui.CalendarItem;
+import ru.neosvet.vestnewage.list.CalendarAdapter;
+import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.ui.DateDialog;
-import ru.neosvet.ui.ListAdapter;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;

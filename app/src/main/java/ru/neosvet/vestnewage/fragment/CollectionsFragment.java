@@ -20,8 +20,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import ru.neosvet.ui.CustomDialog;
-import ru.neosvet.ui.MarkAdapter;
-import ru.neosvet.ui.MarkItem;
+import ru.neosvet.vestnewage.list.MarkAdapter;
+import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;

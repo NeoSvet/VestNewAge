@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.list;
 
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;

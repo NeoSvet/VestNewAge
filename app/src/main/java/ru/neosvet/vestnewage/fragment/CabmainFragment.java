@@ -22,8 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import ru.neosvet.ui.ListAdapter;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;

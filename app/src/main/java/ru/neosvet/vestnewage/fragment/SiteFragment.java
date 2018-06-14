@@ -22,8 +22,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.ui.ListAdapter;
-import ru.neosvet.ui.ListItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
