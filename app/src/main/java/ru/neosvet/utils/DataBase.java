@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", SEARCH = "search",
@@ -47,8 +48,8 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id TITLE
                     + PARAGRAPH + " text);");
-        } else if (name.equals(Unread.NAME)) {
-            db.execSQL("create table if not exists " + Unread.NAME + " ("
+        } else if (name.equals(UnreadHelper.NAME)) {
+            db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
                     + LINK + " text primary key,"
                     + TIME + " integer);");
         } else if (name.equals(SEARCH)) {

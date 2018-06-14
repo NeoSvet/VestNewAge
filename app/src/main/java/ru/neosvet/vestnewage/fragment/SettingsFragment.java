@@ -26,11 +26,11 @@ import android.widget.TextView;
 import ru.neosvet.ui.SetNotifDialog;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NotificationHelper;
-import ru.neosvet.utils.PromHelper;
-import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 import static android.content.Context.MODE_PRIVATE;

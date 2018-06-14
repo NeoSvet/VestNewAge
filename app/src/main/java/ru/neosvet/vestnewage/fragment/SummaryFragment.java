@@ -21,7 +21,7 @@ import ru.neosvet.ui.ListAdapter;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Unread;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -162,7 +162,7 @@ public class SummaryFragment extends Fragment {
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
-            Unread unread = new Unread(act);
+            UnreadHelper unread = new UnreadHelper(act);
             List<String> links = unread.getList();
             unread.close();
             while ((title = br.readLine()) != null) {

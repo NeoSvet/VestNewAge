@@ -21,9 +21,9 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NotificationHelper;
-import ru.neosvet.utils.SummaryHelper;
-import ru.neosvet.utils.Unread;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.SummaryHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.task.LoaderTask;
@@ -117,7 +117,7 @@ public class SummaryService extends JobIntentService {
         }
         List<String> list = new ArrayList<>();
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        Unread unread = new Unread(context);
+        UnreadHelper unread = new UnreadHelper(context);
         Date d;
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();

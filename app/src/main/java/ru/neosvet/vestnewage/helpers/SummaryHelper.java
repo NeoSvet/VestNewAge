@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.helpers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -21,6 +21,9 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
 import ru.neosvet.ui.SetNotifDialog;
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;

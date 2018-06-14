@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.helpers;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,19 +11,21 @@ import java.util.Date;
 import java.util.List;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 
 /**
  * Created by NeoSvet on 03.02.2018.
  */
 
-public class Unread {
+public class UnreadHelper {
     public static final String NAME = "noread";
     private Context context;
     private DataBase dbUnread, dbPages;
     private SQLiteDatabase db;
     private long time = 0;
 
-    public Unread(Context context) {
+    public UnreadHelper(Context context) {
         this.context = context;
         dbUnread = new DataBase(context, NAME);
         db = dbUnread.getWritableDatabase();

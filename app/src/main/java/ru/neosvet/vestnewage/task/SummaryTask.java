@@ -21,8 +21,8 @@ import java.util.List;
 import ru.neosvet.ui.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.NotificationHelper;
-import ru.neosvet.utils.Unread;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 
@@ -108,7 +108,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         String title, link, des, time;
         List<ListItem> data = new ArrayList<ListItem>();
         ListItem item;
-        Unread unread = new Unread(act);
+        UnreadHelper unread = new UnreadHelper(act);
         List<String> links = unread.getList();
         Date d;
         while ((title = br.readLine()) != null) {

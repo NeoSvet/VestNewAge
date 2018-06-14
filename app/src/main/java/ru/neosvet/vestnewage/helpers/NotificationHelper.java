@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.helpers;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -17,6 +17,7 @@ import android.support.v4.app.NotificationCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
 
 /**

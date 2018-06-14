@@ -30,10 +30,10 @@ import ru.neosvet.ui.StatusBar;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NotificationHelper;
-import ru.neosvet.utils.PromHelper;
-import ru.neosvet.utils.SummaryHelper;
-import ru.neosvet.utils.Unread;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.helpers.SummaryHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
@@ -176,16 +176,16 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    File file = new File(getFilesDir() + File.separator + Unread.NAME);
+                    File file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
                     if (file.exists())
                         file.delete();
                     //from old version (code 8 and below)
                     SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
-                    if (!pref.getString(Unread.NAME, "").equals("")) {
+                    if (!pref.getString(UnreadHelper.NAME, "").equals("")) {
                         SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(Unread.NAME, "");
+                        editor.putString(UnreadHelper.NAME, "");
                         editor.apply();
-                        file = new File(getFilesDir() + File.separator + Unread.NAME);
+                        file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
                         if (file.exists())
                             file.delete();
                     }

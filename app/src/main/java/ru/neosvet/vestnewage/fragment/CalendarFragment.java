@@ -46,7 +46,7 @@ import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.MultiWindowSupport;
-import ru.neosvet.utils.Unread;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -108,7 +108,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dateDialog.dismiss();
         else if (dialog > -1)
             alert.dismiss();
-        outState.putBoolean(Unread.NAME, (lvUnread.getVisibility() == View.VISIBLE));
+        outState.putBoolean(UnreadHelper.NAME, (lvUnread.getVisibility() == View.VISIBLE));
         outState.putLong(CURRENT_DATE, dCurrent.getTime());
         outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
@@ -128,7 +128,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     setStatus(true);
                 } else task = null;
             }
-            if (state.getBoolean(Unread.NAME, false)) {
+            if (state.getBoolean(UnreadHelper.NAME, false)) {
                 pCalendar.setVisibility(View.GONE);
                 tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
@@ -220,7 +220,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 closeUnread();
                 tvNew.setText("0");
                 try {
-                    Unread unread = new Unread(act);
+                    UnreadHelper unread = new UnreadHelper(act);
                     unread.clearList();
                     unread.setBadge();
                     unread.close();
@@ -611,7 +611,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             String t, s;
             int n;
             boolean isNew = false;
-            Unread unread = new Unread(act);
+            UnreadHelper unread = new UnreadHelper(act);
             unread.setBadge();
             long time = unread.lastModified();
             if (time > 0) {

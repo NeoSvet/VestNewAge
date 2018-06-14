@@ -9,7 +9,7 @@ import android.os.Build;
 
 import java.util.Date;
 
-import ru.neosvet.utils.PromHelper;
+import ru.neosvet.vestnewage.helpers.PromHelper;
 
 
 public class PromReceiver extends BroadcastReceiver {

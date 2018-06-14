@@ -28,7 +28,6 @@ import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.PromHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -41,6 +40,7 @@ import ru.neosvet.vestnewage.fragment.SearchFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {

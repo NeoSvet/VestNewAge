@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.vestnewage.helpers;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -25,6 +25,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.SetNotifDialog;
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;

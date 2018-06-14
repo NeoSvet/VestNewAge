@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-import ru.neosvet.utils.SummaryHelper;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.helpers.SummaryHelper;
 
 /**
  * Created by NeoSvet on 10.02.2018.
