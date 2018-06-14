@@ -17,7 +17,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import java.util.Date;
+import org.threeten.bp.Clock;
+import org.threeten.bp.temporal.ChronoField;
+import org.threeten.bp.temporal.ChronoUnit;
+import org.threeten.bp.temporal.Temporal;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -48,13 +52,18 @@ public class PromHelper {
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
-            long t = getPromDate(false).getTime() - System.currentTimeMillis();
-            if (t > 39600000) // today prom was been
+            if (timeToProm() > 39600) // today prom was been
                 return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
         }
+    }
+
+    private int timeToProm() {
+        Temporal prom = getPromDate(false);
+        Temporal now = Clock.systemUTC().instant();
+        return prom.get(ChronoField.INSTANT_SECONDS) - now.get(ChronoField.INSTANT_SECONDS);
     }
 
     public void stop() {
@@ -141,26 +150,25 @@ public class PromHelper {
         return tvPromTime != null;
     }
 
-    public Date getPromDate(boolean next) {
+    public Temporal getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        // Moscow getTimezoneOffset=-180
-        Date prom = new Date(System.currentTimeMillis() - timeDiff);
-        prom.setMinutes(prom.getTimezoneOffset()); //remove timezone
-        prom.setSeconds(0);
+        Temporal prom = Clock.systemUTC().instant();
+        prom.with(ChronoField.SECOND_OF_MINUTE, 0);
+        prom.minus(timeDiff, ChronoUnit.MILLIS);
         if (next) {
-            if (prom.getHours() < hour_prom1)
-                prom.setHours(hour_prom1);
-            else if (prom.getHours() < hour_prom2)
-                prom.setHours(hour_prom2);
+            if (prom.get(ChronoField.HOUR_OF_DAY) < hour_prom1)
+                prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
+            else if (prom.get(ChronoField.HOUR_OF_DAY) < hour_prom2)
+                prom.with(ChronoField.HOUR_OF_DAY, hour_prom2);
         }
-        if (prom.getHours() >= hour_prom1) {
-            if (prom.getHours() >= hour_prom2) {
-                prom.setHours(hour_prom1 + 24);
+        if (prom.get(ChronoField.HOUR_OF_DAY) >= hour_prom1) {
+            if (prom.get(ChronoField.HOUR_OF_DAY) >= hour_prom2) {
+                prom.plus(1, ChronoUnit.DAYS);
+                prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
             } else
-                prom.setHours(hour_prom2);
+                prom.with(ChronoField.HOUR_OF_DAY, hour_prom2);
         } else
-            prom.setHours(hour_prom1);
-        prom.setMinutes(-prom.getTimezoneOffset()); //return timezone
+            prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
         return prom;
     }
 
@@ -202,11 +210,12 @@ public class PromHelper {
     }
 
     private String getPromText() {
-        String t = lib.getDiffDate(getPromDate(false).getTime(), System.currentTimeMillis());
+        Temporal prom = getPromDate(false);
+        String t = lib.getDiffDate(prom.get(ChronoField.INSTANT_SECONDS) * 1000, System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        Date d = new Date();
+        Temporal d = Clock.systemUTC().instant();
         for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
             if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
                 if (i < 3) {
@@ -231,12 +240,12 @@ public class PromHelper {
                     if (i == 3)
                         t = t.replace(context.getResources().getStringArray(R.array.time)[i]
                                 , context.getResources().getString(R.string.minute));
-                    d.setMinutes(d.getMinutes() + 1);
-                    d.setSeconds(1);
+                    d.plus(1, ChronoUnit.MINUTES);
+                    d.with(ChronoField.SECOND_OF_MINUTE, 1);
                 } else {
-                    d.setHours(d.getHours() + 1);
-                    d.setMinutes(0);
-                    d.setSeconds(1);
+                    d.plus(1, ChronoUnit.HOURS);
+                    d.with(ChronoField.MINUTE_OF_HOUR, 0);
+                    d.with(ChronoField.SECOND_OF_MINUTE, 1);
                 }
                 if (hTime != null) {
                     timer = new Timer();
@@ -245,7 +254,7 @@ public class PromHelper {
                         public void run() {
                             hTime.sendEmptyMessage(0);
                         }
-                    }, d);
+                    }, d.getLong(ChronoField.INSTANT_SECONDS) * 1000);
                 }
                 break;
             }
@@ -268,7 +277,8 @@ public class PromHelper {
                     OkHttpClient client = Lib.createHttpClient();
                     Response response = client.newCall(builderRequest.build()).execute();
                     String s = response.headers().value(1);
-                    long timeServer = Date.parse(s);
+                    Lib.LOG("server: " + s);
+                    long timeServer = 0;//Date.parse(s);
                     response.close();
 
                     int timeDiff = (int) (System.currentTimeMillis() - timeServer);
@@ -280,11 +290,8 @@ public class PromHelper {
                         if (t > -1)
                             PromReceiver.setReceiver(context, t);
                     }
-                    if (action != null) {
-                        Date d = getPromDate(false);
-                        timeDiff = (int) (d.getTime() - System.currentTimeMillis());
-                        action.sendEmptyMessage(timeDiff);
-                    }
+                    if (action != null)
+                        action.sendEmptyMessage(timeToProm());
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -18,10 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -35,6 +32,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 
 public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     public static final String DOWNLOAD_ALL = "all", DOWNLOAD_YEAR = "year", DOWNLOAD_ID = "id",
@@ -162,7 +160,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadYear(int year) throws Exception {
         msg = context.getResources().getString(R.string.download_list);
         //refresh list:
-        Date d = new Date();
+        DateHelper d = new DateHelper();
         int m, k = 12;
         if (year == d.getYear())
             k -= d.getMonth() + 1;
@@ -184,13 +182,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         int em = k;
         k = 0;
         m = 0;
-        DateFormat df = new SimpleDateFormat("MM.yy");
         //count pages:
         while (start) {
-            d = new Date(year, m, 1);
+            d = new DateHelper(year, m, 1);
             for (i = 0; i < list.size(); i++) {
-                if (list.contains(df.format(d))) {
-                    k += countBookList(df.format(d));
+                if (list.contains(d.getMY())) {
+                    k += countBookList(d.getMY());
                     break;
                 }
             }
@@ -204,10 +201,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         publishProgress(k);
         m = 0;
         while (start) {
-            d = new Date(year, m, 1);
+            d = new DateHelper(year, m, 1);
             for (i = 0; i < list.size(); i++) {
-                if (list.contains(df.format(d))) {
-                    downloadBookList(df.format(d));
+                if (list.contains(d.getMY())) {
+                    downloadBookList(d.getMY());
                     break;
                 }
             }
@@ -222,13 +219,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         // подсчёт количества списков:
         int k = 0;
         if (p == -1 || p == R.id.nav_book) {
-            Date d = new Date();
-            k = (d.getYear() - 116) * 12 + d.getMonth(); //poems
+            DateHelper d = new DateHelper();
+            k = (d.getYear() - 2016) * 12 + d.getMonth(); //poems
             k += 9; // poslaniya (01.16-09.16)
         }
         if (p == -1) {
-            Date d = new Date();
-            k += (d.getYear() - 116) * 12 + d.getMonth() + 1; // calendar
+            DateHelper d = new DateHelper();
+            k += (d.getYear() - 2016) * 12 + d.getMonth() + 1; // calendar
             k += 4; // main, news, media and rss
         } else if (p == R.id.nav_main) // main, news, media
             k = 3;
@@ -262,10 +259,10 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!start) return;
 
         if (p == -1) {
-            Date d = new Date();
+            DateHelper d = new DateHelper();
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;
-            for (int y = 116; y < max_y && start; y++) {
+            for (int y = 2016; y < max_y && start; y++) {
                 if (y == max_y - 1)
                     max_m = d.getMonth() + 1;
                 for (int m = 0; m < max_m && start; m++) {
@@ -334,19 +331,18 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         }
         int sy, sm, ey, em, k = 0;
         sm = 0;
-        sy = 116;
-        Date d = new Date();
+        sy = 2016;
+        DateHelper d = new DateHelper();
         em = d.getMonth();
         ey = d.getYear();
-        DateFormat df = new SimpleDateFormat("MM.yy");
         while (start) {
-            d = new Date(sy, sm, 1);
+            d = new DateHelper(sy, sm, 1);
             for (i = 0; i < list.size(); i++) {
-                if (list.contains(df.format(d))) {
+                if (list.contains(d.getMY())) {
                     if (count)
-                        k += countBookList(df.format(d));
+                        k += countBookList(d.getMY());
                     else
-                        downloadBookList(df.format(d));
+                        downloadBookList(d.getMY());
                     break;
                 }
             }

@@ -15,9 +15,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -110,14 +110,14 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         ListItem item;
         UnreadHelper unread = new UnreadHelper(act);
         List<String> links = unread.getList();
-        Date d;
+        DateHelper d;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             des = br.readLine();
             time = br.readLine();
             if (link.contains(":"))
                 continue;
-            d = new Date(Long.parseLong(time));
+            d = new DateHelper(Long.parseLong(time));
             if (unread.addLink(link, d)) {
                 item = new ListItem(title, link);
                 item.setDes(des);
@@ -195,7 +195,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
                 bw.write(Const.N);
-                bw.write(Date.parse(withOutTag(br.readLine())) + Const.N); //time
+                bw.write(DateHelper.parse(withOutTag(br.readLine())) + Const.N); //time
                 bw.flush();
             }
         }

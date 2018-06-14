@@ -40,10 +40,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.SoftKeyboard;
@@ -53,6 +50,7 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
@@ -644,11 +642,11 @@ public class BrowserActivity extends AppCompatActivity
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
                 int id;
-                Date d;
+                DateHelper d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                     s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
-                    d = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    d = new DateHelper(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                     if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
                         status.checkTime(d.getTime() + 2592000000L);
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
@@ -678,22 +676,20 @@ public class BrowserActivity extends AppCompatActivity
                 }
                 cursor.close();
                 dbPage.close();
-                DateFormat df = new SimpleDateFormat("yy");
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
                 if (link.contains("print")) {// материалы с сайта Откровений
                     miRefresh.setVisible(false);
                     bw.write("Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
-                    bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + Const.BR);
+                    bw.write(" Leonid Maslov 2004-");
+                    bw.write(d.getYear() + Const.BR);
                 } else {
                     bw.write(getResources().getString(R.string.page) + " " + Const.SITE + link);
                     bw.write("<br>Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
-                    bw.write(" Leonid Maslov 2004-20");
-                    bw.write(df.format(d) + Const.BR);
-                    df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-                    bw.write(getResources().getString(R.string.downloaded) + " " + df.format(d));
+                    bw.write(" Leonid Maslov 2004-");
+                    bw.write(d.getYear() + Const.BR);
+                    bw.write(getResources().getString(R.string.downloaded) + " " + d.getTimeString());
                 }
                 bw.write("\n</div></body></html>");
                 bw.close();

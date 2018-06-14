@@ -23,6 +23,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.threeten.bp.Instant;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,11 +32,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.ui.dialogs.CustomDialog;
@@ -57,7 +59,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private int today_m, today_y, iNew = -1;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
-    private Date dCurrent;
+    private DateHelper dCurrent;
     private TextView tvDate, tvNew;
     private ListView lvUnread;
     private View container, tvEmpty, pCalendar, ivPrev, ivNext, fabRefresh, fabClose, fabClear;
@@ -116,11 +118,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            Date d = new Date();
-            dCurrent = new Date(d.getYear(), d.getMonth(), d.getDate());
+            dCurrent = new DateHelper();
         } else {
             act.setFrCalendar(this);
-            dCurrent = new Date(state.getLong(CURRENT_DATE));
+            dCurrent = new DateHelper(state.getLong(CURRENT_DATE));
             task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
@@ -337,7 +338,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void initViews() {
-        Date d = new Date();
+        DateHelper d = new DateHelper();
         today_m = d.getMonth();
         today_y = d.getYear();
         tvNew = (TextView) container.findViewById(R.id.tvNew);
@@ -465,51 +466,43 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void createCalendar(int offsetMonth) {
-        Date d = (Date) dCurrent.clone();
+        DateHelper d = dCurrent;
         if (offsetMonth != 0)
-            d.setMonth(d.getMonth() + offsetMonth);
-        tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
-                + "\n" + (d.getYear() + 1900));
+            d.plusDay(offsetMonth);
+        tvDate.setText(d.getMonthString() + "\n" + d.getYear());
         adCalendar.clear();
         for (int i = -1; i > -7; i--) //monday-saturday
             adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));
         adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray)); //sunday
-        int n;
         final int m = d.getMonth();
-        d.setDate(1);
-        dCurrent = (Date) d.clone();
-        if (d.getDay() != 1) {
-            if (d.getDay() == 0) //sunday
-                d.setDate(-5);
+        d.setDay(1);
+        dCurrent = d;
+        if (d.getDayWeek() != 1) {
+            if (d.getDayWeek() == 0) //sunday
+                d.plusDay(-5);
             else
-                d.setDate(2 - d.getDay());
-            n = d.getDate();
-            while (d.getDate() > 1) {
-                adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.darker_gray));
-                n++;
-                d.setDate(n);
+                d.plusDay(2 - d.getDayWeek());
+            while (d.getDayWeek() > 1) {
+                adCalendar.addItem(new CalendarItem(act, d.getDayWeek(), android.R.color.darker_gray));
+                d.plusDay(1);
             }
         }
-        n = 1;
-        Date today = new Date();
+        DateHelper today = new DateHelper();
         int n_today = 0;
         if (today.getMonth() == m)
-            n_today = today.getDate();
+            n_today = today.getDay();
         while (d.getMonth() == m) {
-            adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.white));
-            if (d.getDate() == n_today)
+            adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.white));
+            if (d.getDay() == n_today)
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
-            n++;
-            d.setDate(n);
+            d.plusDay(1);
         }
-        n = 1;
         while (d.getDay() != 1) {
-            adCalendar.addItem(new CalendarItem(act, d.getDate(), android.R.color.darker_gray));
-            n++;
-            d.setDate(n);
+            adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
+            d.plusDay(1);
         }
         openCalendar(true);
-        if (dCurrent.getYear() == 116)
+        if (dCurrent.getYear() == 2016)
             ivPrev.setEnabled(dCurrent.getMonth() != 0);
         if (dCurrent.getYear() == today_y)
             ivNext.setEnabled(dCurrent.getMonth() != today_m);
@@ -577,7 +570,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
                 (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-            Date d = new Date(time);
+            DateHelper d = new DateHelper(time);
             if (d.getMonth() != today_m)
                 act.status.checkTime(time);
         }
@@ -716,7 +709,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     @Override
-    public void putDate(@Nullable Date date) {
+    public void putDate(@Nullable DateHelper date) {
         dialog = -2;
         if (date == null) // cancel
             return;

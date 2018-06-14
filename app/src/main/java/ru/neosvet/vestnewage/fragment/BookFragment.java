@@ -27,15 +27,13 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.Tip;
@@ -53,7 +51,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private MainActivity act;
     private View container;
     private Animation anMin, anMax;
-    private final DateFormat df = new SimpleDateFormat("MM.yy");
     private ListAdapter adBook;
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
     private TextView tvDate;
@@ -66,7 +63,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private Tip menuRnd;
     private String dialog = "";
     private boolean notClick = false, fromOtkr;
-    private Date dKatren, dPoslanie;
+    private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     final Handler hTimer = new Handler(new Handler.Callback() {
@@ -102,10 +99,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void restoreActivityState(Bundle state) {
-        Date d = new Date();
+        DateHelper d = new DateHelper();
         d.setYear(100);
-        dKatren = new Date(pref.getLong(KAT, d.getTime()));
-        dPoslanie = new Date(pref.getLong(POS, d.getTime()));
+        dKatren = new DateHelper(pref.getLong(KAT, d.getTime()));
+        dPoslanie = new DateHelper(pref.getLong(POS, d.getTime()));
         fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
@@ -173,7 +170,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     private void openList(boolean loadIfNeed) {
         try {
-            Date d;
+            DateHelper d;
             boolean katren;
             if (tab == 0) {
                 d = dKatren;
@@ -188,23 +185,22 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 return;
             }
             adBook.clear();
-            tvDate.setText(getResources().getStringArray(R.array.months)[d.getMonth()]
-                    + "\n" + (d.getYear() + 1900));
-            if (d.getMonth() == 0 && d.getYear() == 116 && !fromOtkr)
+            tvDate.setText(d.getMonthString() + "\n" + d.getYear());
+            if (d.getMonth() == 0 && d.getYear() == 2016 && !fromOtkr)
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(true);
             else
                 ivPrev.setEnabled(existsList(setDate(d, -1), katren));
             ivNext.setEnabled(existsList(setDate(d, 1), katren));
 
-            DataBase dataBase = new DataBase(act, df.format(d));
+            DataBase dataBase = new DataBase(act, d.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
             Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
-            Date dModList;
+            DateHelper dModList;
             if (cursor.moveToFirst()) {
-                dModList = new Date(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
-                if (d.getYear() > 115) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
+                dModList = new DateHelper(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                if (d.getYear() > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
                     if (katren) { // катрены
                         cursor = db.query(DataBase.TITLE, null,
@@ -240,7 +236,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 dModList = d;
             cursor.close();
             dataBase.close();
-            Date n = new Date();
+            DateHelper n = new DateHelper();
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
                 //если выбранный месяц - текущий
                 katren = act.status.checkTime(dModList.getTime());
@@ -268,9 +264,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         }
     }
 
-    private boolean existsList(Date d, boolean katren) {
+    private boolean existsList(DateHelper d, boolean katren) {
         if (d.getYear() == 100) return false; //def year
-        DataBase dataBase = new DataBase(act, df.format(d));
+        DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
                 null, null, null, null, null);
@@ -431,7 +427,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void openMonth(int v) {
         if (task == null) {
             if (v == -1 && tab == 1) {
-                if (dPoslanie.getMonth() == 0 && dPoslanie.getYear() == 116 && !fromOtkr) {
+                if (dPoslanie.getMonth() == 0 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                     builder.setMessage(getResources().getString(R.string.alert_download_otkr));
                     builder.setNegativeButton(getResources().getString(R.string.no),
@@ -471,18 +467,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             dPoslanie = setDate(dPoslanie, i);
     }
 
-    private Date setDate(Date d, int i) {
-        int m, y;
-        m = d.getMonth() + i;
-        y = d.getYear();
-        if (m == -1) {
-            y--;
-            m = 11;
-        } else if (m == 12) {
-            y++;
-            m = 0;
-        }
-        return new Date(y, m, 1);
+    private DateHelper setDate(DateHelper d, int i) {
+        d.plusMonth(i);
+        return d;
     }
 
     private void startLoad() {
@@ -499,7 +486,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             tabHost.setCurrentTab(tab);
         task = null;
         if (result.length() > 0) {
-            Date d;
+            DateHelper d;
             if (tab == 0)
                 d = dKatren;
             else
@@ -517,7 +504,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             act.status.setLoad(false);
             if (d.getYear() == 100 || !existsList(d, tab == 0)) {
                 // 100 - year in default date
-                d = new Date();
+                d = new DateHelper();
                 d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
                 if (tab == 0)
@@ -528,7 +515,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             if (existsList(d, tab == 0)) {
                 openList(false);
             } else {
-                Date n = new Date();
+                DateHelper n = new DateHelper();
                 if (n.getMonth() == d.getMonth() && n.getYear() == d.getYear())
                     Lib.showToast(act, getResources().getString(R.string.list_is_empty));
                 else
@@ -544,7 +531,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void showDatePicker() {
-        Date d;
+        DateHelper d;
         if (tab == 0)
             d = dKatren;
         else
@@ -556,16 +543,16 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         } else { //poslyania
             if (fromOtkr) {
                 dateDialog.setMinMonth(7); //aug
-                dateDialog.setMinYear(104); //2004
+                dateDialog.setMinYear(2004); //2004
             }
             dateDialog.setMaxMonth(8); //sep
-            dateDialog.setMaxYear(116); //2016
+            dateDialog.setMaxYear(2016);
         }
         dateDialog.show();
     }
 
     @Override
-    public void putDate(@Nullable Date date) {
+    public void putDate(@Nullable DateHelper date) {
         dialog = "";
         if (date == null) //cancel
             return;
@@ -580,8 +567,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     public void onClick(View view) {
         menuRnd.hide();
         //Определяем диапозон дат:
-        Date d = new Date();
-        int m, y, max_m = d.getMonth() + 1, max_y = d.getYear() - 100;
+        DateHelper d = new DateHelper();
+        int m, y, max_m = d.getMonth() + 1, max_y = d.getYear() - 2000;
         if (view.getId() == R.id.bRndKat) {
             m = 2;
             y = 16;
@@ -600,7 +587,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         }
         int n = (max_y - y) * 12 + max_m - m;
         if (max_y > 16) { //проверка на существование текущего месяца
-            File f = new File(act.lib.getDBFolder() + "/" + df.format(d));
+            File f = new File(act.lib.getDBFolder() + "/" + d.getMY());
             if (!f.exists()) n--;
         }
         //определяем случайный месяц:

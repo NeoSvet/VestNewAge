@@ -13,26 +13,25 @@ import android.view.Window;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 
 public class DateDialog extends Dialog {
-
     private Activity act;
     private TextView tvYear;
-    private Date date;
+    private DateHelper date;
     private Result result;
     private MonthAdapter adMonth;
-    private int min_year = 116, min_month = 0, max_year = 0, max_month = 0;
+    private int min_year = 2016, min_month = 0, max_year = 0, max_month = 0;
     private boolean cancel = true;
 
-    public DateDialog(Activity act, Date date) {
+    public DateDialog(Activity act, DateHelper date) {
         super(act);
         this.act = act;
-        this.date = (Date) date.clone();
+        this.date = date;
     }
 
     public void setResult(Result result) {
@@ -107,7 +106,7 @@ public class DateDialog extends Dialog {
         }
         rvMonth.setLayoutManager(layoutManager);
         rvMonth.setAdapter(adMonth);
-        Date d = new Date();
+        DateHelper d = new DateHelper();
         if (max_year == 0)
             max_year = d.getYear();
         if (max_month == 0)
@@ -156,7 +155,7 @@ public class DateDialog extends Dialog {
     }
 
     public interface Result {
-        void putDate(@Nullable Date date); // null for cancel
+        void putDate(@Nullable DateHelper date); // null for cancel
     }
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {

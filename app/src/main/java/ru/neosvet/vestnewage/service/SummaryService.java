@@ -15,12 +15,12 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
@@ -111,18 +111,18 @@ public class SummaryService extends JobIntentService {
         long t = 0;
         if (file.exists())
             t = file.lastModified();
-        if (t > Date.parse(s)) { //список в загрузке не нуждается
+        if (t > DateHelper.parse(s)) { //список в загрузке не нуждается
             br.close();
             return null;
         }
         List<String> list = new ArrayList<>();
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         UnreadHelper unread = new UnreadHelper(context);
-        Date d;
+        DateHelper d;
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();
         do {
-            d = new Date(Date.parse(s));
+            d = new DateHelper(DateHelper.parse(s));
             if (unread.addLink(link, d)) {
                 loader.downloadPage(link, true);
                 list.add(title);

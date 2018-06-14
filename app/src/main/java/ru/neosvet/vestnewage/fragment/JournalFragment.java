@@ -14,10 +14,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.Tip;
@@ -80,11 +77,11 @@ public class JournalFragment extends Fragment {
             String s;
             String[] id;
             ListItem item;
-            DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
             long now = System.currentTimeMillis();
             long t;
             if (offset > 0)
                 curJ.moveToPosition(offset);
+            DateHelper d;
             do {
                 id = curJ.getString(iID).split(Const.AND);
                 dataBase = new DataBase(act, id[0]);
@@ -96,9 +93,10 @@ public class JournalFragment extends Fragment {
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
+                    d = new DateHelper(t);
                     item.setDes(act.lib.getDiffDate(now, t) +
                             getResources().getString(R.string.back)
-                            + "\n(" + df.format(new Date(t)) + ")");
+                            + "\n(" + d.getTimeString() + ")");
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
                             if (s.contains(Const.POEMS))

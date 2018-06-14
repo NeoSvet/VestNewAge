@@ -7,8 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import java.util.Date;
+import org.threeten.bp.Clock;
+import org.threeten.bp.temporal.ChronoField;
+import org.threeten.bp.temporal.ChronoUnit;
+import org.threeten.bp.temporal.Temporal;
 
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 
 
@@ -21,23 +25,24 @@ public class PromReceiver extends BroadcastReceiver {
         am.cancel(piProm);
         if (p > -1) {
             PromHelper prom = new PromHelper(context, null);
-            Date d = prom.getPromDate(false);
-            d.setMinutes(d.getMinutes() - p);
-            if (d.getTime() < System.currentTimeMillis()) {
+            Temporal d = prom.getPromDate(false);
+            d.minus(p, ChronoUnit.MINUTES);
+            Temporal now = Clock.systemUTC().instant();
+            if (d.get(ChronoField.INSTANT_SECONDS) < now.get(ChronoField.INSTANT_SECONDS)) {
                 d = prom.getPromDate(true);
-                d.setMinutes(d.getMinutes() - p);
+                d.minus(p, ChronoUnit.MINUTES);
             }
             if (p == 0)
-                d.setSeconds(d.getSeconds() - 30);
+                d.minus(30, ChronoUnit.SECONDS);
+            long time = d.get(ChronoField.INSTANT_SECONDS) * 1000;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(d.getTime(), piProm);
+                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
                 am.setAlarmClock(alarmClockInfo, piProm);
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                am.setExact(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
+                am.setExact(AlarmManager.RTC_WAKEUP, time, piProm);
             else
-                am.set(AlarmManager.RTC_WAKEUP, d.getTime(), piProm);
+                am.set(AlarmManager.RTC_WAKEUP, time, piProm);
         }
-
     }
 
     @Override

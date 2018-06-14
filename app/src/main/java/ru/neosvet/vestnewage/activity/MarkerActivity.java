@@ -26,10 +26,7 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CheckAdapter;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
@@ -266,8 +263,8 @@ public class MarkerActivity extends AppCompatActivity {
             if (getIntent().hasExtra(DataBase.DESCTRIPTION))
                 etDes.setText(getIntent().getStringExtra(DataBase.DESCTRIPTION));
             else {
-                DateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.yy");
-                etDes.setText(df.format(new Date()));
+                DateHelper d = new DateHelper();
+                etDes.setText(d.getTimeString());
             }
             rPar.setChecked(true);
             if (id == -1) {

@@ -7,10 +7,7 @@ import android.os.AsyncTask;
 
 import java.io.File;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
@@ -18,6 +15,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SearchFragment;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 
 public class SearchTask extends AsyncTask<String, Long, Boolean> implements Serializable {
     private transient SearchFragment frm;
@@ -93,17 +91,16 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 return true;
             }
             dbS.delete(DataBase.SEARCH, null, null);
-            Date d;
-            DateFormat df = new SimpleDateFormat("MM.yy");
+            DateHelper d;
             if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
                 searchList("00.00", str, mode);
             }
             while (start) {
-                d = new Date(sy, sm, 1);
-                if (list.contains(df.format(d))) {
+                d = new DateHelper(sy, sm, 1);
+                if (list.contains(d.getMY())) {
                     publishProgress(d.getTime());
-                    searchList(df.format(d), str, mode);
+                    searchList(d.getMY(), str, mode);
                 }
                 if (sy == ey && sm == em)
                     break;

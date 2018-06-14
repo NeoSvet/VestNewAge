@@ -20,11 +20,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
+import org.threeten.bp.Instant;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,6 +32,7 @@ import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
@@ -328,9 +329,8 @@ public class SlashActivity extends AppCompatActivity {
             }
             return;
         }
-        Date dCurrent = new Date();
-        DateFormat df = new SimpleDateFormat("MM.yy");
-        DataBase dataBase = new DataBase(SlashActivity.this, df.format(dCurrent));
+        DateHelper date = new DateHelper();
+        DataBase dataBase = new DataBase(SlashActivity.this, date.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
         long time = 0;
@@ -338,8 +338,7 @@ public class SlashActivity extends AppCompatActivity {
             time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
         if (System.currentTimeMillis() - time > 3600000) {
             task = new CalendarTask(this);
-            Date d = new Date();
-            task.execute(d.getYear(), d.getMonth(), 1);
+            task.execute(date.getYear(), date.getMonth(), 1);
         }
         cursor.close();
         dataBase.close();

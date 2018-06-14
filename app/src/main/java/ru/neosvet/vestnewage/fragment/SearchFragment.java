@@ -37,12 +37,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.ui.dialogs.DateDialog;
@@ -63,7 +61,6 @@ import ru.neosvet.vestnewage.task.SearchTask;
 public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
     private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
             LAST_RESULTS = "r";
-    private final DateFormat df = new SimpleDateFormat(" yyyy");
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
@@ -78,9 +75,9 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private AutoCompleteTextView etSearch;
     private ArrayAdapter<String> adSearch;
     private SearchTask task = null;
-    private Date dStart, dEnd;
+    private DateHelper dStart, dEnd;
     private ListAdapter adResults;
-    private int min_m = 0, min_y = 116, dialog = -1, mode = 5, page = -1;
+    private int min_m = 0, min_y = 2016, dialog = -1, mode = 5, page = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
@@ -135,14 +132,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         if (f.exists()) {
             // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
             min_m = 7; //aug
-            min_y = 104; //2004
+            min_y = 2004; //2004
         }
         if (state == null) {
-            dEnd = new Date();
-            dStart = new Date();
+            dEnd = new DateHelper();
+            dStart = new DateHelper();
             if (mode < 5) { // открываем ссылку с сайта Благая Весть
                 dStart.setYear(0);
-                dStart.setMonth(116);
+                dStart.setMonth(2016);
             } else {
                 dStart.setYear(min_y);
                 dStart.setMonth(min_m);
@@ -154,8 +151,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             }
         } else {
             act.setFrSearch(this);
-            dStart = new Date(state.getLong(START));
-            dEnd = new Date(state.getLong(END));
+            dStart = new DateHelper(state.getLong(START));
+            dEnd = new DateHelper(state.getLong(END));
             task = (SearchTask) state.getSerializable(Const.TASK);
             page = state.getInt(DataBase.SEARCH, -1);
             if (task != null) {
@@ -211,10 +208,10 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         pPages.setVisibility(View.GONE);
     }
 
-    private String formatDate(Date d) {
+    private String formatDate(DateHelper d) {
         return getResources().getStringArray(
                 R.array.months_short)[d.getMonth()]
-                + df.format(d);
+                + " " + d.getYear();
     }
 
     private void initViews() {
@@ -363,7 +360,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         container.findViewById(R.id.bChangeRange).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Date d = dEnd;
+                DateHelper d = dEnd;
                 dEnd = dStart;
                 dStart = d;
                 bStart.setText(formatDate(dStart));
@@ -424,7 +421,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     private void showDatePicker(int id) {
-        Date d;
+        DateHelper d;
         if (id == 0)
             d = dStart;
         else
@@ -438,7 +435,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     @Override
-    public void putDate(@Nullable Date date) {
+    public void putDate(@Nullable DateHelper date) {
         if (date == null) { // cancel
             dialog = -1;
             return;
@@ -460,15 +457,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         fabSettings.setVisibility(View.GONE);
         final String s = etSearch.getText().toString();
         task = new SearchTask(SearchFragment.this);
-        DateFormat df = new SimpleDateFormat("MM.yy");
         int mode;
         if (cbSearchInResults.isChecked()) {
             mode = 6;
             tvStatus.setText(getResources().getString(R.string.search));
         } else
             mode = sMode.getSelectedItemPosition();
-        task.execute(s, String.valueOf(mode),
-                df.format(dStart), df.format(dEnd));
+        task.execute(s, String.valueOf(mode), dStart.getMY(), dEnd.getMY());
         boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
             if (adSearch.getItem(i).equals(s)) {
@@ -572,10 +567,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     public void updateStatus(Long date) {
-        Date d = new Date(date);
-        tvStatus.setText(getResources().getString(R.string.search) + ": " +
-                getResources().getStringArray(R.array.months)
-                        [d.getMonth()] + " " + (2000 + d.getYear()));
+        DateHelper d = new DateHelper(date);
+        tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + d.getYear());
     }
 
     @Override

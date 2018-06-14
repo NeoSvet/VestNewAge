@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
@@ -31,7 +30,7 @@ public class UnreadHelper {
         db = dbUnread.getWritableDatabase();
     }
 
-    public boolean addLink(String link, Date date) {
+    public boolean addLink(String link, DateHelper date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
             dbPages = new DataBase(context, link);

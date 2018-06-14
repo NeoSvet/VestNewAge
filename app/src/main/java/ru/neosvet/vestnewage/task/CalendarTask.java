@@ -18,12 +18,10 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -121,9 +119,8 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     }
 
     private void downloadMonth(int year, int month) throws Exception {
-        DateFormat df = new SimpleDateFormat("MM.yy");
-        Date d = new Date(year, month, 1);
-        DataBase dataBase = new DataBase(act, df.format(d));
+        DateHelper d = new DateHelper(year, month, 1);
+        DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
                 null, null, null, null, null);
@@ -227,11 +224,11 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
             }
 
             if (updateUnread) {
-                Date dItem = new Date((month < 9 ? "0" : "") + (month + 1) + "/01/" + (year + 1900));
+                DateHelper dItem = new DateHelper(year, month, 1);
                 UnreadHelper unread = new UnreadHelper(act);
                 for (int i = 0; i < data.size(); i++) {
                     for (int j = 0; j < data.get(i).getCount(); j++) {
-                        dItem.setDate(Integer.parseInt(data.get(i).getTitle()));
+                        dItem.setDay(Integer.parseInt(data.get(i).getTitle()));
                         unread.addLink(data.get(i).getLink(j), dItem);
                     }
                 }
