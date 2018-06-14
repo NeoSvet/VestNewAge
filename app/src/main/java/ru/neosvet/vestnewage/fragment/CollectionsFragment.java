@@ -19,7 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import ru.neosvet.ui.CustomDialog;
+import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.utils.Const;

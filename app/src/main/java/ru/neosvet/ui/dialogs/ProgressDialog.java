@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;

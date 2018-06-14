@@ -22,7 +22,7 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.ui.SetNotifDialog;
+import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.ui.StatusBar;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;

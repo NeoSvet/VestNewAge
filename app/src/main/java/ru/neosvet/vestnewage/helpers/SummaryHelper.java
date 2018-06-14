@@ -20,7 +20,7 @@ import android.os.PersistableBundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
-import ru.neosvet.ui.SetNotifDialog;
+import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;

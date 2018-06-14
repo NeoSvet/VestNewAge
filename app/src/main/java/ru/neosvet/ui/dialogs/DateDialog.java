@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.ui.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.vestnewage.R;
 
 public class DateDialog extends Dialog {

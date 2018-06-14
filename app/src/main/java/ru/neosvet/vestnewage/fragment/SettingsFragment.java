@@ -24,7 +24,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import ru.neosvet.ui.SetNotifDialog;
+import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
