@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.ui;
 
 import android.support.annotation.RequiresApi;
 import android.view.ViewGroup;

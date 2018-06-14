@@ -45,7 +45,7 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.MultiWindowSupport;
+import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
