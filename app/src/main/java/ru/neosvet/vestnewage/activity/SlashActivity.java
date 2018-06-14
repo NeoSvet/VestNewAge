@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -43,7 +43,7 @@ public class SlashActivity extends AppCompatActivity {
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private Intent main;
-    private StatusBar status;
+    private StatusButton status;
     private boolean animation = true;
     private CalendarTask task = null;
     private Lib lib;
@@ -58,7 +58,7 @@ public class SlashActivity extends AppCompatActivity {
 
         setContentView(R.layout.slash_activity);
         main = new Intent(getApplicationContext(), MainActivity.class);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
+        status = new StatusButton(this, findViewById(R.id.pStatus));
         lib = new Lib(this);
 
         initAnimation();

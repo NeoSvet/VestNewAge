@@ -11,7 +11,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
 
-public class StatusBar {
+public class StatusButton {
     private Context context;
     private Animation anRotate;
     private View panel;
@@ -20,7 +20,7 @@ public class StatusBar {
     private Animation anMin, anMax;
     private boolean crash = false, stop = true, time = false, visible;
 
-    public StatusBar(Context context, View p) {
+    public StatusButton(Context context, View p) {
         this.context = context;
         this.panel = p;
         tv = (TextView) panel.findViewById(R.id.tvStatus);

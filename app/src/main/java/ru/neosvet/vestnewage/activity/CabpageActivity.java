@@ -16,7 +16,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -27,7 +27,7 @@ public class CabpageActivity extends AppCompatActivity {
             "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
-    private StatusBar status;
+    private StatusButton status;
     private boolean twoPointers = false;
 
     public static void openPage(Context context, String link, @Nullable String cookie) {
@@ -83,7 +83,7 @@ public class CabpageActivity extends AppCompatActivity {
                 }
             });
         }
-        status = new StatusBar(this, findViewById(R.id.pStatus));
+        status = new StatusButton(this, findViewById(R.id.pStatus));
     }
 
     private class wvClient extends WebViewClient {

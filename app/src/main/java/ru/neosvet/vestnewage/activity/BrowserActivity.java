@@ -47,7 +47,7 @@ import java.util.Date;
 import java.util.List;
 
 import ru.neosvet.ui.SoftKeyboard;
-import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
@@ -74,7 +74,7 @@ public class BrowserActivity extends AppCompatActivity
     private DataBase dbPage, dbJournal;
     private TextView tvPlace;
     private EditText etSearch;
-    private StatusBar status;
+    private StatusButton status;
     private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
@@ -279,7 +279,7 @@ public class BrowserActivity extends AppCompatActivity
         etSearch = (EditText) findViewById(R.id.etSearch);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);
-        status = new StatusBar(this, findViewById(R.id.pStatus));
+        status = new StatusButton(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
 

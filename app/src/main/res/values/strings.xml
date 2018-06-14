@@ -163,7 +163,7 @@
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="it_load_suc">Раздел успешно загружен</string>
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
-    <!--StatusBar-->
+    <!--StatusButton-->
     <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
     <string name="crash">Сбой</string>
     <!--SummaryNotif-->

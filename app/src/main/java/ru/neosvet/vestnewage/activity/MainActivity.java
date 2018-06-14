@@ -23,7 +23,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
-import ru.neosvet.ui.StatusBar;
+import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private TextView bDownloadIt;
-    public StatusBar status;
+    public StatusButton status;
     private PromHelper prom;
     private SharedPreferences pref;
     private int cur_id, tab = 0, statusBack;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setContentView(R.layout.main_activity);
 
         myFragmentManager = getFragmentManager();
-        status = new StatusBar(this, findViewById(R.id.pStatus));
+        status = new StatusButton(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         initInterface();
 
