@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -298,7 +299,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void initViews() {
-        pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+        pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         editor = pref.edit();
         menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
         fabRefresh = container.findViewById(R.id.fabRefresh);

@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.app.Service;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -59,7 +60,7 @@ public class CabmainFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             String s = pref.getString(EMAIL, "");
             if (s.length() > 0) {
                 cbRemEmail.setChecked(true);
@@ -272,7 +273,7 @@ public class CabmainFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (!cbRemPassword.isChecked()) {
-            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(PASSWORD, "");
             if (!cbRemEmail.isChecked()) {
@@ -313,7 +314,7 @@ public class CabmainFragment extends Fragment {
             loginList();
         }
         if (cbRemEmail.isChecked()) {
-            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+            SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(EMAIL, etEmail.getText().toString());
             if (cbRemPassword.isChecked()) {

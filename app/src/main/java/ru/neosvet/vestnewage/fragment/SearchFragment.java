@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -217,7 +218,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     private void initViews() {
-        pref = act.getSharedPreferences(this.getClass().getSimpleName(), act.MODE_PRIVATE);
+        pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         editor = pref.edit();
         mainLayout = (LinearLayout) container.findViewById(R.id.content_search);
         pSettings = container.findViewById(R.id.pSettings);

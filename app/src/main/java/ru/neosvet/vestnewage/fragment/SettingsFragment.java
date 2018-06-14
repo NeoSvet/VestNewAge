@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -32,8 +33,6 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class SettingsFragment extends Fragment {
     public static final String PANELS = "panels", TIME = "time",
@@ -257,7 +256,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setBaseCheckBox(String name, boolean check) {
-        SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean(name, check);
         editor.apply();
@@ -268,7 +267,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void saveSummary() {
-        SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = sbCheckTime.getProgress();
         if (p < sbCheckTime.getMax()) {
@@ -281,7 +280,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void saveProm() {
-        SharedPreferences pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = sbPromTime.getProgress();
         if (p == sbPromTime.getMax())
@@ -314,7 +313,7 @@ public class SettingsFragment extends Fragment {
         tvCheckOn = container.findViewById(R.id.tvCheckOn);
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
         sbCheckTime = container.findViewById(R.id.sbCheckTime);
-        SharedPreferences pref = act.getSharedPreferences(SUMMARY, MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
         int p = pref.getInt(TIME, -1);
         if (p == -1)
             p = sbCheckTime.getMax();
@@ -325,7 +324,7 @@ public class SettingsFragment extends Fragment {
         tvPromOn = container.findViewById(R.id.tvPromOn);
         tvPromOff = container.findViewById(R.id.tvPromOff);
         sbPromTime = container.findViewById(R.id.sbPromTime);
-        pref = act.getSharedPreferences(PROM, MODE_PRIVATE);
+        pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
         p = pref.getInt(TIME, -1);
         if (p == -1)
             p = sbPromTime.getMax();

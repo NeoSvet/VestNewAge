@@ -2,6 +2,7 @@ package ru.neosvet.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
@@ -16,8 +17,6 @@ import android.widget.TextView;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class SetNotifDialog extends Dialog {
     public static final byte RINGTONE = 1, CUSTOM = 2;
@@ -48,7 +47,7 @@ public class SetNotifDialog extends Dialog {
         cbSound = findViewById(R.id.cbSound);
         cbVibr = findViewById(R.id.cbVibr);
 
-        pref = act.getSharedPreferences(source, MODE_PRIVATE);
+        pref = act.getSharedPreferences(source, Context.MODE_PRIVATE);
         name = pref.getString(NAME, null);
         uri = pref.getString(URI, null);
         setRingtone();

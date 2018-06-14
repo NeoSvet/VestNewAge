@@ -38,7 +38,7 @@ public class Lib {
     }
 
     public int getPreviosVer() {
-        SharedPreferences pref = context.getSharedPreferences("main", context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences("main", Context.MODE_PRIVATE);
         int prev = pref.getInt("ver", 0);
         try {
             int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;

@@ -16,12 +16,12 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, Context.MODE_PRIVATE);
         int p = pref.getInt(SettingsFragment.TIME, -1);
         if (p > -1)
             PromReceiver.setReceiver(context, p);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            pref = context.getSharedPreferences(SettingsFragment.SUMMARY, context.MODE_PRIVATE);
+            pref = context.getSharedPreferences(SettingsFragment.SUMMARY, Context.MODE_PRIVATE);
             p = pref.getInt(SettingsFragment.TIME, -1);
             if (p > -1)
                 SummaryHelper.setReceiver(context, 0); // or p?

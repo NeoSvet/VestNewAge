@@ -24,7 +24,7 @@ public class PresentationActivity extends AppCompatActivity {
     private int index = 1;
 
     public static boolean checkPresentation(Context context, int id) {
-        SharedPreferences pref = context.getSharedPreferences(NAME_PREF, context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(NAME_PREF, Context.MODE_PRIVATE);
         return !pref.getBoolean("p" + id, false);
     }
 
