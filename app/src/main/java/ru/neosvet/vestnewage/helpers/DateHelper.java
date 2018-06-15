@@ -1,12 +1,14 @@
 package ru.neosvet.vestnewage.helpers;
 
-import org.threeten.bp.Clock;
+import android.content.Context;
+
+import com.jakewharton.threetenabp.AndroidThreeTen;
+
 import org.threeten.bp.Instant;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.temporal.ChronoField;
 import org.threeten.bp.temporal.ChronoUnit;
-import org.threeten.bp.temporal.Temporal;
 import org.threeten.bp.temporal.TemporalAccessor;
 
 import ru.neosvet.utils.Lib;
@@ -16,7 +18,8 @@ public class DateHelper {
     private DateTimeFormatter formatter = null;
     private Instant date;
 
-    public DateHelper() {
+    public DateHelper(Context context) {
+        AndroidThreeTen.init(context);
         date = Instant.now();
     }
 

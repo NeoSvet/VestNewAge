@@ -23,8 +23,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.threeten.bp.Instant;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -36,22 +34,22 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.CalendarAdapter;
-import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
+import ru.neosvet.ui.dialogs.CustomDialog;
+import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.ui.MultiWindowSupport;
-import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.list.CalendarAdapter;
+import ru.neosvet.vestnewage.list.CalendarItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.CalendarTask;
 
 public class CalendarFragment extends Fragment implements DateDialog.Result {
@@ -118,7 +116,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            dCurrent = new DateHelper();
+            dCurrent = new DateHelper(act);
         } else {
             act.setFrCalendar(this);
             dCurrent = new DateHelper(state.getLong(CURRENT_DATE));
@@ -338,7 +336,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void initViews() {
-        DateHelper d = new DateHelper();
+        DateHelper d = new DateHelper(act);
         today_m = d.getMonth();
         today_y = d.getYear();
         tvNew = (TextView) container.findViewById(R.id.tvNew);
@@ -487,7 +485,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 d.plusDay(1);
             }
         }
-        DateHelper today = new DateHelper();
+        DateHelper today = new DateHelper(act);
         int n_today = 0;
         if (today.getMonth() == m)
             n_today = today.getDay();

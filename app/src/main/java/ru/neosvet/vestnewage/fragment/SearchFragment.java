@@ -135,8 +135,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             min_y = 2004; //2004
         }
         if (state == null) {
-            dEnd = new DateHelper();
-            dStart = new DateHelper();
+            dEnd = new DateHelper(act);
+            dStart = new DateHelper(act);
             if (mode < 5) { // открываем ссылку с сайта Благая Весть
                 dStart.setYear(0);
                 dStart.setMonth(2016);

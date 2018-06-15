@@ -160,7 +160,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadYear(int year) throws Exception {
         msg = context.getResources().getString(R.string.download_list);
         //refresh list:
-        DateHelper d = new DateHelper();
+        DateHelper d = new DateHelper(context);
         int m, k = 12;
         if (year == d.getYear())
             k -= d.getMonth() + 1;
@@ -219,12 +219,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         // подсчёт количества списков:
         int k = 0;
         if (p == -1 || p == R.id.nav_book) {
-            DateHelper d = new DateHelper();
+            DateHelper d = new DateHelper(context);
             k = (d.getYear() - 2016) * 12 + d.getMonth(); //poems
             k += 9; // poslaniya (01.16-09.16)
         }
         if (p == -1) {
-            DateHelper d = new DateHelper();
+            DateHelper d = new DateHelper(context);
             k += (d.getYear() - 2016) * 12 + d.getMonth() + 1; // calendar
             k += 4; // main, news, media and rss
         } else if (p == R.id.nav_main) // main, news, media
@@ -259,7 +259,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!start) return;
 
         if (p == -1) {
-            DateHelper d = new DateHelper();
+            DateHelper d = new DateHelper(context);
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 12;
             for (int y = 2016; y < max_y && start; y++) {
@@ -332,7 +332,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         int sy, sm, ey, em, k = 0;
         sm = 0;
         sy = 2016;
-        DateHelper d = new DateHelper();
+        DateHelper d = new DateHelper(context);
         em = d.getMonth();
         ey = d.getYear();
         while (start) {

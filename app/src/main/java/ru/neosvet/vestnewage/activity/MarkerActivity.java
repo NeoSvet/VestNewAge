@@ -26,14 +26,14 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.CheckAdapter;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.list.CheckAdapter;
 
 public class MarkerActivity extends AppCompatActivity {
     private final String PAGE = "page", COL = "col";
@@ -263,7 +263,7 @@ public class MarkerActivity extends AppCompatActivity {
             if (getIntent().hasExtra(DataBase.DESCTRIPTION))
                 etDes.setText(getIntent().getStringExtra(DataBase.DESCTRIPTION));
             else {
-                DateHelper d = new DateHelper();
+                DateHelper d = new DateHelper(this);
                 etDes.setText(d.getTimeString());
             }
             rPar.setChecked(true);

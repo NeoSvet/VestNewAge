@@ -31,12 +31,9 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -44,6 +41,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.BookTask;
 
 public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
@@ -99,7 +99,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void restoreActivityState(Bundle state) {
-        DateHelper d = new DateHelper();
+        DateHelper d = new DateHelper(act);
         d.setYear(100);
         dKatren = new DateHelper(pref.getLong(KAT, d.getTime()));
         dPoslanie = new DateHelper(pref.getLong(POS, d.getTime()));
@@ -236,7 +236,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 dModList = d;
             cursor.close();
             dataBase.close();
-            DateHelper n = new DateHelper();
+            DateHelper n = new DateHelper(act);
             if (d.getMonth() == n.getMonth() && d.getYear() == n.getYear()) {
                 //если выбранный месяц - текущий
                 katren = act.status.checkTime(dModList.getTime());
@@ -504,7 +504,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             act.status.setLoad(false);
             if (d.getYear() == 100 || !existsList(d, tab == 0)) {
                 // 100 - year in default date
-                d = new DateHelper();
+                d = new DateHelper(act);
                 d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
                 if (tab == 0)
@@ -515,7 +515,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             if (existsList(d, tab == 0)) {
                 openList(false);
             } else {
-                DateHelper n = new DateHelper();
+                DateHelper n = new DateHelper(act);
                 if (n.getMonth() == d.getMonth() && n.getYear() == d.getYear())
                     Lib.showToast(act, getResources().getString(R.string.list_is_empty));
                 else
@@ -567,7 +567,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     public void onClick(View view) {
         menuRnd.hide();
         //Определяем диапозон дат:
-        DateHelper d = new DateHelper();
+        DateHelper d = new DateHelper(act);
         int m, y, max_m = d.getMonth() + 1, max_y = d.getYear() - 2000;
         if (view.getId() == R.id.bRndKat) {
             m = 2;
