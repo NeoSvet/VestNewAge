@@ -138,8 +138,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             dEnd = new DateHelper(act);
             dStart = new DateHelper(act);
             if (mode < 5) { // открываем ссылку с сайта Благая Весть
-                dStart.setYear(0);
-                dStart.setMonth(2016);
+                dStart.setYear(2016);
+                dStart.setMonth(1);
             } else {
                 dStart.setYear(min_y);
                 dStart.setMonth(min_m);
@@ -209,9 +209,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     private String formatDate(DateHelper d) {
-        return getResources().getStringArray(
-                R.array.months_short)[d.getMonth()]
-                + " " + d.getYear();
+        return getResources().getStringArray(R.array.months_short)[d.getMonth() - 1] + " " + d.getYear();
     }
 
     private void initViews() {

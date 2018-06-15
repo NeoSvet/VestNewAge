@@ -180,7 +180,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     public void downloadCalendar(int year, int month, boolean updateUnread) throws Exception {
         try {
             InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
-                    + (year + 1900) + "&month=" + (month + 1)));
+                    + year + "&month=" + month));
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s = br.readLine();
             br.close();

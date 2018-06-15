@@ -25,7 +25,7 @@ public class DateDialog extends Dialog {
     private DateHelper date;
     private Result result;
     private MonthAdapter adMonth;
-    private int min_year = 2016, min_month = 0, max_year = 0, max_month = 0;
+    private int min_year = 2016, min_month = 1, max_year = 2016, max_month = 12;
     private boolean cancel = true;
 
     public DateDialog(Activity act, DateHelper date) {
@@ -66,7 +66,7 @@ public class DateDialog extends Dialog {
             public void onClick(View view) {
                 if (date.getYear() > min_year) {
                     date.setYear(date.getYear() - 1);
-                    date.setMonth(11);
+                    date.setMonth(12);
                     setCalendar();
                 }
             }
@@ -76,7 +76,7 @@ public class DateDialog extends Dialog {
             public void onClick(View view) {
                 if (date.getYear() < max_year) {
                     date.setYear(date.getYear() + 1);
-                    date.setMonth(0);
+                    date.setMonth(1);
                     setCalendar();
                 }
             }
@@ -116,7 +116,7 @@ public class DateDialog extends Dialog {
                 new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, final int pos) {
-                        date.setMonth(pos);
+                        date.setMonth(pos + 1);
                         adMonth.setSelect(pos);
                         adMonth.notifyDataSetChanged();
                     }
@@ -125,7 +125,6 @@ public class DateDialog extends Dialog {
         findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                date.setMonth(adMonth.getSelect());
                 result.putDate(date);
                 cancel = false;
                 DateDialog.this.dismiss();
@@ -134,7 +133,7 @@ public class DateDialog extends Dialog {
     }
 
     private void setCalendar() {
-        tvYear.setText(String.valueOf(date.getYear() + 1900));
+        tvYear.setText(String.valueOf(date.getYear()));
         if (date.getYear() == min_year)
             adMonth.setMinMonth(min_month);
         else
@@ -160,7 +159,7 @@ public class DateDialog extends Dialog {
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {
         private List<String> data = new ArrayList<String>();
-        private int select, min_month = -1, max_month = 12;
+        private int select, min_month = 1, max_month = 12;
 
         @Override
         public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

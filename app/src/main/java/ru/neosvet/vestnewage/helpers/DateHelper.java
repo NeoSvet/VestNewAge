@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
+import org.threeten.bp.Clock;
 import org.threeten.bp.Instant;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -20,7 +21,7 @@ public class DateHelper {
 
     public DateHelper(Context context) {
         AndroidThreeTen.init(context);
-        date = Instant.now();
+        date = Instant.now(Clock.system(ZoneId.of(ZONE_MOSCOW)));
     }
 
     public DateHelper(long time) {
@@ -96,4 +97,25 @@ public class DateHelper {
         TemporalAccessor ta = date;
         return df.format(ta);
     }
+
+//    public class Builder {
+//
+//        private Builder() {
+//            // private constructor
+//        }
+//
+//        public Builder setUserId(String userId) {
+//            DateHelper.this.userId = userId;
+//            return this;
+//        }
+//
+//        public Builder setToken(String token) {
+//            DateHelper.this.token = token;
+//            return this;
+//        }
+//
+//        public DateHelper build() {
+//            return DateHelper.this;
+//        }
+//    }
 }

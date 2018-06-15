@@ -505,8 +505,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             if (d.getYear() == 100 || !existsList(d, tab == 0)) {
                 // 100 - year in default date
                 d = new DateHelper(act);
-                d.setYear(100 + Integer.parseInt(result.substring(3, 5)));
-                d.setMonth(Integer.parseInt(result.substring(0, 2)) - 1);
+                d.setYear(2000 + Integer.parseInt(result.substring(3, 5)));
+                d.setMonth(Integer.parseInt(result.substring(0, 2)));
                 if (tab == 0)
                     dKatren = d;
                 else
