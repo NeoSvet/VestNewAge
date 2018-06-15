@@ -47,6 +47,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.BookTask;
 
 public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
+    private final int DEF_YEAR = 100;
     private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
@@ -100,7 +101,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
 
     private void restoreActivityState(Bundle state) {
         DateHelper d = new DateHelper(act);
-        d.setYear(100);
+        d.setYear(DEF_YEAR);
         dKatren = new DateHelper(pref.getLong(KAT, d.getTime()));
         dPoslanie = new DateHelper(pref.getLong(POS, d.getTime()));
         fromOtkr = pref.getBoolean(OTKR, false);
@@ -265,7 +266,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private boolean existsList(DateHelper d, boolean katren) {
-        if (d.getYear() == 100) return false; //def year
+        if (d.getYear() == DEF_YEAR) return false;
         DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
@@ -497,13 +498,12 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 fromOtkr = true;
                 editor.putBoolean(OTKR, fromOtkr);
                 result = result.substring(0, 5);
-                d.setYear(100);
+                d.setYear(DEF_YEAR);
             }
             fabRefresh.setVisibility(View.VISIBLE);
             fabRndMenu.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
-            if (d.getYear() == 100 || !existsList(d, tab == 0)) {
-                // 100 - year in default date
+            if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
                 d = new DateHelper(act);
                 d.setYear(2000 + Integer.parseInt(result.substring(3, 5)));
                 d.setMonth(Integer.parseInt(result.substring(0, 2)));
