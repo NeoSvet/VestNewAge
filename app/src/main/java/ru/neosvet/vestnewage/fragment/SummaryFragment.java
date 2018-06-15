@@ -22,6 +22,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -68,7 +69,7 @@ public class SummaryFragment extends Fragment {
         }
         File f = new File(act.getFilesDir() + RSS);
         if (f.exists()) {
-            if (act.status.checkTime(f.lastModified()))
+            if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);

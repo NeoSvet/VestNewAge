@@ -263,8 +263,8 @@ public class MarkerActivity extends AppCompatActivity {
             if (getIntent().hasExtra(DataBase.DESCTRIPTION))
                 etDes.setText(getIntent().getStringExtra(DataBase.DESCTRIPTION));
             else {
-                DateHelper d = new DateHelper(this);
-                etDes.setText(d.getTimeString());
+                DateHelper d = DateHelper.newBuilder(this).initToday().build();
+                etDes.setText(d.toString());
             }
             rPar.setChecked(true);
             if (id == -1) {

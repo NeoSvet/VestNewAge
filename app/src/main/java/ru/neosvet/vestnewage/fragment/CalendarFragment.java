@@ -41,6 +41,7 @@ import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -109,17 +110,18 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         else if (dialog > -1)
             alert.dismiss();
         outState.putBoolean(UnreadHelper.NAME, (lvUnread.getVisibility() == View.VISIBLE));
-        outState.putLong(CURRENT_DATE, dCurrent.getTime());
+        outState.putInt(CURRENT_DATE, dCurrent.getTimeInDays());
         outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            dCurrent = new DateHelper(act);
+            dCurrent = DateHelper.newBuilder(act).initToday().build();
+            dCurrent.setDay(1);
         } else {
             act.setFrCalendar(this);
-            dCurrent = new DateHelper(state.getLong(CURRENT_DATE));
+            dCurrent = DateHelper.newBuilder(act).setDays(state.getInt(CURRENT_DATE)).build();
             task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
@@ -336,7 +338,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void initViews() {
-        DateHelper d = new DateHelper(act);
+        DateHelper d = DateHelper.newBuilder(act).initToday().build();
         today_m = d.getMonth();
         today_y = d.getYear();
         tvNew = (TextView) container.findViewById(R.id.tvNew);
@@ -464,38 +466,36 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void createCalendar(int offsetMonth) {
-        DateHelper d = dCurrent;
+        DateHelper d = DateHelper.newBuilder(act).setDays(dCurrent.getTimeInDays()).build();
         if (offsetMonth != 0)
-            d.plusDay(offsetMonth);
+            d.plusMonth(offsetMonth);
         tvDate.setText(d.getMonthString() + "\n" + d.getYear());
         adCalendar.clear();
-        for (int i = -1; i > -7; i--) //monday-saturday
+        for (int i = -1; i > -7; i--) //add label monday-saturday
             adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));
         adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray)); //sunday
-        final int m = d.getMonth();
-        d.setDay(1);
-        dCurrent = d;
-        if (d.getDayWeek() != 1) {
-            if (d.getDayWeek() == 0) //sunday
-                d.plusDay(-5);
+        final int cur_month = d.getMonth();
+        if (d.getDayWeek() != DateHelper.MONDAY) {
+            if (d.getDayWeek() == DateHelper.SUNDAY)
+                d.plusDay(-6);
             else
-                d.plusDay(2 - d.getDayWeek());
-            while (d.getDayWeek() > 1) {
-                adCalendar.addItem(new CalendarItem(act, d.getDayWeek(), android.R.color.darker_gray));
+                d.plusDay(1 - d.getDayWeek());
+            while (d.getMonth() != cur_month) {
+                adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
                 d.plusDay(1);
             }
         }
-        DateHelper today = new DateHelper(act);
+        DateHelper today = DateHelper.newBuilder(act).initToday().build();
         int n_today = 0;
-        if (today.getMonth() == m)
+        if (today.getMonth() == cur_month)
             n_today = today.getDay();
-        while (d.getMonth() == m) {
+        while (d.getMonth() == cur_month) {
             adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.white));
             if (d.getDay() == n_today)
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
             d.plusDay(1);
         }
-        while (d.getDay() != 1) {
+        while (d.getDayWeek() != DateHelper.MONDAY) {
             adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
             d.plusDay(1);
         }
@@ -525,7 +525,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             boolean empty = true;
             if (cursor.moveToFirst()) {
                 if (loadIfNeed) {
-                    checkTime(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    checkTime((int) (cursor.getLong(cursor.getColumnIndex(
+                            DataBase.TIME)) / DateHelper.SEC_IN_MILLS));
                 }
 
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
@@ -561,16 +562,16 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
     }
 
-    private void checkTime(long time) {
+    private void checkTime(int sec) {
         if (isCurMonth()) {
-            act.status.checkTime(time);
+            act.status.checkTime(sec);
             return;
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
                 (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-            DateHelper d = new DateHelper(time);
+            DateHelper d = DateHelper.newBuilder(act).setSeconds(sec).build();
             if (d.getMonth() != today_m)
-                act.status.checkTime(time);
+                act.status.checkTime(sec);
         }
     }
 

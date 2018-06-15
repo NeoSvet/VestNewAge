@@ -116,8 +116,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         if (dialog > -1)
             dateDialog.dismiss();
         outState.putSerializable(Const.TASK, task);
-        outState.putLong(START, dStart.getTime());
-        outState.putLong(END, dEnd.getTime());
+        outState.putInt(START, dStart.getTimeInDays());
+        outState.putInt(END, dEnd.getTimeInDays());
         outState.putInt(DataBase.SEARCH, page);
         if (page > -1) {
             outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
@@ -135,15 +135,11 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             min_y = 2004; //2004
         }
         if (state == null) {
-            dEnd = new DateHelper(act);
-            dStart = new DateHelper(act);
-            if (mode < 5) { // открываем ссылку с сайта Благая Весть
-                dStart.setYear(2016);
-                dStart.setMonth(1);
-            } else {
-                dStart.setYear(min_y);
-                dStart.setMonth(min_m);
-            }
+            dEnd = DateHelper.newBuilder(act).initToday().build();
+            if (mode < 5)// открываем ссылку с сайта Благая Весть
+                dStart = DateHelper.newBuilder(act).setYearMonth(2016, 1).build();
+            else
+                dStart = DateHelper.newBuilder(act).setYearMonth(min_y, min_m).build();
             sMode.setSelection(mode);
             if (string != null) {
                 etSearch.setText(string);
@@ -151,8 +147,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             }
         } else {
             act.setFrSearch(this);
-            dStart = new DateHelper(state.getLong(START));
-            dEnd = new DateHelper(state.getLong(END));
+            dStart = DateHelper.newBuilder(act).setDays(state.getInt(START)).build();
+            dEnd = DateHelper.newBuilder(act).setDays(state.getInt(END)).build();
             task = (SearchTask) state.getSerializable(Const.TASK);
             page = state.getInt(DataBase.SEARCH, -1);
             if (task != null) {
@@ -515,7 +511,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         DataBase dataBase = new DataBase(act, DataBase.SEARCH);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.SEARCH, null, null, null, null, null,
-                DataBase.ID + (dStart.getTime() > dEnd.getTime() ? DataBase.DESC : ""));
+                DataBase.ID + (dStart.getTimeInMills() > dEnd.getTimeInMills() ? DataBase.DESC : ""));
         if (cursor.getCount() == 0) {
             bShow.setVisibility(View.GONE);
             pAdditionSet.setVisibility(View.GONE);
@@ -564,8 +560,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         }
     }
 
-    public void updateStatus(Long date) {
-        DateHelper d = new DateHelper(date);
+    public void updateStatus(int date) {
+        DateHelper d = DateHelper.newBuilder(act).setDays(date).build();
         tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + d.getYear());
     }
 

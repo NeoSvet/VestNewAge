@@ -323,7 +323,7 @@ public class SlashActivity extends AppCompatActivity {
             }
             return;
         }
-        DateHelper date = new DateHelper(this);
+        DateHelper date = DateHelper.newBuilder(SlashActivity.this).initToday().build();
         DataBase dataBase = new DataBase(SlashActivity.this, date.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);

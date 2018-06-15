@@ -26,6 +26,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.SiteTask;
@@ -272,7 +273,7 @@ public class SiteFragment extends Fragment {
     private void openList(File f, boolean loadIfNeed) {
         try {
             adMain.clear();
-            if (act.status.checkTime(f.lastModified()))
+            if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);

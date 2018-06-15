@@ -642,13 +642,14 @@ public class BrowserActivity extends AppCompatActivity
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
                 int id;
+                DateHelper.Builder builder = DateHelper.newBuilder(this);
                 DateHelper d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                     s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
-                    d = new DateHelper(cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    d = builder.setMills(cursor.getLong(cursor.getColumnIndex(DataBase.TIME))).build();
                     if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
-                        status.checkTime(d.getTime() + 2592000000L);
+                        status.checkTime(d.getTimeInSeconds() + DateHelper.MONTH_IN_SEC);
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
                     bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
                     bw.flush();
@@ -689,7 +690,7 @@ public class BrowserActivity extends AppCompatActivity
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-");
                     bw.write(d.getYear() + Const.BR);
-                    bw.write(getResources().getString(R.string.downloaded) + " " + d.getTimeString());
+                    bw.write(getResources().getString(R.string.downloaded) + " " + d.toString());
                 }
                 bw.write("\n</div></body></html>");
                 bw.close();

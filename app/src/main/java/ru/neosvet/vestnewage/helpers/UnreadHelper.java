@@ -46,7 +46,7 @@ public class UnreadHelper {
         cursor.close();
         if (exists) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.TIME, date.getTime());
+        cv.put(DataBase.TIME, date.getTimeInMills());
         cv.put(DataBase.LINK, link);
         db.insert(NAME, null, cv);
         time = System.currentTimeMillis();

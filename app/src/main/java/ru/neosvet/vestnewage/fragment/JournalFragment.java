@@ -77,11 +77,11 @@ public class JournalFragment extends Fragment {
             String s;
             String[] id;
             ListItem item;
-            long now = System.currentTimeMillis();
-            long t;
+            long now = DateHelper.now() * DateHelper.SEC_IN_MILLS;
             if (offset > 0)
                 curJ.moveToPosition(offset);
             DateHelper d;
+            long t;
             do {
                 id = curJ.getString(iID).split(Const.AND);
                 dataBase = new DataBase(act, id[0]);
@@ -93,10 +93,10 @@ public class JournalFragment extends Fragment {
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
-                    d = new DateHelper(t);
+                    d = DateHelper.newBuilder(act).setMills(t).build();
                     item.setDes(act.lib.getDiffDate(now, t) +
                             getResources().getString(R.string.back)
-                            + "\n(" + d.getTimeString() + ")");
+                            + "\n(" + d.toString() + ")");
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
                             if (s.contains(Const.POEMS))

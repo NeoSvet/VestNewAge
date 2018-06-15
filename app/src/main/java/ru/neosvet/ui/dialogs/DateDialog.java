@@ -25,7 +25,7 @@ public class DateDialog extends Dialog {
     private DateHelper date;
     private Result result;
     private MonthAdapter adMonth;
-    private int min_year = 2016, min_month = 1, max_year = 2016, max_month = 12;
+    private int min_year = 2016, min_month = 1, max_year = 0, max_month = 0;
     private boolean cancel = true;
 
     public DateDialog(Activity act, DateHelper date) {
@@ -106,7 +106,7 @@ public class DateDialog extends Dialog {
         }
         rvMonth.setLayoutManager(layoutManager);
         rvMonth.setAdapter(adMonth);
-        DateHelper d = new DateHelper(act);
+        DateHelper d = DateHelper.newBuilder(act).initToday().build();
         if (max_year == 0)
             max_year = d.getYear();
         if (max_month == 0)

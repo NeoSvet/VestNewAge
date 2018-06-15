@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SearchFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 
-public class SearchTask extends AsyncTask<String, Long, Boolean> implements Serializable {
+public class SearchTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
     private transient SearchFragment frm;
     private transient MainActivity act;
     private boolean start = true;
@@ -41,7 +41,7 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
     }
 
     @Override
-    protected void onProgressUpdate(Long... values) {
+    protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
         if (frm != null)
             frm.updateStatus(values[0]);
@@ -72,16 +72,16 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 return false;
             dbSearch = new DataBase(act, DataBase.SEARCH);
             dbS = dbSearch.getWritableDatabase();
-            int sy, sm, ey, em, step;
+            int start_year, start_month, end_year, end_month, step;
             mode = Integer.parseInt(params[1]);
             str = params[2]; // начальная дата
-            sm = Integer.parseInt(str.substring(0, 2)) - 1;
-            sy = Integer.parseInt(str.substring(3, 5));
+            start_month = Integer.parseInt(str.substring(0, 2)) - 1;
+            start_year = Integer.parseInt(str.substring(3, 5));
             str = params[3]; // конечная дата
-            em = Integer.parseInt(str.substring(0, 2)) - 1;
-            ey = Integer.parseInt(str.substring(3, 5));
+            end_month = Integer.parseInt(str.substring(0, 2)) - 1;
+            end_year = Integer.parseInt(str.substring(3, 5));
             str = params[0]; // строка для поиска
-            if ((sy == ey && sm <= em) || sy < ey)
+            if ((start_year == end_year && start_month <= end_month) || start_year < end_year)
                 step = 1;
             else
                 step = -1;
@@ -96,22 +96,15 @@ public class SearchTask extends AsyncTask<String, Long, Boolean> implements Seri
                 //поиск по материалам (статьям)
                 searchList("00.00", str, mode);
             }
+            d = DateHelper.newBuilder(act).setYearMonth(start_year, start_month).build();
             while (start) {
-                d = new DateHelper(sy, sm, 1);
                 if (list.contains(d.getMY())) {
-                    publishProgress(d.getTime());
+                    publishProgress(d.getTimeInDays());
                     searchList(d.getMY(), str, mode);
                 }
-                if (sy == ey && sm == em)
+                if (d.getYear() == end_year && d.getMonth() == end_month)
                     break;
-                sm += step;
-                if (sm == 12) {
-                    sm = 0;
-                    sy++;
-                } else if (sm == -1) {
-                    sm = 11;
-                    sy--;
-                }
+                d.plusMonth(step);
             }
             dbSearch.close();
             return true;

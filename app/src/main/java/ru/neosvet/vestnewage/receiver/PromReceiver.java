@@ -7,11 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import org.threeten.bp.Clock;
-import org.threeten.bp.temporal.ChronoField;
-import org.threeten.bp.temporal.ChronoUnit;
-import org.threeten.bp.temporal.Temporal;
-
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 
 
@@ -24,16 +20,15 @@ public class PromReceiver extends BroadcastReceiver {
         am.cancel(piProm);
         if (p > -1) {
             PromHelper prom = new PromHelper(context, null);
-            Temporal d = prom.getPromDate(false);
-            d.minus(p, ChronoUnit.MINUTES);
-            Temporal now = Clock.systemUTC().instant();
-            if (d.get(ChronoField.INSTANT_SECONDS) < now.get(ChronoField.INSTANT_SECONDS)) {
+            DateHelper d = prom.getPromDate(false);
+            d.minusMinutes(p);
+            if (d.getTimeInSeconds() < DateHelper.now()) {
                 d = prom.getPromDate(true);
-                d.minus(p, ChronoUnit.MINUTES);
+                d.minusMinutes(p);
             }
             if (p == 0)
-                d.minus(30, ChronoUnit.SECONDS);
-            long time = d.get(ChronoField.INSTANT_SECONDS) * 1000;
+                d.minusSeconds(30);
+            long time = d.getTimeInMills();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
                 am.setAlarmClock(alarmClockInfo, piProm);

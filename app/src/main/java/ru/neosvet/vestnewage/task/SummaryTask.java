@@ -111,13 +111,14 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         UnreadHelper unread = new UnreadHelper(act);
         List<String> links = unread.getList();
         DateHelper d;
+        DateHelper.Builder builder = DateHelper.newBuilder(act);
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             des = br.readLine();
             time = br.readLine();
             if (link.contains(":"))
                 continue;
-            d = new DateHelper(Long.parseLong(time));
+            d = builder.setMills(Long.parseLong(time)).build();
             if (unread.addLink(link, d)) {
                 item = new ListItem(title, link);
                 item.setDes(des);
@@ -181,6 +182,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
         InputStream in = new BufferedInputStream(act.lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(act.getFilesDir() + SummaryFragment.RSS));
+        DateHelper.Builder builder = DateHelper.newBuilder(act);
         while ((line = br.readLine()) != null) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
@@ -195,7 +197,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
                 bw.write(Const.N);
-                bw.write(DateHelper.parse(withOutTag(br.readLine())) + Const.N); //time
+                bw.write(builder.parse(withOutTag(br.readLine())).build().getTimeInMills() + Const.N); //time
                 bw.flush();
             }
         }

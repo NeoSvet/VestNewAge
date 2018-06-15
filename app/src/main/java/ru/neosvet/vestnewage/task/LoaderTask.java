@@ -160,13 +160,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadYear(int year) throws Exception {
         msg = context.getResources().getString(R.string.download_list);
         //refresh list:
-        DateHelper d = new DateHelper(context);
-        int m, k = 12;
+        DateHelper d = DateHelper.newBuilder(context).initToday().build();
+        int k = 12;
         if (year == d.getYear())
-            k -= d.getMonth() + 1;
+            k -= d.getMonth();
         publishProgress(k);
         CalendarTask t2 = new CalendarTask((Activity) context);
-        for (m = 0; m < k && start; m++) {
+        for (int m = 0; m < k && start; m++) {
             t2.downloadCalendar(year, m, false);
             prog++;
         }
@@ -179,38 +179,36 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             if (f[i].getName().length() == 5)
                 list.add(f[i].getName());
         }
-        int em = k;
+        int end_month = k;
         k = 0;
-        m = 0;
         //count pages:
+        d = DateHelper.newBuilder(context).setYearMonth(year, 1).build();
         while (start) {
-            d = new DateHelper(year, m, 1);
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     k += countBookList(d.getMY());
                     break;
                 }
             }
-            if (m == em)
+            if (d.getMonth() == end_month)
                 break;
-            m++;
+            d.plusMonth(1);
         }
         //download:
         prog = 0;
         msg = context.getResources().getString(R.string.download_materials);
         publishProgress(k);
-        m = 0;
+        d = DateHelper.newBuilder(context).setYearMonth(year, 1).build();
         while (start) {
-            d = new DateHelper(year, m, 1);
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     downloadBookList(d.getMY());
                     break;
                 }
             }
-            if (m == em)
+            if (d.getMonth() == end_month)
                 break;
-            m++;
+            d.plusMonth(1);
         }
     }
 
@@ -218,14 +216,13 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
+        DateHelper d = DateHelper.newBuilder(context).initToday().build();
         if (p == -1 || p == R.id.nav_book) {
-            DateHelper d = new DateHelper(context);
-            k = (d.getYear() - 2016) * 12 + d.getMonth(); //poems
+            k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
             k += 9; // poslaniya (01.16-09.16)
         }
         if (p == -1) {
-            DateHelper d = new DateHelper(context);
-            k += (d.getYear() - 2016) * 12 + d.getMonth() + 1; // calendar
+            k += (d.getYear() - 2016) * 12 + d.getMonth(); // calendar from 01.16
             k += 4; // main, news, media and rss
         } else if (p == R.id.nav_main) // main, news, media
             k = 3;
@@ -259,11 +256,11 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!start) return;
 
         if (p == -1) {
-            DateHelper d = new DateHelper(context);
+            d = DateHelper.newBuilder(context).initToday().build();
             CalendarTask t2 = new CalendarTask((Activity) context);
-            int max_y = d.getYear() + 1, max_m = 12;
+            int max_y = d.getYear() + 1, max_m = 13;
             for (int y = 2016; y < max_y && start; y++) {
-                if (y == max_y - 1)
+                if (y == d.getYear())
                     max_m = d.getMonth() + 1;
                 for (int m = 0; m < max_m && start; m++) {
                     t2.downloadCalendar(y, m, false);
@@ -329,14 +326,12 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             if (f[i].getName().length() == 5)
                 list.add(f[i].getName());
         }
-        int sy, sm, ey, em, k = 0;
-        sm = 0;
-        sy = 2016;
-        DateHelper d = new DateHelper(context);
-        em = d.getMonth();
-        ey = d.getYear();
+        int end_year, end_month, k = 0;
+        DateHelper d = DateHelper.newBuilder(context).initToday().build();
+        end_month = d.getMonth();
+        end_year = d.getYear();
+        d = DateHelper.newBuilder(context).setYearMonth(2016, 1).build();
         while (start) {
-            d = new DateHelper(sy, sm, 1);
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     if (count)
@@ -346,13 +341,9 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                     break;
                 }
             }
-            if (sy == ey && sm == em)
+            if (d.getYear() == end_year && d.getMonth() == end_month)
                 break;
-            sm++;
-            if (sm == 12) {
-                sm = 0;
-                sy++;
-            }
+            d.plusMonth(1);
         }
         return k;
     }

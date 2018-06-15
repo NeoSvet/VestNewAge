@@ -10,6 +10,7 @@ import android.widget.TextView;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 
 public class StatusButton {
     private Context context;
@@ -103,17 +104,17 @@ public class StatusButton {
         }
     }
 
-    public boolean checkTime(long t) {
+    public boolean checkTime(long time) {
         if (!stop || crash)
             return true;
-        if (System.currentTimeMillis() - t > 86400000) {
-            time = true;
+        if (DateHelper.now() - time > DateHelper.DAY_IN_SEC) {
+            this.time = true;
             panel.setVisibility(View.VISIBLE);
             visible = true;
             tv.setText(context.getResources().getString(R.string.refresh) + "?");
             return true;
         } else {
-            time = false;
+            this.time = false;
             visible = false;
             panel.setVisibility(View.GONE);
             restoreText();

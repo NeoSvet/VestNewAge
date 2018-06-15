@@ -17,11 +17,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import org.threeten.bp.Clock;
-import org.threeten.bp.temporal.ChronoField;
-import org.threeten.bp.temporal.ChronoUnit;
-import org.threeten.bp.temporal.Temporal;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,7 +33,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class PromHelper {
-    private static final int hour_prom1 = 8, hour_prom2 = 11;
+    private static final int hour_prom1 = 11, hour_prom2 = 14;
     private final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -52,8 +47,8 @@ public class PromHelper {
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
-            if (timeToProm() > 39600) // today prom was been
-                return;
+//            if (timeToProm() > 39600) //11 hours in sec, today prom was been
+//                return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
@@ -61,9 +56,9 @@ public class PromHelper {
     }
 
     private int timeToProm() {
-        Temporal prom = getPromDate(false);
-        Temporal now = Clock.systemUTC().instant();
-        return prom.get(ChronoField.INSTANT_SECONDS) - now.get(ChronoField.INSTANT_SECONDS);
+        DateHelper prom = getPromDate(false);
+        DateHelper now = DateHelper.newBuilder(context).initNowMoscow().build();
+        return prom.getTimeInSeconds() - now.getTimeInSeconds();
     }
 
     public void stop() {
@@ -150,25 +145,25 @@ public class PromHelper {
         return tvPromTime != null;
     }
 
-    public Temporal getPromDate(boolean next) {
+    public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        Temporal prom = Clock.systemUTC().instant();
-        prom.with(ChronoField.SECOND_OF_MINUTE, 0);
-        prom.minus(timeDiff, ChronoUnit.MILLIS);
+        DateHelper prom = DateHelper.newBuilder(context).initNowMoscow().build();
+        prom.setSeconds(0);
+        prom.minusSeconds(timeDiff);
         if (next) {
-            if (prom.get(ChronoField.HOUR_OF_DAY) < hour_prom1)
-                prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
-            else if (prom.get(ChronoField.HOUR_OF_DAY) < hour_prom2)
-                prom.with(ChronoField.HOUR_OF_DAY, hour_prom2);
+            if (prom.getHours() < hour_prom1)
+                prom.setHours(hour_prom1);
+            else if (prom.getHours() < hour_prom2)
+                prom.setHours(hour_prom2);
         }
-        if (prom.get(ChronoField.HOUR_OF_DAY) >= hour_prom1) {
-            if (prom.get(ChronoField.HOUR_OF_DAY) >= hour_prom2) {
-                prom.plus(1, ChronoUnit.DAYS);
-                prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
+        if (prom.getHours() >= hour_prom1) {
+            if (prom.getHours() >= hour_prom2) {
+                prom.plusDay(1);
+                prom.setHours(hour_prom1);
             } else
-                prom.with(ChronoField.HOUR_OF_DAY, hour_prom2);
+                prom.setHours(hour_prom2);
         } else
-            prom.with(ChronoField.HOUR_OF_DAY, hour_prom1);
+            prom.setHours(hour_prom1);
         return prom;
     }
 
@@ -210,15 +205,15 @@ public class PromHelper {
     }
 
     private String getPromText() {
-        Temporal prom = getPromDate(false);
-        String t = lib.getDiffDate(prom.get(ChronoField.INSTANT_SECONDS) * 1000, System.currentTimeMillis());
+        DateHelper prom = getPromDate(false);
+        String t = lib.getDiffDate(prom.getTimeInMills(), System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        Temporal d = Clock.systemUTC().instant();
+        DateHelper d = DateHelper.newBuilder(context).initNowMoscow().build();
         for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
             if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
-                if (i < 3) {
+                if (i < 3) { // less minutes
                     if (i == 0) {
                         if (!t.contains("1"))
                             return context.getResources().getString(R.string.prom);
@@ -236,16 +231,16 @@ public class PromHelper {
                         }, 1000);
                     }
                     break;
-                } else if (i < 6) {
+                } else if (i < 6) { // less hour
                     if (i == 3)
                         t = t.replace(context.getResources().getStringArray(R.array.time)[i]
                                 , context.getResources().getString(R.string.minute));
-                    d.plus(1, ChronoUnit.MINUTES);
-                    d.with(ChronoField.SECOND_OF_MINUTE, 1);
+                    d.plusMinutes(1);
+                    d.setSeconds(1);
                 } else {
-                    d.plus(1, ChronoUnit.HOURS);
-                    d.with(ChronoField.MINUTE_OF_HOUR, 0);
-                    d.with(ChronoField.SECOND_OF_MINUTE, 1);
+                    d.plusHours(1);
+                    d.setMinutes(0);
+                    d.setSeconds(1);
                 }
                 if (hTime != null) {
                     timer = new Timer();
@@ -254,7 +249,7 @@ public class PromHelper {
                         public void run() {
                             hTime.sendEmptyMessage(0);
                         }
-                    }, d.getLong(ChronoField.INSTANT_SECONDS) * 1000);
+                    }, d.getTimeInMills());
                 }
                 break;
             }
@@ -277,11 +272,11 @@ public class PromHelper {
                     OkHttpClient client = Lib.createHttpClient();
                     Response response = client.newCall(builderRequest.build()).execute();
                     String s = response.headers().value(1);
-                    Lib.LOG("server: " + s);
-                    long timeServer = 0;//Date.parse(s);
+                    DateHelper.Builder builder = DateHelper.newBuilder(context);
+                    int timeServer = builder.parse(s).build().getTimeInSeconds();
                     response.close();
 
-                    int timeDiff = (int) (System.currentTimeMillis() - timeServer);
+                    int timeDiff = (int) (DateHelper.now() - timeServer);
                     if (timeDiff != pref.getInt(TIMEDIFF, 0)) {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putInt(TIMEDIFF, timeDiff);

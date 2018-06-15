@@ -108,10 +108,12 @@ public class SummaryService extends JobIntentService {
         s = withOutTag(br.readLine()); //time
 
         File file = new File(context.getFilesDir() + SummaryFragment.RSS);
-        long t = 0;
+        DateHelper.Builder builder = DateHelper.newBuilder(context).setMills(0);
         if (file.exists())
-            t = file.lastModified();
-        if (t > DateHelper.parse(s)) { //список в загрузке не нуждается
+            builder.setMills(file.lastModified());
+        int secFile = builder.build().getTimeInSeconds();
+        int secList = builder.parse(s).build().getTimeInSeconds();
+        if (secFile > secList) { //список в загрузке не нуждается
             br.close();
             return null;
         }
@@ -122,7 +124,7 @@ public class SummaryService extends JobIntentService {
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();
         do {
-            d = new DateHelper(DateHelper.parse(s));
+            d = builder.parse(s).build();
             if (unread.addLink(link, d)) {
                 loader.downloadPage(link, true);
                 list.add(title);
@@ -134,7 +136,7 @@ public class SummaryService extends JobIntentService {
             bw.write(Const.N);
             bw.write(des);
             bw.write(Const.N);
-            bw.write(d.getTime() + Const.N); //time
+            bw.write(d.getTimeInMills() + Const.N); //time
             bw.flush();
             s = br.readLine(); //</item><item> or </channel>
             if (s.contains("</channel>")) break;
