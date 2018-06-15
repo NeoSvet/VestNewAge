@@ -50,10 +50,10 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class BrowserActivity extends AppCompatActivity

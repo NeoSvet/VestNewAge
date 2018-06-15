@@ -10,8 +10,8 @@ import android.widget.CheckBox;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MarkerActivity;
 
 public class CheckAdapter extends BaseAdapter {
     private MarkerActivity act = null;

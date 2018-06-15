@@ -40,14 +40,9 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.CalendarAdapter;
-import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -55,6 +50,11 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.list.CalendarAdapter;
+import ru.neosvet.vestnewage.list.CalendarItem;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.SearchTask;
 
 

@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import ru.neosvet.vestnewage.list.HelpAdapter;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.list.HelpAdapter;
 
 public class HelpFragment extends Fragment {
     private final String PANELS = "panels";

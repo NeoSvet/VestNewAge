@@ -8,10 +8,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import ru.neosvet.vestnewage.list.MenuAdapter;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.list.MenuAdapter;
 
 public class MenuFragment extends Fragment {
     private static final String SELECT = "select";

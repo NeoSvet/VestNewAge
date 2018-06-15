@@ -14,9 +14,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -25,6 +22,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 
 public class JournalFragment extends Fragment {
     private final String OFFSET = "offset", FINISH = "finish";

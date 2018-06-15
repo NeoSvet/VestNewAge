@@ -20,8 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.vestnewage.list.MarkAdapter;
-import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -30,6 +28,8 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.activity.PresentationActivity;
+import ru.neosvet.vestnewage.list.MarkAdapter;
+import ru.neosvet.vestnewage.list.MarkItem;
 
 public class CollectionsFragment extends Fragment {
     private final String SEL = "sel", RENAME = "rename";

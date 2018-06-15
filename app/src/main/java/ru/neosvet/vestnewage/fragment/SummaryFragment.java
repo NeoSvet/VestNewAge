@@ -17,14 +17,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.SummaryTask;
 
 public class SummaryFragment extends Fragment {

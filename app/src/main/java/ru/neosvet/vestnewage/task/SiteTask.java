@@ -13,11 +13,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.list.ListItem;
 
 public class SiteTask extends AsyncTask<String, Void, String> implements Serializable {
     private transient SiteFragment frm;

@@ -20,12 +20,12 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
-import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 /**

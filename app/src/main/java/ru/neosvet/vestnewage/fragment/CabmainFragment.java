@@ -22,16 +22,16 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import ru.neosvet.vestnewage.list.ListAdapter;
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.list.ListAdapter;
+import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.CabTask;
-import ru.neosvet.utils.Lib;
 
 public class CabmainFragment extends Fragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";

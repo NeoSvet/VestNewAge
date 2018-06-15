@@ -17,14 +17,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.vestnewage.helpers.NotificationHelper;
-import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.list.ListItem;
 
 public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Serializable {
     private transient SummaryFragment frm;
