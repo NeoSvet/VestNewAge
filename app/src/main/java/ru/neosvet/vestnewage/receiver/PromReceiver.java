@@ -21,13 +21,13 @@ public class PromReceiver extends BroadcastReceiver {
         if (p > -1) {
             PromHelper prom = new PromHelper(context, null);
             DateHelper d = prom.getPromDate(false);
-            d.minusMinutes(p);
+            d.changeMinutes(-p);
             if (d.getTimeInSeconds() < DateHelper.initNow(context).getTimeInSeconds()) {
                 d = prom.getPromDate(true);
-                d.minusMinutes(p);
+                d.changeMinutes(-p);
             }
             if (p == 0)
-                d.minusSeconds(30);
+                d.changeSeconds(30);
             long time = d.getTimeInMills();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);

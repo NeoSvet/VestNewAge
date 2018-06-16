@@ -104,7 +104,7 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
                 }
                 if (d.getYear() == end_year && d.getMonth() == end_month)
                     break;
-                d.plusMonth(step);
+                d.changeMonth(step);
             }
             dbSearch.close();
             return true;

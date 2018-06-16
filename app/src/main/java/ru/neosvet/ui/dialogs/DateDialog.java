@@ -65,7 +65,7 @@ public class DateDialog extends Dialog {
             @Override
             public void onClick(View view) {
                 if (date.getYear() > min_year) {
-                    date.setYear(date.getYear() - 1);
+                    date.changeYear(-1);
                     date.setMonth(12);
                     setCalendar();
                 }
@@ -75,7 +75,7 @@ public class DateDialog extends Dialog {
             @Override
             public void onClick(View view) {
                 if (date.getYear() < max_year) {
-                    date.setYear(date.getYear() + 1);
+                    date.changeYear(1);
                     date.setMonth(1);
                     setCalendar();
                 }

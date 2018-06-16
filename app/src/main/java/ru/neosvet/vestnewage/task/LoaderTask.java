@@ -192,7 +192,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             }
             if (d.getMonth() == end_month)
                 break;
-            d.plusMonth(1);
+            d.changeMonth(1);
         }
         //download:
         prog = 0;
@@ -208,7 +208,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             }
             if (d.getMonth() == end_month)
                 break;
-            d.plusMonth(1);
+            d.changeMonth(1);
         }
     }
 
@@ -343,7 +343,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             }
             if (d.getYear() == end_year && d.getMonth() == end_month)
                 break;
-            d.plusMonth(1);
+            d.changeMonth(1);
         }
         return k;
     }

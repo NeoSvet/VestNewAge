@@ -148,7 +148,7 @@ public class PromHelper {
         DateHelper prom = DateHelper.initNow(context);;
         prom.setMinutes(0);
         prom.setSeconds(0);
-        prom.minusSeconds(timeDiff);
+        prom.changeSeconds(-timeDiff);
         if (next) {
             if (prom.getHours() < hour_prom1)
                 prom.setHours(hour_prom1);
@@ -157,7 +157,7 @@ public class PromHelper {
         }
         if (prom.getHours() >= hour_prom1) {
             if (prom.getHours() >= hour_prom2) {
-                prom.plusDay(1);
+                prom.changeDay(1);
                 prom.setHours(hour_prom1);
             } else
                 prom.setHours(hour_prom2);
@@ -234,10 +234,10 @@ public class PromHelper {
                     if (i == 3)
                         t = t.replace(context.getResources().getStringArray(R.array.time)[i]
                                 , context.getResources().getString(R.string.minute));
-                    d.plusMinutes(1);
+                    d.changeMinutes(1);
                     d.setSeconds(1);
                 } else {
-                    d.plusHours(1);
+                    d.changeHours(1);
                     d.setMinutes(0);
                     d.setSeconds(1);
                 }

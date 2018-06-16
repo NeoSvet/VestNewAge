@@ -171,23 +171,27 @@ public class DateHelper {
         date = date.withYear(year);
     }
 
-    public void plusDay(int day) {
-        date = date.plusDays(day);
+    public void changeDay(int offset) {
+        date = date.plusDays(offset);
     }
 
-    public void plusMonth(int month) {
-        date = date.plusMonths(month);
+    public void changeMonth(int offset) {
+        date = date.plusMonths(offset);
+    }
+
+    public void changeYear(int offset) {
+        date = date.plusYears(offset);
     }
 
     // TIME ~~~~~~~~~~~~~~~~~~~~~~~~
+    public int getHours() {
+        if (time == null) return 0;
+        return time.getHour();
+    }
+
     public void setSeconds(int seconds) {
         if (time == null) return;
         time = time.withSecond(seconds);
-    }
-
-    public void minusSeconds(int seconds) {
-        if (time == null) return;
-        time = time.minusSeconds(seconds);
     }
 
     public void setMinutes(int min) {
@@ -195,31 +199,27 @@ public class DateHelper {
         time = time.withMinute(min);
     }
 
-    public void minusMinutes(int min) {
-        if (time == null) return;
-        time = time.minusMinutes(min);
-    }
-
-    public void plusMinutes(int min) {
-        if (time == null) return;
-        time = time.plusMinutes(min);
-    }
-
     public void setHours(int hours) {
         if (time == null) return;
         time = time.withHour(hours);
     }
 
-    public void plusHours(int hours) {
+    public void changeSeconds(int offset) {
         if (time == null) return;
-        time = time.plusHours(hours);
+        time = time.plusSeconds(offset);
     }
 
-    public int getHours() {
-        if (time == null) return 0;
-        return time.getHour();
+    public void changeMinutes(int offset) {
+        if (time == null) return;
+        time = time.plusMinutes(offset);
     }
 
+    public void changeHours(int offset) {
+        if (time == null) return;
+        time = time.plusHours(offset);
+    }
+
+    // BUILDER ~~~~~~~~~~~~~~~~~~~~~~~~
     public class Builder {
         public Builder() {
         }

@@ -190,14 +190,14 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(true);
-                d.plusMonth(1);
+                d.changeMonth(1);
             } else {
-                d.plusMonth(-1);
+                d.changeMonth(-1);
                 ivPrev.setEnabled(existsList(d, katren));
-                d.plusMonth(2);
+                d.changeMonth(2);
             }
             ivNext.setEnabled(existsList(d, katren));
-            d.plusMonth(-1);
+            d.changeMonth(-1);
             DataBase dataBase = new DataBase(act, d.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
@@ -460,9 +460,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             else
                 d = dPoslanie;
             if (plus)
-                d.plusMonth(1);
+                d.changeMonth(1);
             else
-                d.plusMonth(-1);
+                d.changeMonth(-1);
             tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
                 @Override

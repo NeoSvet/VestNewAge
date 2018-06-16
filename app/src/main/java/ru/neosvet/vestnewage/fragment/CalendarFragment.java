@@ -465,8 +465,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private void createCalendar(int offsetMonth) {
         DateHelper d = DateHelper.newBuilder(act).setDays(dCurrent.getTimeInDays()).build();
         if (offsetMonth != 0) {
-            d.plusMonth(offsetMonth);
-            dCurrent.plusMonth(offsetMonth);
+            d.changeMonth(offsetMonth);
+            dCurrent.changeMonth(offsetMonth);
         }
         tvDate.setText(d.getMonthString() + "\n" + d.getYear());
         adCalendar.clear();
@@ -476,12 +476,12 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         final int cur_month = d.getMonth();
         if (d.getDayWeek() != DateHelper.MONDAY) {
             if (d.getDayWeek() == DateHelper.SUNDAY)
-                d.plusDay(-6);
+                d.changeDay(-6);
             else
-                d.plusDay(1 - d.getDayWeek());
+                d.changeDay(1 - d.getDayWeek());
             while (d.getMonth() != cur_month) {
                 adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
-                d.plusDay(1);
+                d.changeDay(1);
             }
         }
         DateHelper today = DateHelper.initToday(act);
@@ -492,11 +492,11 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.white));
             if (d.getDay() == n_today)
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
-            d.plusDay(1);
+            d.changeDay(1);
         }
         while (d.getDayWeek() != DateHelper.MONDAY) {
             adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
-            d.plusDay(1);
+            d.changeDay(1);
         }
         openCalendar(true);
         if (dCurrent.getYear() == 2016)
