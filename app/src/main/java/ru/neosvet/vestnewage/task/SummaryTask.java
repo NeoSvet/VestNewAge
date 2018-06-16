@@ -197,7 +197,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
                 bw.write(Const.N);
-                bw.write(builder.parse(withOutTag(br.readLine())).build().getTimeInMills() + Const.N); //time
+                bw.write(DateHelper.parse(act, withOutTag(br.readLine())).getTimeInMills() + Const.N); //time
                 bw.flush();
             }
         }

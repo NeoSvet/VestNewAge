@@ -160,7 +160,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
     private void downloadYear(int year) throws Exception {
         msg = context.getResources().getString(R.string.download_list);
         //refresh list:
-        DateHelper d = DateHelper.newBuilder(context).initToday().build();
+        DateHelper d = DateHelper.initToday(context);
         int k = 12;
         if (year == d.getYear())
             k -= d.getMonth();
@@ -216,7 +216,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
-        DateHelper d = DateHelper.newBuilder(context).initToday().build();
+        DateHelper d = DateHelper.initToday(context);
         if (p == -1 || p == R.id.nav_book) {
             k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
             k += 9; // poslaniya (01.16-09.16)
@@ -256,7 +256,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         if (!start) return;
 
         if (p == -1) {
-            d = DateHelper.newBuilder(context).initToday().build();
+            d = DateHelper.initToday(context);
             CalendarTask t2 = new CalendarTask((Activity) context);
             int max_y = d.getYear() + 1, max_m = 13;
             for (int y = 2016; y < max_y && start; y++) {
@@ -327,7 +327,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
                 list.add(f[i].getName());
         }
         int end_year, end_month, k = 0;
-        DateHelper d = DateHelper.newBuilder(context).initToday().build();
+        DateHelper d = DateHelper.initToday(context);
         end_month = d.getMonth();
         end_year = d.getYear();
         d = DateHelper.newBuilder(context).setYearMonth(2016, 1).build();

@@ -112,7 +112,7 @@ public class SummaryService extends JobIntentService {
         if (file.exists())
             builder.setMills(file.lastModified());
         long secFile = builder.build().getTimeInSeconds();
-        long secList = builder.parse(s).build().getTimeInSeconds();
+        long secList = DateHelper.parse(context, s).getTimeInSeconds();
         if (secFile > secList) { //список в загрузке не нуждается
             br.close();
             return null;
@@ -124,7 +124,7 @@ public class SummaryService extends JobIntentService {
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();
         do {
-            d = builder.parse(s).build();
+            d = DateHelper.parse(context, s);
             if (unread.addLink(link, d)) {
                 loader.downloadPage(link, true);
                 list.add(title);

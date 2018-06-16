@@ -135,7 +135,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             min_y = 2004; //2004
         }
         if (state == null) {
-            dEnd = DateHelper.newBuilder(act).initToday().build();
+            dEnd = DateHelper.initToday(act);
             if (mode < 5)// открываем ссылку с сайта Благая Весть
                 dStart = DateHelper.newBuilder(act).setYearMonth(2016, 1).build();
             else

@@ -100,7 +100,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void restoreActivityState(Bundle state) {
-        DateHelper d = DateHelper.newBuilder(act).initToday(act).build();
+        DateHelper d = DateHelper.initToday(act);
         d.setYear(DEF_YEAR);
         dKatren = DateHelper.newBuilder(act).setDays(pref.getInt(KAT, d.getTimeInDays())).build();
         dPoslanie = DateHelper.newBuilder(act).setDays(pref.getInt(POS, d.getTimeInDays())).build();
@@ -238,7 +238,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 dModList = d;
             cursor.close();
             dataBase.close();
-            DateHelper today = DateHelper.newBuilder(act).initToday().build();
+            DateHelper today = DateHelper.initToday(act);
             if (d.getMonth() == today.getMonth() && d.getYear() == today.getYear()) {
                 //если выбранный месяц - текущий
                 katren = act.status.checkTime(dModList.getTimeInSeconds());
@@ -522,7 +522,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             if (existsList(d, tab == 0)) {
                 openList(false);
             } else {
-                DateHelper t = DateHelper.newBuilder(act).initToday().build();
+                DateHelper t = DateHelper.initToday(act);
                 if (t.getMonth() == d.getMonth() && t.getYear() == d.getYear())
                     Lib.showToast(act, getResources().getString(R.string.list_is_empty));
                 else
@@ -574,7 +574,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     public void onClick(View view) {
         menuRnd.hide();
         //Определяем диапозон дат:
-        DateHelper d = DateHelper.newBuilder(act).initToday().build();
+        DateHelper d = DateHelper.initToday(act);
         int m, y, max_m = d.getMonth(), max_y = d.getYear() - 2000;
         if (view.getId() == R.id.bRndKat) {
             m = 2;

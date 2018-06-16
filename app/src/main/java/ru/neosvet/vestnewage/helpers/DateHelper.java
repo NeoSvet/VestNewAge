@@ -15,7 +15,6 @@ import org.threeten.bp.temporal.ChronoField;
 
 import java.util.Locale;
 
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class DateHelper {
@@ -29,6 +28,39 @@ public class DateHelper {
     private DateHelper(Context context) {
         AndroidThreeTen.init(context);
         this.context = context;
+    }
+
+    private DateHelper(Context context, LocalDate date, LocalTime time) {
+        AndroidThreeTen.init(context);
+        this.context = context;
+        this.date = date;
+        this.time = time;
+    }
+
+    public static Builder newBuilder(Context context) {
+        return new DateHelper(context).new Builder();
+    }
+
+    public static DateHelper initToday(Context context) {
+        return new DateHelper(context, LocalDate.now(Clock.system(ZoneId.of("GMT"))), null);
+    }
+
+    public static DateHelper initNow(Context context) {
+        Clock clock = Clock.system(ZoneId.of("GMT"));
+        return new DateHelper(context, LocalDate.now(clock), LocalTime.now(clock));
+    }
+
+    public static DateHelper parse(Context context, String s) {
+        //Fri, 15 Jun 2018 07:58:29 GMT or +0300
+        boolean offset = s.contains("+0300");
+        s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
+        DateTimeFormatter fDate = DateTimeFormatter
+                .ofPattern("EEE, dd MMM yyyy HH:mm:ss")
+                .withLocale(Locale.US);
+        LocalDateTime dateTime = LocalDateTime.parse(s, fDate);
+        if (offset)
+            dateTime = dateTime.minusHours(3);
+        return new DateHelper(context, dateTime.toLocalDate(), dateTime.toLocalTime());
     }
 
     public long getTimeInSeconds() {
@@ -152,24 +184,8 @@ public class DateHelper {
         return time.getHour();
     }
 
-    public static Builder newBuilder(Context context) {
-        return new DateHelper(context).new Builder();
-    }
-
     public class Builder {
         public Builder() {
-        }
-
-        public Builder initToday() {
-            date = LocalDate.now(Clock.system(ZoneId.of("GMT")));
-            return this;
-        }
-
-        public Builder initNow() {
-            Clock clock = Clock.system(ZoneId.of("GMT"));
-            date = LocalDate.now(clock);
-            time = LocalTime.now(clock);
-            return this;
         }
 
         public Builder setDays(int days) {

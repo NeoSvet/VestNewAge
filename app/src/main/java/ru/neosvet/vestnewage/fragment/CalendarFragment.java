@@ -114,7 +114,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            dCurrent = DateHelper.newBuilder(act).initToday().build();
+            dCurrent = DateHelper.initToday(act);
             dCurrent.setDay(1);
         } else {
             act.setFrCalendar(this);
@@ -335,7 +335,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void initViews() {
-        DateHelper d = DateHelper.newBuilder(act).initToday().build();
+        DateHelper d = DateHelper.initToday(act);
         today_m = d.getMonth();
         today_y = d.getYear();
         tvNew = (TextView) container.findViewById(R.id.tvNew);
@@ -482,7 +482,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 d.plusDay(1);
             }
         }
-        DateHelper today = DateHelper.newBuilder(act).initToday().build();
+        DateHelper today = DateHelper.initToday(act);
         int n_today = 0;
         if (today.getMonth() == cur_month)
             n_today = today.getDay();

@@ -57,7 +57,7 @@ public class PromHelper {
 
     private int timeToProm() {
         DateHelper prom = getPromDate(false);
-        DateHelper now = DateHelper.newBuilder(context).initNow().build();
+        DateHelper now = DateHelper.initNow(context);;
         return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
     }
 
@@ -147,7 +147,7 @@ public class PromHelper {
 
     public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        DateHelper prom = DateHelper.newBuilder(context).initNow().build();
+        DateHelper prom = DateHelper.initNow(context);;
         prom.setSeconds(0);
         prom.minusSeconds(timeDiff);
         if (next) {
@@ -210,7 +210,7 @@ public class PromHelper {
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        DateHelper d = DateHelper.newBuilder(context).initNow().build();
+        DateHelper d = DateHelper.initNow(context);;
         for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
             if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
                 if (i < 3) { // less minutes
@@ -272,8 +272,7 @@ public class PromHelper {
                     OkHttpClient client = Lib.createHttpClient();
                     Response response = client.newCall(builderRequest.build()).execute();
                     String s = response.headers().value(1);
-                    DateHelper.Builder builder = DateHelper.newBuilder(context);
-                    long timeServer = builder.parse(s).build().getTimeInSeconds();
+                    long timeServer = DateHelper.parse(context, s).getTimeInSeconds();
                     response.close();
 
                     int timeDiff = (int) (DateHelper.now() - timeServer);

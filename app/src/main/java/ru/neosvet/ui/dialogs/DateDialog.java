@@ -106,7 +106,7 @@ public class DateDialog extends Dialog {
         }
         rvMonth.setLayoutManager(layoutManager);
         rvMonth.setAdapter(adMonth);
-        DateHelper d = DateHelper.newBuilder(act).initToday().build();
+        DateHelper d = DateHelper.initToday(act);
         if (max_year == 0)
             max_year = d.getYear();
         if (max_month == 0)
