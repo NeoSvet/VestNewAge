@@ -108,10 +108,11 @@ public class SummaryService extends JobIntentService {
         s = withOutTag(br.readLine()); //time
 
         File file = new File(context.getFilesDir() + SummaryFragment.RSS);
-        DateHelper.Builder builder = DateHelper.newBuilder(context).setMills(0);
+        long secFile = 0;
         if (file.exists())
-            builder.setMills(file.lastModified());
-        long secFile = builder.build().getTimeInSeconds();
+            secFile = DateHelper.newBuilder(context)
+                    .setMills(file.lastModified())
+                    .build().getTimeInSeconds();
         long secList = DateHelper.parse(context, s).getTimeInSeconds();
         if (secFile > secList) { //список в загрузке не нуждается
             br.close();
