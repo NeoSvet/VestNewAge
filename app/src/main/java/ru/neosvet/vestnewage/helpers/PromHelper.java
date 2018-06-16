@@ -274,8 +274,8 @@ public class PromHelper {
                     String s = response.headers().value(1);
                     long timeServer = DateHelper.parse(context, s).getTimeInSeconds();
                     response.close();
-
-                    int timeDiff = (int) (DateHelper.now() - timeServer);
+                    long timeDevice = DateHelper.initNow(context).getTimeInSeconds();
+                    int timeDiff = (int) (timeDevice - timeServer);
                     if (timeDiff != pref.getInt(TIMEDIFF, 0)) {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putInt(TIMEDIFF, timeDiff);

@@ -77,7 +77,7 @@ public class JournalFragment extends Fragment {
             String s;
             String[] id;
             ListItem item;
-            long now = DateHelper.now() * DateHelper.SEC_IN_MILLS;
+            long now = DateHelper.initNow(act).getTimeInMills();
             if (offset > 0)
                 curJ.moveToPosition(offset);
             DateHelper d;

@@ -249,9 +249,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     if (dModList.getMonth() != today.getMonth())
                         act.status.checkTime(dModList.getTimeInSeconds());
                     else
-                        katren = act.status.checkTime(DateHelper.now()); //hide "ref?"
+                        katren = act.status.checkTime(DateHelper.initNow(act).getTimeInSeconds()); //hide "ref?"
                 } else
-                    katren = act.status.checkTime(DateHelper.now()); //hide "ref?"
+                    katren = act.status.checkTime(DateHelper.initNow(act).getTimeInSeconds()); //hide "ref?"
             }
             if (katren)
                 fabRefresh.setVisibility(View.GONE);

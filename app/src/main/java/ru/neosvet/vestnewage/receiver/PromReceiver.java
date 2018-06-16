@@ -22,7 +22,7 @@ public class PromReceiver extends BroadcastReceiver {
             PromHelper prom = new PromHelper(context, null);
             DateHelper d = prom.getPromDate(false);
             d.minusMinutes(p);
-            if (d.getTimeInSeconds() < DateHelper.now()) {
+            if (d.getTimeInSeconds() < DateHelper.initNow(context).getTimeInSeconds()) {
                 d = prom.getPromDate(true);
                 d.minusMinutes(p);
             }

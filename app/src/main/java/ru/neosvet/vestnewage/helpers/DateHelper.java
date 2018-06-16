@@ -5,13 +5,11 @@ import android.content.Context;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.threeten.bp.Clock;
-import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;
-import org.threeten.bp.temporal.ChronoField;
 
 import java.util.Locale;
 
@@ -99,11 +97,6 @@ public class DateHelper {
             sTime = time.format(fTime);
         }
         return sTime + " " + date.format(fDate);
-    }
-
-    public static long now() {
-        Instant now = Instant.now();
-        return now.getLong(ChronoField.INSTANT_SECONDS);
     }
 
     // DATE ~~~~~~~~~~~~~~~~~~~~~~~~
