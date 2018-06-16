@@ -135,14 +135,14 @@ public class DateDialog extends Dialog {
     private void setCalendar() {
         tvYear.setText(String.valueOf(date.getYear()));
         if (date.getYear() == min_year)
-            adMonth.setMinMonth(min_month);
+            adMonth.setMinPos(min_month - 1);
         else
-            adMonth.setMinMonth(-1);
+            adMonth.setMinPos(MonthAdapter.NONE_MIN);
         if (date.getYear() == max_year)
-            adMonth.setMaxMonth(max_month);
+            adMonth.setMaxPos(max_month - 1);
         else
-            adMonth.setMaxMonth(12);
-        adMonth.setSelect(date.getMonth());
+            adMonth.setMaxPos(MonthAdapter.NONE_MAX);
+        adMonth.setSelect(date.getMonth() - 1);
         adMonth.notifyDataSetChanged();
     }
 
@@ -158,8 +158,9 @@ public class DateDialog extends Dialog {
     }
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {
+        public static final int NONE_MIN = -1, NONE_MAX = 12;
         private List<String> data = new ArrayList<String>();
-        private int select, min_month = 1, max_month = 12;
+        private int select, min_pos = 0, max_pos = 11;
 
         @Override
         public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -167,16 +168,16 @@ public class DateDialog extends Dialog {
             return new MonthAdapter.ViewHolder(view);
         }
 
-        public void setMinMonth(int min_month) {
-            this.min_month = min_month;
+        public void setMinPos(int min_pos) {
+            this.min_pos = min_pos;
         }
 
-        public void setMaxMonth(int max_month) {
-            this.max_month = max_month;
+        public void setMaxPos(int max_pos) {
+            this.max_pos = max_pos;
         }
 
         public void setSelect(int pos) {
-            if (pos <= max_month && pos >= min_month)
+            if (pos <= max_pos && pos >= min_pos)
                 select = pos;
         }
 
@@ -187,10 +188,10 @@ public class DateDialog extends Dialog {
         @Override
         public void onBindViewHolder(MonthAdapter.ViewHolder holder, int pos) {
             holder.tv.setText(data.get(pos));
-            if (pos > max_month && pos < min_year) {
+            if (pos > max_pos && pos < min_year) {
                 holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
                 holder.bg.setEnabled(false);
-            } else if (pos == max_month || pos == min_month) {
+            } else if (pos == max_pos || pos == min_pos) {
                 if (pos == select)
                     holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_kp));
                 else
