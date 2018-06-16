@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
+import org.threeten.bp.Clock;
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -70,7 +71,6 @@ public class DateHelper {
 
     public static long now() {
         Instant now = Instant.now();
-        Lib.LOG("now sec: " + now.getLong(ChronoField.INSTANT_SECONDS));
         return now.getLong(ChronoField.INSTANT_SECONDS);
     }
 
@@ -161,14 +161,14 @@ public class DateHelper {
         }
 
         public Builder initToday() {
-            date = LocalDate.now();//Clock.system(ZoneId.systemDefault())
+            date = LocalDate.now(Clock.system(ZoneId.of("GMT")));
             return this;
         }
 
         public Builder initNow() {
-            initToday();
-            time = LocalTime.now();
-            Lib.LOG("now: " + DateHelper.this.toString());
+            Clock clock = Clock.system(ZoneId.of("GMT"));
+            date = LocalDate.now(clock);
+            time = LocalTime.now(clock);
             return this;
         }
 
