@@ -206,7 +206,7 @@ public class PromHelper {
 
     private String getPromText() {
         DateHelper prom = getPromDate(false);
-        String t = lib.getDiffDate(prom.getTimeInMills(), System.currentTimeMillis());
+        String t = prom.getDiffDate(System.currentTimeMillis());
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;

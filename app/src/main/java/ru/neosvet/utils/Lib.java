@@ -111,47 +111,6 @@ public class Lib {
         Toast.makeText(context, context.getResources().getText(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
 
-    public String getDiffDate(long t1, long t2) {
-        t2 = (t1 - t2) / 1000;
-        int k;
-        if (t2 < 60) {
-            if (t2 == 0)
-                t2 = 1;
-            k = 0;
-        } else {
-            t2 = t2 / 60;
-            if (t2 < 60)
-                k = 3;
-            else {
-                t2 = t2 / 60;
-                if (t2 < 24)
-                    k = 6;
-                else {
-                    t2 = t2 / 24;
-                    k = 9;
-                }
-            }
-        }
-        String time;
-        if (t2 > 4 && t2 < 21)
-            time = t2 + context.getResources().getStringArray(R.array.time)[1 + k];
-        else {
-            if (t2 == 1)
-                time = context.getResources().getStringArray(R.array.time)[k];
-            else {
-                int n = (int) t2 % 10;
-                if (n == 1)
-                    time = t2 + " " + context.getResources().getStringArray(R.array.time)[k];
-                else if (n > 1 && n < 5)
-                    time = t2 + context.getResources().getStringArray(R.array.time)[2 + k];
-                else
-                    time = t2 + context.getResources().getStringArray(R.array.time)[1 + k];
-            }
-        }
-
-        return time;
-    }
-
     public boolean verifyStoragePermissions(int code) {
         //http://stackoverflow.com/questions/38989050/android-6-0-write-to-external-sd-card
         int permission = ActivityCompat.checkSelfPermission(context,

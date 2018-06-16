@@ -37,6 +37,7 @@ public class SummaryFragment extends Fragment {
     private View container;
     private View fabRefresh;
     private SummaryTask task = null;
+    private DateHelper dateNow;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -159,6 +160,7 @@ public class SummaryFragment extends Fragment {
     public void openList(boolean loadIfNeed, boolean addOnlyExists) {
         try {
             adSummary.clear();
+            dateNow = DateHelper.initNow(act);
             BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
             String title, des, time, link, name;
             int i = 0;
@@ -214,6 +216,7 @@ public class SummaryFragment extends Fragment {
     }
 
     public void blinkItem(String[] item) {
+        dateNow = DateHelper.initNow(act);
         adSummary.insertItem(0, new ListItem(item[0], item[1]));
         adSummary.getItem(0).setDes(prepareDes(item[2], item[3], true));
         adSummary.setAnimation(true);
@@ -222,7 +225,7 @@ public class SummaryFragment extends Fragment {
 
     private String prepareDes(String des, String time, boolean isNewItem) {
         return (isNewItem ? getResources().getString(R.string.new_item) + Const.N : "") +
-                act.lib.getDiffDate(System.currentTimeMillis(), Long.parseLong(time))
+                dateNow.getDiffDate(Long.parseLong(time))
                 + getResources().getString(R.string.back)
                 + Const.N + des;
     }

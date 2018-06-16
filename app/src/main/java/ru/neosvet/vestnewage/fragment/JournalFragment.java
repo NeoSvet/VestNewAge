@@ -77,7 +77,7 @@ public class JournalFragment extends Fragment {
             String s;
             String[] id;
             ListItem item;
-            long now = DateHelper.initNow(act).getTimeInMills();
+            DateHelper now = DateHelper.initNow(act);
             if (offset > 0)
                 curJ.moveToPosition(offset);
             DateHelper d;
@@ -94,7 +94,7 @@ public class JournalFragment extends Fragment {
                             cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
                     d = DateHelper.newBuilder(act).setMills(t).build();
-                    item.setDes(act.lib.getDiffDate(now, t) +
+                    item.setDes(now.getDiffDate(t) +
                             getResources().getString(R.string.back)
                             + "\n(" + d.toString() + ")");
                     if (id.length == 3) { //случайные

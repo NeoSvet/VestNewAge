@@ -87,6 +87,47 @@ public class DateHelper {
         return formatter.format(date);
     }
 
+    public String getDiffDate(long time) {
+        time = getTimeInSeconds() - time / SEC_IN_MILLS;
+        int k;
+        if (time < 60) {
+            if (time == 0)
+                time = 1;
+            k = 0;
+        } else {
+            time = time / 60;
+            if (time < 60)
+                k = 3;
+            else {
+                time = time / 60;
+                if (time < 24)
+                    k = 6;
+                else {
+                    time = time / 24;
+                    k = 9;
+                }
+            }
+        }
+        String result;
+        if (time > 4 && time < 21)
+            result = time + context.getResources().getStringArray(R.array.time)[1 + k];
+        else {
+            if (time == 1)
+                result = context.getResources().getStringArray(R.array.time)[k];
+            else {
+                int n = (int) time % 10;
+                if (n == 1)
+                    result = time + " " + context.getResources().getStringArray(R.array.time)[k];
+                else if (n > 1 && n < 5)
+                    result = time + context.getResources().getStringArray(R.array.time)[2 + k];
+                else
+                    result = time + context.getResources().getStringArray(R.array.time)[1 + k];
+            }
+        }
+
+        return result;
+    }
+
     @Override
     public String toString() {
         ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
