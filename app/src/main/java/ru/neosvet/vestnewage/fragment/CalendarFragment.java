@@ -449,7 +449,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         adUnread.clear();
     }
 
-    private void openMonth(int v) {
+    private void openMonth(int offset) {
         if (task == null) {
             tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
@@ -458,7 +458,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     hTimer.sendEmptyMessage(1);
                 }
             }, 300);
-            createCalendar(v);
+            createCalendar(offset);
         }
     }
 
