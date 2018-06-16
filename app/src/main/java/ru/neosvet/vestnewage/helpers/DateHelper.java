@@ -7,12 +7,13 @@ import com.jakewharton.threetenabp.AndroidThreeTen;
 import org.threeten.bp.Clock;
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
-import org.threeten.bp.ZoneOffset;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.temporal.ChronoField;
-import org.threeten.bp.temporal.TemporalAccessor;
+
+import java.util.Locale;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -161,26 +162,23 @@ public class DateHelper {
         public Builder() {
         }
 
-        public Builder initTodayMoscow() {
-            date = LocalDate.now(Clock.system(ZoneId.of(ZONE_MOSCOW)));
-            return this;
-        }
-
         public Builder initNowMoscow() {
             Clock clock = Clock.system(ZoneId.of(ZONE_MOSCOW));
             date = LocalDate.now(clock);
             time = LocalTime.now(clock);
+            Lib.LOG("now MSK: " + DateHelper.this.toString());
             return this;
         }
 
         public Builder initToday() {
-            date = LocalDate.now();//Clock.system(ZoneId.systemDefault())\
+            date = LocalDate.now();//Clock.system(ZoneId.systemDefault())
             return this;
         }
 
         public Builder initNow() {
             initToday();
             time = LocalTime.now();
+            Lib.LOG("now: " + DateHelper.this.toString());
             return this;
         }
 
@@ -194,12 +192,10 @@ public class DateHelper {
         }
 
         public Builder setSeconds(int sec) {
-            int days = (int) sec / DAY_IN_SEC;
-            int secs = (int) sec % DAY_IN_SEC;
-            Lib.LOG("setSeconds: " + sec + " - " + (days * DAY_IN_SEC) + " = " + secs);
+            int days = sec / DAY_IN_SEC;
+            int secs = sec % DAY_IN_SEC;
             date = LocalDate.ofEpochDay(days);
             time = LocalTime.ofSecondOfDay(secs);
-            Lib.LOG("DateHelper: " + toString());
             return this;
         }
 
@@ -209,15 +205,17 @@ public class DateHelper {
         }
 
         public Builder parse(String s) {
-            //Fri, 15 Jun 2018 07:58:29 GMT
-            Lib.LOG("parse: " + s);
-            DateTimeFormatter fDate = DateTimeFormatter.ofPattern(
-                    "EE, dd MMM yyyy HH:mm:ss z").withZone(ZoneOffset.UTC);
-            Lib.LOG("parse r: " + fDate.parse(s));
-            TemporalAccessor t = fDate.parse(s);
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy").withZone(ZoneId.systemDefault());
-            Lib.LOG("parse t=" + df.format(t));
-            setSeconds((int) t.getLong(ChronoField.INSTANT_SECONDS));
+            //Fri, 15 Jun 2018 07:58:29 GMT or +0300
+            boolean offset = s.contains("+0300");
+            s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
+            DateTimeFormatter fDate = DateTimeFormatter
+                    .ofPattern("EEE, dd MMM yyyy HH:mm:ss")
+                    .withLocale(Locale.US);
+            LocalDateTime dateTime = LocalDateTime.parse(s, fDate);
+            if (offset)
+                dateTime = dateTime.minusHours(3);
+            date = dateTime.toLocalDate();
+            time = dateTime.toLocalTime();
             return this;
         }
 
