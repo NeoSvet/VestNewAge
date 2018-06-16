@@ -158,7 +158,7 @@ public class SettingsFragment extends Fragment {
                             bSyncTime.setEnabled(true);
                             return false;
                         }
-                        float f = ((float) timeleft) / 60000f;
+                        float f = ((float) timeleft) / 60f;
                         if (f < 60f)
                             Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
                         else {
