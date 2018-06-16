@@ -204,21 +204,6 @@ public class DateHelper {
             return this;
         }
 
-        public Builder parse(String s) {
-            //Fri, 15 Jun 2018 07:58:29 GMT or +0300
-            boolean offset = s.contains("+0300");
-            s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
-            DateTimeFormatter fDate = DateTimeFormatter
-                    .ofPattern("EEE, dd MMM yyyy HH:mm:ss")
-                    .withLocale(Locale.US);
-            LocalDateTime dateTime = LocalDateTime.parse(s, fDate);
-            if (offset)
-                dateTime = dateTime.minusHours(3);
-            date = dateTime.toLocalDate();
-            time = dateTime.toLocalTime();
-            return this;
-        }
-
         public DateHelper build() {
             return DateHelper.this;
         }
