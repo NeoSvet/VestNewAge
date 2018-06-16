@@ -464,8 +464,10 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void createCalendar(int offsetMonth) {
         DateHelper d = DateHelper.newBuilder(act).setDays(dCurrent.getTimeInDays()).build();
-        if (offsetMonth != 0)
+        if (offsetMonth != 0) {
             d.plusMonth(offsetMonth);
+            dCurrent.plusMonth(offsetMonth);
+        }
         tvDate.setText(d.getMonthString() + "\n" + d.getYear());
         adCalendar.clear();
         for (int i = -1; i > -7; i--) //add label monday-saturday
@@ -666,7 +668,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     isNew = adUnread.getCount() > Integer.parseInt(tvNew.getText().toString());
                 if (!isNew) {
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
-                    if (Math.abs(time - file.lastModified()) < 2 * DateHelper.SEC_IN_MILLS) {
+                    if (Math.abs(time - file.lastModified()) < 2000) {
                         isNew = true;
                         file.setLastModified(time - 2500);
                     }

@@ -187,13 +187,17 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             }
             adBook.clear();
             tvDate.setText(d.getMonthString() + "\n" + d.getYear());
-            if (d.getMonth() == 0 && d.getYear() == 2016 && !fromOtkr)
+            if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(true);
-            else
-                ivPrev.setEnabled(existsList(setDate(d, -1), katren));
-            ivNext.setEnabled(existsList(setDate(d, 1), katren));
-
+                d.plusMonth(1);
+            } else {
+                d.plusMonth(-1);
+                ivPrev.setEnabled(existsList(d, katren));
+                d.plusMonth(2);
+            }
+            ivNext.setEnabled(existsList(d, katren));
+            d.plusMonth(-1);
             DataBase dataBase = new DataBase(act, d.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
@@ -363,11 +367,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                             if (r > Math.abs(y - (int) event.getY(0))) {
                                 if (x > x2) { // next
                                     if (ivNext.isEnabled())
-                                        openMonth(1);
+                                        openMonth(true);
                                     notClick = true;
                                 } else if (x < x2) { // prev
                                     if (ivPrev.isEnabled())
-                                        openMonth(-1);
+                                        openMonth(false);
                                     notClick = true;
                                 }
                             }
@@ -386,13 +390,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         ivPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openMonth(-1);
+                openMonth(false);
             }
         });
         ivNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openMonth(1);
+                openMonth(true);
             }
         });
         act.status.setClick(new View.OnClickListener() {
@@ -426,10 +430,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         container.findViewById(R.id.bRndKat).setOnClickListener(this);
     }
 
-    private void openMonth(int v) {
+    private void openMonth(boolean plus) {
         if (task == null) {
-            if (v == -1 && tab == 1) {
-                if (dPoslanie.getMonth() == 0 && dPoslanie.getYear() == 2016 && !fromOtkr) {
+            if (!plus && tab == 1) {
+                if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                     builder.setMessage(getResources().getString(R.string.alert_download_otkr));
                     builder.setNegativeButton(getResources().getString(R.string.no),
@@ -450,7 +454,15 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     return;
                 }
             }
-            setDate(v);
+            DateHelper d;
+            if (tab == 0)
+                d = dKatren;
+            else
+                d = dPoslanie;
+            if (plus)
+                d.plusMonth(1);
+            else
+                d.plusMonth(-1);
             tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -460,18 +472,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             }, 300);
             openList(true);
         }
-    }
-
-    private void setDate(int i) {
-        if (tab == 0)
-            dKatren = setDate(dKatren, i);
-        else
-            dPoslanie = setDate(dPoslanie, i);
-    }
-
-    private DateHelper setDate(DateHelper d, int i) {
-        d.plusMonth(i);
-        return d;
     }
 
     private void startLoad() {
@@ -540,13 +540,13 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         dateDialog = new DateDialog(act, d);
         dateDialog.setResult(BookFragment.this);
         if (tab == 0) { //katreny
-            dateDialog.setMinMonth(1); //feb
+            dateDialog.setMinMonth(2); //feb
         } else { //poslyania
             if (fromOtkr) {
-                dateDialog.setMinMonth(7); //aug
+                dateDialog.setMinMonth(8); //aug
                 dateDialog.setMinYear(2004); //2004
             }
-            dateDialog.setMaxMonth(8); //sep
+            dateDialog.setMaxMonth(9); //sep
             dateDialog.setMaxYear(2016);
         }
         dateDialog.show();
