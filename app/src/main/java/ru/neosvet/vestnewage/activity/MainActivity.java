@@ -40,6 +40,7 @@ import ru.neosvet.vestnewage.fragment.SearchFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
@@ -402,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (statusBack == STATUS_EXIT)
                         statusBack = STATUS_MENU;
                 }
-            }, 3000);
+            }, 3 * DateHelper.SEC_IN_MILLS);
         }
     }
 

@@ -379,7 +379,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
             public void run() {
                 try {
                     while (start && prog < max) {
-                        Thread.sleep(1000);
+                        Thread.sleep(DateHelper.SEC_IN_MILLS);
                         publishProgress();
                     }
                 } catch (Exception e) {

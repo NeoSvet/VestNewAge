@@ -115,7 +115,7 @@ public class PromHelper {
                         public void run() {
                             hTime.sendEmptyMessage(1);
                         }
-                    }, 2000);
+                    }, 2 * DateHelper.SEC_IN_MILLS);
                 }
             });
             hTime = new Handler(new Handler.Callback() {
@@ -199,7 +199,7 @@ public class PromHelper {
                 public void run() {
                     hTime.sendEmptyMessage(0);
                 }
-            }, 3000);
+            }, 3 * DateHelper.SEC_IN_MILLS);
             tvPromTime.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
         }
     }
@@ -228,7 +228,7 @@ public class PromHelper {
                             public void run() {
                                 hTime.sendEmptyMessage(0);
                             }
-                        }, 1000);
+                        }, DateHelper.SEC_IN_MILLS);
                     }
                     break;
                 } else if (i < 6) { // less hour
@@ -320,12 +320,12 @@ public class PromHelper {
         notifBuilder.setContentIntent(piProm)
                 .setFullScreenIntent(piEmpty, true)
                 .addAction(0, context.getResources().getString(R.string.accept), piCancel)
-                .setLights(Color.GREEN, 1000, 1000);
+                .setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (p == 0)
-                notifBuilder.setTimeoutAfter(30000);
+                notifBuilder.setTimeoutAfter(30 * DateHelper.SEC_IN_MILLS);
             else
-                notifBuilder.setTimeoutAfter(p * 60000);
+                notifBuilder.setTimeoutAfter(p * 60 * DateHelper.SEC_IN_MILLS);
         } else {
             if (sound) {
                 String uri = pref.getString(SetNotifDialog.URI, null);

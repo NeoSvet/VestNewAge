@@ -330,7 +330,7 @@ public class SlashActivity extends AppCompatActivity {
         long time = 0;
         if (cursor.moveToFirst())
             time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
-        if (System.currentTimeMillis() - time > 3600000) {
+        if (System.currentTimeMillis() - time > DateHelper.HOUR_IN_MILLS) {
             task = new CalendarTask(this);
             task.execute(date.getYear(), date.getMonth(), 1);
         }

@@ -34,6 +34,7 @@ import ru.neosvet.vestnewage.service.SummaryService;
  * Created by NeoSvet on 11.06.2018.
  */
 public class SummaryHelper {
+    private static final int TEN_MIN_IN_MILLS = 600000;
     private Context context;
     private NotificationHelper notifHelper;
     private Intent intent;
@@ -99,7 +100,7 @@ public class SummaryHelper {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
             boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
-            notifBuilder.setLights(Color.GREEN, 1000, 1000);
+            notifBuilder.setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);
             if (sound) {
                 String uri = pref.getString(SetNotifDialog.URI, null);
                 if (uri == null)
@@ -133,7 +134,7 @@ public class SummaryHelper {
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
             jobScheduler.cancel(NotificationHelper.ID_SUMMARY);
             if (p > -1) {
-                p = (p + 1) * 600000;
+                p = (p + 1) * TEN_MIN_IN_MILLS;
                 exerciseJobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
                 exerciseJobBuilder.setPersisted(true); // save job after reboot
                 exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
@@ -147,7 +148,7 @@ public class SummaryHelper {
             PendingIntent piCheck = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             am.cancel(piCheck);
             if (p > -1) {
-                p = (p + 1) * 600000;
+                p = (p + 1) * TEN_MIN_IN_MILLS;
                 am.set(AlarmManager.RTC_WAKEUP, p + System.currentTimeMillis(), piCheck);
             }
         }
@@ -160,7 +161,7 @@ public class SummaryHelper {
         intent.putExtra(DataBase.LINK, link);
         PendingIntent piCheck = PendingIntent.getService(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC, 600000 + System.currentTimeMillis(), piCheck);
+        am.set(AlarmManager.RTC, TEN_MIN_IN_MILLS + System.currentTimeMillis(), piCheck);
     }
 
     @RequiresApi(21)
@@ -169,13 +170,12 @@ public class SummaryHelper {
         ComponentName jobService = new ComponentName(context, InitJobService.class);
         JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(NotificationHelper.ID_SUMMARY_POSTPONE, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        long latency = 600000; // 10 min
         PersistableBundle extras = new PersistableBundle();
         extras.putString(DataBase.DESCTRIPTION, des);
         extras.putString(DataBase.LINK, link);
         exerciseJobBuilder.setExtras(extras);
-        exerciseJobBuilder.setMinimumLatency(latency);
-        exerciseJobBuilder.setOverrideDeadline(latency + latency);
+        exerciseJobBuilder.setMinimumLatency(TEN_MIN_IN_MILLS);
+        exerciseJobBuilder.setOverrideDeadline(2 * TEN_MIN_IN_MILLS);
         exerciseJobBuilder.setPersisted(true); // save job after reboot
         exerciseJobBuilder.setRequiresDeviceIdle(false); // anyway: use device or not use
         exerciseJobBuilder.setRequiresCharging(false); // anyway: charging device or not charging

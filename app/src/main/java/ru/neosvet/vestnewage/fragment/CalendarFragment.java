@@ -603,7 +603,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             unread.setBadge();
             long time = unread.lastModified();
             if (time > 0) {
-                isNew = (System.currentTimeMillis() - time < 10000);
+                isNew = (System.currentTimeMillis() - time < 10 * DateHelper.SEC_IN_MILLS);
                 List<String> links = unread.getList();
                 unread.close();
                 for (int i = 0; i < links.size(); i++) {
@@ -622,7 +622,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             }
             File file = new File(act.getFilesDir() + File.separator + ADS);
             if (file.exists()) {
-                isNew = isNew || (System.currentTimeMillis() - file.lastModified() < 10000);
+                isNew = isNew || (System.currentTimeMillis() - file.lastModified() < 10 * DateHelper.SEC_IN_MILLS);
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
                 final String end = "<e>";
@@ -666,7 +666,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                     isNew = adUnread.getCount() > Integer.parseInt(tvNew.getText().toString());
                 if (!isNew) {
                     file = new File(act.getFilesDir() + SummaryFragment.RSS);
-                    if (Math.abs(time - file.lastModified()) < 2000) {
+                    if (Math.abs(time - file.lastModified()) < 2 * DateHelper.SEC_IN_MILLS) {
                         isNew = true;
                         file.setLastModified(time - 2500);
                     }

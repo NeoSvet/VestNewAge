@@ -18,7 +18,8 @@ import ru.neosvet.vestnewage.R;
 
 public class DateHelper {
     public static final short MONDAY = 1, SUNDAY = 0;
-    public static final int MONTH_IN_SEC = 2592000, DAY_IN_SEC = 86400, SEC_IN_MILLS = 1000;
+    public static final int MONTH_IN_SEC = 2592000, DAY_IN_SEC = 86400,
+            HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000;
     private Context context;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
