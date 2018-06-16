@@ -9,6 +9,7 @@ import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZoneOffset;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.Locale;
@@ -88,15 +89,15 @@ public class DateHelper {
 
     @Override
     public String toString() {
-        DateTimeFormatter fDate = DateTimeFormatter.ofPattern("dd.MM.yy").withZone(ZoneId.systemDefault());
-        String sTime;
+        ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
+        LocalDateTime dateTime;
         if (time == null)
-            sTime = "00:00:00";
-        else {
-            DateTimeFormatter fTime = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
-            sTime = time.format(fTime);
-        }
-        return sTime + " " + date.format(fDate);
+            dateTime = LocalDateTime.of(date, LocalTime.of(0, 0, 0));
+        else
+            dateTime = LocalDateTime.of(date, time);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy").withZone(ZoneId.systemDefault());
+        dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
+        return dateTime.format(formatter);
     }
 
     // DATE ~~~~~~~~~~~~~~~~~~~~~~~~
