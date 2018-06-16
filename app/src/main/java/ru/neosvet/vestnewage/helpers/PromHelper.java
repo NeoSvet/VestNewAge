@@ -47,8 +47,8 @@ public class PromHelper {
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         lib = new Lib(context);
         if (textView != null) {
-//            if (timeToProm() > 39600) //11 hours in sec, today prom was been
-//                return;
+            if (timeToProm() > 39600) //11 hours in sec, today prom was been
+                return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
