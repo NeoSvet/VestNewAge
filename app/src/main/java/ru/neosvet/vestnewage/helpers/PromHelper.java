@@ -57,7 +57,7 @@ public class PromHelper {
 
     private int timeToProm() {
         DateHelper prom = getPromDate(false);
-        DateHelper now = DateHelper.initNow(context);;
+        DateHelper now = DateHelper.initNow(context);
         return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
     }
 
@@ -148,6 +148,7 @@ public class PromHelper {
     public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
         DateHelper prom = DateHelper.initNow(context);;
+        prom.setMinutes(0);
         prom.setSeconds(0);
         prom.minusSeconds(timeDiff);
         if (next) {
