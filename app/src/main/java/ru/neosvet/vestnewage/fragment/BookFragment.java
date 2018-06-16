@@ -489,13 +489,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         task = null;
         if (result.length() > 0) {
             DateHelper d;
-            if (tab == 0) {
-                Lib.LOG("finishLoad1: " + dKatren.toString());
+            if (tab == 0)
                 d = dKatren;
-            } else {
-                Lib.LOG("finishLoad1: " + dPoslanie.toString());
+            else
                 d = dPoslanie;
-            }
             if (result.length() == 6) { //значит была загрузка с сайта Откровений
                 if (result.substring(5).equals("0")) // загрузка не была завершена
                     return;
@@ -511,13 +508,10 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 d = DateHelper.newBuilder(act).setYearMonth(
                         2000 + Integer.parseInt(result.substring(3, 5)),
                         Integer.parseInt(result.substring(0, 2))).build();
-                if (tab == 0) {
-                    Lib.LOG("finishLoad2: " + dKatren.toString());
+                if (tab == 0)
                     dKatren = d;
-                } else {
-                    Lib.LOG("finishLoad2: " + dPoslanie.toString());
+                else
                     dPoslanie = d;
-                }
             }
             if (existsList(d, tab == 0)) {
                 openList(false);
