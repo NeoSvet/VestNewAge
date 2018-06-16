@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
-import org.threeten.bp.Clock;
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -21,7 +20,6 @@ import ru.neosvet.vestnewage.R;
 public class DateHelper {
     public static final short MONDAY = 1, SUNDAY = 0;
     public static final int MONTH_IN_SEC = 2592000, DAY_IN_SEC = 86400, SEC_IN_MILLS = 1000;
-    private final String ZONE_MOSCOW = "Europe/Moscow";
     private Context context;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
@@ -53,7 +51,7 @@ public class DateHelper {
 
     public String getMY() {
         if (formatter == null)
-            formatter = DateTimeFormatter.ofPattern("MM.yy").withZone(ZoneId.of(ZONE_MOSCOW));
+            formatter = DateTimeFormatter.ofPattern("MM.yy").withZone(ZoneId.systemDefault());
         return formatter.format(date);
     }
 
@@ -160,14 +158,6 @@ public class DateHelper {
 
     public class Builder {
         public Builder() {
-        }
-
-        public Builder initNowMoscow() {
-            Clock clock = Clock.system(ZoneId.of(ZONE_MOSCOW));
-            date = LocalDate.now(clock);
-            time = LocalTime.now(clock);
-            Lib.LOG("now MSK: " + DateHelper.this.toString());
-            return this;
         }
 
         public Builder initToday() {

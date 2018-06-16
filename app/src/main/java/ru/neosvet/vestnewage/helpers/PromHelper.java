@@ -33,7 +33,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class PromHelper {
-    private static final int hour_prom1 = 11, hour_prom2 = 14;
+    private static final int hour_prom1 = 8, hour_prom2 = 11;
     private final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -57,7 +57,7 @@ public class PromHelper {
 
     private int timeToProm() {
         DateHelper prom = getPromDate(false);
-        DateHelper now = DateHelper.newBuilder(context).initNowMoscow().build();
+        DateHelper now = DateHelper.newBuilder(context).initNow().build();
         return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
     }
 
@@ -147,7 +147,7 @@ public class PromHelper {
 
     public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        DateHelper prom = DateHelper.newBuilder(context).initNowMoscow().build();
+        DateHelper prom = DateHelper.newBuilder(context).initNow().build();
         prom.setSeconds(0);
         prom.minusSeconds(timeDiff);
         if (next) {
@@ -210,7 +210,7 @@ public class PromHelper {
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        DateHelper d = DateHelper.newBuilder(context).initNowMoscow().build();
+        DateHelper d = DateHelper.newBuilder(context).initNow().build();
         for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
             if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
                 if (i < 3) { // less minutes
