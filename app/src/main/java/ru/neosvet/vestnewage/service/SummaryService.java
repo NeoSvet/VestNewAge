@@ -111,8 +111,8 @@ public class SummaryService extends JobIntentService {
         DateHelper.Builder builder = DateHelper.newBuilder(context).setMills(0);
         if (file.exists())
             builder.setMills(file.lastModified());
-        int secFile = builder.build().getTimeInSeconds();
-        int secList = builder.parse(s).build().getTimeInSeconds();
+        long secFile = builder.build().getTimeInSeconds();
+        long secList = builder.parse(s).build().getTimeInSeconds();
         if (secFile > secList) { //список в загрузке не нуждается
             br.close();
             return null;

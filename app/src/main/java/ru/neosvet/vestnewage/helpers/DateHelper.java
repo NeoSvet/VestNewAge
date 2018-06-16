@@ -32,11 +32,11 @@ public class DateHelper {
         this.context = context;
     }
 
-    public int getTimeInSeconds() {
+    public long getTimeInSeconds() {
         int sec = 0;
         if (time != null)
             sec = time.toSecondOfDay();
-        return (int) date.toEpochDay() * DAY_IN_SEC + sec;
+        return date.toEpochDay() * DAY_IN_SEC + sec;
     }
 
     public long getTimeInMills() {

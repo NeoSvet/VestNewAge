@@ -58,7 +58,7 @@ public class PromHelper {
     private int timeToProm() {
         DateHelper prom = getPromDate(false);
         DateHelper now = DateHelper.newBuilder(context).initNowMoscow().build();
-        return prom.getTimeInSeconds() - now.getTimeInSeconds();
+        return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
     }
 
     public void stop() {
@@ -273,7 +273,7 @@ public class PromHelper {
                     Response response = client.newCall(builderRequest.build()).execute();
                     String s = response.headers().value(1);
                     DateHelper.Builder builder = DateHelper.newBuilder(context);
-                    int timeServer = builder.parse(s).build().getTimeInSeconds();
+                    long timeServer = builder.parse(s).build().getTimeInSeconds();
                     response.close();
 
                     int timeDiff = (int) (DateHelper.now() - timeServer);
