@@ -28,8 +28,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,7 +39,6 @@ import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -518,8 +515,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 if (task.isLoadList())
                     return;
 
-            DateFormat df = new SimpleDateFormat("MM.yy");
-            DataBase dataBase = new DataBase(act, df.format(dCurrent));
+            DataBase dataBase = new DataBase(act, dCurrent.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
             boolean empty = true;
