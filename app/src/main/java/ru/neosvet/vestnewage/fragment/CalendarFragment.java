@@ -468,7 +468,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             d.changeMonth(offsetMonth);
             dCurrent.changeMonth(offsetMonth);
         }
-        tvDate.setText(d.getMonthString() + "\n" + d.getYear());
+        tvDate.setText(d.getMonthString() + Const.N + d.getYear());
         adCalendar.clear();
         for (int i = -1; i > -7; i--) //add label monday-saturday
             adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));

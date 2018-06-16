@@ -186,7 +186,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                 return;
             }
             adBook.clear();
-            tvDate.setText(d.getMonthString() + "\n" + d.getYear());
+            tvDate.setText(d.getMonthString() + Const.N + d.getYear());
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(true);
