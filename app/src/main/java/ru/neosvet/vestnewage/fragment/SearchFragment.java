@@ -77,7 +77,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private SearchTask task = null;
     private DateHelper dStart, dEnd;
     private ListAdapter adResults;
-    private int min_m = 0, min_y = 2016, dialog = -1, mode = 5, page = -1;
+    private int min_m = 1, min_y = 2016, dialog = -1, mode = 5, page = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
@@ -131,7 +131,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         File f = new File(act.lib.getDBFolder() + "/12.15");
         if (f.exists()) {
             // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
-            min_m = 7; //aug
+            min_m = 8; //aug
             min_y = 2004; //2004
         }
         if (state == null) {
