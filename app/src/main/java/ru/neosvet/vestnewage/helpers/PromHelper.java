@@ -145,10 +145,7 @@ public class PromHelper {
 
     public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
-        DateHelper prom = DateHelper.initNow(context);;
-        prom.setMinutes(0);
-        prom.setSeconds(0);
-        prom.changeSeconds(-timeDiff);
+        DateHelper prom = DateHelper.initNow(context);
         if (next) {
             if (prom.getHours() < hour_prom1)
                 prom.setHours(hour_prom1);
@@ -163,6 +160,9 @@ public class PromHelper {
                 prom.setHours(hour_prom2);
         } else
             prom.setHours(hour_prom1);
+        prom.setMinutes(0);
+        prom.setSeconds(0);
+        prom.changeSeconds(-timeDiff);
         return prom;
     }
 
