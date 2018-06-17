@@ -34,6 +34,7 @@ import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class PromHelper {
     public static final byte ERROR = -1;
+    private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private static final int hour_prom1 = 8, hour_prom2 = 11;
     private final String TIMEDIFF = "timediff";
     private Context context;
@@ -112,7 +113,7 @@ public class PromHelper {
                     timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            hTime.sendEmptyMessage(1);
+                            hTime.sendEmptyMessage(START_ANIM);
                         }
                     }, 2 * DateHelper.SEC_IN_MILLS);
                 }
@@ -197,7 +198,7 @@ public class PromHelper {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    hTime.sendEmptyMessage(0);
+                    hTime.sendEmptyMessage(SET_PROM_TEXT);
                 }
             }, 3 * DateHelper.SEC_IN_MILLS);
             tvPromTime.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
@@ -222,7 +223,7 @@ public class PromHelper {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    hTime.sendEmptyMessage(0);
+                    hTime.sendEmptyMessage(SET_PROM_TEXT);
                 }
             }, delay);
         }
