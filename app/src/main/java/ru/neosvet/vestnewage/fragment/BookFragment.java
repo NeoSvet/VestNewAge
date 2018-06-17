@@ -102,8 +102,16 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private void restoreActivityState(Bundle state) {
         DateHelper d = DateHelper.initToday(act);
         d.setYear(DEF_YEAR);
-        dKatren = DateHelper.newBuilder(act).setDays(pref.getInt(KAT, d.getTimeInDays())).build();
-        dPoslanie = DateHelper.newBuilder(act).setDays(pref.getInt(POS, d.getTimeInDays())).build();
+        int kat, pos;
+        try {
+            kat = pref.getInt(KAT, d.getTimeInDays());
+            pos = pref.getInt(POS, d.getTimeInDays());
+        } catch (Exception e) {
+            kat = (int) (pref.getLong(KAT, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
+            pos = (int) (pref.getLong(POS, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
+        }
+        dKatren = DateHelper.newBuilder(act).setDays(kat).build();
+        dPoslanie = DateHelper.newBuilder(act).setDays(pos).build();
         fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
