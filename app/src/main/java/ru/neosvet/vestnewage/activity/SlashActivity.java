@@ -60,7 +60,11 @@ public class SlashActivity extends AppCompatActivity {
         lib = new Lib(this);
 
         initAnimation();
-        initData(savedInstanceState);
+        if(initData(savedInstanceState)) {
+            startActivity(main);
+            finish();
+            return;
+        }
 
         PromHelper prom = new PromHelper(this, null);
         prom.synchronTime(null);
@@ -155,12 +159,13 @@ public class SlashActivity extends AppCompatActivity {
             PromReceiver.setReceiver(this, p);
     }
 
-    private void initData(Bundle state) {
+    private boolean initData(Bundle state) {
         Uri data = getIntent().getData();
         if (data == null)
             initTask(state);
         else
             parseUri(data);
+        return data != null;
     }
 
     private void adapterNewVersion() {
