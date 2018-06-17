@@ -1,16 +1,15 @@
 package ru.neosvet.vestnewage.helpers;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
@@ -33,40 +32,36 @@ public class NotificationHelper extends ContextWrapper {
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
     private List<String> notifList;
 
-    public static class Result extends Activity {
+    public static class Result extends BroadcastReceiver {
         @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            int mode = getIntent().getIntExtra(MODE, -1);
-            NotificationHelper notifHelper = new NotificationHelper(this);
+        public void onReceive(Context context, Intent intent) {
+            int mode = intent.getIntExtra(MODE, -1);
+            NotificationHelper notifHelper = new NotificationHelper(context);
             if (mode == ID_ACCEPT) {
                 notifHelper.cancel(NOTIF_PROM);
             } else if (mode == ID_SUMMARY_POSTPONE) {
-                notifHelper.cancel(getIntent().getIntExtra(DataBase.ID, 0));
-                SummaryHelper.postpone(this,
-                        getIntent().getStringExtra(DataBase.DESCTRIPTION),
-                        getIntent().getStringExtra(DataBase.LINK));
+                notifHelper.cancel(intent.getIntExtra(DataBase.ID, 0));
+                SummaryHelper.postpone(context,
+                        intent.getStringExtra(DataBase.DESCTRIPTION),
+                        intent.getStringExtra(DataBase.LINK));
             }
-            finish();
         }
     }
 
     public PendingIntent getCancelPromNotif() {
         Intent intent = new Intent(this, NotificationHelper.Result.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, ID_ACCEPT);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 
     public PendingIntent getPostponeSummaryNotif(int id, String des, String link) {
         Intent intent = new Intent(this, NotificationHelper.Result.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(MODE, ID_SUMMARY_POSTPONE);
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
         intent.putExtra(DataBase.ID, id);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;
     }
 

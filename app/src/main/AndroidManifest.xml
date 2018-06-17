@@ -80,9 +80,6 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".helpers.NotificationHelper$Result"
-            android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver
             android:name=".receiver.BootReceiver"
@@ -98,6 +95,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.PromReceiver" />
+        <receiver android:name=".helpers.NotificationHelper$Result" />
         <service
             android:name=".helpers.SummaryHelper$InitJobService"
             android:enabled="true"
