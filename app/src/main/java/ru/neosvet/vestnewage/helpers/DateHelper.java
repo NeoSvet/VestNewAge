@@ -42,11 +42,11 @@ public class DateHelper {
     }
 
     public static DateHelper initToday(Context context) {
-        return new DateHelper(context, LocalDate.now(Clock.system(ZoneId.of("GMT"))), null);
+        return new DateHelper(context, LocalDate.now(Clock.system(ZoneId.of("UTC"))), null);
     }
 
     public static DateHelper initNow(Context context) {
-        Clock clock = Clock.system(ZoneId.of("GMT"));
+        Clock clock = Clock.system(ZoneId.of("UTC"));
         return new DateHelper(context, LocalDate.now(clock), LocalTime.now(clock));
     }
 
