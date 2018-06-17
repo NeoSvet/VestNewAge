@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="time">
-        <item>секунду</item>
+        <item>секунда</item>
         <item>&#160;секунд</item>
         <item>&#160;секунды</item>
-        <item>минуту</item>
+        <item>минута</item>
         <item>&#160;минут</item>
         <item>&#160;минуты</item>
         <item>час</item>
