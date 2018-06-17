@@ -26,6 +26,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.receiver.SummaryReceiver;
 import ru.neosvet.vestnewage.service.SummaryService;
@@ -126,7 +127,7 @@ public class SummaryHelper {
             JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(NotificationHelper.ID_SUMMARY, jobService);
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
             jobScheduler.cancel(NotificationHelper.ID_SUMMARY);
-            if (p > -1) {
+            if (p != SettingsFragment.TURN_OFF) {
                 p = (p + 1) * TEN_MIN_IN_MILLS;
                 exerciseJobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
                 exerciseJobBuilder.setPersisted(true); // save job after reboot
@@ -140,7 +141,7 @@ public class SummaryHelper {
             Intent intent = new Intent(context, SummaryReceiver.class);
             PendingIntent piCheck = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             am.cancel(piCheck);
-            if (p > -1) {
+            if (p != SettingsFragment.TURN_OFF) {
                 p = (p + 1) * TEN_MIN_IN_MILLS;
                 am.set(AlarmManager.RTC_WAKEUP, p + System.currentTimeMillis(), piCheck);
             }
