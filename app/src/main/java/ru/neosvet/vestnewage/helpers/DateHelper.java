@@ -88,45 +88,53 @@ public class DateHelper {
         return formatter.format(date);
     }
 
-    public String getDiffDate(long time) {
-        time = getTimeInSeconds() - time / SEC_IN_MILLS;
+    public String getDiffDate(long mills) {
+        float time = getTimeInSeconds() - mills / SEC_IN_MILLS;
         int k;
-        if (time < 60) {
+        if (time < 59.95f) {
             if (time == 0)
                 time = 1;
             k = 0;
         } else {
-            time = time / 60;
-            if (time < 60)
+            time = time / 60f;
+            if (time < 59.95f)
                 k = 3;
             else {
-                time = time / 60;
-                if (time < 24)
+                time = time / 60f;
+                if (time < 23.95f)
                     k = 6;
                 else {
-                    time = time / 24;
+                    time = time / 24f;
                     k = 9;
                 }
             }
         }
         String result;
-        if (time > 4 && time < 21)
-            result = time + context.getResources().getStringArray(R.array.time)[1 + k];
+        if (time > 4.95f && time < 20.95f)
+            result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[1 + k];
         else {
-            if (time == 1)
+            if (time == 1f)
                 result = context.getResources().getStringArray(R.array.time)[k];
             else {
-                int n = (int) time % 10;
+                int n = (time - Math.floor(time) < 0.95f ? 0 : 1);
+                n = ((int) time + n) % 10;
                 if (n == 1)
-                    result = time + " " + context.getResources().getStringArray(R.array.time)[k];
+                    result = formatFloat(time) + " " + context.getResources().getStringArray(R.array.time)[k];
                 else if (n > 1 && n < 5)
-                    result = time + context.getResources().getStringArray(R.array.time)[2 + k];
+                    result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[2 + k];
                 else
-                    result = time + context.getResources().getStringArray(R.array.time)[1 + k];
+                    result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[1 + k];
             }
         }
 
         return result;
+    }
+
+    private String formatFloat(float f) {
+        String s = String.format(Locale.FRANCE, "%.1f", f);
+        if (s.contains(",0"))
+            return s.substring(0, s.length() - 2);
+        return s;
     }
 
     @Override
