@@ -222,11 +222,6 @@ public class DateHelper {
         time = time.plusMinutes(offset);
     }
 
-    public void changeHours(int offset) {
-        if (time == null) return;
-        time = time.plusHours(offset);
-    }
-
     // BUILDER ~~~~~~~~~~~~~~~~~~~~~~~~
     public class Builder {
         public Builder() {
