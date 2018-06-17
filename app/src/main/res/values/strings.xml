@@ -146,8 +146,8 @@
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
     <string name="prom">Посыл</string>
-    <string name="seconde">секунда</string>
-    <string name="minute">минута</string>
+    <string name="sec">сек</string>
+    <string name="min">мин</string>
     <string name="prom_for_soul_unite">Посыл на Духовное Единение</string>
     <string name="accept">Принято</string>
     <string name="prom_in_hour">Посыл через %.1f ч.</string>

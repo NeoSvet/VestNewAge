@@ -210,49 +210,21 @@ public class PromHelper {
         if (t.contains("-"))
             return t;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
-        DateHelper d = DateHelper.initNow(context);;
-        for (int i = 0; i < context.getResources().getStringArray(R.array.time).length; i++) {
-            if (t.contains(context.getResources().getStringArray(R.array.time)[i])) {
-                if (i < 3) { // less minutes
-                    if (i == 0) {
-                        if (!t.contains("1"))
-                            return context.getResources().getString(R.string.prom);
-                        else
-                            t = t.replace(context.getResources().getStringArray(R.array.time)[i]
-                                    , context.getResources().getString(R.string.seconde));
-                    }
-                    if (hTime != null) {
-                        timer = new Timer();
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                hTime.sendEmptyMessage(0);
-                            }
-                        }, DateHelper.SEC_IN_MILLS);
-                    }
-                    break;
-                } else if (i < 6) { // less hour
-                    if (i == 3)
-                        t = t.replace(context.getResources().getStringArray(R.array.time)[i]
-                                , context.getResources().getString(R.string.minute));
-                    d.changeMinutes(1);
-                    d.setSeconds(1);
-                } else {
-                    d.changeHours(1);
-                    d.setMinutes(0);
-                    d.setSeconds(1);
+        int delay;
+        if (t.contains(context.getResources().getString(R.string.sec)))
+            delay = DateHelper.SEC_IN_MILLS; // 1 sec
+        else if (t.contains(context.getResources().getString(R.string.min)))
+            delay = 6 * DateHelper.SEC_IN_MILLS; // 1/10 of min in sec
+        else
+            delay = 360 * DateHelper.SEC_IN_MILLS; // 1/10 of hour in sec
+        if (hTime != null) {
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    hTime.sendEmptyMessage(0);
                 }
-                if (hTime != null) {
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            hTime.sendEmptyMessage(0);
-                        }
-                    }, d.getTimeInMills());
-                }
-                break;
-            }
+            }, delay);
         }
         return t;
     }
