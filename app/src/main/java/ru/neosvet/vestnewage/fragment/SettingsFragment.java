@@ -43,8 +43,8 @@ public class SettingsFragment extends Fragment {
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View container, bSyncTime, pBase;
-    private View pCheck, tvCheckOn, tvCheckOff;
-    private View pProm, tvPromOn, tvPromOff;
+    private View pCheck, tvCheckOn, tvCheckOff, bCheckSet;
+    private View pProm, tvPromOn, tvPromOff, bPromSet;
     private ImageView imgBase, imgCheck, imgProm;
     private boolean[] bPanels;
     private CheckBox cbCountFloat, cbMenuMode;
@@ -213,16 +213,14 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initButtonsSet() {
-        View bSet = container.findViewById(R.id.bCheckSet);
-        bSet.setOnClickListener(new View.OnClickListener() {
+        bCheckSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog = new SetNotifDialog(act, SUMMARY);
                 dialog.show();
             }
         });
-        bSet = container.findViewById(R.id.bPromSet);
-        bSet.setOnClickListener(new View.OnClickListener() {
+        bPromSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog = new SetNotifDialog(act, PROM);
@@ -233,8 +231,7 @@ public class SettingsFragment extends Fragment {
 
     @RequiresApi(26)
     private void initButtonsSetNew() {
-        View bSet = container.findViewById(R.id.bCheckSet);
-        bSet.setOnClickListener(new View.OnClickListener() {
+        bCheckSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
@@ -243,8 +240,7 @@ public class SettingsFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        bSet = container.findViewById(R.id.bPromSet);
-        bSet.setOnClickListener(new View.OnClickListener() {
+        bPromSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
@@ -313,6 +309,7 @@ public class SettingsFragment extends Fragment {
         tvCheckOn = container.findViewById(R.id.tvCheckOn);
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
         sbCheckTime = container.findViewById(R.id.sbCheckTime);
+        bCheckSet = container.findViewById(R.id.bCheckSet);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
         int p = pref.getInt(TIME, TURN_OFF);
         if (p == TURN_OFF)
@@ -324,6 +321,7 @@ public class SettingsFragment extends Fragment {
         tvPromOn = container.findViewById(R.id.tvPromOn);
         tvPromOff = container.findViewById(R.id.tvPromOff);
         sbPromTime = container.findViewById(R.id.sbPromTime);
+        bPromSet = container.findViewById(R.id.bPromSet);
         pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
         p = pref.getInt(TIME, TURN_OFF);
         if (p == TURN_OFF)
@@ -341,8 +339,10 @@ public class SettingsFragment extends Fragment {
             tvCheckOff.setVisibility(View.GONE);
             t.append(getResources().getString(R.string.turn_off));
             tvCheck.setText(t);
+            bCheckSet.setEnabled(false);
             return;
         }
+        bCheckSet.setEnabled(true);
         tvCheckOn.setVisibility(View.GONE);
         tvCheckOff.setVisibility(View.VISIBLE);
         int p = sbCheckTime.getProgress() + 1;
@@ -373,8 +373,10 @@ public class SettingsFragment extends Fragment {
             tvPromOn.setVisibility(View.VISIBLE);
             tvPromOff.setVisibility(View.GONE);
             tvPromNotif.setText(getResources().getString(R.string.prom_notif_off));
+            bPromSet.setEnabled(false);
             return;
         }
+        bPromSet.setEnabled(true);
         tvPromOn.setVisibility(View.GONE);
         tvPromOff.setVisibility(View.VISIBLE);
         StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
