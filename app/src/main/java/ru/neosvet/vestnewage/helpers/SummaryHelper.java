@@ -113,13 +113,6 @@ public class SummaryHelper {
         }
     }
 
-    public static void postpone(Context context, String des, String link) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            setSummaryPostponeNew(context, des, link);
-        else
-            setSummaryPostpone(context, des, link);
-    }
-
     public void serviceFinish() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Intent finish = new Intent(InitJobService.ACTION_FINISHED);
@@ -154,8 +147,15 @@ public class SummaryHelper {
         }
     }
 
-    private static void setSummaryPostpone(Context context, String des, String link) {
+    public static void postpone(Context context, String des, String link) {
         Lib.showToast(context, context.getResources().getString(R.string.postpone_alert));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            setSummaryPostponeNew(context, des, link);
+        else
+            setSummaryPostpone(context, des, link);
+    }
+
+    private static void setSummaryPostpone(Context context, String des, String link) {
         Intent intent = new Intent(context, SummaryService.class);
         intent.putExtra(DataBase.DESCTRIPTION, des);
         intent.putExtra(DataBase.LINK, link);
@@ -166,7 +166,6 @@ public class SummaryHelper {
 
     @RequiresApi(21)
     public static void setSummaryPostponeNew(Context context, String des, String link) {
-        Lib.showToast(context, context.getResources().getString(R.string.postpone_alert));
         ComponentName jobService = new ComponentName(context, InitJobService.class);
         JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(NotificationHelper.ID_SUMMARY_POSTPONE, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
