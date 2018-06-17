@@ -54,7 +54,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/calendar_margin_top"
             android:background="@drawable/field"
-            android:padding="6dp" />
+            android:padding="3dp" />
     </LinearLayout>
 
     <ListView
