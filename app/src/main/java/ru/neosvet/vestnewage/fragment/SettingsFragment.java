@@ -153,13 +153,12 @@ public class SettingsFragment extends Fragment {
                 Handler action = new Handler(new Handler.Callback() {
                     @Override
                     public boolean handleMessage(Message message) {
-                        int timeleft = message.what;
-                        if (timeleft == -1) {
+                        if (message.what == PromHelper.ERROR) {
                             Lib.showToast(act, getResources().getString(R.string.sync_error));
                             bSyncTime.setEnabled(true);
                             return false;
                         }
-                        float f = ((float) timeleft) / 60f;
+                        float f = ((float) message.what) / 60f;
                         if (f < 60f)
                             Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
                         else {

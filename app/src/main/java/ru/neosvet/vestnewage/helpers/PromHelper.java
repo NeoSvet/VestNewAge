@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class PromHelper {
+    public static final byte ERROR = -1;
     private static final int hour_prom1 = 8, hour_prom2 = 11;
     private final String TIMEDIFF = "timediff";
     private Context context;
@@ -290,7 +291,7 @@ public class PromHelper {
                     e.printStackTrace();
                 }
                 if (action != null)
-                    action.sendEmptyMessage(-1);
+                    action.sendEmptyMessage(ERROR);
             }
         }).start();
     }
