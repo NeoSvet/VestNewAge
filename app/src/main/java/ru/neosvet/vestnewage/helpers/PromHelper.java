@@ -170,7 +170,7 @@ public class PromHelper {
 
     private void setPromTime() {
         String t = getPromText();
-        if (t.contains("-")) {
+        if (t == null) { //t.contains("-")
             Animation an = AnimationUtils.loadAnimation(context, R.anim.hide);
             an.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -208,8 +208,9 @@ public class PromHelper {
     private String getPromText() {
         DateHelper prom = getPromDate(false);
         String t = prom.getDiffDate(System.currentTimeMillis());
-        if (t.contains("-"))
-            return t;
+        if (t.contains("-") || // prom was been
+                t.contains(context.getResources().getStringArray(R.array.time)[0])) //second
+            return null;
         t = context.getResources().getString(R.string.to_prom) + " " + t;
         int delay;
         if (t.contains(context.getResources().getString(R.string.sec)))
@@ -282,9 +283,8 @@ public class PromHelper {
         PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationHelper notifHelper = new NotificationHelper(context);
         String msg = getPromText();
-        if (msg.contains("-")) {
+        if (msg == null) //msg.contains("-")
             msg = context.getResources().getString(R.string.prom);
-        }
         PendingIntent piCancel = notifHelper.getCancelPromNotif();
 
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
