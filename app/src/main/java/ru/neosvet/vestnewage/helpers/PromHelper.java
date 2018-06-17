@@ -279,8 +279,8 @@ public class PromHelper {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putInt(TIMEDIFF, timeDiff);
                         editor.apply();
-                        int t = pref.getInt(SettingsFragment.TIME, -1);
-                        if (t > -1)
+                        int t = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+                        if (t != SettingsFragment.TURN_OFF)
                             PromReceiver.setReceiver(context, t);
                     }
                     if (action != null)
@@ -297,8 +297,8 @@ public class PromHelper {
 
     public void showNotif() {
         SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, Context.MODE_PRIVATE);
-        final int p = pref.getInt(SettingsFragment.TIME, -1);
-        if (p == -1)
+        final int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+        if (p == SettingsFragment.TURN_OFF)
             return;
         boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);

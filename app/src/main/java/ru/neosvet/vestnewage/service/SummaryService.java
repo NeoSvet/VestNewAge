@@ -51,7 +51,7 @@ public class SummaryService extends JobIntentService {
                 result.add(intent.getStringExtra(DataBase.DESCTRIPTION));
                 result.add(intent.getStringExtra(DataBase.LINK));
             } else {
-                if (pref.getInt(SettingsFragment.TIME, -1) == -1)
+                if (pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF) == SettingsFragment.TURN_OFF)
                     return;
                 result = checkSummary();
             }

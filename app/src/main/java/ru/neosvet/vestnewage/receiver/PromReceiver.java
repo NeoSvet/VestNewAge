@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 
@@ -18,7 +19,7 @@ public class PromReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, PromReceiver.class);
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(piProm);
-        if (p > -1) {
+        if (p != SettingsFragment.TURN_OFF) {
             PromHelper prom = new PromHelper(context, null);
             DateHelper d = prom.getPromDate(false);
             if (p == 0)

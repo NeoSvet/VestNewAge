@@ -37,6 +37,7 @@ import ru.neosvet.vestnewage.receiver.PromReceiver;
 public class SettingsFragment extends Fragment {
     public static final String PANELS = "panels", TIME = "time",
             SUMMARY = "Summary", PROM = "Prom";
+    public static final byte TURN_OFF = -1;
     private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
     private MainActivity act;
     private SetNotifDialog dialog = null;
@@ -273,7 +274,7 @@ public class SettingsFragment extends Fragment {
         if (p < sbCheckTime.getMax()) {
             if (p > 5)
                 p += (p - 5) * 5;
-        } else p = -1;
+        } else p = TURN_OFF;
         editor.putInt(TIME, p);
         editor.apply();
         SummaryHelper.setReceiver(act, p);
@@ -284,7 +285,7 @@ public class SettingsFragment extends Fragment {
         SharedPreferences.Editor editor = pref.edit();
         int p = sbPromTime.getProgress();
         if (p == sbPromTime.getMax())
-            p = -1;
+            p = TURN_OFF;
         editor.putInt(TIME, p);
         editor.apply();
         PromReceiver.setReceiver(act, p);
@@ -314,8 +315,8 @@ public class SettingsFragment extends Fragment {
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
         sbCheckTime = container.findViewById(R.id.sbCheckTime);
         SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
-        int p = pref.getInt(TIME, -1);
-        if (p == -1)
+        int p = pref.getInt(TIME, TURN_OFF);
+        if (p == TURN_OFF)
             p = sbCheckTime.getMax();
         sbCheckTime.setProgress(p);
         setCheckTime();
@@ -325,8 +326,8 @@ public class SettingsFragment extends Fragment {
         tvPromOff = container.findViewById(R.id.tvPromOff);
         sbPromTime = container.findViewById(R.id.sbPromTime);
         pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
-        p = pref.getInt(TIME, -1);
-        if (p == -1)
+        p = pref.getInt(TIME, TURN_OFF);
+        if (p == TURN_OFF)
             p = sbPromTime.getMax();
         sbPromTime.setProgress(p);
         setPromTime();

@@ -69,16 +69,16 @@ public class SlashActivity extends AppCompatActivity {
         int ver = lib.getPreviosVer();
         if (ver < 21) {
             SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-            int p = pref.getInt(SettingsFragment.TIME, -1);
+            int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
-            if (p == -1)
+            if (p == SettingsFragment.TURN_OFF)
                 showNotifTip(getResources().getString(R.string.are_you_know),
                         getResources().getString(R.string.new_option_notif), intent);
             else {
                 pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
-                p = pref.getInt(SettingsFragment.TIME, -1);
-                if (p == -1)
+                p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+                if (p == SettingsFragment.TURN_OFF)
                     showNotifTip(getResources().getString(R.string.are_you_know),
                             getResources().getString(R.string.new_option_notif), intent);
             }
@@ -152,12 +152,12 @@ public class SlashActivity extends AppCompatActivity {
 
     private void rebuildNotif() {
         SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-        int p = pref.getInt(SettingsFragment.TIME, -1);
-        if (p > -1)
+        int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+        if (p != SettingsFragment.TURN_OFF)
             SummaryHelper.setReceiver(this, p);
         pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
-        p = pref.getInt(SettingsFragment.TIME, -1);
-        if (p > -1)
+        p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+        if (p != SettingsFragment.TURN_OFF)
             PromReceiver.setReceiver(this, p);
     }
 
