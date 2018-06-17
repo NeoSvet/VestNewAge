@@ -18,8 +18,6 @@
     <string name="open_link">Открыть ссылку</string>
     <!--New option-->
     <string name="new_option">Появилась новая опция!</string>
-    <string name="new_option_menu">«Меню на весь экран» (для смартфонов)</string>
-    <string name="new_option_counting">«Переместить отсчёт времени до Посыла в меню»</string>
     <string name="are_you_know">А вы знали?</string>
     <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
     <!--Lib-->

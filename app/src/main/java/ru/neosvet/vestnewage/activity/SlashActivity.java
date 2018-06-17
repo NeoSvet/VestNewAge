@@ -89,16 +89,10 @@ public class SlashActivity extends AppCompatActivity {
         }
         if (ver < 10)
             adapterNewVersion();
+        if (ver < 19)
+            rebuildNotif();
         if (ver < 21)
             adapterNewVersion2();
-        if (ver < 13)
-            showNotifTip(getResources().getString(R.string.new_option),
-                    getResources().getString(R.string.new_option_menu), getSettingsIntent());
-        if (ver < 19) {
-            showNotifTip(getResources().getString(R.string.new_option),
-                    getResources().getString(R.string.new_option_counting), getSettingsIntent());
-            rebuildNotif();
-        }
 
         showSummaryNotif();
     }
