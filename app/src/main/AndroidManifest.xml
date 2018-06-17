@@ -81,7 +81,7 @@
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="ru.neosvet.utils.NotificationHelper$Result"
+            android:name=".helpers.NotificationHelper$Result"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver
@@ -99,7 +99,7 @@
         </receiver>
         <receiver android:name=".receiver.PromReceiver" />
         <service
-            android:name="ru.neosvet.utils.SummaryHelper$InitJobService"
+            android:name=".helpers.SummaryHelper$InitJobService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
