@@ -62,7 +62,8 @@ public class SlashActivity extends AppCompatActivity {
 
         initAnimation();
         if(initData(savedInstanceState)) {
-            startActivity(main);
+            if (main != null)
+                startActivity(main);
             finish();
             return;
         }
@@ -252,8 +253,6 @@ public class SlashActivity extends AppCompatActivity {
         } else
             link = data.getPath();
         if (link != null) {
-//            Lib.LOG("link1=" + link);
-            ////http://blagayavest.info/poems/?date=11-3-2017
             if (link.contains(SummaryFragment.RSS)) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_rss);
                 if (getIntent().hasExtra(DataBase.ID))
@@ -269,13 +268,15 @@ public class SlashActivity extends AppCompatActivity {
                 main.putExtra(MainActivity.TAB, 2);
             } else if (link.contains("html")) {
                 BrowserActivity.openReader(this, link.substring(1), null);
-            } else if (data.getQuery() != null && data.getQuery().contains("date")) {
+                main = null;
+            } else if (data.getQuery() != null && data.getQuery().contains("date")) { //http://blagayavest.info/poems/?date=11-3-2017
                 String s = data.getQuery().substring(5);
                 String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
                 link = link.substring(1) + s.substring(0, s.indexOf("-"))
                         + "." + (m.length() == 1 ? "0" : "") + m
                         + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML;
                 BrowserActivity.openReader(this, link, null);
+                main = null;
             } else if (link.contains("/poems")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
                 main.putExtra(MainActivity.TAB, 0);
