@@ -93,7 +93,7 @@ public class JournalFragment extends Fragment {
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(DataBase.TITLE)), s), s);
                     t = curJ.getLong(iTime);
-                    d = DateHelper.newBuilder(act).setMills(t).build();
+                    d = DateHelper.putMills(act, t);
                     item.setDes(now.getDiffDate(t) +
                             getResources().getString(R.string.back)
                             + "\n(" + d.toString() + ")");

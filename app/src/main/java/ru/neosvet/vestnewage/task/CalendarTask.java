@@ -119,7 +119,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     }
 
     private void downloadMonth(int year, int month) throws Exception {
-        DateHelper d = DateHelper.newBuilder(act).setYearMonth(year, month).build();
+        DateHelper d = DateHelper.putYearMonth(act, year, month);
         DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
@@ -224,7 +224,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
             }
 
             if (updateUnread) {
-                DateHelper dItem = DateHelper.newBuilder(act).setYearMonth(year, month).build();
+                DateHelper dItem = DateHelper.putYearMonth(act, year, month);
                 UnreadHelper unread = new UnreadHelper(act);
                 for (int i = 0; i < data.size(); i++) {
                     for (int j = 0; j < data.get(i).getCount(); j++) {

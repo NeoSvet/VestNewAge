@@ -96,7 +96,7 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
                 //поиск по материалам (статьям)
                 searchList("00.00", str, mode);
             }
-            d = DateHelper.newBuilder(act).setYearMonth(start_year, start_month).build();
+            d = DateHelper.putYearMonth(act, start_year, start_month);
             while (start) {
                 if (list.contains(d.getMY())) {
                     publishProgress(d.getTimeInDays());

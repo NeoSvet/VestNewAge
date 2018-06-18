@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.helpers;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
@@ -30,15 +31,29 @@ public class DateHelper {
         this.context = context;
     }
 
-    private DateHelper(Context context, LocalDate date, LocalTime time) {
+    private DateHelper(Context context, LocalDate date, @Nullable LocalTime time) {
         AndroidThreeTen.init(context);
         this.context = context;
         this.date = date;
         this.time = time;
     }
 
-    public static Builder newBuilder(Context context) {
-        return new DateHelper(context).new Builder();
+    public static DateHelper putDays(Context context, int days) {
+        return new DateHelper(context, LocalDate.ofEpochDay(days), null);
+    }
+
+    public static DateHelper putMills(Context context, long mills) {
+        return putSeconds(context, (int) (mills / SEC_IN_MILLS));
+    }
+
+    public static DateHelper putSeconds(Context context, int sec) {
+        int days = sec / DAY_IN_SEC;
+        int secs = sec % DAY_IN_SEC;
+        return new DateHelper(context, LocalDate.ofEpochDay(days), LocalTime.ofSecondOfDay(secs));
+    }
+
+    public static DateHelper putYearMonth(Context context, int year, int month) {
+        return new DateHelper(context, LocalDate.of(year, month, 1), null);
     }
 
     public static DateHelper initToday(Context context) {
@@ -220,37 +235,5 @@ public class DateHelper {
     public void changeMinutes(int offset) {
         if (time == null) return;
         time = time.plusMinutes(offset);
-    }
-
-    // BUILDER ~~~~~~~~~~~~~~~~~~~~~~~~
-    public class Builder {
-        public Builder() {
-        }
-
-        public Builder setDays(int days) {
-            date = LocalDate.ofEpochDay(days);
-            return this;
-        }
-
-        public Builder setMills(long mills) {
-            return setSeconds((int) (mills / SEC_IN_MILLS));
-        }
-
-        public Builder setSeconds(int sec) {
-            int days = sec / DAY_IN_SEC;
-            int secs = sec % DAY_IN_SEC;
-            date = LocalDate.ofEpochDay(days);
-            time = LocalTime.ofSecondOfDay(secs);
-            return this;
-        }
-
-        public Builder setYearMonth(int year, int month) {
-            date = LocalDate.of(year, month, 1);
-            return this;
-        }
-
-        public DateHelper build() {
-            return DateHelper.this;
-        }
     }
 }

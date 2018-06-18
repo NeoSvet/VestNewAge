@@ -110,8 +110,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             kat = (int) (pref.getLong(KAT, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
             pos = (int) (pref.getLong(POS, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
         }
-        dKatren = DateHelper.newBuilder(act).setDays(kat).build();
-        dPoslanie = DateHelper.newBuilder(act).setDays(pos).build();
+        dKatren = DateHelper.putDays(act, kat);
+        dPoslanie = DateHelper.putDays(act, pos);
         fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
@@ -212,8 +212,8 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
             DateHelper dModList;
             if (cursor.moveToFirst()) {
-                dModList = DateHelper.newBuilder(act).setMills(
-                        cursor.getLong(cursor.getColumnIndex(DataBase.TIME))).build();
+                dModList = DateHelper.putMills(act,
+                        cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                 if (d.getYear() > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
                     if (katren) { // катрены
@@ -513,9 +513,9 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             fabRndMenu.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
-                d = DateHelper.newBuilder(act).setYearMonth(
+                d = DateHelper.putYearMonth(act,
                         2000 + Integer.parseInt(result.substring(3, 5)),
-                        Integer.parseInt(result.substring(0, 2))).build();
+                        Integer.parseInt(result.substring(0, 2)));
                 if (tab == 0)
                     dKatren = d;
                 else

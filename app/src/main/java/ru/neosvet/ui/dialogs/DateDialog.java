@@ -31,7 +31,7 @@ public class DateDialog extends Dialog {
     public DateDialog(Activity act, DateHelper date) {
         super(act);
         this.act = act;
-        this.date = DateHelper.newBuilder(act).setDays(date.getTimeInDays()).build();
+        this.date = DateHelper.putDays(act, date.getTimeInDays());
     }
 
     public void setResult(Result result) {

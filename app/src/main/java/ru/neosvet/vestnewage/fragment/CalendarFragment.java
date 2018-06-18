@@ -118,7 +118,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dCurrent.setDay(1);
         } else {
             act.setFrCalendar(this);
-            dCurrent = DateHelper.newBuilder(act).setDays(state.getInt(CURRENT_DATE)).build();
+            dCurrent = DateHelper.putDays(act, state.getInt(CURRENT_DATE));
             task = (CalendarTask) state.getSerializable(Const.TASK);
             if (task != null) {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
@@ -463,7 +463,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void createCalendar(int offsetMonth) {
-        DateHelper d = DateHelper.newBuilder(act).setDays(dCurrent.getTimeInDays()).build();
+        DateHelper d = DateHelper.putDays(act, dCurrent.getTimeInDays());
         if (offsetMonth != 0) {
             d.changeMonth(offsetMonth);
             dCurrent.changeMonth(offsetMonth);
@@ -567,7 +567,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
                 (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-            DateHelper d = DateHelper.newBuilder(act).setSeconds(sec).build();
+            DateHelper d = DateHelper.putSeconds(act, sec);
             if (d.getMonth() != today_m)
                 act.status.checkTime(sec);
         }

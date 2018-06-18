@@ -642,12 +642,11 @@ public class BrowserActivity extends AppCompatActivity
                         DataBase.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
                 int id;
-                DateHelper.Builder builder = DateHelper.newBuilder(this);
                 DateHelper d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                     s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
-                    d = builder.setMills(cursor.getLong(cursor.getColumnIndex(DataBase.TIME))).build();
+                    d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
                     if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
                         status.checkTime(d.getTimeInSeconds() - DateHelper.MONTH_IN_SEC);
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");

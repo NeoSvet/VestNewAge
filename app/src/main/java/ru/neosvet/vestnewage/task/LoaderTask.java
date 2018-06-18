@@ -182,7 +182,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         int end_month = k;
         k = 0;
         //count pages:
-        d = DateHelper.newBuilder(context).setYearMonth(year, 1).build();
+        d = DateHelper.putYearMonth(context, year, 1);
         while (start) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
@@ -198,7 +198,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         prog = 0;
         msg = context.getResources().getString(R.string.download_materials);
         publishProgress(k);
-        d = DateHelper.newBuilder(context).setYearMonth(year, 1).build();
+        d = DateHelper.putYearMonth(context, year, 1);
         while (start) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
@@ -330,7 +330,7 @@ public class LoaderTask extends AsyncTask<String, Integer, Boolean> implements S
         DateHelper d = DateHelper.initToday(context);
         end_month = d.getMonth();
         end_year = d.getYear();
-        d = DateHelper.newBuilder(context).setYearMonth(2016, 1).build();
+        d = DateHelper.putYearMonth(context, 2016, 1);
         while (start) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {

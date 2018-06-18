@@ -137,9 +137,9 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         if (state == null) {
             dEnd = DateHelper.initToday(act);
             if (mode < 5)// открываем ссылку с сайта Благая Весть
-                dStart = DateHelper.newBuilder(act).setYearMonth(2016, 1).build();
+                dStart = DateHelper.putYearMonth(act, 2016, 1);
             else
-                dStart = DateHelper.newBuilder(act).setYearMonth(min_y, min_m).build();
+                dStart = DateHelper.putYearMonth(act, min_y, min_m);
             sMode.setSelection(mode);
             if (string != null) {
                 etSearch.setText(string);
@@ -147,8 +147,8 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             }
         } else {
             act.setFrSearch(this);
-            dStart = DateHelper.newBuilder(act).setDays(state.getInt(START)).build();
-            dEnd = DateHelper.newBuilder(act).setDays(state.getInt(END)).build();
+            dStart = DateHelper.putDays(act, state.getInt(START));
+            dEnd = DateHelper.putDays(act, state.getInt(END));
             task = (SearchTask) state.getSerializable(Const.TASK);
             page = state.getInt(DataBase.SEARCH, -1);
             if (task != null) {
@@ -561,7 +561,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     public void updateStatus(int date) {
-        DateHelper d = DateHelper.newBuilder(act).setDays(date).build();
+        DateHelper d = DateHelper.putDays(act, date);
         tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + d.getYear());
     }
 
