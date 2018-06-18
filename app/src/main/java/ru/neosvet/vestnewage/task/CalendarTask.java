@@ -79,7 +79,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
     protected void onCancelled(Boolean result) {
         super.onCancelled(result);
         if (frm != null)
-            frm.finishLoad(result);
+            frm.finishLoad(true);
     }
 
     @Override

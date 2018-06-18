@@ -63,7 +63,7 @@ public class SummaryTask extends AsyncTask<Void, String, Boolean> implements Ser
     protected void onCancelled(Boolean result) {
         super.onCancelled(result);
         if (frm != null) {
-            frm.finishLoad(result);
+            frm.finishLoad(true);
             frm.openList(false, false);
         }
     }
