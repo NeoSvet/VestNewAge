@@ -41,6 +41,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
@@ -273,6 +274,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_rss:
                 frSummary = new SummaryFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frSummary);
+                if (getIntent().hasExtra(DataBase.ID)) {
+                    int n = getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY);
+                    NotificationHelper notifHelper = new NotificationHelper(MainActivity.this);
+                    for (int i = NotificationHelper.NOTIF_SUMMARY; i <= n; i++)
+                        notifHelper.cancel(i);
+                    getIntent().removeExtra(DataBase.ID);
+                }
                 break;
             case R.id.nav_main:
                 SiteFragment frSite = new SiteFragment();

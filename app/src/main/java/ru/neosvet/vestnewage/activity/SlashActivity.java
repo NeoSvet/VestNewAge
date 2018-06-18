@@ -29,6 +29,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -253,8 +254,10 @@ public class SlashActivity extends AppCompatActivity {
         if (link != null) {
 //            Lib.LOG("link1=" + link);
             ////http://blagayavest.info/poems/?date=11-3-2017
-            if (link.contains("/rss")) {
+            if (link.contains(SummaryFragment.RSS)) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_rss);
+                if (getIntent().hasExtra(DataBase.ID))
+                    main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
             } else if (link.length() < 2 || link.equals("/index.html")) {
                 main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
                 main.putExtra(MainActivity.TAB, 0);
