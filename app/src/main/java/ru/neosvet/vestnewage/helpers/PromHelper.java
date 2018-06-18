@@ -233,7 +233,8 @@ public class PromHelper {
 
     public void synchronTime(@Nullable final Handler action) {
         if (action == null) {
-            if (pref.getInt(TIMEDIFF, 0) > 0)
+            int time = pref.getInt(TIMEDIFF, 0);
+            if (time > 0 && time < 1000)
                 return;
         }
         new Thread(new Runnable() {
