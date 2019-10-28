@@ -20,7 +20,7 @@
         <Spinner
             android:id="@+id/sMode"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/button"
             android:gravity="center" />
@@ -43,7 +43,7 @@
                 android:id="@+id/bStartRange"
                 style="@style/Button"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp" />
 
@@ -60,7 +60,7 @@
                 android:id="@+id/bEndRange"
                 style="@style/Button"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp" />
 
@@ -70,7 +70,7 @@
             android:id="@+id/bChangeRange"
             style="@style/Button"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:paddingLeft="15dp"
@@ -81,7 +81,7 @@
             android:id="@+id/bClearSearch"
             style="@style/Button"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:paddingLeft="15dp"
