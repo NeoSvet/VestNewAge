@@ -174,6 +174,8 @@ public class SummaryHelper {
         PersistableBundle extras = new PersistableBundle();
         extras.putString(DataBase.DESCTRIPTION, des);
         extras.putString(DataBase.LINK, link);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            exerciseJobBuilder.setEstimatedNetworkBytes(70000,1000);
         exerciseJobBuilder.setExtras(extras);
         exerciseJobBuilder.setMinimumLatency(TEN_MIN_IN_MILLS);
         exerciseJobBuilder.setOverrideDeadline(2 * TEN_MIN_IN_MILLS);
