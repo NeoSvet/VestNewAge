@@ -35,7 +35,6 @@ import ru.neosvet.vestnewage.receiver.PromReceiver;
 public class PromHelper {
     public static final byte ERROR = -1;
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
-    private static final int hour_prom1 = 8, hour_prom2 = 11;
     private final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
@@ -47,8 +46,6 @@ public class PromHelper {
         this.context = context;
         pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         if (textView != null) {
-            if (timeToProm() > 39600) //11 hours in sec, today prom was been
-                return;
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
@@ -148,20 +145,16 @@ public class PromHelper {
     public DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(TIMEDIFF, 0);
         DateHelper prom = DateHelper.initNow(context);
+        int hour = 8;
         if (next) {
-            if (prom.getHours() < hour_prom1)
-                prom.setHours(hour_prom1);
-            else if (prom.getHours() < hour_prom2)
-                prom.setHours(hour_prom2);
+            while (prom.getHours() > hour)
+                hour += 8;
+            prom.setHours(hour);
+            hour = 8;
         }
-        if (prom.getHours() >= hour_prom1) {
-            if (prom.getHours() >= hour_prom2) {
-                prom.changeDay(1);
-                prom.setHours(hour_prom1);
-            } else
-                prom.setHours(hour_prom2);
-        } else
-            prom.setHours(hour_prom1);
+        while (prom.getHours() >= hour)
+            hour += 8;
+        prom.setHours(hour);
         prom.setMinutes(0);
         prom.setSeconds(0);
         prom.changeSeconds(-timeDiff);
