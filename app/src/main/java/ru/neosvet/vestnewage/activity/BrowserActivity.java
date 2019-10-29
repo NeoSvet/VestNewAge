@@ -515,7 +515,11 @@ public class BrowserActivity extends AppCompatActivity
                 startActivity(marker);
             }
         } else if (id == R.id.nav_scale) {
-            wvBrowser.setInitialScale((int) (100f * getResources().getDisplayMetrics().density));
+            editor.putInt(SCALE, 0);
+            editor.apply();
+            openReader(BrowserActivity.this, link, null);
+            finish();
+            return true;
         } else if (id == R.id.nav_light || id == R.id.nav_dark) {
             if ((id == R.id.nav_light && lightTheme)
                     || (id == R.id.nav_dark && !lightTheme))
