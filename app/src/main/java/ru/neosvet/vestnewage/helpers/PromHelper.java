@@ -149,12 +149,20 @@ public class PromHelper {
         if (next) {
             while (prom.getHours() > hour)
                 hour += 8;
-            prom.setHours(hour);
+            if (hour == 24) {
+                prom.changeDay(1);
+                prom.setHours(0);
+            } else
+                prom.setHours(hour);
             hour = 8;
         }
         while (prom.getHours() >= hour)
             hour += 8;
-        prom.setHours(hour);
+        if (hour == 24) {
+            prom.changeDay(1);
+            prom.setHours(0);
+        } else
+            prom.setHours(hour);
         prom.setMinutes(0);
         prom.setSeconds(0);
         prom.changeSeconds(-timeDiff);
@@ -306,5 +314,11 @@ public class PromHelper {
         }
         notifHelper.notify(NotificationHelper.NOTIF_PROM, notifBuilder);
         PromReceiver.setReceiver(context, p);
+    }
+
+    public void clearTimeDiff() {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(TIMEDIFF, 0);
+        editor.apply();
     }
 }
