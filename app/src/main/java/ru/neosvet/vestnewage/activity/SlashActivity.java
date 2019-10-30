@@ -99,6 +99,8 @@ public class SlashActivity extends AppCompatActivity {
             rebuildNotif();
         if (ver < 21)
             adapterNewVersion2();
+        if (ver < 31)
+            prom.clearTimeDiff();
 
         showSummaryNotif();
     }
