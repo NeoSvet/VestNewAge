@@ -6,7 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 
-import okhttp3.MultipartBody;
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -18,7 +18,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
 
 public class CabTask extends AsyncTask<String, Integer, String> implements Serializable {
-    private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
+    private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private transient CabmainFragment frm;
     private transient MainActivity act;
 
@@ -54,27 +54,30 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
     }
 
     private String subLogin(String email, String pass) throws Exception {
-        Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(HOST);
-        builderRequest.header(Const.USER_AGENT, act.getPackageName());
+        Request request = new Request.Builder()
+                .url(HOST)
+                .addHeader(Const.USER_AGENT, act.getPackageName())
+                .build();
         OkHttpClient client = Lib.createHttpClient();
-        Response response = client.newCall(builderRequest.build()).execute();
+        Response response = client.newCall(request).execute();
 
         String cookie = response.header(Const.SET_COOKIE);
         cookie = cookie.substring(0, cookie.indexOf(";"));
         frm.setCookie(cookie);
         response.close();
 
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("user", email)
-                .addFormDataPart("pass", pass)
+        RequestBody requestBody = new FormBody.Builder()
+                .add("user", email)
+                .add("pass", pass)
                 .build();
-        builderRequest.url(HOST + "auth.php");
-        builderRequest.post(requestBody);
-        builderRequest.addHeader(Const.COOKIE, cookie);
+        request  = new Request.Builder()
+                .post(requestBody)
+                .url(HOST + "auth.php")
+                .addHeader(Const.USER_AGENT, act.getPackageName())
+                .addHeader(Const.COOKIE, cookie)
+                .build();
 
-        response = client.newCall(builderRequest.build()).execute();
+        response = client.newCall(request).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         String s = br.readLine();
         br.close();
@@ -142,11 +145,10 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
         builderRequest.url(HOST + "savedata.php");
         builderRequest.header(Const.USER_AGENT, act.getPackageName());
         builderRequest.addHeader(Const.COOKIE, cookie);
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("keyw", String.valueOf(index + 1))
-                .addFormDataPart("login", email)
-                .addFormDataPart("hash", "")
+        RequestBody requestBody = new FormBody.Builder()
+                .add("keyw", String.valueOf(index + 1))
+                .add("login", email)
+                .add("hash", "")
                 .build();
         builderRequest.post(requestBody);
 
