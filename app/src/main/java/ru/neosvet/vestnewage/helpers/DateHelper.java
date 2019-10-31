@@ -15,6 +15,7 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.Locale;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class DateHelper {
@@ -229,11 +230,15 @@ public class DateHelper {
 
     public void changeSeconds(int offset) {
         if (time == null) return;
+        if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0 && time.getSecond() == 0)
+                this.changeDay(-1);
         time = time.plusSeconds(offset);
     }
 
     public void changeMinutes(int offset) {
         if (time == null) return;
+        if (offset < 0 && time.getMinute() == 0 && time.getSecond() == 0)
+            this.changeDay(-1);
         time = time.plusMinutes(offset);
     }
 }
