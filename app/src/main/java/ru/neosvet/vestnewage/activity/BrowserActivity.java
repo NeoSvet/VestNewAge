@@ -482,54 +482,59 @@ public class BrowserActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_refresh) {
-            if (loader == null)
-                downloadPage(true);
-        } else if (id == R.id.nav_nomenu) {
-            nomenu = !nomenu;
-            setCheckItem(item, nomenu);
-            editor.putBoolean(NOMENU, nomenu);
-            if (nomenu)
+        switch (id) {
+            case R.id.nav_refresh:
+                if (loader == null)
+                    downloadPage(true);
+                break;
+            case R.id.nav_nomenu:
+                nomenu = !nomenu;
+                setCheckItem(item, nomenu);
+                editor.putBoolean(NOMENU, nomenu);
+                if (nomenu)
+                    fabMenu.setVisibility(View.GONE);
+                else
+                    fabMenu.setVisibility(View.VISIBLE);
+                break;
+            case R.id.nav_search:
+                if (pSearch.getVisibility() == View.VISIBLE)
+                    closeSearch();
                 fabMenu.setVisibility(View.GONE);
-            else
-                fabMenu.setVisibility(View.VISIBLE);
-        } else if (id == R.id.nav_search) {
-            if (pSearch.getVisibility() == View.VISIBLE)
-                closeSearch();
-            fabMenu.setVisibility(View.GONE);
-            pSearch.setVisibility(View.VISIBLE);
-            etSearch.post(new Runnable() {
-                @Override
-                public void run() {
-                    etSearch.requestFocus();
+                pSearch.setVisibility(View.VISIBLE);
+                etSearch.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        etSearch.requestFocus();
+                    }
+                });
+                softKeyboard.openSoftKeyboard();
+                break;
+            case R.id.nav_marker:
+                if (iPlace > -1)
+                    MarkerActivity.addMarker(this, link, place[iPlace], null);
+                else {
+                    Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
+                    marker.putExtra(DataBase.LINK, link);
+                    marker.putExtra(DataBase.PLACE, getPositionOnPage() * 100f);
+                    startActivity(marker);
                 }
-            });
-            softKeyboard.openSoftKeyboard();
-        } else if (id == R.id.nav_marker) {
-            if (iPlace > -1)
-                MarkerActivity.addMarker(this, link, place[iPlace], null);
-            else {
-                Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
-                marker.putExtra(DataBase.LINK, link);
-                marker.putExtra(DataBase.PLACE, getPositionOnPage() * 100f);
-                startActivity(marker);
-            }
-        } else if (id == R.id.nav_scale) {
-            editor.putInt(SCALE, 0);
-            editor.apply();
-            openReader(BrowserActivity.this, link, null);
-            finish();
-            return true;
-        } else if (id == R.id.nav_light || id == R.id.nav_dark) {
-            if ((id == R.id.nav_light && lightTheme)
-                    || (id == R.id.nav_dark && !lightTheme))
+                break;
+            case R.id.nav_opt_scale:
+            case R.id.nav_src_scale:
+                editor.putInt(SCALE, id == R.id.nav_opt_scale ? 0 : 100);
+                editor.apply();
+                openReader(BrowserActivity.this, link, null);
+                finish();
                 return true;
-            lightTheme = !lightTheme;
-            setCheckItem(miTheme.getSubMenu().getItem(0), lightTheme);
-            setCheckItem(miTheme.getSubMenu().getItem(1), !lightTheme);
-            editor.putInt(THEME, (lightTheme ? 0 : 1));
-            wvBrowser.clearCache(true);
-            openPage(false);
+            default:
+                if ((id == R.id.nav_light && lightTheme) || (id == R.id.nav_dark && !lightTheme))
+                    return true;
+                lightTheme = !lightTheme;
+                setCheckItem(miTheme.getSubMenu().getItem(0), lightTheme);
+                setCheckItem(miTheme.getSubMenu().getItem(1), !lightTheme);
+                editor.putInt(THEME, (lightTheme ? 0 : 1));
+                wvBrowser.clearCache(true);
+                openPage(false);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

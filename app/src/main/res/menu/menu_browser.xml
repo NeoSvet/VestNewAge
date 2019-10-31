@@ -17,14 +17,22 @@
         android:title="@string/search" />
 
     <item
-        android:id="@+id/nav_scale"
-        android:icon="@drawable/one_one"
-        android:title="@string/reset_scale" />
-
-    <item
         android:id="@+id/nav_nomenu"
         android:icon="@drawable/none"
         android:title="@string/hide_menu" />
+
+    <item android:title="@string/scale_font">
+        <menu>
+            <item
+                android:id="@+id/nav_opt_scale"
+                android:icon="@drawable/opt_scale"
+                android:title="@string/opt_scale" />
+            <item
+                android:id="@+id/nav_src_scale"
+                android:icon="@drawable/src_scale"
+                android:title="@string/src_scale" />
+        </menu>
+    </item>
 
     <item android:title="@string/theme">
         <menu>
