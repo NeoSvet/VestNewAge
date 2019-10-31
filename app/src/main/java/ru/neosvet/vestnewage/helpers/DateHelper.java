@@ -237,7 +237,7 @@ public class DateHelper {
 
     public void changeMinutes(int offset) {
         if (time == null) return;
-        if (offset < 0 && time.getMinute() == 0 && time.getSecond() == 0)
+        if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0)
             this.changeDay(-1);
         time = time.plusMinutes(offset);
     }
