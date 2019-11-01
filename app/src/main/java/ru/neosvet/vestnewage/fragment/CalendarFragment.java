@@ -73,7 +73,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             if (message.what == 0)
                 tvEmpty.startAnimation(anHide);
             else
-                tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press));
+                tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
             return false;
         }
     });
