@@ -77,14 +77,15 @@ public class ListAdapter extends BaseAdapter {
                 tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         }
         //}
+        View item_bg = convertView.findViewById(R.id.item_bg);
         tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
         if (data.get(position).getLink().equals("@") && isItemList)
             tv.setTextColor(context.getResources().getColor(R.color.light_gray));
         if (data.get(position).isSelect())
-            convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
+            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
         else
-            convertView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
         if (animation) {
             convertView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
             animation = false;

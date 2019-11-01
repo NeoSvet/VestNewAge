@@ -2,30 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/item_bg"
-    android:orientation="vertical"
-    android:paddingTop="10dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text_item"
-        style="@style/Label"
+    <LinearLayout
+        android:id="@+id/item_bg"
+        style="@style/ItemBG"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textColor="@color/colorAccentLight" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ru.neosvet.ui.HtmlTextView
-        android:id="@+id/des_item"
-        style="@style/Des"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp" />
+        <TextView
+            android:id="@+id/text_item"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:textColor="@color/colorAccentLight" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/colorAccentLight" />
+        <ru.neosvet.ui.HtmlTextView
+            android:id="@+id/des_item"
+            style="@style/Des"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp" />
+
+    </LinearLayout>
 </LinearLayout>
