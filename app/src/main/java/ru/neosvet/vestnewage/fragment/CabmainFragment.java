@@ -167,9 +167,7 @@ public class CabmainFragment extends Fragment {
                     switch (pos) {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
-                                    getResources().getString(R.string.select_status))
-                                    || adMain.getItem(pos).getDes().contains(
-                                    getResources().getString(R.string.selected))) {
+                                    getResources().getString(R.string.select_status))) {
                                 //get list words
                                 task = new CabTask(CabmainFragment.this);
                                 task.execute(cookie);
@@ -362,14 +360,15 @@ public class CabmainFragment extends Fragment {
             } else {// режим списка - в кабинете
                 mode_list = ENTER;
                 if (result.indexOf("ok") == 0) { //слово выбрано успешно
-                    result = act.getResources().getString(R.string.selected) + " " +
-                            adMain.getItem(Integer.parseInt(result.substring(2))).getTitle();
+                    result = adMain.getItem(Integer.parseInt(result.substring(2))).getTitle();
                 }
             }
             adMain.clear();
             for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
                 adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
             }
+            if (!result.equals(getResources().getString(R.string.select_status)))
+                adMain.getItem(0).setTitle(getResources().getString(R.string.selected_status));
             adMain.getItem(0).setDes(result);
             adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         }
