@@ -249,6 +249,16 @@ public class SettingsFragment extends Fragment {
                 startActivity(intent);
             }
         });
+        container.findViewById(R.id.tvPromSetBattery).setVisibility(View.VISIBLE);
+        View bPromSetBattery = container.findViewById(R.id.bPromSetBattery);
+        bPromSetBattery.setVisibility(View.VISIBLE);
+        bPromSetBattery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setBaseCheckBox(String name, boolean check) {
