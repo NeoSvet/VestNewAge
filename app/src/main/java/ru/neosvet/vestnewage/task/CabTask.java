@@ -70,7 +70,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
                 .add("user", email)
                 .add("pass", pass)
                 .build();
-        request  = new Request.Builder()
+        request = new Request.Builder()
                 .post(requestBody)
                 .url(HOST + "auth.php")
                 .addHeader(Const.USER_AGENT, act.getPackageName())
@@ -126,7 +126,7 @@ public class CabTask extends AsyncTask<String, Integer, String> implements Seria
                 if (m[i].contains("selected")) {
                     m[i] = m[i].substring(m[i].indexOf(">") + 1);
                     if (returnSelectWord)
-                        return act.getResources().getString(R.string.selected) + " " + m[i];
+                        return m[i];
                 }
                 list.append(m[i]);
                 list.append(Const.N);
