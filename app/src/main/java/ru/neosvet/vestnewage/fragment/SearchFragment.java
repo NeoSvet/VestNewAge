@@ -11,7 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,7 +26,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -51,10 +50,9 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.list.CalendarAdapter;
-import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.task.SearchTask;
 
 
@@ -64,8 +62,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private MainActivity act;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
-    private HorizontalScrollView scroll;
-    private CalendarAdapter adPages;
+    private PageAdapter adPages;
     private RecyclerView rvPages;
     private LinearLayout mainLayout;
     private ListView lvResult;
@@ -167,12 +164,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                     pAdditionSet.setVisibility(View.VISIBLE);
                 else
                     bShow.setVisibility(View.VISIBLE);
-                scroll.postDelayed(new Runnable() {
-                    public void run() {
-                        scroll.smoothScrollTo((int) (page *
-                                getResources().getDimension(R.dimen.cell_size)), 0);
-                    }
-                }, 100L);
             }
             if (state.getBoolean(SETTINGS)) {
                 visSettings();
@@ -216,7 +207,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         pAdditionSet = container.findViewById(R.id.pAdditionSet);
         fabSettings = container.findViewById(R.id.fabSettings);
         fabOk = container.findViewById(R.id.fabOk);
-        scroll = (HorizontalScrollView) container.findViewById(R.id.scrollPage);
         rvPages = (RecyclerView) container.findViewById(R.id.rvPages);
         bStart = (Button) container.findViewById(R.id.bStartRange);
         bEnd = (Button) container.findViewById(R.id.bEndRange);
@@ -529,15 +519,14 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
             pPages.setVisibility(View.VISIBLE);
             int max = cursor.getCount() / Const.MAX_ON_PAGE;
             if (cursor.getCount() % Const.MAX_ON_PAGE > 0) max++;
-            GridLayoutManager layoutManager = new GridLayoutManager(act, max);
-            if (adPages != null) adPages.clear();
-            adPages = new CalendarAdapter();
-            rvPages.setLayoutManager(layoutManager);
-            for (int i = 1; i < max + 1; i++) {
-                adPages.addItem(new CalendarItem(act, i, android.R.color.white));
+            if (adPages != null && adPages.getItemCount() == max)
+                adPages.setSelect(page);
+            else {
+                adPages = new PageAdapter(act, max, page);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(act, LinearLayoutManager.HORIZONTAL, false);
+                rvPages.setLayoutManager(layoutManager);
+                rvPages.setAdapter(adPages);
             }
-            adPages.getItem(page).addLink(Const.SITE); //add any link for mark (border) of current page
-            rvPages.setAdapter(adPages);
             if (cursor.moveToPosition(page * Const.MAX_ON_PAGE)) {
                 int iTitle = cursor.getColumnIndex(DataBase.TITLE);
                 int iLink = cursor.getColumnIndex(DataBase.LINK);
