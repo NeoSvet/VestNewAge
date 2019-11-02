@@ -117,8 +117,8 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:itemBackground="@drawable/menu_bg"
-        app:itemIconTint="@color/menu_colors"
-        app:itemTextColor="@color/menu_colors"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
         app:menu="@menu/menu_main" />
 
 </android.support.v4.widget.DrawerLayout>

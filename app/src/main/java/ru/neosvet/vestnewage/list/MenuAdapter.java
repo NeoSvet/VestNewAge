@@ -52,7 +52,7 @@ public class MenuAdapter extends BaseAdapter {
         iv.setImageResource(data.get(position).getImage());
         View item_bg = convertView.findViewById(R.id.item_bg);
         if (data.get(position).isSelect())
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_bg));
+            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.selected));
         else
             item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
 
