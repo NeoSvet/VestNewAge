@@ -222,7 +222,7 @@ public class MarkerActivity extends AppCompatActivity {
                 s = tvCol.getText().toString();
             setColList(s);
             s = state.getString(DataBase.PLACE);
-            tvSel.setText(s.replace(",", ", "));
+            tvSel.setText(s);
             if (s.contains("%"))
                 rPos.setChecked(true);
             else
