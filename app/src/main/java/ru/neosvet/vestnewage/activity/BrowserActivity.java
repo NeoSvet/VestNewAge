@@ -81,7 +81,7 @@ public class BrowserActivity extends AppCompatActivity
     private int iPlace = -1;
     private PromHelper prom;
     private Animation anMin, anMax;
-    private MenuItem miTheme, miNomenu, miRefresh;
+    private MenuItem miThemeL, miThemeD, miNomenu, miRefresh;
     private Tip tip;
 
 
@@ -177,7 +177,8 @@ public class BrowserActivity extends AppCompatActivity
                 fabMenu.setVisibility(View.GONE);
             }
         }
-        miTheme.setVisible(!link.contains(PNG));
+        miThemeL.setVisible(!link.contains(PNG));
+        miThemeD.setVisible(!link.contains(PNG));
     }
 
     private void initPlace() {
@@ -268,8 +269,9 @@ public class BrowserActivity extends AppCompatActivity
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
         miRefresh = navMenu.getMenu().getItem(0);
-        miNomenu = navMenu.getMenu().getItem(4);
-        miTheme = navMenu.getMenu().getItem(5);
+        miNomenu = navMenu.getMenu().getItem(3);
+        miThemeL = navMenu.getMenu().getItem(6);
+        miThemeD = navMenu.getMenu().getItem(7);
 
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         tip = new Tip(this, findViewById(R.id.tvFinish));
@@ -438,9 +440,9 @@ public class BrowserActivity extends AppCompatActivity
             }
         });
         if (lightTheme)
-            setCheckItem(miTheme.getSubMenu().getItem(0), true);
+            setCheckItem(miThemeL, true);
         else
-            setCheckItem(miTheme.getSubMenu().getItem(1), true);
+            setCheckItem(miThemeD, true);
         if (pref.getBoolean(NOMENU, false)) {
             nomenu = true;
             setCheckItem(miNomenu, nomenu);
@@ -530,8 +532,8 @@ public class BrowserActivity extends AppCompatActivity
                 if ((id == R.id.nav_light && lightTheme) || (id == R.id.nav_dark && !lightTheme))
                     return true;
                 lightTheme = !lightTheme;
-                setCheckItem(miTheme.getSubMenu().getItem(0), lightTheme);
-                setCheckItem(miTheme.getSubMenu().getItem(1), !lightTheme);
+                setCheckItem(miThemeL, lightTheme);
+                setCheckItem(miThemeD, !lightTheme);
                 editor.putInt(THEME, (lightTheme ? 0 : 1));
                 wvBrowser.clearCache(true);
                 openPage(false);
