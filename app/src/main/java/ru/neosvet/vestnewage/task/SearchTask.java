@@ -75,10 +75,10 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
             int start_year, start_month, end_year, end_month, step;
             mode = Integer.parseInt(params[1]);
             str = params[2]; // начальная дата
-            start_month = Integer.parseInt(str.substring(0, 2)) - 1;
+            start_month = Integer.parseInt(str.substring(0, 2));
             start_year = Integer.parseInt(str.substring(3, 5));
             str = params[3]; // конечная дата
-            end_month = Integer.parseInt(str.substring(0, 2)) - 1;
+            end_month = Integer.parseInt(str.substring(0, 2));
             end_year = Integer.parseInt(str.substring(3, 5));
             str = params[0]; // строка для поиска
             if ((start_year == end_year && start_month <= end_month) || start_year < end_year)
