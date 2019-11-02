@@ -563,7 +563,6 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     public void updateStatus(int date) {
         DateHelper d = DateHelper.putDays(act, date);
         tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
-        Lib.LOG(tvStatus.getText().toString());
     }
 
     @Override
