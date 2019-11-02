@@ -67,11 +67,6 @@
                             android:src="@drawable/right" />
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="@color/colorAccentLight" />
-
                     <ListView
                         android:id="@+id/lvBook"
                         android:layout_width="match_parent"

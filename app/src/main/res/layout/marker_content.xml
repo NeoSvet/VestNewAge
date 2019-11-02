@@ -21,29 +21,27 @@
 
             <TextView
                 android:id="@+id/tvTitle"
-                style="@style/Label"
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
+                android:layout_margin="10dp"
+                android:background="@drawable/card_bg"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" />
 
             <RadioGroup
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:background="@drawable/card_bg"
+                android:orientation="horizontal"
+                android:padding="10dp">
 
                 <RadioButton
                     android:id="@+id/rPar"
                     style="@style/CheckBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="13dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="14dp"
                     android:layout_weight="1"
                     android:text="@string/paragraph" />
 
@@ -52,79 +50,68 @@
                     style="@style/CheckBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="13dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="14dp"
                     android:layout_weight="1"
                     android:text="@string/position" />
             </RadioGroup>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
-
             <TextView
                 android:id="@+id/tvSel"
-                style="@style/Label"
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/press"
+                android:background="@drawable/card_bg"
                 android:padding="10dp" />
 
-            <View
+            <LinearLayout
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
+                android:layout_height="match_parent"
+                android:background="@drawable/card_bg"
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/etDes"
-                style="@style/Label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:hint="@string/desctription"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
+                <EditText
+                    android:id="@+id/etDes"
+                    style="@style/Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@color/colorPrimary"
+                    android:hint="@string/desctription"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColorHint="@color/light_gray" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
+            </LinearLayout>
 
-            <EditText
-                android:id="@+id/etCol"
-                style="@style/Label"
+            <LinearLayout
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:hint="@string/add_col"
-                android:imeOptions="actionGo"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
+                android:layout_height="match_parent"
+                android:background="@drawable/card_bg"
+                android:orientation="vertical">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
+                <EditText
+                    android:id="@+id/etCol"
+                    style="@style/Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@color/colorPrimary"
+                    android:hint="@string/add_col"
+                    android:imeOptions="actionGo"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColorHint="@color/light_gray" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvCol"
-                style="@style/Label"
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/press"
+                android:background="@drawable/card_bg"
                 android:padding="10dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
 
         </LinearLayout>
     </ScrollView>

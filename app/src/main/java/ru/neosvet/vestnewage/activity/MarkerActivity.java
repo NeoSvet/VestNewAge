@@ -37,7 +37,6 @@ import ru.neosvet.vestnewage.list.CheckAdapter;
 
 public class MarkerActivity extends AppCompatActivity {
     private final String PAGE = "page", COL = "col";
-    private final int height_pos = 230;
     private float density;
     private String pageCon;
     private CheckAdapter adPage, adCol;
@@ -50,7 +49,7 @@ public class MarkerActivity extends AppCompatActivity {
     private View pPos, fabHelp, fabOk;
     private String link, sel;
     private SoftKeyboard softKeyboard;
-    private int id, heightList, k_par;
+    private int id, heightDialog, k_par;
     private byte modeList = 0;
     private boolean posVisible = false;
 
@@ -244,7 +243,7 @@ public class MarkerActivity extends AppCompatActivity {
                 else
                     lvList.setAdapter(adCol);
                 mainLayout.setVisibility(View.GONE);
-                lvList.getLayoutParams().height = heightList;
+                lvList.getLayoutParams().height = heightDialog;
                 lvList.requestLayout();
                 fabHelp.setVisibility(View.GONE);
                 lvList.setVisibility(View.VISIBLE);
@@ -252,7 +251,7 @@ public class MarkerActivity extends AppCompatActivity {
             if (state.getBoolean(DataBase.Q, false)) {
                 mainLayout.setVisibility(View.GONE);
                 fabHelp.setVisibility(View.GONE);
-                pPos.getLayoutParams().height = (int) (height_pos * density);
+                pPos.getLayoutParams().height = heightDialog;
                 pPos.requestLayout();
                 pPos.setVisibility(View.VISIBLE);
                 posVisible = true;
@@ -363,7 +362,7 @@ public class MarkerActivity extends AppCompatActivity {
         lvList = (ListView) findViewById(R.id.lvList);
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        heightList = displaymetrics.heightPixels -
+        heightDialog = displaymetrics.heightPixels -
                 (int) (getResources().getInteger(R.integer.top_minus) * density);
         mainLayout = (LinearLayout) findViewById(R.id.content_marker);
         sbPos = (SeekBar) findViewById(R.id.sbPos);
@@ -411,8 +410,7 @@ public class MarkerActivity extends AppCompatActivity {
                     posVisible = true;
                     fabHelp.setVisibility(View.GONE);
                     pPos.setVisibility(View.VISIBLE);
-                    ResizeAnim anim = new ResizeAnim(pPos, false,
-                            (int) (height_pos * density));
+                    ResizeAnim anim = new ResizeAnim(pPos, false, heightDialog);
                     anim.setDuration(800);
                     pPos.clearAnimation();
                     pPos.startAnimation(anim);
@@ -697,7 +695,7 @@ public class MarkerActivity extends AppCompatActivity {
         fabHelp.setVisibility(View.GONE);
         softKeyboard.closeSoftKeyboard();
         lvList.setVisibility(View.VISIBLE);
-        ResizeAnim anim = new ResizeAnim(lvList, false, heightList);
+        ResizeAnim anim = new ResizeAnim(lvList, false, heightDialog);
         anim.setDuration(800);
         lvList.clearAnimation();
         lvList.startAnimation(anim);
