@@ -59,9 +59,9 @@ public class MarkAdapter extends BaseAdapter {
             tv = (TextView) convertView.findViewById(R.id.des_item);
             tv.setText(data.get(position).getDes());
         }
-        View item_bg = convertView.findViewById(R.id.item_bg);
         tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
+        View item_bg = convertView.findViewById(R.id.item_bg);
         if (data.get(position).isSelect())
             item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
         else

@@ -29,11 +29,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/menu_fragment_top" />
-
-    <View
-        android:id="@+id/divMenu"
-        android:layout_width="2dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:background="@color/colorAccentLight" />
 </RelativeLayout>

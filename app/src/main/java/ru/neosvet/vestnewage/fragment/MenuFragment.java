@@ -56,7 +56,6 @@ public class MenuFragment extends Fragment {
         } else {
             act.setTitle(getResources().getString(R.string.app_name));
             this.container.findViewById(R.id.ivHeadMenu).setVisibility(View.GONE);
-            this.container.findViewById(R.id.divMenu).setVisibility(View.GONE);
             isFullScreen = true;
             i = 1;
         }
