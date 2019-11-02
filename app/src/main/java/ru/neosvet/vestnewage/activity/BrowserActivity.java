@@ -73,6 +73,7 @@ public class BrowserActivity extends AppCompatActivity
     private TextView tvPlace;
     private EditText etSearch;
     private StatusButton status;
+    private LinearLayout mainLayout;
     private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
     private DrawerLayout drawerMenu;
     private Lib lib;
@@ -264,7 +265,7 @@ public class BrowserActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.GONE);
         InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
-        LinearLayout mainLayout = (LinearLayout) findViewById(R.id.content_browser);
+        mainLayout = (LinearLayout) findViewById(R.id.content_browser);
         softKeyboard = new SoftKeyboard(mainLayout, im);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
@@ -534,6 +535,8 @@ public class BrowserActivity extends AppCompatActivity
                 lightTheme = !lightTheme;
                 setCheckItem(miThemeL, lightTheme);
                 setCheckItem(miThemeD, !lightTheme);
+                mainLayout.setBackgroundColor(getResources().getColor(
+                        lightTheme ? android.R.color.white : android.R.color.black));
                 editor.putInt(THEME, (lightTheme ? 0 : 1));
                 wvBrowser.clearCache(true);
                 openPage(false);
