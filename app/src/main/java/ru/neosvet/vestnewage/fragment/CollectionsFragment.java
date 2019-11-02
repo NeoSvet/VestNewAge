@@ -35,7 +35,7 @@ public class CollectionsFragment extends Fragment {
     private final String SEL = "sel", RENAME = "rename";
     public final int MARKER_REQUEST = 11;
     private ListView lvMarker;
-    private View container, fabEdit, fabHelp, divEdit, pEdit;
+    private View container, fabEdit, fabHelp, pEdit;
     private TextView tvEmpty;
     private MainActivity act;
     private MarkAdapter adMarker;
@@ -295,7 +295,6 @@ public class CollectionsFragment extends Fragment {
     private void initViews() {
         fabEdit = container.findViewById(R.id.fabEdit);
         fabHelp = container.findViewById(R.id.fabHelp);
-        divEdit = container.findViewById(R.id.divEdit);
         pEdit = container.findViewById(R.id.pEdit);
         tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
         lvMarker = (ListView) container.findViewById(R.id.lvMarker);
@@ -558,7 +557,6 @@ public class CollectionsFragment extends Fragment {
         adMarker.notifyDataSetChanged();
         fabEdit.setVisibility(View.GONE);
         fabHelp.setVisibility(View.GONE);
-        divEdit.setVisibility(View.VISIBLE);
         pEdit.setVisibility(View.VISIBLE);
     }
 
@@ -693,7 +691,6 @@ public class CollectionsFragment extends Fragment {
             fabEdit.setVisibility(View.VISIBLE);
             fabHelp.setVisibility(View.VISIBLE);
         }
-        divEdit.setVisibility(View.GONE);
         pEdit.setVisibility(View.GONE);
         iSel = -1;
     }

@@ -4,7 +4,6 @@
     android:id="@+id/content_browser"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
     android:orientation="vertical"
     tools:showIn="@layout/browser_float">
 
@@ -12,7 +11,7 @@
         android:id="@+id/pSearch"
         android:layout_width="match_parent"
         android:layout_height="@dimen/panel_height"
-        android:background="@drawable/starsky_bg"
+        android:background="@drawable/card_bg"
         android:orientation="horizontal"
         android:padding="5dp"
         android:visibility="gone">

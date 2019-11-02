@@ -14,12 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
-    <View
-        android:id="@+id/divCab"
-        android:layout_width="3dp"
-        android:layout_height="match_parent"
-        android:background="@color/colorAccent" />
-
     <ScrollView
         android:id="@+id/pMain"
         android:layout_width="match_parent"
@@ -33,63 +27,70 @@
 
             <TextView
                 android:id="@+id/tvTip"
-                style="@style/Label"
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/card_bg"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:text="@string/cabinet_title" />
 
-            <View
+            <LinearLayout
+                android:id="@+id/item_bg"
+                style="@style/ItemBG"
                 android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:background="@color/colorAccent" />
+                android:layout_height="match_parent"
+                android:background="@drawable/card_bg"
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/etEmail"
-                style="@style/Label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/colorPrimary"
-                android:hint="@string/email"
-                android:imeOptions="actionNext"
-                android:inputType="textEmailAddress"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
+                <EditText
+                    android:id="@+id/etEmail"
+                    style="@style/Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@color/colorPrimary"
+                    android:hint="@string/email"
+                    android:imeOptions="actionNext"
+                    android:inputType="textEmailAddress"
+                    android:padding="5dp"
+                    android:textColorHint="@color/light_gray" />
 
-            <EditText
-                android:id="@+id/etPassword"
-                style="@style/Label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:hint="@string/password"
-                android:imeOptions="actionGo"
-                android:inputType="textPassword"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
+                <EditText
+                    android:id="@+id/etPassword"
+                    style="@style/Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@color/colorPrimary"
+                    android:hint="@string/password"
+                    android:imeOptions="actionGo"
+                    android:inputType="textPassword"
+                    android:padding="5dp"
+                    android:textColorHint="@color/light_gray" />
 
-            <CheckBox
-                android:id="@+id/cbRemEmail"
-                style="@style/CheckBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="10dp"
-                android:text="@string/remember_email" />
+                <CheckBox
+                    android:id="@+id/cbRemEmail"
+                    style="@style/CheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/remember_email" />
 
-            <CheckBox
-                android:id="@+id/cbRemPassword"
-                style="@style/CheckBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="10dp"
-                android:enabled="false"
-                android:text="@string/remember_password" />
+                <CheckBox
+                    android:id="@+id/cbRemPassword"
+                    style="@style/CheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:enabled="false"
+                    android:text="@string/remember_password" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -42,7 +42,7 @@ public class CabmainFragment extends Fragment {
     private CheckBox cbRemEmail, cbRemPassword;
     private TextView tvError;
     private EditText etEmail, etPassword;
-    private View container, fabEnter, fabExit, pMain, divCab;
+    private View container, fabEnter, fabExit, pMain;
     private String cookie = "";
     private byte mode_list = 0;
     private CabTask task;
@@ -85,7 +85,6 @@ public class CabmainFragment extends Fragment {
             mode_list = state.getByte(PANEL);
             if (mode_list > LOGIN) {
                 pMain.setVisibility(View.GONE);
-                divCab.setVisibility(View.GONE);
                 fabEnter.setVisibility(View.GONE);
                 fabExit.setVisibility(View.VISIBLE);
             }
@@ -125,7 +124,6 @@ public class CabmainFragment extends Fragment {
     private void initViews() {
         act.setTitle(getResources().getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
-        divCab = container.findViewById(R.id.divCab);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
         tvError = (TextView) container.findViewById(R.id.tvError);
@@ -262,7 +260,6 @@ public class CabmainFragment extends Fragment {
                 fabEnter.setVisibility(View.VISIBLE);
                 fabExit.setVisibility(View.GONE);
                 pMain.setVisibility(View.VISIBLE);
-                divCab.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -333,7 +330,6 @@ public class CabmainFragment extends Fragment {
             adMain.clear();
             adMain.notifyDataSetChanged();
             pMain.setVisibility(View.GONE);
-            divCab.setVisibility(View.GONE);
             fabEnter.setVisibility(View.GONE);
             fabExit.setVisibility(View.VISIBLE);
             tvError.setText(result.substring(1));
@@ -354,7 +350,6 @@ public class CabmainFragment extends Fragment {
         } else { // ENTER or after select word
             if (mode_list == ENTER) {
                 pMain.setVisibility(View.GONE);
-                divCab.setVisibility(View.GONE);
                 fabEnter.setVisibility(View.GONE);
                 fabExit.setVisibility(View.VISIBLE);
             } else {// режим списка - в кабинете
@@ -382,7 +377,6 @@ public class CabmainFragment extends Fragment {
             mode_list--;
             if (mode_list == LOGIN) {
                 pMain.setVisibility(View.VISIBLE);
-                divCab.setVisibility(View.VISIBLE);
                 fabEnter.setVisibility(View.VISIBLE);
                 fabExit.setVisibility(View.GONE);
                 adMain.clear();

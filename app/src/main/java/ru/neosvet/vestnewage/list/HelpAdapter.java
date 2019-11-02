@@ -71,17 +71,22 @@ public class HelpAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.item_detail, null);
         TextView tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(pos).getTitle());
+        View item_bg = convertView.findViewById(R.id.item_bg);
         if (button) {
+            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.card_bg));
             ImageView img = (ImageView) convertView.findViewById(R.id.image_item);
             int icon = Integer.parseInt(data.get(pos).getLink());
             img.setImageDrawable(context.getResources().getDrawable(icon));
         } else {
             tv = (TextView) convertView.findViewById(R.id.des_item);
             tv.setText(data.get(pos).getDes());
-            if (data.get(pos).getCount() == 0)
+            if (data.get(pos).getCount() == 0) {
+                item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.card_bg));
                 tv.setVisibility(View.GONE);
-            else
+            } else {
+                item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
                 tv.setVisibility(View.VISIBLE);
+            }
         }
         return convertView;
     }

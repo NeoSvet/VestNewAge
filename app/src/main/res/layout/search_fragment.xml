@@ -144,22 +144,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/card_bg"
         android:orientation="horizontal"
         android:padding="5dp"
         android:visibility="gone">
 
-        <HorizontalScrollView
-            android:id="@+id/scrollPage"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvPages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="30">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rvPages"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </HorizontalScrollView>
+            android:layout_marginLeft="5dp"
+            android:layout_weight="30" />
 
         <ImageButton
             android:id="@+id/bSettings"

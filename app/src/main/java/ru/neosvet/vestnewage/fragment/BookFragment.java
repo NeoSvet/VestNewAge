@@ -70,7 +70,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.press));
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
             return false;
         }
     });

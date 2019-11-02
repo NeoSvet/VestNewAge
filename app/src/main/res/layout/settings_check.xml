@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/ItemBG"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/colorAccentLight" />
+    android:background="@drawable/item_bg"
+    android:orientation="vertical"
+    android:padding="0dp">
 
     <LinearLayout
         android:id="@+id/bCheck"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/press"
+        android:background="@drawable/card_bg"
         android:orientation="horizontal"
         android:padding="10dp">
 
@@ -39,28 +37,23 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorAccentLight" />
-
         <TextView
             android:id="@+id/tvCheck"
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
             android:text="@string/check_summary" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp">
 
             <SeekBar
                 android:id="@+id/sbCheckTime"
@@ -89,26 +82,26 @@
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginRight="20dp"
+                android:layout_alignParentRight="true"
                 android:layout_marginTop="2dp"
+                android:layout_marginRight="20dp"
                 android:text="@string/off" />
 
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:layout_below="@id/sbCheckTime"
+                android:layout_alignParentLeft="true"
                 android:text="@string/often" />
 
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_below="@id/sbCheckTime"
+                android:layout_alignParentRight="true"
                 android:text="@string/less" />
         </RelativeLayout>
 
@@ -117,9 +110,9 @@
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/set_notif" />

@@ -13,18 +13,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="10dp">
 
             <include layout="@layout/settings_base" />
 
             <include layout="@layout/settings_check" />
 
             <include layout="@layout/settings_prom" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/colorAccentLight" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
