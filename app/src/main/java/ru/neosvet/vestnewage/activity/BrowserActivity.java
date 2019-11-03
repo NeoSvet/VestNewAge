@@ -284,9 +284,7 @@ public class BrowserActivity extends AppCompatActivity
         fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
 
-        String main = MainActivity.class.getName();
-        main = main.substring(main.indexOf("act"));
-        SharedPreferences prMain = getSharedPreferences(main, MODE_PRIVATE);
+        SharedPreferences prMain = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, true))
             prom = new PromHelper(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
@@ -301,11 +299,11 @@ public class BrowserActivity extends AppCompatActivity
         drawerMenu.addDrawerListener(toggle);
         toggle.syncState();
         lib = new Lib(this);
-        pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
+        pref = getSharedPreferences(BrowserActivity.class.getSimpleName(), MODE_PRIVATE);
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
         if (!lightTheme) //dark
-            findViewById(R.id.content_browser).setBackgroundColor(getResources().getColor(android.R.color.black));
+            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
         int z = pref.getInt(SCALE, 0);
