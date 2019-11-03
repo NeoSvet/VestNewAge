@@ -8,7 +8,7 @@
     android:padding="0dp">
 
     <LinearLayout
-        android:id="@+id/bBase"
+        android:id="@+id/bScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/card_bg"
@@ -16,48 +16,47 @@
         android:padding="10dp">
 
         <ImageView
-            android:id="@+id/imgBase"
+            android:id="@+id/imgScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:src="@drawable/minus" />
+            android:src="@drawable/plus" />
 
         <TextView
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="@string/base" />
+            android:text="@string/start_screen" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/pBase"
+    <RadioGroup
+        android:id="@+id/pScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <CheckBox
-            android:id="@+id/cbCountFloat"
+        <RadioButton
+            android:id="@+id/rbMenu"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/count_float" />
+            android:text="@string/menu" />
 
-        <CheckBox
-            android:id="@+id/cbNew"
+        <RadioButton
+            android:id="@+id/rbCalendar"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start_with_new" />
+            android:text="@string/calendar" />
 
-        <Button
-            android:id="@+id/bSyncTime"
-            style="@style/Button"
+        <RadioButton
+            android:id="@+id/rbSummary"
+            style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/sync_time" />
-    </LinearLayout>
+            android:text="@string/rss" />
+
+    </RadioGroup>
 </LinearLayout>

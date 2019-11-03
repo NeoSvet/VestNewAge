@@ -18,6 +18,10 @@
 
             <include layout="@layout/settings_base" />
 
+            <include layout="@layout/settings_screen" />
+
+            <include layout="@layout/settings_clear" />
+
             <include layout="@layout/settings_check" />
 
             <include layout="@layout/settings_prom" />

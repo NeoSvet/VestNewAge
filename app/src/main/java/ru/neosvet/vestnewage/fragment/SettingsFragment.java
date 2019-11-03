@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,16 +39,19 @@ public class SettingsFragment extends Fragment {
     public static final String PANELS = "panels", TIME = "time",
             SUMMARY = "Summary", PROM = "Prom";
     public static final byte TURN_OFF = -1;
-    private final byte PANEL_BASE = 0, PANEL_CHECK = 1, PANEL_PROM = 2;
+    private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
     private MainActivity act;
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
-    private View container, bSyncTime, pBase;
-    private View pCheck, tvCheckOn, tvCheckOff, bCheckSet;
-    private View pProm, tvPromOn, tvPromOff, bPromSet;
-    private ImageView imgBase, imgCheck, imgProm;
+    private View[] pSections;
+    private View container, bSyncTime, bClearDo;
+    private View tvCheckOn, tvCheckOff, bCheckSet;
+    private View tvPromOn, tvPromOff, bPromSet;
+    private ImageView[] imgSections;
     private boolean[] bPanels;
-    private CheckBox cbCountFloat, cbMenuMode;
+    private CheckBox cbCountFloat, cbNew;
+    private RadioButton[] rbsScreen;
+    private CheckBox[] cbsClear;
     private SeekBar sbCheckTime, sbPromTime;
 
     @Override
@@ -56,6 +60,7 @@ public class SettingsFragment extends Fragment {
         this.container = inflater.inflate(R.layout.settings_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.settings));
+        initSections();
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
@@ -70,82 +75,129 @@ public class SettingsFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            bPanels = new boolean[]{true, false, false};
+            bPanels = new boolean[]{true, false, false, false, false};
             return;
         }
         bPanels = state.getBooleanArray(PANELS);
         if (bPanels == null)
-            bPanels = new boolean[]{true, false, false};
-        if (bPanels[PANEL_BASE]) {
-            pBase.setVisibility(View.VISIBLE);
-            imgBase.setImageDrawable(getResources().getDrawable(R.drawable.minus));
-        }
-        if (bPanels[PANEL_CHECK]) {
-            pCheck.setVisibility(View.VISIBLE);
-            imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.minus));
-        }
-        if (bPanels[PANEL_PROM]) {
-            pProm.setVisibility(View.VISIBLE);
-            imgProm.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+            bPanels = new boolean[]{true, false, false, false, false};
+        for (int i = 0; i < bPanels.length; i++) {
+            if (bPanels[i]) {
+                pSections[i].setVisibility(View.VISIBLE);
+                imgSections[i].setImageDrawable(getResources().getDrawable(R.drawable.minus));
+            }
         }
     }
 
-    private void setViews() {
-        container.findViewById(R.id.bBase).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (bPanels[PANEL_BASE]) { //if open
-                    pBase.setVisibility(View.GONE);
-                    imgBase.setImageDrawable(getResources().getDrawable(R.drawable.plus));
-                } else { //if close
-                    pBase.setVisibility(View.VISIBLE);
-                    imgBase.setImageDrawable(getResources().getDrawable(R.drawable.minus));
-                }
-                bPanels[PANEL_BASE] = !bPanels[PANEL_BASE];
-            }
-        });
-        container.findViewById(R.id.bCheck).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (bPanels[PANEL_CHECK]) { //if open
-                    pCheck.setVisibility(View.GONE);
-                    imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.plus));
-                } else { //if close
-                    pCheck.setVisibility(View.VISIBLE);
-                    imgCheck.setImageDrawable(getResources().getDrawable(R.drawable.minus));
-                }
-                bPanels[PANEL_CHECK] = !bPanels[PANEL_CHECK];
-            }
-        });
-        container.findViewById(R.id.bProm).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (bPanels[PANEL_PROM]) { //if open
-                    pProm.setVisibility(View.GONE);
-                    imgProm.setImageDrawable(getResources().getDrawable(R.drawable.plus));
-                } else { //if close
-                    pProm.setVisibility(View.VISIBLE);
-                    imgProm.setImageDrawable(getResources().getDrawable(R.drawable.minus));
-                }
-                bPanels[PANEL_PROM] = !bPanels[PANEL_PROM];
-            }
-        });
+    private void initSections() {
+        imgSections = new ImageView[]{container.findViewById(R.id.imgBase),
+                container.findViewById(R.id.imgScreen), container.findViewById(R.id.imgClear),
+                container.findViewById(R.id.imgCheck), container.findViewById(R.id.imgProm)};
+        pSections = new View[]{container.findViewById(R.id.pBase),
+                container.findViewById(R.id.pScreen), container.findViewById(R.id.pClear),
+                container.findViewById(R.id.pCheck), container.findViewById(R.id.pProm)};
+        View[] bSections = new View[]{container.findViewById(R.id.bBase),
+                container.findViewById(R.id.bScreen), container.findViewById(R.id.bClear),
+                container.findViewById(R.id.bCheck), container.findViewById(R.id.bProm)};
 
+        View.OnClickListener SectionsClick = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int section;
+                switch (view.getId()) {
+                    case R.id.bBase:
+                        section = PANEL_BASE;
+                        break;
+                    case R.id.bScreen:
+                        section = PANEL_SCREEN;
+                        break;
+                    case R.id.bClear:
+                        section = PANEL_CLEAR;
+                        break;
+                    case R.id.bCheck:
+                        section = PANEL_CHECK;
+                        break;
+                    default:
+                        section = PANEL_PROM;
+                        break;
+                }
+                if (bPanels[section]) { //if open
+                    pSections[section].setVisibility(View.GONE);
+                    imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                } else { //if close
+                    pSections[section].setVisibility(View.VISIBLE);
+                    imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                }
+                bPanels[section] = !bPanels[section];
+            }
+        };
+        for (int i = 0; i < bSections.length; i++)
+            bSections[i].setOnClickListener(SectionsClick);
+    }
+
+    private void initViews() {
+        cbCountFloat = container.findViewById(R.id.cbCountFloat);
+        cbCountFloat.setChecked(!MainActivity.isCountInMenu);
+        if (act.isMenuMode)
+            cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
+        cbNew = container.findViewById(R.id.cbNew);
+        SharedPreferences pref = act.getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+        cbNew.setChecked(pref.getBoolean(MainActivity.START_NEW, false));
+
+        bClearDo = container.findViewById(R.id.bClearDo);
+        rbsScreen = new RadioButton[]{container.findViewById(R.id.rbMenu),
+                container.findViewById(R.id.rbCalendar),
+                container.findViewById(R.id.rbSummary)};
+        if (getResources().getInteger(R.integer.screen_mode) >= getResources().getInteger(R.integer.screen_tablet_port)) {
+            rbsScreen[0].setVisibility(View.GONE);
+        }
+        int p = pref.getInt(MainActivity.START_SCEEN, 1);
+        rbsScreen[p].setChecked(true);
+        cbsClear = new CheckBox[]{container.findViewById(R.id.cbKatreny),
+                container.findViewById(R.id.cbPoslaniya),
+                container.findViewById(R.id.cbMaterials),
+                container.findViewById(R.id.cbMarkers)};
+
+        tvCheck = container.findViewById(R.id.tvCheck);
+        tvCheckOn = container.findViewById(R.id.tvCheckOn);
+        tvCheckOff = container.findViewById(R.id.tvCheckOff);
+        sbCheckTime = container.findViewById(R.id.sbCheckTime);
+        bCheckSet = container.findViewById(R.id.bCheckSet);
+        pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
+        p = pref.getInt(TIME, TURN_OFF);
+        if (p == TURN_OFF)
+            p = sbCheckTime.getMax();
+        sbCheckTime.setProgress(p);
+        setCheckTime();
+
+        tvPromNotif = container.findViewById(R.id.tvPromNotif);
+        tvPromOn = container.findViewById(R.id.tvPromOn);
+        tvPromOff = container.findViewById(R.id.tvPromOff);
+        sbPromTime = container.findViewById(R.id.sbPromTime);
+        bPromSet = container.findViewById(R.id.bPromSet);
+        pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
+        p = pref.getInt(TIME, TURN_OFF);
+        if (p == TURN_OFF)
+            p = sbPromTime.getMax();
+        sbPromTime.setProgress(p);
+        setPromTime();
+        bSyncTime = container.findViewById(R.id.bSyncTime);
+    }
+
+    private void setViews() {
         cbCountFloat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setBaseCheckBox(MainActivity.COUNT_IN_MENU, !check);
+                setMainCheckBox(MainActivity.COUNT_IN_MENU, !check, -1);
                 MainActivity.isCountInMenu = !check;
             }
         });
-        if (cbMenuMode.getVisibility() == View.VISIBLE)
-            cbMenuMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                    setBaseCheckBox(MainActivity.MENU_MODE, check);
-                    MainActivity.isMenuMode = check;
-                }
-            });
+        cbNew.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
+                setMainCheckBox(MainActivity.START_NEW, !check, -1);
+            }
+        });
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,6 +223,52 @@ public class SettingsFragment extends Fragment {
                 prom.synchronTime(action);
                 bSyncTime.setEnabled(false);
 
+            }
+        });
+
+        CheckBox.OnCheckedChangeListener ScreenChecked = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                if (checked) {
+                    int sel;
+                    switch (compoundButton.getId()) {
+                        case R.id.rbMenu:
+                            sel = 0;
+                            break;
+                        case R.id.rbCalendar:
+                            sel = 1;
+                            break;
+                        default:
+                            sel = 2;
+                            break;
+                    }
+                    setMainCheckBox(MainActivity.START_SCEEN, false, sel);
+                }
+            }
+        };
+        for (int i = 0; i < rbsScreen.length; i++)
+            rbsScreen[i].setOnCheckedChangeListener(ScreenChecked);
+
+        CheckBox.OnCheckedChangeListener ClearChecked = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                int k = 0;
+                for (int i = 0; i < cbsClear.length; i++) {
+                    if (cbsClear[i].isChecked())
+                        k++;
+                }
+                bClearDo.setEnabled(k > 0);
+            }
+        };
+        for (int i = 0; i < cbsClear.length; i++)
+            cbsClear[i].setOnCheckedChangeListener(ClearChecked);
+        bClearDo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO tut
+                for (int i = 0; i < cbsClear.length; i++)
+                    cbsClear[i].setChecked(false);
+                bClearDo.setEnabled(false);
             }
         });
 
@@ -261,13 +359,19 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private void setBaseCheckBox(String name, boolean check) {
-        SharedPreferences pref = act.getSharedPreferences(act.getLocalClassName(), Context.MODE_PRIVATE);
+    private void setMainCheckBox(String name, boolean check, int value) {
+        SharedPreferences pref = act.getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean(name, check);
+        if (value == -1)
+            editor.putBoolean(name, check);
+        else
+            editor.putInt(name, value);
         editor.apply();
+        if (name.equals(MainActivity.START_NEW))
+            return;
         Intent main = new Intent(act, MainActivity.class);
-        main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+        if (value == -1)
+            main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
         act.startActivity(main);
         act.finish();
     }
@@ -294,51 +398,6 @@ public class SettingsFragment extends Fragment {
         editor.putInt(TIME, p);
         editor.apply();
         PromReceiver.setReceiver(act, p);
-    }
-
-    private void initViews() {
-        cbCountFloat = container.findViewById(R.id.cbCountFloat);
-        cbCountFloat.setChecked(!MainActivity.isCountInMenu);
-        if (MainActivity.isMenuMode)
-            cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
-        cbMenuMode = container.findViewById(R.id.cbMenuMode);
-        if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port)) {
-            cbMenuMode.setChecked(MainActivity.isMenuMode);
-        } else { // else tablet
-            cbMenuMode.setVisibility(View.GONE);
-        }
-
-        imgBase = container.findViewById(R.id.imgBase);
-        imgCheck = container.findViewById(R.id.imgCheck);
-        imgProm = container.findViewById(R.id.imgProm);
-        pBase = container.findViewById(R.id.pBase);
-        pCheck = container.findViewById(R.id.pCheck);
-        pProm = container.findViewById(R.id.pProm);
-
-        tvCheck = container.findViewById(R.id.tvCheck);
-        tvCheckOn = container.findViewById(R.id.tvCheckOn);
-        tvCheckOff = container.findViewById(R.id.tvCheckOff);
-        sbCheckTime = container.findViewById(R.id.sbCheckTime);
-        bCheckSet = container.findViewById(R.id.bCheckSet);
-        SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
-        int p = pref.getInt(TIME, TURN_OFF);
-        if (p == TURN_OFF)
-            p = sbCheckTime.getMax();
-        sbCheckTime.setProgress(p);
-        setCheckTime();
-
-        tvPromNotif = container.findViewById(R.id.tvPromNotif);
-        tvPromOn = container.findViewById(R.id.tvPromOn);
-        tvPromOff = container.findViewById(R.id.tvPromOff);
-        sbPromTime = container.findViewById(R.id.sbPromTime);
-        bPromSet = container.findViewById(R.id.bPromSet);
-        pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
-        p = pref.getInt(TIME, TURN_OFF);
-        if (p == TURN_OFF)
-            p = sbPromTime.getMax();
-        sbPromTime.setProgress(p);
-        setPromTime();
-        bSyncTime = container.findViewById(R.id.bSyncTime);
     }
 
     private void setCheckTime() {

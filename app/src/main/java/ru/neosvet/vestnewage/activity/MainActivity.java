@@ -48,8 +48,11 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     private final String LOADER = "loader";
-    public static final String COUNT_IN_MENU = "count_in_menu", MENU_MODE = "menu_mode", CUR_ID = "cur_id", TAB = "tab";
-    public static boolean isFirst = false, isMenuMode = false, isCountInMenu = false;
+    public static final String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new",
+            START_SCEEN = "start_screen", CUR_ID = "cur_id", TAB = "tab";
+    public static boolean isFirst = false, isCountInMenu = false;
+    public boolean isMenuMode = false;
+    private int first_fragment;
     private MenuFragment frMenu;
     private SummaryFragment frSummary;
     private CalendarFragment frCalendar;
@@ -73,14 +76,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
-        if (getResources().getInteger(R.integer.screen_mode) < getResources().getInteger(R.integer.screen_tablet_port))
-            isMenuMode = pref.getBoolean(MENU_MODE, false);
-
-        if (isMenuMode)
+        pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
+        int p = pref.getInt(START_SCEEN, 1);
+        if (p == 0 && getResources().getInteger(R.integer.screen_mode)
+                < getResources().getInteger(R.integer.screen_tablet_port)) {
             setContentView(R.layout.main_activity_nomenu);
-        else
+            first_fragment = R.id.menu_fragment;
+            isMenuMode = true;
+        } else
             setContentView(R.layout.main_activity);
+        if (p == 2)
+            first_fragment = R.id.nav_rss;
+        else if (p == 1 || !isMenuMode)
+            first_fragment = R.id.nav_calendar;
 
         myFragmentManager = getFragmentManager();
         status = new StatusButton(this, findViewById(R.id.pStatus));
@@ -95,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .findViewById(R.id.tvPromTimeInMenu));
         }
 
+        if (pref.getBoolean(START_NEW, false)) {
+            //TODO tut
+        }
         restoreActivityState(savedInstanceState);
     }
 
@@ -110,10 +121,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(R.id.nav_help);
                 isFirst = true;
             } else {
-                if (isMenuMode)
-                    setFragment(intent.getIntExtra(CUR_ID, R.id.menu_fragment));
-                else
-                    setFragment(intent.getIntExtra(CUR_ID, R.id.nav_calendar));
+                setFragment(intent.getIntExtra(CUR_ID, first_fragment));
             }
         } else {
             cur_id = state.getInt(CUR_ID);
@@ -375,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFirst) {
-            setFragment(R.id.nav_calendar);
+            setFragment(first_fragment);
         } else if (frCalendar != null) {
             if (frCalendar.onBackPressed())
                 exit();

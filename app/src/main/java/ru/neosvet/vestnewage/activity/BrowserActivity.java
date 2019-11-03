@@ -301,7 +301,7 @@ public class BrowserActivity extends AppCompatActivity
         drawerMenu.addDrawerListener(toggle);
         toggle.syncState();
         lib = new Lib(this);
-        pref = getSharedPreferences(this.getLocalClassName(), MODE_PRIVATE);
+        pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
         if (!lightTheme) //dark

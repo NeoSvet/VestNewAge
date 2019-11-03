@@ -27,6 +27,7 @@
     <string name="mute_notif">Беззвучные</string>
     <string name="tips">Подсказки</string>
     <!--Menu-->
+    <string name="new_section">Новое</string>
     <string name="rss">Сводка</string>
     <string name="main">Главная</string>
     <string name="calendar">Календарь</string>
@@ -114,7 +115,13 @@
     <string name="notif_prom">Напоминание о Посыле</string>
     <string name="count_float">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="count_everywhere">Показывать отсчёт времени до Посыла везде</string>
-    <string name="menu_on_full_screen">Меню на весь экран</string>
+    <string name="start_with_new">При запуске открыть Новое, если имеется</string>
+    <string name="start_screen">Начальный экран</string>
+    <string name="menu">Меню</string>
+    <string name="clear">Очистить</string>
+    <string name="loaded_katreny">Загруженные Катрены</string>
+    <string name="loaded_poslaniya">Загруженные Послания</string>
+    <string name="loaded_materials">Загруженные материалы</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
     <string name="minutes">минут</string>

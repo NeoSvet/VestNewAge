@@ -8,7 +8,7 @@
     android:padding="0dp">
 
     <LinearLayout
-        android:id="@+id/bBase"
+        android:id="@+id/bClear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/card_bg"
@@ -16,48 +16,63 @@
         android:padding="10dp">
 
         <ImageView
-            android:id="@+id/imgBase"
+            android:id="@+id/imgClear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:src="@drawable/minus" />
+            android:src="@drawable/plus" />
 
         <TextView
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="@string/base" />
+            android:text="@string/clear" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/pBase"
+        android:id="@+id/pClear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <CheckBox
-            android:id="@+id/cbCountFloat"
+            android:id="@+id/cbKatreny"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/count_float" />
+            android:text="@string/loaded_katreny" />
 
         <CheckBox
-            android:id="@+id/cbNew"
+            android:id="@+id/cbPoslaniya"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start_with_new" />
+            android:text="@string/loaded_poslaniya" />
+
+        <CheckBox
+            android:id="@+id/cbMaterials"
+            style="@style/CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loaded_materials" />
+
+        <CheckBox
+            android:id="@+id/cbMarkers"
+            style="@style/CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/markers" />
 
         <Button
-            android:id="@+id/bSyncTime"
+            android:id="@+id/bClearDo"
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="@string/sync_time" />
+            android:text="@string/clear" />
     </LinearLayout>
 </LinearLayout>

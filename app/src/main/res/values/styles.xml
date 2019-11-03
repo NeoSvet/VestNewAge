@@ -29,7 +29,10 @@
     </style>
 
     <style name="CheckBox" parent="Label">
-        <item name="android:paddingLeft">10dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:background">@drawable/press</item>
         <item name="android:button">@drawable/check_selector</item>
     </style>
 

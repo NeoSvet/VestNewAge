@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -61,7 +62,7 @@ public class SlashActivity extends AppCompatActivity {
         lib = new Lib(this);
 
         initAnimation();
-        if(initData(savedInstanceState)) {
+        if (initData(savedInstanceState)) {
             if (main != null)
                 startActivity(main);
             finish();
@@ -101,6 +102,21 @@ public class SlashActivity extends AppCompatActivity {
             adapterNewVersion2();
         if (ver < 31)
             prom.clearTimeDiff();
+        if (ver < 32) {
+            File f = new File("/data/data/" + this.getPackageName() + "/shared_prefs/activity."
+                    + MainActivity.class.getSimpleName() + ".xml");
+            if (f.exists())
+                f.renameTo(new File(f.getParent() + "/" + MainActivity.class.getSimpleName() + ".xml"));
+            f = new File(f.toString().replace(MainActivity.class.getSimpleName(), BrowserActivity.class.getSimpleName()));
+            if (f.exists())
+                f.renameTo(new File(f.getParent() + "/" + BrowserActivity.class.getSimpleName() + ".xml"));
+            SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+            if (pref.getBoolean("menu_mode", false)) {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt(MainActivity.START_SCEEN, 0);
+                editor.apply();
+            }
+        }
 
         showSummaryNotif();
     }
