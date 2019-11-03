@@ -454,7 +454,7 @@ public class CollectionsFragment extends Fragment {
     private void deleteDialog() {
         lvMarker.smoothScrollToPosition(iSel);
         final CustomDialog dialog = new CustomDialog(act);
-        dialog.setTitle(getResources().getString(R.string.delete));
+        dialog.setTitle(getResources().getString(R.string.delete) + "?");
         dialog.setMessage(adMarker.getItem(iSel).getTitle());
         dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
             @Override

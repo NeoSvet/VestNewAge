@@ -11,7 +11,7 @@
     <string name="download_it_calendar">Скачать текущий год</string>
     <string name="new_item">[Новое]</string>
     <!--Dialog-->
-    <string name="delete">Удалить?</string>
+    <string name="delete">Удалить</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="new_name">Новое название</string>
@@ -118,7 +118,7 @@
     <string name="start_with_new">При запуске открыть Новое, если имеется</string>
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
-    <string name="clear">Очистить</string>
+    <string name="free_storage">Освободить память</string>
     <string name="loaded_katreny">Загруженные Катрены</string>
     <string name="loaded_poslaniya">Загруженные Послания</string>
     <string name="loaded_materials">Загруженные материалы</string>
