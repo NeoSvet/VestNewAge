@@ -223,7 +223,7 @@ public class BrowserActivity extends AppCompatActivity
         if (iPlace == -1) return;
         String s = place[iPlace];
         tvPlace.setText(s.replace(Const.N, " "));
-        findText(s);
+        findText(s.substring(0, s.indexOf(Const.N)));
     }
 
     private void findText(String s) {
@@ -415,7 +415,7 @@ public class BrowserActivity extends AppCompatActivity
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tvPlace == null) {
+                if (place == null) {
                     softKeyboard.closeSoftKeyboard();
                     wvBrowser.findNext(false);
                 } else if (iPlace > 0) {
@@ -428,7 +428,7 @@ public class BrowserActivity extends AppCompatActivity
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tvPlace == null) {
+                if (place == null) {
                     softKeyboard.closeSoftKeyboard();
                     wvBrowser.findNext(true);
                 } else if (iPlace < place.length - 1) {
@@ -785,6 +785,7 @@ public class BrowserActivity extends AppCompatActivity
         loader = null;
         if (suc) {
             status.setLoad(false);
+            status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
             if (link.contains(PNG))
                 openFile();
             else
