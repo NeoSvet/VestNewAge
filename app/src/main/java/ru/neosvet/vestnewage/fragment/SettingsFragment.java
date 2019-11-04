@@ -195,7 +195,7 @@ public class SettingsFragment extends Fragment {
         cbNew.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setMainCheckBox(MainActivity.START_NEW, !check, -1);
+                setMainCheckBox(MainActivity.START_NEW, check, -1);
             }
         });
         bSyncTime.setOnClickListener(new View.OnClickListener() {

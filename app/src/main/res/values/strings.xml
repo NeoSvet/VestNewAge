@@ -9,7 +9,6 @@
     <string name="download_it_main">Скачать все статьи</string>
     <string name="download_it_book">Скачать книгу с 2016 года</string>
     <string name="download_it_calendar">Скачать текущий год</string>
-    <string name="new_item">[Новое]</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>
@@ -38,10 +37,11 @@
     <string name="cabinet">Кабинет</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
+    <!--NewFragment-->
+    <string name="empty_list">Список нового пуст.</string>
     <!--CalendarFragment-->
     <string name="ad">Объявление</string>
     <string name="katren">Катрен</string>
-    <string name="empty_list">Список пуст</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="no_list">Список ещё не загружен</string>
     <!--BookFragment-->

@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -11,19 +12,19 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.List;
 
+import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.SummaryTask;
@@ -36,6 +37,7 @@ public class SummaryFragment extends Fragment {
     private Animation anMin, anMax;
     private View container;
     private View fabRefresh;
+    private TextView tvNew;
     private SummaryTask task = null;
     private DateHelper dateNow;
 
@@ -48,6 +50,10 @@ public class SummaryFragment extends Fragment {
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (act.isInMultiWindowMode())
+                MultiWindowSupport.resizeFloatTextView(tvNew, true);
+        }
         return this.container;
     }
 
@@ -80,9 +86,22 @@ public class SummaryFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        act.updateNew();
+        if (act.k_new == 0)
+            tvNew.setVisibility(View.GONE);
+        else {
+            tvNew.setVisibility(View.VISIBLE);
+            tvNew.setText(String.valueOf(act.k_new));
+        }
+    }
+
     private void initViews() {
+        tvNew = (TextView) container.findViewById(R.id.tvNew);
         fabRefresh = container.findViewById(R.id.fabRefresh);
-        lvSummary = (ListView) container.findViewById(R.id.lvSummary);
+        lvSummary = (ListView) container.findViewById(R.id.lvList);
         adSummary = new ListAdapter(act);
         lvSummary.setAdapter(adSummary);
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
@@ -94,6 +113,7 @@ public class SummaryFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                tvNew.setVisibility(View.GONE);
                 fabRefresh.setVisibility(View.GONE);
             }
 
@@ -106,6 +126,12 @@ public class SummaryFragment extends Fragment {
     }
 
     private void setViews() {
+        tvNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                act.setFragment(R.id.nav_new);
+            }
+        });
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,27 +155,27 @@ public class SummaryFragment extends Fragment {
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                String s = adSummary.getItem(pos).getLink();
-                BrowserActivity.openReader(act, s, null);
-                s = adSummary.getItem(pos).getDes();
-                if (s.contains(getResources().getString(R.string.new_item))) {
-                    s = s.substring(getResources().getString(R.string.new_item).length() + 1);
-                    adSummary.getItem(pos).setDes(s);
-                }
-                adSummary.notifyDataSetChanged();
+                BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
             }
         });
         lvSummary.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (!act.status.startMin())
+                    if (!act.status.startMin()) {
                         fabRefresh.startAnimation(anMin);
+                        if (act.k_new > 0)
+                            tvNew.startAnimation(anMin);
+                    }
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     if (!act.status.startMax()) {
                         fabRefresh.setVisibility(View.VISIBLE);
                         fabRefresh.startAnimation(anMax);
+                        if (act.k_new > 0) {
+                            tvNew.setVisibility(View.VISIBLE);
+                            tvNew.startAnimation(anMax);
+                        }
                     }
                 }
                 return false;
@@ -165,9 +191,6 @@ public class SummaryFragment extends Fragment {
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
-            UnreadHelper unread = new UnreadHelper(act);
-            List<String> links = unread.getList();
-            unread.close();
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
                 des = br.readLine();
@@ -183,8 +206,7 @@ public class SummaryFragment extends Fragment {
                         continue;
                 }
                 adSummary.addItem(new ListItem(title, link));
-                adSummary.getItem(i).setDes(prepareDes(des, time,
-                        links.contains(link.replace(Const.HTML, ""))));
+                adSummary.getItem(i).setDes(prepareDes(des, time));
                 i++;
             }
             br.close();
@@ -218,14 +240,13 @@ public class SummaryFragment extends Fragment {
     public void blinkItem(String[] item) {
         dateNow = DateHelper.initNow(act);
         adSummary.insertItem(0, new ListItem(item[0], item[1]));
-        adSummary.getItem(0).setDes(prepareDes(item[2], item[3], true));
+        adSummary.getItem(0).setDes(prepareDes(item[2], item[3]));
         adSummary.setAnimation(true);
         adSummary.notifyDataSetChanged();
     }
 
-    private String prepareDes(String des, String time, boolean isNewItem) {
-        return (isNewItem ? getResources().getString(R.string.new_item) + Const.N : "") +
-                dateNow.getDiffDate(Long.parseLong(time))
+    private String prepareDes(String des, String time) {
+        return dateNow.getDiffDate(Long.parseLong(time))
                 + getResources().getString(R.string.back)
                 + Const.N + des;
     }

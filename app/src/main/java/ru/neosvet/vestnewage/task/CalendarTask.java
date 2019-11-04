@@ -26,6 +26,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 import ru.neosvet.vestnewage.fragment.CalendarFragment;
+import ru.neosvet.vestnewage.fragment.NewFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -153,7 +154,7 @@ public class CalendarTask extends AsyncTask<Integer, Integer, Boolean> implement
         try {
             String t = "0";
             BufferedReader br;
-            File file = new File(act.getFilesDir() + File.separator + CalendarFragment.ADS);
+            File file = new File(act.getFilesDir() + File.separator + NewFragment.ADS);
             if (file.exists()) {
                 br = new BufferedReader(new FileReader(file));
                 t = br.readLine();

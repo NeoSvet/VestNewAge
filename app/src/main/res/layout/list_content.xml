@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <ListView
-        android:id="@+id/lvSummary"
+        android:id="@+id/lvList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="5dp"

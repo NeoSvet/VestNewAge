@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.fragment.CollectionsFragment;
 import ru.neosvet.vestnewage.fragment.HelpFragment;
 import ru.neosvet.vestnewage.fragment.JournalFragment;
 import ru.neosvet.vestnewage.fragment.MenuFragment;
+import ru.neosvet.vestnewage.fragment.NewFragment;
 import ru.neosvet.vestnewage.fragment.SearchFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
@@ -43,6 +44,7 @@ import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             START_SCEEN = "start_screen", CUR_ID = "cur_id", TAB = "tab";
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
+    public int k_new = 0;
     private int first_fragment;
     private MenuFragment frMenu;
     private SummaryFragment frSummary;
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public StatusButton status;
     private PromHelper prom;
     private SharedPreferences pref;
+    private UnreadHelper unread;
     private int cur_id, tab = 0, statusBack;
 
     @Override
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         myFragmentManager = getFragmentManager();
         status = new StatusButton(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
+        unread = new UnreadHelper(this);
         initInterface();
 
         isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
@@ -103,9 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .findViewById(R.id.tvPromTimeInMenu));
         }
 
-        if (pref.getBoolean(START_NEW, false)) {
-            //TODO tut
-        }
+        updateNew();
         restoreActivityState(savedInstanceState);
     }
 
@@ -121,7 +124,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(R.id.nav_help);
                 isFirst = true;
             } else {
-                setFragment(intent.getIntExtra(CUR_ID, first_fragment));
+                if (pref.getBoolean(START_NEW, false) && k_new > 0)
+                    setFragment(R.id.nav_new);
+                else
+                    setFragment(intent.getIntExtra(CUR_ID, first_fragment));
             }
         } else {
             cur_id = state.getInt(CUR_ID);
@@ -135,10 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void setProm(View textView) {
-        prom = new PromHelper(this, textView);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -150,6 +152,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         if (prom != null)
             prom.resume();
+    }
+
+    public void setProm(View textView) {
+        prom = new PromHelper(this, textView);
+    }
+
+    public void updateNew() {
+        unread.open();
+        k_new = unread.getCount();
+        unread.close();
+        if (navigationView != null)
+            navigationView.getMenu().getItem(0).setIcon(unread.getNewId(k_new));
+        else if (frMenu != null)
+            frMenu.setNew(unread.getNewId(k_new));
     }
 
     private void initInterface() {
@@ -207,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fragmentTransaction.replace(R.id.menu_fragment, frMenu).commit();
         } else
             frMenu.setSelect(cur_id);
+        frMenu.setNew(unread.getNewId(k_new));
     }
 
     @Override
@@ -243,6 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setFrMenu(MenuFragment frMenu) {
         this.frMenu = frMenu;
+        frMenu.setNew(unread.getNewId(k_new));
     }
 
     public void setFrCabinet(CabmainFragment frCabinet) {
@@ -276,8 +294,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (id) {
             case R.id.menu_fragment:
                 statusBack = STATUS_MENU;
-                fragmentTransaction.replace(R.id.my_fragment, new MenuFragment());
+                frMenu = new MenuFragment();
+                fragmentTransaction.replace(R.id.my_fragment, frMenu);
                 if (isCountInMenu) prom.show();
+                break;
+            case R.id.nav_new:
+                fragmentTransaction.replace(R.id.my_fragment, new NewFragment());
+                if (frMenu != null)
+                    frMenu.setSelect(R.id.nav_new);
                 break;
             case R.id.nav_rss:
                 frSummary = new SummaryFragment();

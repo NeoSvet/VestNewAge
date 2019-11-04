@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.list.MenuAdapter;
 
 public class MenuFragment extends Fragment {
     private static final String SELECT = "select";
+    private final int MAX = 12;
     private final int[] mMenu = new int[]{R.id.nav_new, R.id.nav_rss, R.id.nav_main, R.id.nav_calendar,
             R.id.nav_book, R.id.nav_search, R.id.nav_marker, R.id.nav_journal,
             R.id.nav_cabinet, R.id.nav_settings, R.id.nav_help};
@@ -23,15 +24,6 @@ public class MenuFragment extends Fragment {
     private MenuAdapter adMenu;
     private int iSelect = 3;
     private boolean isFullScreen = false;
-
-    public void setSelect(int id) {
-        for (int i = 0; i < mMenu.length; i++) {
-            if (id == mMenu[i]) {
-                iSelect = i;
-                break;
-            }
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,7 +76,7 @@ public class MenuFragment extends Fragment {
                 iSelect = pos - (isFullScreen ? 0 : 1);
                 act.setFragment(mMenu[iSelect]);
                 if (isFullScreen) return;
-                for (int i = 0; i < adMenu.getCount(); i++) {
+                for (int i = getPos(0); i < adMenu.getCount(); i++) {
                     adMenu.getItem(i).setSelect(false);
                 }
                 adMenu.getItem(pos).setSelect(true);
@@ -96,8 +88,9 @@ public class MenuFragment extends Fragment {
                 act.setFrMenu(this);
                 iSelect = savedInstanceState.getInt(SELECT);
             }
-            adMenu.getItem(iSelect + 1).setSelect(true);
+            adMenu.getItem(getPos(iSelect)).setSelect(true);
         }
+        act.updateNew();
         adMenu.notifyDataSetChanged();
 
         return this.container;
@@ -107,5 +100,34 @@ public class MenuFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(SELECT, iSelect);
         super.onSaveInstanceState(outState);
+    }
+
+    public void setSelect(int id) {
+        for (int i = 0; i < mMenu.length; i++) {
+            if (id == mMenu[i]) {
+                if (adMenu != null)
+                    adMenu.getItem(getPos(iSelect)).setSelect(false);
+                iSelect = i;
+                break;
+            }
+        }
+        if (adMenu != null) {
+            adMenu.getItem(getPos(iSelect)).setSelect(true);
+            adMenu.notifyDataSetChanged();
+        }
+    }
+
+    private int getPos(int i) {
+        if (adMenu.getCount() == MAX)
+            return i + 1;
+        else
+            return i;
+    }
+
+    public void setNew(int newId) {
+        if (adMenu != null) {
+            adMenu.changeIcon(newId, getPos(0));
+            adMenu.notifyDataSetChanged();
+        }
     }
 }

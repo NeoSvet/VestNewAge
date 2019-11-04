@@ -40,6 +40,12 @@ public class MenuAdapter extends BaseAdapter {
         data.add(new MenuItem(image, title));
     }
 
+    public void changeIcon(int image, int pos) {
+        data.get(pos).setImage(image);
+        notifyDataSetChanged();
+    }
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
