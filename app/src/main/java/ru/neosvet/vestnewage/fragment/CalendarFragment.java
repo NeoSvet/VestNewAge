@@ -112,6 +112,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         else {
             tvNew.setVisibility(View.VISIBLE);
             tvNew.setText(String.valueOf(act.k_new));
+            tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
         }
     }
 

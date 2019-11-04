@@ -95,6 +95,7 @@ public class SummaryFragment extends Fragment {
         else {
             tvNew.setVisibility(View.VISIBLE);
             tvNew.setText(String.valueOf(act.k_new));
+            tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
         }
     }
 
