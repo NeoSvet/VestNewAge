@@ -48,7 +48,8 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private final int STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
+    private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
+    public static final byte SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
     private final String LOADER = "loader";
     public static final String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new",
             START_SCEEN = "start_screen", CUR_ID = "cur_id", TAB = "tab";
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
-        int p = pref.getInt(START_SCEEN, 1);
+        int p = pref.getInt(START_SCEEN, SCREEN_CALENDAR);
         if (p == 0 && getResources().getInteger(R.integer.screen_mode)
                 < getResources().getInteger(R.integer.screen_tablet_port)) {
             setContentView(R.layout.main_activity_nomenu);
@@ -89,9 +90,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isMenuMode = true;
         } else
             setContentView(R.layout.main_activity);
-        if (p == 2)
+        if (p == SCREEN_SUMMARY)
             first_fragment = R.id.nav_rss;
-        else if (p == 1 || !isMenuMode)
+        else if (p == SCREEN_CALENDAR || !isMenuMode)
             first_fragment = R.id.nav_calendar;
 
         myFragmentManager = getFragmentManager();

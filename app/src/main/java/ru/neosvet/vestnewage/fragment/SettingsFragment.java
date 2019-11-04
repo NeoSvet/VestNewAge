@@ -151,7 +151,7 @@ public class SettingsFragment extends Fragment {
         if (getResources().getInteger(R.integer.screen_mode) >= getResources().getInteger(R.integer.screen_tablet_port)) {
             rbsScreen[0].setVisibility(View.GONE);
         }
-        int p = pref.getInt(MainActivity.START_SCEEN, 1);
+        int p = pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR);
         rbsScreen[p].setChecked(true);
         cbsClear = new CheckBox[]{container.findViewById(R.id.cbKatreny),
                 container.findViewById(R.id.cbPoslaniya),
@@ -230,16 +230,16 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 if (checked) {
-                    int sel;
+                    byte sel;
                     switch (compoundButton.getId()) {
                         case R.id.rbMenu:
-                            sel = 0;
+                            sel = MainActivity.SCREEN_MENU;
                             break;
                         case R.id.rbCalendar:
-                            sel = 1;
+                            sel = MainActivity.SCREEN_CALENDAR;
                             break;
                         default:
-                            sel = 2;
+                            sel = MainActivity.SCREEN_SUMMARY;
                             break;
                     }
                     setMainCheckBox(MainActivity.START_SCEEN, false, sel);
