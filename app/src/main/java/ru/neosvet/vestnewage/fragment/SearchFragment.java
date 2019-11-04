@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.ui.RecyclerItemClickListener;
+import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
@@ -60,6 +62,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
             LAST_RESULTS = "r";
     private MainActivity act;
+    private float density;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
     private PageAdapter adPages;
@@ -100,6 +103,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         this.container = inflater.inflate(R.layout.search_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.search));
+        density = getResources().getDisplayMetrics().density;
         initViews();
         setViews();
         restoreActivityState(savedInstanceState);
@@ -193,6 +197,27 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
         pSettings.setVisibility(View.VISIBLE);
         softKeyboard.closeSoftKeyboard();
         pPages.setVisibility(View.GONE);
+        ResizeAnim anim = new ResizeAnim(pSettings, false, (int) (270 * density));
+        anim.setDuration(800);
+        anim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                pSettings.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                pSettings.requestLayout();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        pSettings.clearAnimation();
+        pSettings.startAnimation(anim);
     }
 
     private String formatDate(DateHelper d) {
