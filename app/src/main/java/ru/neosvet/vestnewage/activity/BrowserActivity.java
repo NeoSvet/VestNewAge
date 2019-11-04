@@ -74,7 +74,7 @@ public class BrowserActivity extends AppCompatActivity
     private EditText etSearch;
     private StatusButton status;
     private LinearLayout mainLayout;
-    private View fabMenu, tvPromTime, pSearch, bPrev, bNext;
+    private View fabMenu, tvPromTime, pSearch, bPrev, bNext, bBack;
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = DataBase.LINK, string = null;
@@ -280,6 +280,7 @@ public class BrowserActivity extends AppCompatActivity
         tvPlace = (TextView) findViewById(R.id.tvPlace);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);
+        bBack = navMenu.getHeaderView(0).findViewById(R.id.bBack);
         status = new StatusButton(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
         dbJournal = new DataBase(this, DataBase.JOURNAL);
@@ -443,6 +444,12 @@ public class BrowserActivity extends AppCompatActivity
             public void onClick(View view) {
                 softKeyboard.closeSoftKeyboard();
                 closeSearch();
+            }
+        });
+        bBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BrowserActivity.super.onBackPressed();
             }
         });
         initTheme();
