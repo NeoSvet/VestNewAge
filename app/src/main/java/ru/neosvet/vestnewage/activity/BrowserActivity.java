@@ -186,7 +186,6 @@ public class BrowserActivity extends AppCompatActivity
         if (iPlace == -1) return;
         String p = getIntent().getStringExtra(DataBase.PLACE);
         fabMenu.setVisibility(View.GONE);
-        tvPlace = (TextView) findViewById(R.id.tvPlace);
         tvPlace.setVisibility(View.VISIBLE);
         etSearch.setVisibility(View.GONE);
         if (p.contains(Const.NN)) {
@@ -278,6 +277,7 @@ public class BrowserActivity extends AppCompatActivity
         tip = new Tip(this, findViewById(R.id.tvFinish));
         pSearch = findViewById(R.id.pSearch);
         etSearch = (EditText) findViewById(R.id.etSearch);
+        tvPlace = (TextView) findViewById(R.id.tvPlace);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);
         status = new StatusButton(this, findViewById(R.id.pStatus));
@@ -302,8 +302,15 @@ public class BrowserActivity extends AppCompatActivity
         pref = getSharedPreferences(BrowserActivity.class.getSimpleName(), MODE_PRIVATE);
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
-        if (!lightTheme) //dark
+        if (lightTheme) {
+            tvPlace.setTextColor(getResources().getColor(android.R.color.black));
+            etSearch.setTextColor(getResources().getColor(android.R.color.black));
+            etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
+        } else
             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
+        tvPlace.requestLayout();
+        etSearch.requestLayout();
+        mainLayout.requestLayout();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
         int z = pref.getInt(SCALE, 0);
@@ -438,10 +445,7 @@ public class BrowserActivity extends AppCompatActivity
                 closeSearch();
             }
         });
-        if (lightTheme)
-            setCheckItem(miThemeL, true);
-        else
-            setCheckItem(miThemeD, true);
+        initTheme();
         if (pref.getBoolean(NOMENU, false)) {
             nomenu = true;
             setCheckItem(miNomenu, nomenu);
@@ -456,6 +460,22 @@ public class BrowserActivity extends AppCompatActivity
                     status.onClick();
             }
         });
+    }
+
+    private void initTheme() {
+        if (lightTheme) {
+            tvPlace.setTextColor(getResources().getColor(android.R.color.black));
+            etSearch.setTextColor(getResources().getColor(android.R.color.black));
+            etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
+            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white));
+            setCheckItem(miThemeL, true);
+        } else {
+            tvPlace.setTextColor(getResources().getColor(android.R.color.white));
+            etSearch.setTextColor(getResources().getColor(android.R.color.white));
+            etSearch.setHintTextColor(getResources().getColor(R.color.light_gray));
+            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
+            setCheckItem(miThemeD, true);
+        }
     }
 
     @Override
@@ -538,6 +558,7 @@ public class BrowserActivity extends AppCompatActivity
                 editor.putInt(THEME, (lightTheme ? 0 : 1));
                 wvBrowser.clearCache(true);
                 openPage(false);
+                initTheme();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

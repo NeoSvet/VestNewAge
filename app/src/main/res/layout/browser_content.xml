@@ -35,7 +35,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="@color/colorPrimary"
+            android:background="@color/colorAccent"
             android:hint="@string/string_for_search"
             android:imeOptions="actionSearch"
             android:inputType="text"
@@ -50,7 +50,6 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:maxLines="1"
-            android:padding="5dp"
             android:visibility="gone" />
 
         <ImageButton
