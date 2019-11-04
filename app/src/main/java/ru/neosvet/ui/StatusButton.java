@@ -107,19 +107,19 @@ public class StatusButton {
     public boolean checkTime(long time) {
         if (!stop || crash)
             return true;
-        if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC) {
-            this.time = true;
-            panel.setVisibility(View.VISIBLE);
-            visible = true;
-            tv.setText(context.getResources().getString(R.string.refresh) + "?");
-            return true;
-        } else {
+        if ((int) (time - DateHelper.initNow(context).getTimeInSeconds()) < DateHelper.DAY_IN_SEC) {
             this.time = false;
             visible = false;
             panel.setVisibility(View.GONE);
             restoreText();
+            return false;
+        } else {
+            this.time = true;
+            visible = true;
+            panel.setVisibility(View.VISIBLE);
+            tv.setText(context.getResources().getString(R.string.refresh) + "?");
+            return true;
         }
-        return false;
     }
 
     public boolean isCrash() {
