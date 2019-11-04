@@ -71,7 +71,6 @@
                         android:id="@+id/lvBook"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingTop="5dp"
                         android:paddingBottom="5dp" />
                 </LinearLayout>
             </FrameLayout>
