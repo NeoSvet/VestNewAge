@@ -35,7 +35,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="@color/colorAccent"
+            android:background="@drawable/field_trans"
             android:hint="@string/string_for_search"
             android:imeOptions="actionSearch"
             android:inputType="text"
