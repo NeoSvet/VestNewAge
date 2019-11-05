@@ -24,11 +24,8 @@ public class CalendarItem {
             bold = true;
     }
 
-    public void setProm() {
+    public void setBold() {
         bold = true;
-        color = context.getResources().getColor(R.color.colorAccentLight);
-        links.add("Posyl-na-Edinenie.html");
-        titles.add(context.getResources().getString(R.string.prom_for_soul_unite));
     }
 
     public void clear(boolean onlyTitle) {

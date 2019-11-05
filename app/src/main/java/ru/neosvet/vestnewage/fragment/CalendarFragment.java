@@ -62,7 +62,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.calendar));
         initViews();
-        setViews();
         initCalendar();
         restoreActivityState(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -116,7 +115,18 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         }
     }
 
-    private void setViews() {
+    private void initViews() {
+        DateHelper d = DateHelper.initToday(act);
+        today_m = d.getMonth();
+        today_y = d.getYear();
+        tvNew = (TextView) container.findViewById(R.id.tvNew);
+        fabRefresh = container.findViewById(R.id.fabRefresh);
+        container.findViewById(R.id.bProm).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openLink("Posyl-na-Edinenie.html");
+            }
+        });
         tvNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,14 +161,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         for (int i = 0; i < adCalendar.getItemCount(); i++) {
             adCalendar.getItem(i).clear(false);
         }
-    }
-
-    private void initViews() {
-        DateHelper d = DateHelper.initToday(act);
-        today_m = d.getMonth();
-        today_y = d.getYear();
-        tvNew = (TextView) container.findViewById(R.id.tvNew);
-        fabRefresh = container.findViewById(R.id.fabRefresh);
     }
 
     public boolean onBackPressed() {
@@ -278,7 +280,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         while (d.getMonth() == cur_month) {
             adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.white));
             if (d.getDay() == n_today)
-                adCalendar.getItem(adCalendar.getItemCount() - 1).setProm();
+                adCalendar.getItem(adCalendar.getItemCount() - 1).setBold();
             d.changeDay(1);
         }
         while (d.getDayWeek() != DateHelper.MONDAY) {
