@@ -1,9 +1,10 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,10 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,13 +32,16 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.vestnewage.task.CalendarTask;
+import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.workers.CalendarWolker;
 
 public class CalendarFragment extends Fragment implements DateDialog.Result {
     public static final String CURRENT_DATE = "current_date";
@@ -43,7 +51,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     private DateHelper dCurrent;
     private TextView tvDate, tvNew;
     private View container, ivPrev, ivNext, fabRefresh;
-    private CalendarTask task = null;
+    private CalendarModel model;
     private MainActivity act;
     private DateDialog dateDialog;
     private boolean dialog = false;
@@ -63,6 +71,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         act.setTitle(getResources().getString(R.string.calendar));
         initViews();
         initCalendar();
+        initModel();
         restoreActivityState(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (act.isInMultiWindowMode())
@@ -72,12 +81,47 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(act);
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(CalendarModel.class);
+        model.getProgress().observe(act, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+                int d = data.getInt(CalendarWolker.DAY, 0);
+                if (d == 0) {
+                    model.loadList = false;
+                    updateCalendar();
+                } else
+                    blinkDay(d);
+            }
+        });
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
+        if (model.inProgress) {
+            setStatus(true);
+            return;
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(Const.DIALOG, dialog);
         if (dialog)
             dateDialog.dismiss();
         outState.putInt(CURRENT_DATE, dCurrent.getTimeInDays());
-        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
@@ -88,13 +132,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         } else {
             act.setFrCalendar(this);
             dCurrent = DateHelper.putDays(act, state.getInt(CURRENT_DATE));
-            task = (CalendarTask) state.getSerializable(Const.TASK);
-            if (task != null) {
-                if (task.getStatus() == AsyncTask.Status.RUNNING) {
-                    task.setFrm(this);
-                    setStatus(true);
-                } else task = null;
-            }
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
                 showDatePicker();
@@ -143,8 +180,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             @Override
             public void onClick(View view) {
                 if (!act.status.isStop()) {
-                    if (task != null)
-                        task.cancel(false);
+                    if (model.inProgress)
+                        model.finish();
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick()) {
@@ -164,8 +201,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     public boolean onBackPressed() {
-        if (task != null) {
-            task.cancel(false);
+        if (model.inProgress) {
+            model.finish();
             return false;
         }
         return true;
@@ -233,13 +270,13 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     private void openLink(String link) {
-        if (task != null)
-            task.cancel(false);
+        if (model.inProgress)
+            model.finish();
         BrowserActivity.openReader(act, link, null);
     }
 
     private void openMonth(int offset) {
-        if (task == null) {
+        if (!model.inProgress) {
             tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -302,9 +339,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void openCalendar(boolean loadIfNeed) {
         try {
-            if (task != null)
-                if (task.isLoadList())
-                    return;
+            if (model.inProgress && model.loadList)
+                return;
 
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -364,9 +400,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
 
     private void startLoad() {
         setStatus(true);
-        task = new CalendarTask(this);
-        int n = (isCurMonth() ? 1 : 0);
-        task.execute(dCurrent.getYear(), dCurrent.getMonth(), n);
+        model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }
 
     public void updateCalendar() {
@@ -375,7 +409,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
     }
 
     public void finishLoad(boolean suc) {
-        task = null;
+        model.finish();
         if (suc)
             setStatus(false);
         else

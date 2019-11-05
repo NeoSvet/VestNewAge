@@ -36,7 +36,6 @@ public class CalendarWolker extends Worker {
     private transient DataBase dataBase;
     private transient SQLiteDatabase db;
     private transient Lib lib;
-    private boolean loadList;
     private List<ListItem> data = new ArrayList<ListItem>();
     private ProgressModel model;
 
@@ -46,7 +45,7 @@ public class CalendarWolker extends Worker {
         lib = new Lib(context);
     }
 
-    public boolean isCanceled() {
+    public boolean isCancelled() {
         if (model != null)
             return false;
         else
@@ -59,13 +58,11 @@ public class CalendarWolker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            loadList = true;
             downloadCalendar(getInputData().getInt(YEAR, 0),
                     getInputData().getInt(MONTH, 0),
                     getInputData().getBoolean(UNREAD, false));
-            if (isCanceled())
+            if (isCancelled())
                 return Result.success();
-            loadList = false;
             publishProgress(0);
             downloadMonth(getInputData().getInt(YEAR, 0),
                     getInputData().getInt(MONTH, 0));
@@ -83,6 +80,7 @@ public class CalendarWolker extends Worker {
 
     private void publishProgress(int p) {
         Data data = new Data.Builder()
+                .putString(Const.TASK, TAG)
                 .putInt(DAY, p)
                 .build();
         model.setProgress(data);
@@ -108,7 +106,7 @@ public class CalendarWolker extends Worker {
                     n = Integer.parseInt(link.substring(n, n + 2));
                     publishProgress(n);
                 }
-                if (isCanceled()) {
+                if (isCancelled()) {
                     curTitle.close();
                     dataBase.close();
                     return;
@@ -126,7 +124,7 @@ public class CalendarWolker extends Worker {
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s = br.readLine();
             br.close();
-            if (isCanceled())
+            if (isCancelled())
                 return;
 
             JSONObject json, jsonI;
@@ -160,7 +158,7 @@ public class CalendarWolker extends Worker {
             }
             dataBase.close();
             dataBase = null;
-            if (isCanceled()) {
+            if (isCancelled()) {
                 data.clear();
                 return;
             }
