@@ -68,8 +68,4 @@ public class SlashModel extends ProgressModel {
         job = job.then(task);
         job.enqueue();
     }
-
-//    public void cancel() {
-//        work.cancelUniqueWork(TAG);
-//    }
 }
