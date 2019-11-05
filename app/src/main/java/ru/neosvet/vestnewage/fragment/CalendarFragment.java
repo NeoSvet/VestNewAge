@@ -86,6 +86,14 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         model.removeObserves(act);
     }
 
+    public boolean onBackPressed() {
+        if (model.inProgress) {
+            model.finish();
+            return false;
+        }
+        return true;
+    }
+
     private void initModel() {
         model = ViewModelProviders.of(act).get(CalendarModel.class);
         model.getProgress().observe(act, new Observer<Data>() {
@@ -196,14 +204,6 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         for (int i = 0; i < adCalendar.getItemCount(); i++) {
             adCalendar.getItem(i).clear(false);
         }
-    }
-
-    public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.finish();
-            return false;
-        }
-        return true;
     }
 
     private void initCalendar() {

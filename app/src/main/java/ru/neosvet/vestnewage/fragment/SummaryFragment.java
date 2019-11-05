@@ -72,6 +72,14 @@ public class SummaryFragment extends Fragment {
         model.removeObserves(act);
     }
 
+    public boolean onBackPressed() {
+        if (model.inProgress) {
+            model.finish();
+            return false;
+        }
+        return true;
+    }
+
     private void initModel() {
         model = ViewModelProviders.of(act).get(SummaryModel.class);
         model.getProgress().observe(act, new Observer<Data>() {
@@ -276,13 +284,5 @@ public class SummaryFragment extends Fragment {
         return dateNow.getDiffDate(Long.parseLong(time))
                 + getResources().getString(R.string.back)
                 + Const.N + des;
-    }
-
-    public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.finish();
-            return false;
-        }
-        return true;
     }
 }
