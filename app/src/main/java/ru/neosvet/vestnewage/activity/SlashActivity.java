@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.ParcelUuid;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,8 +23,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.work.Data;
 import androidx.work.WorkInfo;
+
 import java.io.File;
 import java.util.List;
 import java.util.Timer;
@@ -46,7 +45,6 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
-import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SlashActivity extends AppCompatActivity {
     private final int START_ID = 900;
@@ -118,6 +116,12 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(this);
+    }
+
+    @Override
     public void onBackPressed() {
         super.onBackPressed();
         if (model.inProgress)
@@ -129,7 +133,7 @@ public class SlashActivity extends AppCompatActivity {
     private boolean initData() {
         Uri data = getIntent().getData();
         if (data == null)
-            initTask();
+            initModel();
         else
             parseUri(data);
         return data != null;
@@ -206,8 +210,22 @@ public class SlashActivity extends AppCompatActivity {
         }
     }
 
-    private void initTask() {
+    private void initModel() {
         model = ViewModelProviders.of(this).get(SlashModel.class);
+        model.getState().observe(this, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                String tag;
+                for (int i = 0; i < workInfos.size(); i++) {
+                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
+                    if (tag.equals(SlashModel.TAG) &&
+                            workInfos.get(i).getState().isFinished())
+                        finishLoad();
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
         if (model.inProgress) {
             setStatus();
             return;
@@ -221,28 +239,11 @@ public class SlashActivity extends AppCompatActivity {
             time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
         cursor.close();
         dataBase.close();
-//        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
-//            return;
+        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
+            return;
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         model.startLoad(pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR) == MainActivity.SCREEN_SUMMARY,
                 date.getMonth(), date.getYear());
-        model.getState().observe(this, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                String tag = "none";
-                for (int i = 0; i < workInfos.size(); i++) {
-                    for (String t : workInfos.get(i).getTags()) {
-                        tag = t;
-                        break;
-                    }
-                    if (tag.equals(SlashModel.TAG) &&
-                            workInfos.get(i).getState().isFinished())
-                        finishLoad();
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
-                }
-            }
-        });
     }
 
     public void finishLoad() {
