@@ -33,9 +33,9 @@ public class CalendarWolker extends Worker {
     private Context context;
     public static final String TAG = "Calendar", DAY = "Day",
             MONTH = "Month", YEAR = "Year", UNREAD = "Unread";
-    private transient DataBase dataBase;
-    private transient SQLiteDatabase db;
-    private transient Lib lib;
+    private DataBase dataBase;
+    private SQLiteDatabase db;
+    private Lib lib;
     private List<ListItem> data = new ArrayList<ListItem>();
     private ProgressModel model;
 
