@@ -94,6 +94,23 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         return this.container;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(act);
+        editor.putInt(KAT, dKatren.getTimeInDays());
+        editor.putInt(POS, dPoslanie.getTimeInDays());
+        editor.apply();
+    }
+
+    public boolean onBackPressed() {
+        if (model.inProgress) {
+            model.finish();
+            return false;
+        }
+        return true;
+    }
+
     private void initModel() {
         model = ViewModelProviders.of(act).get(BookModel.class);
         model.getProgress().observe(act, new Observer<Data>() {
@@ -110,7 +127,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TIME));
+                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
                 }
@@ -324,15 +341,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         }
         cursor.close();
         return false;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        model.removeObserves(act);
-        editor.putInt(KAT, dKatren.getTimeInDays());
-        editor.putInt(POS, dPoslanie.getTimeInDays());
-        editor.apply();
     }
 
     private void initViews() {

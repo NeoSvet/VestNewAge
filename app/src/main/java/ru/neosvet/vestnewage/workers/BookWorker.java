@@ -32,7 +32,6 @@ public class BookWorker extends Worker {
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private Lib lib;
-    private boolean start = true;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -53,19 +52,19 @@ public class BookWorker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            String date;
+            String name;
             if (getInputData().getBoolean(OTKR, false)) {
-                date = downloadOtrk(true);
+                name = downloadOtrk(true);
                 return Result.success(new Data.Builder()
-                        .putString(DataBase.TIME, date)
+                        .putString(DataBase.TITLE, name)
                         .build());
             }
             boolean kat = getInputData().getBoolean(KATRENY, false);
             if (!kat && getInputData().getBoolean(FROM_OTKR, false))
                 downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-            date = downloadBook(kat);
+            name = downloadBook(kat);
             return Result.success(new Data.Builder()
-                    .putString(DataBase.TIME, date)
+                    .putString(DataBase.TITLE, name)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +89,7 @@ public class BookWorker extends Worker {
         }
         final String path = lib.getDBFolder() + "/";
         File f;
-        String s;
+        String s, name = "";
         long l;
         BufferedInputStream in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/list.txt"));
         //list format:
@@ -98,6 +97,10 @@ public class BookWorker extends Worker {
         //02.05 [length] - проверка целостности
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         while ((s = br.readLine()) != null) {
+            if (isCancelled()) {
+                br.close();
+                return name;
+            }
             f = new File(path + s.substring(0, s.indexOf(" ")));
             if (f.exists()) {
                 l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
@@ -110,13 +113,12 @@ public class BookWorker extends Worker {
         }
         br.close();
         int prog = 0, m = 8, y = 4;
-        String name = "01.16";
         DataBase dataBase;
         SQLiteDatabase db;
         ContentValues cv;
         boolean isTitle;
         final long time = System.currentTimeMillis();
-        while (y < 16 && start) {
+        while (y < 16) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
                 if (model != null) {
@@ -161,8 +163,10 @@ public class BookWorker extends Worker {
             } else
                 m++;
             prog++;
+            if (isCancelled())
+                return name;
         }
-        return name + (start ? 1 : 0);
+        return name;
     }
 
     private String downloadBook(boolean katren) throws Exception {
@@ -173,6 +177,10 @@ public class BookWorker extends Worker {
         int i, n;
         String line, t, s, date1 = "", date2;
         while ((line = br.readLine()) != null) {
+            if (isCancelled()) {
+                br.close();
+                return date1;
+            }
             if (!begin)
                 begin = line.contains("h2");//razdel
             else if (line.contains("clear"))
@@ -188,7 +196,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        //loader.upProg();
+                        //TODO loader.upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
