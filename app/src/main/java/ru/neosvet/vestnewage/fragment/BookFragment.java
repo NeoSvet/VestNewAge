@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +27,11 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
 import java.io.File;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,6 +42,7 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -44,7 +50,7 @@ import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.task.BookTask;
+import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
     private final int DEF_YEAR = 100;
@@ -57,11 +63,11 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     private TextView tvDate;
     private DateDialog dateDialog;
     private CustomDialog alertRnd;
-    private BookTask task;
     private TabHost tabHost;
     private ListView lvBook;
     private int x, y, tab = 0;
     private Tip menuRnd;
+    private BookModel model;
     private String dialog = "";
     private boolean notClick = false, fromOtkr;
     private DateHelper dKatren, dPoslanie;
@@ -83,8 +89,37 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         initViews();
         setViews();
         initTabs();
+        initModel();
         restoreActivityState(savedInstanceState);
         return this.container;
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(BookModel.class);
+        model.getProgress().observe(act, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+                if (data.getInt(BookModel.MAX, 0) > 0)
+                    model.showDialog(act);
+                else
+                    model.updateDialog();
+            }
+        });
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TIME));
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
+        if (model.inProgress)
+            if (!model.showDialog(act))
+                startLoad();
+
     }
 
     @Override
@@ -95,7 +130,6 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         else if (dialog.length() > 1)
             alertRnd.dismiss();
         outState.putInt(CURRENT_TAB, tab);
-        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
@@ -115,15 +149,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
             tab = state.getInt(CURRENT_TAB);
-            task = (BookTask) state.getSerializable(Const.TASK);
-            if (task != null) {
-                if (task.getStatus() == AsyncTask.Status.RUNNING) {
-                    fabRefresh.setVisibility(View.GONE);
-                    fabRndMenu.setVisibility(View.GONE);
-                    task.setFrm(this);
-                    act.status.setLoad(true);
-                } else task = null;
-            } else {
+            if (!model.inProgress) {
                 dialog = state.getString(Const.DIALOG);
                 if (dialog.length() == 1)
                     showDatePicker();
@@ -166,7 +192,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         tabHost.setCurrentTab(1);
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
-                if (task != null) return;
+                if (model.inProgress) return;
                 if (name.equals(KAT))
                     act.setTitle(getResources().getString(R.string.katreny));
                 else
@@ -303,6 +329,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     @Override
     public void onPause() {
         super.onPause();
+        model.removeObserves(act);
         editor.putInt(KAT, dKatren.getTimeInDays());
         editor.putInt(POS, dPoslanie.getTimeInDays());
         editor.apply();
@@ -439,7 +466,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
     }
 
     private void openMonth(boolean plus) {
-        if (task == null) {
+        if (!model.inProgress) {
             if (!plus && tab == 1) {
                 if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
@@ -453,8 +480,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
                     builder.setPositiveButton(getResources().getString(R.string.yes),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    task = new BookTask(BookFragment.this);
-                                    task.execute(3);
+                                    model.startLoad(true, false, false);
                                     dialog.dismiss();
                                 }
                             });
@@ -486,15 +512,15 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
         fabRndMenu.setVisibility(View.GONE);
-        task = new BookTask(this);
-        task.execute(tab, (fromOtkr ? 1 : 0));
         act.status.setLoad(true);
+        if (!model.inProgress)
+            model.startLoad(false, fromOtkr, tab == 0);
     }
 
     public void finishLoad(String result) {
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
-        task = null;
+        model.finish();
         if (result.length() > 0) {
             DateHelper d;
             if (tab == 0)

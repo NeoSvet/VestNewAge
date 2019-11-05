@@ -1,111 +1,104 @@
-package ru.neosvet.vestnewage.task;
+package ru.neosvet.vestnewage.workers;
 
 import android.content.ContentValues;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import androidx.work.Data;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.ui.dialogs.ProgressDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.task.LoaderTask;
 
-public class BookTask extends AsyncTask<Integer, Boolean, String> implements Serializable {
-    private transient BookFragment frm;
-    private transient MainActivity act;
+public class BookWorker extends Worker {
+    private Context context;
+    public static final String TAG = "book", OTKR = "otkr", FROM_OTKR = "from_otkr",
+            KATRENY = "katreny";
+    private ProgressModel model;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private transient ProgressDialog dialog;
     private int prog = 0;
     private String msg = null;
+    private Lib lib;
     private boolean start = true;
 
-    public BookTask(BookFragment frm) {
-        setFrm(frm);
+    public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+        this.context = context;
+        lib = new Lib(context);
     }
 
-    public BookTask(MainActivity act) {
-        this.act = act;
+    public boolean isCancelled() {
+        if (model != null)
+            return false;
+        else
+            return !model.inProgress;
     }
 
-    public void setFrm(BookFragment frm) {
-        this.frm = frm;
-        act = (MainActivity) frm.getActivity();
-        if (msg != null)
-            publishProgress(true);
-    }
-
+    @NonNull
     @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        if (dialog != null)
-            dialog.dismiss();
-        if (frm != null) {
-            frm.finishLoad(result);
-        }
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
-    protected void onProgressUpdate(Boolean... values) {
-        super.onProgressUpdate(values);
-        if (values[0]) {
-            dialog = new ProgressDialog(act, 137);
-            dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    start = false;
-                }
-            });
-            dialog.show();
-            dialog.setMessage(msg);
-            dialog.setProgress(prog);
-        } else {
-            dialog.setMessage(msg);
-            dialog.setProgress(prog);
-        }
-    }
-
-    @Override
-    protected String doInBackground(Integer... params) {
+    public Result doWork() {
+        String err = "";
+        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            if (params[0] == 3)
-                return downloadOtrk(true);
-            if (params[0] == 1 && params[1] == 1) //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-                downloadOtrk(false);
-            return downloadData(params[0] == 0, null);
+            String date;
+            if (getInputData().getBoolean(OTKR, false)) {
+                date = downloadOtrk(true);
+                return Result.success(new Data.Builder()
+                        .putString(DataBase.TIME, date)
+                        .build());
+            }
+            boolean kat = getInputData().getBoolean(KATRENY, false);
+            if (!kat && getInputData().getBoolean(FROM_OTKR, false))
+                downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+            date = downloadData(kat, null);
+            return Result.success(new Data.Builder()
+                    .putString(DataBase.TIME, date)
+                    .build());
         } catch (Exception e) {
             e.printStackTrace();
+            err = e.getMessage();
+            Lib.LOG("BookWolker error: " + err);
         }
-        return "";
+        Data data = new Data.Builder()
+                .putString(ProgressModel.ERROR, err)
+                .build();
+        return Result.failure(data);
     }
 
     private String downloadOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
-            msg = act.getResources().getString(R.string.start);
-            publishProgress(true);
+            msg = context.getResources().getString(R.string.start);
+            if(model!=null && model instanceof BookModel) {
+                Data data = new Data.Builder()
+                        .putString(BookModel.MSG, msg)
+                        .putInt(BookModel.PROG, 0)
+                        .putInt(BookModel.MAX, 137)
+                        .build();
+                ((BookModel) model).setProgress(data);
+            }
         }
-        final String path = act.lib.getDBFolder() + "/";
+        final String path = lib.getDBFolder() + "/";
         File f;
         String s;
         long l;
-        BufferedInputStream in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/list.txt"));
+        BufferedInputStream in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/list.txt"));
         //list format:
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
@@ -132,15 +125,21 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
         while (y < 16 && start) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
-                msg = act.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
-                publishProgress(false);
+                msg = context.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
+                if(model!=null && model instanceof BookModel) {
+                    Data data = new Data.Builder()
+                            .putString(BookModel.MSG, msg)
+                            .putInt(BookModel.PROG, prog)
+                            .build();
+                    ((BookModel) model).setProgress(data);
+                }
             }
             f = new File(path + name);
             if (!f.exists()) {
-                dataBase = new DataBase(act, name);
+                dataBase = new DataBase(context, name);
                 db = dataBase.getWritableDatabase();
                 isTitle = true;
-                in = new BufferedInputStream(act.lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
+                in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
                 br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
                 while ((s = br.readLine()) != null) {
                     if (s.equals(Const.AND)) {
@@ -174,7 +173,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
 
     public String downloadData(boolean katren, @Nullable LoaderTask loader) throws Exception {
         String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
-        InputStream in = new BufferedInputStream(act.lib.getStream(url));
+        InputStream in = new BufferedInputStream(lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean begin = false;
         int i, n;
@@ -214,7 +213,7 @@ public class BookTask extends AsyncTask<Integer, Boolean, String> implements Ser
 
     private void saveData(String date) throws Exception {
         if (title.size() > 0) {
-            DataBase dataBase = new DataBase(act, date);
+            DataBase dataBase = new DataBase(context, date);
             SQLiteDatabase db = dataBase.getWritableDatabase();
             ContentValues cv = new ContentValues();
             cv.put(DataBase.TIME, System.currentTimeMillis());
