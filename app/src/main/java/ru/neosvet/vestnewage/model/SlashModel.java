@@ -46,7 +46,7 @@ public class SlashModel extends ProgressModel {
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         Data.Builder data = new Data.Builder()
-                .putString(ProgressModel.NAME, SlashModel.class.getSimpleName());
+                .putString(ProgressModel.NAME, this.getClass().getSimpleName());
         if (boolSummary) {
             task = new OneTimeWorkRequest
                     .Builder(SummaryWorker.class)
