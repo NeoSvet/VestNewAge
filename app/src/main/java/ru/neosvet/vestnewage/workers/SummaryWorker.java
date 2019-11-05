@@ -46,7 +46,7 @@ public class SummaryWorker extends Worker {
         this.context = context;
     }
 
-    public boolean isCanceled() {
+    public boolean isCancelled() {
         if (model != null)
             return false;
         else
@@ -65,7 +65,7 @@ public class SummaryWorker extends Worker {
                 downloadList();
                 reportProgress();
                 updateBook();
-                if (isCanceled())
+                if (isCancelled())
                     return Result.success();
                 downloadPages();
             }
@@ -93,11 +93,9 @@ public class SummaryWorker extends Worker {
     private void publishProgress(String title, String link, String des, String time) {
         Data data = new Data.Builder()
                 .putString(Const.TASK, ProgressModel.PAGE)
-                .putString(DataBase.TITLE, title)
-                .putString(DataBase.LINK, link)
-                .putString(DataBase.DESCTRIPTION, des)
-                .putString(DataBase.TIME, time)
-                .build();
+                .putStringArray(ProgressModel.LIST, new String[]{
+                        title, link, des, time
+                }).build();
         if (model != null)
             model.setProgress(data);
     }
@@ -272,7 +270,7 @@ public class SummaryWorker extends Worker {
                 publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
                         data.get(i).getDes(), data.get(i).getHead(0));
             }
-            if (isCanceled())
+            if (isCancelled())
                 break;
         }
         data.clear();

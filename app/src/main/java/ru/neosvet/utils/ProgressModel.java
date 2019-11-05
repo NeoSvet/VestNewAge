@@ -16,6 +16,7 @@ import java.util.Set;
 
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.SlashModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 
 public class ProgressModel extends AndroidViewModel {
@@ -53,6 +54,10 @@ public class ProgressModel extends AndroidViewModel {
     public static ProgressModel getModelByName(String name) {
         if (name.equals(SlashModel.class.getSimpleName()))
             return SlashModel.getInstance();
+        if (name.equals(CalendarModel.class.getSimpleName()))
+            return CalendarModel.getInstance();
+        if (name.equals(SummaryModel.class.getSimpleName()))
+            return SummaryModel.getInstance();
         return null;
     }
 
