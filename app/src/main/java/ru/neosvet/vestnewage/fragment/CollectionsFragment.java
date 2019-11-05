@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -31,9 +31,9 @@ import ru.neosvet.vestnewage.activity.PresentationActivity;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 
-public class CollectionsFragment extends Fragment {
+public class CollectionsFragment extends BackFragment {
     private final String SEL = "sel", RENAME = "rename";
-    public final int MARKER_REQUEST = 11;
+    public static final int MARKER_REQUEST = 11;
     private ListView lvMarker;
     private View container, fabEdit, fabHelp, pEdit;
     private TextView tvEmpty;
@@ -53,7 +53,7 @@ public class CollectionsFragment extends Fragment {
         initViews();
         setViews();
         if (savedInstanceState != null) {
-            act.setFrCollections(this);
+            act.setCurFragment(this);
             sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
             iSel = savedInstanceState.getInt(SEL, -1);
             sName = savedInstanceState.getString(RENAME, null);
@@ -74,6 +74,23 @@ public class CollectionsFragment extends Fragment {
         }
 
         return this.container;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (iSel > -1) {
+            unSelect();
+            if (sCol == null)
+                loadColList();
+            else
+                loadMarList();
+            return false;
+        } else if (sCol != null) {
+            sCol = null;
+            loadColList();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -274,22 +291,6 @@ public class CollectionsFragment extends Fragment {
                 PresentationActivity.startPresentation(act, 1, true);
         }
         adMarker.notifyDataSetChanged();
-    }
-
-    public boolean onBackPressed() {
-        if (iSel > -1) {
-            unSelect();
-            if (sCol == null)
-                loadColList();
-            else
-                loadMarList();
-            return false;
-        } else if (sCol != null) {
-            sCol = null;
-            loadColList();
-            return false;
-        }
-        return true;
     }
 
     private void initViews() {

@@ -25,6 +25,7 @@ import java.util.TimerTask;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -58,12 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public int k_new = 0;
     private int first_fragment;
     private MenuFragment frMenu;
-    private SummaryFragment frSummary;
-    private CalendarFragment frCalendar;
-    private SearchFragment frSearch;
-    private CollectionsFragment frCollections;
-    private CabmainFragment frCabinet;
-    private SettingsFragment frSettings;
+    private BackFragment curFragment;
     private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
     public Lib lib = new Lib(this);
@@ -185,7 +181,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 menuDownload.hide();
                 loader = new LoaderTask(MainActivity.this);
                 if (cur_id == R.id.nav_calendar) {
-                    loader.execute(LoaderTask.DOWNLOAD_YEAR, String.valueOf(frCalendar.getCurrentYear()));
+                    loader.execute(LoaderTask.DOWNLOAD_YEAR, String.valueOf(
+                            ((CalendarFragment)curFragment).getCurrentYear()));
                 } else
                     loader.execute(LoaderTask.DOWNLOAD_ID, String.valueOf(cur_id));
             }
@@ -251,29 +248,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void setFrCalendar(CalendarFragment frCalendar) {
-        this.frCalendar = frCalendar;
-    }
-
-    public void setFrSummary(SummaryFragment frSummary) {
-        this.frSummary = frSummary;
+    public void setCurFragment(BackFragment fragment) {
+        curFragment = fragment;
     }
 
     public void setFrMenu(MenuFragment frMenu) {
         this.frMenu = frMenu;
         frMenu.setNew(unread.getNewId(k_new));
-    }
-
-    public void setFrCabinet(CabmainFragment frCabinet) {
-        this.frCabinet = frCabinet;
-    }
-
-    public void setFrSearch(SearchFragment frSearch) {
-        this.frSearch = frSearch;
-    }
-
-    public void setFrCollections(CollectionsFragment frCollections) {
-        this.frCollections = frCollections;
     }
 
     public void setFragment(int id) {
@@ -289,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(id);
         status.setCrash(false);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
-        frCalendar = null;
+        curFragment = null;
         if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
             prom.hide();
         switch (id) {
@@ -305,8 +286,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     frMenu.setSelect(R.id.nav_new);
                 break;
             case R.id.nav_rss:
-                frSummary = new SummaryFragment();
-                fragmentTransaction.replace(R.id.my_fragment, frSummary);
+                curFragment = new SummaryFragment();
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 if (getIntent().hasExtra(DataBase.ID)) {
                     int n = getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY);
                     NotificationHelper notifHelper = new NotificationHelper(MainActivity.this);
@@ -321,8 +302,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frSite);
                 break;
             case R.id.nav_calendar:
-                frCalendar = new CalendarFragment();
-                fragmentTransaction.replace(R.id.my_fragment, frCalendar);
+                curFragment = new CalendarFragment();
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_book:
                 BookFragment frBook = new BookFragment();
@@ -330,29 +311,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, frBook);
                 break;
             case R.id.nav_search:
-                frSearch = new SearchFragment();
+                SearchFragment search = new SearchFragment();
                 String s = getIntent().getStringExtra(DataBase.LINK);
                 if (s != null) {
-                    frSearch.setString(s);
-                    frSearch.setPage(getIntent().getIntExtra(DataBase.SEARCH, 1));
-                    frSearch.setMode(tab);
+                    search.setString(s);
+                    search.setPage(getIntent().getIntExtra(DataBase.SEARCH, 1));
+                    search.setMode(tab);
                 }
-                fragmentTransaction.replace(R.id.my_fragment, frSearch);
+                curFragment = search;
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
                 break;
             case R.id.nav_marker:
-                frCollections = new CollectionsFragment();
-                fragmentTransaction.replace(R.id.my_fragment, frCollections);
+                curFragment = new CollectionsFragment();
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_cabinet:
-                frCabinet = new CabmainFragment();
-                fragmentTransaction.replace(R.id.my_fragment, frCabinet);
+                curFragment = new CabmainFragment();
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_settings:
-                frSettings = new SettingsFragment();
-                fragmentTransaction.replace(R.id.my_fragment, frSettings);
+                curFragment = new SettingsFragment();
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_help:
                 if (tab == -1) { //first start
@@ -390,17 +372,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (frCollections != null) {
-            if (requestCode == frCollections.MARKER_REQUEST)
-                frCollections.putResult(resultCode);
+        if (curFragment != null) {
+            if (requestCode == CollectionsFragment.MARKER_REQUEST) {
+                ((CollectionsFragment)curFragment).putResult(resultCode);
+            }
+            if (curFragment instanceof SettingsFragment) {
+                if (resultCode == RESULT_OK)
+                    if (requestCode == SetNotifDialog.RINGTONE)
+                        ((SettingsFragment)curFragment).putRingtone(data);
+                    else if (requestCode == SetNotifDialog.CUSTOM)
+                        ((SettingsFragment)curFragment).putCustom(data);
+            }
         }
-        if (frSettings != null) {
-            if (resultCode == RESULT_OK)
-                if (requestCode == SetNotifDialog.RINGTONE)
-                    frSettings.putRingtone(data);
-                else if (requestCode == SetNotifDialog.CUSTOM)
-                    frSettings.putCustom(data);
-        }
+
     }
 
     @Override
@@ -409,22 +393,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFirst) {
             setFragment(first_fragment);
-        } else if (frCalendar != null) {
-            if (frCalendar.onBackPressed())
+        } else if (curFragment != null) {
+            if (curFragment.onBackPressed())
                 exit();
-        } else if (frSummary != null) {
-            if (frSummary.onBackPressed())
-                exit();
-        } else if (frCollections != null) {
-            if (frCollections.onBackPressed())
-                exit();
-        } else if (frCabinet != null) {
-            if (frCabinet.onBackPressed())
-                exit();
-        } else if (frSearch != null) {
-            if (!isMenuMode)
-                frSearch.onDestroy(); //сохранение "истории поиска"
-            exit();
         } else
             exit();
     }

@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -33,7 +33,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.task.CabTask;
 
-public class CabmainFragment extends Fragment {
+public class CabmainFragment extends BackFragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
     private final byte LOGIN = 0, ENTER = 1, WORDS = 2;
     private MainActivity act;
@@ -58,6 +58,28 @@ public class CabmainFragment extends Fragment {
         return this.container;
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if (mode_list == LOGIN)
+            return true;
+        else {
+            mode_list--;
+            if (mode_list == LOGIN) {
+                pMain.setVisibility(View.VISIBLE);
+                fabEnter.setVisibility(View.VISIBLE);
+                fabExit.setVisibility(View.GONE);
+                adMain.clear();
+                loginList();
+            } else { //ENTER
+                mode_list = LOGIN;
+                task = new CabTask(this);
+                task.execute(etEmail.getText().toString(), etPassword.getText().toString());
+                act.status.setLoad(true);
+            }
+            return false;
+        }
+    }
+
     private void restoreActivityState(Bundle state) {
         if (state == null) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
@@ -73,7 +95,7 @@ public class CabmainFragment extends Fragment {
             }
             loginList();
         } else {
-            act.setFrCabinet(this);
+            act.setCurFragment(this);
             cookie = state.getString(Const.COOKIE);
             task = (CabTask) state.getSerializable(Const.TASK);
             if (task != null) {
@@ -368,26 +390,5 @@ public class CabmainFragment extends Fragment {
             adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         }
         adMain.notifyDataSetChanged();
-    }
-
-    public boolean onBackPressed() {
-        if (mode_list == LOGIN)
-            return true;
-        else {
-            mode_list--;
-            if (mode_list == LOGIN) {
-                pMain.setVisibility(View.VISIBLE);
-                fabEnter.setVisibility(View.VISIBLE);
-                fabExit.setVisibility(View.GONE);
-                adMain.clear();
-                loginList();
-            } else { //ENTER
-                mode_list = LOGIN;
-                task = new CabTask(this);
-                task.execute(etEmail.getText().toString(), etPassword.getText().toString());
-                act.status.setLoad(true);
-            }
-            return false;
-        }
     }
 }

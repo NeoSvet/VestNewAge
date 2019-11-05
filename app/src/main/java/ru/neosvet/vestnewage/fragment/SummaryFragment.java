@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Build;
@@ -25,6 +24,7 @@ import java.io.FileReader;
 import java.util.List;
 
 import ru.neosvet.ui.MultiWindowSupport;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -37,7 +37,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
-public class SummaryFragment extends Fragment {
+public class SummaryFragment extends BackFragment {
     public static final String RSS = "/rss";
     private ListView lvSummary;
     private ListAdapter adSummary;
@@ -72,6 +72,7 @@ public class SummaryFragment extends Fragment {
         model.removeObserves(act);
     }
 
+    @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
             model.finish();
@@ -108,7 +109,7 @@ public class SummaryFragment extends Fragment {
 
     private void restoreActivityState(Bundle state) {
         if (state != null)
-            act.setFrSummary(this);
+            act.setCurFragment(this);
         File f = new File(act.getFilesDir() + RSS);
         if (f.exists()) {
             if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))

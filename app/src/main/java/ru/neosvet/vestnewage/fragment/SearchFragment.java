@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -44,6 +43,7 @@ import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -58,7 +58,7 @@ import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.task.SearchTask;
 
 
-public class SearchFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
+public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
     private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
             LAST_RESULTS = "r";
     private MainActivity act;
@@ -112,6 +112,13 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
     }
 
     @Override
+    public boolean onBackPressed() {
+        if (!act.isMenuMode)
+            onDestroy(); //сохранение "истории поиска"
+        return true;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(Const.DIALOG, dialog);
         if (dialog > -1)
@@ -147,7 +154,7 @@ public class SearchFragment extends Fragment implements DateDialog.Result, View.
                 startSearch();
             }
         } else {
-            act.setFrSearch(this);
+            act.setCurFragment(this);
             dStart = DateHelper.putDays(act, state.getInt(START));
             dEnd = DateHelper.putDays(act, state.getInt(END));
             task = (SearchTask) state.getSerializable(Const.TASK);

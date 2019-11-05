@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
@@ -39,6 +38,7 @@ import java.util.TimerTask;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -52,7 +52,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
 
-public class BookFragment extends Fragment implements DateDialog.Result, View.OnClickListener {
+public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
     private final int DEF_YEAR = 100;
     private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
     private MainActivity act;
@@ -103,6 +103,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         editor.apply();
     }
 
+    @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
             model.finish();
@@ -165,6 +166,7 @@ public class BookFragment extends Fragment implements DateDialog.Result, View.On
         dPoslanie = DateHelper.putDays(act, pos);
         fromOtkr = pref.getBoolean(OTKR, false);
         if (state != null) {
+            act.setCurFragment(this);
             tab = state.getInt(CURRENT_TAB);
             if (!model.inProgress) {
                 dialog = state.getString(Const.DIALOG);

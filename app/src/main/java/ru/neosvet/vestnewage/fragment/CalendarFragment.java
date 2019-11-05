@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.database.Cursor;
@@ -30,6 +29,7 @@ import java.util.TimerTask;
 import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.dialogs.DateDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -43,7 +43,7 @@ import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 
-public class CalendarFragment extends Fragment implements DateDialog.Result {
+public class CalendarFragment extends BackFragment implements DateDialog.Result {
     public static final String CURRENT_DATE = "current_date";
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
@@ -86,6 +86,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
         model.removeObserves(act);
     }
 
+    @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
             model.finish();
@@ -136,7 +137,7 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
             dCurrent = DateHelper.initToday(act);
             dCurrent.setDay(1);
         } else {
-            act.setFrCalendar(this);
+            act.setCurFragment(this);;
             dCurrent = DateHelper.putDays(act, state.getInt(CURRENT_DATE));
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)

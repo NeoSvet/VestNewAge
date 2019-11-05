@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +25,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -35,7 +35,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends BackFragment {
     public static final String PANELS = "panels", TIME = "time",
             SUMMARY = "Summary", PROM = "Prom";
     public static final byte TURN_OFF = -1;
@@ -78,6 +78,7 @@ public class SettingsFragment extends Fragment {
             bPanels = new boolean[]{true, false, false, false, false};
             return;
         }
+        act.setCurFragment(this);
         bPanels = state.getBooleanArray(PANELS);
         if (bPanels == null)
             bPanels = new boolean[]{true, false, false, false, false};

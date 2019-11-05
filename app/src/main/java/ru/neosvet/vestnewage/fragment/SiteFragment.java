@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -28,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -40,7 +40,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
-public class SiteFragment extends Fragment {
+public class SiteFragment extends BackFragment {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
@@ -71,6 +71,7 @@ public class SiteFragment extends Fragment {
         model.removeObserves(act);
     }
 
+    @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
             model.finish();
@@ -111,8 +112,10 @@ public class SiteFragment extends Fragment {
     }
 
     private void restoreActivityState(Bundle state) {
-        if (state != null)
+        if (state != null) {
+            act.setCurFragment(this);
             tab = state.getInt(CURRENT_TAB);
+        }
         if (tab == 1) {
             tabHost.setCurrentTab(0);
             tabHost.setCurrentTab(1);
