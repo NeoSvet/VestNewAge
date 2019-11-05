@@ -31,8 +31,6 @@ public class BookWorker extends Worker {
     private ProgressModel model;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
-    private int prog = 0;
-    private String msg = null;
     private Lib lib;
     private boolean start = true;
 
@@ -82,14 +80,12 @@ public class BookWorker extends Worker {
 
     private String downloadOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
-            msg = context.getResources().getString(R.string.start);
-            if (model != null && model instanceof BookModel) {
+            if (model != null) {
                 Data data = new Data.Builder()
-                        .putString(BookModel.MSG, msg)
-                        .putInt(BookModel.PROG, 0)
+                        .putString(BookModel.MSG, context.getResources().getString(R.string.start))
                         .putInt(BookModel.MAX, 137)
                         .build();
-                ((BookModel) model).setProgress(data);
+                model.setProgress(data);
             }
         }
         final String path = lib.getDBFolder() + "/";
@@ -113,7 +109,7 @@ public class BookWorker extends Worker {
             }
         }
         br.close();
-        int m = 8, y = 4;
+        int prog = 0, m = 8, y = 4;
         String name = "01.16";
         DataBase dataBase;
         SQLiteDatabase db;
@@ -123,13 +119,13 @@ public class BookWorker extends Worker {
         while (y < 16 && start) {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
-                msg = context.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
-                if (model != null && model instanceof BookModel) {
+                if (model != null) {
                     Data data = new Data.Builder()
-                            .putString(BookModel.MSG, msg)
+                            .putString(BookModel.MSG, context.getResources().getStringArray(R.array.months)
+                                    [m - 1] + " " + (2000 + y))
                             .putInt(BookModel.PROG, prog)
                             .build();
-                    ((BookModel) model).setProgress(data);
+                    model.setProgress(data);
                 }
             }
             f = new File(path + name);
