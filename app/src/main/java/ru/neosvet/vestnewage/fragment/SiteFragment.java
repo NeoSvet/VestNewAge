@@ -1,8 +1,10 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
-import android.os.AsyncTask;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -18,18 +20,25 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.List;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.task.SiteTask;
+import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends Fragment {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";
@@ -37,7 +46,7 @@ public class SiteFragment extends Fragment {
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
     private Animation anMin, anMax;
-    private SiteTask task = null;
+    private SiteModel model;
     private TabHost tabHost;
     private ListView lvMain;
     private int x, y, tab = 0;
@@ -51,29 +60,59 @@ public class SiteFragment extends Fragment {
         initViews();
         setViews();
         initTabs();
+        initModel();
         restoreActivityState(savedInstanceState);
         return this.container;
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(act);
+    }
+
+    public boolean onBackPressed() {
+        if (model.inProgress) {
+            model.finish();
+            return false;
+        }
+        return true;
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(SiteModel.class);
+        model.getProgress().observe(act, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+                finishLoad(data.getString(DataBase.TITLE));
+            }
+        });
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
+        if (model.inProgress) {
+            fabRefresh.setVisibility(View.GONE);
+            act.status.setLoad(true);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_TAB, tabHost.getCurrentTab());
-        outState.putSerializable(Const.TASK, task);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
-        if (state != null) {
+        if (state != null)
             tab = state.getInt(CURRENT_TAB);
-            task = (SiteTask) state.getSerializable(Const.TASK);
-            if (task != null) {
-                if (task.getStatus() == AsyncTask.Status.RUNNING) {
-                    fabRefresh.setVisibility(View.GONE);
-                    act.status.setLoad(true);
-                    task.setFrm(this);
-                } else task = null;
-            }
-        }
         if (tab == 1) {
             tabHost.setCurrentTab(0);
             tabHost.setCurrentTab(1);
@@ -347,8 +386,7 @@ public class SiteFragment extends Fragment {
                 break;
         }
         fabRefresh.setVisibility(View.GONE);
-        task = new SiteTask(this);
-        task.execute(url, getFile(name).toString());
+        model.startLoad(url, getFile(name).toString());
         act.status.setLoad(true);
     }
 
@@ -357,7 +395,7 @@ public class SiteFragment extends Fragment {
     }
 
     public void finishLoad(String name) {
-        task = null;
+        model.finish();
         if (name == null) {
             act.status.setCrash(true);
         } else {
