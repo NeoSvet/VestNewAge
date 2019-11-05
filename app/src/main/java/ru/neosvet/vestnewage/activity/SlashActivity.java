@@ -1,8 +1,8 @@
 package ru.neosvet.vestnewage.activity;
 
 import android.app.PendingIntent;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,14 +24,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.work.Constraints;
 import androidx.work.Data;
-import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkContinuation;
 import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-
 import java.io.File;
 import java.util.List;
 import java.util.Timer;
@@ -40,6 +35,7 @@ import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
@@ -48,9 +44,8 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.model.SlashModel;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
-import ru.neosvet.vestnewage.workers.AdsWorker;
-import ru.neosvet.vestnewage.workers.CalendarWolker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SlashActivity extends AppCompatActivity {
@@ -59,9 +54,8 @@ public class SlashActivity extends AppCompatActivity {
     private Intent main;
     private StatusButton status;
     private boolean anim = true;
-    private WorkInfo.State state = WorkInfo.State.ENQUEUED;
     private Lib lib;
-    private WorkContinuation work;
+    private SlashModel model;
     private NotificationHelper notifHelper;
 
     @Override
@@ -80,7 +74,7 @@ public class SlashActivity extends AppCompatActivity {
         int ver = lib.getPreviosVer();
         if (ver < 32)
             adapterNewVersion32();
-        if (initData(savedInstanceState)) {
+        if (initData()) {
             if (main != null)
                 startActivity(main);
             finish();
@@ -123,157 +117,22 @@ public class SlashActivity extends AppCompatActivity {
         showSummaryNotif();
     }
 
-    private void adapterNewVersion32() {
-        File f = new File("/data/data/" + this.getPackageName() + "/shared_prefs/activity."
-                + MainActivity.class.getSimpleName() + ".xml");
-        if (f.exists())
-            f.renameTo(new File(f.getParent() + "/" + MainActivity.class.getSimpleName() + ".xml"));
-        f = new File(f.toString().replace(MainActivity.class.getSimpleName(), BrowserActivity.class.getSimpleName()));
-        if (f.exists())
-            f.renameTo(new File(f.getParent() + "/" + BrowserActivity.class.getSimpleName() + ".xml"));
-        SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        if (pref.getBoolean("menu_mode", false)) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt(MainActivity.START_SCEEN, MainActivity.SCREEN_MENU);
-            editor.apply();
-        }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (model.inProgress)
+            model.finish();
+        startActivity(main);
+        finish();
     }
 
-    private void showNotifTip(String title, String msg, Intent intent) {
-        PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                title, msg, NotificationHelper.CHANNEL_TIPS);
-        notifBuilder.setContentIntent(piStart);
-        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { // on N with setFullScreenIntent don't work summary group
-            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            notifBuilder.setFullScreenIntent(piEmpty, false);
-        }
-        notifBuilder.setSound(null);
-        notifHelper.notify(++notif_id, notifBuilder);
-    }
-
-    private void showSummaryNotif() {
-        if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
-        NotificationCompat.Builder notifBuilder = notifHelper.getSummaryNotif(
-                getResources().getString(R.string.tips),
-                NotificationHelper.CHANNEL_TIPS);
-        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-            notifBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
-                    getSettingsIntent(), PendingIntent.FLAG_UPDATE_CURRENT));
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-            notifBuilder.setFullScreenIntent(piEmpty, false);
-        }
-        notifHelper.notify(START_ID, notifBuilder);
-    }
-
-    private void adapterNewVersion21() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    File folder = new File(getFilesDir() + "/calendar/");
-                    if (folder.exists()) {
-                        for (File file : folder.listFiles())
-                            file.delete();
-                        folder.delete();
-                    }
-                } catch (Exception e) {
-                }
-            }
-        }).start();
-    }
-
-    private void rebuildNotif() {
-        SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-        int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p != SettingsFragment.TURN_OFF)
-            SummaryHelper.setReceiver(this, p);
-        pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
-        p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p != SettingsFragment.TURN_OFF)
-            PromReceiver.setReceiver(this, p);
-    }
-
-    private boolean initData(Bundle state) {
+    private boolean initData() {
         Uri data = getIntent().getData();
         if (data == null)
             initTask();
         else
             parseUri(data);
         return data != null;
-    }
-
-    private void adapterNewVersion10() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    File file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
-                    if (file.exists())
-                        file.delete();
-                    //from old version (code 8 and below)
-                    SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
-                    if (!pref.getString(UnreadHelper.NAME, "").equals("")) {
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(UnreadHelper.NAME, "");
-                        editor.apply();
-                        file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
-                        if (file.exists())
-                            file.delete();
-                    }
-                    // удаляем материалы в виде страниц:
-                    File dir = getFilesDir();
-                    if ((new File(dir + "/poems")).exists()) {
-                        for (File d : dir.listFiles()) {
-                            if (d.isDirectory() && !d.getName().equals("instant-run")) {
-                                // instant-run не трогаем, т.к. это системная папка
-                                if (d.listFiles() != null) // если папка не пуста
-                                    for (File f : d.listFiles())
-                                        f.delete();
-                                d.delete();
-                            }
-                        }
-                        // перенос таблицы подборок в базу закладок
-                        DataBase dbCol = new DataBase(SlashActivity.this, DataBase.COLLECTIONS);
-                        SQLiteDatabase dbC = dbCol.getWritableDatabase();
-                        DataBase dbMar = new DataBase(SlashActivity.this, DataBase.MARKERS);
-                        SQLiteDatabase dbM = dbMar.getWritableDatabase();
-                        Cursor cursor = dbC.query(DataBase.COLLECTIONS, null, null, null, null, null, null);
-                        if (cursor.moveToFirst()) {
-                            int iMarker = cursor.getColumnIndex(DataBase.MARKERS);
-                            int iPlace = cursor.getColumnIndex(DataBase.PLACE);
-                            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                            // первую подборку - "вне подборок" вставлять не надо, надо лишь обновить:
-                            ContentValues cv = new ContentValues();
-                            cv.put(DataBase.MARKERS, cursor.getString(iMarker));
-                            dbM.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                                    new String[]{"1"});
-                            // остальные вставляем:
-                            while (cursor.moveToNext()) {
-                                cv = new ContentValues();
-                                cv.put(DataBase.PLACE, cursor.getInt(iPlace));
-                                cv.put(DataBase.MARKERS, cursor.getString(iMarker));
-                                cv.put(DataBase.TITLE, cursor.getString(iTitle));
-                                dbM.insert(DataBase.COLLECTIONS, null, cv);
-                            }
-                        }
-                        cursor.close();
-                        dbMar.close();
-                        // удаление базы журнала старого образца и базы подборок:
-                        dir = lib.getDBFolder();
-                        for (File f : dir.listFiles()) {
-                            if (f.getName().contains(DataBase.COLLECTIONS) ||
-                                    f.getName().indexOf(DataBase.JOURNAL) == 0)
-                                f.delete();
-                        }
-                    }
-                } catch (Exception e) {
-                }
-            }
-        }).start();
     }
 
     private void parseUri(Uri data) {
@@ -347,22 +206,12 @@ public class SlashActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-//        outState.putSerializable(Const.TASK, task);
-        super.onSaveInstanceState(outState);
-    }
-
     private void initTask() {
-        //TODO restore work
-//        if (state != null) {
-//            task = (CalendarTask) state.getSerializable(Const.TASK);
-//            if (task != null) {
-//                task.setAct(this);
-//                setStatus();
-//            }
-//            return;
-//        }
+        model = ViewModelProviders.of(this).get(SlashModel.class);
+        if (model.inProgress) {
+            setStatus();
+            return;
+        }
         DateHelper date = DateHelper.initToday(SlashActivity.this);
         DataBase dataBase = new DataBase(SlashActivity.this, date.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -374,40 +223,10 @@ public class SlashActivity extends AppCompatActivity {
         dataBase.close();
 //        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
 //            return;
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(true)
-                .build();
-        OneTimeWorkRequest task = new OneTimeWorkRequest
-                .Builder(AdsWorker.class)
-                .setConstraints(constraints)
-                .addTag(AdsWorker.TAG)
-                .build();
-        work = WorkManager.getInstance().beginWith(task);
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        if (pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR) == MainActivity.SCREEN_SUMMARY) {
-            task = new OneTimeWorkRequest
-                    .Builder(SummaryWorker.class)
-                    .setConstraints(constraints)
-                    .addTag(SummaryWorker.TAG)
-                    .build();
-        } else {
-            Data data = new Data.Builder()
-                    .putInt(CalendarWolker.MONTH, date.getMonth())
-                    .putInt(CalendarWolker.YEAR, date.getYear())
-                    .putBoolean(CalendarWolker.UNREAD, true)
-                    .build();
-            task = new OneTimeWorkRequest
-                    .Builder(CalendarWolker.class)
-                    .setInputData(data)
-                    .setConstraints(constraints)
-                    .addTag(CalendarWolker.TAG)
-                    .build();
-        }
-        work = work.then(task);
-        LiveData<List<WorkInfo>> workInfos = work.getWorkInfosLiveData();
-        work.enqueue();
-        workInfos.observe(this, new Observer<List<WorkInfo>>() {
+        model.startLoad(pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR) == MainActivity.SCREEN_SUMMARY,
+                date.getMonth(), date.getYear());
+        model.getState().observe(this, new Observer<List<WorkInfo>>() {
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 String tag = "none";
@@ -416,30 +235,22 @@ public class SlashActivity extends AppCompatActivity {
                         tag = t;
                         break;
                     }
-                    if (tag.equals(AdsWorker.TAG))
-                        SlashActivity.this.state = workInfos.get(i).getState();
-                    else if (workInfos.get(i).getState().isFinished())
+                    if (tag.equals(SlashModel.TAG) &&
+                            workInfos.get(i).getState().isFinished())
                         finishLoad();
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
                 }
             }
         });
     }
 
     public void finishLoad() {
-        state = WorkInfo.State.ENQUEUED;
+        model.finish();
         if (!anim) {
             startActivity(main);
             finish();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (!state.equals(WorkInfo.State.ENQUEUED))
-            work.getWorkInfos().cancel(false);
-        startActivity(main);
-        finish();
     }
 
     private void initAnimation() {
@@ -452,7 +263,7 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 anim = false;
-                if (state.equals(WorkInfo.State.ENQUEUED)) {
+                if (!model.inProgress) {
                     startActivity(main);
                     finish();
                 } else
@@ -490,6 +301,150 @@ public class SlashActivity extends AppCompatActivity {
             }
         }, 10);
 
+    }
+
+    private void showNotifTip(String title, String msg, Intent intent) {
+        PendingIntent piStart = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
+                title, msg, NotificationHelper.CHANNEL_TIPS);
+        notifBuilder.setContentIntent(piStart);
+        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { // on N with setFullScreenIntent don't work summary group
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
+        }
+        notifBuilder.setSound(null);
+        notifHelper.notify(++notif_id, notifBuilder);
+    }
+
+    private void rebuildNotif() {
+        SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+        int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+        if (p != SettingsFragment.TURN_OFF)
+            SummaryHelper.setReceiver(this, p);
+        pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
+        p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+        if (p != SettingsFragment.TURN_OFF)
+            PromReceiver.setReceiver(this, p);
+    }
+
+    private void showSummaryNotif() {
+        if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
+        NotificationCompat.Builder notifBuilder = notifHelper.getSummaryNotif(
+                getResources().getString(R.string.tips),
+                NotificationHelper.CHANNEL_TIPS);
+        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            notifBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
+                    getSettingsIntent(), PendingIntent.FLAG_UPDATE_CURRENT));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            notifBuilder.setFullScreenIntent(piEmpty, false);
+        }
+        notifHelper.notify(START_ID, notifBuilder);
+    }
+
+    private void adapterNewVersion32() {
+        File f = new File("/data/data/" + this.getPackageName() + "/shared_prefs/activity."
+                + MainActivity.class.getSimpleName() + ".xml");
+        if (f.exists())
+            f.renameTo(new File(f.getParent() + "/" + MainActivity.class.getSimpleName() + ".xml"));
+        f = new File(f.toString().replace(MainActivity.class.getSimpleName(), BrowserActivity.class.getSimpleName()));
+        if (f.exists())
+            f.renameTo(new File(f.getParent() + "/" + BrowserActivity.class.getSimpleName() + ".xml"));
+        SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+        if (pref.getBoolean("menu_mode", false)) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt(MainActivity.START_SCEEN, MainActivity.SCREEN_MENU);
+            editor.apply();
+        }
+    }
+
+    private void adapterNewVersion21() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File folder = new File(getFilesDir() + "/calendar/");
+                    if (folder.exists()) {
+                        for (File file : folder.listFiles())
+                            file.delete();
+                        folder.delete();
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }).start();
+    }
+
+    private void adapterNewVersion10() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
+                    if (file.exists())
+                        file.delete();
+                    //from old version (code 8 and below)
+                    SharedPreferences pref = getSharedPreferences(Const.COOKIE, MODE_PRIVATE);
+                    if (!pref.getString(UnreadHelper.NAME, "").equals("")) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString(UnreadHelper.NAME, "");
+                        editor.apply();
+                        file = new File(getFilesDir() + File.separator + UnreadHelper.NAME);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    // удаляем материалы в виде страниц:
+                    File dir = getFilesDir();
+                    if ((new File(dir + "/poems")).exists()) {
+                        for (File d : dir.listFiles()) {
+                            if (d.isDirectory() && !d.getName().equals("instant-run")) {
+                                // instant-run не трогаем, т.к. это системная папка
+                                if (d.listFiles() != null) // если папка не пуста
+                                    for (File f : d.listFiles())
+                                        f.delete();
+                                d.delete();
+                            }
+                        }
+                        // перенос таблицы подборок в базу закладок
+                        DataBase dbCol = new DataBase(SlashActivity.this, DataBase.COLLECTIONS);
+                        SQLiteDatabase dbC = dbCol.getWritableDatabase();
+                        DataBase dbMar = new DataBase(SlashActivity.this, DataBase.MARKERS);
+                        SQLiteDatabase dbM = dbMar.getWritableDatabase();
+                        Cursor cursor = dbC.query(DataBase.COLLECTIONS, null, null, null, null, null, null);
+                        if (cursor.moveToFirst()) {
+                            int iMarker = cursor.getColumnIndex(DataBase.MARKERS);
+                            int iPlace = cursor.getColumnIndex(DataBase.PLACE);
+                            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                            // первую подборку - "вне подборок" вставлять не надо, надо лишь обновить:
+                            ContentValues cv = new ContentValues();
+                            cv.put(DataBase.MARKERS, cursor.getString(iMarker));
+                            dbM.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                                    new String[]{"1"});
+                            // остальные вставляем:
+                            while (cursor.moveToNext()) {
+                                cv = new ContentValues();
+                                cv.put(DataBase.PLACE, cursor.getInt(iPlace));
+                                cv.put(DataBase.MARKERS, cursor.getString(iMarker));
+                                cv.put(DataBase.TITLE, cursor.getString(iTitle));
+                                dbM.insert(DataBase.COLLECTIONS, null, cv);
+                            }
+                        }
+                        cursor.close();
+                        dbMar.close();
+                        // удаление базы журнала старого образца и базы подборок:
+                        dir = lib.getDBFolder();
+                        for (File f : dir.listFiles()) {
+                            if (f.getName().contains(DataBase.COLLECTIONS) ||
+                                    f.getName().indexOf(DataBase.JOURNAL) == 0)
+                                f.delete();
+                        }
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
     public Intent getSettingsIntent() {

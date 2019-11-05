@@ -23,6 +23,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -30,13 +31,14 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class CalendarWolker extends Worker {
     private Context context;
-    public static final String TAG = "Calendar", PROGRESS = "prog",
+    public static final String TAG = "Calendar", DAY = "Day",
             MONTH = "Month", YEAR = "Year", UNREAD = "Unread";
     private transient DataBase dataBase;
     private transient SQLiteDatabase db;
     private transient Lib lib;
-    private boolean loadList, cancel;
+    private boolean loadList;
     private List<ListItem> data = new ArrayList<ListItem>();
+    private ProgressModel model;
 
     public CalendarWolker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -44,19 +46,24 @@ public class CalendarWolker extends Worker {
         lib = new Lib(context);
     }
 
-    public void cancel() {
-        cancel = true;
+    public boolean isCanceled() {
+        if (model != null)
+            return false;
+        else
+            return !model.inProgress;
     }
 
     @NonNull
     @Override
     public Result doWork() {
+        String err = "";
+        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             loadList = true;
             downloadCalendar(getInputData().getInt(YEAR, 0),
                     getInputData().getInt(MONTH, 0),
                     getInputData().getBoolean(UNREAD, false));
-            if (cancel)
+            if (isCanceled())
                 return Result.success();
             loadList = false;
             publishProgress(0);
@@ -65,17 +72,20 @@ public class CalendarWolker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.LOG("CalendarWolker error: " + e.getMessage());
+            err = e.getMessage();
+            Lib.LOG("CalendarWolker error: " + err);
         }
-        return Result.failure();
+        Data data = new Data.Builder()
+                .putString(ProgressModel.ERROR, err)
+                .build();
+        return Result.failure(data);
     }
 
     private void publishProgress(int p) {
         Data data = new Data.Builder()
-                .putInt(PROGRESS, p)
+                .putInt(DAY, p)
                 .build();
-
-        //setProgressAsync(data);
+        model.setProgress(data);
     }
 
     private void downloadMonth(int year, int month) throws Exception {
@@ -98,7 +108,7 @@ public class CalendarWolker extends Worker {
                     n = Integer.parseInt(link.substring(n, n + 2));
                     publishProgress(n);
                 }
-                if (cancel) {
+                if (isCanceled()) {
                     curTitle.close();
                     dataBase.close();
                     return;
@@ -116,7 +126,7 @@ public class CalendarWolker extends Worker {
             BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
             String s = br.readLine();
             br.close();
-            if (cancel)
+            if (isCanceled())
                 return;
 
             JSONObject json, jsonI;
@@ -150,7 +160,7 @@ public class CalendarWolker extends Worker {
             }
             dataBase.close();
             dataBase = null;
-            if (cancel) {
+            if (isCanceled()) {
                 data.clear();
                 return;
             }

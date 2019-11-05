@@ -26,6 +26,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -37,22 +38,26 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryWorker extends Worker {
     private Context context;
-    private static final String LAST_TIME = "last_time", CHECK = "check";
-    public static final String TAG = "Summary";
-    private boolean cancel;
+    private ProgressModel model;
+    private final String LAST_TIME = "last_time", CHECK = "check";
 
     public SummaryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.context = context;
     }
 
-    public void cancel() {
-        cancel = true;
+    public boolean isCanceled() {
+        if (model != null)
+            return false;
+        else
+            return !model.inProgress;
     }
 
     @NonNull
     @Override
     public Result doWork() {
+        String err = "";
+        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             if (getInputData().getBoolean(CHECK, false))
                 initCheck();
@@ -60,31 +65,41 @@ public class SummaryWorker extends Worker {
                 downloadList();
                 reportProgress();
                 updateBook();
-                if (cancel)
+                if (isCanceled())
                     return Result.success();
                 downloadPages();
             }
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.LOG("SummaryWorker error: " + e.getMessage());
+            err = e.getMessage();
+            Lib.LOG("SummaryWorker error: " + err);
         }
-        return Result.failure();
+        Data data = new Data.Builder()
+                .putString(ProgressModel.ERROR, err)
+                .build();
+        return Result.failure(data);
     }
 
     private void reportProgress() {
-        //setProgressAsync();
+        Data data = new Data.Builder()
+                .putString(Const.TASK, ProgressModel.LIST)
+                .build();
+        if (model != null)
+            model.setProgress(data);
     }
 
 
     private void publishProgress(String title, String link, String des, String time) {
         Data data = new Data.Builder()
+                .putString(Const.TASK, ProgressModel.PAGE)
                 .putString(DataBase.TITLE, title)
                 .putString(DataBase.LINK, link)
                 .putString(DataBase.DESCTRIPTION, des)
                 .putString(DataBase.TIME, time)
                 .build();
-        //setProgressAsync(data);
+        if (model != null)
+            model.setProgress(data);
     }
 
     private void initCheck() throws Exception {
@@ -109,11 +124,7 @@ public class SummaryWorker extends Worker {
             result = checkSummary();
         }
         if (result == null) { // no updates
-            summaryHelper.createNotification("no updates", "news");
             Lib.LOG("SummaryWorker: no updates");
-            summaryHelper.singleNotification("single no updates");
-            summaryHelper.setPreferences(pref);
-            summaryHelper.showNotification();
             return;
         }
 
@@ -261,7 +272,7 @@ public class SummaryWorker extends Worker {
                 publishProgress(data.get(i).getTitle(), data.get(i).getLink(),
                         data.get(i).getDes(), data.get(i).getHead(0));
             }
-            if (cancel)
+            if (isCanceled())
                 break;
         }
         data.clear();
