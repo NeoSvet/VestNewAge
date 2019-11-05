@@ -62,7 +62,6 @@
         android:layout_alignLeft="@id/rvCalendar"
         android:layout_alignRight="@id/rvCalendar"
         android:layout_margin="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:padding="10dp"
         android:text="@string/prom_for_soul_unite" />
 </RelativeLayout>
