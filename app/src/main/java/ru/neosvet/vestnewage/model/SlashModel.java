@@ -18,7 +18,6 @@ import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SlashModel extends ProgressModel {
     public static final String TAG = "slash";
-    private final String WORK_NAME = "load";
     private static SlashModel current = null;
 
     public static SlashModel getInstance() {
@@ -44,7 +43,7 @@ public class SlashModel extends ProgressModel {
                 .setConstraints(constraints)
                 .addTag(AdsWorker.TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(WORK_NAME,
+        WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         Data.Builder data = new Data.Builder()
                 .putString(ProgressModel.NAME, SlashModel.class.getSimpleName());
@@ -71,6 +70,6 @@ public class SlashModel extends ProgressModel {
     }
 
 //    public void cancel() {
-//        work.cancelUniqueWork(WORK_NAME);
+//        work.cancelUniqueWork(TAG);
 //    }
 }
