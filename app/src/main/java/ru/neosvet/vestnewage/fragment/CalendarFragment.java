@@ -110,10 +110,8 @@ public class CalendarFragment extends Fragment implements DateDialog.Result {
                 }
             }
         });
-        if (model.inProgress) {
+        if (model.inProgress)
             setStatus(true);
-            return;
-        }
     }
 
     @Override
