@@ -46,8 +46,8 @@ public class SummaryWorker extends Worker {
         this.context = context;
     }
 
-    public boolean isCancelled() {
-        if (model != null)
+    private boolean isCancelled() {
+        if (model == null)
             return false;
         else
             return !model.inProgress;
@@ -311,7 +311,7 @@ public class SummaryWorker extends Worker {
             dataBase.close();
     }
 
-    public void downloadList() throws Exception {
+    private void downloadList() throws Exception {
         NotificationHelper notifHelper = new NotificationHelper(context);
         notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         String line;

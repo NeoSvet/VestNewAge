@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import androidx.work.Data;
 import androidx.work.Worker;
@@ -24,7 +23,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.model.BookModel;
-import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class BookWorker extends Worker {
     private Context context;
@@ -45,7 +43,7 @@ public class BookWorker extends Worker {
     }
 
     public boolean isCancelled() {
-        if (model != null)
+        if (model == null)
             return false;
         else
             return !model.inProgress;
@@ -67,7 +65,7 @@ public class BookWorker extends Worker {
             boolean kat = getInputData().getBoolean(KATRENY, false);
             if (!kat && getInputData().getBoolean(FROM_OTKR, false))
                 downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-            date = downloadData(kat, null);
+            date = downloadBook(kat);
             return Result.success(new Data.Builder()
                     .putString(DataBase.TIME, date)
                     .build());
@@ -85,7 +83,7 @@ public class BookWorker extends Worker {
     private String downloadOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
             msg = context.getResources().getString(R.string.start);
-            if(model!=null && model instanceof BookModel) {
+            if (model != null && model instanceof BookModel) {
                 Data data = new Data.Builder()
                         .putString(BookModel.MSG, msg)
                         .putInt(BookModel.PROG, 0)
@@ -126,7 +124,7 @@ public class BookWorker extends Worker {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
                 msg = context.getResources().getStringArray(R.array.months)[m - 1] + " " + (2000 + y);
-                if(model!=null && model instanceof BookModel) {
+                if (model != null && model instanceof BookModel) {
                     Data data = new Data.Builder()
                             .putString(BookModel.MSG, msg)
                             .putInt(BookModel.PROG, prog)
@@ -171,7 +169,7 @@ public class BookWorker extends Worker {
         return name + (start ? 1 : 0);
     }
 
-    public String downloadData(boolean katren, @Nullable LoaderTask loader) throws Exception {
+    private String downloadBook(boolean katren) throws Exception {
         String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
         InputStream in = new BufferedInputStream(lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
@@ -194,8 +192,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        if (loader != null)
-                            loader.upProg();
+                        //loader.upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

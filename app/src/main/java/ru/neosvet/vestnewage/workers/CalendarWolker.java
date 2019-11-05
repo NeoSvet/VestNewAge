@@ -45,8 +45,8 @@ public class CalendarWolker extends Worker {
         lib = new Lib(context);
     }
 
-    public boolean isCancelled() {
-        if (model != null)
+    private boolean isCancelled() {
+        if (model == null)
             return false;
         else
             return !model.inProgress;
@@ -117,7 +117,7 @@ public class CalendarWolker extends Worker {
         dataBase.close();
     }
 
-    public void downloadCalendar(int year, int month, boolean updateUnread) throws Exception {
+    private void downloadCalendar(int year, int month, boolean updateUnread) throws Exception {
         try {
             InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "?json&year="
                     + year + "&month=" + month));
