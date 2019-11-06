@@ -36,13 +36,6 @@ public class CabWorker extends Worker {
         this.context = context;
     }
 
-    public boolean isCancelled() {
-        if (model == null)
-            return false;
-        else
-            return !model.inProgress;
-    }
-
     @NonNull
     @Override
     public Result doWork() {
