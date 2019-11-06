@@ -67,7 +67,7 @@ public class BookModel extends ProgressModel {
         int max = data.getInt(Const.MAX, 0);
         if (max == 0)
             return false;
-        ProgressDialog dialog = new ProgressDialog(act, 0);
+        dialog = new ProgressDialog(act, 0);
         dialog.setMessage(data.getString(Const.MSG));
         dialog.setProgress(data.getInt(Const.PROG, 0));
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
