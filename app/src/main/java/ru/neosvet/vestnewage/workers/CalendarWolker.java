@@ -27,7 +27,6 @@ import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class CalendarWolker extends Worker {
     private Context context;

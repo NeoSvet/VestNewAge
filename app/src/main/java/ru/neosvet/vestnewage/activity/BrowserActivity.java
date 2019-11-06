@@ -2,6 +2,8 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.Activity;
 import android.app.Service;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +37,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -54,7 +59,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.task.LoaderTask;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BrowserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -67,7 +72,7 @@ public class BrowserActivity extends AppCompatActivity
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private SoftKeyboard softKeyboard;
-    private LoaderTask loader = null;
+    private LoaderModel model;
     private WebView wvBrowser;
     private DataBase dbPage, dbJournal;
     private TextView tvPlace;
@@ -108,12 +113,14 @@ public class BrowserActivity extends AppCompatActivity
         setViews();
         restoreActivityState(savedInstanceState);
         initPlace();
+        initModel();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         prom.stop();
+        model.removeObserves(this);
     }
 
     @Override
@@ -122,9 +129,34 @@ public class BrowserActivity extends AppCompatActivity
         prom.resume();
     }
 
+    private void initModel() {
+        model = ViewModelProviders.of(this).get(LoaderModel.class);
+        model.getProgress().observe(this, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+
+            }
+        });
+        model.getState().observe(this, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        finishLoad();
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED)) {
+                        Lib.showToast(BrowserActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                        model.finish();
+                        status.setCrash(true);
+                    }
+                }
+            }
+        });
+        if (model.inProgress)
+            status.setLoad(true);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Const.TASK, loader);
         if (link.contains(PNG))
             outState.putString(DataBase.LINK, history.get(0));
         else
@@ -788,18 +820,14 @@ public class BrowserActivity extends AppCompatActivity
         lib.openInApps(url, null);
     }
 
-    public void finishLoad(boolean suc) {
-        loader = null;
-        if (suc) {
-            status.setLoad(false);
-            status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
-            if (link.contains(PNG))
-                openFile();
-            else
-                openPage(true);
-        } else {
-            status.setCrash(true);
-        }
+    public void finishLoad() {
+        model.finish();
+        status.setLoad(false);
+        status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
+        if (link.contains(PNG))
+            openFile();
+        else
+            openPage(true);
     }
 
     public float getPositionOnPage() {

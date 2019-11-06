@@ -2,11 +2,13 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,6 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -46,7 +52,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.task.LoaderTask;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
@@ -57,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int first_fragment;
     private MenuFragment frMenu;
     private BackFragment curFragment;
-    private LoaderTask loader = null;
     private FragmentManager myFragmentManager;
     public Lib lib = new Lib(this);
     private Tip menuDownload;
@@ -68,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private PromHelper prom;
     private SharedPreferences pref;
     private UnreadHelper unread;
+    private LoaderModel model;
     private int cur_id, tab = 0, statusBack;
 
     @Override
@@ -93,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         unread = new UnreadHelper(this);
         initInterface();
+        initModel();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
@@ -104,6 +111,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         updateNew();
         restoreActivityState(savedInstanceState);
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(this).get(LoaderModel.class);
+        model.getProgress().observe(this, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+
+            }
+        });
+        model.getState().observe(this, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        finishLoad();
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(MainActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                }
+            }
+        });
+        //if (model.inProgress)
+            //TODO show dialog
     }
 
     private void restoreActivityState(Bundle state) {
@@ -127,11 +157,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             cur_id = state.getInt(Const.CUR_ID);
             if (navigationView == null && !isMenuMode)
                 setMenuFragment();
-            loader = (LoaderTask) state.getSerializable(LOADER);
-            if (loader != null)
-                if (loader.getStatus() == AsyncTask.Status.RUNNING)
-                    loader.setAct(this);
-                else loader = null;
         }
     }
 
@@ -139,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onPause() {
         super.onPause();
         prom.stop();
+        model.removeObserves(this);
     }
 
     @Override
@@ -167,8 +193,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                loader = new LoaderTask(MainActivity.this);
-                loader.execute(LoaderTask.DOWNLOAD_ALL);
+                model.startLoad(LoaderModel.DOWNLOAD_ALL, null);
             }
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
@@ -176,12 +201,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                loader = new LoaderTask(MainActivity.this);
+                Data.Builder data = new Data.Builder();
                 if (cur_id == R.id.nav_calendar) {
-                    loader.execute(LoaderTask.DOWNLOAD_YEAR, String.valueOf(
-                            ((CalendarFragment)curFragment).getCurrentYear()));
-                } else
-                    loader.execute(LoaderTask.DOWNLOAD_ID, String.valueOf(cur_id));
+                    data.putInt(Const.YEAR, ((CalendarFragment) curFragment).getCurrentYear());
+                    model.startLoad(LoaderModel.DOWNLOAD_YEAR, data.build());
+                } else {
+                    data.putInt(Const.SELECT, cur_id);
+                    model.startLoad(LoaderModel.DOWNLOAD_ID, data.build());
+                }
             }
         });
 
@@ -223,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(LOADER, loader);
         outState.putInt(Const.CUR_ID, cur_id);
         super.onSaveInstanceState(outState);
     }
@@ -349,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void finishAllLoad(boolean suc, boolean all) {
-        loader = null;
+        model.finish();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (suc) {
             if (all)
@@ -371,14 +397,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (curFragment != null) {
             if (requestCode == CollectionsFragment.MARKER_REQUEST) {
-                ((CollectionsFragment)curFragment).putResult(resultCode);
+                ((CollectionsFragment) curFragment).putResult(resultCode);
             }
             if (curFragment instanceof SettingsFragment) {
                 if (resultCode == RESULT_OK)
                     if (requestCode == SetNotifDialog.RINGTONE)
-                        ((SettingsFragment)curFragment).putRingtone(data);
+                        ((SettingsFragment) curFragment).putRingtone(data);
                     else if (requestCode == SetNotifDialog.CUSTOM)
-                        ((SettingsFragment)curFragment).putCustom(data);
+                        ((SettingsFragment) curFragment).putCustom(data);
             }
         }
 

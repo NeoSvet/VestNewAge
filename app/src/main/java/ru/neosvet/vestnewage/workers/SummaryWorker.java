@@ -33,7 +33,6 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class SummaryWorker extends Worker {
     private Context context;
@@ -61,12 +60,15 @@ public class SummaryWorker extends Worker {
             if (getInputData().getBoolean(CHECK, false))
                 initCheck();
             else {
-                downloadList();
-                reportProgress();
-                updateBook();
+                if(getInputData().getBoolean(Const.LIST,true)) {
+                    downloadList();
+                    reportProgress();
+                    updateBook();
+                }
                 if (isCancelled())
                     return Result.success();
-                downloadPages();
+                if(getInputData().getBoolean(Const.PAGE,true))
+                    downloadPages();
             }
             return Result.success();
         } catch (Exception e) {
