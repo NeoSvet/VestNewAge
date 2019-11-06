@@ -1,12 +1,13 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Service;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +32,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,6 +51,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -55,11 +60,12 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.list.PageAdapter;
-import ru.neosvet.vestnewage.task.SearchTask;
+import ru.neosvet.vestnewage.model.SearchModel;
+import ru.neosvet.vestnewage.workers.SearchWorker;
 
 
 public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
-    private final String START = "start", END = "end", SETTINGS = "s", ADDITION = "a", LABEL = "l",
+    private final String SETTINGS = "s", ADDITION = "a", LABEL = "l",
             LAST_RESULTS = "r";
     private MainActivity act;
     private float density;
@@ -74,7 +80,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     private Spinner sMode;
     private AutoCompleteTextView etSearch;
     private ArrayAdapter<String> adSearch;
-    private SearchTask task = null;
+    private SearchModel model;
     private DateHelper dStart, dEnd;
     private ListAdapter adResults;
     private int min_m = 1, min_y = 2016, dialog = -1, mode = 5, page = -1;
@@ -106,9 +112,16 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         density = getResources().getDisplayMetrics().density;
         initViews();
         setViews();
+        initModel();
         restoreActivityState(savedInstanceState);
 
         return this.container;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(act);
     }
 
     @Override
@@ -118,14 +131,45 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         return true;
     }
 
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(SearchModel.class);
+        model.getProgress().observe(act, new Observer<Data>() {
+            @Override
+            public void onChanged(@Nullable Data data) {
+                DateHelper d = DateHelper.putDays(act, data.getInt(DataBase.TIME, 0));
+                tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
+            }
+        });
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished()) {
+                        Data result = workInfos.get(i).getOutputData();
+                        putResult(result.getInt(SearchWorker.MODE, 0),
+                                result.getString(SearchWorker.STRING),
+                                result.getInt(SearchModel.START, 0),
+                                result.getInt(SearchModel.END, 0));
+                    }
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
+        if (model.inProgress) {
+            pStatus.setVisibility(View.VISIBLE);
+            fabSettings.setVisibility(View.GONE);
+            etSearch.setEnabled(false);
+        }
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(Const.DIALOG, dialog);
         if (dialog > -1)
             dateDialog.dismiss();
-        outState.putSerializable(Const.TASK, task);
-        outState.putInt(START, dStart.getTimeInDays());
-        outState.putInt(END, dEnd.getTimeInDays());
+        outState.putInt(SearchModel.START, dStart.getTimeInDays());
+        outState.putInt(SearchModel.END, dEnd.getTimeInDays());
         outState.putInt(DataBase.SEARCH, page);
         if (page > -1) {
             outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
@@ -155,18 +199,9 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             }
         } else {
             act.setCurFragment(this);
-            dStart = DateHelper.putDays(act, state.getInt(START));
-            dEnd = DateHelper.putDays(act, state.getInt(END));
-            task = (SearchTask) state.getSerializable(Const.TASK);
+            dStart = DateHelper.putDays(act, state.getInt(SearchModel.START));
+            dEnd = DateHelper.putDays(act, state.getInt(SearchModel.END));
             page = state.getInt(DataBase.SEARCH, -1);
-            if (task != null) {
-                if (task.getStatus() == AsyncTask.Status.RUNNING) {
-                    task.setFrm(this);
-                    pStatus.setVisibility(View.VISIBLE);
-                    fabSettings.setVisibility(View.GONE);
-                    etSearch.setEnabled(false);
-                } else task = null;
-            }
             if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
                 showResult();
@@ -186,7 +221,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         }
         bStart.setText(formatDate(dStart));
         bEnd.setText(formatDate(dEnd));
-        if (adResults.getCount() == 0 && task == null) {
+        if (adResults.getCount() == 0 && !model.inProgress) {
             f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(
@@ -307,7 +342,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (task != null) return;
+                if (model.inProgress) return;
                 if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
                     fabSettings.setVisibility(View.GONE);
                     bShow.setVisibility(View.VISIBLE);
@@ -336,7 +371,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                task.stop();
+                model.finish();
             }
         });
 
@@ -472,14 +507,13 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         pStatus.setVisibility(View.VISIBLE);
         fabSettings.setVisibility(View.GONE);
         final String s = etSearch.getText().toString();
-        task = new SearchTask(SearchFragment.this);
         int mode;
         if (cbSearchInResults.isChecked()) {
             mode = 6;
             tvStatus.setText(getResources().getString(R.string.search));
         } else
             mode = sMode.getSelectedItemPosition();
-        task.execute(s, String.valueOf(mode), dStart.getMY(), dEnd.getMY());
+        model.search(s, mode, dStart.getMY(), dEnd.getMY());
         boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
             if (adSearch.getItem(i).equals(s)) {
@@ -505,7 +539,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         page = 0;
         etSearch.setEnabled(true);
         pStatus.setVisibility(View.GONE);
-        task = null;
+        model.finish();
         if (count1 > 0) {
             pAdditionSet.setVisibility(View.VISIBLE);
             cbSearchInResults.setChecked(true);
@@ -579,11 +613,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 }
             }
         }
-    }
-
-    public void updateStatus(int date) {
-        DateHelper d = DateHelper.putDays(act, date);
-        tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
     }
 
     @Override

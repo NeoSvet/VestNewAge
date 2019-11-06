@@ -1,94 +1,82 @@
-package ru.neosvet.vestnewage.task;
+package ru.neosvet.vestnewage.workers;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+
+import androidx.work.Data;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.fragment.SearchFragment;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.model.SearchModel;
 
-public class SearchTask extends AsyncTask<String, Integer, Boolean> implements Serializable {
-    private transient SearchFragment frm;
-    private transient MainActivity act;
-    private boolean start = true;
-    //    private String msg;
+public class SearchWorker extends Worker {
+    private Context context;
+    public static final String TAG = "search", MODE = "mode", STRING = "string";
+    private ProgressModel model;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
     private String str;
     private int mode, count1 = 0, count2 = 0;
 
-    public SearchTask(SearchFragment frm) {
-        setFrm(frm);
+    public SearchWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+        this.context = context;
     }
 
-    public void setFrm(SearchFragment frm) {
-        this.frm = frm;
-        act = (MainActivity) frm.getActivity();
+    private boolean isCancelled() {
+        if (model == null)
+            return false;
+        else
+            return !model.inProgress;
     }
 
-    public void stop() {
-        start = false;
-    }
-
+    @NonNull
     @Override
-    protected void onProgressUpdate(Integer... values) {
-        super.onProgressUpdate(values);
-        if (frm != null)
-            frm.updateStatus(values[0]);
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
-    protected void onPostExecute(Boolean result) {
-        super.onPostExecute(result);
-        if (frm != null)
-            frm.putResult(mode, str, count1, count2);
-    }
-
-    @Override
-    protected Boolean doInBackground(String... params) {
+    public Result doWork() {
+        String err = "";
+        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
+            Lib lib = new Lib(context);
             List<String> list = new ArrayList<String>();
-            for (File f : act.lib.getDBFolder().listFiles()) {
+            for (File f : lib.getDBFolder().listFiles()) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
-                if (!start) return true;
+                if (isCancelled())
+                    return getResult();
             }
             if (list.size() == 0) //empty list
-                return false;
-            dbSearch = new DataBase(act, DataBase.SEARCH);
+                return getResult();
+            dbSearch = new DataBase(context, DataBase.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
-            mode = Integer.parseInt(params[1]);
-            str = params[2]; // начальная дата
+            mode = getInputData().getInt(MODE, 0);
+            str = getInputData().getString(SearchModel.START); // начальная дата
             start_month = Integer.parseInt(str.substring(0, 2));
             start_year = Integer.parseInt(str.substring(3, 5));
-            str = params[3]; // конечная дата
+            str = getInputData().getString(SearchModel.END); // конечная дата
             end_month = Integer.parseInt(str.substring(0, 2));
             end_year = Integer.parseInt(str.substring(3, 5));
-            str = params[0]; // строка для поиска
+            str = getInputData().getString(STRING); // строка для поиска
             if ((start_year == end_year && start_month <= end_month) || start_year < end_year)
                 step = 1;
             else
                 step = -1;
             if (mode == 6) { // поиск в результатах
-                searchInResults(params[0], step == -1);
+                searchInResults(getInputData().getString(STRING), step == -1);
                 dbSearch.close();
-                return true;
+                return getResult();
             }
             dbS.delete(DataBase.SEARCH, null, null);
             DateHelper d;
@@ -96,8 +84,8 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
                 //поиск по материалам (статьям)
                 searchList("00.00", str, mode);
             }
-            d = DateHelper.putYearMonth(act, start_year, start_month);
-            while (start) {
+            d = DateHelper.putYearMonth(context, start_year, start_month);
+            while (!isCancelled()) {
                 if (list.contains(d.getMY())) {
                     publishProgress(d.getTimeInDays());
                     searchList(d.getMY(), str, mode);
@@ -107,11 +95,34 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
                 d.changeMonth(step);
             }
             dbSearch.close();
-            return true;
+            return getResult();
         } catch (Exception e) {
             e.printStackTrace();
+            err = e.getMessage();
+            Lib.LOG("SearchWolker error: " + err);
         }
-        return false;
+        Data data = new Data.Builder()
+                .putString(ProgressModel.ERROR, err)
+                .build();
+        return Result.failure(data);
+    }
+
+    private Result getResult() {
+        Data.Builder result = new Data.Builder()
+                .putInt(MODE, mode)
+                .putString(STRING, str)
+                .putInt(SearchModel.START, count1)
+                .putInt(SearchModel.END, count2);
+        return Result.success(result.build());
+    }
+
+    private void publishProgress(int time) {
+        if (model != null) {
+            Data data = new Data.Builder()
+                    .putInt(DataBase.TIME, time)
+                    .build();
+            model.setProgress(data);
+        }
     }
 
     private void searchInResults(String find, boolean reverseOrder) throws Exception {
@@ -143,7 +154,7 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
             if (!name1.equals(name2)) {
                 if (dataBase != null)
                     dataBase.close();
-                dataBase = new DataBase(act, name1);
+                dataBase = new DataBase(context, name1);
                 db = dataBase.getWritableDatabase();
             }
             cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
@@ -176,7 +187,7 @@ public class SearchTask extends AsyncTask<String, Integer, Boolean> implements S
     }
 
     private void searchList(String name, final String find, int mode) throws Exception {
-        DataBase dataBase = new DataBase(act, name);
+        DataBase dataBase = new DataBase(context, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
         SQLiteDatabase db = dataBase.getWritableDatabase();
