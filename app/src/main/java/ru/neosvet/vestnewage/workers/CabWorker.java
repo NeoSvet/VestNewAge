@@ -9,7 +9,6 @@ import androidx.work.WorkerParameters;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.List;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -25,8 +24,7 @@ import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabWorker extends Worker {
     private Context context;
-    public static final String TAG = "cab", LOGIN = "login", PASSWORD = "pass",
-            GET_WORDS = "get_w", SELECT_WORD = "select";
+    public static final String TAG = "cab";
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
     private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private CabModel model;
@@ -44,13 +42,13 @@ public class CabWorker extends Worker {
         try {
             String task = getInputData().getString(Const.TASK);
             Data.Builder result;
-            if (task.equals(LOGIN)) {
+            if (task.equals(Const.LOGIN)) {
                 result = subLogin(model.getEmail(),
-                        getInputData().getString(PASSWORD));
-            } else if (task.equals(GET_WORDS)) {
+                        getInputData().getString(Const.PASSWORD));
+            } else if (task.equals(Const.GET_WORDS)) {
                 result = getListWord(false);
             } else {
-                result = sendWord(getInputData().getInt(ProgressModel.LIST, 0));
+                result = sendWord(getInputData().getInt(Const.LIST, 0));
             }
             result.putString(Const.TASK, task);
             return Result.success(result.build());
@@ -60,7 +58,7 @@ public class CabWorker extends Worker {
             Lib.LOG("CabWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }

@@ -22,12 +22,10 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookWorker extends Worker {
     private Context context;
-    public static final String TAG = "book", OTKR = "otkr", FROM_OTKR = "from_otkr",
-            KATRENY = "katreny";
+    public static final String TAG = "book";
     private ProgressModel model;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
@@ -53,14 +51,14 @@ public class BookWorker extends Worker {
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             String name;
-            if (getInputData().getBoolean(OTKR, false)) {
+            if (getInputData().getBoolean(Const.OTKR, false)) {
                 name = downloadOtrk(true);
                 return Result.success(new Data.Builder()
                         .putString(DataBase.TITLE, name)
                         .build());
             }
-            boolean kat = getInputData().getBoolean(KATRENY, false);
-            if (!kat && getInputData().getBoolean(FROM_OTKR, false))
+            boolean kat = getInputData().getBoolean(Const.KATRENY, false);
+            if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
                 downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
             name = downloadBook(kat);
             return Result.success(new Data.Builder()
@@ -72,7 +70,7 @@ public class BookWorker extends Worker {
             Lib.LOG("BookWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }
@@ -81,8 +79,8 @@ public class BookWorker extends Worker {
         if (withDialog) {
             if (model != null) {
                 Data data = new Data.Builder()
-                        .putString(BookModel.MSG, context.getResources().getString(R.string.start))
-                        .putInt(BookModel.MAX, 137)
+                        .putString(Const.MSG, context.getResources().getString(R.string.start))
+                        .putInt(Const.MAX, 137)
                         .build();
                 model.setProgress(data);
             }
@@ -123,9 +121,9 @@ public class BookWorker extends Worker {
             if (withDialog) {
                 if (model != null) {
                     Data data = new Data.Builder()
-                            .putString(BookModel.MSG, context.getResources().getStringArray(R.array.months)
+                            .putString(Const.MSG, context.getResources().getStringArray(R.array.months)
                                     [m - 1] + " " + (2000 + y))
-                            .putInt(BookModel.PROG, prog)
+                            .putInt(Const.PROG, prog)
                             .build();
                     model.setProgress(data);
                 }

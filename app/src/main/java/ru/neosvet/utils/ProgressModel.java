@@ -24,7 +24,7 @@ import ru.neosvet.vestnewage.model.SlashModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class ProgressModel extends AndroidViewModel {
-    public static final String NAME = "CLASS_NAME", ERROR = "ERROR", LIST = "list", PAGE = "page";
+    public static final String NAME = "CLASS_NAME";
     public boolean inProgress = true;
     protected WorkManager work;
     protected LiveData<List<WorkInfo>> state;

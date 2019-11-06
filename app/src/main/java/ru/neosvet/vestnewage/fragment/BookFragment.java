@@ -42,7 +42,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -54,7 +53,6 @@ import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
     private final int DEF_YEAR = 100;
-    private final String POS = "pos", KAT = "kat", OTKR = "otkr", CURRENT_TAB = "tab";
     private MainActivity act;
     private View container;
     private Animation anMin, anMax;
@@ -98,8 +96,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     public void onPause() {
         super.onPause();
         model.removeObserves(act);
-        editor.putInt(KAT, dKatren.getTimeInDays());
-        editor.putInt(POS, dPoslanie.getTimeInDays());
+        editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
+        editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
     }
 
@@ -117,7 +115,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getInt(BookModel.MAX, 0) > 0)
+                if (data.getInt(Const.MAX, 0) > 0)
                     model.showDialog(act);
                 else
                     model.updateDialog();
@@ -130,7 +128,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                     if (workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -147,7 +145,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             dateDialog.dismiss();
         else if (dialog.length() > 1)
             alertRnd.dismiss();
-        outState.putInt(CURRENT_TAB, tab);
+        outState.putInt(Const.TAB, tab);
         super.onSaveInstanceState(outState);
     }
 
@@ -156,18 +154,18 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         d.setYear(DEF_YEAR);
         int kat, pos;
         try {
-            kat = pref.getInt(KAT, d.getTimeInDays());
-            pos = pref.getInt(POS, d.getTimeInDays());
+            kat = pref.getInt(Const.KATRENY, d.getTimeInDays());
+            pos = pref.getInt(Const.POSLANIYA, d.getTimeInDays());
         } catch (Exception e) {
-            kat = (int) (pref.getLong(KAT, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
-            pos = (int) (pref.getLong(POS, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
+            kat = (int) (pref.getLong(Const.KATRENY, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
+            pos = (int) (pref.getLong(Const.POSLANIYA, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
         }
         dKatren = DateHelper.putDays(act, kat);
         dPoslanie = DateHelper.putDays(act, pos);
-        fromOtkr = pref.getBoolean(OTKR, false);
+        fromOtkr = pref.getBoolean(Const.OTKR, false);
         if (state != null) {
             act.setCurFragment(this);
-            tab = state.getInt(CURRENT_TAB);
+            tab = state.getInt(Const.TAB);
             if (!model.inProgress) {
                 dialog = state.getString(Const.DIALOG);
                 if (dialog.length() == 1)
@@ -187,13 +185,13 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
-        tabSpec = tabHost.newTabSpec(KAT);
+        tabSpec = tabHost.newTabSpec(Const.KATRENY);
         tabSpec.setIndicator(getResources().getString(R.string.katreny),
                 getResources().getDrawable(R.drawable.none));
         tabSpec.setContent(R.id.pBook);
         tabHost.addTab(tabSpec);
 
-        tabSpec = tabHost.newTabSpec(POS);
+        tabSpec = tabHost.newTabSpec(Const.POSLANIYA);
         tabSpec.setIndicator(getResources().getString(R.string.poslaniya),
                 getResources().getDrawable(R.drawable.none));
         tabSpec.setContent(R.id.pBook);
@@ -212,7 +210,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
                 if (model.inProgress) return;
-                if (name.equals(KAT))
+                if (name.equals(Const.KATRENY))
                     act.setTitle(getResources().getString(R.string.katreny));
                 else
                     act.setTitle(getResources().getString(R.string.poslaniya));
@@ -541,7 +539,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 if (result.substring(5).equals("0")) // загрузка не была завершена
                     return;
                 fromOtkr = true;
-                editor.putBoolean(OTKR, fromOtkr);
+                editor.putBoolean(Const.OTKR, fromOtkr);
                 result = result.substring(0, 5);
                 d.setYear(DEF_YEAR);
             }

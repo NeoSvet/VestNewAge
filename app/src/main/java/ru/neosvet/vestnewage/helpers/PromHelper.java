@@ -29,7 +29,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class PromHelper {
@@ -256,8 +255,8 @@ public class PromHelper {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putInt(TIMEDIFF, timeDiff);
                         editor.apply();
-                        int t = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-                        if (t != SettingsFragment.TURN_OFF)
+                        int t = pref.getInt(Const.TIME, Const.TURN_OFF);
+                        if (t != Const.TURN_OFF)
                             PromReceiver.setReceiver(context, t);
                     }
                     if (action != null)
@@ -273,9 +272,9 @@ public class PromHelper {
     }
 
     public void showNotif() {
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, Context.MODE_PRIVATE);
-        final int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p == SettingsFragment.TURN_OFF)
+        SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p == Const.TURN_OFF)
             return;
         boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);

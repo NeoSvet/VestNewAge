@@ -10,11 +10,12 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.SearchWorker;
 
 public class SearchModel extends ProgressModel {
-    public static final String TAG = "search", START = "start", END = "end";
+    public static final String TAG = "search";
     private static SearchModel current = null;
 
     public static SearchModel getInstance() {
@@ -36,10 +37,10 @@ public class SearchModel extends ProgressModel {
                 .build();
         Data.Builder data = new Data.Builder()
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName())
-                .putString(SearchWorker.STRING, str)
-                .putInt(SearchWorker.MODE, mode)
-                .putString(START, start)
-                .putString(END, end);
+                .putString(Const.STRING, str)
+                .putInt(Const.MODE, mode)
+                .putString(Const.START, start)
+                .putString(Const.END, end);
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(SearchWorker.class)
                 .setInputData(data.build())

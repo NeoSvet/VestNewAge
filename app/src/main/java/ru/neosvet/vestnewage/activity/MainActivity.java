@@ -50,10 +50,7 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
-    public static final byte SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
     private final String LOADER = "loader";
-    public static final String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new",
-            START_SCEEN = "start_screen", CUR_ID = "cur_id", TAB = "tab";
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
     public int k_new = 0;
@@ -78,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
-        int p = pref.getInt(START_SCEEN, SCREEN_CALENDAR);
+        int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
         if (p == 0 && getResources().getInteger(R.integer.screen_mode)
                 < getResources().getInteger(R.integer.screen_tablet_port)) {
             setContentView(R.layout.main_activity_nomenu);
@@ -86,9 +83,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isMenuMode = true;
         } else
             setContentView(R.layout.main_activity);
-        if (p == SCREEN_SUMMARY)
+        if (p == Const.SCREEN_SUMMARY)
             first_fragment = R.id.nav_rss;
-        else if (p == SCREEN_CALENDAR || !isMenuMode)
+        else if (p == Const.SCREEN_CALENDAR || !isMenuMode)
             first_fragment = R.id.nav_calendar;
 
         myFragmentManager = getFragmentManager();
@@ -97,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         unread = new UnreadHelper(this);
         initInterface();
 
-        isCountInMenu = pref.getBoolean(COUNT_IN_MENU, true);
+        isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
             prom = new PromHelper(this, findViewById(R.id.tvPromTime));
         } else if (navigationView != null) { //it is not tablet and land
@@ -112,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void restoreActivityState(Bundle state) {
         if (state == null) {
             Intent intent = getIntent();
-            tab = intent.getIntExtra(TAB, 0);
+            tab = intent.getIntExtra(Const.TAB, 0);
             if (pref.getBoolean(Const.FIRST, true)) {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean(Const.FIRST, false);
@@ -121,13 +118,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(R.id.nav_help);
                 isFirst = true;
             } else {
-                if (pref.getBoolean(START_NEW, false) && k_new > 0)
+                if (pref.getBoolean(Const.START_NEW, false) && k_new > 0)
                     setFragment(R.id.nav_new);
                 else
-                    setFragment(intent.getIntExtra(CUR_ID, first_fragment));
+                    setFragment(intent.getIntExtra(Const.CUR_ID, first_fragment));
             }
         } else {
-            cur_id = state.getInt(CUR_ID);
+            cur_id = state.getInt(Const.CUR_ID);
             if (navigationView == null && !isMenuMode)
                 setMenuFragment();
             loader = (LoaderTask) state.getSerializable(LOADER);
@@ -227,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(LOADER, loader);
-        outState.putInt(CUR_ID, cur_id);
+        outState.putInt(Const.CUR_ID, cur_id);
         super.onSaveInstanceState(outState);
     }
 

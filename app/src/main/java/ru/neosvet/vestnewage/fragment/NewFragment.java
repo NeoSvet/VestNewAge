@@ -26,7 +26,6 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 
 public class NewFragment extends Fragment {
-    public static final String ADS = "ads";
     private CustomDialog alert;
     private ListAdapter adNew;
     private MainActivity act;
@@ -48,13 +47,13 @@ public class NewFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(ADS, index_ads);
+        outState.putInt(Const.ADS, index_ads);
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state != null) {
-            index_ads = state.getInt(ADS);
+            index_ads = state.getInt(Const.ADS);
             showAd(adNew.getItem(index_ads).getLink(), adNew.getItem(index_ads).getHead(0));
         }
     }
@@ -77,7 +76,7 @@ public class NewFragment extends Fragment {
                     unread.clearList();
                     unread.setBadge();
                     unread.close();
-                    File file = new File(act.getFilesDir() + File.separator + ADS);
+                    File file = new File(act.getFilesDir() + File.separator + Const.ADS);
                     if (file.exists()) {
                         BufferedReader br = new BufferedReader(new FileReader(file));
                         String t = br.readLine(); // читаем время последней загрузки объявлений
@@ -151,7 +150,7 @@ public class NewFragment extends Fragment {
                 }
                 links.clear();
             }
-            File file = new File(act.getFilesDir() + File.separator + ADS);
+            File file = new File(act.getFilesDir() + File.separator + Const.ADS);
             if (file.exists()) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time

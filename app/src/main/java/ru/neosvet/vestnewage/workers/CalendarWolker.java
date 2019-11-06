@@ -31,8 +31,7 @@ import ru.neosvet.vestnewage.task.LoaderTask;
 
 public class CalendarWolker extends Worker {
     private Context context;
-    public static final String TAG = "Calendar", DAY = "Day",
-            MONTH = "Month", YEAR = "Year", UNREAD = "Unread";
+    public static final String TAG = "calendar";
     private DataBase dataBase;
     private SQLiteDatabase db;
     private Lib lib;
@@ -58,14 +57,14 @@ public class CalendarWolker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            downloadCalendar(getInputData().getInt(YEAR, 0),
-                    getInputData().getInt(MONTH, 0),
-                    getInputData().getBoolean(UNREAD, false));
+            downloadCalendar(getInputData().getInt(Const.YEAR, 0),
+                    getInputData().getInt(Const.MONTH, 0),
+                    getInputData().getBoolean(Const.UNREAD, false));
             if (isCancelled())
                 return Result.success();
             publishProgress(0);
-            downloadMonth(getInputData().getInt(YEAR, 0),
-                    getInputData().getInt(MONTH, 0));
+            downloadMonth(getInputData().getInt(Const.YEAR, 0),
+                    getInputData().getInt(Const.MONTH, 0));
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,7 +72,7 @@ public class CalendarWolker extends Worker {
             Lib.LOG("CalendarWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }
@@ -81,7 +80,7 @@ public class CalendarWolker extends Worker {
     private void publishProgress(int p) {
         Data data = new Data.Builder()
                 .putString(Const.TASK, TAG)
-                .putInt(DAY, p)
+                .putInt(Const.DAY, p)
                 .build();
         model.setProgress(data);
     }

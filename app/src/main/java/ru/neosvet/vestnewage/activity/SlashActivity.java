@@ -36,7 +36,6 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
@@ -84,17 +83,17 @@ public class SlashActivity extends AppCompatActivity {
 
         notifHelper = new NotificationHelper(SlashActivity.this);
         if (ver < 21) {
-            SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-            int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
+            SharedPreferences pref = getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
+            int p = pref.getInt(Const.TIME, Const.TURN_OFF);
             Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
-            if (p == SettingsFragment.TURN_OFF)
+            intent.putExtra(Const.CUR_ID, R.id.nav_settings);
+            if (p == Const.TURN_OFF)
                 showNotifTip(getResources().getString(R.string.are_you_know),
                         getResources().getString(R.string.new_option_notif), intent);
             else {
-                pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
-                p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-                if (p == SettingsFragment.TURN_OFF)
+                pref = getSharedPreferences(Const.PROM, MODE_PRIVATE);
+                p = pref.getInt(Const.TIME, Const.TURN_OFF);
+                if (p == Const.TURN_OFF)
                     showNotifTip(getResources().getString(R.string.are_you_know),
                             getResources().getString(R.string.new_option_notif), intent);
             }
@@ -153,18 +152,18 @@ public class SlashActivity extends AppCompatActivity {
             link = data.getPath();
         if (link != null) {
             if (link.contains(SummaryFragment.RSS)) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_rss);
+                main.putExtra(Const.CUR_ID, R.id.nav_rss);
                 if (getIntent().hasExtra(DataBase.ID))
                     main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
             } else if (link.length() < 2 || link.equals("/index.html")) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
-                main.putExtra(MainActivity.TAB, 0);
+                main.putExtra(Const.CUR_ID, R.id.nav_main);
+                main.putExtra(Const.TAB, 0);
             } else if (link.equals("/novosti.html")) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
-                main.putExtra(MainActivity.TAB, 1);
+                main.putExtra(Const.CUR_ID, R.id.nav_main);
+                main.putExtra(Const.TAB, 1);
             } else if (link.equals("/media.html")) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_main);
-                main.putExtra(MainActivity.TAB, 2);
+                main.putExtra(Const.CUR_ID, R.id.nav_main);
+                main.putExtra(Const.TAB, 2);
             } else if (link.contains("html")) {
                 BrowserActivity.openReader(this, link.substring(1), null);
                 main = null;
@@ -177,11 +176,11 @@ public class SlashActivity extends AppCompatActivity {
                 BrowserActivity.openReader(this, link, null);
                 main = null;
             } else if (link.contains("/poems")) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
-                main.putExtra(MainActivity.TAB, 0);
+                main.putExtra(Const.CUR_ID, R.id.nav_book);
+                main.putExtra(Const.TAB, 0);
             } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_book);
-                main.putExtra(MainActivity.TAB, 1);
+                main.putExtra(Const.CUR_ID, R.id.nav_book);
+                main.putExtra(Const.TAB, 1);
             } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
                 link = data.getQuery();
                 int page = 1;
@@ -203,8 +202,8 @@ public class SlashActivity extends AppCompatActivity {
                     else if (mode > 0) mode++; // поэтому остальное смещается
                 }
                 main.putExtra(DataBase.PLACE, page);
-                main.putExtra(MainActivity.TAB, mode);
-                main.putExtra(MainActivity.CUR_ID, R.id.nav_search);
+                main.putExtra(Const.TAB, mode);
+                main.putExtra(Const.CUR_ID, R.id.nav_search);
                 main.putExtra(DataBase.LINK, link.substring(link.indexOf("=") + 1));
             }
         }
@@ -222,7 +221,7 @@ public class SlashActivity extends AppCompatActivity {
                             workInfos.get(i).getState().isFinished())
                         finishLoad();
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -242,7 +241,7 @@ public class SlashActivity extends AppCompatActivity {
         if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
             return;
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        model.startLoad(pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR) == MainActivity.SCREEN_SUMMARY,
+        model.startLoad(pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_SUMMARY,
                 date.getMonth(), date.getYear());
     }
 
@@ -319,13 +318,13 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     private void rebuildNotif() {
-        SharedPreferences pref = getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
-        int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p != SettingsFragment.TURN_OFF)
+        SharedPreferences pref = getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
+        int p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p != Const.TURN_OFF)
             SummaryHelper.setReceiver(this, p);
-        pref = getSharedPreferences(SettingsFragment.PROM, MODE_PRIVATE);
-        p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p != SettingsFragment.TURN_OFF)
+        pref = getSharedPreferences(Const.PROM, MODE_PRIVATE);
+        p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p != Const.TURN_OFF)
             PromReceiver.setReceiver(this, p);
     }
 
@@ -356,7 +355,7 @@ public class SlashActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         if (pref.getBoolean("menu_mode", false)) {
             SharedPreferences.Editor editor = pref.edit();
-            editor.putInt(MainActivity.START_SCEEN, MainActivity.SCREEN_MENU);
+            editor.putInt(Const.START_SCEEN, Const.SCREEN_MENU);
             editor.apply();
         }
     }
@@ -450,7 +449,7 @@ public class SlashActivity extends AppCompatActivity {
 
     public Intent getSettingsIntent() {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+        intent.putExtra(Const.CUR_ID, R.id.nav_settings);
         return intent;
     }
 }

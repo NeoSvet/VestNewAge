@@ -12,7 +12,6 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
@@ -55,21 +54,21 @@ public class CabModel extends ProgressModel {
     public void login(String email, String password) {
         this.email = email;
         Data.Builder data = new Data.Builder()
-                .putString(Const.TASK, CabWorker.LOGIN)
-                .putString(CabWorker.PASSWORD, password);
+                .putString(Const.TASK, Const.LOGIN)
+                .putString(Const.PASSWORD, password);
         startWorker(data);
     }
 
     public void getListWord() {
         Data.Builder data = new Data.Builder()
-                .putString(Const.TASK, CabWorker.GET_WORDS);
+                .putString(Const.TASK, Const.GET_WORDS);
         startWorker(data);
     }
 
     public void selectWord(int index) {
         Data.Builder data = new Data.Builder()
-                .putString(Const.TASK, CabWorker.SELECT_WORD)
-                .putInt(ProgressModel.LIST, index);
+                .putString(Const.TASK, Const.SELECT_WORD)
+                .putInt(Const.LIST, index);
         startWorker(data);
     }
 

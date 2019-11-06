@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 
@@ -39,9 +40,9 @@ public class CalendarModel extends ProgressModel {
                 .build();
         Data.Builder data = new Data.Builder()
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName())
-                .putInt(CalendarWolker.MONTH, month)
-                .putInt(CalendarWolker.YEAR, year)
-                .putBoolean(CalendarWolker.UNREAD, updateUnread);
+                .putInt(Const.MONTH, month)
+                .putInt(Const.YEAR, year)
+                .putBoolean(Const.UNREAD, updateUnread);
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(CalendarWolker.class)
                 .setInputData(data.build())

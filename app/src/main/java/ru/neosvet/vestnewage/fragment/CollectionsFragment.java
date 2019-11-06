@@ -32,7 +32,6 @@ import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 
 public class CollectionsFragment extends BackFragment {
-    private final String SEL = "sel", RENAME = "rename";
     public static final int MARKER_REQUEST = 11;
     private ListView lvMarker;
     private View container, fabEdit, fabHelp, pEdit;
@@ -55,8 +54,8 @@ public class CollectionsFragment extends BackFragment {
         if (savedInstanceState != null) {
             act.setCurFragment(this);
             sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
-            iSel = savedInstanceState.getInt(SEL, -1);
-            sName = savedInstanceState.getString(RENAME, null);
+            iSel = savedInstanceState.getInt(Const.SELECT, -1);
+            sName = savedInstanceState.getString(Const.RENAME, null);
             delete = savedInstanceState.getBoolean(Const.DIALOG, false);
         }
 
@@ -97,8 +96,8 @@ public class CollectionsFragment extends BackFragment {
     public void onSaveInstanceState(Bundle outState) {
         saveChange();
         outState.putString(DataBase.COLLECTIONS, sCol);
-        outState.putInt(SEL, iSel);
-        outState.putString(RENAME, sName);
+        outState.putInt(Const.SELECT, iSel);
+        outState.putString(Const.RENAME, sName);
         outState.putBoolean(Const.DIALOG, delete);
         super.onSaveInstanceState(outState);
     }

@@ -51,7 +51,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -61,12 +60,10 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
-import ru.neosvet.vestnewage.workers.SearchWorker;
 
 
 public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
-    private final String SETTINGS = "s", ADDITION = "a", LABEL = "l",
-            LAST_RESULTS = "r";
+    private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r";
     private MainActivity act;
     private float density;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
@@ -146,13 +143,13 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished()) {
                         Data result = workInfos.get(i).getOutputData();
-                        putResult(result.getInt(SearchWorker.MODE, 0),
-                                result.getString(SearchWorker.STRING),
-                                result.getInt(SearchModel.START, 0),
-                                result.getInt(SearchModel.END, 0));
+                        putResult(result.getInt(Const.MODE, 0),
+                                result.getString(Const.STRING),
+                                result.getInt(Const.START, 0),
+                                result.getInt(Const.END, 0));
                     }
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -168,8 +165,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         outState.putInt(Const.DIALOG, dialog);
         if (dialog > -1)
             dateDialog.dismiss();
-        outState.putInt(SearchModel.START, dStart.getTimeInDays());
-        outState.putInt(SearchModel.END, dEnd.getTimeInDays());
+        outState.putInt(Const.START, dStart.getTimeInDays());
+        outState.putInt(Const.END, dEnd.getTimeInDays());
         outState.putInt(DataBase.SEARCH, page);
         if (page > -1) {
             outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
@@ -199,8 +196,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             }
         } else {
             act.setCurFragment(this);
-            dStart = DateHelper.putDays(act, state.getInt(SearchModel.START));
-            dEnd = DateHelper.putDays(act, state.getInt(SearchModel.END));
+            dStart = DateHelper.putDays(act, state.getInt(Const.START));
+            dEnd = DateHelper.putDays(act, state.getInt(Const.END));
             page = state.getInt(DataBase.SEARCH, -1);
             if (page > -1) {
                 fabSettings.setVisibility(View.GONE);

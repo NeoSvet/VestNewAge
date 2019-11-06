@@ -14,12 +14,13 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.ui.dialogs.ProgressDialog;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.workers.BookWorker;
 
 public class BookModel extends ProgressModel {
-    public static final String TAG = "book", MSG = "msg", PROG = "prog", MAX = "max";
+    public static final String TAG = "book";
     private static BookModel current = null;
     private ProgressDialog dialog;
 
@@ -63,12 +64,12 @@ public class BookModel extends ProgressModel {
 
     public boolean showDialog(MainActivity act) {
         Data data = getProgress().getValue();
-        int max = data.getInt(MAX, 0);
+        int max = data.getInt(Const.MAX, 0);
         if (max == 0)
             return false;
         ProgressDialog dialog = new ProgressDialog(act, 0);
-        dialog.setMessage(data.getString(MSG));
-        dialog.setProgress(data.getInt(PROG, 0));
+        dialog.setMessage(data.getString(Const.MSG));
+        dialog.setProgress(data.getInt(Const.PROG, 0));
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -81,7 +82,7 @@ public class BookModel extends ProgressModel {
 
     public void updateDialog() {
         Data data = getProgress().getValue();
-        dialog.setMessage(data.getString(MSG));
-        dialog.setProgress(data.getInt(PROG, 0));
+        dialog.setMessage(data.getString(Const.MSG));
+        dialog.setProgress(data.getInt(Const.PROG, 0));
     }
 }

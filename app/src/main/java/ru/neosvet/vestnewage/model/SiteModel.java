@@ -16,7 +16,7 @@ import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.SiteWorker;
 
 public class SiteModel extends ProgressModel {
-    public static final String TAG = "Site";
+    public static final String TAG = "site";
     private static SiteModel current = null;
 
     public static SiteModel getInstance() {

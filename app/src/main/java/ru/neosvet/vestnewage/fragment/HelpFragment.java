@@ -9,12 +9,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.HelpAdapter;
 
 public class HelpFragment extends Fragment {
-    private final String PANELS = "panels";
     private final int COUNT = 8, FEEDBACK = 1, FEEDBACK_COUNT = 3,
             WRITE_TO_DEV = 1, LINK_ON_APP = 2, CHANGELOG = 3;
     private boolean feedback = false;
@@ -44,7 +44,7 @@ public class HelpFragment extends Fragment {
             if (mHelp == null)
                 mHelp = new boolean[COUNT];
         } else {
-            mHelp = state.getBooleanArray(PANELS);
+            mHelp = state.getBooleanArray(Const.PANEL);
             if (mHelp[FEEDBACK])
                 turnFeedback();
             adHelp.notifyDataSetChanged();
@@ -59,7 +59,7 @@ public class HelpFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBooleanArray(PANELS, mHelp);
+        outState.putBooleanArray(Const.PANEL, mHelp);
         super.onSaveInstanceState(outState);
     }
 

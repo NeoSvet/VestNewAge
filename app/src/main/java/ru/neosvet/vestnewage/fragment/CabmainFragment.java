@@ -33,7 +33,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -43,7 +42,6 @@ import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
 public class CabmainFragment extends BackFragment {
-    private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -102,7 +100,7 @@ public class CabmainFragment extends BackFragment {
                     if (workInfos.get(i).getState().isFinished())
                         parseResult(workInfos.get(i).getOutputData());
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        initError(workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        initError(workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -115,7 +113,7 @@ public class CabmainFragment extends BackFragment {
         act.status.setLoad(false);
         switch (result.getInt(DataBase.TITLE, 0)) {
             case CabWorker.SELECTED_WORD:
-                if (result.getString(Const.TASK).equals(CabWorker.GET_WORDS)) {
+                if (result.getString(Const.TASK).equals(Const.GET_WORDS)) {
                     initCabinet(getResources().getString(R.string.selected_status),
                             result.getString(DataBase.DESCTRIPTION));
                 } else {
@@ -143,11 +141,11 @@ public class CabmainFragment extends BackFragment {
     private void restoreActivityState(Bundle state) {
         if (state == null) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
-            String s = pref.getString(EMAIL, "");
+            String s = pref.getString(Const.EMAIL, "");
             if (s.length() > 0) {
                 cbRemEmail.setChecked(true);
                 etEmail.setText(s);
-                s = pref.getString(PASSWORD, "");
+                s = pref.getString(Const.PASSWORD, "");
                 if (s.length() > 0) {
                     cbRemPassword.setChecked(true);
                     etPassword.setText(uncriptPassword(s));
@@ -156,7 +154,7 @@ public class CabmainFragment extends BackFragment {
             loginList();
         } else {
             act.setCurFragment(this);
-            mode_list = state.getByte(PANEL);
+            mode_list = state.getByte(Const.PANEL);
             if (mode_list > CabModel.LOGIN) {
                 pMain.setVisibility(View.GONE);
                 fabEnter.setVisibility(View.GONE);
@@ -178,7 +176,7 @@ public class CabmainFragment extends BackFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putByte(PANEL, mode_list);
+        outState.putByte(Const.PANEL, mode_list);
         String[] m = new String[adMain.getCount()];
         String d;
         for (int i = 0; i < adMain.getCount(); i++) {
@@ -335,9 +333,9 @@ public class CabmainFragment extends BackFragment {
         if (!cbRemPassword.isChecked()) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
-            editor.putString(PASSWORD, "");
+            editor.putString(Const.PASSWORD, "");
             if (!cbRemEmail.isChecked()) {
-                editor.putString(EMAIL, "");
+                editor.putString(Const.EMAIL, "");
             }
             editor.commit();
         }
@@ -376,9 +374,9 @@ public class CabmainFragment extends BackFragment {
         if (cbRemEmail.isChecked()) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
-            editor.putString(EMAIL, etEmail.getText().toString());
+            editor.putString(Const.EMAIL, etEmail.getText().toString());
             if (cbRemPassword.isChecked()) {
-                editor.putString(PASSWORD, criptPassword(etPassword.getText().toString()));
+                editor.putString(Const.PASSWORD, criptPassword(etPassword.getText().toString()));
             }
             editor.commit();
         }

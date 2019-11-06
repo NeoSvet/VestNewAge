@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 
 /**
@@ -16,14 +16,14 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.PROM, Context.MODE_PRIVATE);
-        int p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-        if (p != SettingsFragment.TURN_OFF)
+        SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        int p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p != Const.TURN_OFF)
             PromReceiver.setReceiver(context, p);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            pref = context.getSharedPreferences(SettingsFragment.SUMMARY, Context.MODE_PRIVATE);
-            p = pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF);
-            if (p != SettingsFragment.TURN_OFF)
+            pref = context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
+            p = pref.getInt(Const.TIME, Const.TURN_OFF);
+            if (p != Const.TURN_OFF)
                 SummaryHelper.setReceiver(context, 0); // or p?
         }
     }

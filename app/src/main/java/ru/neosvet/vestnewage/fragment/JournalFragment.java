@@ -27,7 +27,6 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 
 public class JournalFragment extends Fragment {
-    private final String OFFSET = "offset", FINISH = "finish";
     private DataBase dbJournal;
     private ListAdapter adJournal;
     private MainActivity act;
@@ -46,8 +45,8 @@ public class JournalFragment extends Fragment {
         act.setTitle(getResources().getString(R.string.journal));
         initViews();
         if (savedInstanceState != null) {
-            offset = savedInstanceState.getInt(OFFSET, 0);
-            finish = savedInstanceState.getBoolean(FINISH, true);
+            offset = savedInstanceState.getInt(Const.START, 0);
+            finish = savedInstanceState.getBoolean(Const.END, true);
             if (offset > 0 || !finish) {
                 fabPrev.setVisibility(View.VISIBLE);
                 fabNext.setVisibility(View.VISIBLE);
@@ -58,8 +57,8 @@ public class JournalFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(OFFSET, offset);
-        outState.putBoolean(FINISH, finish);
+        outState.putInt(Const.START, offset);
+        outState.putBoolean(Const.END, finish);
         super.onSaveInstanceState(outState);
     }
 

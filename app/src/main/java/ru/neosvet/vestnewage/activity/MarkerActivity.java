@@ -36,7 +36,6 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CheckAdapter;
 
 public class MarkerActivity extends AppCompatActivity {
-    private final String PAGE = "page", COL = "col";
     private float density;
     private String pageCon;
     private CheckAdapter adPage, adCol;
@@ -118,9 +117,9 @@ public class MarkerActivity extends AppCompatActivity {
         outState.putString(DataBase.JOURNAL, sel);
         outState.putString(DataBase.COLLECTIONS, tvCol.getText().toString());
         if (modeList == 1)
-            outState.putString(PAGE, getPageList());
+            outState.putString(Const.PAGE, getPageList());
         else if (modeList == 2)
-            outState.putString(COL, getColList());
+            outState.putString(Const.LIST, getColList());
         outState.putBoolean(DataBase.Q, (pPos.getVisibility() == View.VISIBLE));
         super.onSaveInstanceState(outState);
     }
@@ -216,7 +215,7 @@ public class MarkerActivity extends AppCompatActivity {
     private void restoreActivityState(Bundle state) {
         if (state != null) {
             tvCol.setText(state.getString(DataBase.COLLECTIONS));
-            String s = state.getString(COL);
+            String s = state.getString(Const.LIST);
             if (s == null)
                 s = tvCol.getText().toString();
             setColList(s);
@@ -227,7 +226,7 @@ public class MarkerActivity extends AppCompatActivity {
             else
                 rPar.setChecked(true);
             sel = state.getString(DataBase.JOURNAL);
-            s = state.getString(PAGE);
+            s = state.getString(Const.PAGE);
             if (s == null) {
                 if (sel.contains("%"))
                     s = tvSel.getText().toString();

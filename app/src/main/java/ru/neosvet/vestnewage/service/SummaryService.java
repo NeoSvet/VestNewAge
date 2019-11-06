@@ -20,13 +20,11 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.task.LoaderTask;
 
 /**
  * Created by NeoSvet on 10.02.2018.
@@ -42,7 +40,7 @@ public class SummaryService extends JobIntentService {
     @Override
     protected void onHandleWork(@NonNull final Intent intent) {
         context = getApplicationContext();
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
         SummaryHelper summaryHelper = new SummaryHelper(context);
         try {
             List<String> result;
@@ -51,7 +49,7 @@ public class SummaryService extends JobIntentService {
                 result.add(intent.getStringExtra(DataBase.DESCTRIPTION));
                 result.add(intent.getStringExtra(DataBase.LINK));
             } else {
-                if (pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF) == SettingsFragment.TURN_OFF)
+                if (pref.getInt(Const.TIME, Const.TURN_OFF) == Const.TURN_OFF)
                     return;
                 result = checkSummary();
             }

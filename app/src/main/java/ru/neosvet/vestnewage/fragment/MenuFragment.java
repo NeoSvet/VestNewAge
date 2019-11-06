@@ -14,7 +14,6 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.MenuAdapter;
 
 public class MenuFragment extends Fragment {
-    private static final String SELECT = "select";
     private final int MAX = 12;
     private final int[] mMenu = new int[]{R.id.nav_new, R.id.nav_rss, R.id.nav_main, R.id.nav_calendar,
             R.id.nav_book, R.id.nav_search, R.id.nav_marker, R.id.nav_journal,
@@ -86,7 +85,7 @@ public class MenuFragment extends Fragment {
         if (!isFullScreen) {
             if (savedInstanceState != null) {
                 act.setFrMenu(this);
-                iSelect = savedInstanceState.getInt(SELECT);
+                iSelect = savedInstanceState.getInt(Const.SELECT);
             }
             adMenu.getItem(getPos(iSelect)).setSelect(true);
         }
@@ -98,7 +97,7 @@ public class MenuFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(SELECT, iSelect);
+        outState.putInt(Const.SELECT, iSelect);
         super.onSaveInstanceState(outState);
     }
 

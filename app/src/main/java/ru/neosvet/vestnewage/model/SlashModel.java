@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.AdsWorker;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
@@ -55,9 +56,9 @@ public class SlashModel extends ProgressModel {
                     .addTag(TAG)
                     .build();
         } else {
-            data.putInt(CalendarWolker.MONTH, month)
-                    .putInt(CalendarWolker.YEAR, year)
-                    .putBoolean(CalendarWolker.UNREAD, true);
+            data.putInt(Const.MONTH, month)
+                    .putInt(Const.YEAR, year)
+                    .putBoolean(Const.UNREAD, true);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWolker.class)
                     .setInputData(data.build())

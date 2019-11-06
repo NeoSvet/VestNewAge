@@ -27,7 +27,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
@@ -76,14 +75,14 @@ public class SummaryWorker extends Worker {
             Lib.LOG("SummaryWorker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }
 
     private void reportProgress() {
         Data data = new Data.Builder()
-                .putString(Const.TASK, ProgressModel.LIST)
+                .putString(Const.TASK, Const.LIST)
                 .build();
         if (model != null)
             model.setProgress(data);
@@ -92,8 +91,8 @@ public class SummaryWorker extends Worker {
 
     private void publishProgress(String title, String link, String des, String time) {
         Data data = new Data.Builder()
-                .putString(Const.TASK, ProgressModel.PAGE)
-                .putStringArray(ProgressModel.LIST, new String[]{
+                .putString(Const.TASK, Const.PAGE)
+                .putStringArray(Const.LIST, new String[]{
                         title, link, des, time
                 }).build();
         if (model != null)
@@ -101,7 +100,7 @@ public class SummaryWorker extends Worker {
     }
 
     private void initCheck() throws Exception {
-        SharedPreferences pref = context.getSharedPreferences(SettingsFragment.SUMMARY, Context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
         SummaryHelper summaryHelper = new SummaryHelper(context);
         List<String> result;
         String link = getInputData().getString(DataBase.LINK);
@@ -111,8 +110,8 @@ public class SummaryWorker extends Worker {
             result.add(link);
         } else {
             long last_time = System.currentTimeMillis() - pref.getLong(LAST_TIME, 0);
-            if (pref.getInt(SettingsFragment.TIME, SettingsFragment.TURN_OFF)
-                    == SettingsFragment.TURN_OFF || last_time < 900000L) {
+            if (pref.getInt(Const.TIME, Const.TURN_OFF)
+                    == Const.TURN_OFF || last_time < 900000L) {
                 Lib.LOG("SummaryWorker: too fast " + this.getId());
                 return;
             }

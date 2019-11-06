@@ -15,11 +15,10 @@ import java.io.InputStreamReader;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.fragment.NewFragment;
 
 public class AdsWorker extends Worker {
     private Context context;
-    public static final String TAG = "Ads";
+    public static final String TAG = "ads";
 
     public AdsWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -32,7 +31,7 @@ public class AdsWorker extends Worker {
         try {
             String t = "0";
             BufferedReader br;
-            File file = new File(context.getFilesDir() + File.separator + NewFragment.ADS);
+            File file = new File(context.getFilesDir() + File.separator + Const.ADS);
             if (file.exists()) {
                 br = new BufferedReader(new FileReader(file));
                 t = br.readLine();

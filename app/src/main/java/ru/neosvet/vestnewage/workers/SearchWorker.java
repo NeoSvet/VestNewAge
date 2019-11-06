@@ -19,11 +19,10 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.model.SearchModel;
 
 public class SearchWorker extends Worker {
     private Context context;
-    public static final String TAG = "search", MODE = "mode", STRING = "string";
+    public static final String TAG = "search";
     private ProgressModel model;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
@@ -61,20 +60,20 @@ public class SearchWorker extends Worker {
             dbSearch = new DataBase(context, DataBase.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
-            mode = getInputData().getInt(MODE, 0);
-            str = getInputData().getString(SearchModel.START); // начальная дата
+            mode = getInputData().getInt(Const.MODE, 0);
+            str = getInputData().getString(Const.START); // начальная дата
             start_month = Integer.parseInt(str.substring(0, 2));
             start_year = Integer.parseInt(str.substring(3, 5));
-            str = getInputData().getString(SearchModel.END); // конечная дата
+            str = getInputData().getString(Const.END); // конечная дата
             end_month = Integer.parseInt(str.substring(0, 2));
             end_year = Integer.parseInt(str.substring(3, 5));
-            str = getInputData().getString(STRING); // строка для поиска
+            str = getInputData().getString(Const.STRING); // строка для поиска
             if ((start_year == end_year && start_month <= end_month) || start_year < end_year)
                 step = 1;
             else
                 step = -1;
             if (mode == 6) { // поиск в результатах
-                searchInResults(getInputData().getString(STRING), step == -1);
+                searchInResults(getInputData().getString(Const.STRING), step == -1);
                 dbSearch.close();
                 return getResult();
             }
@@ -102,17 +101,17 @@ public class SearchWorker extends Worker {
             Lib.LOG("SearchWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }
 
     private Result getResult() {
         Data.Builder result = new Data.Builder()
-                .putInt(MODE, mode)
-                .putString(STRING, str)
-                .putInt(SearchModel.START, count1)
-                .putInt(SearchModel.END, count2);
+                .putInt(Const.MODE, mode)
+                .putString(Const.STRING, str)
+                .putInt(Const.START, count1)
+                .putInt(Const.END, count2);
         return Result.success(result.build());
     }
 

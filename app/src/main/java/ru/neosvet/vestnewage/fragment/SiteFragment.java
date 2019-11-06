@@ -31,7 +31,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -41,7 +40,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment {
-    public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", CURRENT_TAB = "tab", END = "<end>";
+    public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
@@ -95,7 +94,7 @@ public class SiteFragment extends BackFragment {
                     if (workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -107,14 +106,14 @@ public class SiteFragment extends BackFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(CURRENT_TAB, tabHost.getCurrentTab());
+        outState.putInt(Const.TAB, tabHost.getCurrentTab());
         super.onSaveInstanceState(outState);
     }
 
     private void restoreActivityState(Bundle state) {
         if (state != null) {
             act.setCurFragment(this);
-            tab = state.getInt(CURRENT_TAB);
+            tab = state.getInt(Const.TAB);
         }
         if (tab == 1) {
             tabHost.setCurrentTab(0);

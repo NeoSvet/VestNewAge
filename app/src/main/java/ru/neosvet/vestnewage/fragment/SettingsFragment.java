@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -36,9 +37,6 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class SettingsFragment extends BackFragment {
-    public static final String PANELS = "panels", TIME = "time",
-            SUMMARY = "Summary", PROM = "Prom";
-    public static final byte TURN_OFF = -1;
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
     private MainActivity act;
     private SetNotifDialog dialog = null;
@@ -69,7 +67,7 @@ public class SettingsFragment extends BackFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBooleanArray(PANELS, bPanels);
+        outState.putBooleanArray(Const.PANEL, bPanels);
         super.onSaveInstanceState(outState);
     }
 
@@ -79,7 +77,7 @@ public class SettingsFragment extends BackFragment {
             return;
         }
         act.setCurFragment(this);
-        bPanels = state.getBooleanArray(PANELS);
+        bPanels = state.getBooleanArray(Const.PANEL);
         if (bPanels == null)
             bPanels = new boolean[]{true, false, false, false, false};
         for (int i = 0; i < bPanels.length; i++) {
@@ -143,7 +141,7 @@ public class SettingsFragment extends BackFragment {
             cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
         cbNew = container.findViewById(R.id.cbNew);
         SharedPreferences pref = act.getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        cbNew.setChecked(pref.getBoolean(MainActivity.START_NEW, false));
+        cbNew.setChecked(pref.getBoolean(Const.START_NEW, false));
 
         bClearDo = container.findViewById(R.id.bClearDo);
         rbsScreen = new RadioButton[]{container.findViewById(R.id.rbMenu),
@@ -152,7 +150,7 @@ public class SettingsFragment extends BackFragment {
         if (getResources().getInteger(R.integer.screen_mode) >= getResources().getInteger(R.integer.screen_tablet_port)) {
             rbsScreen[0].setVisibility(View.GONE);
         }
-        int p = pref.getInt(MainActivity.START_SCEEN, MainActivity.SCREEN_CALENDAR);
+        int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
         rbsScreen[p].setChecked(true);
         cbsClear = new CheckBox[]{container.findViewById(R.id.cbKatreny),
                 container.findViewById(R.id.cbPoslaniya),
@@ -164,9 +162,9 @@ public class SettingsFragment extends BackFragment {
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
         sbCheckTime = container.findViewById(R.id.sbCheckTime);
         bCheckSet = container.findViewById(R.id.bCheckSet);
-        pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
-        p = pref.getInt(TIME, TURN_OFF);
-        if (p == TURN_OFF)
+        pref = act.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
+        p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p == Const.TURN_OFF)
             p = sbCheckTime.getMax();
         sbCheckTime.setProgress(p);
         setCheckTime();
@@ -176,9 +174,9 @@ public class SettingsFragment extends BackFragment {
         tvPromOff = container.findViewById(R.id.tvPromOff);
         sbPromTime = container.findViewById(R.id.sbPromTime);
         bPromSet = container.findViewById(R.id.bPromSet);
-        pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
-        p = pref.getInt(TIME, TURN_OFF);
-        if (p == TURN_OFF)
+        pref = act.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        p = pref.getInt(Const.TIME, Const.TURN_OFF);
+        if (p == Const.TURN_OFF)
             p = sbPromTime.getMax();
         sbPromTime.setProgress(p);
         setPromTime();
@@ -189,14 +187,14 @@ public class SettingsFragment extends BackFragment {
         cbCountFloat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setMainCheckBox(MainActivity.COUNT_IN_MENU, !check, -1);
+                setMainCheckBox(Const.COUNT_IN_MENU, !check, -1);
                 MainActivity.isCountInMenu = !check;
             }
         });
         cbNew.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setMainCheckBox(MainActivity.START_NEW, check, -1);
+                setMainCheckBox(Const.START_NEW, check, -1);
             }
         });
         bSyncTime.setOnClickListener(new View.OnClickListener() {
@@ -234,16 +232,16 @@ public class SettingsFragment extends BackFragment {
                     byte sel;
                     switch (compoundButton.getId()) {
                         case R.id.rbMenu:
-                            sel = MainActivity.SCREEN_MENU;
+                            sel = Const.SCREEN_MENU;
                             break;
                         case R.id.rbCalendar:
-                            sel = MainActivity.SCREEN_CALENDAR;
+                            sel = Const.SCREEN_CALENDAR;
                             break;
                         default:
-                            sel = MainActivity.SCREEN_SUMMARY;
+                            sel = Const.SCREEN_SUMMARY;
                             break;
                     }
-                    setMainCheckBox(MainActivity.START_SCEEN, false, sel);
+                    setMainCheckBox(Const.START_SCEEN, false, sel);
                 }
             }
         };
@@ -315,14 +313,14 @@ public class SettingsFragment extends BackFragment {
         bCheckSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog = new SetNotifDialog(act, SUMMARY);
+                dialog = new SetNotifDialog(act, Const.SUMMARY);
                 dialog.show();
             }
         });
         bPromSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog = new SetNotifDialog(act, PROM);
+                dialog = new SetNotifDialog(act, Const.PROM);
                 dialog.show();
             }
         });
@@ -368,35 +366,35 @@ public class SettingsFragment extends BackFragment {
         else
             editor.putInt(name, value);
         editor.apply();
-        if (name.equals(MainActivity.START_NEW))
+        if (name.equals(Const.START_NEW))
             return;
         Intent main = new Intent(act, MainActivity.class);
         if (value == -1)
-            main.putExtra(MainActivity.CUR_ID, R.id.nav_settings);
+            main.putExtra(Const.CUR_ID, R.id.nav_settings);
         act.startActivity(main);
         act.finish();
     }
 
     private void saveSummary() {
-        SharedPreferences pref = act.getSharedPreferences(SUMMARY, Context.MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = sbCheckTime.getProgress();
         if (p < sbCheckTime.getMax()) {
             if (p > 5)
                 p += (p - 5) * 5;
-        } else p = TURN_OFF;
-        editor.putInt(TIME, p);
+        } else p = Const.TURN_OFF;
+        editor.putInt(Const.TIME, p);
         editor.apply();
         SummaryHelper.setReceiver(act, p);
     }
 
     private void saveProm() {
-        SharedPreferences pref = act.getSharedPreferences(PROM, Context.MODE_PRIVATE);
+        SharedPreferences pref = act.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         int p = sbPromTime.getProgress();
         if (p == sbPromTime.getMax())
-            p = TURN_OFF;
-        editor.putInt(TIME, p);
+            p = Const.TURN_OFF;
+        editor.putInt(Const.TIME, p);
         editor.apply();
         PromReceiver.setReceiver(act, p);
     }

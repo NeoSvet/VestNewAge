@@ -286,7 +286,7 @@ public class BrowserActivity extends AppCompatActivity
         dbJournal = new DataBase(this, DataBase.JOURNAL);
 
         SharedPreferences prMain = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
-        if (prMain.getBoolean(MainActivity.COUNT_IN_MENU, true))
+        if (prMain.getBoolean(Const.COUNT_IN_MENU, true))
             prom = new PromHelper(this, navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         else {

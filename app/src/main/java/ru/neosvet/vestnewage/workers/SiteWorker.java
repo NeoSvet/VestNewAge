@@ -63,7 +63,7 @@ public class SiteWorker extends Worker {
         }
         Data data = new Data.Builder()
                 .putString(DataBase.TITLE, null)
-                .putString(ProgressModel.ERROR, err)
+                .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
     }

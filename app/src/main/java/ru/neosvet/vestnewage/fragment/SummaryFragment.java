@@ -28,7 +28,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -86,10 +85,10 @@ public class SummaryFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getString(Const.TASK).equals(ProgressModel.LIST)) {
+                if (data.getString(Const.TASK).equals(Const.LIST)) {
                     openList(false, true);
                 } else
-                    blinkItem(data.getStringArray(ProgressModel.LIST));
+                    blinkItem(data.getStringArray(Const.LIST));
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
@@ -99,7 +98,7 @@ public class SummaryFragment extends BackFragment {
                     if (workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });

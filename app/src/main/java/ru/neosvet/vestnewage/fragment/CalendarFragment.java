@@ -33,7 +33,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -41,10 +40,8 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
-import ru.neosvet.vestnewage.workers.CalendarWolker;
 
 public class CalendarFragment extends BackFragment implements DateDialog.Result {
-    public static final String CURRENT_DATE = "current_date";
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -100,7 +97,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                int d = data.getInt(CalendarWolker.DAY, 0);
+                int d = data.getInt(Const.DAY, 0);
                 if (d == 0) {
                     model.loadList = false;
                     updateCalendar();
@@ -115,7 +112,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                     if (workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -128,7 +125,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         outState.putBoolean(Const.DIALOG, dialog);
         if (dialog)
             dateDialog.dismiss();
-        outState.putInt(CURRENT_DATE, dCurrent.getTimeInDays());
+        outState.putInt(Const.CURRENT_DATE, dCurrent.getTimeInDays());
         super.onSaveInstanceState(outState);
     }
 
@@ -138,7 +135,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
             dCurrent.setDay(1);
         } else {
             act.setCurFragment(this);;
-            dCurrent = DateHelper.putDays(act, state.getInt(CURRENT_DATE));
+            dCurrent = DateHelper.putDays(act, state.getInt(Const.CURRENT_DATE));
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
                 showDatePicker();
