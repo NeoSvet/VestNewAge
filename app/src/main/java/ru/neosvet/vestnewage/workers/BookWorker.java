@@ -39,7 +39,7 @@ public class BookWorker extends Worker {
         lib = new Lib(context);
     }
 
-    public boolean isCancelled() {
+    private boolean isCancelled() {
         if (model == null)
             return false;
         else
