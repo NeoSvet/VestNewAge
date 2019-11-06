@@ -95,6 +95,7 @@
     <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->
     <string name="anketa_failed">Анкета загружена неверно</string>
+    <string name="send_status">Передать ощущение</string>
     <string name="selected_status">Выбранное состояние</string>
     <string name="select_status">Выберите состояние</string>
     <string name="send_unlivable">Сейчас передать невозможно</string>

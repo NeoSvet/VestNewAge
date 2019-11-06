@@ -1,10 +1,12 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Service;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -21,21 +23,27 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
+import java.util.List;
+
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.task.CabTask;
+import ru.neosvet.vestnewage.model.CabModel;
+import ru.neosvet.vestnewage.workers.CabWorker;
 
 public class CabmainFragment extends BackFragment {
     private final String EMAIL = "email", PASSWORD = "password", PANEL = "panel";
-    private final byte LOGIN = 0, ENTER = 1, WORDS = 2;
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -43,9 +51,8 @@ public class CabmainFragment extends BackFragment {
     private TextView tvError;
     private EditText etEmail, etPassword;
     private View container, fabEnter, fabExit, pMain;
-    private String cookie = "";
     private byte mode_list = 0;
-    private CabTask task;
+    private CabModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,29 +61,82 @@ public class CabmainFragment extends BackFragment {
         act = (MainActivity) getActivity();
         initViews();
         setViews();
+        initModel();
         restoreActivityState(savedInstanceState);
         return this.container;
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObserves(act);
+    }
+
+    @Override
     public boolean onBackPressed() {
-        if (mode_list == LOGIN)
+        if (mode_list == CabModel.LOGIN)
             return true;
         else {
             mode_list--;
-            if (mode_list == LOGIN) {
+            if (mode_list == CabModel.LOGIN) {
                 pMain.setVisibility(View.VISIBLE);
                 fabEnter.setVisibility(View.VISIBLE);
                 fabExit.setVisibility(View.GONE);
                 adMain.clear();
                 loginList();
-            } else { //ENTER
-                mode_list = LOGIN;
-                task = new CabTask(this);
-                task.execute(etEmail.getText().toString(), etPassword.getText().toString());
+            } else { //CabModel.CABINET
+                mode_list = CabModel.LOGIN;
+                model.login(etEmail.getText().toString(), etPassword.getText().toString());
                 act.status.setLoad(true);
             }
             return false;
+        }
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(CabModel.class);
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished())
+                        parseResult(workInfos.get(i).getOutputData());
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        initError(workInfos.get(i).getOutputData().getString(ProgressModel.ERROR));
+                }
+            }
+        });
+        if (model.inProgress)
+            act.status.setLoad(true);
+    }
+
+    private void parseResult(Data result) {
+        model.finish();
+        act.status.setLoad(false);
+        switch (result.getInt(DataBase.TITLE, 0)) {
+            case CabWorker.SELECTED_WORD:
+                if (result.getString(Const.TASK).equals(CabWorker.GET_WORDS)) {
+                    initCabinet(getResources().getString(R.string.selected_status),
+                            result.getString(DataBase.DESCTRIPTION));
+                } else {
+                    initCabinet(getResources().getString(R.string.selected_status),
+                            adMain.getItem(result.getInt(DataBase.DESCTRIPTION, 0)).getTitle());
+                }
+                break;
+            case CabWorker.NO_SELECTED:
+                initCabinet(getResources().getString(R.string.send_status),
+                        getResources().getString(R.string.select_status));
+                break;
+            case CabWorker.WORD_LIST:
+                initWordList(result.getStringArray(DataBase.DESCTRIPTION));
+                break;
+            case CabWorker.TIMEOUT:
+                initCabinet(getResources().getString(R.string.send_status),
+                        result.getString(DataBase.DESCTRIPTION));
+                break;
+            case CabWorker.ERROR:
+                initError(result.getString(DataBase.DESCTRIPTION));
+                break;
         }
     }
 
@@ -96,16 +156,8 @@ public class CabmainFragment extends BackFragment {
             loginList();
         } else {
             act.setCurFragment(this);
-            cookie = state.getString(Const.COOKIE);
-            task = (CabTask) state.getSerializable(Const.TASK);
-            if (task != null) {
-                if (task.getStatus() == AsyncTask.Status.RUNNING) {
-                    task.setFrm(this);
-                    act.status.setLoad(true);
-                } else task = null;
-            }
             mode_list = state.getByte(PANEL);
-            if (mode_list > LOGIN) {
+            if (mode_list > CabModel.LOGIN) {
                 pMain.setVisibility(View.GONE);
                 fabEnter.setVisibility(View.GONE);
                 fabExit.setVisibility(View.VISIBLE);
@@ -126,8 +178,6 @@ public class CabmainFragment extends BackFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString(Const.COOKIE, cookie);
-        outState.putSerializable(Const.TASK, task);
         outState.putByte(PANEL, mode_list);
         String[] m = new String[adMain.getCount()];
         String d;
@@ -137,10 +187,6 @@ public class CabmainFragment extends BackFragment {
         }
         outState.putStringArray(DataBase.LINK, m);
         super.onSaveInstanceState(outState);
-    }
-
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
     }
 
     private void initViews() {
@@ -163,7 +209,7 @@ public class CabmainFragment extends BackFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (act.status.isVisible()) return;
-                if (mode_list == LOGIN) { //до кабинета
+                if (mode_list == CabModel.LOGIN) {
                     String s;
                     switch (pos) {
                         case 0: //восстановить доступ
@@ -183,30 +229,27 @@ public class CabmainFragment extends BackFragment {
                             break;
                     }
                     CabpageActivity.openPage(act, s, null);
-                } else if (mode_list == ENTER) { // в кабинете
+                } else if (mode_list == CabModel.CABINET) {
                     switch (pos) {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
                                     getResources().getString(R.string.select_status))) {
-                                //get list words
-                                task = new CabTask(CabmainFragment.this);
-                                task.execute(cookie);
+                                model.getListWord();
                                 act.status.setLoad(true);
                             } else
                                 Lib.showToast(act, getResources().getString(R.string.send_unlivable));
                             break;
                         case 1: //анкета
-                            CabpageActivity.openPage(act, "edinenie/anketa.html", cookie);
+                            CabpageActivity.openPage(act, "edinenie/anketa.html", model.getCookie());
                             break;
                         case 2: //единомышленники
-                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", cookie);
+                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", model.getCookie());
                             break;
                         default:
                             break;
                     }
-                } else if (mode_list == WORDS) { //выбор слова
-                    task = new CabTask(CabmainFragment.this);
-                    task.execute(etEmail.getText().toString(), cookie, String.valueOf(pos));
+                } else if (mode_list == CabModel.WORDS) {
+                    model.selectWord(pos);
                     act.status.setLoad(true);
                 }
             }
@@ -275,8 +318,8 @@ public class CabmainFragment extends BackFragment {
         fabExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mode_list = LOGIN;
-                cookie = "";
+                mode_list = CabModel.LOGIN;
+                model.setCookie("");
                 adMain.clear();
                 loginList();
                 fabEnter.setVisibility(View.VISIBLE);
@@ -324,7 +367,7 @@ public class CabmainFragment extends BackFragment {
 
     private void subLogin() {
         softKeyboard.closeSoftKeyboard();
-        if (task != null)
+        if (model.inProgress)
             return;
         if (adMain.getCount() == 1) {
             adMain.clear();
@@ -339,56 +382,40 @@ public class CabmainFragment extends BackFragment {
             }
             editor.commit();
         }
-        task = new CabTask(this);
-        task.execute(etEmail.getText().toString(), etPassword.getText().toString());
+        model.login(etEmail.getText().toString(), etPassword.getText().toString());
         act.status.setLoad(true);
     }
 
-    public void putResultTask(String result) {
-        task = null;
-        act.status.setLoad(false);
-        if (result.indexOf(Const.AND) == 0) {
-            mode_list = ENTER;
-            adMain.clear();
-            adMain.notifyDataSetChanged();
-            pMain.setVisibility(View.GONE);
-            fabEnter.setVisibility(View.GONE);
-            fabExit.setVisibility(View.VISIBLE);
-            tvError.setText(result.substring(1));
+    private void initError(String error) {
+        adMain.clear();
+        adMain.notifyDataSetChanged();
+        pMain.setVisibility(View.GONE);
+        fabEnter.setVisibility(View.GONE);
+        fabExit.setVisibility(View.VISIBLE);
+        if (error.length() > 0) {
+            tvError.setText(error);
             tvError.setVisibility(View.VISIBLE);
-            return;
         }
-        if (result.equals(getResources().getString(R.string.load_fail))) {
-            Lib.showToast(act, result);
-            return;
+        //Lib.showToast(act, error);
+    }
+
+    private void initWordList(String[] words) {
+        mode_list = CabModel.WORDS;
+        adMain.clear();
+        for (int i = 0; i < words.length; i++) {
+            adMain.addItem(new ListItem(words[i]));
         }
-        mode_list++;
-        if (mode_list == WORDS) {
-            adMain.clear();
-            String[] m = result.split(Const.N);
-            for (int i = 0; i < m.length; i++) {
-                adMain.addItem(new ListItem(m[i]));
-            }
-        } else { // ENTER or after select word
-            if (mode_list == ENTER) {
-                pMain.setVisibility(View.GONE);
-                fabEnter.setVisibility(View.GONE);
-                fabExit.setVisibility(View.VISIBLE);
-            } else {// режим списка - в кабинете
-                mode_list = ENTER;
-                if (result.indexOf("ok") == 0) { //слово выбрано успешно
-                    result = adMain.getItem(Integer.parseInt(result.substring(2))).getTitle();
-                }
-            }
-            adMain.clear();
-            for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
-                adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
-            }
-            if (!result.equals(getResources().getString(R.string.select_status)))
-                adMain.getItem(0).setTitle(getResources().getString(R.string.selected_status));
-            adMain.getItem(0).setDes(result);
-            adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
+        adMain.notifyDataSetChanged();
+    }
+
+    public void initCabinet(String title, String des) {
+        mode_list = CabModel.CABINET;
+        adMain.clear();
+        adMain.addItem(new ListItem(title, des));
+        for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
+            adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
         }
+        adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         adMain.notifyDataSetChanged();
     }
 }

@@ -14,10 +14,11 @@ import androidx.work.WorkManager;
 import java.util.List;
 import java.util.Set;
 
+import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.SlashModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
-import ru.neosvet.vestnewage.workers.CalendarWolker;
 
 public class ProgressModel extends AndroidViewModel {
     public static final String NAME = "CLASS_NAME", ERROR = "ERROR", LIST = "list", PAGE = "page";
@@ -58,6 +59,10 @@ public class ProgressModel extends AndroidViewModel {
             return CalendarModel.getInstance();
         if (name.equals(SummaryModel.class.getSimpleName()))
             return SummaryModel.getInstance();
+        if (name.equals(BookModel.class.getSimpleName()))
+            return BookModel.getInstance();
+        if (name.equals(CabModel.class.getSimpleName()))
+            return CabModel.getInstance();
         return null;
     }
 
