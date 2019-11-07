@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 
 public class SummaryWorker extends Worker {
     private Context context;
+    public static final String TAG = "summary";
     private ProgressModel model;
     private final String LAST_TIME = "last_time", CHECK = "check";
 

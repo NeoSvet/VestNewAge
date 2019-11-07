@@ -43,7 +43,10 @@ public class BookModel extends ProgressModel {
                 .setRequiresBatteryNotLow(false)
                 .build();
         Data.Builder data = new Data.Builder()
-                .putString(ProgressModel.NAME, this.getClass().getSimpleName());
+                .putString(ProgressModel.NAME, this.getClass().getSimpleName())
+                .putBoolean(Const.OTKR, OTKR)
+                .putBoolean(Const.FROM_OTKR, FROM_OTKR)
+                .putBoolean(Const.KATRENY, KATRENY);
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(BookWorker.class)
                 .setInputData(data.build())
@@ -67,7 +70,7 @@ public class BookModel extends ProgressModel {
         int max = data.getInt(Const.MAX, 0);
         if (max == 0)
             return false;
-        dialog = new ProgressDialog(act, 0);
+        dialog = new ProgressDialog(act, max);
         dialog.setMessage(data.getString(Const.MSG));
         dialog.setProgress(data.getInt(Const.PROG, 0));
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {

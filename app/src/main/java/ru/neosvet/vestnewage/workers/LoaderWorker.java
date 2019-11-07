@@ -68,7 +68,10 @@ public class LoaderWorker extends Worker {
                 return Result.success();
             initClient();
             data.putBoolean(Const.DIALOG, true);
-            switch (getInputData().getInt(Const.MODE, 0)) {
+            int mode = getInputData().getInt(Const.MODE, 0);
+            Data.Builder result = new Data.Builder()
+                    .putInt(Const.MODE, mode);
+            switch (mode) {
                 case LoaderModel.DOWNLOAD_ALL:
                     downloadAll(LoaderModel.ALL);
                     break;
@@ -80,15 +83,16 @@ public class LoaderWorker extends Worker {
                     downloadYear(getInputData().getInt(Const.YEAR, 0));
                     break;
                 default:
+                    String link = getInputData().getString(Const.LINK);
                     if (getInputData().getBoolean(Const.PAGE, true)) {
-                        downloadPage(getInputData().getString(Const.LINK), true);
+                        downloadPage(link, true);
                     } else { //file
-                        downloadFile(getInputData().getString(Const.LINK),
-                                getInputData().getString(Const.FILE));
+                        downloadFile(link, getInputData().getString(Const.FILE));
                     }
+                    result.putString(Const.LINK, link);
                     break;
             }
-            return Result.success();
+            return Result.success(result.build());
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();

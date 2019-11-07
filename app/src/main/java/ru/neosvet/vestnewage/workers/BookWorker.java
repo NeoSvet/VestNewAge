@@ -23,6 +23,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookWorker extends Worker {
     private Context context;
@@ -70,11 +71,11 @@ public class BookWorker extends Worker {
             //loader
             downloadBook(false);
             Data data = new Data.Builder()
-                    .putString(Const.TASK, TAG)
-                    .putBoolean(Const.PROG, true)
+                    .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
             model.setProgress(data);
             downloadBook(true);
+            model.setProgress(data);
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();

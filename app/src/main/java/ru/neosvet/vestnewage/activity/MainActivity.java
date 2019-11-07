@@ -35,6 +35,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -53,6 +54,7 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
@@ -120,6 +122,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onChanged(@Nullable Data data) {
                 if (data.getBoolean(Const.PROG, false)) {
                     model.upProg();
+                } else {
+                    switch (data.getInt(Const.DIALOG, -1)) {
+                        case LoaderModel.DIALOG_SHOW:
+                            model.showDialog(MainActivity.this);
+                            break;
+                        case LoaderModel.DIALOG_UPDATE:
+                            model.setProgMax(data.getInt(Const.MAX, 0));
+                            model.showDialog(MainActivity.this);
+                            break;
+                        case LoaderModel.DIALOG_UP:
+                            model.upProg();
+                            break;
+                        case LoaderModel.DIALOG_MSG:
+                            model.setProgMsg(data.getString(Const.MSG));
+                            break;
+                    }
                 }
             }
         });
@@ -127,15 +145,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
-                        finishLoad();
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(MainActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                    if (workInfos.get(i).getState().isFinished() && ProgressModel.getFirstTag(
+                            workInfos.get(i).getTags()).equals(LoaderWorker.TAG)) {
+                        boolean all= workInfos.get(i).getOutputData().getInt(Const.MODE,0) == LoaderModel.DOWNLOAD_ALL;
+                        finishLoad(all, null);
+                    }
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED)) {
+                        finishLoad(true, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                        //Lib.showToast(MainActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                    }
                 }
             }
         });
-        //if (model.inProgress)
-            //TODO show dialog
+        if (model.inProgress)
+            initLoad();
     }
 
     private void restoreActivityState(Bundle state) {
@@ -190,12 +213,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             frMenu.setNew(unread.getNewId(k_new));
     }
 
+    private void initLoad() {
+        model.showDialog(this);
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (model.inProgress) {
+                        Thread.sleep(DateHelper.SEC_IN_MILLS);
+                        model.updateDialog();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Lib.LOG("timer loader error: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
     private void initInterface() {
         findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                model.startLoad(LoaderModel.DOWNLOAD_ALL, null);
+                if (isBusy())
+                    return;
+                model.startLoad(LoaderModel.DOWNLOAD_ALL, "");
+                initLoad();
             }
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
@@ -203,12 +246,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
+                if (isBusy())
+                    return;
                 if (cur_id == R.id.nav_calendar) {
                     model.startLoad(LoaderModel.DOWNLOAD_YEAR, String.valueOf(
                             ((CalendarFragment) curFragment).getCurrentYear()));
                 } else {
                     model.startLoad(LoaderModel.DOWNLOAD_ID, String.valueOf(cur_id));
                 }
+                initLoad();
             }
         });
 
@@ -235,6 +281,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
+    }
+
+    private boolean isBusy() {
+        if (curFragment.model == null)
+            return false;
+        return curFragment.model.inProgress;
     }
 
     private void setMenuFragment() {
@@ -374,16 +426,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
     }
 
-    public void finishAllLoad(boolean suc, boolean all) {
+    public void finishLoad(boolean all, String err) {
         model.finish();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
-        if (suc) {
+        if (err == null) {
             if (all)
                 builder.setMessage(getResources().getString(R.string.all_load_suc));
             else
                 builder.setMessage(getResources().getString(R.string.it_load_suc));
         } else
-            builder.setMessage(getResources().getString(R.string.load_fail));
+            builder.setMessage(err); //TODO getResources().getString(R.string.load_fail)
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
