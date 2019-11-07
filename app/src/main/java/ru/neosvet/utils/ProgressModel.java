@@ -6,6 +6,7 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import androidx.work.Data;
 import androidx.work.WorkInfo;
@@ -55,7 +56,9 @@ public class ProgressModel extends AndroidViewModel {
         progress.removeObservers(owner);
     }
 
-    public static ProgressModel getModelByName(String name) {
+    public static ProgressModel getModelByName(@Nullable String name) {
+        if (name == null)
+            return null;
         if (name.equals(SlashModel.class.getSimpleName()))
             return SlashModel.getInstance();
         if (name.equals(CalendarModel.class.getSimpleName()))
