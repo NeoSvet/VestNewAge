@@ -145,7 +145,7 @@
     <string name="vibr">Вибрация</string>
     <string name="set_notif">Настроить сигнал, вибрацию</string>
     <string name="set_battery">Настроить энергосбережение</string>
-    <string name="info_battery">Для своевременного срабатывания уведомления рекомендуется отключить энергосбережение для данного приложения (ообенно для Android 9+).</string>
+    <string name="info_battery">Для своевременного срабатывания уведомления рекомендуется отключить энергосбережение для данного приложения (ообенно для Android 9+). И то может быть задержка до 6 минут.</string>
     <string name="default_">По умолчанию</string>
     <string name="select">Выбрать:</string>
     <string name="standard">Стандартные</string>
