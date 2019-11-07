@@ -19,7 +19,6 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.workers.BookWorker;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
-import ru.neosvet.vestnewage.workers.PageWorker;
 import ru.neosvet.vestnewage.workers.SiteWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
@@ -53,7 +52,7 @@ public class LoaderModel extends ProgressModel {
         if (mode >= DOWNLOAD_PAGE) {
             data.putString(DataBase.LINK, request.getString(DataBase.LINK));
             task = new OneTimeWorkRequest
-                    .Builder(PageWorker.class)
+                    .Builder(LoaderWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
                     .addTag(TAG)
