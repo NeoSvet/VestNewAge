@@ -127,9 +127,9 @@ public class CollectionsFragment extends BackFragment {
                     , null, null, null);
             if (cursor.moveToFirst()) {
                 iID = cursor.getColumnIndex(DataBase.ID);
-                iPlace = cursor.getColumnIndex(DataBase.PLACE);
-                iLink = cursor.getColumnIndex(DataBase.LINK);
-                iDes = cursor.getColumnIndex(DataBase.DESCTRIPTION);
+                iPlace = cursor.getColumnIndex(Const.PLACE);
+                iLink = cursor.getColumnIndex(Const.LINK);
+                iDes = cursor.getColumnIndex(Const.DESCTRIPTION);
                 link = cursor.getString(iLink);
                 place = cursor.getString(iPlace);
                 adMarker.addItem(new MarkItem(getTitle(link), cursor.getInt(iID), link));
@@ -197,8 +197,8 @@ public class CollectionsFragment extends BackFragment {
 
                 DataBase dataBase = new DataBase(act, link);
                 SQLiteDatabase db = dataBase.getWritableDatabase();
-                Cursor cursor = db.query(DataBase.TITLE, null,
-                        DataBase.LINK + DataBase.Q, new String[]{link},
+                Cursor cursor = db.query(Const.TITLE, null,
+                        Const.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
                 int id;
                 if (cursor.moveToFirst()) {
@@ -260,12 +260,12 @@ public class CollectionsFragment extends BackFragment {
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         SQLiteDatabase db = dbMarker.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.PLACE);
+        Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, Const.PLACE);
         String s;
         boolean isNull = false;
         if (cursor.moveToFirst()) {
             int iID = cursor.getColumnIndex(DataBase.ID);
-            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+            int iTitle = cursor.getColumnIndex(Const.TITLE);
             int iMarkers = cursor.getColumnIndex(DataBase.MARKERS);
             do {
                 s = cursor.getString(iMarkers);
@@ -431,7 +431,7 @@ public class CollectionsFragment extends BackFragment {
                     saveChange();
                     Intent marker = new Intent(act, MarkerActivity.class);
                     marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
-                    marker.putExtra(DataBase.LINK, adMarker.getItem(iSel).getData());
+                    marker.putExtra(Const.LINK, adMarker.getItem(iSel).getData());
                     act.startActivityForResult(marker, MARKER_REQUEST);
                 }
             }
@@ -541,7 +541,7 @@ public class CollectionsFragment extends BackFragment {
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.TITLE, name);
+        cv.put(Const.TITLE, name);
         int r = db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                 adMarker.getItem(iSel).getStrId());
         dbMarker.close();
@@ -568,7 +568,7 @@ public class CollectionsFragment extends BackFragment {
             if (sCol == null) {
                 for (int i = 1; i < adMarker.getCount(); i++) {
                     cv = new ContentValues();
-                    cv.put(DataBase.PLACE, i);
+                    cv.put(Const.PLACE, i);
                     db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                             adMarker.getItem(i).getStrId());
                 }
@@ -576,7 +576,7 @@ public class CollectionsFragment extends BackFragment {
                 cv = new ContentValues();
                 final String t = getListId();
                 cv.put(DataBase.MARKERS, t);
-                db.update(DataBase.COLLECTIONS, cv, DataBase.TITLE + DataBase.Q,
+                db.update(DataBase.COLLECTIONS, cv, Const.TITLE + DataBase.Q,
                         new String[]{sCol.substring(0, sCol.indexOf(Const.N))});
                 sCol = sCol.substring(0, sCol.indexOf(Const.N) + 1) + t;
             }
@@ -701,7 +701,7 @@ public class CollectionsFragment extends BackFragment {
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
             SQLiteDatabase db = dbMarker.getWritableDatabase();
             Cursor cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                    DataBase.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)}
+                    Const.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)}
                     , null, null, null);
             if (cursor.moveToFirst())
                 sCol += Const.N + cursor.getString(0); //список закладок в подборке

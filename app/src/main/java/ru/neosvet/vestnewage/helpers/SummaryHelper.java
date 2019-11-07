@@ -158,8 +158,8 @@ public class SummaryHelper {
 
     private static void setSummaryPostpone(Context context, String des, String link) {
         Intent intent = new Intent(context, SummaryService.class);
-        intent.putExtra(DataBase.DESCTRIPTION, des);
-        intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(Const.DESCTRIPTION, des);
+        intent.putExtra(Const.LINK, link);
         PendingIntent piCheck = PendingIntent.getService(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC, TEN_MIN_IN_MILLS + System.currentTimeMillis(), piCheck);
@@ -171,8 +171,8 @@ public class SummaryHelper {
         JobInfo.Builder exerciseJobBuilder = new JobInfo.Builder(NotificationHelper.ID_SUMMARY_POSTPONE, jobService);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         PersistableBundle extras = new PersistableBundle();
-        extras.putString(DataBase.DESCTRIPTION, des);
-        extras.putString(DataBase.LINK, link);
+        extras.putString(Const.DESCTRIPTION, des);
+        extras.putString(Const.LINK, link);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
             exerciseJobBuilder.setEstimatedNetworkBytes(70000,1000);
         exerciseJobBuilder.setExtras(extras);
@@ -206,8 +206,8 @@ public class SummaryHelper {
                 PersistableBundle extras = param.getExtras();
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.createNotification(
-                        extras.getString(DataBase.DESCTRIPTION),
-                        extras.getString(DataBase.LINK));
+                        extras.getString(Const.DESCTRIPTION),
+                        extras.getString(Const.LINK));
                 summaryHelper.showNotification();
             }
             return false; //finish

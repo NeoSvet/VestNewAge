@@ -126,7 +126,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
+                        finishLoad(workInfos.get(i).getOutputData().getString(Const.TITLE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
@@ -252,29 +252,29 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             DataBase dataBase = new DataBase(act, d.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             String t, s;
-            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
             DateHelper dModList;
             if (cursor.moveToFirst()) {
                 dModList = DateHelper.putMills(act,
-                        cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                        cursor.getLong(cursor.getColumnIndex(Const.TIME)));
                 if (d.getYear() > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
                     if (katren) { // катрены
-                        cursor = db.query(DataBase.TITLE, null,
-                                DataBase.LINK + DataBase.LIKE,
+                        cursor = db.query(Const.TITLE, null,
+                                Const.LINK + DataBase.LIKE,
                                 new String[]{"%" + Const.POEMS + "%"}
-                                , null, null, DataBase.LINK);
+                                , null, null, Const.LINK);
                     } else { // послания
-                        cursor = db.query(DataBase.TITLE, null,
-                                DataBase.LINK + " NOT" + DataBase.LIKE,
+                        cursor = db.query(Const.TITLE, null,
+                                Const.LINK + " NOT" + DataBase.LIKE,
                                 new String[]{"%" + Const.POEMS + "%"}
-                                , null, null, DataBase.LINK);
+                                , null, null, Const.LINK);
                     }
                     cursor.moveToFirst();
                 } else // в случае списков с сайта Откровений надо просто перейти к следующей записи
                     cursor.moveToNext();
-                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                int iLink = cursor.getColumnIndex(DataBase.LINK);
+                int iTitle = cursor.getColumnIndex(Const.TITLE);
+                int iLink = cursor.getColumnIndex(Const.LINK);
                 do {
                     s = cursor.getString(iLink);
                     if (s.contains("2004") || s.contains("pred"))
@@ -325,7 +325,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (d.getYear() == DEF_YEAR) return false;
         DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+        Cursor cursor = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
         String s;
         if (cursor.moveToFirst()) {
@@ -653,18 +653,18 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         if (view.getId() == R.id.bRndKat) { //случайный катрен
             title = getResources().getString(R.string.rnd_kat);
-            curTitle = db.query(DataBase.TITLE, null,
-                    DataBase.LINK + DataBase.LIKE,
+            curTitle = db.query(Const.TITLE, null,
+                    Const.LINK + DataBase.LIKE,
                     new String[]{"%" + Const.POEMS + "%"}
                     , null, null, null);
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
             title = getResources().getString(R.string.rnd_pos);
-            curTitle = db.query(DataBase.TITLE, null,
-                    DataBase.LINK + " NOT" + DataBase.LIKE,
+            curTitle = db.query(Const.TITLE, null,
+                    Const.LINK + " NOT" + DataBase.LIKE,
                     new String[]{"%" + Const.POEMS + "%"}
                     , null, null, null);
         } else { //случайных стих
-            curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
         }
         //определяем случайных текст:
         if (curTitle.getCount() < 2)
@@ -703,8 +703,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             } else // случайный катрен или послание
                 n = -1;
             //выводим на экран:
-            String link = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
-            String msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), link);
+            String link = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
+            String msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
             if (title == null) {
                 title = msg;
                 msg = s;
@@ -713,7 +713,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             showRndAlert(title, link, msg, s, n);
             //добавляем в журнал:
             ContentValues cv = new ContentValues();
-            cv.put(DataBase.TIME, System.currentTimeMillis());
+            cv.put(Const.TIME, System.currentTimeMillis());
             String id = dataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n;
             DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
             db = dbJournal.getWritableDatabase();
@@ -733,7 +733,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             @Override
             public void onClick(View view) {
                 Intent marker = new Intent(act, MarkerActivity.class);
-                marker.putExtra(DataBase.LINK, link);
+                marker.putExtra(Const.LINK, link);
                 marker.putExtra(DataBase.PARAGRAPH, par);
                 startActivity(marker);
                 alertRnd.dismiss();

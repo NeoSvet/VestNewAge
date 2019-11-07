@@ -201,10 +201,10 @@ public class SlashActivity extends AppCompatActivity {
                     if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
                     else if (mode > 0) mode++; // поэтому остальное смещается
                 }
-                main.putExtra(DataBase.PLACE, page);
+                main.putExtra(Const.PLACE, page);
                 main.putExtra(Const.TAB, mode);
                 main.putExtra(Const.CUR_ID, R.id.nav_search);
-                main.putExtra(DataBase.LINK, link.substring(link.indexOf("=") + 1));
+                main.putExtra(Const.LINK, link.substring(link.indexOf("=") + 1));
             }
         }
     }
@@ -232,10 +232,10 @@ public class SlashActivity extends AppCompatActivity {
         DateHelper date = DateHelper.initToday(SlashActivity.this);
         DataBase dataBase = new DataBase(SlashActivity.this, date.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
         long time = 0;
         if (cursor.moveToFirst())
-            time = cursor.getLong(cursor.getColumnIndex(DataBase.TIME));
+            time = cursor.getLong(cursor.getColumnIndex(Const.TIME));
         cursor.close();
         dataBase.close();
         if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
@@ -415,8 +415,8 @@ public class SlashActivity extends AppCompatActivity {
                         Cursor cursor = dbC.query(DataBase.COLLECTIONS, null, null, null, null, null, null);
                         if (cursor.moveToFirst()) {
                             int iMarker = cursor.getColumnIndex(DataBase.MARKERS);
-                            int iPlace = cursor.getColumnIndex(DataBase.PLACE);
-                            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+                            int iPlace = cursor.getColumnIndex(Const.PLACE);
+                            int iTitle = cursor.getColumnIndex(Const.TITLE);
                             // первую подборку - "вне подборок" вставлять не надо, надо лишь обновить:
                             ContentValues cv = new ContentValues();
                             cv.put(DataBase.MARKERS, cursor.getString(iMarker));
@@ -425,9 +425,9 @@ public class SlashActivity extends AppCompatActivity {
                             // остальные вставляем:
                             while (cursor.moveToNext()) {
                                 cv = new ContentValues();
-                                cv.put(DataBase.PLACE, cursor.getInt(iPlace));
+                                cv.put(Const.PLACE, cursor.getInt(iPlace));
                                 cv.put(DataBase.MARKERS, cursor.getString(iMarker));
-                                cv.put(DataBase.TITLE, cursor.getString(iTitle));
+                                cv.put(Const.TITLE, cursor.getString(iTitle));
                                 dbM.insert(DataBase.COLLECTIONS, null, cv);
                             }
                         }

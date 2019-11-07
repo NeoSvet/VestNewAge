@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
-                String s = getIntent().getStringExtra(DataBase.LINK);
+                String s = getIntent().getStringExtra(Const.LINK);
                 if (s != null) {
                     search.setString(s);
                     search.setPage(getIntent().getIntExtra(DataBase.SEARCH, 1));

@@ -84,7 +84,7 @@ public class SiteFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                finishLoad(data.getString(DataBase.TITLE));
+                finishLoad(data.getString(Const.TITLE));
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
@@ -92,7 +92,7 @@ public class SiteFragment extends BackFragment {
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getOutputData().getString(DataBase.TITLE));
+                        finishLoad(workInfos.get(i).getOutputData().getString(Const.TITLE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }

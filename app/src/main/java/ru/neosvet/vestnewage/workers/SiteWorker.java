@@ -48,12 +48,12 @@ public class SiteWorker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            downloadList(getInputData().getString(DataBase.LINK));
-            String name = getInputData().getString(DataBase.TITLE);
+            downloadList(getInputData().getString(Const.LINK));
+            String name = getInputData().getString(Const.TITLE);
             if (!isCancelled())
                 saveList(name);
             Data data = new Data.Builder()
-                    .putString(DataBase.TITLE, name.substring(name.lastIndexOf("/")))
+                    .putString(Const.TITLE, name.substring(name.lastIndexOf("/")))
                     .build();
             return Result.success(data);
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class SiteWorker extends Worker {
             Lib.LOG("SiteWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(DataBase.TITLE, null)
+                .putString(Const.TITLE, null)
                 .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);

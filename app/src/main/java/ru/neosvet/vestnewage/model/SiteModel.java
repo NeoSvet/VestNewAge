@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.SiteWorker;
@@ -39,8 +40,8 @@ public class SiteModel extends ProgressModel {
                 .build();
         Data.Builder data = new Data.Builder()
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName())
-                .putString(DataBase.LINK, url)
-                .putString(DataBase.TITLE, name);
+                .putString(Const.LINK, url)
+                .putString(Const.TITLE, name);
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(SiteWorker.class)
                 .setInputData(data.build())

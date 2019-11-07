@@ -42,14 +42,14 @@ public class UnreadHelper {
         }
         if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
-        Cursor cursor = db.query(NAME, new String[]{DataBase.LINK},
-                DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
+        Cursor cursor = db.query(NAME, new String[]{Const.LINK},
+                Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean exists = cursor.moveToFirst();
         cursor.close();
         if (exists) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.TIME, date.getTimeInMills());
-        cv.put(DataBase.LINK, link);
+        cv.put(Const.TIME, date.getTimeInMills());
+        cv.put(Const.LINK, link);
         db.insert(NAME, null, cv);
         time = System.currentTimeMillis();
         return true;
@@ -57,7 +57,7 @@ public class UnreadHelper {
 
     public void deleteLink(String link) {
         link = link.replace(Const.HTML, "");
-        if (db.delete(NAME, DataBase.LINK
+        if (db.delete(NAME, Const.LINK
                 + DataBase.Q, new String[]{link}) > 0) {
             time = System.currentTimeMillis();
             setBadge();
@@ -68,10 +68,10 @@ public class UnreadHelper {
     public List<String> getList() {
         List<String> links = new ArrayList<String>();
         Cursor cursor = db.query(NAME, null, null,
-                null, null, null, DataBase.TIME);
+                null, null, null, Const.TIME);
         if (cursor.moveToFirst()) {
-            int iLink = cursor.getColumnIndex(DataBase.LINK);
-            int iTime = cursor.getColumnIndex(DataBase.TIME);
+            int iLink = cursor.getColumnIndex(Const.LINK);
+            int iTime = cursor.getColumnIndex(Const.TIME);
             do {
                 if (cursor.getLong(iTime) > 0)
                     links.add(cursor.getString(iLink));
@@ -83,7 +83,7 @@ public class UnreadHelper {
 
     public int getCount() {
         Cursor cursor = db.query(NAME, null, null,
-                null, null, null, DataBase.TIME);
+                null, null, null, Const.TIME);
         int k = 0;
         if (cursor.moveToFirst())
             k = cursor.getCount();
@@ -104,7 +104,7 @@ public class UnreadHelper {
 
     public long lastModified() {
         SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
-        return pref.getLong(DataBase.TIME, 0);
+        return pref.getLong(Const.TIME, 0);
     }
 
     public void clearList() {
@@ -125,13 +125,13 @@ public class UnreadHelper {
         if (time > 0) {
             SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
-            editor.putLong(DataBase.TIME, time);
+            editor.putLong(Const.TIME, time);
             editor.apply();
         }
     }
 
     public void setBadge() {
-        Cursor cursor = db.query(NAME, null, DataBase.TIME + " > ?",
+        Cursor cursor = db.query(NAME, null, Const.TIME + " > ?",
                 new String[]{"0"}, null, null, null);
         if (cursor.getCount() == 0)
             ShortcutBadger.removeCount(context);

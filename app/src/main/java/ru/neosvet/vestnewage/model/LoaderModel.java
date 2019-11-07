@@ -13,7 +13,6 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.workers.BookWorker;
@@ -50,7 +49,7 @@ public class LoaderModel extends ProgressModel {
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName());
         OneTimeWorkRequest task;
         if (mode >= DOWNLOAD_PAGE) {
-            data.putString(DataBase.LINK, request.getString(DataBase.LINK));
+            data.putString(Const.LINK, request.getString(Const.LINK));
             task = new OneTimeWorkRequest
                     .Builder(LoaderWorker.class)
                     .setInputData(data.build())

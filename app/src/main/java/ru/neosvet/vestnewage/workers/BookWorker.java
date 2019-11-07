@@ -54,7 +54,7 @@ public class BookWorker extends Worker {
             if (getInputData().getBoolean(Const.OTKR, false)) {
                 name = downloadOtrk(true);
                 return Result.success(new Data.Builder()
-                        .putString(DataBase.TITLE, name)
+                        .putString(Const.TITLE, name)
                         .build());
             }
             boolean kat = getInputData().getBoolean(Const.KATRENY, false);
@@ -62,7 +62,7 @@ public class BookWorker extends Worker {
                 downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
             name = downloadBook(kat);
             return Result.success(new Data.Builder()
-                    .putString(DataBase.TITLE, name)
+                    .putString(Const.TITLE, name)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,10 +142,10 @@ public class BookWorker extends Worker {
                     }
                     cv = new ContentValues();
                     if (isTitle) {
-                        cv.put(DataBase.LINK, s);
-                        cv.put(DataBase.TITLE, br.readLine());
-                        cv.put(DataBase.TIME, time);
-                        db.insert(DataBase.TITLE, null, cv);
+                        cv.put(Const.LINK, s);
+                        cv.put(Const.TITLE, br.readLine());
+                        cv.put(Const.TIME, time);
+                        db.insert(Const.TITLE, null, cv);
                     } else {
                         cv.put(DataBase.ID, Integer.parseInt(s));
                         cv.put(DataBase.PARAGRAPH, br.readLine());
@@ -215,21 +215,21 @@ public class BookWorker extends Worker {
             DataBase dataBase = new DataBase(context, date);
             SQLiteDatabase db = dataBase.getWritableDatabase();
             ContentValues cv = new ContentValues();
-            cv.put(DataBase.TIME, System.currentTimeMillis());
-            if (db.update(DataBase.TITLE, cv,
+            cv.put(Const.TIME, System.currentTimeMillis());
+            if (db.update(Const.TITLE, cv,
                     DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
-                db.insert(DataBase.TITLE, null, cv);
+                db.insert(Const.TITLE, null, cv);
             }
             for (int i = 0; i < title.size(); i++) {
                 cv = new ContentValues();
-                cv.put(DataBase.TITLE, title.get(i));
+                cv.put(Const.TITLE, title.get(i));
                 // пытаемся обновить запись:
-                if (db.update(DataBase.TITLE, cv,
-                        DataBase.LINK + DataBase.Q,
+                if (db.update(Const.TITLE, cv,
+                        Const.LINK + DataBase.Q,
                         new String[]{links.get(i)}) == 0) {
                     // обновить не получилось, добавляем:
-                    cv.put(DataBase.LINK, links.get(i));
-                    db.insert(DataBase.TITLE, null, cv);
+                    cv.put(Const.LINK, links.get(i));
+                    db.insert(Const.TITLE, null, cv);
                 }
             }
             dataBase.close();

@@ -82,7 +82,7 @@ public class BrowserActivity extends AppCompatActivity
     private View fabMenu, tvPromTime, pSearch, bPrev, bNext, bBack;
     private DrawerLayout drawerMenu;
     private Lib lib;
-    private String link = DataBase.LINK, string = null;
+    private String link = Const.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
     private PromHelper prom;
@@ -93,9 +93,9 @@ public class BrowserActivity extends AppCompatActivity
 
     public static void openReader(Context context, String link, @Nullable String place) {
         Intent intent = new Intent(context, BrowserActivity.class);
-        intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(Const.LINK, link);
         if (place != null)
-            intent.putExtra(DataBase.PLACE, place);
+            intent.putExtra(Const.PLACE, place);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -158,10 +158,10 @@ public class BrowserActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (link.contains(PNG))
-            outState.putString(DataBase.LINK, history.get(0));
+            outState.putString(Const.LINK, history.get(0));
         else
-            outState.putString(DataBase.LINK, link);
-        outState.putInt(DataBase.PLACE, iPlace);
+            outState.putString(Const.LINK, link);
+        outState.putInt(Const.PLACE, iPlace);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
         outState.putString(DataBase.SEARCH, string);
         super.onSaveInstanceState(outState);
@@ -169,12 +169,12 @@ public class BrowserActivity extends AppCompatActivity
 
     private void restoreActivityState(Bundle state) {
         if (state == null) {
-            openLink(getIntent().getStringExtra(DataBase.LINK));
-            if (getIntent().hasExtra(DataBase.PLACE))
+            openLink(getIntent().getStringExtra(Const.LINK));
+            if (getIntent().hasExtra(Const.PLACE))
                 iPlace = 0;
         } else {
             loader = (LoaderTask) state.getSerializable(Const.TASK);
-            link = state.getString(DataBase.LINK);
+            link = state.getString(Const.LINK);
             dbPage = new DataBase(this, link);
             if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING) {
                 if (loader.getStatus() == AsyncTask.Status.RUNNING) {
@@ -201,7 +201,7 @@ public class BrowserActivity extends AppCompatActivity
                     }
                 }).start();
             }
-            iPlace = state.getInt(DataBase.PLACE);
+            iPlace = state.getInt(Const.PLACE);
             string = state.getString(DataBase.SEARCH);
             if (string != null) {
                 etSearch.setText(string);
@@ -216,7 +216,7 @@ public class BrowserActivity extends AppCompatActivity
 
     private void initPlace() {
         if (iPlace == -1) return;
-        String p = getIntent().getStringExtra(DataBase.PLACE);
+        String p = getIntent().getStringExtra(Const.PLACE);
         fabMenu.setVisibility(View.GONE);
         tvPlace.setVisibility(View.VISIBLE);
         etSearch.setVisibility(View.GONE);
@@ -574,8 +574,8 @@ public class BrowserActivity extends AppCompatActivity
                     MarkerActivity.addMarker(this, link, place[iPlace], null);
                 else {
                     Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
-                    marker.putExtra(DataBase.LINK, link);
-                    marker.putExtra(DataBase.PLACE, getPositionOnPage() * 100f);
+                    marker.putExtra(Const.LINK, link);
+                    marker.putExtra(Const.PLACE, getPositionOnPage() * 100f);
                     startActivity(marker);
                 }
                 break;
@@ -635,7 +635,7 @@ public class BrowserActivity extends AppCompatActivity
             if (!url.contains(PAGE)) {
                 if (back)
                     back = false;
-                else if (!link.equals(DataBase.LINK)) //first value
+                else if (!link.equals(Const.LINK)) //first value
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);
@@ -710,15 +710,15 @@ public class BrowserActivity extends AppCompatActivity
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
                 dbPage = new DataBase(this, link);
                 SQLiteDatabase db = dbPage.getWritableDatabase();
-                Cursor cursor = db.query(DataBase.TITLE, null,
-                        DataBase.LINK + DataBase.Q, new String[]{link},
+                Cursor cursor = db.query(Const.TITLE, null,
+                        Const.LINK + DataBase.Q, new String[]{link},
                         null, null, null);
                 int id;
                 DateHelper d;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-                    s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link);
-                    d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(DataBase.TIME)));
+                    s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
+                    d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
                     if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
                         status.checkTime(d.getTimeInSeconds() - DateHelper.MONTH_IN_SEC);
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
@@ -785,7 +785,7 @@ public class BrowserActivity extends AppCompatActivity
             @Override
             public void run() {
                 ContentValues cv = new ContentValues();
-                cv.put(DataBase.TIME, System.currentTimeMillis());
+                cv.put(Const.TIME, System.currentTimeMillis());
                 String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
                 try {
@@ -809,7 +809,7 @@ public class BrowserActivity extends AppCompatActivity
                     //создаем таблицу нового образца:
                     db.execSQL("create table " + DataBase.JOURNAL + " ("
                             + DataBase.ID + " text primary key,"
-                            + DataBase.TIME + " integer);");
+                            + Const.TIME + " integer);");
                 }
                 dbJournal.close();
             }

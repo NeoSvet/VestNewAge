@@ -57,7 +57,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new DataBase(context, DataBase.SEARCH);
+            dbSearch = new DataBase(context, Const.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
@@ -118,7 +118,7 @@ public class SearchWorker extends Worker {
     private void publishProgress(int time) {
         if (model != null) {
             Data data = new Data.Builder()
-                    .putInt(DataBase.TIME, time)
+                    .putInt(Const.TIME, time)
                     .build();
             model.setProgress(data);
         }
@@ -132,8 +132,8 @@ public class SearchWorker extends Worker {
                 null, null, null, null, null,
                 DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
         if (curSearch.moveToFirst()) {
-            int iTitle = curSearch.getColumnIndex(DataBase.TITLE);
-            int iLink = curSearch.getColumnIndex(DataBase.LINK);
+            int iTitle = curSearch.getColumnIndex(Const.TITLE);
+            int iLink = curSearch.getColumnIndex(Const.LINK);
             int iID = curSearch.getColumnIndex(DataBase.ID);
             do {
                 title.add(curSearch.getString(iTitle));
@@ -162,15 +162,15 @@ public class SearchWorker extends Worker {
                     null, null, null);
             if (cursor.moveToFirst()) {
                 cv = new ContentValues();
-                cv.put(DataBase.TITLE, title.get(i));
-                cv.put(DataBase.LINK, link.get(i));
+                cv.put(Const.TITLE, title.get(i));
+                cv.put(Const.LINK, link.get(i));
                 des = new StringBuilder(getDes(cursor.getString(0), find));
                 count2++;
                 while (cursor.moveToNext()) {
                     des.append(Const.BR + Const.BR);
                     des.append(getDes(cursor.getString(0), find));
                 }
-                cv.put(DataBase.DESCTRIPTION, des.toString());
+                cv.put(Const.DESCTRIPTION, des.toString());
                 dbS.update(DataBase.SEARCH, cv, DataBase.ID +
                         DataBase.Q, new String[]{id.get(i)});
             } else
@@ -192,12 +192,12 @@ public class SearchWorker extends Worker {
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
-            curSearch = db.query(DataBase.TITLE, null,
-                    DataBase.TITLE + DataBase.LIKE, new String[]{"%" + find + "%"}
+            curSearch = db.query(Const.TITLE, null,
+                    Const.TITLE + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         } else if (mode == 4) { //Искать по дате - ищем по ссылкам
-            curSearch = db.query(DataBase.TITLE, null,
-                    DataBase.LINK + DataBase.LIKE, new String[]{"%" + find + "%"}
+            curSearch = db.query(Const.TITLE, null,
+                    Const.LINK + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
             // фильтрация по 0 и 1 будет позже
@@ -220,29 +220,29 @@ public class SearchWorker extends Worker {
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
-                    curTitle = db.query(DataBase.TITLE, null,
+                    curTitle = db.query(Const.TITLE, null,
                             DataBase.ID + DataBase.Q,
                             new String[]{String.valueOf(id)},
                             null, null, null);
                     if (curTitle.moveToFirst()) {
-                        s = curTitle.getString(curTitle.getColumnIndex(DataBase.LINK));
+                        s = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
                         if (mode == 0) //Искать в Посланиях
                             add = !s.contains(Const.POEMS);
                         else if (mode == 1) //Искать в Катренах
                             add = s.contains(Const.POEMS);
                         if (add) {
-                            t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(DataBase.TITLE)), s);
+                            t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), s);
                             if (cv != null) {
                                 if (des != null) {
-                                    cv.put(DataBase.DESCTRIPTION, des.toString());
+                                    cv.put(Const.DESCTRIPTION, des.toString());
                                     des = null;
                                 }
                                 dbS.insert(DataBase.SEARCH, null, cv);
                                 cv = null;
                             }
                             cv = new ContentValues();
-                            cv.put(DataBase.TITLE, t);
-                            cv.put(DataBase.LINK, s);
+                            cv.put(Const.TITLE, t);
+                            cv.put(Const.LINK, s);
                             cv.put(DataBase.ID, n);
                             n++;
                             count2++;
@@ -255,7 +255,7 @@ public class SearchWorker extends Worker {
             } while (curSearch.moveToNext());
             if (cv != null) {
                 if (des != null)
-                    cv.put(DataBase.DESCTRIPTION, des.toString());
+                    cv.put(Const.DESCTRIPTION, des.toString());
                 dbS.insert(DataBase.SEARCH, null, cv);
             }
         }

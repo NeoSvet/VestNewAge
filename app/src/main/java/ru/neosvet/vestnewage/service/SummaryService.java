@@ -44,10 +44,10 @@ public class SummaryService extends JobIntentService {
         SummaryHelper summaryHelper = new SummaryHelper(context);
         try {
             List<String> result;
-            if (intent.hasExtra(DataBase.LINK)) { // postpone
+            if (intent.hasExtra(Const.LINK)) { // postpone
                 result = new ArrayList<>();
-                result.add(intent.getStringExtra(DataBase.DESCTRIPTION));
-                result.add(intent.getStringExtra(DataBase.LINK));
+                result.add(intent.getStringExtra(Const.DESCTRIPTION));
+                result.add(intent.getStringExtra(Const.LINK));
             } else {
                 if (pref.getInt(Const.TIME, Const.TURN_OFF) == Const.TURN_OFF)
                     return;

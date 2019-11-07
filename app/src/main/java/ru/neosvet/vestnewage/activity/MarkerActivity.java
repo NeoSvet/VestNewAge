@@ -54,7 +54,7 @@ public class MarkerActivity extends AppCompatActivity {
 
     public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
-        marker.putExtra(DataBase.LINK, link);
+        marker.putExtra(Const.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
             DataBase dataBase = new DataBase(context, DataBase.getDatePage(link));
@@ -89,7 +89,7 @@ public class MarkerActivity extends AppCompatActivity {
             }
         }
         if (des != null)
-            marker.putExtra(DataBase.DESCTRIPTION, des);
+            marker.putExtra(Const.DESCTRIPTION, des);
         context.startActivity(marker);
     }
 
@@ -101,7 +101,7 @@ public class MarkerActivity extends AppCompatActivity {
         if (PresentationActivity.checkPresentation(this, 2))
             PresentationActivity.startPresentation(this, 2, true);
 
-        link = getIntent().getStringExtra(DataBase.LINK);
+        link = getIntent().getStringExtra(Const.LINK);
         id = getIntent().getIntExtra(DataBase.ID, -1);
         density = getResources().getDisplayMetrics().density;
         initViews();
@@ -112,8 +112,8 @@ public class MarkerActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putByte(DataBase.LINK, modeList);
-        outState.putString(DataBase.PLACE, tvSel.getText().toString());
+        outState.putByte(Const.LINK, modeList);
+        outState.putString(Const.PLACE, tvSel.getText().toString());
         outState.putString(DataBase.JOURNAL, sel);
         outState.putString(DataBase.COLLECTIONS, tvCol.getText().toString());
         if (modeList == 1)
@@ -199,11 +199,11 @@ public class MarkerActivity extends AppCompatActivity {
         DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
         SQLiteDatabase db = dbMarker.getWritableDatabase();
         Cursor cursor = db.query(DataBase.COLLECTIONS,
-                new String[]{DataBase.ID, DataBase.TITLE},
-                null, null, null, null, DataBase.PLACE);
+                new String[]{DataBase.ID, Const.TITLE},
+                null, null, null, null, Const.PLACE);
         if (cursor.moveToFirst()) {
             int iID = cursor.getColumnIndex(DataBase.ID);
-            int iTitle = cursor.getColumnIndex(DataBase.TITLE);
+            int iTitle = cursor.getColumnIndex(Const.TITLE);
             do {
                 adCol.addItem(cursor.getInt(iID), cursor.getString(iTitle));
             } while (cursor.moveToNext());
@@ -219,7 +219,7 @@ public class MarkerActivity extends AppCompatActivity {
             if (s == null)
                 s = tvCol.getText().toString();
             setColList(s);
-            s = state.getString(DataBase.PLACE);
+            s = state.getString(Const.PLACE);
             tvSel.setText(s);
             if (s.contains("%"))
                 rPos.setChecked(true);
@@ -235,7 +235,7 @@ public class MarkerActivity extends AppCompatActivity {
             }
             setPageList(s);
 
-            modeList = state.getByte(DataBase.LINK, modeList);
+            modeList = state.getByte(Const.LINK, modeList);
             if (modeList > 0) {
                 if (modeList == 1)
                     lvList.setAdapter(adPage);
@@ -258,8 +258,8 @@ public class MarkerActivity extends AppCompatActivity {
         } else if (id < 0) { //add marker mode
             tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
             adCol.getItem(0).setCheck(true);
-            if (getIntent().hasExtra(DataBase.DESCTRIPTION))
-                etDes.setText(getIntent().getStringExtra(DataBase.DESCTRIPTION));
+            if (getIntent().hasExtra(Const.DESCTRIPTION))
+                etDes.setText(getIntent().getStringExtra(Const.DESCTRIPTION));
             else {
                 DateHelper d = DateHelper.initNow(this);
                 etDes.setText(d.toString());
@@ -280,7 +280,7 @@ public class MarkerActivity extends AppCompatActivity {
                 setPageList(s);
             }
             sel = getResources().getString(R.string.sel_pos) +
-                    String.format("%.1f", getIntent().getFloatExtra(DataBase.PLACE, 0f)) + "%";
+                    String.format("%.1f", getIntent().getFloatExtra(Const.PLACE, 0f)) + "%";
         } else { //edit mode
             setResult(0);
             DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
@@ -289,8 +289,8 @@ public class MarkerActivity extends AppCompatActivity {
                     DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)}
                     , null, null, null);
             cursor.moveToFirst();
-            etDes.setText(cursor.getString(cursor.getColumnIndex(DataBase.DESCTRIPTION)));
-            String s = cursor.getString(cursor.getColumnIndex(DataBase.PLACE));
+            etDes.setText(cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION)));
+            String s = cursor.getString(cursor.getColumnIndex(Const.PLACE));
             if (s.contains("%")) {
                 rPos.setChecked(true);
                 setPosText(Float.parseFloat(s.substring(0, s.length() - 1).replace(",", ".")));
@@ -314,9 +314,9 @@ public class MarkerActivity extends AppCompatActivity {
             for (int i = 0; i < mId.length; i++) {
                 cursor = db.query(DataBase.COLLECTIONS, null,
                         DataBase.ID + DataBase.Q, new String[]{mId[i]}
-                        , null, null, DataBase.PLACE);
+                        , null, null, Const.PLACE);
                 if (cursor.moveToFirst()) {
-                    b.append(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
+                    b.append(cursor.getString(cursor.getColumnIndex(Const.TITLE)));
                     b.append(", ");
                 }
                 cursor.close();
@@ -530,18 +530,18 @@ public class MarkerActivity extends AppCompatActivity {
                         ContentValues cv;
                         //освобождаем первую позицию (PLACE) путем смещения всех вперед..
                         Cursor cursor = db.query(DataBase.COLLECTIONS,
-                                new String[]{DataBase.ID, DataBase.PLACE},
+                                new String[]{DataBase.ID, Const.PLACE},
                                 null, null, null, null, null);
                         if (cursor.moveToFirst()) {
                             int iID = cursor.getColumnIndex(DataBase.ID);
-                            int iPlace = cursor.getColumnIndex(DataBase.PLACE);
+                            int iPlace = cursor.getColumnIndex(Const.PLACE);
                             int id, i;
                             do {
                                 i = cursor.getInt(iPlace);
                                 if (i > 0) { // нулевую позицию не трогаем ("Вне подборок")
                                     id = cursor.getInt(iID);
                                     cv = new ContentValues();
-                                    cv.put(DataBase.PLACE, i + 1);
+                                    cv.put(Const.PLACE, i + 1);
                                     db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                                             new String[]{String.valueOf(id)});
                                 }
@@ -550,14 +550,14 @@ public class MarkerActivity extends AppCompatActivity {
                         cursor.close();
                         //добавляем новую подборку на первую позицию
                         cv = new ContentValues();
-                        cv.put(DataBase.PLACE, 1);
-                        cv.put(DataBase.TITLE, s);
+                        cv.put(Const.PLACE, 1);
+                        cv.put(Const.TITLE, s);
                         db.insert(DataBase.COLLECTIONS, null, cv);
                         cursor = db.query(DataBase.COLLECTIONS, null,
-                                DataBase.PLACE + DataBase.Q, new String[]{"1"}, null, null, null);
+                                Const.PLACE + DataBase.Q, new String[]{"1"}, null, null, null);
                         if (cursor.moveToFirst()) {
                             adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
-                                    cursor.getString(cursor.getColumnIndex(DataBase.TITLE)));
+                                    cursor.getString(cursor.getColumnIndex(Const.TITLE)));
                         }
                         cursor.close();
                         dbMarker.close();
@@ -762,15 +762,15 @@ public class MarkerActivity extends AppCompatActivity {
 
     public ContentValues getMarkerValues() {
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.LINK, link);
-        cv.put(DataBase.DESCTRIPTION, etDes.getText().toString());
+        cv.put(Const.LINK, link);
+        cv.put(Const.DESCTRIPTION, etDes.getText().toString());
         //определяем место
         String s = tvSel.getText().toString();
         if (s.contains(":"))
             s = s.substring(s.indexOf(":") + 2).replace(", ", ",");
         else
             s = "0";
-        cv.put(DataBase.PLACE, s);
+        cv.put(Const.PLACE, s);
         //формулируем список подборок
         StringBuilder b = new StringBuilder();
         setColList(tvCol.getText().toString());

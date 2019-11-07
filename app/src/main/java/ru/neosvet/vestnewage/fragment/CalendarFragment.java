@@ -340,16 +340,16 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
 
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
-            Cursor cursor = db.query(DataBase.TITLE, null, null, null, null, null, null);
+            Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
             boolean empty = true;
             if (cursor.moveToFirst()) {
                 if (loadIfNeed) {
                     checkTime((int) (cursor.getLong(cursor.getColumnIndex(
-                            DataBase.TIME)) / DateHelper.SEC_IN_MILLS));
+                            Const.TIME)) / DateHelper.SEC_IN_MILLS));
                 }
 
-                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                int iLink = cursor.getColumnIndex(DataBase.LINK);
+                int iTitle = cursor.getColumnIndex(Const.TITLE);
+                int iLink = cursor.getColumnIndex(Const.LINK);
                 int i;
                 String title, link;
                 while (cursor.moveToNext()) {
@@ -478,8 +478,8 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         String title, link;
         for (; i < adCalendar.getItem(item).getCount(); i++) {
             link = adCalendar.getItem(item).getLink(i);
-            cursor = db.query(DataBase.TITLE, new String[]{DataBase.TITLE},
-                    DataBase.LINK + DataBase.Q, new String[]{link},
+            cursor = db.query(Const.TITLE, new String[]{Const.TITLE},
+                    Const.LINK + DataBase.Q, new String[]{link},
                     null, null, null);
             if (cursor.moveToFirst()) {
                 title = cursor.getString(0);

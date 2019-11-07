@@ -12,8 +12,7 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", SEARCH = "search",
             JOURNAL = "journal", MARKERS = "markers", LIKE = " LIKE ?",
-            Q = " = ?", TITLE = "title", COLLECTIONS = "collections", ID = "id",
-            LINK = "link", TIME = "time", PLACE = "place", DESCTRIPTION = "des", DESC = " DESC";
+            Q = " = ?",  COLLECTIONS = "collections", ID = "id",DESC = " DESC";
     private Context context;
     private String name = "";
 
@@ -36,47 +35,47 @@ public class DataBase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         if (name.contains(".")) { // базы данных с материалами
-            db.execSQL("create table " + TITLE + " ("
-                    + ID + " integer primary key autoincrement," //id TITLE
-                    + LINK + " text,"
-                    + TITLE + " text,"
-                    + TIME + " integer);");
+            db.execSQL("create table " + Const.TITLE + " ("
+                    + ID + " integer primary key autoincrement," //id Const.TITLE
+                    + Const.LINK + " text,"
+                    + Const.TITLE + " text,"
+                    + Const.TIME + " integer);");
             //записываем дату создания (в дальнейшем это будет дата изменений):
             ContentValues cv = new ContentValues();
-            cv.put(TIME, System.currentTimeMillis());
-            db.insert(TITLE, null, cv);
+            cv.put(Const.TIME, System.currentTimeMillis());
+            db.insert(Const.TITLE, null, cv);
             db.execSQL("create table " + PARAGRAPH + " ("
-                    + ID + " integer," //id TITLE
+                    + ID + " integer," //id Const.TITLE
                     + PARAGRAPH + " text);");
         } else if (name.equals(UnreadHelper.NAME)) {
             db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
-                    + LINK + " text primary key,"
-                    + TIME + " integer);");
+                    + Const.LINK + " text primary key,"
+                    + Const.TIME + " integer);");
         } else if (name.equals(SEARCH)) {
             db.execSQL("create table if not exists " + SEARCH + " ("
-                    + LINK + " text primary key,"
-                    + TITLE + " text,"
+                    + Const.LINK + " text primary key,"
+                    + Const.TITLE + " text,"
                     + ID + " integer," //number for sorting
-                    + DESCTRIPTION + " text);");
+                    + Const.DESCTRIPTION + " text);");
         } else if (name.equals(JOURNAL)) {
             db.execSQL("create table if not exists " + JOURNAL + " ("
-                    + ID + " text primary key," // date&id TITLE || date&id TITLE&rnd_place
-                    + TIME + " integer);");
+                    + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
+                    + Const.TIME + " integer);");
         } else if (name.equals(MARKERS)) {
             db.execSQL("create table " + MARKERS + " ("
                     + ID + " integer primary key autoincrement," //id закладки
-                    + LINK + " text," //ссылка на материал
+                    + Const.LINK + " text," //ссылка на материал
                     + COLLECTIONS + " text," //список id подборок, в которые включен материал
-                    + DESCTRIPTION + " text,"  //описание
-                    + PLACE + " text);"); //место в материале
+                    + Const.DESCTRIPTION + " text,"  //описание
+                    + Const.PLACE + " text);"); //место в материале
             db.execSQL("create table " + COLLECTIONS + " ("
                     + ID + " integer primary key autoincrement," //id подборок
                     + MARKERS + " text," //список id закладок
-                    + PLACE + " integer," //место подборки в списке подоборок
-                    + TITLE + " text);"); //название Подборки
+                    + Const.PLACE + " integer," //место подборки в списке подоборок
+                    + Const.TITLE + " text);"); //название Подборки
             // добавляем подборку по умолчанию - "вне подборок":
             ContentValues cv = new ContentValues();
-            cv.put(TITLE, context.getResources().getString(R.string.no_collections));
+            cv.put(Const.TITLE, context.getResources().getString(R.string.no_collections));
             db.insert(COLLECTIONS, null, cv);
         }
     }
@@ -111,14 +110,14 @@ public class DataBase extends SQLiteOpenHelper {
     public static String getContentPage(Context ctxt, String link, boolean onlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE, null,
-                DataBase.LINK + DataBase.Q, new String[]{link},
+        Cursor cursor = db.query(Const.TITLE, null,
+                Const.LINK + DataBase.Q, new String[]{link},
                 null, null, null);
         int id;
 
         StringBuilder pageCon = new StringBuilder();
         if (cursor.moveToFirst()) {
-            pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(DataBase.TITLE)), link));
+            pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link));
             if (onlyTitle) {
                 cursor.close();
                 dataBase.close();
@@ -199,9 +198,9 @@ public class DataBase extends SQLiteOpenHelper {
     public int getPageId(String link) {
         DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.TITLE,
+        Cursor cursor = db.query(Const.TITLE,
                 new String[]{DataBase.ID},
-                DataBase.LINK + DataBase.Q, new String[]{link},
+                Const.LINK + DataBase.Q, new String[]{link},
                 null, null, null);
         int r = -1;
         if (cursor.moveToFirst())
@@ -213,8 +212,8 @@ public class DataBase extends SQLiteOpenHelper {
 
     public boolean existsPage(String link) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.ID},
-                DataBase.LINK + DataBase.Q, new String[]{link}, null, null, null);
+        Cursor curTitle = db.query(Const.TITLE, new String[]{DataBase.ID},
+                Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean exists = false;
         if (curTitle.moveToFirst()) {
             Cursor curPar = db.query(DataBase.PARAGRAPH, null,

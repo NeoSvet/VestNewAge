@@ -88,7 +88,7 @@ public class CalendarWolker extends Worker {
         DateHelper d = DateHelper.putYearMonth(context, year, month);
         DataBase dataBase = new DataBase(context, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
@@ -139,11 +139,11 @@ public class CalendarWolker extends Worker {
                     jsonA = json.optJSONArray(s);
                     for (int j = 0; j < jsonA.length(); j++) {
                         jsonI = jsonA.getJSONObject(j);
-                        link = jsonI.getString(DataBase.LINK) + Const.HTML;
+                        link = jsonI.getString(Const.LINK) + Const.HTML;
                         addLink(n, link);
                     }
                 } else { // один материал за день
-                    link = jsonI.getString(DataBase.LINK) + Const.HTML;
+                    link = jsonI.getString(Const.LINK) + Const.HTML;
                     addLink(n, link);
                     jsonI = jsonI.getJSONObject("data");
                     if (jsonI != null) {
@@ -182,10 +182,10 @@ public class CalendarWolker extends Worker {
         dataBase = new DataBase(context, link);
         db = dataBase.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.TIME, System.currentTimeMillis());
-        if (db.update(DataBase.TITLE, cv,
+        cv.put(Const.TIME, System.currentTimeMillis());
+        if (db.update(Const.TITLE, cv,
                 DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
-            db.insert(DataBase.TITLE, null, cv);
+            db.insert(Const.TITLE, null, cv);
         }
     }
 
@@ -200,14 +200,14 @@ public class CalendarWolker extends Worker {
         data.get(n).addLink(link);
         initDatebase(link);
         ContentValues cv = new ContentValues();
-        cv.put(DataBase.LINK, link);
+        cv.put(Const.LINK, link);
         // пытаемся обновить запись:
-        if (db.update(DataBase.TITLE, cv,
-                DataBase.LINK + DataBase.Q,
+        if (db.update(Const.TITLE, cv,
+                Const.LINK + DataBase.Q,
                 new String[]{link}) == 0) {
             // обновить не получилось, добавляем:
-            cv.put(DataBase.TITLE, link);
-            db.insert(DataBase.TITLE, null, cv);
+            cv.put(Const.TITLE, link);
+            db.insert(Const.TITLE, null, cv);
         }
     }
 }

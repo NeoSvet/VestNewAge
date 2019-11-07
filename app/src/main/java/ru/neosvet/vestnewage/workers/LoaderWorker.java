@@ -27,6 +27,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
@@ -82,10 +83,10 @@ public class LoaderWorker extends Worker {
                     break;
                 default:
                     if (getInputData().getBoolean(Const.PAGE, true)) {
-                        downloadPage(getInputData().getString(DataBase.LINK), true);
+                        downloadPage(getInputData().getString(Const.LINK), true);
                     } else { //file
-                        downloadFile(getInputData().getString(DataBase.LINK),
-                                getInputData().getString(DataBase.PLACE));
+                        downloadFile(getInputData().getString(Const.LINK),
+                                getInputData().getString(Const.FILE));
                     }
                     break;
             }
@@ -295,7 +296,7 @@ public class LoaderWorker extends Worker {
     private int countBookList(String name) throws Exception {
         DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(DataBase.TITLE, null, null, null, null, null, null);
+        Cursor curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
         int k = curTitle.getCount();
         curTitle.close();
         dataBase.close();
@@ -305,7 +306,7 @@ public class LoaderWorker extends Worker {
     private void downloadBookList(String name) throws Exception {
         DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(DataBase.TITLE, new String[]{DataBase.LINK},
+        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
@@ -414,16 +415,16 @@ public class LoaderWorker extends Worker {
                             // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
                             s = line.substring(0, line.indexOf(par) + par.length());
                             cv = new ContentValues();
-                            cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, s);
-                            db.insert(DataBase.PARAGRAPH, null, cv);
+                            cv.put(Const.ID, id);
+                            cv.put(Const.PARAGRAPH, s);
+                            db.insert(Const.PARAGRAPH, null, cv);
                             line = line.substring(s.length());
                         }
                     }
                     cv = new ContentValues();
-                    cv.put(DataBase.ID, id);
-                    cv.put(DataBase.PARAGRAPH, line);
-                    db.insert(DataBase.PARAGRAPH, null, cv);
+                    cv.put(Const.ID, id);
+                    cv.put(Const.PARAGRAPH, line);
+                    db.insert(Const.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
                 if (link.contains("#")) {// ссылка на последующий текст на странице
@@ -436,8 +437,8 @@ public class LoaderWorker extends Worker {
                             id--;
                     }
                 }
-                Cursor cursor = db.query(DataBase.TITLE, new String[]{DataBase.ID, DataBase.TITLE},
-                        DataBase.LINK + DataBase.Q, new String[]{link}
+                Cursor cursor = db.query(Const.TITLE, new String[]{Const.ID, Const.TITLE},
+                        Const.LINK + Const.Q, new String[]{link}
                         , null, null, null);
                 s = "";
                 if (cursor.moveToFirst()) {
@@ -446,25 +447,25 @@ public class LoaderWorker extends Worker {
                 }
                 cursor.close();
                 cv = new ContentValues();
-                cv.put(DataBase.TIME, System.currentTimeMillis());
+                cv.put(Const.TIME, System.currentTimeMillis());
                 if (id == 0) { // id не найден, материала нет - добавляем
-                    cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
-                    cv.put(DataBase.LINK, link);
-                    id = (int) db.insert(DataBase.TITLE, null, cv);
+                    cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
+                    cv.put(Const.LINK, link);
+                    id = (int) db.insert(Const.TITLE, null, cv);
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
-                    cv.put(DataBase.TIME, System.currentTimeMillis());
-                    db.update(DataBase.TITLE, cv, DataBase.ID +
-                            DataBase.Q, new String[]{"1"});
+                    cv.put(Const.TIME, System.currentTimeMillis());
+                    db.update(Const.TITLE, cv, Const.ID +
+                            Const.Q, new String[]{"1"});
                 } else { // id найден, значит материал есть
                     if (s.contains("/")) // в заголовке ссылка, необходимо заменить
-                        cv.put(DataBase.TITLE, getTitle(line, dataBase.getName()));
+                        cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
                     //обновляем дату загрузки материала
-                    db.update(DataBase.TITLE, cv, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(id)});
+                    db.update(Const.TITLE, cv, Const.ID +
+                            Const.Q, new String[]{String.valueOf(id)});
                     //удаляем содержимое материала
-                    db.delete(DataBase.PARAGRAPH, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(id)});
+                    db.delete(Const.PARAGRAPH, Const.ID +
+                            Const.Q, new String[]{String.valueOf(id)});
                 }
                 br.readLine();
                 begin = true;

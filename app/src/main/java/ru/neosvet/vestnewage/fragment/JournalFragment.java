@@ -65,12 +65,12 @@ public class JournalFragment extends Fragment {
     private void openList() {
         tip.hide();
         SQLiteDatabase dbJ = dbJournal.getWritableDatabase();
-        Cursor curJ = dbJ.query(DataBase.JOURNAL, null, null, null, null, null, DataBase.TIME + DataBase.DESC);
+        Cursor curJ = dbJ.query(DataBase.JOURNAL, null, null, null, null, null, Const.TIME + DataBase.DESC);
         if (curJ.moveToFirst()) {
             DataBase dataBase;
             SQLiteDatabase db;
             Cursor cursor;
-            int iTime = curJ.getColumnIndex(DataBase.TIME);
+            int iTime = curJ.getColumnIndex(Const.TIME);
             int iID = curJ.getColumnIndex(DataBase.ID);
             int i = 0;
             String s;
@@ -85,12 +85,12 @@ public class JournalFragment extends Fragment {
                 id = curJ.getString(iID).split(Const.AND);
                 dataBase = new DataBase(act, id[0]);
                 db = dataBase.getWritableDatabase();
-                cursor = db.query(DataBase.TITLE, null, DataBase.ID + DataBase.Q,
+                cursor = db.query(Const.TITLE, null, DataBase.ID + DataBase.Q,
                         new String[]{id[1]}, null, null, null);
                 if (cursor.moveToFirst()) {
-                    s = cursor.getString(cursor.getColumnIndex(DataBase.LINK));
+                    s = cursor.getString(cursor.getColumnIndex(Const.LINK));
                     item = new ListItem(dataBase.getPageTitle(cursor.getString(
-                            cursor.getColumnIndex(DataBase.TITLE)), s), s);
+                            cursor.getColumnIndex(Const.TITLE)), s), s);
                     t = curJ.getLong(iTime);
                     d = DateHelper.putMills(act, t);
                     item.setDes(now.getDiffDate(t) +

@@ -42,8 +42,8 @@ public class NotificationHelper extends ContextWrapper {
             } else if (mode == ID_SUMMARY_POSTPONE) {
                 notifHelper.cancel(intent.getIntExtra(DataBase.ID, 0));
                 SummaryHelper.postpone(context,
-                        intent.getStringExtra(DataBase.DESCTRIPTION),
-                        intent.getStringExtra(DataBase.LINK));
+                        intent.getStringExtra(Const.DESCTRIPTION),
+                        intent.getStringExtra(Const.LINK));
             }
         }
     }
@@ -58,8 +58,8 @@ public class NotificationHelper extends ContextWrapper {
     public PendingIntent getPostponeSummaryNotif(int id, String des, String link) {
         Intent intent = new Intent(this, NotificationHelper.Result.class);
         intent.putExtra(MODE, ID_SUMMARY_POSTPONE);
-        intent.putExtra(DataBase.DESCTRIPTION, des);
-        intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(Const.DESCTRIPTION, des);
+        intent.putExtra(Const.LINK, link);
         intent.putExtra(DataBase.ID, id);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         return pendingIntent;

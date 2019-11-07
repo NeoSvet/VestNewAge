@@ -32,7 +32,7 @@ public class CabpageActivity extends AppCompatActivity {
 
     public static void openPage(Context context, String link, @Nullable String cookie) {
         Intent intent = new Intent(context, CabpageActivity.class);
-        intent.putExtra(DataBase.LINK, link);
+        intent.putExtra(Const.LINK, link);
         intent.putExtra(Const.COOKIE, cookie);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -54,7 +54,7 @@ public class CabpageActivity extends AppCompatActivity {
             cookieSyncManager.getInstance().sync();
 //            cookieManager.getCookie(HOST);
         }
-        wvBrowser.loadUrl(HOST + "/" + getIntent().getStringExtra(DataBase.LINK));
+        wvBrowser.loadUrl(HOST + "/" + getIntent().getStringExtra(Const.LINK));
     }
 
     private void initView() {

@@ -133,7 +133,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                DateHelper d = DateHelper.putDays(act, data.getInt(DataBase.TIME, 0));
+                DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
                 tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
             }
         });
@@ -591,9 +591,9 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 rvPages.setAdapter(adPages);
             }
             if (cursor.moveToPosition(page * Const.MAX_ON_PAGE)) {
-                int iTitle = cursor.getColumnIndex(DataBase.TITLE);
-                int iLink = cursor.getColumnIndex(DataBase.LINK);
-                int iDes = cursor.getColumnIndex(DataBase.DESCTRIPTION);
+                int iTitle = cursor.getColumnIndex(Const.TITLE);
+                int iLink = cursor.getColumnIndex(Const.LINK);
+                int iDes = cursor.getColumnIndex(Const.DESCTRIPTION);
                 ListItem item;
                 String s;
                 do {

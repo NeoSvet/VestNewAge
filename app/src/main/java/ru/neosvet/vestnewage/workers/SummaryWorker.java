@@ -105,10 +105,10 @@ public class SummaryWorker extends Worker {
         SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
         SummaryHelper summaryHelper = new SummaryHelper(context);
         List<String> result;
-        String link = getInputData().getString(DataBase.LINK);
+        String link = getInputData().getString(Const.LINK);
         if (link != null) { // postpone
             result = new ArrayList<>();
-            result.add(getInputData().getString(DataBase.DESCTRIPTION));
+            result.add(getInputData().getString(Const.DESCTRIPTION));
             result.add(link);
         } else {
             long last_time = System.currentTimeMillis() - pref.getLong(LAST_TIME, 0);
@@ -296,14 +296,14 @@ public class SummaryWorker extends Worker {
                 dataBase = new DataBase(context, name);
                 db = dataBase.getWritableDatabase();
             }
-            cursor = db.query(DataBase.TITLE, null,
-                    DataBase.LINK + DataBase.Q, new String[]{link},
+            cursor = db.query(Const.TITLE, null,
+                    Const.LINK + DataBase.Q, new String[]{link},
                     null, null, null);
             if (!cursor.moveToFirst()) {
                 cv = new ContentValues();
-                cv.put(DataBase.TITLE, title);
-                cv.put(DataBase.LINK, link);
-                db.insert(DataBase.TITLE, null, cv);
+                cv.put(Const.TITLE, title);
+                cv.put(Const.LINK, link);
+                db.insert(Const.TITLE, null, cv);
             }
             cursor.close();
         }

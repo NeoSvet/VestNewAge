@@ -16,8 +16,8 @@ public interface Const {
     String DAY = "Day", MONTH = "Month", YEAR = "Year", UNREAD = "Unread", ERROR = "ERROR", LIST = "list", PAGE = "page", RENAME = "rename";
     String START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email", PASSWORD = "password", PANEL = "panel";
     String LOGIN = "login", GET_WORDS = "get_words", SELECT_WORD = "select_word", SELECT = "select", CURRENT_DATE = "current_date";
-    String TIME = "time", SUMMARY = "Summary", PROM = "Prom", POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads";
-    String MSG = "msg", PROG = "prog", MAX = "max", FROM_OTKR = "from_otkr";
+    String TIME = "time", SUMMARY = "Summary", PROM = "Prom", POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads", FILE = "file";
+    String MSG = "msg", PROG = "prog", MAX = "max", FROM_OTKR = "from_otkr", TITLE = "title",  LINK = "link", PLACE = "place", DESCTRIPTION = "des";
 
     byte TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
 }

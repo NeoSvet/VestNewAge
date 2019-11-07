@@ -111,14 +111,14 @@ public class CabmainFragment extends BackFragment {
     private void parseResult(Data result) {
         model.finish();
         act.status.setLoad(false);
-        switch (result.getInt(DataBase.TITLE, 0)) {
+        switch (result.getInt(Const.TITLE, 0)) {
             case CabWorker.SELECTED_WORD:
                 if (result.getString(Const.TASK).equals(Const.GET_WORDS)) {
                     initCabinet(getResources().getString(R.string.selected_status),
-                            result.getString(DataBase.DESCTRIPTION));
+                            result.getString(Const.DESCTRIPTION));
                 } else {
                     initCabinet(getResources().getString(R.string.selected_status),
-                            adMain.getItem(result.getInt(DataBase.DESCTRIPTION, 0)).getTitle());
+                            adMain.getItem(result.getInt(Const.DESCTRIPTION, 0)).getTitle());
                 }
                 break;
             case CabWorker.NO_SELECTED:
@@ -126,14 +126,14 @@ public class CabmainFragment extends BackFragment {
                         getResources().getString(R.string.select_status));
                 break;
             case CabWorker.WORD_LIST:
-                initWordList(result.getStringArray(DataBase.DESCTRIPTION));
+                initWordList(result.getStringArray(Const.DESCTRIPTION));
                 break;
             case CabWorker.TIMEOUT:
                 initCabinet(getResources().getString(R.string.send_status),
-                        result.getString(DataBase.DESCTRIPTION));
+                        result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.ERROR:
-                initError(result.getString(DataBase.DESCTRIPTION));
+                initError(result.getString(Const.DESCTRIPTION));
                 break;
         }
     }
@@ -161,7 +161,7 @@ public class CabmainFragment extends BackFragment {
                 fabExit.setVisibility(View.VISIBLE);
             }
             String d;
-            for (String t : state.getStringArray(DataBase.LINK)) {
+            for (String t : state.getStringArray(Const.LINK)) {
                 if (t.contains("#")) {
                     d = t.substring(t.indexOf("#") + 1);
                     t = t.substring(0, t.indexOf("#"));
@@ -183,7 +183,7 @@ public class CabmainFragment extends BackFragment {
             d = adMain.getItem(i).getDes();
             m[i] = adMain.getItem(i).getTitle() + (d == null ? "" : "#" + d);
         }
-        outState.putStringArray(DataBase.LINK, m);
+        outState.putStringArray(Const.LINK, m);
         super.onSaveInstanceState(outState);
     }
 

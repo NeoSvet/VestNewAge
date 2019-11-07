@@ -96,8 +96,8 @@ public class CabWorker extends Worker {
             return getListWord(true);
         } else { //INCORRECT_PASSWORD
             Data.Builder result = new Data.Builder()
-                    .putInt(DataBase.TITLE, ERROR)
-                    .putString(DataBase.DESCTRIPTION, s);
+                    .putInt(Const.TITLE, ERROR)
+                    .putString(Const.DESCTRIPTION, s);
             return result;
         }
     }
@@ -131,8 +131,8 @@ public class CabWorker extends Worker {
             else
                 s = s.substring(0, s.indexOf("</p"));
             s = s.substring(s.lastIndexOf(">") + 1);
-            result.putInt(DataBase.TITLE, TIMEOUT);
-            result.putString(DataBase.DESCTRIPTION, s);
+            result.putInt(Const.TITLE, TIMEOUT);
+            result.putString(Const.DESCTRIPTION, s);
             return result;
         } else if (s.contains("name=\"keyw")) { // list word
             s = s.substring(s.indexOf("-<") + 10, s.indexOf("</select>") - 9);
@@ -143,23 +143,23 @@ public class CabWorker extends Worker {
                 if (m[i].contains("selected")) {
                     m[i] = m[i].substring(m[i].indexOf(">") + 1);
                     if (returnSelectWord) {
-                        result.putInt(DataBase.TITLE, SELECTED_WORD);
-                        result.putString(DataBase.DESCTRIPTION, m[i]);
+                        result.putInt(Const.TITLE, SELECTED_WORD);
+                        result.putString(Const.DESCTRIPTION, m[i]);
                         return result;
                     }
                 }
                 list[i] = m[i];
             }
             if (returnSelectWord) {
-                result.putInt(DataBase.TITLE, NO_SELECTED);
+                result.putInt(Const.TITLE, NO_SELECTED);
                 return result;
             }
-            result.putInt(DataBase.TITLE, WORD_LIST);
-            result.putStringArray(DataBase.DESCTRIPTION, list);
+            result.putInt(Const.TITLE, WORD_LIST);
+            result.putStringArray(Const.DESCTRIPTION, list);
             return result;
         } else {
-            result.putInt(DataBase.TITLE, ERROR);
-            result.putString(DataBase.DESCTRIPTION, context.getResources().getString(R.string.anketa_failed));
+            result.putInt(Const.TITLE, ERROR);
+            result.putString(Const.DESCTRIPTION, context.getResources().getString(R.string.anketa_failed));
             return result;
         }
     }
@@ -186,11 +186,11 @@ public class CabWorker extends Worker {
 
         Data.Builder result = new Data.Builder();
         if (s == null) { //no error
-            result.putInt(DataBase.TITLE, SELECTED_WORD);
-            result.putInt(DataBase.DESCTRIPTION, index);
+            result.putInt(Const.TITLE, SELECTED_WORD);
+            result.putInt(Const.DESCTRIPTION, index);
         } else {
-            result.putInt(DataBase.TITLE, ERROR);
-            result.putString(DataBase.DESCTRIPTION, s);
+            result.putInt(Const.TITLE, ERROR);
+            result.putString(Const.DESCTRIPTION, s);
         }
         return result;
     }
