@@ -243,15 +243,15 @@ public class BrowserActivity extends AppCompatActivity
         if (iPlace == -1) return;
         String s = place[iPlace];
         tvPlace.setText(s.replace(Const.N, " "));
-        findText(s.substring(0, s.indexOf(Const.N)));
+        findText(s);
     }
 
     private void findText(String s) {
+        if (s.contains(Const.N))
+            s = s.substring(0, s.indexOf(Const.N));
         if (android.os.Build.VERSION.SDK_INT > 15)
             wvBrowser.findAllAsync(s);
         else {
-            if (s.contains(Const.N))
-                s = s.substring(0, s.indexOf(Const.N));
             wvBrowser.findAll(s);
             try {
                 //Can't use getMethod() as it's a private method
