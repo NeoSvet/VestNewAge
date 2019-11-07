@@ -118,7 +118,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         model.getProgress().observe(this, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-
+                if (data.getBoolean(Const.PROG, false)) {
+                    model.upProg();
+                }
             }
         });
         model.getState().observe(this, new Observer<List<WorkInfo>>() {
@@ -201,13 +203,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                Data.Builder data = new Data.Builder();
                 if (cur_id == R.id.nav_calendar) {
-                    data.putInt(Const.YEAR, ((CalendarFragment) curFragment).getCurrentYear());
-                    model.startLoad(LoaderModel.DOWNLOAD_YEAR, data.build());
+                    model.startLoad(LoaderModel.DOWNLOAD_YEAR, String.valueOf(
+                            ((CalendarFragment) curFragment).getCurrentYear()));
                 } else {
-                    data.putInt(Const.SELECT, cur_id);
-                    model.startLoad(LoaderModel.DOWNLOAD_ID, data.build());
+                    model.startLoad(LoaderModel.DOWNLOAD_ID, String.valueOf(cur_id));
                 }
             }
         });

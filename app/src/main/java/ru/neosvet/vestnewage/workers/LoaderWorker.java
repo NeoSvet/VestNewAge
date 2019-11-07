@@ -27,7 +27,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
@@ -44,8 +43,7 @@ public class LoaderWorker extends Worker {
     private Lib lib;
     private Request.Builder builderRequest;
     private OkHttpClient client;
-    private String msg;
-    private int prog = 0;
+    private Data.Builder data;
 
     public LoaderWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -66,16 +64,16 @@ public class LoaderWorker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            startTimer();
+            if(isCancelled())
+                return Result.success();
             initClient();
+            data.putBoolean(Const.DIALOG, true);
             switch (getInputData().getInt(Const.MODE, 0)) {
                 case LoaderModel.DOWNLOAD_ALL:
-                    refreshLists(-1);
-                    downloadAll(-1);
+                    downloadAll(LoaderModel.ALL);
                     break;
                 case LoaderModel.DOWNLOAD_ID:
                     int p = getInputData().getInt(Const.SELECT, 0);
-                    refreshLists(p);
                     downloadAll(p);
                     break;
                 case LoaderModel.DOWNLOAD_YEAR:
@@ -103,16 +101,16 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadYear(int year) throws Exception {
-        msg = context.getResources().getString(R.string.download_list);
-        //refresh list:
         DateHelper d = DateHelper.initToday(context);
         int k = 12;
         if (year == d.getYear())
             k -= d.getMonth();
-        publishProgress(k);
-        CalendarTask t2 = new CalendarTask((Activity) context);
-        for (int m = 0; m < k && start; m++) {
-            t2.downloadCalendar(year, m, false);
+        data.putString(Const.MSG, context.getResources().getString(R.string.download_list));
+        data.putInt(Const.MAX, k);
+        model.setProgress(data.build());
+        for (int m = 0; m < k && !isCancelled(); m++) {
+            CalendarWolker.getListLink(context, year, m);
+            downloadList();
             prog++;
         }
         //open list:
@@ -120,7 +118,7 @@ public class LoaderWorker extends Worker {
         File dir = lib.getDBFolder();
         File[] f = dir.listFiles();
         int i;
-        for (i = 0; i < f.length && start; i++) {
+        for (i = 0; i < f.length && !isCancelled(); i++) {
             if (f[i].getName().length() == 5)
                 list.add(f[i].getName());
         }
@@ -128,7 +126,7 @@ public class LoaderWorker extends Worker {
         k = 0;
         //count pages:
         d = DateHelper.putYearMonth(context, year, 1);
-        while (start) {
+        while (!isCancelled()) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     k += countBookList(d.getMY());
@@ -142,9 +140,9 @@ public class LoaderWorker extends Worker {
         //download:
         prog = 0;
         msg = context.getResources().getString(R.string.download_materials);
-        publishProgress(k);
+        setProgMax(k);
         d = DateHelper.putYearMonth(context, year, 1);
-        while (start) {
+        while (!isCancelled()) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     downloadBookList(d.getMY());
@@ -157,86 +155,23 @@ public class LoaderWorker extends Worker {
         }
     }
 
-    private void refreshLists(int p) throws Exception {
-        msg = context.getResources().getString(R.string.download_list);
-        // подсчёт количества списков:
-        int k = 0;
-        DateHelper d = DateHelper.initToday(context);
-        if (p == -1 || p == R.id.nav_book) {
-            k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
-            k += 9; // poslaniya (01.16-09.16)
-        }
-        if (p == -1) {
-            k += (d.getYear() - 2016) * 12 + d.getMonth(); // calendar from 01.16
-            k += 4; // main, news, media and rss
-        } else if (p == R.id.nav_main) // main, news, media
-            k = 3;
-        publishProgress(k);
-        //загрузка списков
-        if (p == -1) {
-            SummaryTask t1 = new SummaryTask((MainActivity) context);
-            t1.downloadList();
-            prog++;
-        }
-        if (!start) return;
+    private void downloadList() {
 
-        if (p == -1 || p == R.id.nav_main) {
-            SiteTask t4 = new SiteTask((MainActivity) context);
-            String[] url = new String[]{
-                    Const.SITE,
-                    Const.SITE + "novosti.html",
-                    Const.SITE + "media.html"
-            };
-            String[] file = new String[]{
-                    getFile(SiteFragment.MAIN).toString(),
-                    getFile(SiteFragment.NEWS).toString(),
-                    getFile(SiteFragment.MEDIA).toString()
-            };
-            for (int i = 0; i < url.length && start; i++) {
-                t4.downloadList(url[i]);
-                t4.saveList(file[i]);
-                prog++;
-            }
-        }
-        if (!start) return;
-
-        if (p == -1) {
-            d = DateHelper.initToday(context);
-            CalendarTask t2 = new CalendarTask((Activity) context);
-            int max_y = d.getYear() + 1, max_m = 13;
-            for (int y = 2016; y < max_y && start; y++) {
-                if (y == d.getYear())
-                    max_m = d.getMonth() + 1;
-                for (int m = 0; m < max_m && start; m++) {
-                    t2.downloadCalendar(y, m, false);
-                    prog++;
-                }
-            }
-        }
-        if (!start) return;
-
-        if (p == -1 || p == R.id.nav_book) {
-            BookTask t3 = new BookTask((MainActivity) context);
-            t3.downloadData(true, this);
-            prog++;
-            t3.downloadData(false, this);
-            prog++;
-        }
     }
 
-    private void downloadAll(int p) throws Exception {
+    private void downloadAll(int id) throws Exception {
         prog = 0;
         msg = context.getResources().getString(R.string.download_materials);
-        if (!start) return;
+        if (isCancelled()) return;
         File[] d;
-        if (p == -1) { //download all
+        if (id == LoaderModel.ALL) { //download all
             d = new File[]{
                     null,
                     getFile(SiteFragment.MAIN),
                     getFile(SiteFragment.MEDIA)
             };
         } else { // download it
-            if (p == R.id.nav_main) {
+            if (id == R.id.nav_main) {
                 d = new File[]{
                         getFile(SiteFragment.MAIN),
                         getFile(SiteFragment.MEDIA)
@@ -244,9 +179,12 @@ public class LoaderWorker extends Worker {
             } else //R.id.nav_book
                 d = new File[]{null};
         }
+        data.putString(Const.MSG, context.getResources().getString(R.string.download_materials));
+        data.putInt(Const.MAX, k);
+        model.setProgress(data.build());
         // подсчёт количества страниц:
         int k = 0;
-        for (int i = 0; i < d.length && start; i++) {
+        for (int i = 0; i < d.length && !isCancelled(); i++) {
             if (d[i] == null)
                 k += workWithBook(true);
             else
@@ -254,7 +192,7 @@ public class LoaderWorker extends Worker {
         }
         publishProgress(k);
         // загрузка страниц:
-        for (int i = 0; i < d.length && start; i++) {
+        for (int i = 0; i < d.length && !isCancelled(); i++) {
             if (d[i] == null)
                 workWithBook(false);
             else
@@ -267,7 +205,7 @@ public class LoaderWorker extends Worker {
         File dir = lib.getDBFolder();
         File[] f = dir.listFiles();
         int i;
-        for (i = 0; i < f.length && start; i++) {
+        for (i = 0; i < f.length && !isCancelled(); i++) {
             if (f[i].getName().length() == 5)
                 list.add(f[i].getName());
         }
@@ -276,7 +214,7 @@ public class LoaderWorker extends Worker {
         end_month = d.getMonth();
         end_year = d.getYear();
         d = DateHelper.putYearMonth(context, 2016, 1);
-        while (start) {
+        while (!isCancelled()) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {
                     if (count)
@@ -319,27 +257,12 @@ public class LoaderWorker extends Worker {
         dataBase.close();
     }
 
-    private void startTimer() {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (start && prog < max) {
-                        Thread.sleep(DateHelper.SEC_IN_MILLS);
-                        publishProgress();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
     private int workWithList(File file, boolean count) throws Exception {
         downloadStyle(false);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String s;
         int k = 0;
-        while ((s = br.readLine()) != null && start) {
+        while ((s = br.readLine()) != null && !isCancelled()) {
             if (s.contains(Const.HTML)) {
                 if (count)
                     k++;
@@ -573,9 +496,7 @@ public class LoaderWorker extends Worker {
         }
     }
 
-    private File getFile(String name) {
-        return new File(context.getFilesDir() + name);
-    }
+
 
     public void initClient() throws Exception {
         builderRequest = new Request.Builder();

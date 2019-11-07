@@ -32,7 +32,7 @@ public class SiteModel extends ProgressModel {
         current = this;
     }
 
-    public void startLoad(String url, String name) {
+    public void startLoad(String url, String file) {
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -41,7 +41,7 @@ public class SiteModel extends ProgressModel {
         Data.Builder data = new Data.Builder()
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName())
                 .putString(Const.LINK, url)
-                .putString(Const.TITLE, name);
+                .putString(Const.FILE, file);
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(SiteWorker.class)
                 .setInputData(data.build())

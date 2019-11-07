@@ -60,15 +60,9 @@ public class SummaryWorker extends Worker {
             if (getInputData().getBoolean(CHECK, false))
                 initCheck();
             else {
-                if(getInputData().getBoolean(Const.LIST,true)) {
-                    downloadList();
-                    reportProgress();
+                downloadList();
+                if (!isCancelled())
                     updateBook();
-                }
-                if (isCancelled())
-                    return Result.success();
-                if(getInputData().getBoolean(Const.PAGE,true))
-                    downloadPages();
             }
             return Result.success();
         } catch (Exception e) {
@@ -81,15 +75,6 @@ public class SummaryWorker extends Worker {
                 .build();
         return Result.failure(data);
     }
-
-    private void reportProgress() {
-        Data data = new Data.Builder()
-                .putString(Const.TASK, Const.LIST)
-                .build();
-        if (model != null)
-            model.setProgress(data);
-    }
-
 
     private void publishProgress(String title, String link, String des, String time) {
         Data data = new Data.Builder()
@@ -320,7 +305,7 @@ public class SummaryWorker extends Worker {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + SummaryFragment.RSS));
-        while ((line = br.readLine()) != null) {
+        while ((line = br.readLine()) != null && !isCancelled()) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine())); //title

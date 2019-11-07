@@ -131,12 +131,6 @@ public class BrowserActivity extends AppCompatActivity
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(LoaderModel.class);
-        model.getProgress().observe(this, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-
-            }
-        });
         model.getState().observe(this, new Observer<List<WorkInfo>>() {
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
@@ -173,15 +167,9 @@ public class BrowserActivity extends AppCompatActivity
             if (getIntent().hasExtra(Const.PLACE))
                 iPlace = 0;
         } else {
-            loader = (LoaderTask) state.getSerializable(Const.TASK);
             link = state.getString(Const.LINK);
             dbPage = new DataBase(this, link);
-            if (loader != null && loader.getStatus() == AsyncTask.Status.RUNNING) {
-                if (loader.getStatus() == AsyncTask.Status.RUNNING) {
-                    loader.setAct(this);
-                    status.setLoad(true);
-                } else loader = null;
-            } else {
+            if (!model.inProgress) {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);
                 final Handler h = new Handler() {
@@ -282,13 +270,12 @@ public class BrowserActivity extends AppCompatActivity
     private void downloadPage(boolean replaceStyle) {
         wvBrowser.clearCache(true);
         restoreStyle();
-        loader = new LoaderTask(this);
         status.setCrash(false);
         status.setLoad(true);
         if (replaceStyle)
-            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, link);
+            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, link);
         else
-            loader.execute(LoaderTask.DOWNLOAD_PAGE, link);
+            model.startLoad(LoaderModel.DOWNLOAD_PAGE, link);
     }
 
     private void initViews() {
@@ -544,7 +531,7 @@ public class BrowserActivity extends AppCompatActivity
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_refresh:
-                if (loader == null)
+                if (!model.inProgress)
                     downloadPage(true);
                 break;
             case R.id.nav_nomenu:
@@ -670,9 +657,8 @@ public class BrowserActivity extends AppCompatActivity
 
 
     private void downloadFile(File f) {
-        loader = new LoaderTask(this);
-        status.setLoad(true);
-        loader.execute(LoaderTask.DOWNLOAD_FILE, Const.SITE + link, f.toString());
+        model.startLoad(LoaderModel.DOWNLOAD_FILE, Const.SITE + link
+                + Const.AND +  f.toString());
     }
 
     public void openPage(boolean newPage) {
@@ -680,10 +666,9 @@ public class BrowserActivity extends AppCompatActivity
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
-            loader = new LoaderTask(this);
             status.setCrash(false);
             status.setLoad(true);
-            loader.execute(LoaderTask.DOWNLOAD_PAGE_WITH_STYLE, "");
+            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, "");
             return;
         }
         final File fStyle = lib.getFile(STYLE);

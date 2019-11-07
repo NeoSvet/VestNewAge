@@ -10,7 +10,10 @@ import androidx.work.WorkerParameters;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -18,11 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
     private Context context;
@@ -45,24 +49,46 @@ public class SiteWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
-        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
+        String err, s;
+        s = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(s);
         try {
-            downloadList(getInputData().getString(Const.LINK));
-            String name = getInputData().getString(Const.TITLE);
-            if (!isCancelled())
-                saveList(name);
+            if (s.equals(SiteModel.class.getSimpleName())) {
+                downloadList(getInputData().getString(Const.LINK));
+                s = getInputData().getString(Const.FILE);
+                saveList(s);
+                Data data = new Data.Builder()
+                        .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
+                        .build();
+                return Result.success(data);
+            }
+            //loader, load all
+            String[] url = new String[]{
+                    Const.SITE,
+                    Const.SITE + "novosti.html",
+                    Const.SITE + "media.html"
+            };
+            String[] file = new String[]{
+                    LoaderModel.getFile(context, SiteFragment.MAIN).toString(),
+                    LoaderModel.getFile(context, SiteFragment.NEWS).toString(),
+                    LoaderModel.getFile(context, SiteFragment.MEDIA).toString()
+            };
             Data data = new Data.Builder()
-                    .putString(Const.TITLE, name.substring(name.lastIndexOf("/")))
+                    .putString(Const.TASK, TAG)
+                    .putBoolean(Const.PROG, true)
                     .build();
-            return Result.success(data);
+            for (int i = 0; i < url.length && !isCancelled(); i++) {
+                downloadList(url[i]);
+                saveList(file[i]);
+                model.setProgress(data);
+            }
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
             Lib.LOG("SiteWolker error: " + err);
         }
         Data data = new Data.Builder()
-                .putString(Const.TITLE, null)
                 .putString(Const.ERROR, err)
                 .build();
         return Result.failure(data);
@@ -182,5 +208,23 @@ public class SiteWorker extends Worker {
                     data.get(i).setDes(d);
             }
         }
+    }
+
+    public static void getListLink(Context context, String file) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        File f = LoaderModel.getFileList(context);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+        String s, l = "";
+        while ((s = br.readLine()) != null) {
+            if (s.equals(Const.END)) {
+                if (!s.contains("http") && l.length() > 1) {
+                    bw.write(l);
+                    bw.newLine();
+                }
+            } else
+                l = s;
+        }
+        bw.close();
+        br.close();
     }
 }

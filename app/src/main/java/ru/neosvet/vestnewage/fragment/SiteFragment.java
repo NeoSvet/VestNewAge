@@ -84,7 +84,7 @@ public class SiteFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                finishLoad(data.getString(Const.TITLE));
+                finishLoad(data.getString(Const.FILE));
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
@@ -396,14 +396,14 @@ public class SiteFragment extends BackFragment {
         return new File(act.getFilesDir() + name);
     }
 
-    public void finishLoad(String name) {
+    public void finishLoad(String file) {
         model.finish();
-        if (name == null) {
+        if (file == null) {
             act.status.setCrash(true);
         } else {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
-            openList(getFile(name), false);
+            openList(getFile(file), false);
         }
     }
 

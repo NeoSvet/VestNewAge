@@ -22,6 +22,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookWorker extends Worker {
     private Context context;
@@ -47,23 +48,34 @@ public class BookWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
-        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
+        String err, name;
+        name = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(name);
         try {
-            String name;
-            if (getInputData().getBoolean(Const.OTKR, false)) {
-                name = downloadOtrk(true);
+            if (name.equals(BookModel.class.getSimpleName())) {
+                if (getInputData().getBoolean(Const.OTKR, false)) {
+                    name = downloadOtrk(true);
+                    return Result.success(new Data.Builder()
+                            .putString(Const.TITLE, name)
+                            .build());
+                }
+                boolean kat = getInputData().getBoolean(Const.KATRENY, false);
+                if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
+                    downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+                name = downloadBook(kat);
                 return Result.success(new Data.Builder()
                         .putString(Const.TITLE, name)
                         .build());
             }
-            boolean kat = getInputData().getBoolean(Const.KATRENY, false);
-            if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
-                downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-            name = downloadBook(kat);
-            return Result.success(new Data.Builder()
-                    .putString(Const.TITLE, name)
-                    .build());
+            //loader
+            downloadBook(false);
+            Data data = new Data.Builder()
+                    .putString(Const.TASK, TAG)
+                    .putBoolean(Const.PROG, true)
+                    .build();
+            model.setProgress(data);
+            downloadBook(true);
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
