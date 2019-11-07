@@ -49,18 +49,18 @@
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
             android:text="@string/prom_notif" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp">
 
             <SeekBar
                 android:id="@+id/sbPromTime"
@@ -88,26 +88,26 @@
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginRight="20dp"
+                android:layout_alignParentRight="true"
                 android:layout_marginTop="2dp"
+                android:layout_marginRight="20dp"
                 android:text="@string/off" />
 
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:layout_below="@id/sbPromTime"
+                android:layout_alignParentLeft="true"
                 android:text="@string/prom" />
 
             <TextView
                 style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_below="@id/sbPromTime"
+                android:layout_alignParentRight="true"
                 android:text="@string/advance" />
         </RelativeLayout>
 
@@ -116,9 +116,9 @@
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/set_notif" />
@@ -131,7 +131,8 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="10dp"
-            android:text="@string/info_battery" />
+            android:text="@string/info_battery"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/bPromSetBattery"
