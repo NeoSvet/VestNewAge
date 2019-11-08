@@ -27,18 +27,16 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
     private Context context;
-    public static final String TAG = "summary";
     private ProgressModel model;
     private final String LAST_TIME = "last_time", CHECK = "check";
 
@@ -57,15 +55,15 @@ public class SummaryWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err, s;
-        s = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(s);
+        String err, name;
+        name = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(name);
         try {
             if (getInputData().getBoolean(CHECK, false))
                 initCheck();
             else {
-                downloadList();
-                if (!s.equals(SummaryModel.class.getSimpleName()))
+                loadList();
+                if (name.equals(SummaryModel.class.getSimpleName()))
                     updateBook();
             }
             return Result.success();
@@ -157,7 +155,7 @@ public class SummaryWorker extends Worker {
         des = withOutTag(br.readLine());
         s = withOutTag(br.readLine()); //time
 
-        File file = new File(context.getFilesDir() + SummaryFragment.RSS);
+        File file = new File(context.getFilesDir() + Const.RSS);
         long secFile = 0;
         if (file.exists())
             secFile = DateHelper.putMills(context, file.lastModified()).getTimeInSeconds();
@@ -222,7 +220,7 @@ public class SummaryWorker extends Worker {
     }
 
     private void downloadPages() throws Exception {
-        File file = new File(context.getFilesDir() + SummaryFragment.RSS);
+        File file = new File(context.getFilesDir() + Const.RSS);
         if (!file.exists()) return;
         LoaderTask loader = new LoaderTask(context);
         loader.initClient();
@@ -264,7 +262,7 @@ public class SummaryWorker extends Worker {
     }
 
     private void updateBook() throws Exception {
-        File file = new File(context.getFilesDir() + SummaryFragment.RSS);
+        File file = new File(context.getFilesDir() + Const.RSS);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String title, link, name;
         DataBase dataBase = null;
@@ -298,14 +296,14 @@ public class SummaryWorker extends Worker {
             dataBase.close();
     }
 
-    private void downloadList() throws Exception {
+    private void loadList() throws Exception {
         NotificationHelper notifHelper = new NotificationHelper(context);
         notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         String line;
         Lib lib = new Lib(context);
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + SummaryFragment.RSS));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
         while ((line = br.readLine()) != null && !isCancelled()) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
@@ -326,5 +324,25 @@ public class SummaryWorker extends Worker {
         }
         bw.close();
         br.close();
+    }
+
+    public static int getListLink(Context context) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(context.getFilesDir() + Const.RSS));
+        File file = LoaderModel.getFileList(context);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        String s;
+        int k = 0;
+        while (br.readLine() != null) { //title
+            s = br.readLine(); //link
+            bw.write(s);
+            bw.newLine();
+            bw.flush();
+            k++;
+            br.readLine(); //des
+            br.readLine(); //time
+        }
+        bw.close();
+        br.close();
+        return k;
     }
 }

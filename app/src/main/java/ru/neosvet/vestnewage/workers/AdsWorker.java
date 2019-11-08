@@ -18,7 +18,6 @@ import ru.neosvet.utils.Lib;
 
 public class AdsWorker extends Worker {
     private Context context;
-    public static final String TAG = "ads";
 
     public AdsWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);

@@ -42,7 +42,6 @@ public class SlashModel extends ProgressModel {
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(AdsWorker.class)
                 .setConstraints(constraints)
-                .addTag(AdsWorker.TAG)
                 .build();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);

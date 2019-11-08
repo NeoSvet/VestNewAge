@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -37,7 +36,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.work.Data;
 import androidx.work.WorkInfo;
 
 import java.io.BufferedWriter;
@@ -111,9 +109,9 @@ public class BrowserActivity extends AppCompatActivity
         setContentView(R.layout.browser_activity);
         initViews();
         setViews();
-        restoreActivityState(savedInstanceState);
-        initPlace();
         initModel();
+        restoreState(savedInstanceState);
+        initPlace();
     }
 
     @Override
@@ -161,7 +159,7 @@ public class BrowserActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             openLink(getIntent().getStringExtra(Const.LINK));
             if (getIntent().hasExtra(Const.PLACE))
@@ -805,7 +803,7 @@ public class BrowserActivity extends AppCompatActivity
         lib.openInApps(url, null);
     }
 
-    public void finishLoad() {
+    private void finishLoad() {
         model.finish();
         status.setLoad(false);
         status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
@@ -815,7 +813,7 @@ public class BrowserActivity extends AppCompatActivity
             openPage(true);
     }
 
-    public float getPositionOnPage() {
+    private float getPositionOnPage() {
         return (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
                 / ((float) wvBrowser.getContentHeight());
     }

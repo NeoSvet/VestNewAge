@@ -28,6 +28,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -37,7 +38,6 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryFragment extends BackFragment {
-    public static final String RSS = "/rss";
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
@@ -46,7 +46,6 @@ public class SummaryFragment extends BackFragment {
     private View fabRefresh;
     private TextView tvNew;
     private SummaryModel model;
-    private DateHelper dateNow;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +56,7 @@ public class SummaryFragment extends BackFragment {
         initViews();
         setViews();
         initModel();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (act.isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
@@ -85,17 +84,22 @@ public class SummaryFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getString(Const.TASK).equals(Const.LIST)) {
-                    openList(false, true);
-                } else
-                    blinkItem(data.getStringArray(Const.LIST));
+                String link = data.getString(Const.LINK);
+                for (int i = 0; i < adSummary.getCount(); i++) {
+                    if (adSummary.getItem(i).equals(link)) {
+                        View item = (View) lvSummary.getItemAtPosition(i);
+                        item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+                    }
+                }
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                String tag;
                 for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
+                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
+                    if (tag.equals(SummaryModel.TAG) && workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
@@ -106,19 +110,18 @@ public class SummaryFragment extends BackFragment {
             act.status.setLoad(true);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state != null)
             act.setCurFragment(this);
-        File f = new File(act.getFilesDir() + RSS);
+        File f = new File(act.getFilesDir() + Const.RSS);
         if (f.exists()) {
             if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
-            openList(true, false);
-        } else {
+            openList(true);
+        } else if (!model.inProgress)
             startLoad();
-        }
     }
 
     @Override
@@ -219,11 +222,11 @@ public class SummaryFragment extends BackFragment {
         });
     }
 
-    public void openList(boolean loadIfNeed, boolean addOnlyExists) {
+    private void openList(boolean loadIfNeed) {
         try {
             adSummary.clear();
-            dateNow = DateHelper.initNow(act);
-            BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + RSS));
+            DateHelper dateNow = DateHelper.initNow(act);
+            BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + Const.RSS));
             String title, des, time, link, name;
             int i = 0;
             DataBase dataBase = null;
@@ -231,7 +234,7 @@ public class SummaryFragment extends BackFragment {
                 link = br.readLine();
                 des = br.readLine();
                 time = br.readLine();
-                if (addOnlyExists && !link.contains(":")) {
+                if (!link.contains(":")) {
                     name = DataBase.getDatePage(link);
                     if (dataBase == null || !dataBase.getName().equals(name)) {
                         if (dataBase != null)
@@ -242,7 +245,10 @@ public class SummaryFragment extends BackFragment {
                         continue;
                 }
                 adSummary.addItem(new ListItem(title, link));
-                adSummary.getItem(i).setDes(prepareDes(des, time));
+                adSummary.getItem(i).setDes(
+                        dateNow.getDiffDate(Long.parseLong(time))
+                                + getResources().getString(R.string.back)
+                                + Const.N + des);
                 i++;
             }
             br.close();
@@ -258,11 +264,11 @@ public class SummaryFragment extends BackFragment {
     private void startLoad() {
         act.status.setCrash(false);
         fabRefresh.setVisibility(View.GONE);
-        model.startLoad();
         act.status.setLoad(true);
+        model.startLoad();
     }
 
-    public void finishLoad(Boolean suc) {
+    private void finishLoad(Boolean suc) {
         model.finish();
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
@@ -270,19 +276,6 @@ public class SummaryFragment extends BackFragment {
         } else {
             act.status.setCrash(true);
         }
-    }
-
-    public void blinkItem(String[] item) {
-        dateNow = DateHelper.initNow(act);
-        adSummary.insertItem(0, new ListItem(item[0], item[1]));
-        adSummary.getItem(0).setDes(prepareDes(item[2], item[3]));
-        adSummary.setAnimation(true);
-        adSummary.notifyDataSetChanged();
-    }
-
-    private String prepareDes(String des, String time) {
-        return dateNow.getDiffDate(Long.parseLong(time))
-                + getResources().getString(R.string.back)
-                + Const.N + des;
+        openList(false);
     }
 }

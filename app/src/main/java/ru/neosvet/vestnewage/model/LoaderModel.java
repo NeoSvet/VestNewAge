@@ -34,7 +34,6 @@ public class LoaderModel extends ProgressModel {
             DOWNLOAD_PAGE = 3, DOWNLOAD_FILE = 4, DOWNLOAD_PAGE_WITH_STYLE = 5;
     public static final int DIALOG_SHOW = 0, DIALOG_UP = 1, DIALOG_UPDATE = 3, DIALOG_MSG = 4;
     private static LoaderModel current = null;
-    private Context context;
     private ProgressDialog dialog;
     private Data.Builder data;
     private Constraints constraints;
@@ -51,14 +50,13 @@ public class LoaderModel extends ProgressModel {
         state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
-        context = application.getBaseContext();
     }
 
     public void startLoad(int mode, String request) {
         inProgress = true;
         prog = 0;
         max = 0;
-        msg = context.getResources().getString(R.string.start);
+        msg = getApplication().getBaseContext().getResources().getString(R.string.start);
         constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
@@ -68,7 +66,7 @@ public class LoaderModel extends ProgressModel {
                 .putInt(Const.MODE, mode);
         OneTimeWorkRequest task;
         WorkContinuation job;
-        if (mode >= DOWNLOAD_PAGE) { // also DOWNLOAD_FILE,  DOWNLOAD_PAGE_WITH_STYLE
+        if (mode >= DOWNLOAD_PAGE) { // also DOWNLOAD_FILE, DOWNLOAD_PAGE_WITH_STYLE
             data.putString(Const.LINK, request);
             task = new OneTimeWorkRequest
                     .Builder(LoaderWorker.class)
@@ -79,7 +77,7 @@ public class LoaderModel extends ProgressModel {
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
         } else {
-            msg = context.getResources().getString(R.string.download_list);
+            msg = getApplication().getBaseContext().getResources().getString(R.string.download_list);
             if (mode == DOWNLOAD_ALL) {
                 job = refreshLists(ALL);
             } else if (mode == DOWNLOAD_ID) {
@@ -92,7 +90,7 @@ public class LoaderModel extends ProgressModel {
                         .Builder(CalendarWolker.class)
                         .setInputData(data.build())
                         .setConstraints(constraints)
-                        .addTag(CalendarWolker.TAG)
+                        .addTag(CalendarModel.TAG)
                         .build();
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
@@ -114,16 +112,20 @@ public class LoaderModel extends ProgressModel {
         int k = 0;
         DateHelper d = null;
         if (id == ALL || id == R.id.nav_book) {
-            d = DateHelper.initToday(context);
+            d = DateHelper.initToday(getApplication().getBaseContext());
             k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
             k += 9; // poslaniya (01.16-09.16)
         }
         if (id == ALL) {
-            k += (d.getYear() - 2016) * 12 + d.getMonth(); // calendar from 01.16
-            k += 4; // main, news, media and rss
-        } else if (id == R.id.nav_main) // main, news, media
+            k += (d.getYear() - 2016) * 12 + d.getMonth(); //calendar from 01.16
+            k += 4; //main, news, media and rss
+        } else if (id == R.id.nav_main) //main, news, media
             k = 3;
         setProgMax(k);
+        this.setProgress(new Data.Builder()
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                .putString(Const.MSG, msg)
+                .putInt(Const.MAX, max).build());
         OneTimeWorkRequest task;
         WorkContinuation job = null;
         if (id == ALL) { //Summary
@@ -131,7 +133,7 @@ public class LoaderModel extends ProgressModel {
                     .Builder(SummaryWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
-                    .addTag(SummaryWorker.TAG)
+                    .addTag(SummaryModel.TAG)
                     .build();
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
@@ -141,7 +143,7 @@ public class LoaderModel extends ProgressModel {
                     .Builder(SiteWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
-                    .addTag(SiteWorker.TAG)
+                    .addTag(SiteModel.TAG)
                     .build();
             if (id == ALL)
                 job = job.then(task);
@@ -149,22 +151,22 @@ public class LoaderModel extends ProgressModel {
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL) { // Calendar
+        if (id == ALL) { //Calendar
             data = data.putInt(Const.YEAR, ALL);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWolker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
-                    .addTag(CalendarWolker.TAG)
+                    .addTag(CalendarModel.TAG)
                     .build();
             job = job.then(task);
         }
-        if (id == ALL || id == R.id.nav_book) { // Book
+        if (id == ALL || id == R.id.nav_book) { //Book
             task = new OneTimeWorkRequest
                     .Builder(BookWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
-                    .addTag(BookWorker.TAG)
+                    .addTag(BookModel.TAG)
                     .build();
             if (id == ALL)
                 job = job.then(task);
@@ -183,6 +185,8 @@ public class LoaderModel extends ProgressModel {
     }
 
     public void showDialog(MainActivity act) {
+        if (dialog != null)
+            dialog.dismiss();
         dialog = new ProgressDialog(act, max);
         dialog.setMessage(msg);
         dialog.setProgress(prog);

@@ -30,7 +30,7 @@ public class HelpFragment extends Fragment {
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.help));
         initList();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -39,7 +39,7 @@ public class HelpFragment extends Fragment {
         mHelp[i] = true;
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             if (mHelp == null)
                 mHelp = new boolean[COUNT];

@@ -88,7 +88,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         setViews();
         initTabs();
         initModel();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -149,7 +149,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         DateHelper d = DateHelper.initToday(act);
         d.setYear(DEF_YEAR);
         int kat, pos;
@@ -525,7 +525,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             model.startLoad(false, fromOtkr, tab == 0);
     }
 
-    public void finishLoad(String result) {
+    private void finishLoad(String result) {
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
         model.finish();

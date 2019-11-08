@@ -83,7 +83,7 @@ public class SummaryHelper {
         notifBuilder = notifHelper.getSummaryNotif(
                 context.getResources().getString(R.string.appeared_new_some),
                 NotificationHelper.CHANNEL_SUMMARY);
-        intent.setData(Uri.parse(Const.SITE + SummaryFragment.RSS));
+        intent.setData(Uri.parse(Const.SITE + Const.RSS));
         intent.putExtra(DataBase.ID, notif_id);
         PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notifBuilder.setContentIntent(piSummary)

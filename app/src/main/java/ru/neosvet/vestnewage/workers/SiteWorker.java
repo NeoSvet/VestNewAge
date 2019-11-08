@@ -30,7 +30,6 @@ import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
     private Context context;
-    public static final String TAG = "site";
     private ProgressModel model;
     List<ListItem> list = new ArrayList<ListItem>();
 
@@ -54,7 +53,7 @@ public class SiteWorker extends Worker {
         model = ProgressModel.getModelByName(s);
         try {
             if (s.equals(SiteModel.class.getSimpleName())) {
-                downloadList(getInputData().getString(Const.LINK));
+                loadList(getInputData().getString(Const.LINK));
                 s = getInputData().getString(Const.FILE);
                 saveList(s);
                 return Result.success(new Data.Builder()
@@ -77,7 +76,7 @@ public class SiteWorker extends Worker {
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
             for (int i = 0; i < url.length && !isCancelled(); i++) {
-                downloadList(url[i]);
+                loadList(url[i]);
                 saveList(file[i]);
                 model.setProgress(progUp);
             }
@@ -116,7 +115,7 @@ public class SiteWorker extends Worker {
         list.clear();
     }
 
-    private void downloadList(String url) throws Exception {
+    private void loadList(String url) throws Exception {
         String line;
         url += Const.PRINT;
         Lib lib = new Lib(context);

@@ -14,6 +14,7 @@ import androidx.work.WorkManager;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
+import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class CalendarModel extends ProgressModel {
     public static final String TAG = "calendar";
@@ -47,10 +48,15 @@ public class CalendarModel extends ProgressModel {
                 .Builder(CalendarWolker.class)
                 .setInputData(data.build())
                 .setConstraints(constraints)
-                .addTag(TAG)
                 .build();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
+        task = new OneTimeWorkRequest
+                .Builder(LoaderWorker.class)
+                .setInputData(data.build())
+                .setConstraints(constraints)
+                .build();
+        job = job.then(task);
         job.enqueue();
     }
 }

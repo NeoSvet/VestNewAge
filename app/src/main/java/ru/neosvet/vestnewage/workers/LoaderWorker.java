@@ -32,11 +32,13 @@ import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class LoaderWorker extends Worker {
     private Context context;
-    public static final String TAG = "loader";
     private ProgressModel model;
     private Lib lib;
     private Request.Builder builderRequest;
@@ -58,9 +60,31 @@ public class LoaderWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
-        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
+        String err, name;
+        name = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(name);
         try {
+            if (name.equals(CalendarModel.class.getSimpleName())) {
+                int k = CalendarWolker.getListLink(context,
+                        getInputData().getInt(Const.YEAR, 0),
+                        getInputData().getInt(Const.MONTH, 0));
+                setProgMax(k);
+                downloadList();
+                return Result.success();
+            }
+            if (name.equals(SummaryModel.class.getSimpleName())) {
+                int k = SummaryWorker.getListLink(context);
+                setProgMax(k);
+                downloadList();
+                return Result.success();
+            }
+            if (name.equals(SiteModel.class.getSimpleName())) {
+                int k = SiteWorker.getListLink(context, lib.getFileByName(
+                        getInputData().getString(Const.FILE)).toString());
+                setProgMax(k);
+                downloadList();
+                return Result.success();
+            }
             if (isCancelled())
                 return Result.success();
             initClient();
@@ -292,11 +316,10 @@ public class LoaderWorker extends Worker {
                 Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
                         Const.LINK + DataBase.Q, new String[]{link}
                         , null, null, null);
-                s = "";
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(0);
                     s = cursor.getString(1);
-                }
+                } else s = "";
                 cursor.close();
                 cv = new ContentValues();
                 cv.put(Const.TIME, System.currentTimeMillis());
@@ -434,6 +457,7 @@ public class LoaderWorker extends Worker {
 
     private void setProgMax(int max) {
         model.setProgress(new Data.Builder()
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                 .putString(Const.MSG, context.getResources().getString(R.string.download_materials))
                 .putInt(Const.MAX, max).build());
     }

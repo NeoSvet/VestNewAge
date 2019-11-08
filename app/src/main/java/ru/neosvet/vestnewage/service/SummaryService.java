@@ -105,7 +105,7 @@ public class SummaryService extends JobIntentService {
         des = withOutTag(br.readLine());
         s = withOutTag(br.readLine()); //time
 
-        File file = new File(context.getFilesDir() + SummaryFragment.RSS);
+        File file = new File(context.getFilesDir() + Const.RSS);
         long secFile = 0;
         if (file.exists())
             secFile = DateHelper.putMills(context, file.lastModified()).getTimeInSeconds();

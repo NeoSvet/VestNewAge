@@ -31,7 +31,6 @@ import java.util.List;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
@@ -59,8 +58,8 @@ public class CabmainFragment extends BackFragment {
         act = (MainActivity) getActivity();
         initViews();
         setViews();
+        restoreState(savedInstanceState);
         initModel();
-        restoreActivityState(savedInstanceState);
         return this.container;
     }
 
@@ -138,7 +137,7 @@ public class CabmainFragment extends BackFragment {
         }
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             String s = pref.getString(Const.EMAIL, "");
@@ -406,7 +405,7 @@ public class CabmainFragment extends BackFragment {
         adMain.notifyDataSetChanged();
     }
 
-    public void initCabinet(String title, String des) {
+    private void initCabinet(String title, String des) {
         mode_list = CabModel.CABINET;
         adMain.clear();
         adMain.addItem(new ListItem(title, des));

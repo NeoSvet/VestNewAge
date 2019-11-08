@@ -36,7 +36,6 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -151,7 +150,7 @@ public class SlashActivity extends AppCompatActivity {
         } else
             link = data.getPath();
         if (link != null) {
-            if (link.contains(SummaryFragment.RSS)) {
+            if (link.contains(Const.RSS)) {
                 main.putExtra(Const.CUR_ID, R.id.nav_rss);
                 if (getIntent().hasExtra(DataBase.ID))
                     main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
@@ -217,8 +216,7 @@ public class SlashActivity extends AppCompatActivity {
                 String tag;
                 for (int i = 0; i < workInfos.size(); i++) {
                     tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
-                    if (tag.equals(SlashModel.TAG) &&
-                            workInfos.get(i).getState().isFinished())
+                    if (tag.equals(SlashModel.TAG) && workInfos.get(i).getState().isFinished())
                         finishLoad();
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));

@@ -12,8 +12,8 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.workers.LoaderWorker;
 import ru.neosvet.vestnewage.workers.SiteWorker;
 
 public class SiteModel extends ProgressModel {
@@ -50,6 +50,12 @@ public class SiteModel extends ProgressModel {
                 .build();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
+        task = new OneTimeWorkRequest
+                .Builder(LoaderWorker.class)
+                .setInputData(data.build())
+                .setConstraints(constraints)
+                .build();
+        job = job.then(task);
         job.enqueue();
     }
 }

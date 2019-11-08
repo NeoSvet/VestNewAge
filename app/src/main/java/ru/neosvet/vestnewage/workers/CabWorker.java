@@ -16,7 +16,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
@@ -24,7 +23,6 @@ import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabWorker extends Worker {
     private Context context;
-    public static final String TAG = "cab";
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
     private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
     private CabModel model;
@@ -37,7 +35,7 @@ public class CabWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
+        String err;
         model = (CabModel) ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             String task = getInputData().getString(Const.TASK);

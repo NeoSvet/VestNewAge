@@ -61,7 +61,7 @@ public class SettingsFragment extends BackFragment {
         initSections();
         initViews();
         setViews();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -71,7 +71,7 @@ public class SettingsFragment extends BackFragment {
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             bPanels = new boolean[]{true, false, false, false, false};
             return;

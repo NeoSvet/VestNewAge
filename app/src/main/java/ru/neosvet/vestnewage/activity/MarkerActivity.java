@@ -105,7 +105,7 @@ public class MarkerActivity extends AppCompatActivity {
         id = getIntent().getIntExtra(DataBase.ID, -1);
         density = getResources().getDisplayMetrics().density;
         initViews();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         setViews();
         initKeyboard();
     }
@@ -212,7 +212,7 @@ public class MarkerActivity extends AppCompatActivity {
         dbMarker.close();
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state != null) {
             tvCol.setText(state.getString(DataBase.COLLECTIONS));
             String s = state.getString(Const.LIST);

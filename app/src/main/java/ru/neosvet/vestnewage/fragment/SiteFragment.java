@@ -29,8 +29,8 @@ import java.util.List;
 
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -60,7 +60,7 @@ public class SiteFragment extends BackFragment {
         setViews();
         initTabs();
         initModel();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -84,15 +84,23 @@ public class SiteFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                finishLoad(data.getString(Const.FILE));
+                String link = data.getString(Const.LINK);
+                for (int i = 0; i < adMain.getCount(); i++) {
+                    if (adMain.getItem(i).equals(link)) {
+                        View item = (View) lvMain.getItemAtPosition(i);
+                        item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+                    }
+                }
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                String tag;
                 for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getOutputData().getString(Const.TITLE));
+                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
+                    if (tag.equals(SiteModel.TAG) && workInfos.get(i).getState().isFinished())
+                        finishLoad(workInfos.get(i).getOutputData().getString(Const.FILE));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
@@ -110,7 +118,7 @@ public class SiteFragment extends BackFragment {
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state != null) {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
@@ -396,7 +404,7 @@ public class SiteFragment extends BackFragment {
         return new File(act.getFilesDir() + name);
     }
 
-    public void finishLoad(String file) {
+    private void finishLoad(String file) {
         model.finish();
         if (file == null) {
             act.status.setCrash(true);

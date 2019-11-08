@@ -41,7 +41,7 @@ public class NewFragment extends Fragment {
         tvEmptyNew = this.container.findViewById(R.id.tvEmptyNew);
         initClear();
         initList();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -51,7 +51,7 @@ public class NewFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state != null) {
             index_ads = state.getInt(Const.ADS);
             showAd(adNew.getItem(index_ads).getLink(), adNew.getItem(index_ads).getHead(0));

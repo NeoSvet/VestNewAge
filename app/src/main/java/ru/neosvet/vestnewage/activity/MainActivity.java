@@ -56,7 +56,6 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         updateNew();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
     }
 
     private void initModel() {
@@ -129,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                     case LoaderModel.DIALOG_UPDATE:
                         model.setProgMax(data.getInt(Const.MAX, 0));
+                        model.setProgMsg(data.getString(Const.MSG));
                         model.showDialog(MainActivity.this);
                         break;
                     case LoaderModel.DIALOG_UP:
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished() && ProgressModel.getFirstTag(
-                            workInfos.get(i).getTags()).equals(LoaderWorker.TAG)) {
+                            workInfos.get(i).getTags()).equals(LoaderModel.TAG)) {
                         boolean all = workInfos.get(i).getOutputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_ALL;
                         finishLoad(all, null);
                     }
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             initLoad();
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             Intent intent = getIntent();
             tab = intent.getIntExtra(Const.TAB, 0);

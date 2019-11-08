@@ -110,8 +110,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         initViews();
         setViews();
         initModel();
-        restoreActivityState(savedInstanceState);
-
+        restoreState(savedInstanceState);
         return this.container;
     }
 
@@ -176,7 +175,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         File f = new File(act.lib.getDBFolder() + "/12.15");
         if (f.exists()) {
             // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
@@ -532,7 +531,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         }
     }
 
-    public void putResult(int mode, String str, int count1, int count2) {
+    private void putResult(int mode, String str, int count1, int count2) {
         page = 0;
         etSearch.setEnabled(true);
         pStatus.setVisibility(View.GONE);

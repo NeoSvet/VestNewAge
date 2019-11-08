@@ -27,6 +27,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -35,7 +36,6 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarWolker extends Worker {
     private Context context;
-    public static final String TAG = "calendar";
     private DataBase dataBase;
     private SQLiteDatabase db;
     private Lib lib;
@@ -59,12 +59,12 @@ public class CalendarWolker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err, s;
-        s = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(s);
+        String err, name;
+        name = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(name);
         try {
-            if (s.equals(CalendarModel.class.getSimpleName())) {
-                downloadCalendar(getInputData().getInt(Const.YEAR, 0),
+            if (name.equals(CalendarModel.class.getSimpleName())) {
+                loadListMonth(getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0),
                         getInputData().getBoolean(Const.UNREAD, false));
                 return Result.success();
@@ -74,15 +74,23 @@ public class CalendarWolker extends Worker {
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
             DateHelper d = DateHelper.initToday(context);
-            // TODO set prog max
             if (getInputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_YEAR) {
-                downloadYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
+                model.setProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                        .putString(Const.MSG, context.getResources().getString(R.string.download_list))
+                        .putInt(Const.MAX, d.getMonth()).build());
+                loadListYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
             } else { //all calendar
+                int k = (d.getYear() - 2016) * 12 + d.getMonth();
+                model.setProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                        .putString(Const.MSG, context.getResources().getString(R.string.download_list))
+                        .putInt(Const.MAX, k).build());
                 int max_y = d.getYear() + 1, max_m = 13;
                 for (int y = 2016; y < max_y && !isCancelled(); y++) {
                     if (y == d.getYear())
                         max_m = d.getMonth() + 1;
-                    downloadYear(y, max_m);
+                    loadListYear(y, max_m);
                 }
             }
             return Result.success();
@@ -96,19 +104,20 @@ public class CalendarWolker extends Worker {
                 .build());
     }
 
-    private void downloadYear(int year, int max_m) throws Exception {
+    private void loadListYear(int year, int max_m) throws Exception {
         for (int m = 1; m < max_m && !isCancelled(); m++) {
-            downloadCalendar(year, m, false);
+            loadListMonth(year, m, false);
             model.setProgress(progUp);
         }
     }
 
-    public static void getListLink(Context context, int year, int month) throws Exception {
+    public static int getListLink(Context context, int year, int month) throws Exception {
         DateHelper d = DateHelper.putYearMonth(context, year, month);
         DataBase dataBase = new DataBase(context, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
+        int k = 0;
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
             String link;
@@ -117,6 +126,7 @@ public class CalendarWolker extends Worker {
             while (curTitle.moveToNext()) {
                 link = curTitle.getString(0);
                 bw.write(link);
+                k++;
                 bw.newLine();
                 bw.flush();
             }
@@ -124,10 +134,10 @@ public class CalendarWolker extends Worker {
         }
         curTitle.close();
         dataBase.close();
-
+        return k;
     }
 
-    private void downloadCalendar(int year, int month, boolean updateUnread) throws Exception {
+    private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "?json&year=" + year + "&month=" + month));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);

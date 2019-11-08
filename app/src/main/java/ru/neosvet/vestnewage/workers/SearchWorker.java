@@ -22,7 +22,6 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 
 public class SearchWorker extends Worker {
     private Context context;
-    public static final String TAG = "search";
     private ProgressModel model;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
@@ -44,7 +43,7 @@ public class SearchWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
+        String err;
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             Lib lib = new Lib(context);

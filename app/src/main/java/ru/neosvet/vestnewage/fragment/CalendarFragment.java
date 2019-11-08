@@ -33,6 +33,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -69,7 +70,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         initViews();
         initCalendar();
         initModel();
-        restoreActivityState(savedInstanceState);
+        restoreState(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (act.isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
@@ -97,19 +98,18 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                int d = data.getInt(Const.DAY, 0);
-                if (d == 0) {
-                    model.loadList = false;
-                    updateCalendar();
-                } else
-                    blinkDay(d);
+                String s = data.getString(Const.LINK);
+                int i = s.lastIndexOf("/" + 1);
+                blinkDay(Integer.parseInt(s.substring(i, i + 2)));
             }
         });
         model.getState().observe(act, new Observer<List<WorkInfo>>() {
             @Override
             public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                String tag;
                 for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
+                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
+                    if (tag.equals(CalendarModel.TAG) && workInfos.get(i).getState().isFinished())
                         finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
                         Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
@@ -129,12 +129,12 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreActivityState(Bundle state) {
+    private void restoreState(Bundle state) {
         if (state == null) {
             dCurrent = DateHelper.initToday(act);
             dCurrent.setDay(1);
         } else {
-            act.setCurFragment(this);;
+            act.setCurFragment(this);
             dCurrent = DateHelper.putDays(act, state.getInt(Const.CURRENT_DATE));
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
@@ -198,7 +198,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         });
     }
 
-    public void clearDays() {
+    private void clearDays() {
         for (int i = 0; i < adCalendar.getItemCount(); i++) {
             adCalendar.getItem(i).clear(false);
         }
@@ -329,7 +329,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
             ivNext.setEnabled(true);
     }
 
-    public boolean isCurMonth() {
+    private boolean isCurMonth() {
         return dCurrent.getMonth() == today_m && dCurrent.getYear() == today_y;
     }
 
@@ -399,17 +399,15 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }
 
-    public void updateCalendar() {
-        clearDays();
-        openCalendar(false);
-    }
-
-    public void finishLoad(boolean suc) {
+    private void finishLoad(boolean suc) {
         model.finish();
         if (suc)
             setStatus(false);
-        else
+        else {
             act.status.setCrash(true);
+            clearDays();
+            openCalendar(false);
+        }
     }
 
     private void setStatus(boolean load) {
@@ -448,7 +446,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
             MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
     }
 
-    public void blinkDay(int d) {
+    private void blinkDay(int d) {
         boolean begin = false;
         for (int i = 6; i < adCalendar.getItemCount(); i++) {
             if (adCalendar.getItem(i).getNum() == 1)

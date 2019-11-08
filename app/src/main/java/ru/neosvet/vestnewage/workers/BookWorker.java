@@ -27,7 +27,6 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookWorker extends Worker {
     private Context context;
-    public static final String TAG = "book";
     private ProgressModel model;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
@@ -56,15 +55,15 @@ public class BookWorker extends Worker {
         try {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
-                    name = downloadOtrk(true);
+                    name = loadListOtrk(true);
                     return Result.success(new Data.Builder()
                             .putString(Const.TITLE, name)
                             .build());
                 }
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
-                    downloadOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-                name = downloadBook(kat);
+                    loadListOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+                name = loadListBook(kat);
                 return Result.success(new Data.Builder()
                         .putString(Const.TITLE, name)
                         .build());
@@ -73,8 +72,8 @@ public class BookWorker extends Worker {
             progUp = new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
-            downloadBook(false);
-            downloadBook(true);
+            loadListBook(false);
+            loadListBook(true);
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,7 +85,7 @@ public class BookWorker extends Worker {
                 .build());
     }
 
-    private String downloadOtrk(boolean withDialog) throws Exception {
+    private String loadListOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
             if (model != null) {
                 model.setProgress(new Data.Builder()
@@ -176,7 +175,7 @@ public class BookWorker extends Worker {
         return name;
     }
 
-    private String downloadBook(boolean katren) throws Exception {
+    private String loadListBook(boolean katren) throws Exception {
         String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
         InputStream in = new BufferedInputStream(lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
