@@ -57,7 +57,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new DataBase(context, Const.SEARCH);
+            dbSearch = new DataBase(context, DataBase.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
@@ -100,10 +100,9 @@ public class SearchWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("SearchWolker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private Result getResult() {

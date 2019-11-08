@@ -33,6 +33,8 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
     private Context context;
@@ -55,14 +57,15 @@ public class SummaryWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err = "";
-        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
+        String err, s;
+        s = getInputData().getString(ProgressModel.NAME);
+        model = ProgressModel.getModelByName(s);
         try {
             if (getInputData().getBoolean(CHECK, false))
                 initCheck();
             else {
                 downloadList();
-                if (!isCancelled())
+                if (!s.equals(SummaryModel.class.getSimpleName()))
                     updateBook();
             }
             return Result.success();
@@ -71,20 +74,17 @@ public class SummaryWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("SummaryWorker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private void publishProgress(String title, String link, String des, String time) {
-        Data data = new Data.Builder()
+        model.setProgress(new Data.Builder()
                 .putString(Const.TASK, Const.PAGE)
                 .putStringArray(Const.LIST, new String[]{
                         title, link, des, time
-                }).build();
-        if (model != null)
-            model.setProgress(data);
+                }).build());
     }
 
     private void initCheck() throws Exception {

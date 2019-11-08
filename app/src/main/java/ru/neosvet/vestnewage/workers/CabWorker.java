@@ -57,10 +57,9 @@ public class CabWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("CabWolker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private Data.Builder subLogin(String email, String pass) throws Exception {

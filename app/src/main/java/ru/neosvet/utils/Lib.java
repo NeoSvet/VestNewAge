@@ -88,6 +88,10 @@ public class Lib {
         return file;
     }
 
+    public File getFileByName(String name) {
+        return new File(context.getFilesDir() + name);
+    }
+
     public void openInApps(String url, @Nullable String titleChooser) {
         try {
             Intent myIntent = new Intent(Intent.ACTION_VIEW);

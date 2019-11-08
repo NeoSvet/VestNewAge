@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.workers;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -31,7 +30,6 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -43,7 +41,6 @@ public class LoaderWorker extends Worker {
     private Lib lib;
     private Request.Builder builderRequest;
     private OkHttpClient client;
-    private Data.Builder data;
 
     public LoaderWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -64,27 +61,28 @@ public class LoaderWorker extends Worker {
         String err = "";
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
-            if(isCancelled())
+            if (isCancelled())
                 return Result.success();
             initClient();
-            data.putBoolean(Const.DIALOG, true);
             int mode = getInputData().getInt(Const.MODE, 0);
             Data.Builder result = new Data.Builder()
                     .putInt(Const.MODE, mode);
             switch (mode) {
                 case LoaderModel.DOWNLOAD_ALL:
-                    downloadAll(LoaderModel.ALL);
+                    download(LoaderModel.ALL);
                     break;
                 case LoaderModel.DOWNLOAD_ID:
                     int p = getInputData().getInt(Const.SELECT, 0);
-                    downloadAll(p);
+                    download(p);
                     break;
                 case LoaderModel.DOWNLOAD_YEAR:
                     downloadYear(getInputData().getInt(Const.YEAR, 0));
                     break;
                 default:
                     String link = getInputData().getString(Const.LINK);
-                    if (getInputData().getBoolean(Const.PAGE, true)) {
+                    if (mode == LoaderModel.DOWNLOAD_PAGE ||
+                            mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE) {
+                        downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
                         downloadPage(link, true);
                     } else { //file
                         downloadFile(link, getInputData().getString(Const.FILE));
@@ -98,10 +96,9 @@ public class LoaderWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("LoaderWolker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private void downloadYear(int year) throws Exception {
@@ -109,99 +106,43 @@ public class LoaderWorker extends Worker {
         int k = 12;
         if (year == d.getYear())
             k -= d.getMonth();
-        data.putString(Const.MSG, context.getResources().getString(R.string.download_list));
-        data.putInt(Const.MAX, k);
-        model.setProgress(data.build());
+        setProgMax(k);
         for (int m = 0; m < k && !isCancelled(); m++) {
             CalendarWolker.getListLink(context, year, m);
             downloadList();
-            prog++;
-        }
-        //open list:
-        List<String> list = new ArrayList<String>();
-        File dir = lib.getDBFolder();
-        File[] f = dir.listFiles();
-        int i;
-        for (i = 0; i < f.length && !isCancelled(); i++) {
-            if (f[i].getName().length() == 5)
-                list.add(f[i].getName());
-        }
-        int end_month = k;
-        k = 0;
-        //count pages:
-        d = DateHelper.putYearMonth(context, year, 1);
-        while (!isCancelled()) {
-            for (i = 0; i < list.size(); i++) {
-                if (list.contains(d.getMY())) {
-                    k += countBookList(d.getMY());
-                    break;
-                }
-            }
-            if (d.getMonth() == end_month)
-                break;
-            d.changeMonth(1);
-        }
-        //download:
-        prog = 0;
-        msg = context.getResources().getString(R.string.download_materials);
-        setProgMax(k);
-        d = DateHelper.putYearMonth(context, year, 1);
-        while (!isCancelled()) {
-            for (i = 0; i < list.size(); i++) {
-                if (list.contains(d.getMY())) {
-                    downloadBookList(d.getMY());
-                    break;
-                }
-            }
-            if (d.getMonth() == end_month)
-                break;
-            d.changeMonth(1);
+            upProg();
         }
     }
 
-    private void downloadList() {
-
+    private void downloadList() throws Exception {
+        File file = LoaderModel.getFileList(context);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String s;
+        while ((s = br.readLine()) != null && !isCancelled()) {
+            downloadPage(s, false);
+        }
+        br.close();
+        file.delete();
     }
 
-    private void downloadAll(int id) throws Exception {
-        prog = 0;
-        msg = context.getResources().getString(R.string.download_materials);
+    private void download(int id) throws Exception {
         if (isCancelled()) return;
-        File[] d;
-        if (id == LoaderModel.ALL) { //download all
-            d = new File[]{
-                    null,
-                    getFile(SiteFragment.MAIN),
-                    getFile(SiteFragment.MEDIA)
-            };
-        } else { // download it
-            if (id == R.id.nav_main) {
-                d = new File[]{
-                        getFile(SiteFragment.MAIN),
-                        getFile(SiteFragment.MEDIA)
-                };
-            } else //R.id.nav_book
-                d = new File[]{null};
-        }
-        data.putString(Const.MSG, context.getResources().getString(R.string.download_materials));
-        data.putInt(Const.MAX, k);
-        model.setProgress(data.build());
         // подсчёт количества страниц:
         int k = 0;
-        for (int i = 0; i < d.length && !isCancelled(); i++) {
-            if (d[i] == null)
-                k += workWithBook(true);
-            else
-                k += workWithList(d[i], true);
+        if (id == LoaderModel.ALL || id == R.id.nav_main) {
+            k = SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
+            k += SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MEDIA).toString());
         }
-        publishProgress(k);
+        if (id == LoaderModel.ALL || id == R.id.nav_book)
+            k += workWithBook(true);
+        setProgMax(k);
         // загрузка страниц:
-        for (int i = 0; i < d.length && !isCancelled(); i++) {
-            if (d[i] == null)
-                workWithBook(false);
-            else
-                workWithList(d[i], false);
-        }
+        if (id == LoaderModel.ALL || id == R.id.nav_main)
+            downloadList();
+        if (isCancelled())
+            return;
+        if (id == LoaderModel.ALL || id == R.id.nav_book)
+            workWithBook(false);
     }
 
     private int workWithBook(boolean count) throws Exception {
@@ -254,38 +195,22 @@ public class LoaderWorker extends Worker {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
                 downloadPage(curTitle.getString(0), false);
-                prog++;
+                upProg();
             }
         }
         curTitle.close();
         dataBase.close();
     }
 
-    private int workWithList(File file, boolean count) throws Exception {
-        downloadStyle(false);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String s;
-        int k = 0;
-        while ((s = br.readLine()) != null && !isCancelled()) {
-            if (s.contains(Const.HTML)) {
-                if (count)
-                    k++;
-                else {
-                    downloadPage(s, false);
-                    prog++;
-                }
-            }
-        }
-        br.close();
-        return k;
-    }
-
     public boolean downloadPage(String link, boolean singlePage) throws Exception {
-        msg = link;
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         DataBase dataBase = new DataBase(context, link);
         if (!singlePage && dataBase.existsPage(link))
             return false;
+        model.setProgress(new Data.Builder()
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                .putString(Const.LINK, link)
+                .build());
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) {
@@ -342,16 +267,16 @@ public class LoaderWorker extends Worker {
                             // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
                             s = line.substring(0, line.indexOf(par) + par.length());
                             cv = new ContentValues();
-                            cv.put(Const.ID, id);
-                            cv.put(Const.PARAGRAPH, s);
-                            db.insert(Const.PARAGRAPH, null, cv);
+                            cv.put(DataBase.ID, id);
+                            cv.put(DataBase.PARAGRAPH, s);
+                            db.insert(DataBase.PARAGRAPH, null, cv);
                             line = line.substring(s.length());
                         }
                     }
                     cv = new ContentValues();
-                    cv.put(Const.ID, id);
-                    cv.put(Const.PARAGRAPH, line);
-                    db.insert(Const.PARAGRAPH, null, cv);
+                    cv.put(DataBase.ID, id);
+                    cv.put(DataBase.PARAGRAPH, line);
+                    db.insert(DataBase.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
                 if (link.contains("#")) {// ссылка на последующий текст на странице
@@ -364,8 +289,8 @@ public class LoaderWorker extends Worker {
                             id--;
                     }
                 }
-                Cursor cursor = db.query(Const.TITLE, new String[]{Const.ID, Const.TITLE},
-                        Const.LINK + Const.Q, new String[]{link}
+                Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
+                        Const.LINK + DataBase.Q, new String[]{link}
                         , null, null, null);
                 s = "";
                 if (cursor.moveToFirst()) {
@@ -382,17 +307,17 @@ public class LoaderWorker extends Worker {
                     //обновляем дату изменения списка:
                     cv = new ContentValues();
                     cv.put(Const.TIME, System.currentTimeMillis());
-                    db.update(Const.TITLE, cv, Const.ID +
-                            Const.Q, new String[]{"1"});
+                    db.update(Const.TITLE, cv, DataBase.ID +
+                            DataBase.Q, new String[]{"1"});
                 } else { // id найден, значит материал есть
                     if (s.contains("/")) // в заголовке ссылка, необходимо заменить
                         cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
                     //обновляем дату загрузки материала
-                    db.update(Const.TITLE, cv, Const.ID +
-                            Const.Q, new String[]{String.valueOf(id)});
+                    db.update(Const.TITLE, cv, DataBase.ID +
+                            DataBase.Q, new String[]{String.valueOf(id)});
                     //удаляем содержимое материала
-                    db.delete(Const.PARAGRAPH, Const.ID +
-                            Const.Q, new String[]{String.valueOf(id)});
+                    db.delete(DataBase.PARAGRAPH, DataBase.ID +
+                            DataBase.Q, new String[]{String.valueOf(id)});
                 }
                 br.readLine();
                 begin = true;
@@ -457,7 +382,7 @@ public class LoaderWorker extends Worker {
 
     public void downloadStyle(boolean replaceStyle) throws Exception {
         final File fLight = lib.getFile(Const.LIGHT);
-        final File fDark = getFile(Const.DARK);
+        final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
             String line = "";
             int i;
@@ -500,8 +425,6 @@ public class LoaderWorker extends Worker {
         }
     }
 
-
-
     public void initClient() throws Exception {
         builderRequest = new Request.Builder();
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
@@ -509,7 +432,15 @@ public class LoaderWorker extends Worker {
         client = lib.createHttpClient();
     }
 
+    private void setProgMax(int max) {
+        model.setProgress(new Data.Builder()
+                .putString(Const.MSG, context.getResources().getString(R.string.download_materials))
+                .putInt(Const.MAX, max).build());
+    }
+
     public void upProg() {
-        prog++;
+        model.setProgress(new Data.Builder()
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
+                .build());
     }
 }

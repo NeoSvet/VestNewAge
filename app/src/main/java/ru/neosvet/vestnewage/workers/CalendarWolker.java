@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.workers;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -40,7 +39,7 @@ public class CalendarWolker extends Worker {
     private DataBase dataBase;
     private SQLiteDatabase db;
     private Lib lib;
-    private Data data;
+    private Data progUp;
     private List<ListItem> list = new ArrayList<ListItem>();
     private ProgressModel model;
 
@@ -71,11 +70,11 @@ public class CalendarWolker extends Worker {
                 return Result.success();
             }
             //loader
-            data = new Data.Builder()
-                    .putString(Const.TASK, TAG)
-                    .putBoolean(Const.PROG, true)
+            progUp = new Data.Builder()
+                    .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
             DateHelper d = DateHelper.initToday(context);
+            // TODO set prog max
             if (getInputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_YEAR) {
                 downloadYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
             } else { //all calendar
@@ -92,16 +91,15 @@ public class CalendarWolker extends Worker {
             err = e.getMessage();
             Lib.LOG("CalendarWolker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private void downloadYear(int year, int max_m) throws Exception {
         for (int m = 1; m < max_m && !isCancelled(); m++) {
             downloadCalendar(year, m, false);
-            model.setProgress(data);
+            model.setProgress(progUp);
         }
     }
 

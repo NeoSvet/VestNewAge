@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private UnreadHelper unread;
     private LoaderModel model;
     private int cur_id, tab = 0, statusBack;
+    private Handler updateDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,24 +123,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         model.getProgress().observe(this, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.PROG, false)) {
-                    model.upProg();
-                } else {
-                    switch (data.getInt(Const.DIALOG, -1)) {
-                        case LoaderModel.DIALOG_SHOW:
-                            model.showDialog(MainActivity.this);
-                            break;
-                        case LoaderModel.DIALOG_UPDATE:
-                            model.setProgMax(data.getInt(Const.MAX, 0));
-                            model.showDialog(MainActivity.this);
-                            break;
-                        case LoaderModel.DIALOG_UP:
-                            model.upProg();
-                            break;
-                        case LoaderModel.DIALOG_MSG:
-                            model.setProgMsg(data.getString(Const.MSG));
-                            break;
-                    }
+                switch (data.getInt(Const.DIALOG, -1)) {
+                    case LoaderModel.DIALOG_SHOW:
+                        model.showDialog(MainActivity.this);
+                        break;
+                    case LoaderModel.DIALOG_UPDATE:
+                        model.setProgMax(data.getInt(Const.MAX, 0));
+                        model.showDialog(MainActivity.this);
+                        break;
+                    case LoaderModel.DIALOG_UP:
+                        model.upProg();
+                        break;
+                    case LoaderModel.DIALOG_MSG:
+                        model.setProgMsg(data.getString(Const.MSG));
+                        break;
                 }
             }
         });
@@ -147,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 for (int i = 0; i < workInfos.size(); i++) {
                     if (workInfos.get(i).getState().isFinished() && ProgressModel.getFirstTag(
                             workInfos.get(i).getTags()).equals(LoaderWorker.TAG)) {
-                        boolean all= workInfos.get(i).getOutputData().getInt(Const.MODE,0) == LoaderModel.DOWNLOAD_ALL;
+                        boolean all = workInfos.get(i).getOutputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_ALL;
                         finishLoad(all, null);
                     }
                     if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED)) {
@@ -215,12 +214,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initLoad() {
         model.showDialog(this);
+        if (updateDialog == null) {
+            updateDialog = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message message) {
+                    model.updateDialog();
+                    return false;
+                }
+            });
+        }
         new Thread(new Runnable() {
             public void run() {
                 try {
                     while (model.inProgress) {
                         Thread.sleep(DateHelper.SEC_IN_MILLS);
-                        model.updateDialog();
+                        updateDialog.sendEmptyMessage(0);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

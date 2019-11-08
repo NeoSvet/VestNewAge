@@ -32,6 +32,7 @@ public class BookWorker extends Worker {
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private Lib lib;
+    private Data progUp;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -69,33 +70,29 @@ public class BookWorker extends Worker {
                         .build());
             }
             //loader
-            downloadBook(false);
-            Data data = new Data.Builder()
+            progUp = new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
-            model.setProgress(data);
+            downloadBook(false);
             downloadBook(true);
-            model.setProgress(data);
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
             Lib.LOG("BookWolker error: " + err);
         }
-        Data data = new Data.Builder()
+        return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
-                .build();
-        return Result.failure(data);
+                .build());
     }
 
     private String downloadOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
             if (model != null) {
-                Data data = new Data.Builder()
+                model.setProgress(new Data.Builder()
                         .putString(Const.MSG, context.getResources().getString(R.string.start))
                         .putInt(Const.MAX, 137)
-                        .build();
-                model.setProgress(data);
+                        .build());
             }
         }
         final String path = lib.getDBFolder() + "/";
@@ -133,12 +130,11 @@ public class BookWorker extends Worker {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
                 if (model != null) {
-                    Data data = new Data.Builder()
+                    model.setProgress(new Data.Builder()
                             .putString(Const.MSG, context.getResources().getStringArray(R.array.months)
                                     [m - 1] + " " + (2000 + y))
                             .putInt(Const.PROG, prog)
-                            .build();
-                    model.setProgress(data);
+                            .build());
                 }
             }
             f = new File(path + name);
@@ -207,7 +203,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        //TODO loader.upProg();
+                        model.setProgress(progUp);
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

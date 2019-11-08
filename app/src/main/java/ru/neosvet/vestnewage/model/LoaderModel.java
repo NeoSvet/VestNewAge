@@ -79,6 +79,7 @@ public class LoaderModel extends ProgressModel {
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
         } else {
+            msg = context.getResources().getString(R.string.download_list);
             if (mode == DOWNLOAD_ALL) {
                 job = refreshLists(ALL);
             } else if (mode == DOWNLOAD_ID) {
@@ -109,7 +110,6 @@ public class LoaderModel extends ProgressModel {
     }
 
     private WorkContinuation refreshLists(int id) {
-        msg = context.getResources().getString(R.string.download_list);
         // подсчёт количества списков:
         int k = 0;
         DateHelper d = null;
@@ -217,9 +217,5 @@ public class LoaderModel extends ProgressModel {
 
     public static File getFileList(Context context) {
         return new File(context.getFilesDir() + File.separator + Const.LIST);
-    }
-
-    public static File getFile(Context context, String name) {
-        return new File(context.getFilesDir() + name);
     }
 }
