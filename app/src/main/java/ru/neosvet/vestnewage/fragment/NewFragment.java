@@ -136,7 +136,7 @@ public class NewFragment extends Fragment {
             if (time > 0) {
                 List<String> links = unread.getList();
                 unread.close();
-                for (int i = 0; i < links.size(); i++) {
+                for (int i = links.size() - 1; i > -1; i--) {
                     s = links.get(i);
                     t = s.substring(s.lastIndexOf(File.separator) + 1);
                     if (t.contains("_")) {
