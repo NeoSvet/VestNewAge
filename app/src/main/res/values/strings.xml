@@ -139,7 +139,6 @@
     <string name="secs">30 секунд</string>
     <string name="often">чаще</string>
     <string name="less">реже</string>
-    <string name="sync_time">Сверить время с сайтом</string>
     <!--<string name="at_moment_prom">в момент Посыла</string>-->
     <string name="notif_sound">Звуковой сигнал</string>
     <string name="vibr">Вибрация</string>

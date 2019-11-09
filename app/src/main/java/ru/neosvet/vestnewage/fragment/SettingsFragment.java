@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,10 +26,8 @@ import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
@@ -44,7 +39,6 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
-import ru.neosvet.vestnewage.model.PromModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 
 public class SettingsFragment extends BackFragment {
@@ -53,7 +47,7 @@ public class SettingsFragment extends BackFragment {
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View[] pSections;
-    private View container, bSyncTime, bClearDo;
+    private View container, bClearDo;
     private View tvCheckOn, tvCheckOff, bCheckSet;
     private View tvPromOn, tvPromOff, bPromSet;
     private ImageView[] imgSections;
@@ -62,7 +56,6 @@ public class SettingsFragment extends BackFragment {
     private RadioButton[] rbsScreen;
     private CheckBox[] cbsClear;
     private SeekBar sbCheckTime, sbPromTime;
-    private PromModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,35 +66,8 @@ public class SettingsFragment extends BackFragment {
         initSections();
         initViews();
         setViews();
-        initModel();
         restoreState(savedInstanceState);
         return this.container;
-    }
-
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(PromModel.class);
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished()) {
-                        float f = workInfos.get(i).getOutputData().getFloat(Const.TIME, 0);
-                        f = f / 60f;
-                        if (f < 60f)
-                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
-                        else {
-                            f = f / 60f;
-                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_hour), f));
-                        }
-                    }
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, getResources().getString(R.string.sync_error));
-                    //Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                }
-            }
-        });
-        if (model.inProgress)
-            act.status.setLoad(true);
     }
 
     @Override
@@ -219,7 +185,6 @@ public class SettingsFragment extends BackFragment {
             p = sbPromTime.getMax();
         sbPromTime.setProgress(p);
         setPromTime();
-        bSyncTime = container.findViewById(R.id.bSyncTime);
     }
 
     private void setViews() {
@@ -234,13 +199,6 @@ public class SettingsFragment extends BackFragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                 setMainCheckBox(Const.START_NEW, check, -1);
-            }
-        });
-        bSyncTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bSyncTime.setEnabled(false);
-                model.startSynchron();
             }
         });
 
