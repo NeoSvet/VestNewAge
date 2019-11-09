@@ -170,8 +170,15 @@ public class SettingsFragment extends BackFragment {
         pref = act.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
         p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p == Const.TURN_OFF)
-            p = sbCheckTime.getMax();
-        sbCheckTime.setProgress(p);
+            sbCheckTime.setProgress(sbCheckTime.getMax());
+        else {
+            p /= 15;
+            if (p > 3)
+                p = p / 4 + 2;
+            else
+                p--;
+            sbCheckTime.setProgress(p);
+        }
         setCheckTime();
 
         tvPromNotif = container.findViewById(R.id.tvPromNotif);
