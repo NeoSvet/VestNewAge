@@ -46,7 +46,6 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.PromModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
-import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SettingsFragment extends BackFragment {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
@@ -240,7 +239,7 @@ public class SettingsFragment extends BackFragment {
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                bSyncTime.setEnabled(true);
+                bSyncTime.setEnabled(false);
                 model.startSynchron();
             }
         });
@@ -409,11 +408,9 @@ public class SettingsFragment extends BackFragment {
         editor.putInt(Const.TIME, p);
         editor.apply();
         WorkManager work = WorkManager.getInstance();
-        if (p == Const.TURN_OFF) {
-            Lib.LOG("Check Summary cancel");
-            work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
+        work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
+        if (p == Const.TURN_OFF)
             return;
-        }
         Lib.LOG("Check Summary: " + p + " min");
         if (p == 15) p = 20;
         Constraints constraints = new Constraints.Builder()
@@ -424,28 +421,11 @@ public class SettingsFragment extends BackFragment {
                 .putBoolean(Const.CHECK, true)
                 .build();
         PeriodicWorkRequest task = new PeriodicWorkRequest
-                .Builder(SummaryWorker.class, p, TimeUnit.MINUTES, p - 5, TimeUnit.MINUTES)
+                .Builder(CheckWorker.class, p, TimeUnit.MINUTES, p - 5, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .setInputData(data)
                 .addTag(CheckWorker.TAG_PERIODIC)
                 .build();
-//        Operation job = work.enqueueUniquePeriodicWork(Const.CHECK,
-//                ExistingPeriodicWorkPolicy.REPLACE, task);
-        work.getWorkInfoByIdLiveData(task.getId())
-                .observe(act, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        Lib.LOG("onChanged-WorkInfo");
-                        if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                            StringBuilder builder = new StringBuilder();
-                            for (String tag : workInfo.getTags()) {
-                                builder.append(tag);
-                                builder.append(", ");
-                            }
-                            Lib.LOG("onChanged-WorkInfo: tag " + builder.toString());
-                        }
-                    }
-                });
         work.enqueue(task);
     }
 
@@ -480,11 +460,11 @@ public class SettingsFragment extends BackFragment {
         tvCheckOff.setVisibility(View.VISIBLE);
         int p = sbCheckTime.getProgress() + 1;
         boolean bH = false;
-        if (p > 5) {
+        if (p > 3) {
             bH = true;
-            p -= 5;
+            p -= 3;
         } else
-            p *= 10;
+            p *= 15;
         if (p == 1)
             t.append(getResources().getString(R.string.each_one));
         else {
