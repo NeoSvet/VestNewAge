@@ -17,24 +17,26 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
+import ru.neosvet.vestnewage.workers.PromWorker;
 
 public class PromHelper {
     public static final byte ERROR = -1;
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
-    private final String TIMEDIFF = "timediff";
     private Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -51,7 +53,7 @@ public class PromHelper {
         }
     }
 
-    private int timeToProm() {
+    public int timeToProm() {
         DateHelper prom = getPromDate(false);
         DateHelper now = DateHelper.initNow(context);
         return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
@@ -142,7 +144,7 @@ public class PromHelper {
     }
 
     public DateHelper getPromDate(boolean next) {
-        int timeDiff = pref.getInt(TIMEDIFF, 0);
+        int timeDiff = pref.getInt(Const.TIMEDIFF, 0);
         DateHelper prom = DateHelper.initNow(context);
         int hour = 8;
         if (next) {
@@ -231,46 +233,6 @@ public class PromHelper {
         return t;
     }
 
-    public void synchronTime(@Nullable final Handler action) {
-        if (action == null) {
-            int time = pref.getInt(TIMEDIFF, 0);
-            if (time > 0 && time < 1000)
-                return;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Request.Builder builderRequest = new Request.Builder();
-                    builderRequest.url(Const.SITE2);
-                    builderRequest.header(Const.USER_AGENT, context.getPackageName());
-                    OkHttpClient client = Lib.createHttpClient();
-                    Response response = client.newCall(builderRequest.build()).execute();
-                    String s = response.headers().value(1);
-                    long timeServer = DateHelper.parse(context, s).getTimeInSeconds();
-                    response.close();
-                    long timeDevice = DateHelper.initNow(context).getTimeInSeconds();
-                    int timeDiff = (int) (timeDevice - timeServer);
-                    if (timeDiff != pref.getInt(TIMEDIFF, 0)) {
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putInt(TIMEDIFF, timeDiff);
-                        editor.apply();
-                        int t = pref.getInt(Const.TIME, Const.TURN_OFF);
-                        if (t != Const.TURN_OFF)
-                            PromReceiver.setReceiver(context, t);
-                    }
-                    if (action != null)
-                        action.sendEmptyMessage(timeToProm());
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (action != null)
-                    action.sendEmptyMessage(ERROR);
-            }
-        }).start();
-    }
-
     public void showNotif() {
         SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
@@ -312,12 +274,37 @@ public class PromHelper {
                 notifBuilder.setVibrate(new long[]{500, 1500});
         }
         notifHelper.notify(NotificationHelper.NOTIF_PROM, notifBuilder);
-        PromReceiver.setReceiver(context, p);
+        initWorker(p);
+    }
+
+    public void initWorker(int time) {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .setRequiresBatteryNotLow(false)
+                .build();
+        int m = timeToProm() / 60 - time;
+        Lib.LOG("time to prom: " + m + "+" + time);
+        if (m < 15) {
+            m += 480; // 8 hour, next Prom
+            Lib.LOG("time to next prom: " + m + "+" + time);
+        }
+        OneTimeWorkRequest request = new OneTimeWorkRequest
+                .Builder(PromWorker.class)
+                .setInitialDelay(m, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .addTag(PromWorker.TAG)
+                .build();
+        WorkManager.getInstance().enqueue(request);
+    }
+
+    public void cancelWorker() {
+        Lib.LOG("prom cancel");
+        WorkManager.getInstance().cancelAllWorkByTag(PromWorker.TAG);
     }
 
     public void clearTimeDiff() {
         SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(TIMEDIFF, 0);
+        editor.putInt(Const.TIMEDIFF, 0);
         editor.apply();
     }
 }

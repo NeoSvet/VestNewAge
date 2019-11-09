@@ -15,6 +15,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.AdsWorker;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
+import ru.neosvet.vestnewage.workers.PromWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SlashModel extends ProgressModel {
@@ -39,28 +40,38 @@ public class SlashModel extends ProgressModel {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
                 .build();
-        OneTimeWorkRequest task = new OneTimeWorkRequest
-                .Builder(AdsWorker.class)
+        Data data1 = new Data.Builder()
+                .putString(ProgressModel.NAME, this.getClass().getSimpleName())
+                .putBoolean(Const.TIME, true)
+                .build();
+        OneTimeWorkRequest task = new OneTimeWorkRequest //SynchronTime
+                .Builder(PromWorker.class)
                 .setConstraints(constraints)
+                .setInputData(data1)
                 .build();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
-        Data.Builder data = new Data.Builder()
+        task = new OneTimeWorkRequest
+                .Builder(AdsWorker.class)
+                .setConstraints(constraints)
+                .build();
+        job = job.then(task);
+        Data.Builder data2 = new Data.Builder()
                 .putString(ProgressModel.NAME, this.getClass().getSimpleName());
         if (boolSummary) {
             task = new OneTimeWorkRequest
                     .Builder(SummaryWorker.class)
-                    .setInputData(data.build())
+                    .setInputData(data2.build())
                     .setConstraints(constraints)
                     .addTag(TAG)
                     .build();
         } else {
-            data.putInt(Const.MONTH, month)
+            data2.putInt(Const.MONTH, month)
                     .putInt(Const.YEAR, year)
                     .putBoolean(Const.UNREAD, true);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWolker.class)
-                    .setInputData(data.build())
+                    .setInputData(data2.build())
                     .setConstraints(constraints)
                     .addTag(TAG)
                     .build();

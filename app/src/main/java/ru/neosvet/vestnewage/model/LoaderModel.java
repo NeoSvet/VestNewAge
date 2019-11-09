@@ -122,7 +122,7 @@ public class LoaderModel extends ProgressModel {
         } else if (id == R.id.nav_main) //main, news, media
             k = 3;
         setProgMax(k);
-        this.setProgress(new Data.Builder()
+        this.postProgress(new Data.Builder()
                 .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                 .putString(Const.MSG, msg)
                 .putInt(Const.MAX, max).build());

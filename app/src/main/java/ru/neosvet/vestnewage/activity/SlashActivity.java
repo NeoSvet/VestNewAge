@@ -39,10 +39,8 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
-import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
 
 public class SlashActivity extends AppCompatActivity {
     private final int START_ID = 900;
@@ -77,9 +75,6 @@ public class SlashActivity extends AppCompatActivity {
             return;
         }
 
-        PromHelper prom = new PromHelper(this, null);
-        prom.synchronTime(null);
-
         notifHelper = new NotificationHelper(SlashActivity.this);
         if (ver < 21) {
             SharedPreferences pref = getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
@@ -103,12 +98,14 @@ public class SlashActivity extends AppCompatActivity {
         }
         if (ver < 10)
             adapterNewVersion10();
-        if (ver < 19)
-            rebuildNotif();
+//        if (ver < 19)
+//            rebuildNotif();
         if (ver < 21)
             adapterNewVersion21();
-        if (ver < 31)
+        if (ver < 31) {
+            PromHelper prom = new PromHelper(this, null);
             prom.clearTimeDiff();
+        }
 
         showSummaryNotif();
     }
@@ -315,7 +312,7 @@ public class SlashActivity extends AppCompatActivity {
         notifHelper.notify(++notif_id, notifBuilder);
     }
 
-    private void rebuildNotif() {
+   /* private void rebuildNotif() {
         SharedPreferences pref = getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
         int p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p != Const.TURN_OFF)
@@ -324,7 +321,7 @@ public class SlashActivity extends AppCompatActivity {
         p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p != Const.TURN_OFF)
             PromReceiver.setReceiver(this, p);
-    }
+    }*/
 
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need

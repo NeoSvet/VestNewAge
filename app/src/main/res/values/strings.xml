@@ -175,6 +175,7 @@
     <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
     <string name="crash">Сбой</string>
     <!--SummaryNotif-->
+    <string name="check_new">Проверка на наличие нового</string>
     <string name="appeared_new">Новое:&#160;</string>
     <string name="appeared_new_some">Новые материалы</string>
     <string name="site_name">«Благая Весть»</string>

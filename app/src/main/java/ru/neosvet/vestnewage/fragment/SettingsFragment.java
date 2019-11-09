@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,10 +11,9 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,16 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
@@ -33,8 +44,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
-import ru.neosvet.vestnewage.helpers.SummaryHelper;
-import ru.neosvet.vestnewage.receiver.PromReceiver;
+import ru.neosvet.vestnewage.model.PromModel;
+import ru.neosvet.vestnewage.workers.CheckWorker;
+import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class SettingsFragment extends BackFragment {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
@@ -51,6 +63,7 @@ public class SettingsFragment extends BackFragment {
     private RadioButton[] rbsScreen;
     private CheckBox[] cbsClear;
     private SeekBar sbCheckTime, sbPromTime;
+    private PromModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,8 +74,35 @@ public class SettingsFragment extends BackFragment {
         initSections();
         initViews();
         setViews();
+        initModel();
         restoreState(savedInstanceState);
         return this.container;
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(PromModel.class);
+        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+            @Override
+            public void onChanged(@Nullable List<WorkInfo> workInfos) {
+                for (int i = 0; i < workInfos.size(); i++) {
+                    if (workInfos.get(i).getState().isFinished()) {
+                        float f = workInfos.get(i).getOutputData().getFloat(Const.TIME, 0);
+                        f = f / 60f;
+                        if (f < 60f)
+                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
+                        else {
+                            f = f / 60f;
+                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_hour), f));
+                        }
+                    }
+                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
+                        Lib.showToast(act, getResources().getString(R.string.sync_error));
+                    //Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                }
+            }
+        });
+        if (model.inProgress)
+            act.status.setLoad(true);
     }
 
     @Override
@@ -200,28 +240,8 @@ public class SettingsFragment extends BackFragment {
         bSyncTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PromHelper prom = new PromHelper(act.getApplicationContext(), null);
-                Handler action = new Handler(new Handler.Callback() {
-                    @Override
-                    public boolean handleMessage(Message message) {
-                        if (message.what == PromHelper.ERROR) {
-                            Lib.showToast(act, getResources().getString(R.string.sync_error));
-                            bSyncTime.setEnabled(true);
-                            return false;
-                        }
-                        float f = ((float) message.what) / 60f;
-                        if (f < 60f)
-                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_minute), f));
-                        else {
-                            f = f / 60f;
-                            Lib.showToast(act, String.format(getResources().getString(R.string.prom_in_hour), f));
-                        }
-                        return false;
-                    }
-                });
-                prom.synchronTime(action);
-                bSyncTime.setEnabled(false);
-
+                bSyncTime.setEnabled(true);
+                model.startSynchron();
             }
         });
 
@@ -380,12 +400,53 @@ public class SettingsFragment extends BackFragment {
         SharedPreferences.Editor editor = pref.edit();
         int p = sbCheckTime.getProgress();
         if (p < sbCheckTime.getMax()) {
-            if (p > 5)
-                p += (p - 5) * 5;
+            if (p > 2)
+                p = (p - 2) * 4;
+            else
+                p++;
+            p = p * 15;
         } else p = Const.TURN_OFF;
         editor.putInt(Const.TIME, p);
         editor.apply();
-        SummaryHelper.setReceiver(act, p);
+        WorkManager work = WorkManager.getInstance();
+        if (p == Const.TURN_OFF) {
+            Lib.LOG("Check Summary cancel");
+            work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
+            return;
+        }
+        Lib.LOG("Check Summary: " + p + " min");
+        if (p == 15) p = 20;
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .build();
+        Data data = new Data.Builder()
+                .putBoolean(Const.CHECK, true)
+                .build();
+        PeriodicWorkRequest task = new PeriodicWorkRequest
+                .Builder(SummaryWorker.class, p, TimeUnit.MINUTES, p - 5, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .setInputData(data)
+                .addTag(CheckWorker.TAG_PERIODIC)
+                .build();
+//        Operation job = work.enqueueUniquePeriodicWork(Const.CHECK,
+//                ExistingPeriodicWorkPolicy.REPLACE, task);
+        work.getWorkInfoByIdLiveData(task.getId())
+                .observe(act, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        Lib.LOG("onChanged-WorkInfo");
+                        if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            StringBuilder builder = new StringBuilder();
+                            for (String tag : workInfo.getTags()) {
+                                builder.append(tag);
+                                builder.append(", ");
+                            }
+                            Lib.LOG("onChanged-WorkInfo: tag " + builder.toString());
+                        }
+                    }
+                });
+        work.enqueue(task);
     }
 
     private void saveProm() {
@@ -396,7 +457,11 @@ public class SettingsFragment extends BackFragment {
             p = Const.TURN_OFF;
         editor.putInt(Const.TIME, p);
         editor.apply();
-        PromReceiver.setReceiver(act, p);
+        PromHelper prom = new PromHelper(act, null);
+        if (p == Const.TURN_OFF)
+            prom.cancelWorker();
+        else
+            prom.initWorker(p);
     }
 
     private void setCheckTime() {

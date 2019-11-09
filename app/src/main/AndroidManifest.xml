@@ -81,32 +81,6 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <receiver
-            android:name=".receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".receiver.SummaryReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".receiver.PromReceiver" />
-        <receiver android:name=".helpers.NotificationHelper$Result" />
-        <service
-            android:name=".helpers.SummaryHelper$InitJobService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service
-            android:name=".service.SummaryService"
-            android:icon="@mipmap/ic_launcher"
-            android:label="SummaryCheck"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

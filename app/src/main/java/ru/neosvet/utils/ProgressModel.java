@@ -43,7 +43,7 @@ public class ProgressModel extends AndroidViewModel {
         return state;
     }
 
-    public void setProgress(Data data) {
+    public void postProgress(Data data) {
         progress.postValue(data);
     }
 

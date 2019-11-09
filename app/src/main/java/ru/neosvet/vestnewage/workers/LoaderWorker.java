@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
+import ru.neosvet.vestnewage.service.CheckService;
 
 public class LoaderWorker extends Worker {
     private Context context;
@@ -64,6 +65,10 @@ public class LoaderWorker extends Worker {
         name = getInputData().getString(ProgressModel.NAME);
         model = ProgressModel.getModelByName(name);
         try {
+            if (name.equals(CheckService.class.getSimpleName())) {
+                downloadList();
+                return Result.success();
+            }
             if (name.equals(CalendarModel.class.getSimpleName())) {
                 int k = CalendarWolker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
@@ -140,6 +145,8 @@ public class LoaderWorker extends Worker {
 
     private void downloadList() throws Exception {
         File file = LoaderModel.getFileList(context);
+        if (!file.exists())
+            return;
         BufferedReader br = new BufferedReader(new FileReader(file));
         String s;
         while ((s = br.readLine()) != null && !isCancelled()) {
@@ -226,15 +233,22 @@ public class LoaderWorker extends Worker {
         dataBase.close();
     }
 
-    public boolean downloadPage(String link, boolean singlePage) throws Exception {
+    private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         DataBase dataBase = new DataBase(context, link);
         if (!singlePage && dataBase.existsPage(link))
             return false;
-        model.setProgress(new Data.Builder()
-                .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
-                .putString(Const.LINK, link)
-                .build());
+//        if (model == null) { //CheckService
+//            CheckService.progress.postValue(new Data.Builder()
+//                    .putString(Const.LINK, link)
+//                    .build());
+//        }
+        if (model != null) {
+            model.postProgress(new Data.Builder()
+                    .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                    .putString(Const.LINK, link)
+                    .build());
+        }
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) {
@@ -403,7 +417,7 @@ public class LoaderWorker extends Worker {
         }
     }
 
-    public void downloadStyle(boolean replaceStyle) throws Exception {
+    private void downloadStyle(boolean replaceStyle) throws Exception {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
@@ -448,7 +462,7 @@ public class LoaderWorker extends Worker {
         }
     }
 
-    public void initClient() throws Exception {
+    private void initClient() throws Exception {
         builderRequest = new Request.Builder();
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
@@ -456,14 +470,14 @@ public class LoaderWorker extends Worker {
     }
 
     private void setProgMax(int max) {
-        model.setProgress(new Data.Builder()
+        model.postProgress(new Data.Builder()
                 .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                 .putString(Const.MSG, context.getResources().getString(R.string.download_materials))
                 .putInt(Const.MAX, max).build());
     }
 
-    public void upProg() {
-        model.setProgress(new Data.Builder()
+    private void upProg() {
+        model.postProgress(new Data.Builder()
                 .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                 .build());
     }

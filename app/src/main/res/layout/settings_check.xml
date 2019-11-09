@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_marginBottom="5dp"
-                android:max="9"
+                android:max="7"
                 android:progress="0"
                 android:progressDrawable="@drawable/progress_bar"
                 android:thumb="@drawable/sb_thumb" />
