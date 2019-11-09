@@ -78,7 +78,7 @@ public class SiteWorker extends Worker {
             for (int i = 0; i < url.length && !isCancelled(); i++) {
                 loadList(url[i]);
                 saveList(file[i]);
-                model.setProgress(progUp);
+                model.postProgress(progUp);
             }
             return Result.success();
         } catch (Exception e) {

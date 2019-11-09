@@ -88,7 +88,7 @@ public class BookWorker extends Worker {
     private String loadListOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
             if (model != null) {
-                model.setProgress(new Data.Builder()
+                model.postProgress(new Data.Builder()
                         .putString(Const.MSG, context.getResources().getString(R.string.start))
                         .putInt(Const.MAX, 137)
                         .build());
@@ -129,7 +129,7 @@ public class BookWorker extends Worker {
             name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
             if (withDialog) {
                 if (model != null) {
-                    model.setProgress(new Data.Builder()
+                    model.postProgress(new Data.Builder()
                             .putString(Const.MSG, context.getResources().getStringArray(R.array.months)
                                     [m - 1] + " " + (2000 + y))
                             .putInt(Const.PROG, prog)
@@ -202,7 +202,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        model.setProgress(progUp);
+                        model.postProgress(progUp);
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

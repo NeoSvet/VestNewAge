@@ -118,7 +118,7 @@ public class SearchWorker extends Worker {
             Data data = new Data.Builder()
                     .putInt(Const.TIME, time)
                     .build();
-            model.setProgress(data);
+            model.postProgress(data);
         }
     }
 
