@@ -52,7 +52,7 @@ public class CheckWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
-            Lib.LOG("SummaryWorker error: " + err);
+            Lib.LOG("CheckWorker error: " + err);
         }
         return Result.failure(new Data.Builder()
                 .putString(Const.ERROR, err)
@@ -112,6 +112,7 @@ public class CheckWorker extends Worker {
         } while (s != null);
         bwRSS.close();
         br.close();
+        in.close();
         if (unread.addLink(link, d)) {
             bwList.write(link);
             bwList.newLine();

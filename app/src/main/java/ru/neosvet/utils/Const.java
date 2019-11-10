@@ -14,7 +14,7 @@ public interface Const {
     String TASK = "task", HREF = "href", DIALOG = "dialog", POEMS = "poems", FIRST = "first", RSS = "/rss";
     String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new", START_SCEEN = "start_screen", CUR_ID = "cur_id";
     String TAB = "tab", MONTH = "Month", YEAR = "Year", UNREAD = "Unread", ERROR = "ERROR", LIST = "list", PAGE = "page";
-    String RENAME = "rename", START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email";
+    String RENAME = "rename", START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email", FINISH = "finish";
     String PASSWORD = "password", PANEL = "panel", LOGIN = "login", GET_WORDS = "get_words", SELECT_WORD = "select_word";
     String SELECT = "select", CURRENT_DATE = "current_date", TIME = "time", TIMEDIFF = "timediff", SUMMARY = "Summary";
     String PROM = "Prom", POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads", FILE = "file", MSG = "msg";

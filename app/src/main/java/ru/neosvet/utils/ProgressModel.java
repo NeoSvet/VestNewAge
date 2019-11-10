@@ -3,16 +3,12 @@ package ru.neosvet.utils;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
 
-import java.util.List;
 import java.util.Set;
 
 import ru.neosvet.vestnewage.model.BookModel;
@@ -27,20 +23,15 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 public class ProgressModel extends AndroidViewModel {
     public static final String NAME = "CLASS_NAME";
     public boolean inProgress = true;
-    protected WorkManager work;
-    protected LiveData<List<WorkInfo>> state;
     private MutableLiveData<Data> progress = new MutableLiveData<Data>();
 
     public ProgressModel(@NonNull Application application) {
         super(application);
     }
 
-    public void finish() {
+    public void finish(LifecycleOwner owner) {
+        progress.removeObservers(owner);
         inProgress = false;
-    }
-
-    public LiveData<List<WorkInfo>> getState() {
-        return state;
     }
 
     public void postProgress(Data data) {
@@ -52,7 +43,6 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public void removeObserves(LifecycleOwner owner) {
-        state.removeObservers(owner);
         progress.removeObservers(owner);
     }
 
@@ -79,8 +69,9 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public static String getFirstTag(Set<String> tags) {
+        String tag = "none";
         for (String t : tags)
-            return t;
-        return "none";
+            tag=t;
+        return tag;
     }
 }

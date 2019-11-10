@@ -15,6 +15,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.model.SlashModel;
 
 public class PromWorker extends Worker {
     private Context context;
@@ -43,20 +44,16 @@ public class PromWorker extends Worker {
     private Result startSynchronTime() {
         String err;
         try {
-            return Result.success(new Data.Builder()
-                    .putFloat(Const.TIMEDIFF, synchronTime())
-                    .build());
+            synchronTime();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("PromWorker error: " + err);
+            Lib.LOG("PromWorker error: " + e.getMessage());
         }
-        return Result.failure(new Data.Builder()
-                .putString(Const.ERROR, err)
-                .build());
+        return Result.failure();
     }
 
-    private float synchronTime() throws Exception {
+    private void synchronTime() throws Exception {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(Const.SITE2);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
@@ -72,8 +69,9 @@ public class PromWorker extends Worker {
             SharedPreferences.Editor editor = pref.edit();
             editor.putInt(Const.TIMEDIFF, timeDiff);
             editor.apply();
+            SlashModel.getInstance().postProgress(new Data.Builder()
+                    .putBoolean(Const.TIME, true)
+                    .build());
         }
-        PromHelper prom = new PromHelper(context, null);
-        return prom.timeToProm();
     }
 }

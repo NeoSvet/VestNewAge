@@ -52,6 +52,15 @@ public class SummaryWorker extends Worker {
             if (name.equals(SummaryModel.class.getSimpleName())) {
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();
+                Data data = new Data.Builder()
+                        .putBoolean(Const.FINISH, true)
+                        .build();
+                model.postProgress(data);
+            } else {
+                Data data = new Data.Builder()
+                        .putBoolean(Const.LIST, true)
+                        .build();
+                model.postProgress(data);
             }
             return Result.success();
         } catch (Exception e) {
@@ -59,9 +68,11 @@ public class SummaryWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("SummaryWorker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private String withOutTag(String s) {
@@ -98,6 +109,7 @@ public class SummaryWorker extends Worker {
         }
         bw.close();
         br.close();
+        in.close();
     }
 
     public static int getListLink(Context context) throws Exception {

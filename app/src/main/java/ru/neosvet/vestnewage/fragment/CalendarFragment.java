@@ -20,9 +20,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,7 +31,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -87,7 +84,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.finish(act);
             return false;
         }
         return true;
@@ -98,22 +95,23 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                String s = data.getString(Const.LINK);
-                int i = s.lastIndexOf("/" + 1);
-                blinkDay(Integer.parseInt(s.substring(i, i + 2)));
-            }
-        });
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                String tag;
-                for (int i = 0; i < workInfos.size(); i++) {
-                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
-                    if (tag.equals(CalendarModel.TAG) && workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
+                if (data.getBoolean(Const.FINISH, false)) {
+                    String err = data.getString(Const.ERROR);
+                    if (err != null) {
+                        act.status.setCrash(true);
+                        Lib.showToast(act, err);
+                    } else
+                    setStatus(false);
+                    model.finish(act);
+                    openCalendar(false);
+                    updateNew();
+                    return;
                 }
+                String s = data.getString(Const.LINK);
+                if (s == null)
+                    return;
+                int i = s.lastIndexOf("/") + 1;
+                blinkDay(Integer.parseInt(s.substring(i, i + 2)));
             }
         });
         if (model.inProgress)
@@ -146,6 +144,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
     @Override
     public void onResume() {
         super.onResume();
+        updateNew();
+    }
+
+    private void updateNew() {
         act.updateNew();
         if (act.k_new == 0)
             tvNew.setVisibility(View.GONE);
@@ -185,7 +187,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish();
+                        model.finish(act);
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick()) {
@@ -196,12 +198,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                     startLoad();
             }
         });
-    }
-
-    private void clearDays() {
-        for (int i = 0; i < adCalendar.getItemCount(); i++) {
-            adCalendar.getItem(i).clear(false);
-        }
     }
 
     private void initCalendar() {
@@ -267,7 +263,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
 
     private void openLink(String link) {
         if (model.inProgress)
-            model.finish();
+            model.finish(act);
         BrowserActivity.openReader(act, link, null);
     }
 
@@ -335,9 +331,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
 
     private void openCalendar(boolean loadIfNeed) {
         try {
-            if (model.inProgress && model.loadList)
+            if (model.inProgress)
                 return;
-
+            for (int i = 0; i < adCalendar.getItemCount(); i++)
+                adCalendar.getItem(i).clear(false);
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
@@ -399,17 +396,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
         model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }
 
-    private void finishLoad(boolean suc) {
-        model.finish();
-        if (suc)
-            setStatus(false);
-        else {
-            act.status.setCrash(true);
-            clearDays();
-            openCalendar(false);
-        }
-    }
-
     private void setStatus(boolean load) {
         act.status.setCrash(false);
         act.status.setLoad(load);
@@ -441,7 +427,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
     }
@@ -453,7 +438,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                 begin = true;
             if (begin) {
                 if (adCalendar.getItem(i).getNum() == d) {
-                    updateTitles(i);
                     View v = rvCalendar.getLayoutManager().findViewByPosition(i);
                     if (v != null) {
                         v.clearAnimation();
@@ -463,34 +447,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                 }
             }
         }
-    }
-
-    private void updateTitles(int item) {
-        adCalendar.getItem(item).clear(true);
-        int i = 0;
-        if (adCalendar.getItem(item).isBold())
-            i = 1;
-        DataBase dataBase = new DataBase(act, adCalendar.getItem(item).getLink(i));
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor;
-        String title, link;
-        for (; i < adCalendar.getItem(item).getCount(); i++) {
-            link = adCalendar.getItem(item).getLink(i);
-            cursor = db.query(Const.TITLE, new String[]{Const.TITLE},
-                    Const.LINK + DataBase.Q, new String[]{link},
-                    null, null, null);
-            if (cursor.moveToFirst()) {
-                title = cursor.getString(0);
-                if (title.contains("/"))
-                    adCalendar.getItem(item).addTitle(title);
-                else {
-                    title = dataBase.getPageTitle(title, link);
-                    adCalendar.getItem(item).addTitle(title.substring(title.indexOf(" ") + 1));
-                }
-            }
-            cursor.close();
-        }
-        dataBase.close();
     }
 
     public int getCurrentYear() {

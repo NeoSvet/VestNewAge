@@ -161,7 +161,6 @@
     <string name="accept">Принято</string>
     <string name="prom_in_hour">Посыл через %.1f ч.</string>
     <string name="prom_in_minute">Посыл через %.1f мин.</string>
-    <string name="sync_error">Синхронизация не удалась</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
@@ -170,6 +169,7 @@
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="it_load_suc">Раздел успешно загружен</string>
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
+    <string name="error">Ошибка:&#160;</string>
     <!--StatusButton-->
     <string name="about_crash">Сбой скорее всего произошёл из-за отсутствия доступа к интернету.</string>
     <string name="crash">Сбой</string>

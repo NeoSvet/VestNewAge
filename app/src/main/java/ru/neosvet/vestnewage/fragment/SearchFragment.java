@@ -33,7 +33,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -132,24 +131,18 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
+                if (data.getBoolean(Const.FINISH, false)) {
+                    String err = data.getString(Const.ERROR);
+                    if (err != null)
+                        Lib.showToast(act, err);
+                    else
+                        putResult(data.getInt(Const.MODE, 0),
+                                data.getString(Const.STRING),
+                                data.getInt(Const.START, 0),
+                                data.getInt(Const.END, 0));
+                }
                 DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
                 tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
-            }
-        });
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished()) {
-                        Data result = workInfos.get(i).getOutputData();
-                        putResult(result.getInt(Const.MODE, 0),
-                                result.getString(Const.STRING),
-                                result.getInt(Const.START, 0),
-                                result.getInt(Const.END, 0));
-                    }
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                }
             }
         });
         if (model.inProgress) {
@@ -367,7 +360,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                model.finish();
+                model.finish(act);
             }
         });
 
@@ -535,7 +528,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         page = 0;
         etSearch.setEnabled(true);
         pStatus.setVisibility(View.GONE);
-        model.finish();
+        model.finish(act);
         if (count1 > 0) {
             pAdditionSet.setVisibility(View.VISIBLE);
             cbSearchInResults.setChecked(true);

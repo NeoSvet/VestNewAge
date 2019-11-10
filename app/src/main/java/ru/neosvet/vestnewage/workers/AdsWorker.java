@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,7 +39,8 @@ public class AdsWorker extends Worker {
             }
             String s = "http://neosvet.ucoz.ru/ads_vna.txt";
             Lib lib = new Lib(context);
-            br = new BufferedReader(new InputStreamReader(lib.getStream(s)));
+            BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
+            br = new BufferedReader(new InputStreamReader(in));
             s = br.readLine();
             if (Long.parseLong(s) > Long.parseLong(t)) {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -50,6 +52,7 @@ public class AdsWorker extends Worker {
                 bw.close();
             }
             br.close();
+            in.close();
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();

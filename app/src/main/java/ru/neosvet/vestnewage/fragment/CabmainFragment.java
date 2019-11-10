@@ -24,9 +24,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
-
-import java.util.List;
 
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.BackFragment;
@@ -92,14 +89,12 @@ public class CabmainFragment extends BackFragment {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CabModel.class);
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
+        model.getProgress().observe(act, new Observer<Data>() {
             @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
-                        parseResult(workInfos.get(i).getOutputData());
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        initError(workInfos.get(i).getOutputData().getString(Const.ERROR));
+            public void onChanged(@Nullable Data data) {
+                if (data.getBoolean(Const.FINISH, false)) {
+                    parseResult(data);
+                    initError(data.getString(Const.ERROR));
                 }
             }
         });
@@ -108,9 +103,9 @@ public class CabmainFragment extends BackFragment {
     }
 
     private void parseResult(Data result) {
-        model.finish();
+        model.finish(act);
         act.status.setLoad(false);
-        switch (result.getInt(Const.TITLE, 0)) {
+        switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
                 if (result.getString(Const.TASK).equals(Const.GET_WORDS)) {
                     initCabinet(getResources().getString(R.string.selected_status),

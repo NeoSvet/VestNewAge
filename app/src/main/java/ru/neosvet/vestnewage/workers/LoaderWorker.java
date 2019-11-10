@@ -65,37 +65,43 @@ public class LoaderWorker extends Worker {
         name = getInputData().getString(ProgressModel.NAME);
         model = ProgressModel.getModelByName(name);
         try {
+            builderRequest = new Request.Builder();
+            builderRequest.header(Const.USER_AGENT, context.getPackageName());
+            builderRequest.header("Referer", Const.SITE);
+            client = Lib.createHttpClient();
             if (name.equals(CheckService.class.getSimpleName())) {
                 downloadList();
-                return Result.success();
+                return postFinish();
             }
             if (name.equals(CalendarModel.class.getSimpleName())) {
+                Lib.LOG("start loader month");
                 int k = CalendarWolker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0));
                 setProgMax(k);
                 downloadList();
-                return Result.success();
+                Lib.LOG("finish loader month");
+                return postFinish();
             }
             if (name.equals(SummaryModel.class.getSimpleName())) {
                 int k = SummaryWorker.getListLink(context);
                 setProgMax(k);
                 downloadList();
-                return Result.success();
+                return postFinish();
             }
             if (name.equals(SiteModel.class.getSimpleName())) {
                 int k = SiteWorker.getListLink(context, lib.getFileByName(
                         getInputData().getString(Const.FILE)).toString());
                 setProgMax(k);
                 downloadList();
-                return Result.success();
+                return postFinish();
             }
             if (isCancelled())
-                return Result.success();
-            initClient();
+                return postFinish();
             int mode = getInputData().getInt(Const.MODE, 0);
             Data.Builder result = new Data.Builder()
-                    .putInt(Const.MODE, mode);
+                    .putInt(Const.MODE, mode)
+                    .putBoolean(Const.FINISH, true);
             switch (mode) {
                 case LoaderModel.DOWNLOAD_ALL:
                     download(LoaderModel.ALL);
@@ -112,6 +118,7 @@ public class LoaderWorker extends Worker {
                     if (mode == LoaderModel.DOWNLOAD_PAGE ||
                             mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE) {
                         downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
+                        Lib.LOG("download page");
                         downloadPage(link, true);
                     } else { //file
                         downloadFile(link, getInputData().getString(Const.FILE));
@@ -119,24 +126,35 @@ public class LoaderWorker extends Worker {
                     result.putString(Const.LINK, link);
                     break;
             }
-            return Result.success(result.build());
+            model.postProgress(result.build());
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
             Lib.LOG("LoaderWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
+    }
+
+    private Result postFinish() {
+        Data data = new Data.Builder()
+                .putBoolean(Const.FINISH, true)
+                .build();
+        model.postProgress(data);
+        return Result.success();
     }
 
     private void downloadYear(int year) throws Exception {
         DateHelper d = DateHelper.initToday(context);
-        int k = 12;
+        int k = 13;
         if (year == d.getYear())
             k -= d.getMonth();
         setProgMax(k);
-        for (int m = 0; m < k && !isCancelled(); m++) {
+        for (int m = 1; m < k && !isCancelled(); m++) {
             CalendarWolker.getListLink(context, year, m);
             downloadList();
             upProg();
@@ -149,6 +167,7 @@ public class LoaderWorker extends Worker {
             return;
         BufferedReader br = new BufferedReader(new FileReader(file));
         String s;
+        Lib.LOG("download list");
         while ((s = br.readLine()) != null && !isCancelled()) {
             downloadPage(s, false);
         }
@@ -224,6 +243,7 @@ public class LoaderWorker extends Worker {
                 null, null, null, null, null);
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
+            Lib.LOG("download book");
             while (curTitle.moveToNext()) {
                 downloadPage(curTitle.getString(0), false);
                 upProg();
@@ -238,6 +258,7 @@ public class LoaderWorker extends Worker {
         DataBase dataBase = new DataBase(context, link);
         if (!singlePage && dataBase.existsPage(link))
             return false;
+        Lib.LOG("load page: " + link);
 //        if (model == null) { //CheckService
 //            CheckService.progress.postValue(new Data.Builder()
 //                    .putString(Const.LINK, link)
@@ -246,7 +267,7 @@ public class LoaderWorker extends Worker {
         if (model != null) {
             model.postProgress(new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
-                    .putString(Const.LINK, link)
+                    .putString(Const.MSG, link)
                     .build());
         }
         String line, s = link;
@@ -363,6 +384,7 @@ public class LoaderWorker extends Worker {
             }
         }
         br.close();
+        response.close();
         dataBase.close();
         return true;
     }
@@ -457,16 +479,10 @@ public class LoaderWorker extends Worker {
                 bwDark.flush();
             }
             br.close();
+            response.close();
             bwLight.close();
             bwDark.close();
         }
-    }
-
-    private void initClient() throws Exception {
-        builderRequest = new Request.Builder();
-        builderRequest.header(Const.USER_AGENT, context.getPackageName());
-        builderRequest.header("Referer", Const.SITE);
-        client = lib.createHttpClient();
     }
 
     private void setProgMax(int max) {

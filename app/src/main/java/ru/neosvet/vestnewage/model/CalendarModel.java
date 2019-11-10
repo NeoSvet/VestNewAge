@@ -19,7 +19,6 @@ import ru.neosvet.vestnewage.workers.LoaderWorker;
 public class CalendarModel extends ProgressModel {
     public static final String TAG = "calendar";
     private static CalendarModel current = null;
-    public boolean loadList = true;
 
     public static CalendarModel getInstance() {
         return current;
@@ -27,8 +26,6 @@ public class CalendarModel extends ProgressModel {
 
     public CalendarModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -48,13 +45,15 @@ public class CalendarModel extends ProgressModel {
                 .Builder(CalendarWolker.class)
                 .setInputData(data.build())
                 .setConstraints(constraints)
+                .addTag(TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         task = new OneTimeWorkRequest
                 .Builder(LoaderWorker.class)
                 .setInputData(data.build())
                 .setConstraints(constraints)
+                .addTag(TAG)
                 .build();
         job = job.then(task);
         job.enqueue();

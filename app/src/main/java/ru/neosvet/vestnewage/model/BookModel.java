@@ -30,8 +30,6 @@ public class BookModel extends ProgressModel {
 
     public BookModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -53,7 +51,7 @@ public class BookModel extends ProgressModel {
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         job.enqueue();
     }
@@ -71,8 +69,6 @@ public class BookModel extends ProgressModel {
         if (max == 0)
             return false;
         dialog = new ProgressDialog(act, max);
-        dialog.setMessage(data.getString(Const.MSG));
-        dialog.setProgress(data.getInt(Const.PROG, 0));
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -80,6 +76,8 @@ public class BookModel extends ProgressModel {
             }
         });
         dialog.show();
+        dialog.setMessage(data.getString(Const.MSG));
+        dialog.setProgress(data.getInt(Const.PROG, 0));
         return true;
     }
 

@@ -16,19 +16,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.List;
 
 import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -73,7 +69,7 @@ public class SummaryFragment extends BackFragment {
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.finish(act);
             return false;
         }
         return true;
@@ -84,25 +80,29 @@ public class SummaryFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
+                if (data.getBoolean(Const.LIST, false)) {
+                    Lib.LOG("list progress");
+                    openList(false);
+                    return;
+                }
+                if (data.getBoolean(Const.FINISH, false)) {
+                    Lib.LOG("finish progress");
+                    String err = data.getString(Const.ERROR);
+                    if (err != null)
+                        Lib.showToast(act, err);
+                    finishLoad(err == null);
+                    return;
+                }
                 String link = data.getString(Const.LINK);
                 for (int i = 0; i < adSummary.getCount(); i++) {
-                    if (adSummary.getItem(i).equals(link)) {
-                        View item = (View) lvSummary.getItemAtPosition(i);
+                    if (adSummary.getItem(i).getLink().equals(link)) {
+                        lvSummary.smoothScrollToPosition(i);
+                        View item = lvSummary.getChildAt(i);
+                        if (item == null)
+                            break;
                         item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+                        break;
                     }
-                }
-            }
-        });
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                String tag;
-                for (int i = 0; i < workInfos.size(); i++) {
-                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
-                    if (tag.equals(SummaryModel.TAG) && workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getState().equals(WorkInfo.State.SUCCEEDED));
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
                 }
             }
         });
@@ -120,13 +120,17 @@ public class SummaryFragment extends BackFragment {
             else
                 fabRefresh.setVisibility(View.VISIBLE);
             openList(true);
-        } else if (!model.inProgress)
+        } else
             startLoad();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        updateNew();
+    }
+
+    private void updateNew() {
         act.updateNew();
         if (act.k_new == 0)
             tvNew.setVisibility(View.GONE);
@@ -182,7 +186,7 @@ public class SummaryFragment extends BackFragment {
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish();
+                        model.finish(act);
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick())
@@ -227,23 +231,12 @@ public class SummaryFragment extends BackFragment {
             adSummary.clear();
             DateHelper dateNow = DateHelper.initNow(act);
             BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + Const.RSS));
-            String title, des, time, link, name;
+            String title, des, time, link;
             int i = 0;
-            DataBase dataBase = null;
             while ((title = br.readLine()) != null) {
                 link = br.readLine();
                 des = br.readLine();
                 time = br.readLine();
-                if (!link.contains(":")) {
-                    name = DataBase.getDatePage(link);
-                    if (dataBase == null || !dataBase.getName().equals(name)) {
-                        if (dataBase != null)
-                            dataBase.close();
-                        dataBase = new DataBase(act, name);
-                    }
-                    if (!dataBase.existsPage(link))
-                        continue;
-                }
                 adSummary.addItem(new ListItem(title, link));
                 adSummary.getItem(i).setDes(
                         dateNow.getDiffDate(Long.parseLong(time))
@@ -268,14 +261,13 @@ public class SummaryFragment extends BackFragment {
         model.startLoad();
     }
 
-    private void finishLoad(Boolean suc) {
-        model.finish();
+    private void finishLoad(boolean suc) {
+        model.finish(act);
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
-        } else {
+        } else
             act.status.setCrash(true);
-        }
-        openList(false);
+        updateNew();
     }
 }

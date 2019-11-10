@@ -56,17 +56,21 @@ public class BookWorker extends Worker {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
                     name = loadListOtrk(true);
-                    return Result.success(new Data.Builder()
+                    model.postProgress(new Data.Builder()
+                            .putBoolean(Const.FINISH, true)
                             .putString(Const.TITLE, name)
                             .build());
+                    return Result.success();
                 }
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
                     loadListOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
                 name = loadListBook(kat);
-                return Result.success(new Data.Builder()
+                model.postProgress(new Data.Builder()
+                        .putBoolean(Const.FINISH, true)
                         .putString(Const.TITLE, name)
                         .build());
+                return Result.success();
             }
             //loader
             progUp = new Data.Builder()
@@ -80,15 +84,18 @@ public class BookWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("BookWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private String loadListOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
             if (model != null) {
                 model.postProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
                         .putString(Const.MSG, context.getResources().getString(R.string.start))
                         .putInt(Const.MAX, 137)
                         .build());
@@ -106,6 +113,7 @@ public class BookWorker extends Worker {
         while ((s = br.readLine()) != null) {
             if (isCancelled()) {
                 br.close();
+                in.close();
                 return name;
             }
             f = new File(path + s.substring(0, s.indexOf(" ")));
@@ -119,6 +127,7 @@ public class BookWorker extends Worker {
             }
         }
         br.close();
+        in.close();
         int prog = 0, m = 8, y = 4;
         DataBase dataBase;
         SQLiteDatabase db;
@@ -130,6 +139,7 @@ public class BookWorker extends Worker {
             if (withDialog) {
                 if (model != null) {
                     model.postProgress(new Data.Builder()
+                            .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                             .putString(Const.MSG, context.getResources().getStringArray(R.array.months)
                                     [m - 1] + " " + (2000 + y))
                             .putInt(Const.PROG, prog)
@@ -161,6 +171,7 @@ public class BookWorker extends Worker {
                     }
                 }
                 br.close();
+                in.close();
                 dataBase.close();
             }
             if (m == 12) {
@@ -185,6 +196,7 @@ public class BookWorker extends Worker {
         while ((line = br.readLine()) != null) {
             if (isCancelled()) {
                 br.close();
+                in.close();
                 return date1;
             }
             if (!begin)
@@ -202,7 +214,8 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        model.postProgress(progUp);
+                        if (progUp != null)
+                            model.postProgress(progUp);
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
@@ -215,6 +228,7 @@ public class BookWorker extends Worker {
             }
         }
         br.close();
+        in.close();
         return date1;
     }
 

@@ -99,18 +99,21 @@ public class SearchWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("SearchWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private Result getResult() {
-        Data.Builder result = new Data.Builder()
+        model.postProgress(new Data.Builder()
                 .putInt(Const.MODE, mode)
                 .putString(Const.STRING, str)
                 .putInt(Const.START, count1)
-                .putInt(Const.END, count2);
-        return Result.success(result.build());
+                .putInt(Const.END, count2)
+                .build());
+        return Result.success();
     }
 
     private void publishProgress(int time) {

@@ -23,10 +23,9 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.work.WorkInfo;
+import androidx.work.Data;
 
 import java.io.File;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,7 +33,6 @@ import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
@@ -120,7 +118,7 @@ public class SlashActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         if (model.inProgress)
-            model.finish();
+            model.finish(this);
         startActivity(main);
         finish();
     }
@@ -207,16 +205,14 @@ public class SlashActivity extends AppCompatActivity {
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(SlashModel.class);
-        model.getState().observe(this, new Observer<List<WorkInfo>>() {
+        model.getProgress().observe(this, new Observer<Data>() {
             @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                String tag;
-                for (int i = 0; i < workInfos.size(); i++) {
-                    tag = ProgressModel.getFirstTag(workInfos.get(i).getTags());
-                    if (tag.equals(SlashModel.TAG) && workInfos.get(i).getState().isFinished())
-                        finishLoad();
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(SlashActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
+            public void onChanged(@Nullable Data data) {
+                if (data.getBoolean(Const.TIME, false)) {
+                    //TODO rebuild prom notif
+                }
+                if (data.getBoolean(Const.LIST, false)) {
+                    finishLoad();
                 }
             }
         });
@@ -241,7 +237,7 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     public void finishLoad() {
-        model.finish();
+        model.finish(this);
         if (!anim) {
             startActivity(main);
             finish();

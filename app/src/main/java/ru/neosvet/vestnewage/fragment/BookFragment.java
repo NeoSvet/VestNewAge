@@ -27,10 +27,8 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
 
 import java.io.File;
-import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,6 +48,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
     private final int DEF_YEAR = 100;
@@ -104,7 +103,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.finish(act);
             return false;
         }
         return true;
@@ -115,21 +114,19 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getInt(Const.MAX, 0) > 0)
+                if (data.getBoolean(Const.FINISH, false)) {
+                    String err = data.getString(Const.ERROR);
+                    if (err != null) {
+                        act.status.setCrash(true);
+                        Lib.showToast(act, err);
+                    } else
+                        finishLoad(data.getString(Const.TITLE));
+                    return;
+                }
+                if (data.getInt(Const.DIALOG, 0) == LoaderModel.DIALOG_SHOW)
                     model.showDialog(act);
                 else
                     model.updateDialog();
-            }
-        });
-        model.getState().observe(act, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
-                        finishLoad(workInfos.get(i).getOutputData().getString(Const.TITLE));
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED))
-                        Lib.showToast(act, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                }
             }
         });
         if (model.inProgress)
@@ -528,44 +525,40 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void finishLoad(String result) {
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
-        model.finish();
-        if (result.length() > 0) {
-            DateHelper d;
+        model.finish(act);
+        DateHelper d;
+        if (tab == 0)
+            d = dKatren;
+        else
+            d = dPoslanie;
+        if (result.length() == 6) { //значит была загрузка с сайта Откровений
+            if (result.substring(5).equals("0")) // загрузка не была завершена
+                return;
+            fromOtkr = true;
+            editor.putBoolean(Const.OTKR, fromOtkr);
+            result = result.substring(0, 5);
+            d.setYear(DEF_YEAR);
+        }
+        fabRefresh.setVisibility(View.VISIBLE);
+        fabRndMenu.setVisibility(View.VISIBLE);
+        act.status.setLoad(false);
+        if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
+            d = DateHelper.putYearMonth(act,
+                    2000 + Integer.parseInt(result.substring(3, 5)),
+                    Integer.parseInt(result.substring(0, 2)));
             if (tab == 0)
-                d = dKatren;
+                dKatren = d;
             else
-                d = dPoslanie;
-            if (result.length() == 6) { //значит была загрузка с сайта Откровений
-                if (result.substring(5).equals("0")) // загрузка не была завершена
-                    return;
-                fromOtkr = true;
-                editor.putBoolean(Const.OTKR, fromOtkr);
-                result = result.substring(0, 5);
-                d.setYear(DEF_YEAR);
-            }
-            fabRefresh.setVisibility(View.VISIBLE);
-            fabRndMenu.setVisibility(View.VISIBLE);
-            act.status.setLoad(false);
-            if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
-                d = DateHelper.putYearMonth(act,
-                        2000 + Integer.parseInt(result.substring(3, 5)),
-                        Integer.parseInt(result.substring(0, 2)));
-                if (tab == 0)
-                    dKatren = d;
-                else
-                    dPoslanie = d;
-            }
-            if (existsList(d, tab == 0)) {
-                openList(false);
-            } else {
-                DateHelper t = DateHelper.initToday(act);
-                if (t.getMonth() == d.getMonth() && t.getYear() == d.getYear())
-                    Lib.showToast(act, getResources().getString(R.string.list_is_empty));
-                else
-                    startLoad();
-            }
+                dPoslanie = d;
+        }
+        if (existsList(d, tab == 0)) {
+            openList(false);
         } else {
-            act.status.setCrash(true);
+            DateHelper t = DateHelper.initToday(act);
+            if (t.getMonth() == d.getMonth() && t.getYear() == d.getYear())
+                Lib.showToast(act, getResources().getString(R.string.list_is_empty));
+            else
+                startLoad();
         }
     }
 

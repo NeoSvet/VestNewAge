@@ -56,9 +56,11 @@ public class SiteWorker extends Worker {
                 loadList(getInputData().getString(Const.LINK));
                 s = getInputData().getString(Const.FILE);
                 saveList(s);
-                return Result.success(new Data.Builder()
+                model.postProgress(new Data.Builder()
+                        .putBoolean(Const.FINISH, true)
                         .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
                         .build());
+                return Result.success();
             }
             //loader
             String[] url = new String[]{
@@ -86,9 +88,11 @@ public class SiteWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("SiteWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private void saveList(String file) throws Exception {
@@ -126,7 +130,7 @@ public class SiteWorker extends Worker {
         String s, d = "";
         String[] m;
         while ((line = br.readLine()) != null) {
-            if(isCancelled())
+            if (isCancelled())
                 break;
             if (!begin) {
                 begin = line.contains("h2") || line.contains("h3");//razdel
@@ -177,6 +181,7 @@ public class SiteWorker extends Worker {
         }
         setDes(d);
         br.close();
+        in.close();
     }
 
     private void addLink(String head, String link) {

@@ -36,7 +36,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.work.WorkInfo;
+import androidx.work.Data;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -129,17 +129,11 @@ public class BrowserActivity extends AppCompatActivity
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(LoaderModel.class);
-        model.getState().observe(this, new Observer<List<WorkInfo>>() {
+        model.getProgress().observe(this, new Observer<Data>() {
             @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished())
-                        finishLoad();
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED)) {
-                        Lib.showToast(BrowserActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                        model.finish();
-                        status.setCrash(true);
-                    }
+            public void onChanged(@Nullable Data data) {
+                if (data.getBoolean(Const.FINISH, false)) {
+                    finishLoad(data.getString(Const.ERROR));
                 }
             }
         });
@@ -656,7 +650,7 @@ public class BrowserActivity extends AppCompatActivity
 
     private void downloadFile(File f) {
         model.startLoad(LoaderModel.DOWNLOAD_FILE, Const.SITE + link
-                + Const.AND +  f.toString());
+                + Const.AND + f.toString());
     }
 
     public void openPage(boolean newPage) {
@@ -803,8 +797,10 @@ public class BrowserActivity extends AppCompatActivity
         lib.openInApps(url, null);
     }
 
-    private void finishLoad() {
-        model.finish();
+    private void finishLoad(String err) {
+        model.finish(this);
+        if (err != null)
+            Lib.showToast(BrowserActivity.this, err);
         status.setLoad(false);
         status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
         if (link.contains(PNG))

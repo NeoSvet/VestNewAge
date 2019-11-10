@@ -24,9 +24,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.work.Data;
-import androidx.work.WorkInfo;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,7 +35,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -59,7 +56,6 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
-    private final String LOADER = "loader";
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
     public int k_new = 0;
@@ -138,21 +134,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         model.setProgMsg(data.getString(Const.MSG));
                         break;
                 }
-            }
-        });
-        model.getState().observe(this, new Observer<List<WorkInfo>>() {
-            @Override
-            public void onChanged(@Nullable List<WorkInfo> workInfos) {
-                for (int i = 0; i < workInfos.size(); i++) {
-                    if (workInfos.get(i).getState().isFinished() && ProgressModel.getFirstTag(
-                            workInfos.get(i).getTags()).equals(LoaderModel.TAG)) {
-                        boolean all = workInfos.get(i).getOutputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_ALL;
-                        finishLoad(all, null);
-                    }
-                    if (workInfos.get(i).getState().equals(WorkInfo.State.FAILED)) {
-                        finishLoad(true, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                        //Lib.showToast(MainActivity.this, workInfos.get(i).getOutputData().getString(Const.ERROR));
-                    }
+                if (data.getBoolean(Const.FINISH, false)) {
+                    boolean all = data.getInt(Const.MODE, 0) == LoaderModel.ALL;
+                    finishLoad(all, data.getString(Const.ERROR));
                 }
             }
         });
@@ -292,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private boolean isBusy() {
-        if (curFragment.model == null)
+        if (curFragment == null || curFragment.model == null)
             return false;
         return curFragment.model.inProgress;
     }
@@ -435,7 +419,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void finishLoad(boolean all, String err) {
-        model.finish();
+        model.dismissDialog();
+        model.finish(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (err == null) {
             if (all)
@@ -443,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else
                 builder.setMessage(getResources().getString(R.string.it_load_suc));
         } else
-            builder.setMessage(err); //TODO getResources().getString(R.string.load_fail)
+            builder.setMessage(getResources().getString(R.string.error) + err); //TODO  getResources().getString(R.string.load_fail)
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {

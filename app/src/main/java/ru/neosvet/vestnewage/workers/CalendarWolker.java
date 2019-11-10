@@ -67,6 +67,9 @@ public class CalendarWolker extends Worker {
                 loadListMonth(getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0),
                         getInputData().getBoolean(Const.UNREAD, false));
+                model.postProgress(new Data.Builder()
+                        .putBoolean(Const.LIST, true)
+                        .build());
                 return Result.success();
             }
             //loader
@@ -99,9 +102,11 @@ public class CalendarWolker extends Worker {
             err = e.getMessage();
             Lib.LOG("CalendarWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private void loadListYear(int year, int max_m) throws Exception {
@@ -141,8 +146,10 @@ public class CalendarWolker extends Worker {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "?json&year=" + year + "&month=" + month));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        Lib.LOG("start load month: " + month + "." + year);
         String s = br.readLine();
         br.close();
+        in.close();
         JSONObject json, jsonI;
         JSONArray jsonA;
         String link;
@@ -172,8 +179,10 @@ public class CalendarWolker extends Worker {
                 }
             }
         }
-        dataBase.close();
-        dataBase = null;
+        if (dataBase != null) {
+            dataBase.close();
+            dataBase = null;
+        }
         if (isCancelled()) {
             list.clear();
             return;
@@ -190,7 +199,9 @@ public class CalendarWolker extends Worker {
             unread.close();
         }
         list.clear();
+        Lib.LOG("finish load month: " + month + "." + year);
     }
+
 
     private void initDatebase(String link) {
         if (dataBase != null) return;

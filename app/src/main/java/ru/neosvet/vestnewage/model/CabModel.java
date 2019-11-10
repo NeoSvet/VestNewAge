@@ -27,8 +27,6 @@ public class CabModel extends ProgressModel {
 
     public CabModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -46,7 +44,7 @@ public class CabModel extends ProgressModel {
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         job.enqueue();
     }

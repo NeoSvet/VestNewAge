@@ -48,16 +48,20 @@ public class CabWorker extends Worker {
             } else {
                 result = sendWord(getInputData().getInt(Const.LIST, 0));
             }
-            result.putString(Const.TASK, task);
-            return Result.success(result.build());
+            result.putString(Const.TASK, task)
+                    .putBoolean(Const.FINISH, true);
+            model.postProgress(result.build());
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             err = e.getMessage();
             Lib.LOG("CabWolker error: " + err);
         }
-        return Result.failure(new Data.Builder()
+        model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, err)
                 .build());
+        return Result.failure();
     }
 
     private Data.Builder subLogin(String email, String pass) throws Exception {
@@ -88,12 +92,12 @@ public class CabWorker extends Worker {
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         String s = br.readLine();
         br.close();
-
+        response.close();
         if (s.length() == 2) { // ok
             return getListWord(true);
         } else { //INCORRECT_PASSWORD
             Data.Builder result = new Data.Builder()
-                    .putInt(Const.TITLE, ERROR)
+                    .putInt(Const.MODE, ERROR)
                     .putString(Const.DESCTRIPTION, s);
             return result;
         }
@@ -120,6 +124,7 @@ public class CabWorker extends Worker {
             }
         }
         br.close();
+        response.close();
         Data.Builder result = new Data.Builder();
         if (s.contains("lt_box")) {  // incorrect time s.contains("fd_box") ||
             s = s.replace(Const.BR, Const.N);
@@ -128,7 +133,7 @@ public class CabWorker extends Worker {
             else
                 s = s.substring(0, s.indexOf("</p"));
             s = s.substring(s.lastIndexOf(">") + 1);
-            result.putInt(Const.TITLE, TIMEOUT);
+            result.putInt(Const.MODE, TIMEOUT);
             result.putString(Const.DESCTRIPTION, s);
             return result;
         } else if (s.contains("name=\"keyw")) { // list word
@@ -140,7 +145,7 @@ public class CabWorker extends Worker {
                 if (m[i].contains("selected")) {
                     m[i] = m[i].substring(m[i].indexOf(">") + 1);
                     if (returnSelectWord) {
-                        result.putInt(Const.TITLE, SELECTED_WORD);
+                        result.putInt(Const.MODE, SELECTED_WORD);
                         result.putString(Const.DESCTRIPTION, m[i]);
                         return result;
                     }
@@ -148,14 +153,14 @@ public class CabWorker extends Worker {
                 list[i] = m[i];
             }
             if (returnSelectWord) {
-                result.putInt(Const.TITLE, NO_SELECTED);
+                result.putInt(Const.MODE, NO_SELECTED);
                 return result;
             }
-            result.putInt(Const.TITLE, WORD_LIST);
+            result.putInt(Const.MODE, WORD_LIST);
             result.putStringArray(Const.DESCTRIPTION, list);
             return result;
         } else {
-            result.putInt(Const.TITLE, ERROR);
+            result.putInt(Const.MODE, ERROR);
             result.putString(Const.DESCTRIPTION, context.getResources().getString(R.string.anketa_failed));
             return result;
         }
@@ -180,13 +185,13 @@ public class CabWorker extends Worker {
                 response.body().byteStream(), Const.ENCODING), 1000);
         String s = br.readLine();
         br.close();
-
+        response.close();
         Data.Builder result = new Data.Builder();
         if (s == null) { //no error
-            result.putInt(Const.TITLE, SELECTED_WORD);
+            result.putInt(Const.MODE, SELECTED_WORD);
             result.putInt(Const.DESCTRIPTION, index);
         } else {
-            result.putInt(Const.TITLE, ERROR);
+            result.putInt(Const.MODE, ERROR);
             result.putString(Const.DESCTRIPTION, s);
         }
         return result;

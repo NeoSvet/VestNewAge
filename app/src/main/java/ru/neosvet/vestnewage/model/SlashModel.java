@@ -28,8 +28,6 @@ public class SlashModel extends ProgressModel {
 
     public SlashModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -49,7 +47,7 @@ public class SlashModel extends ProgressModel {
                 .setConstraints(constraints)
                 .setInputData(data1)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         task = new OneTimeWorkRequest
                 .Builder(AdsWorker.class)

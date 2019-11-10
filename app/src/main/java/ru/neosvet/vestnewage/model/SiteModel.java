@@ -26,8 +26,6 @@ public class SiteModel extends ProgressModel {
 
     public SiteModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -46,14 +44,14 @@ public class SiteModel extends ProgressModel {
                 .Builder(SiteWorker.class)
                 .setInputData(data.build())
                 .setConstraints(constraints)
-                .addTag(TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         task = new OneTimeWorkRequest
                 .Builder(LoaderWorker.class)
                 .setInputData(data.build())
                 .setConstraints(constraints)
+                .addTag(TAG)
                 .build();
         job = job.then(task);
         job.enqueue();

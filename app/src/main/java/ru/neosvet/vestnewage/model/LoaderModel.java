@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.workers.SiteWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
 public class LoaderModel extends ProgressModel {
-    public static final String TAG = "loader";
+    public static final String TAG = "Loader";
     public static final int ALL = -1, DOWNLOAD_ALL = 0, DOWNLOAD_ID = 1, DOWNLOAD_YEAR = 2,
             DOWNLOAD_PAGE = 3, DOWNLOAD_FILE = 4, DOWNLOAD_PAGE_WITH_STYLE = 5;
     public static final int DIALOG_SHOW = 0, DIALOG_UP = 1, DIALOG_UPDATE = 3, DIALOG_MSG = 4;
@@ -37,6 +37,7 @@ public class LoaderModel extends ProgressModel {
     private ProgressDialog dialog;
     private Data.Builder data;
     private Constraints constraints;
+    private WorkManager work;
     private String msg;
     private int prog, max;
 
@@ -47,7 +48,6 @@ public class LoaderModel extends ProgressModel {
     public LoaderModel(@NonNull Application application) {
         super(application);
         work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -77,7 +77,6 @@ public class LoaderModel extends ProgressModel {
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
         } else {
-            msg = getApplication().getBaseContext().getResources().getString(R.string.download_list);
             if (mode == DOWNLOAD_ALL) {
                 job = refreshLists(ALL);
             } else if (mode == DOWNLOAD_ID) {
@@ -188,8 +187,6 @@ public class LoaderModel extends ProgressModel {
         if (dialog != null)
             dialog.dismiss();
         dialog = new ProgressDialog(act, max);
-        dialog.setMessage(msg);
-        dialog.setProgress(prog);
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -197,11 +194,18 @@ public class LoaderModel extends ProgressModel {
             }
         });
         dialog.show();
+        dialog.setMessage(msg);
+        dialog.setProgress(prog);
     }
 
     public void updateDialog() {
         dialog.setMessage(msg);
         dialog.setProgress(prog);
+    }
+
+    public void dismissDialog() {
+        if (dialog != null)
+            dialog.dismiss();
     }
 
     public void setProgMax(int max) {

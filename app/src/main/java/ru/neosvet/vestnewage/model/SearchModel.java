@@ -24,8 +24,6 @@ public class SearchModel extends ProgressModel {
 
     public SearchModel(@NonNull Application application) {
         super(application);
-        work = WorkManager.getInstance();
-        state = work.getWorkInfosByTagLiveData(TAG);
         inProgress = false;
         current = this;
     }
@@ -47,7 +45,7 @@ public class SearchModel extends ProgressModel {
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
-        WorkContinuation job = work.beginUniqueWork(TAG,
+        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         job.enqueue();
     }
