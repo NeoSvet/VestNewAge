@@ -27,7 +27,6 @@ public class CabModel extends ProgressModel {
 
     public CabModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

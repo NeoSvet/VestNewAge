@@ -420,7 +420,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void finishLoad(boolean all, String err) {
         model.dismissDialog();
-        model.finish(this);
+        model.finish();
+        model.removeObserves(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (err == null) {
             if (all)

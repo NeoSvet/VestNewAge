@@ -38,6 +38,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarFragment extends BackFragment implements DateDialog.Result {
     private int today_m, today_y;
@@ -84,7 +85,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish(act);
+            model.finish();
             return false;
         }
         return true;
@@ -101,13 +102,16 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                         act.status.setCrash(true);
                         Lib.showToast(act, err);
                     } else
-                    setStatus(false);
-                    model.finish(act);
+                        setStatus(false);
+                    model.finish();
+                    model.removeObserves(act);
                     openCalendar(false);
                     updateNew();
                     return;
                 }
-                String s = data.getString(Const.LINK);
+                if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
+                    return;
+                String s = data.getString(Const.MSG);
                 if (s == null)
                     return;
                 int i = s.lastIndexOf("/") + 1;
@@ -187,7 +191,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish(act);
+                        model.finish();
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick()) {
@@ -263,7 +267,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
 
     private void openLink(String link) {
         if (model.inProgress)
-            model.finish(act);
+            model.finish();
         BrowserActivity.openReader(act, link, null);
     }
 

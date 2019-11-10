@@ -118,7 +118,7 @@ public class SlashActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         if (model.inProgress)
-            model.finish(this);
+            model.finish();
         startActivity(main);
         finish();
     }
@@ -209,9 +209,10 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable Data data) {
                 if (data.getBoolean(Const.TIME, false)) {
+                    model.non_start = false;
                     //TODO rebuild prom notif
                 }
-                if (data.getBoolean(Const.LIST, false)) {
+                if (data.getBoolean(Const.FINISH, false)) {
                     finishLoad();
                 }
             }
@@ -237,7 +238,8 @@ public class SlashActivity extends AppCompatActivity {
     }
 
     public void finishLoad() {
-        model.finish(this);
+        model.finish();
+        model.removeObserves(this);
         if (!anim) {
             startActivity(main);
             finish();
@@ -254,7 +256,7 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 anim = false;
-                if (!model.inProgress) {
+                if (!model.inProgress || model.non_start) {
                     startActivity(main);
                     finish();
                 } else

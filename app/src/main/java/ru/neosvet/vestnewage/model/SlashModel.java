@@ -21,6 +21,7 @@ import ru.neosvet.vestnewage.workers.SummaryWorker;
 public class SlashModel extends ProgressModel {
     public static final String TAG = "slash";
     private static SlashModel current = null;
+    public boolean non_start = true;
 
     public static SlashModel getInstance() {
         return current;
@@ -28,7 +29,6 @@ public class SlashModel extends ProgressModel {
 
     public SlashModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

@@ -94,7 +94,6 @@ public class CabmainFragment extends BackFragment {
             public void onChanged(@Nullable Data data) {
                 if (data.getBoolean(Const.FINISH, false)) {
                     parseResult(data);
-                    initError(data.getString(Const.ERROR));
                 }
             }
         });
@@ -103,8 +102,7 @@ public class CabmainFragment extends BackFragment {
     }
 
     private void parseResult(Data result) {
-        model.finish(act);
-        act.status.setLoad(false);
+        String err = result.getString(Const.ERROR);
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
                 if (result.getString(Const.TASK).equals(Const.GET_WORDS)) {
@@ -127,8 +125,18 @@ public class CabmainFragment extends BackFragment {
                         result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.ERROR:
-                initError(result.getString(Const.DESCTRIPTION));
+                err = result.getString(Const.DESCTRIPTION);
                 break;
+        }
+        model.finish();
+        model.removeObserves(act);
+        act.status.setLoad(false);
+        pMain.setVisibility(View.GONE);
+        fabEnter.setVisibility(View.GONE);
+        fabExit.setVisibility(View.VISIBLE);
+        if (err != null) {
+            tvError.setText(err);
+            tvError.setVisibility(View.VISIBLE);
         }
     }
 
@@ -378,19 +386,6 @@ public class CabmainFragment extends BackFragment {
         act.status.setLoad(true);
     }
 
-    private void initError(String error) {
-        adMain.clear();
-        adMain.notifyDataSetChanged();
-        pMain.setVisibility(View.GONE);
-        fabEnter.setVisibility(View.GONE);
-        fabExit.setVisibility(View.VISIBLE);
-        if (error.length() > 0) {
-            tvError.setText(error);
-            tvError.setVisibility(View.VISIBLE);
-        }
-        //Lib.showToast(act, error);
-    }
-
     private void initWordList(String[] words) {
         mode_list = CabModel.WORDS;
         adMain.clear();
@@ -403,7 +398,8 @@ public class CabmainFragment extends BackFragment {
     private void initCabinet(String title, String des) {
         mode_list = CabModel.CABINET;
         adMain.clear();
-        adMain.addItem(new ListItem(title, des));
+        adMain.addItem(new ListItem(title));
+        adMain.getItem(0).setDes(des);
         for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
         }

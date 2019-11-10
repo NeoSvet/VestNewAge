@@ -25,7 +25,6 @@ public class SummaryModel extends ProgressModel {
 
     public SummaryModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

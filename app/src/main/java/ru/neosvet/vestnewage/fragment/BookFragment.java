@@ -103,7 +103,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish(act);
+            model.finish();
             return false;
         }
         return true;
@@ -132,7 +132,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (model.inProgress)
             if (!model.showDialog(act))
                 startLoad();
-
     }
 
     @Override
@@ -525,7 +524,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void finishLoad(String result) {
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
-        model.finish(act);
+        model.finish();
+        model.removeObserves(act);
         DateHelper d;
         if (tab == 0)
             d = dKatren;

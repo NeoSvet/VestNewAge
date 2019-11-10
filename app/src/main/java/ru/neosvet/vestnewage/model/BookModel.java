@@ -30,7 +30,6 @@ public class BookModel extends ProgressModel {
 
     public BookModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

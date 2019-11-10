@@ -70,7 +70,7 @@ public class SiteFragment extends BackFragment {
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish(act);
+            model.finish();
             return false;
         }
         return true;
@@ -87,7 +87,7 @@ public class SiteFragment extends BackFragment {
                         Lib.showToast(act, err);
                     finishLoad(data.getString(Const.FILE));
                 }
-                String link = data.getString(Const.LINK);
+                String link = data.getString(Const.MSG);
                 for (int i = 0; i < adMain.getCount(); i++) {
                     if (adMain.getItem(i).equals(link)) {
                         View item = (View) lvMain.getItemAtPosition(i);
@@ -395,7 +395,8 @@ public class SiteFragment extends BackFragment {
     }
 
     private void finishLoad(String file) {
-        model.finish(act);
+        model.finish();
+        model.removeObserves(act);
         if (file == null) {
             act.status.setCrash(true);
         } else {

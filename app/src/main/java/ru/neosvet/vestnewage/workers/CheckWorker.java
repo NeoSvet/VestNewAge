@@ -2,9 +2,9 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 
-import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
@@ -27,7 +29,7 @@ import ru.neosvet.vestnewage.service.CheckService;
 public class CheckWorker extends Worker {
     private Context context;
     public static final String TAG_PERIODIC = "check periodic";
-    //private final String LAST_TIME = "last_time";
+    private List<String> list = new ArrayList<>();
 
     public CheckWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -41,11 +43,15 @@ public class CheckWorker extends Worker {
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
                 Intent intent = new Intent(context, CheckService.class);
-                context.startService(intent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    context.startForegroundService(intent);
+                else
+                    context.startService(intent);
             } else {
-                if(checkSummary()) {
+                if (checkSummary()) {
                     SummaryHelper summaryHelper = new SummaryHelper(context);
                     summaryHelper.updateBook();
+                    makeNotification();
                 }
             }
             return Result.success();
@@ -54,9 +60,7 @@ public class CheckWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("CheckWorker error: " + err);
         }
-        return Result.failure(new Data.Builder()
-                .putString(Const.ERROR, err)
-                .build());
+        return Result.failure();
     }
 
     private boolean checkSummary() throws Exception {
@@ -126,10 +130,13 @@ public class CheckWorker extends Worker {
     }
 
     private void postItem(String title, String link) {
-        CheckService.progress.postValue(new Data.Builder()
-                .putString(Const.TITLE, title)
-                .putString(Const.LINK, link)
-                .build());
+        list.add(title);
+        list.add(link);
+//        CheckService.progress.postValue(new Data.Builder()
+//                .putBoolean(Const.PAGE, true)
+//                .putString(Const.TITLE, title)
+//                .putString(Const.LINK, link)
+//                .build());
     }
 
     private String withOutTag(String s) {
@@ -145,5 +152,38 @@ public class CheckWorker extends Worker {
         else if (s.contains(Const.SITE))
             s = s.substring(Const.SITE.length());
         return s;
+    }
+
+    private void makeNotification() {
+        if (list.size() == 0)
+            return;
+        SummaryHelper summaryHelper = new SummaryHelper(getApplicationContext());
+        boolean several = list.size() > 2;
+        boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
+        int start, end, step;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            start = 0;
+            end = list.size();
+            step = 2;
+        } else {
+            start = list.size() - 2;
+            end = -2;
+            step = -2;
+        }
+        for (int i = start; i != end; i += step) {
+            if (summaryHelper.isNotification() && !notNotify)
+                summaryHelper.showNotification();
+            summaryHelper.createNotification(list.get(i), list.get(i + 1));
+            if (several)
+                summaryHelper.muteNotification();
+        }
+        if (several) {
+            if (!notNotify)
+                summaryHelper.showNotification();
+            summaryHelper.groupNotification();
+        } else
+            summaryHelper.singleNotification(list.get(0));
+        summaryHelper.setPreferences();
+        summaryHelper.showNotification();
     }
 }

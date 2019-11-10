@@ -26,7 +26,6 @@ public class CalendarModel extends ProgressModel {
 
     public CalendarModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

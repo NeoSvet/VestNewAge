@@ -798,7 +798,8 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     private void finishLoad(String err) {
-        model.finish(this);
+        model.finish();
+        model.removeObserves(this);
         if (err != null)
             Lib.showToast(BrowserActivity.this, err);
         status.setLoad(false);

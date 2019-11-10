@@ -48,7 +48,6 @@ public class LoaderModel extends ProgressModel {
     public LoaderModel(@NonNull Application application) {
         super(application);
         work = WorkManager.getInstance();
-        inProgress = false;
         current = this;
     }
 
@@ -120,7 +119,6 @@ public class LoaderModel extends ProgressModel {
             k += 4; //main, news, media and rss
         } else if (id == R.id.nav_main) //main, news, media
             k = 3;
-        setProgMax(k);
         this.postProgress(new Data.Builder()
                 .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                 .putString(Const.MSG, msg)

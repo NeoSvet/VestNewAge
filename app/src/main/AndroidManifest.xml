@@ -15,8 +15,8 @@
         android:label="@string/app_name"
         android:resizeableActivity="true"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".activity.SlashActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -81,6 +81,12 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".service.CheckService"
+            android:icon="@drawable/rss"
+            android:label="@string/check_summary"
+            android:process=":check" />
     </application>
 
 </manifest>

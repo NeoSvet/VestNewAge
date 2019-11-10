@@ -69,7 +69,7 @@ public class SummaryFragment extends BackFragment {
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish(act);
+            model.finish();
             return false;
         }
         return true;
@@ -81,19 +81,17 @@ public class SummaryFragment extends BackFragment {
             @Override
             public void onChanged(@Nullable Data data) {
                 if (data.getBoolean(Const.LIST, false)) {
-                    Lib.LOG("list progress");
                     openList(false);
                     return;
                 }
                 if (data.getBoolean(Const.FINISH, false)) {
-                    Lib.LOG("finish progress");
                     String err = data.getString(Const.ERROR);
                     if (err != null)
                         Lib.showToast(act, err);
                     finishLoad(err == null);
                     return;
                 }
-                String link = data.getString(Const.LINK);
+                String link = data.getString(Const.MSG);
                 for (int i = 0; i < adSummary.getCount(); i++) {
                     if (adSummary.getItem(i).getLink().equals(link)) {
                         lvSummary.smoothScrollToPosition(i);
@@ -186,7 +184,7 @@ public class SummaryFragment extends BackFragment {
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish(act);
+                        model.finish();
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick())
@@ -262,7 +260,8 @@ public class SummaryFragment extends BackFragment {
     }
 
     private void finishLoad(boolean suc) {
-        model.finish(act);
+        model.finish();
+        model.removeObserves(act);
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);

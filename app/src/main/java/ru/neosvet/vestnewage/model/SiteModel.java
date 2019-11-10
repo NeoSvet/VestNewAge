@@ -26,7 +26,6 @@ public class SiteModel extends ProgressModel {
 
     public SiteModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

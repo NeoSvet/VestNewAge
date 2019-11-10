@@ -22,8 +22,8 @@ import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
+import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
     private Context context;
@@ -49,19 +49,13 @@ public class SummaryWorker extends Worker {
         model = ProgressModel.getModelByName(name);
         try {
             loadList();
-            if (name.equals(SummaryModel.class.getSimpleName())) {
+            if (!name.equals(LoaderModel.class.getSimpleName())) { //SummaryModel or SlashModel
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();
-                Data data = new Data.Builder()
-                        .putBoolean(Const.FINISH, true)
-                        .build();
-                model.postProgress(data);
-            } else {
-                Data data = new Data.Builder()
-                        .putBoolean(Const.LIST, true)
-                        .build();
-                model.postProgress(data);
             }
+            model.postProgress(new Data.Builder()
+                    .putBoolean(Const.LIST, true)
+                    .build());
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,6 +83,8 @@ public class SummaryWorker extends Worker {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
+        DateHelper now = DateHelper.initNow(context);
+        UnreadHelper unread = new UnreadHelper(context);
         while ((line = br.readLine()) != null && !isCancelled()) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
@@ -99,6 +95,7 @@ public class SummaryWorker extends Worker {
                     line = line.substring(Const.SITE2.length());
                 else if (line.contains(Const.SITE))
                     line = line.substring(Const.SITE.length());
+                unread.addLink(line, now);
                 bw.write(line);
                 bw.write(Const.N);
                 bw.write(withOutTag(br.readLine())); //des
@@ -110,6 +107,7 @@ public class SummaryWorker extends Worker {
         bw.close();
         br.close();
         in.close();
+        unread.close();
     }
 
     public static int getListLink(Context context) throws Exception {

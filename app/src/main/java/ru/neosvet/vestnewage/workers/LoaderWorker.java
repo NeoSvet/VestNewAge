@@ -44,6 +44,8 @@ public class LoaderWorker extends Worker {
     private Lib lib;
     private Request.Builder builderRequest;
     private OkHttpClient client;
+    private int k_requests = 0;
+    private long time_requests = 0;
 
     public LoaderWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -63,24 +65,24 @@ public class LoaderWorker extends Worker {
     public Result doWork() {
         String err, name;
         name = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(name);
         try {
+            time_requests = System.currentTimeMillis();
             builderRequest = new Request.Builder();
             builderRequest.header(Const.USER_AGENT, context.getPackageName());
             builderRequest.header("Referer", Const.SITE);
             client = Lib.createHttpClient();
             if (name.equals(CheckService.class.getSimpleName())) {
                 downloadList();
-                return postFinish();
+                CheckService.getService().stop();
+                return Result.success();
             }
+            model = ProgressModel.getModelByName(name);
             if (name.equals(CalendarModel.class.getSimpleName())) {
-                Lib.LOG("start loader month");
                 int k = CalendarWolker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0));
                 setProgMax(k);
                 downloadList();
-                Lib.LOG("finish loader month");
                 return postFinish();
             }
             if (name.equals(SummaryModel.class.getSimpleName())) {
@@ -118,7 +120,6 @@ public class LoaderWorker extends Worker {
                     if (mode == LoaderModel.DOWNLOAD_PAGE ||
                             mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE) {
                         downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
-                        Lib.LOG("download page");
                         downloadPage(link, true);
                     } else { //file
                         downloadFile(link, getInputData().getString(Const.FILE));
@@ -141,10 +142,9 @@ public class LoaderWorker extends Worker {
     }
 
     private Result postFinish() {
-        Data data = new Data.Builder()
+        model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
-                .build();
-        model.postProgress(data);
+                .build());
         return Result.success();
     }
 
@@ -167,7 +167,6 @@ public class LoaderWorker extends Worker {
             return;
         BufferedReader br = new BufferedReader(new FileReader(file));
         String s;
-        Lib.LOG("download list");
         while ((s = br.readLine()) != null && !isCancelled()) {
             downloadPage(s, false);
         }
@@ -243,7 +242,6 @@ public class LoaderWorker extends Worker {
                 null, null, null, null, null);
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
-            Lib.LOG("download book");
             while (curTitle.moveToNext()) {
                 downloadPage(curTitle.getString(0), false);
                 upProg();
@@ -255,21 +253,18 @@ public class LoaderWorker extends Worker {
 
     private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        DataBase dataBase = new DataBase(context, link);
-        if (!singlePage && dataBase.existsPage(link))
-            return false;
-        Lib.LOG("load page: " + link);
-//        if (model == null) { //CheckService
-//            CheckService.progress.postValue(new Data.Builder()
-//                    .putString(Const.LINK, link)
-//                    .build());
-//        }
         if (model != null) {
             model.postProgress(new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
                     .putString(Const.MSG, link)
                     .build());
         }
+        DataBase dataBase = new DataBase(context, link);
+        if (!singlePage && dataBase.existsPage(link)) {
+            dataBase.close();
+            return false;
+        }
+        checkRequests();
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) {
@@ -387,6 +382,23 @@ public class LoaderWorker extends Worker {
         response.close();
         dataBase.close();
         return true;
+    }
+
+    private void checkRequests() {
+        k_requests++;
+        if (k_requests == 20) {
+            long now = System.currentTimeMillis();
+            k_requests = 0;
+            if (now - time_requests < DateHelper.SEC_IN_MILLS) {
+                try {
+                    Lib.LOG("sleep loader");
+                    Thread.sleep(DateHelper.SEC_IN_MILLS);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            time_requests = now;
+        }
     }
 
     private String getTitle(String line, String name) {

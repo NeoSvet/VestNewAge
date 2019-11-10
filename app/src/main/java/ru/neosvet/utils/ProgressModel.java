@@ -22,15 +22,14 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class ProgressModel extends AndroidViewModel {
     public static final String NAME = "CLASS_NAME";
-    public boolean inProgress = true;
+    public boolean inProgress = false;
     private MutableLiveData<Data> progress = new MutableLiveData<Data>();
 
     public ProgressModel(@NonNull Application application) {
         super(application);
     }
 
-    public void finish(LifecycleOwner owner) {
-        progress.removeObservers(owner);
+    public void finish() {
         inProgress = false;
     }
 

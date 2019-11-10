@@ -133,6 +133,11 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             public void onChanged(@Nullable Data data) {
                 if (data.getBoolean(Const.FINISH, false)) {
                     String err = data.getString(Const.ERROR);
+                    page = 0;
+                    etSearch.setEnabled(true);
+                    pStatus.setVisibility(View.GONE);
+                    model.finish();
+                    model.removeObserves(act);
                     if (err != null)
                         Lib.showToast(act, err);
                     else
@@ -140,9 +145,11 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                                 data.getString(Const.STRING),
                                 data.getInt(Const.START, 0),
                                 data.getInt(Const.END, 0));
+                    return;
                 }
                 DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
-                tvStatus.setText(getResources().getString(R.string.search) + ": " + d.getMonthString() + " " + (d.getYear() + 2000));
+                tvStatus.setText(getResources().getString(R.string.search) + ": "
+                        + d.getMonthString() + " " + (d.getYear() + 2000));
             }
         });
         if (model.inProgress) {
@@ -360,7 +367,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                model.finish(act);
+                model.finish();
             }
         });
 
@@ -525,10 +532,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void putResult(int mode, String str, int count1, int count2) {
-        page = 0;
-        etSearch.setEnabled(true);
-        pStatus.setVisibility(View.GONE);
-        model.finish(act);
         if (count1 > 0) {
             pAdditionSet.setVisibility(View.VISIBLE);
             cbSearchInResults.setChecked(true);

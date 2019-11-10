@@ -31,7 +31,6 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarWolker extends Worker {
@@ -63,7 +62,7 @@ public class CalendarWolker extends Worker {
         name = getInputData().getString(ProgressModel.NAME);
         model = ProgressModel.getModelByName(name);
         try {
-            if (name.equals(CalendarModel.class.getSimpleName())) {
+            if (!name.equals(LoaderModel.class.getSimpleName())) { //CalendarModel or SlashModel
                 loadListMonth(getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0),
                         getInputData().getBoolean(Const.UNREAD, false));
@@ -72,7 +71,7 @@ public class CalendarWolker extends Worker {
                         .build());
                 return Result.success();
             }
-            //loader
+            //LoaderModel
             progUp = new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
                     .build();
@@ -146,7 +145,6 @@ public class CalendarWolker extends Worker {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "?json&year=" + year + "&month=" + month));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        Lib.LOG("start load month: " + month + "." + year);
         String s = br.readLine();
         br.close();
         in.close();
@@ -199,7 +197,6 @@ public class CalendarWolker extends Worker {
             unread.close();
         }
         list.clear();
-        Lib.LOG("finish load month: " + month + "." + year);
     }
 
 

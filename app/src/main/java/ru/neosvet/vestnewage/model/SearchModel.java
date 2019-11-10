@@ -24,7 +24,6 @@ public class SearchModel extends ProgressModel {
 
     public SearchModel(@NonNull Application application) {
         super(application);
-        inProgress = false;
         current = this;
     }
 

@@ -108,6 +108,7 @@ public class SearchWorker extends Worker {
 
     private Result getResult() {
         model.postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
                 .putInt(Const.MODE, mode)
                 .putString(Const.STRING, str)
                 .putInt(Const.START, count1)
@@ -118,10 +119,9 @@ public class SearchWorker extends Worker {
 
     private void publishProgress(int time) {
         if (model != null) {
-            Data data = new Data.Builder()
+            model.postProgress(new Data.Builder()
                     .putInt(Const.TIME, time)
-                    .build();
-            model.postProgress(data);
+                    .build());
         }
     }
 
