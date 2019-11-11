@@ -20,13 +20,49 @@
         android:padding="15dp"
         android:visibility="gone" />
 
+    <LinearLayout
+        android:id="@+id/pMenu"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginBottom="80dp"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/field"
+        android:orientation="vertical"
+        android:padding="3dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/bExport"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/press"
+            android:padding="10dp"
+            android:text="@string/export" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorAccentLight" />
+
+        <TextView
+            android:id="@+id/bImport"
+            style="@style/Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/press"
+            android:padding="10dp"
+            android:text="@string/import_" />
+    </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabHelp"
+        android:id="@+id/fabMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/help" />
+        app:srcCompat="@drawable/list" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabEdit"

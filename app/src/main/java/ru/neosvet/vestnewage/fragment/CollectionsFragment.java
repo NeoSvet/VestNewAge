@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
@@ -34,10 +35,11 @@ import ru.neosvet.vestnewage.list.MarkItem;
 public class CollectionsFragment extends BackFragment {
     public static final int MARKER_REQUEST = 11;
     private ListView lvMarker;
-    private View container, fabEdit, fabHelp, pEdit;
+    private View container, fabEdit, fabMenu, pEdit;
     private TextView tvEmpty;
     private MainActivity act;
     private MarkAdapter adMarker;
+    private Tip menu;
     private int iSel = -1;
     private boolean change = false, delete = false;
     private String sCol = null, sName = null;
@@ -104,9 +106,9 @@ public class CollectionsFragment extends BackFragment {
 
     private void loadMarList() {
         fabEdit.clearAnimation();
-        fabHelp.clearAnimation();
+        fabMenu.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        fabHelp.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -147,7 +149,7 @@ public class CollectionsFragment extends BackFragment {
             tvEmpty.setVisibility(View.VISIBLE);
         } else if (iSel == -1) {
             fabEdit.setVisibility(View.VISIBLE);
-            fabHelp.setVisibility(View.VISIBLE);
+            fabMenu.setVisibility(View.VISIBLE);
         }
     }
 
@@ -253,9 +255,9 @@ public class CollectionsFragment extends BackFragment {
 
     private void loadColList() {
         fabEdit.clearAnimation();
-        fabHelp.clearAnimation();
+        fabMenu.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        fabHelp.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -284,7 +286,7 @@ public class CollectionsFragment extends BackFragment {
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
             fabEdit.setVisibility(View.VISIBLE);
-            fabHelp.setVisibility(View.VISIBLE);
+            fabMenu.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
             if (PresentationActivity.checkPresentation(act, 1))
                 PresentationActivity.startPresentation(act, 1, true);
@@ -294,8 +296,9 @@ public class CollectionsFragment extends BackFragment {
 
     private void initViews() {
         fabEdit = container.findViewById(R.id.fabEdit);
-        fabHelp = container.findViewById(R.id.fabHelp);
+        fabMenu = container.findViewById(R.id.fabMenu);
         pEdit = container.findViewById(R.id.pEdit);
+        menu = new Tip(act, container.findViewById(R.id.pMenu));
         tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
         lvMarker = (ListView) container.findViewById(R.id.lvMarker);
         adMarker = new MarkAdapter(act);
@@ -310,7 +313,7 @@ public class CollectionsFragment extends BackFragment {
             @Override
             public void onAnimationEnd(Animation animation) {
                 fabEdit.setVisibility(View.GONE);
-                fabHelp.setVisibility(View.GONE);
+                fabMenu.setVisibility(View.GONE);
             }
 
             @Override
@@ -355,13 +358,13 @@ public class CollectionsFragment extends BackFragment {
                     return false;
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     fabEdit.startAnimation(anMin);
-                    fabHelp.startAnimation(anMin);
+                    fabMenu.startAnimation(anMin);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     fabEdit.setVisibility(View.VISIBLE);
                     fabEdit.startAnimation(anMax);
-                    fabHelp.setVisibility(View.VISIBLE);
-                    fabHelp.startAnimation(anMax);
+                    fabMenu.setVisibility(View.VISIBLE);
+                    fabMenu.startAnimation(anMax);
                 }
                 return false;
             }
@@ -443,10 +446,25 @@ public class CollectionsFragment extends BackFragment {
                 deleteDialog();
             }
         });
-        fabHelp.setOnClickListener(new View.OnClickListener() {
+        fabMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PresentationActivity.startPresentation(act, 1, false);
+                if (menu.isShow())
+                    menu.hide();
+                else
+                    menu.show();
+            }
+        });
+        container.findViewById(R.id.bExport).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO export collections
+            }
+        });
+        container.findViewById(R.id.bImport).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO import collections
             }
         });
     }
@@ -556,7 +574,7 @@ public class CollectionsFragment extends BackFragment {
         adMarker.getItem(iSel).setSelect(true);
         adMarker.notifyDataSetChanged();
         fabEdit.setVisibility(View.GONE);
-        fabHelp.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.GONE);
         pEdit.setVisibility(View.VISIBLE);
     }
 
@@ -689,7 +707,7 @@ public class CollectionsFragment extends BackFragment {
         change = false;
         if (adMarker.getCount() > 0) {
             fabEdit.setVisibility(View.VISIBLE);
-            fabHelp.setVisibility(View.VISIBLE);
+            fabMenu.setVisibility(View.VISIBLE);
         }
         pEdit.setVisibility(View.GONE);
         iSel = -1;

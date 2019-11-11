@@ -63,6 +63,8 @@
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <!--CollectionsFragment-->
+    <string name="export">Экспорт</string>
+    <string name="import_">Импорт</string>
     <string name="not_found_page">Страница не найдена</string>
     <string name="collections">Подборки</string>
     <string name="cancel_rename">Переименование отменено</string>
