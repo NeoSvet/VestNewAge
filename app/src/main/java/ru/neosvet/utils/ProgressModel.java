@@ -64,11 +64,4 @@ public class ProgressModel extends AndroidViewModel {
             return LoaderModel.getInstance();
         return null;
     }
-
-    public static String getFirstTag(Set<String> tags) {
-        String tag = "none";
-        for (String t : tags)
-            tag=t;
-        return tag;
-    }
 }
