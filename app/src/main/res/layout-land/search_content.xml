@@ -65,12 +65,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/card_bg"
+            android:padding="0dp"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/bHide"
-                android:layout_width="@dimen/string_size"
-                android:layout_height="@dimen/string_size"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="5dp"
@@ -86,10 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:layout_gravity="center"
-                android:layout_marginLeft="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="15dp"
+                android:layout_margin="0dp"
                 android:background="@drawable/press"
                 android:checked="false"
                 android:text="@string/search_in_results" />
@@ -98,7 +96,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/cbSearchInResults"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="5dp">
 
                 <TextView
                     android:id="@+id/tvLabel"
