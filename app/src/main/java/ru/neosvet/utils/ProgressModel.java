@@ -9,8 +9,6 @@ import android.support.annotation.Nullable;
 
 import androidx.work.Data;
 
-import java.util.Set;
-
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.model.CalendarModel;
