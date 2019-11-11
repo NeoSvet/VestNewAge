@@ -64,4 +64,8 @@ public class ProgressModel extends AndroidViewModel {
             return LoaderModel.getInstance();
         return null;
     }
+
+    public static int getProcent(float cur, float max) {
+        return (int) (cur / max * 100f);
+    }
 }
