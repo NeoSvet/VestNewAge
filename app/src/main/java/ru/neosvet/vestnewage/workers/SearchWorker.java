@@ -118,11 +118,10 @@ public class SearchWorker extends Worker {
     }
 
     private void publishProgress(int time) {
-        if (model != null) {
             model.postProgress(new Data.Builder()
+                    .putString(Const.MODE, Const.TIME)
                     .putInt(Const.TIME, time)
                     .build());
-        }
     }
 
     private void searchInResults(String find, boolean reverseOrder) throws Exception {
@@ -149,6 +148,7 @@ public class SearchWorker extends Worker {
         String name1, name2 = "";
         ContentValues cv;
         StringBuilder des;
+        int p1 = -1, p2;
         for (int i = 0; i < title.size(); i++) {
             name1 = DataBase.getDatePage(link.get(i));
             if (!name1.equals(name2)) {
@@ -174,10 +174,19 @@ public class SearchWorker extends Worker {
                 cv.put(Const.DESCTRIPTION, des.toString());
                 dbS.update(DataBase.SEARCH, cv, DataBase.ID +
                         DataBase.Q, new String[]{id.get(i)});
-            } else
+            } else {
                 dbS.delete(DataBase.SEARCH, DataBase.ID +
                         DataBase.Q, new String[]{id.get(i)});
+            }
             cursor.close();
+            p2 = ProgressModel.getProcent(i, title.size());
+            if (p1 < p2) {
+                p1 = p2;
+                model.postProgress(new Data.Builder()
+                        .putString(Const.MODE, Const.PROG)
+                        .putInt(Const.PROG, p1)
+                        .build());
+            }
         }
         if (dataBase != null)
             dataBase.close();

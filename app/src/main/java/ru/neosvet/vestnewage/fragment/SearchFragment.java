@@ -137,7 +137,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                     etSearch.setEnabled(true);
                     pStatus.setVisibility(View.GONE);
                     model.finish();
-                    model.removeObserves(act);
                     if (err != null)
                         Lib.showToast(act, err);
                     else
@@ -147,9 +146,14 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                                 data.getInt(Const.END, 0));
                     return;
                 }
-                DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
-                tvStatus.setText(getResources().getString(R.string.search) + ": "
-                        + d.getMonthString() + " " + (d.getYear() + 2000));
+                if (data.getString(Const.MODE).equals(Const.TIME)) {
+                    DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
+                    tvStatus.setText(getResources().getString(R.string.search) + ": "
+                            + d.getMonthString() + " " + (d.getYear() + 2000));
+                } else { //Const.PROG
+                    tvStatus.setText(getResources().getString(R.string.search) + " "
+                            + data.getInt(Const.PROG, 0) + "%");
+                }
             }
         });
         if (model.inProgress) {
