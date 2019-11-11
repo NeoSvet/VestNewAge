@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Service;
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -92,9 +93,8 @@ public class CabmainFragment extends BackFragment {
         model.getProgress().observe(act, new Observer<Data>() {
             @Override
             public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
+                if (data.getBoolean(Const.FINISH, false))
                     parseResult(data);
-                }
             }
         });
         if (model.inProgress)
@@ -105,13 +105,8 @@ public class CabmainFragment extends BackFragment {
         String err = result.getString(Const.ERROR);
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
-                if (result.getString(Const.TASK).equals(Const.GET_WORDS)) {
-                    initCabinet(getResources().getString(R.string.selected_status),
-                            result.getString(Const.DESCTRIPTION));
-                } else {
-                    initCabinet(getResources().getString(R.string.selected_status),
-                            adMain.getItem(result.getInt(Const.DESCTRIPTION, 0)).getTitle());
-                }
+                initCabinet(getResources().getString(R.string.selected_status),
+                        result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.NO_SELECTED:
                 initCabinet(getResources().getString(R.string.send_status),
@@ -129,7 +124,6 @@ public class CabmainFragment extends BackFragment {
                 break;
         }
         model.finish();
-        model.removeObserves(act);
         act.status.setLoad(false);
         pMain.setVisibility(View.GONE);
         fabEnter.setVisibility(View.GONE);
