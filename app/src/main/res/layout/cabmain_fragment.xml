@@ -33,6 +33,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:visibility="gone"
-        app:srcCompat="@drawable/close" />
+        app:srcCompat="@drawable/exit" />
 
 </android.support.design.widget.CoordinatorLayout>
