@@ -262,7 +262,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void downloadPage(boolean replaceStyle) {
         wvBrowser.clearCache(true);
         restoreStyle();
-        status.setCrash(false);
+        status.setError(null);
         status.setLoad(true);
         if (replaceStyle)
             model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, link);
@@ -658,7 +658,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
-            status.setCrash(false);
+            status.setError(null);
             status.setLoad(true);
             model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, "");
             return;
@@ -797,10 +797,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         lib.openInApps(url, null);
     }
 
-    private void finishLoad(String err) {
+    private void finishLoad(String error) {
         model.finish();
-        if (err != null)
-            Lib.showToast(BrowserActivity.this, err);
+        if (error != null) {
+            status.setError(error);
+            return;
+        }
         status.setLoad(false);
         status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
         if (link.contains(PNG))

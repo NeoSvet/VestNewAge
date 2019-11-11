@@ -126,12 +126,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
-            String err = data.getString(Const.ERROR);
-            if (err != null) {
-                act.status.setCrash(true);
-                Lib.showToast(act, err);
-            } else
-                finishLoad(data.getString(Const.TITLE));
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                act.status.setError(error);
+                return;
+            }
+            finishLoad(data.getString(Const.TITLE));
             return;
         }
         if (data.getInt(Const.DIALOG, 0) == LoaderModel.DIALOG_SHOW)
@@ -519,7 +519,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void startLoad() {
-        act.status.setCrash(false);
+        act.status.setError(null);
         fabRefresh.setVisibility(View.GONE);
         fabRndMenu.setVisibility(View.GONE);
         act.status.setLoad(true);

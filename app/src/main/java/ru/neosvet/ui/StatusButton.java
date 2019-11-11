@@ -1,6 +1,8 @@
 package ru.neosvet.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -19,7 +21,8 @@ public class StatusButton {
     private TextView tv;
     private ImageView iv;
     private Animation anMin, anMax;
-    private boolean crash = false, stop = true, time = false, visible;
+    private String error = null;
+    private boolean stop = true, time = false, visible;
 
     public StatusButton(Context context, View p) {
         this.context = context;
@@ -74,7 +77,7 @@ public class StatusButton {
     public void setLoad(boolean start) {
         stop = !start;
         if (start) {
-            crash = false;
+            error = null;
             time = false;
             panel.setVisibility(View.VISIBLE);
             visible = true;
@@ -86,9 +89,9 @@ public class StatusButton {
         }
     }
 
-    public void setCrash(boolean crash) {
-        this.crash = crash;
-        if (crash) {
+    public void setError(String error) {
+        this.error = error;
+        if (error != null) {
             stop = true;
             time = false;
             tv.setText(context.getResources().getString(R.string.crash));
@@ -105,7 +108,7 @@ public class StatusButton {
     }
 
     public boolean checkTime(long time) {
-        if (!stop || crash)
+        if (!stop || isCrash())
             return true;
         if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC) {
             this.time = true;
@@ -122,15 +125,15 @@ public class StatusButton {
         return false;
     }
 
-    public boolean isCrash() {
-        return crash;
+    private boolean isCrash() {
+        return error != null;
     }
 
     public void setText(String s) {
         tv.setText(s);
     }
 
-    public void restoreText() {
+    private void restoreText() {
         tv.setText(context.getResources().getString(R.string.load));
     }
 
@@ -140,9 +143,18 @@ public class StatusButton {
 
     public boolean onClick() {
         if (isCrash()) {
-            Lib.showToast(context, context.getResources().getString(R.string.about_crash));
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.NeoDialog)
+                    .setTitle(context.getResources().getString(R.string.error))
+                    .setMessage(error)
+                    .setPositiveButton(context.getResources().getString(android.R.string.ok),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                }
+                            });
+            builder.create().show();
             setLoad(false);
-            setCrash(false);
+            setError(null);
             return true;
         }
         return false;

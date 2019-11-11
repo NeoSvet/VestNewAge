@@ -145,18 +145,19 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
-            String err = data.getString(Const.ERROR);
+            String error = data.getString(Const.ERROR);
             page = 0;
             etSearch.setEnabled(true);
             pStatus.setVisibility(View.GONE);
             model.finish();
-            if (err != null)
-                Lib.showToast(act, err);
-            else
-                putResult(data.getInt(Const.MODE, 0),
-                        data.getString(Const.STRING),
-                        data.getInt(Const.START, 0),
-                        data.getInt(Const.END, 0));
+            if (error != null) {
+                act.status.setError(error);
+                return;
+            }
+            putResult(data.getInt(Const.MODE, 0),
+                    data.getString(Const.STRING),
+                    data.getInt(Const.START, 0),
+                    data.getInt(Const.END, 0));
             return;
         }
         if (data.getString(Const.MODE).equals(Const.TIME)) {

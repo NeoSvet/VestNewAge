@@ -94,9 +94,12 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
-            String err = data.getString(Const.ERROR);
-            if (err != null)
-                Lib.showToast(act, err);
+            model.finish();
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                act.status.setError(error);
+                return;
+            }
             finishLoad(data.getString(Const.FILE));
         }
         String link = data.getString(Const.MSG);
@@ -381,7 +384,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void startLoad(String name) {
-        act.status.setCrash(false);
+        act.status.setError(null);
         String url = Const.SITE;
         switch (name) {
             case NEWS:
@@ -401,14 +404,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void finishLoad(String file) {
-        model.finish();
-        if (file == null) {
-            act.status.setCrash(true);
-        } else {
-            fabRefresh.setVisibility(View.VISIBLE);
-            act.status.setLoad(false);
-            openList(getFile(file), false);
-        }
+        fabRefresh.setVisibility(View.VISIBLE);
+        act.status.setLoad(false);
+        openList(getFile(file), false);
     }
 
     public void setTab(int tab) {

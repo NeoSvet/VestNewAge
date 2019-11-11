@@ -108,15 +108,15 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
-            String err = data.getString(Const.ERROR);
-            if (err != null) {
-                act.status.setCrash(true);
-                Lib.showToast(act, err);
-            } else
-                setStatus(false);
             model.finish();
-            openCalendar(false);
             updateNew();
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                act.status.setError(error);
+                return;
+            }
+            setStatus(false);
+            openCalendar(false);
             return;
         }
         if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
@@ -401,7 +401,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void setStatus(boolean load) {
-        act.status.setCrash(false);
+        act.status.setError(null);
         act.status.setLoad(load);
         if (load) {
             tvNew.setVisibility(View.GONE);

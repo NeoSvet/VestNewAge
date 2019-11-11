@@ -96,10 +96,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            String err = data.getString(Const.ERROR);
-            if (err != null)
-                Lib.showToast(act, err);
-            finishLoad(err == null);
+            finishLoad(data.getString(Const.ERROR));
             return;
         }
         String link = data.getString(Const.MSG);
@@ -254,19 +251,20 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     }
 
     private void startLoad() {
-        act.status.setCrash(false);
+        act.status.setError(null);
         fabRefresh.setVisibility(View.GONE);
         act.status.setLoad(true);
         model.startLoad();
     }
 
-    private void finishLoad(boolean suc) {
+    private void finishLoad(String error) {
         model.finish();
-        if (suc) {
-            fabRefresh.setVisibility(View.VISIBLE);
-            act.status.setLoad(false);
-        } else
-            act.status.setCrash(true);
         updateNew();
+        if (error != null) {
+            act.status.setError(error);
+            return;
+        }
+        fabRefresh.setVisibility(View.VISIBLE);
+        act.status.setLoad(false);
     }
 }

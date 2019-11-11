@@ -104,7 +104,12 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     public void onChanged(@Nullable Data result) {
         if (!result.getBoolean(Const.FINISH, false))
             return;
-        String err = result.getString(Const.ERROR);
+        model.finish();
+        String error = result.getString(Const.ERROR);
+        if (error != null) {
+            act.status.setError(error);
+            return;
+        }
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
                 initCabinet(getResources().getString(R.string.selected_status),
@@ -122,18 +127,14 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                         result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.ERROR:
-                err = result.getString(Const.DESCTRIPTION);
+                tvError.setText(result.getString(Const.DESCTRIPTION));
+                tvError.setVisibility(View.VISIBLE);
                 break;
         }
-        model.finish();
         act.status.setLoad(false);
         pMain.setVisibility(View.GONE);
         fabEnter.setVisibility(View.GONE);
         fabExit.setVisibility(View.VISIBLE);
-        if (err != null) {
-            tvError.setText(err);
-            tvError.setVisibility(View.VISIBLE);
-        }
     }
 
     private void restoreState(Bundle state) {

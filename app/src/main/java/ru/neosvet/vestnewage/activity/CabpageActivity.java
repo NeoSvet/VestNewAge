@@ -122,7 +122,7 @@ public class CabpageActivity extends AppCompatActivity {
             }
             String s = wvBrowser.getTitle();
             if (!s.contains(":")) {
-                Lib.showToast(CabpageActivity.this, getResources().getString(R.string.load_fail));
+                status.setError(getResources().getString(R.string.load_fail));
                 finish();
                 return;
             }

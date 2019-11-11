@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setMenuFragment();
         } else
             navigationView.setCheckedItem(id);
-        status.setCrash(false);
+        status.setError(null);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
         curFragment = null;
         if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
@@ -419,17 +419,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
     }
 
-    public void finishLoad(boolean all, String err) {
+    public void finishLoad(boolean all, String error) {
         model.dismissDialog();
         model.finish();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
-        if (err == null) {
+        if (error == null) {
             if (all)
                 builder.setMessage(getResources().getString(R.string.all_load_suc));
             else
                 builder.setMessage(getResources().getString(R.string.it_load_suc));
         } else
-            builder.setMessage(getResources().getString(R.string.error) + err); //TODO  getResources().getString(R.string.load_fail)
+            builder.setTitle(getResources().getString(R.string.error)).setMessage(error);
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
