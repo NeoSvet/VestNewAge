@@ -42,7 +42,6 @@ public class PromWorker extends Worker {
     }
 
     private Result startSynchronTime() {
-        String err;
         try {
             synchronTime();
             return Result.success();

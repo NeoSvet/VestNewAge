@@ -48,7 +48,7 @@ public class SiteWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err, s;
+        String error, s;
         s = getInputData().getString(ProgressModel.NAME);
         model = ProgressModel.getModelByName(s);
         try {
@@ -85,12 +85,12 @@ public class SiteWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("SiteWolker error: " + err);
+            error = e.getMessage();
+            Lib.LOG("SiteWolker error: " + error);
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, err)
+                .putString(Const.ERROR, error)
                 .build());
         return Result.failure();
     }

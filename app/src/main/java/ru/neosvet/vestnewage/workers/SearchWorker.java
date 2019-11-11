@@ -43,7 +43,7 @@ public class SearchWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err;
+        String error;
         model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             Lib lib = new Lib(context);
@@ -96,12 +96,12 @@ public class SearchWorker extends Worker {
             return getResult();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("SearchWolker error: " + err);
+            error = e.getMessage();
+            Lib.LOG("SearchWolker error: " + error);
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, err)
+                .putString(Const.ERROR, error)
                 .build());
         return Result.failure();
     }

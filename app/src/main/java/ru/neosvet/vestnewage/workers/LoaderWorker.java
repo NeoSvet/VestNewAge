@@ -63,7 +63,7 @@ public class LoaderWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err, name;
+        String error, name;
         name = getInputData().getString(ProgressModel.NAME);
         try {
             time_requests = System.currentTimeMillis();
@@ -131,8 +131,8 @@ public class LoaderWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("LoaderWolker error: " + err);
+            error = e.getMessage();
+            Lib.LOG("LoaderWolker error: " + error);
         }
         if (name.equals(CheckService.class.getSimpleName())) {
             CheckService.postCommand(context, false);
@@ -140,7 +140,7 @@ public class LoaderWorker extends Worker {
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, err)
+                .putString(Const.ERROR, error)
                 .build());
         return Result.failure();
     }

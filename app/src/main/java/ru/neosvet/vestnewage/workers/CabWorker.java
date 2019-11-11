@@ -35,7 +35,7 @@ public class CabWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err;
+        String error;
         model = (CabModel) ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             String task = getInputData().getString(Const.TASK);
@@ -54,12 +54,12 @@ public class CabWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("CabWolker error: " + err);
+            error = e.getMessage();
+            Lib.LOG("CabWolker error: " + error);
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, err)
+                .putString(Const.ERROR, error)
                 .build());
         return Result.failure();
     }

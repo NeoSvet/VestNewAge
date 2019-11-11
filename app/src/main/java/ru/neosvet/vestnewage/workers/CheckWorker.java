@@ -39,7 +39,7 @@ public class CheckWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String err;
+        String error;
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
                 CheckService.postCommand(context, true);
@@ -53,8 +53,8 @@ public class CheckWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            err = e.getMessage();
-            Lib.LOG("CheckWorker error: " + err);
+            error = e.getMessage();
+            Lib.LOG("CheckWorker error: " + error);
         }
         CheckService.postCommand(context, false);
         return Result.failure();
