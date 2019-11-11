@@ -50,7 +50,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
+public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final int DEF_YEAR = 100;
     private MainActivity act;
     private View container;
@@ -94,10 +94,16 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -111,27 +117,27 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(BookModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
-                    String err = data.getString(Const.ERROR);
-                    if (err != null) {
-                        act.status.setCrash(true);
-                        Lib.showToast(act, err);
-                    } else
-                        finishLoad(data.getString(Const.TITLE));
-                    return;
-                }
-                if (data.getInt(Const.DIALOG, 0) == LoaderModel.DIALOG_SHOW)
-                    model.showDialog(act);
-                else
-                    model.updateDialog();
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress)
             if (!model.showDialog(act))
                 startLoad();
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            String err = data.getString(Const.ERROR);
+            if (err != null) {
+                act.status.setCrash(true);
+                Lib.showToast(act, err);
+            } else
+                finishLoad(data.getString(Const.TITLE));
+            return;
+        }
+        if (data.getInt(Const.DIALOG, 0) == LoaderModel.DIALOG_SHOW)
+            model.showDialog(act);
+        else
+            model.updateDialog();
     }
 
     @Override
@@ -525,7 +531,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
         model.finish();
-        model.removeObserves(act);
         DateHelper d;
         if (tab == 0)
             d = dKatren;

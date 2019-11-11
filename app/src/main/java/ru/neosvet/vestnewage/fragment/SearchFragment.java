@@ -61,7 +61,7 @@ import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
 
 
-public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener {
+public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r";
     private MainActivity act;
     private float density;
@@ -116,7 +116,13 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -128,38 +134,38 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SearchModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
-                    String err = data.getString(Const.ERROR);
-                    page = 0;
-                    etSearch.setEnabled(true);
-                    pStatus.setVisibility(View.GONE);
-                    model.finish();
-                    if (err != null)
-                        Lib.showToast(act, err);
-                    else
-                        putResult(data.getInt(Const.MODE, 0),
-                                data.getString(Const.STRING),
-                                data.getInt(Const.START, 0),
-                                data.getInt(Const.END, 0));
-                    return;
-                }
-                if (data.getString(Const.MODE).equals(Const.TIME)) {
-                    DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
-                    tvStatus.setText(getResources().getString(R.string.search) + ": "
-                            + d.getMonthString() + " " + (d.getYear() + 2000));
-                } else { //Const.PROG
-                    tvStatus.setText(getResources().getString(R.string.search) + " "
-                            + data.getInt(Const.PROG, 0) + "%");
-                }
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress) {
             pStatus.setVisibility(View.VISIBLE);
             fabSettings.setVisibility(View.GONE);
             etSearch.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            String err = data.getString(Const.ERROR);
+            page = 0;
+            etSearch.setEnabled(true);
+            pStatus.setVisibility(View.GONE);
+            model.finish();
+            if (err != null)
+                Lib.showToast(act, err);
+            else
+                putResult(data.getInt(Const.MODE, 0),
+                        data.getString(Const.STRING),
+                        data.getInt(Const.START, 0),
+                        data.getInt(Const.END, 0));
+            return;
+        }
+        if (data.getString(Const.MODE).equals(Const.TIME)) {
+            DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
+            tvStatus.setText(getResources().getString(R.string.search) + ": "
+                    + d.getMonthString() + " " + (d.getYear() + 2000));
+        } else { //Const.PROG
+            tvStatus.setText(getResources().getString(R.string.search) + " "
+                    + data.getInt(Const.PROG, 0) + "%");
         }
     }
 

@@ -36,7 +36,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
-public class SiteFragment extends BackFragment {
+public class SiteFragment extends BackFragment implements Observer<Data> {
     public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
@@ -64,7 +64,13 @@ public class SiteFragment extends BackFragment {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -78,27 +84,27 @@ public class SiteFragment extends BackFragment {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SiteModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
-                    String err = data.getString(Const.ERROR);
-                    if (err != null)
-                        Lib.showToast(act, err);
-                    finishLoad(data.getString(Const.FILE));
-                }
-                String link = data.getString(Const.MSG);
-                for (int i = 0; i < adMain.getCount(); i++) {
-                    if (adMain.getItem(i).equals(link)) {
-                        View item = (View) lvMain.getItemAtPosition(i);
-                        item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-                    }
-                }
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress) {
             fabRefresh.setVisibility(View.GONE);
             act.status.setLoad(true);
+        }
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            String err = data.getString(Const.ERROR);
+            if (err != null)
+                Lib.showToast(act, err);
+            finishLoad(data.getString(Const.FILE));
+        }
+        String link = data.getString(Const.MSG);
+        for (int i = 0; i < adMain.getCount(); i++) {
+            if (adMain.getItem(i).equals(link)) {
+                View item = (View) lvMain.getItemAtPosition(i);
+                item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+            }
         }
     }
 
@@ -396,7 +402,6 @@ public class SiteFragment extends BackFragment {
 
     private void finishLoad(String file) {
         model.finish();
-        model.removeObserves(act);
         if (file == null) {
             act.status.setCrash(true);
         } else {

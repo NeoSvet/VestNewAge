@@ -59,8 +59,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class BrowserActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class BrowserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     public static final String THEME = "theme", NOMENU = "nomenu",
             SCALE = "scale", FILE = "file://", PNG = ".png",
             STYLE = "/style/style.css", PAGE = "/page.html";
@@ -118,27 +117,28 @@ public class BrowserActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         prom.stop();
-        model.removeObserves(this);
+        model.removeObservers(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         prom.resume();
+        model.addObserver(this, this);
     }
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(LoaderModel.class);
-        model.getProgress().observe(this, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
-                    finishLoad(data.getString(Const.ERROR));
-                }
-            }
-        });
+        model.getProgress().observe(this, this);
         if (model.inProgress)
             status.setLoad(true);
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            finishLoad(data.getString(Const.ERROR));
+        }
     }
 
     @Override
@@ -799,7 +799,6 @@ public class BrowserActivity extends AppCompatActivity
 
     private void finishLoad(String err) {
         model.finish();
-        model.removeObserves(this);
         if (err != null)
             Lib.showToast(BrowserActivity.this, err);
         status.setLoad(false);

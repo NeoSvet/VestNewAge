@@ -111,7 +111,7 @@ public class SlashActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(this);
+        model.removeObservers(this);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class SlashActivity extends AppCompatActivity {
 
     public void finishLoad() {
         model.finish();
-        model.removeObserves(this);
+        model.removeObservers(this);
         if (!anim) {
             startActivity(main);
             finish();

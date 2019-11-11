@@ -56,8 +56,8 @@ public class BookModel extends ProgressModel {
     }
 
     @Override
-    public void removeObserves(LifecycleOwner owner) {
-        super.removeObserves(owner);
+    public void removeObservers(LifecycleOwner owner) {
+        super.removeObservers(owner);
         if (dialog != null)
             dialog.dismiss();
     }

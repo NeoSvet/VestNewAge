@@ -40,7 +40,7 @@ import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class CalendarFragment extends BackFragment implements DateDialog.Result {
+public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data> {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -79,7 +79,14 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateNew();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -93,33 +100,32 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CalendarModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false)) {
-                    String err = data.getString(Const.ERROR);
-                    if (err != null) {
-                        act.status.setCrash(true);
-                        Lib.showToast(act, err);
-                    } else
-                        setStatus(false);
-                    model.finish();
-                    model.removeObserves(act);
-                    openCalendar(false);
-                    updateNew();
-                    return;
-                }
-                if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
-                    return;
-                String s = data.getString(Const.MSG);
-                if (s == null)
-                    return;
-                int i = s.lastIndexOf("/") + 1;
-                blinkDay(Integer.parseInt(s.substring(i, i + 2)));
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress)
             setStatus(true);
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            String err = data.getString(Const.ERROR);
+            if (err != null) {
+                act.status.setCrash(true);
+                Lib.showToast(act, err);
+            } else
+                setStatus(false);
+            model.finish();
+            openCalendar(false);
+            updateNew();
+            return;
+        }
+        if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
+            return;
+        String s = data.getString(Const.MSG);
+        if (s == null)
+            return;
+        int i = s.lastIndexOf("/") + 1;
+        blinkDay(Integer.parseInt(s.substring(i, i + 2)));
     }
 
     @Override
@@ -143,12 +149,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result 
                 showDatePicker();
         }
         createCalendar(0);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateNew();
     }
 
     private void updateNew() {

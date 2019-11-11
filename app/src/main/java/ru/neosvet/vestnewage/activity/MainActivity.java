@@ -54,7 +54,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
@@ -115,33 +115,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(LoaderModel.class);
-        model.getProgress().observe(this, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                switch (data.getInt(Const.DIALOG, -1)) {
-                    case LoaderModel.DIALOG_SHOW:
-                        model.showDialog(MainActivity.this);
-                        break;
-                    case LoaderModel.DIALOG_UPDATE:
-                        model.setProgMax(data.getInt(Const.MAX, 0));
-                        model.setProgMsg(data.getString(Const.MSG));
-                        model.showDialog(MainActivity.this);
-                        break;
-                    case LoaderModel.DIALOG_UP:
-                        model.upProg();
-                        break;
-                    case LoaderModel.DIALOG_MSG:
-                        model.setProgMsg(data.getString(Const.MSG));
-                        break;
-                }
-                if (data.getBoolean(Const.FINISH, false)) {
-                    boolean all = data.getInt(Const.MODE, 0) == LoaderModel.ALL;
-                    finishLoad(all, data.getString(Const.ERROR));
-                }
-            }
-        });
+        model.getProgress().observe(this, this);
         if (model.inProgress)
             initLoad();
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        switch (data.getInt(Const.DIALOG, -1)) {
+            case LoaderModel.DIALOG_SHOW:
+                model.showDialog(MainActivity.this);
+                break;
+            case LoaderModel.DIALOG_UPDATE:
+                model.setProgMax(data.getInt(Const.MAX, 0));
+                model.setProgMsg(data.getString(Const.MSG));
+                model.showDialog(MainActivity.this);
+                break;
+            case LoaderModel.DIALOG_UP:
+                model.upProg();
+                break;
+            case LoaderModel.DIALOG_MSG:
+                model.setProgMsg(data.getString(Const.MSG));
+                break;
+        }
+        if (data.getBoolean(Const.FINISH, false)) {
+            boolean all = data.getInt(Const.MODE, 0) == LoaderModel.ALL;
+            finishLoad(all, data.getString(Const.ERROR));
+        }
     }
 
     private void restoreState(Bundle state) {
@@ -172,12 +172,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onPause() {
         super.onPause();
         prom.stop();
-        model.removeObserves(this);
+        model.removeObservers(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        model.addObserver(this, this);
         if (prom != null)
             prom.resume();
     }
@@ -421,7 +422,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void finishLoad(boolean all, String err) {
         model.dismissDialog();
         model.finish();
-        model.removeObserves(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (err == null) {
             if (all)

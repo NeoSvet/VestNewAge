@@ -33,7 +33,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
-public class SummaryFragment extends BackFragment {
+public class SummaryFragment extends BackFragment implements Observer<Data> {
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
@@ -63,7 +63,14 @@ public class SummaryFragment extends BackFragment {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateNew();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -77,35 +84,35 @@ public class SummaryFragment extends BackFragment {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SummaryModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.LIST, false)) {
-                    openList(false);
-                    return;
-                }
-                if (data.getBoolean(Const.FINISH, false)) {
-                    String err = data.getString(Const.ERROR);
-                    if (err != null)
-                        Lib.showToast(act, err);
-                    finishLoad(err == null);
-                    return;
-                }
-                String link = data.getString(Const.MSG);
-                for (int i = 0; i < adSummary.getCount(); i++) {
-                    if (adSummary.getItem(i).getLink().equals(link)) {
-                        lvSummary.smoothScrollToPosition(i);
-                        View item = lvSummary.getChildAt(i);
-                        if (item == null)
-                            break;
-                        item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-                        break;
-                    }
-                }
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress)
             act.status.setLoad(true);
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.LIST, false)) {
+            openList(false);
+            return;
+        }
+        if (data.getBoolean(Const.FINISH, false)) {
+            String err = data.getString(Const.ERROR);
+            if (err != null)
+                Lib.showToast(act, err);
+            finishLoad(err == null);
+            return;
+        }
+        String link = data.getString(Const.MSG);
+        for (int i = 0; i < adSummary.getCount(); i++) {
+            if (adSummary.getItem(i).getLink().equals(link)) {
+                lvSummary.smoothScrollToPosition(i);
+                View item = lvSummary.getChildAt(i);
+                if (item == null)
+                    break;
+                item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
+                break;
+            }
+        }
     }
 
     private void restoreState(Bundle state) {
@@ -120,12 +127,6 @@ public class SummaryFragment extends BackFragment {
             openList(true);
         } else
             startLoad();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateNew();
     }
 
     private void updateNew() {
@@ -261,7 +262,6 @@ public class SummaryFragment extends BackFragment {
 
     private void finishLoad(boolean suc) {
         model.finish();
-        model.removeObserves(act);
         if (suc) {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);

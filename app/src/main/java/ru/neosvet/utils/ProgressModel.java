@@ -4,6 +4,7 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -39,8 +40,14 @@ public class ProgressModel extends AndroidViewModel {
         return progress;
     }
 
-    public void removeObserves(LifecycleOwner owner) {
+    public void removeObservers(LifecycleOwner owner) {
         progress.removeObservers(owner);
+    }
+
+    public void addObserver(LifecycleOwner owner, Observer<Data> observer) {
+        if (!progress.hasObservers())
+            progress.observe(owner, observer);
+
     }
 
     public static ProgressModel getModelByName(@Nullable String name) {

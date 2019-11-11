@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Service;
-import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -38,7 +37,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
-public class CabmainFragment extends BackFragment {
+public class CabmainFragment extends BackFragment implements Observer<Data> {
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -64,7 +63,13 @@ public class CabmainFragment extends BackFragment {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObserves(act);
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -90,18 +95,15 @@ public class CabmainFragment extends BackFragment {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CabModel.class);
-        model.getProgress().observe(act, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.FINISH, false))
-                    parseResult(data);
-            }
-        });
+        model.getProgress().observe(act, this);
         if (model.inProgress)
             act.status.setLoad(true);
     }
 
-    private void parseResult(Data result) {
+    @Override
+    public void onChanged(@Nullable Data result) {
+        if (!result.getBoolean(Const.FINISH, false))
+            return;
         String err = result.getString(Const.ERROR);
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
