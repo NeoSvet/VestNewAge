@@ -28,6 +28,7 @@ public class CabpageActivity extends AppCompatActivity {
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
     private StatusButton status;
+    private View fabClose;
     private boolean twoPointers = false;
 
     public static void openPage(Context context, String link, @Nullable String cookie) {
@@ -84,12 +85,20 @@ public class CabpageActivity extends AppCompatActivity {
             });
         }
         status = new StatusButton(this, findViewById(R.id.pStatus));
+        fabClose = findViewById(R.id.fabClose);
+        fabClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
     }
 
     private class wvClient extends WebViewClient {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             if (url.contains("#")) return;
+            fabClose.setVisibility(View.GONE);
             status.setLoad(true);
             CabpageActivity.this.setTitle("");
             view.setVisibility(View.GONE);
@@ -119,6 +128,7 @@ public class CabpageActivity extends AppCompatActivity {
             }
             CabpageActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
             status.setLoad(false);
+            fabClose.setVisibility(View.VISIBLE);
             super.onPageFinished(view, url);
         }
     }
