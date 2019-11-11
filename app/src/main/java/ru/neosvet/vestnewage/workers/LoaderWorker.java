@@ -73,7 +73,7 @@ public class LoaderWorker extends Worker {
             client = Lib.createHttpClient();
             if (name.equals(CheckService.class.getSimpleName())) {
                 downloadList();
-                CheckService.getService().stop();
+                CheckService.postCommand(context, false);
                 return Result.success();
             }
             model = ProgressModel.getModelByName(name);
@@ -133,6 +133,10 @@ public class LoaderWorker extends Worker {
             e.printStackTrace();
             err = e.getMessage();
             Lib.LOG("LoaderWolker error: " + err);
+        }
+        if (name.equals(CheckService.class.getSimpleName())) {
+            CheckService.postCommand(context, false);
+            return Result.failure();
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)

@@ -42,11 +42,7 @@ public class CheckWorker extends Worker {
         String err;
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
-                Intent intent = new Intent(context, CheckService.class);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    context.startForegroundService(intent);
-                else
-                    context.startService(intent);
+                CheckService.postCommand(context, true);
             } else {
                 if (checkSummary()) {
                     SummaryHelper summaryHelper = new SummaryHelper(context);
@@ -60,6 +56,7 @@ public class CheckWorker extends Worker {
             err = e.getMessage();
             Lib.LOG("CheckWorker error: " + err);
         }
+        CheckService.postCommand(context, false);
         return Result.failure();
     }
 

@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage.service;
 import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import androidx.work.Configuration;
@@ -14,8 +15,11 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
@@ -26,11 +30,6 @@ import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class CheckService extends LifecycleService {
     public static final String TAG = "CheckService";
-    private static CheckService srv;
-
-    public static CheckService getService() {
-        return srv;
-    }
 
     @Override
     public void onCreate() {
@@ -42,11 +41,34 @@ public class CheckService extends LifecycleService {
                 context.getResources().getString(R.string.check_new),
                 NotificationHelper.CHANNEL_MUTE);
         startForeground(NotificationHelper.NOTIF_SUMMARY, notifBuilder.build());
-        srv = this;
+    }
+
+    public static void postCommand(Context context, boolean start) {
+        Intent intent = new Intent(context, CheckService.class);
+        intent.putExtra(Const.START, start);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            context.startForegroundService(intent);
+        else
+            context.startService(intent);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (!intent.getBooleanExtra(Const.START, false)) {
+            Lib.LOG("CheckService finish");
+            stopForeground(true);
+            return super.onStartCommand(intent, flags, startId);
+        }
+        Lib.LOG("CheckService start");
+        try {
+            Configuration configuration = new Configuration.Builder()
+                    .setMinimumLoggingLevel(android.util.Log.INFO)
+                    .build();
+            WorkManager.initialize(getApplicationContext(), configuration);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        WorkManager work = WorkManager.getInstance();
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
@@ -55,11 +77,6 @@ public class CheckService extends LifecycleService {
                 .Builder(CheckWorker.class)
                 .setConstraints(constraints)
                 .build();
-        Configuration configuration = new Configuration.Builder()
-                .setMinimumLoggingLevel(android.util.Log.INFO)
-                .build();
-        WorkManager.initialize(getApplicationContext(), configuration);
-        WorkManager work = WorkManager.getInstance();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
         Data data = new Data.Builder()
@@ -73,9 +90,5 @@ public class CheckService extends LifecycleService {
         job = job.then(task);
         job.enqueue();
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    public void stop() {
-        stopForeground(true);
     }
 }
