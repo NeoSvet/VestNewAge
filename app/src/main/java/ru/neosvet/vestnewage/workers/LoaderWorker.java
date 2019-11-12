@@ -117,14 +117,14 @@ public class LoaderWorker extends Worker {
                     break;
                 default:
                     String link = getInputData().getString(Const.LINK);
-                    if (mode == LoaderModel.DOWNLOAD_PAGE ||
-                            mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE) {
-                        downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
-                        downloadPage(link, true);
-                    } else { //file
+                    if (mode == LoaderModel.DOWNLOAD_FILE) {
                         downloadFile(link, getInputData().getString(Const.FILE));
+                    } else { //page
+                        downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
+                        if (link != null)
+                            downloadPage(link, true);
                     }
-                    result.putString(Const.LINK, link);
+                    result.putString(Const.LINK, link); //non-use
                     break;
             }
             model.postProgress(result.build());

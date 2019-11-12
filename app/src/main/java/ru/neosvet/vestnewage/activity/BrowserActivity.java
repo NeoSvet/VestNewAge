@@ -660,7 +660,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (!fLight.exists() && !fDark.exists()) { //download style
             status.setError(null);
             status.setLoad(true);
-            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, "");
+            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, null);
             return;
         }
         final File fStyle = lib.getFile(STYLE);
