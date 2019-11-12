@@ -115,15 +115,11 @@ public class LoaderWorker extends Worker {
                 case LoaderModel.DOWNLOAD_YEAR:
                     downloadYear(getInputData().getInt(Const.YEAR, 0));
                     break;
-                default:
+                default://page
                     String link = getInputData().getString(Const.LINK);
-                    if (mode == LoaderModel.DOWNLOAD_FILE) {
-                        downloadFile(link, getInputData().getString(Const.FILE));
-                    } else { //page
-                        downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
-                        if (link != null)
-                            downloadPage(link, true);
-                    }
+                    downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
+                    if (link != null)
+                        downloadPage(link, true);
                     result.putString(Const.LINK, link); //non-use
                     break;
             }
@@ -431,27 +427,6 @@ public class LoaderWorker extends Worker {
                     }
                 }
             }).start();
-        }
-    }
-
-    private void downloadFile(String url, String file) {
-        try {
-            File f = new File(file);
-            //if(f.exists()) f.delete();
-            builderRequest.url(url);
-            Response response = client.newCall(builderRequest.build()).execute();
-            InputStream in = new BufferedInputStream(response.body().byteStream());
-            OutputStream out = new FileOutputStream(f, false);
-            byte[] buf = new byte[1024];
-            int i;
-            while ((i = in.read(buf)) > 0) {
-                out.write(buf, 0, i);
-                out.flush();
-            }
-            out.close();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

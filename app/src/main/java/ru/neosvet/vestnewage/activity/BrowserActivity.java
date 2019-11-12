@@ -61,9 +61,8 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BrowserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     public static final String THEME = "theme", NOMENU = "nomenu",
-            SCALE = "scale", FILE = "file://", PNG = ".png",
+            SCALE = "scale", FILE = "file://",
             STYLE = "/style/style.css", PAGE = "/page.html";
-    private final int CODE_OPEN = 1;
     private List<String> history = new ArrayList<String>();
     private boolean nomenu, lightTheme, twoPointers = false, back = false;
     private SharedPreferences pref;
@@ -143,10 +142,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (link.contains(PNG))
-            outState.putString(Const.LINK, history.get(0));
-        else
-            outState.putString(Const.LINK, link);
+        outState.putString(Const.LINK, link);
         outState.putInt(Const.PLACE, iPlace);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
         outState.putString(DataBase.SEARCH, string);
@@ -190,8 +186,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 fabMenu.setVisibility(View.GONE);
             }
         }
-        miThemeL.setVisible(!link.contains(PNG));
-        miThemeD.setVisible(!link.contains(PNG));
     }
 
     private void initPlace() {
@@ -503,20 +497,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         super.onStop();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        //http://stackoverflow.com/questions/35484767/activitycompat-requestpermissions-not-showing-dialog-box
-        if (grantResults.length > 0 && grantResults[0] == 0) {
-            if (requestCode == CODE_OPEN)
-                openFile();
-            else
-                downloadFile(getFile());
-        } else {
-            lib.openInApps(Const.SITE + link, null);
-            onBackBrowser();
-        }
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -604,10 +584,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     public void openLink(String url) {
-        if (url.contains(PNG)) {
-            history.add(0, link);
-            link = url;
-            openFile();
+        if (!url.contains(Const.HTML) && !url.contains("http:")) {
+            lib.openInApps(url, null);
             return;
         }
         if (!link.equals(url)) {
@@ -624,33 +602,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             openPage(true);
         else
             downloadPage(false);
-    }
-
-    private void openFile() {
-        status.setLoad(false);
-        File f = getFile();
-        if (f.exists()) {
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(android.net.Uri.fromFile(f), "image/png");
-                startActivity(intent);
-            } catch (Exception e) {
-            }
-            onBackBrowser();
-        } else
-            downloadFile(f);
-    }
-
-    private File getFile() {
-        return new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
-                .toString() + link.substring(link.lastIndexOf("/")));
-    }
-
-
-    private void downloadFile(File f) {
-        model.startLoad(LoaderModel.DOWNLOAD_FILE, Const.SITE + link
-                + Const.AND + f.toString());
     }
 
     public void openPage(boolean newPage) {
@@ -805,10 +756,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         }
         status.setLoad(false);
         status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
-        if (link.contains(PNG))
-            openFile();
-        else
-            openPage(true);
+        openPage(true);
     }
 
     private float getPositionOnPage() {

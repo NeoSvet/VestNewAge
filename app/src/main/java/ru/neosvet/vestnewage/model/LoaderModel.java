@@ -31,7 +31,7 @@ import ru.neosvet.vestnewage.workers.SummaryWorker;
 public class LoaderModel extends ProgressModel {
     public static final String TAG = "Loader";
     public static final int ALL = -1, DOWNLOAD_ALL = 0, DOWNLOAD_ID = 1, DOWNLOAD_YEAR = 2,
-            DOWNLOAD_PAGE = 3, DOWNLOAD_PAGE_WITH_STYLE = 4, DOWNLOAD_FILE = 5;
+            DOWNLOAD_PAGE = 3, DOWNLOAD_PAGE_WITH_STYLE = 4;
     public static final int DIALOG_SHOW = 0, DIALOG_UP = 1, DIALOG_UPDATE = 3, DIALOG_MSG = 4;
     private static LoaderModel current = null;
     private ProgressDialog dialog;
