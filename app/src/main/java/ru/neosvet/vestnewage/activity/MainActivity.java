@@ -441,19 +441,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (curFragment != null) {
-            if (requestCode == CollectionsFragment.MARKER_REQUEST) {
-                ((CollectionsFragment) curFragment).putResult(resultCode);
-            }
-            if (curFragment instanceof SettingsFragment) {
-                if (resultCode == RESULT_OK)
-                    if (requestCode == SetNotifDialog.RINGTONE)
-                        ((SettingsFragment) curFragment).putRingtone(data);
-                    else if (requestCode == SetNotifDialog.CUSTOM)
-                        ((SettingsFragment) curFragment).putCustom(data);
+        if (curFragment == null)
+            return;
+        if (requestCode == CollectionsFragment.MARKER_REQUEST) {
+            ((CollectionsFragment) curFragment).putResult(resultCode);
+            return;
+        }
+        if (curFragment instanceof SettingsFragment) {
+            if (resultCode == RESULT_OK) {
+                SettingsFragment fr = (SettingsFragment) curFragment;
+                if (requestCode == SetNotifDialog.RINGTONE)
+                    fr.putRingtone(data);
+                else if (requestCode == SetNotifDialog.CUSTOM)
+                    fr.putCustom(data);
             }
         }
-
     }
 
     @Override
