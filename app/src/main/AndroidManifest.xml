@@ -81,7 +81,7 @@
             android:name=".helpers.PromHelper"
             android:process=":prom" />
         <service
-            android:name=".service.CheckService"
+            android:name=".helpers.CheckHelper"
             android:icon="@drawable/rss"
             android:label="@string/check_summary"
             android:process=":check" />

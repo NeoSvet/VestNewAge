@@ -10,14 +10,11 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +28,12 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
-import ru.neosvet.vestnewage.service.CheckService;
 
 public class LoaderWorker extends Worker {
     private Context context;
@@ -71,9 +68,9 @@ public class LoaderWorker extends Worker {
             builderRequest.header(Const.USER_AGENT, context.getPackageName());
             builderRequest.header("Referer", Const.SITE);
             client = Lib.createHttpClient();
-            if (name.equals(CheckService.class.getSimpleName())) {
+            if (name.equals(CheckHelper.class.getSimpleName())) {
                 downloadList();
-                CheckService.postCommand(context, false);
+                CheckHelper.postCommand(context, false);
                 return Result.success();
             }
             model = ProgressModel.getModelByName(name);
@@ -130,8 +127,8 @@ public class LoaderWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("LoaderWolker error: " + error);
         }
-        if (name.equals(CheckService.class.getSimpleName())) {
-            CheckService.postCommand(context, false);
+        if (name.equals(CheckHelper.class.getSimpleName())) {
+            CheckHelper.postCommand(context, false);
             return Result.failure();
         }
         model.postProgress(new Data.Builder()

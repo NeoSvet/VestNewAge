@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
@@ -20,11 +19,11 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.service.CheckService;
 
 public class CheckWorker extends Worker {
     private Context context;
@@ -42,7 +41,7 @@ public class CheckWorker extends Worker {
         String error;
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
-                CheckService.postCommand(context, true);
+                CheckHelper.postCommand(context, true);
             } else {
                 if (checkSummary()) {
                     SummaryHelper summaryHelper = new SummaryHelper(context);
@@ -56,7 +55,7 @@ public class CheckWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("CheckWorker error: " + error);
         }
-        CheckService.postCommand(context, false);
+        CheckHelper.postCommand(context, false);
         return Result.failure();
     }
 
@@ -129,11 +128,6 @@ public class CheckWorker extends Worker {
     private void postItem(String title, String link) {
         list.add(title);
         list.add(link);
-//        CheckService.progress.postValue(new Data.Builder()
-//                .putBoolean(Const.PAGE, true)
-//                .putString(Const.TITLE, title)
-//                .putString(Const.LINK, link)
-//                .build());
     }
 
     private String withOutTag(String s) {

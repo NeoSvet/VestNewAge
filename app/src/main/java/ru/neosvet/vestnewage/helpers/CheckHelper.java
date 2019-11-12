@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.service;
+package ru.neosvet.vestnewage.helpers;
 
 import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
@@ -19,8 +19,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
@@ -28,8 +26,8 @@ import ru.neosvet.vestnewage.workers.LoaderWorker;
  * Created by NeoSvet on 09.11.2019.
  */
 
-public class CheckService extends LifecycleService {
-    public static final String TAG = "CheckService";
+public class CheckHelper extends LifecycleService {
+    public static final String TAG = "CheckHelper";
 
     @Override
     public void onCreate() {
@@ -44,7 +42,7 @@ public class CheckService extends LifecycleService {
     }
 
     public static void postCommand(Context context, boolean start) {
-        Intent intent = new Intent(context, CheckService.class);
+        Intent intent = new Intent(context, CheckHelper.class);
         intent.putExtra(Const.START, start);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             context.startForegroundService(intent);
@@ -55,11 +53,11 @@ public class CheckService extends LifecycleService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!intent.getBooleanExtra(Const.START, false)) {
-            Lib.LOG("CheckService finish");
+            Lib.LOG("CheckHelper finish");
             stopForeground(true);
             return super.onStartCommand(intent, flags, startId);
         }
-        Lib.LOG("CheckService start");
+        Lib.LOG("CheckHelper start");
         try {
             Configuration configuration = new Configuration.Builder()
                     .setMinimumLoggingLevel(android.util.Log.INFO)
