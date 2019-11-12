@@ -45,7 +45,7 @@ public class MarkerActivity extends AppCompatActivity {
     private ListView lvList;
     private SeekBar sbPos;
     private LinearLayout mainLayout;
-    private View pPos, fabHelp, fabOk;
+    private View pPos, fabOk;
     private String link, sel;
     private SoftKeyboard softKeyboard;
     private int id, heightDialog, k_par;
@@ -71,7 +71,7 @@ public class MarkerActivity extends AppCompatActivity {
                     n = 1;
                 do {
                     if (par.contains(Lib.withOutTags(cursor.getString(0)))) {
-                        s.append(String.valueOf(n));
+                        s.append(n);
                         s.append(", ");
                     }
                     n++;
@@ -97,9 +97,6 @@ public class MarkerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.marker_activity);
-
-        if (PresentationActivity.checkPresentation(this, 2))
-            PresentationActivity.startPresentation(this, 2, true);
 
         link = getIntent().getStringExtra(Const.LINK);
         id = getIntent().getIntExtra(DataBase.ID, -1);
@@ -164,13 +161,10 @@ public class MarkerActivity extends AppCompatActivity {
         final Handler hFab = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message message) {
-                if (message.what == 0) {
-                    fabHelp.setVisibility(View.VISIBLE);
+                if (message.what == 0)
                     fabOk.setVisibility(View.VISIBLE);
-                } else {
-                    fabHelp.setVisibility(View.GONE);
+                else
                     fabOk.setVisibility(View.GONE);
-                }
                 return false;
             }
         });
@@ -244,12 +238,10 @@ public class MarkerActivity extends AppCompatActivity {
                 mainLayout.setVisibility(View.GONE);
                 lvList.getLayoutParams().height = heightDialog;
                 lvList.requestLayout();
-                fabHelp.setVisibility(View.GONE);
                 lvList.setVisibility(View.VISIBLE);
             }
             if (state.getBoolean(DataBase.Q, false)) {
                 mainLayout.setVisibility(View.GONE);
-                fabHelp.setVisibility(View.GONE);
                 pPos.getLayoutParams().height = heightDialog;
                 pPos.requestLayout();
                 pPos.setVisibility(View.VISIBLE);
@@ -369,7 +361,6 @@ public class MarkerActivity extends AppCompatActivity {
         tvCol = (TextView) findViewById(R.id.tvCol);
         etDes = (EditText) findViewById(R.id.etDes);
         etCol = (EditText) findViewById(R.id.etCol);
-        fabHelp = findViewById(R.id.fabHelp);
         fabOk = findViewById(R.id.fabOk);
     }
 
@@ -407,7 +398,6 @@ public class MarkerActivity extends AppCompatActivity {
                     sbPos.setProgress((int) (pos * 10));
                     setPosText(pos);
                     posVisible = true;
-                    fabHelp.setVisibility(View.GONE);
                     pPos.setVisibility(View.VISIBLE);
                     ResizeAnim anim = new ResizeAnim(pPos, false, heightDialog);
                     anim.setDuration(800);
@@ -443,12 +433,6 @@ public class MarkerActivity extends AppCompatActivity {
                 setColList(tvCol.getText().toString());
                 lvList.setAdapter(adCol);
                 showList();
-            }
-        });
-        fabHelp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PresentationActivity.startPresentation(MarkerActivity.this, 2, false);
             }
         });
         fabOk.setOnClickListener(new View.OnClickListener() {
@@ -691,7 +675,6 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void showList() {
-        fabHelp.setVisibility(View.GONE);
         softKeyboard.closeSoftKeyboard();
         lvList.setVisibility(View.VISIBLE);
         ResizeAnim anim = new ResizeAnim(lvList, false, heightDialog);
@@ -721,7 +704,6 @@ public class MarkerActivity extends AppCompatActivity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    fabHelp.setVisibility(View.VISIBLE);
                     lvList.setVisibility(View.GONE);
                     pPos.setVisibility(View.GONE);
                     mainLayout.setVisibility(View.VISIBLE);

@@ -77,9 +77,6 @@
             android:label="@string/marker"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.PresentationActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 

@@ -28,7 +28,6 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
-import ru.neosvet.vestnewage.activity.PresentationActivity;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 
@@ -288,8 +287,6 @@ public class CollectionsFragment extends BackFragment {
             fabEdit.setVisibility(View.VISIBLE);
             fabMenu.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
-            if (PresentationActivity.checkPresentation(act, 1))
-                PresentationActivity.startPresentation(act, 1, true);
         }
         adMarker.notifyDataSetChanged();
     }
