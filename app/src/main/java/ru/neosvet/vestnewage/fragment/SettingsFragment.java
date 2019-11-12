@@ -330,10 +330,8 @@ public class SettingsFragment extends BackFragment {
                 startActivity(intent);
             }
         });
-        container.findViewById(R.id.tvPromSetBattery).setVisibility(View.VISIBLE);
-        View bPromSetBattery = container.findViewById(R.id.bPromSetBattery);
-        bPromSetBattery.setVisibility(View.VISIBLE);
-        bPromSetBattery.setOnClickListener(new View.OnClickListener() {
+        container.findViewById(R.id.pBattery).setVisibility(View.VISIBLE);
+        container.findViewById(R.id.bSetBattery).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);

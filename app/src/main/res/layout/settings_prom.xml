@@ -115,28 +115,5 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/set_notif" />
-
-        <TextView
-            android:id="@+id/tvPromSetBattery"
-            style="@style/Label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/info_battery" />
-
-        <Button
-            android:id="@+id/bPromSetBattery"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/set_battery"
-            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

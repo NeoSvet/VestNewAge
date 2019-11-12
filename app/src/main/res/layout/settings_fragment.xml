@@ -25,6 +25,37 @@
             <include layout="@layout/settings_check" />
 
             <include layout="@layout/settings_prom" />
+
+            <LinearLayout
+                android:id="@+id/pBattery"
+                style="@style/ItemBG"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/item_bg"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/info_battery" />
+
+                <Button
+                    android:id="@+id/bSetBattery"
+                    style="@style/Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:text="@string/set_battery" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
