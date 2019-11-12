@@ -14,6 +14,13 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 public class WebClient extends WebViewClient {
     private final String files = "file";
     private BrowserActivity act;
+    private Handler hPlace = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            act.setPlace();
+            return false;
+        }
+    });
 
     public WebClient(BrowserActivity act) {
         this.act = act;
@@ -52,13 +59,6 @@ public class WebClient extends WebViewClient {
             act.checkUnread();
             act.addJournal();
         }
-        final Handler hPlace = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                act.setPlace();
-                return false;
-            }
-        });
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
