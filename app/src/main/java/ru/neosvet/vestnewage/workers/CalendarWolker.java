@@ -194,6 +194,7 @@ public class CalendarWolker extends Worker {
                     unread.addLink(list.get(i).getLink(j), dItem);
                 }
             }
+            unread.setBadge();
             unread.close();
         }
         list.clear();
