@@ -126,18 +126,26 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
+            model.finish();
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
                 return;
             }
-            finishLoad(data.getString(Const.TITLE));
+            act.status.setLoad(false);
+            String name = data.getString(Const.TITLE);
+            if (name != null)
+                finishLoad(name);
             return;
         }
-        if (data.getInt(Const.DIALOG, 0) == LoaderModel.DIALOG_SHOW)
-            model.showDialog(act);
-        else
-            model.updateDialog();
+        switch (data.getInt(Const.DIALOG, -1)) {
+            case LoaderModel.DIALOG_SHOW:
+                model.showDialog(act);
+                break;
+            case LoaderModel.DIALOG_UPDATE:
+                model.updateDialog();
+                break;
+        }
     }
 
     @Override
@@ -530,7 +538,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void finishLoad(String result) {
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
-        model.finish();
         DateHelper d;
         if (tab == 0)
             d = dKatren;
@@ -546,7 +553,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         }
         fabRefresh.setVisibility(View.VISIBLE);
         fabRndMenu.setVisibility(View.VISIBLE);
-        act.status.setLoad(false);
         if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
             d = DateHelper.putYearMonth(act,
                     2000 + Integer.parseInt(result.substring(3, 5)),
