@@ -138,7 +138,6 @@
     <string name="prom_notif">Напомнить о Посыле</string>
     <string name="prom_notif_off">Не напоминать о Посыле</string>
     <string name="in">за</string>
-    <string name="secs">30 секунд</string>
     <string name="often">чаще</string>
     <string name="less">реже</string>
     <string name="notif_sound">Звуковой сигнал</string>

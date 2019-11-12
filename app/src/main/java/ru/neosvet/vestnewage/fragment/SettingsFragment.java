@@ -456,26 +456,20 @@ public class SettingsFragment extends BackFragment {
         t.append(" ");
         t.append(getResources().getString(R.string.in));
         t.append(" ");
-        if (p == 0) {
-            t.append(getResources().getString(R.string.secs));
-//            t.append(getResources().getString(R.string.at_moment_prom));
-        } else {
-//            t.append(getResources().getString(R.string.in));
-//            t.append(" ");
-            if (p > 4 && p < 21)
-                t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
+        p++;
+        if (p > 4 && p < 21)
+            t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
+        else {
+            if (p == 1)
+                t.append(getResources().getStringArray(R.array.time)[3]);
             else {
-                if (p == 1)
-                    t.append(getResources().getStringArray(R.array.time)[3]);
-                else {
-                    int n = (int) p % 10;
-                    if (n == 1)
-                        t.append(p + " " + getResources().getStringArray(R.array.time)[3]);
-                    else if (n > 1 && n < 5)
-                        t.append(p + " " + getResources().getStringArray(R.array.time)[5]);
-                    else
-                        t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
-                }
+                int n = p % 10;
+                if (n == 1)
+                    t.append(p + " " + getResources().getStringArray(R.array.time)[3]);
+                else if (n > 1 && n < 5)
+                    t.append(p + " " + getResources().getStringArray(R.array.time)[5]);
+                else
+                    t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
             }
         }
         tvPromNotif.setText(t);

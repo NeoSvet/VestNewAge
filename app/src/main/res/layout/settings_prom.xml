@@ -60,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:max="61"
+                android:max="60"
                 android:progress="0"
                 android:progressDrawable="@drawable/progress_bar"
                 android:thumb="@drawable/sb_thumb" />

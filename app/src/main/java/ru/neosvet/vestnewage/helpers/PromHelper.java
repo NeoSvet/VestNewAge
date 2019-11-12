@@ -281,16 +281,11 @@ public class PromHelper extends LifecycleService {
             return;
         PromHelper prom = new PromHelper(context, null);
         DateHelper d = prom.getPromDate(false);
-        if (p == 0)
-            d.changeSeconds(-30);
-        else
-            d.changeMinutes(-p);
+        p++;
+        d.changeMinutes(-p);
         if (d.getTimeInSeconds() < DateHelper.initNow(context).getTimeInSeconds()) {
             d = prom.getPromDate(true);
-            if (p == 0)
-                d.changeSeconds(-30);
-            else
-                d.changeMinutes(-p);
+            d.changeMinutes(-p);
         }
         long time = d.getTimeInMills();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
