@@ -77,7 +77,9 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
+        <service
+            android:name=".helpers.PromHelper"
+            android:process=":prom" />
         <service
             android:name=".service.CheckService"
             android:icon="@drawable/rss"

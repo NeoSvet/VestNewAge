@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,24 +19,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import androidx.work.Constraints;
-import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
-import ru.neosvet.vestnewage.workers.PromWorker;
 
-public class PromHelper {
+public class PromHelper extends LifecycleService {
     public static final byte ERROR = -1;
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private Context context;
@@ -53,10 +47,11 @@ public class PromHelper {
         }
     }
 
-    public int timeToProm() {
-        DateHelper prom = getPromDate(false);
-        DateHelper now = DateHelper.initNow(context);
-        return (int) (prom.getTimeInSeconds() - now.getTimeInSeconds());
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        this.context = getApplicationContext();
+        showNotif();
     }
 
     public void stop() {
@@ -143,7 +138,7 @@ public class PromHelper {
         return tvPromTime != null;
     }
 
-    public DateHelper getPromDate(boolean next) {
+    private DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(Const.TIMEDIFF, 0);
         DateHelper prom = DateHelper.initNow(context);
         int hour = 8;
@@ -233,7 +228,7 @@ public class PromHelper {
         return t;
     }
 
-    public void showNotif() {
+    private void showNotif() {
         SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p == Const.TURN_OFF)
@@ -274,32 +269,37 @@ public class PromHelper {
                 notifBuilder.setVibrate(new long[]{500, 1500});
         }
         notifHelper.notify(NotificationHelper.NOTIF_PROM, notifBuilder);
-        initWorker(p);
+        initNotif(p);
     }
 
-    public void initWorker(int time) {
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                .setRequiresBatteryNotLow(false)
-                .build();
-        int m = timeToProm() / 60 - time;
-        Lib.LOG("time to prom: " + m + "+" + time);
-        if (m < 15) {
-            m += 480; // 8 hour, next Prom
-            Lib.LOG("time to next prom: " + m + "+" + time);
+    public void initNotif(int p) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, PromHelper.class);
+        PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.cancel(piProm);
+        if (p == Const.TURN_OFF)
+            return;
+        PromHelper prom = new PromHelper(context, null);
+        DateHelper d = prom.getPromDate(false);
+        if (p == 0)
+            d.changeSeconds(-30);
+        else
+            d.changeMinutes(-p);
+        if (d.getTimeInSeconds() < DateHelper.initNow(context).getTimeInSeconds()) {
+            d = prom.getPromDate(true);
+            if (p == 0)
+                d.changeSeconds(-30);
+            else
+                d.changeMinutes(-p);
         }
-        OneTimeWorkRequest request = new OneTimeWorkRequest
-                .Builder(PromWorker.class)
-                .setInitialDelay(m, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .addTag(PromWorker.TAG)
-                .build();
-        WorkManager.getInstance().enqueue(request);
-    }
-
-    public void cancelWorker() {
-        Lib.LOG("prom cancel");
-        WorkManager.getInstance().cancelAllWorkByTag(PromWorker.TAG);
+        long time = d.getTimeInMills();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
+            am.setAlarmClock(alarmClockInfo, piProm);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            am.setExact(AlarmManager.RTC_WAKEUP, time, piProm);
+        else
+            am.set(AlarmManager.RTC_WAKEUP, time, piProm);
     }
 
     public void clearTimeDiff() {

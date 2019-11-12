@@ -401,10 +401,7 @@ public class SettingsFragment extends BackFragment {
         editor.putInt(Const.TIME, p);
         editor.apply();
         PromHelper prom = new PromHelper(act, null);
-        if (p == Const.TURN_OFF)
-            prom.cancelWorker();
-        else
-            prom.initWorker(p);
+        prom.initNotif(p);
     }
 
     private void setCheckTime() {
