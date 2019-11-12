@@ -72,8 +72,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:enabled="false"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:text="@string/delete" />
     </LinearLayout>
 </LinearLayout>
