@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,7 +52,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+            if (message.what == 0)
+                tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+            else
+                act.startAnimMax();
             return false;
         }
     });
@@ -186,7 +190,26 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         adCalendar = new CalendarAdapter(this);
         rvCalendar.setLayoutManager(layoutManager);
         rvCalendar.setAdapter(adCalendar);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            rvCalendar.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (!act.isInMultiWindowMode())
+                        return false;
+                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        act.startAnimMin();
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                hTimer.sendEmptyMessage(1);
+                            }
+                        }, 1000);
+                    }
+                    return false;
+                }
+            });
         ivPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
