@@ -30,11 +30,10 @@
             android:text="@string/free_storage" />
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/pClear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:visibility="gone">
 
         <CheckBox
@@ -42,6 +41,7 @@
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:text="@string/loaded_katreny" />
 
         <CheckBox
@@ -49,6 +49,7 @@
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/cbKatreny"
             android:text="@string/loaded_poslaniya" />
 
         <CheckBox
@@ -56,6 +57,7 @@
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/cbPoslaniya"
             android:text="@string/loaded_materials" />
 
         <CheckBox
@@ -63,6 +65,7 @@
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/cbMaterials"
             android:text="@string/markers" />
 
         <Button
@@ -70,10 +73,20 @@
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/cbMarkers"
             android:layout_margin="10dp"
             android:enabled="false"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:text="@string/delete" />
-    </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivClear"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignTop="@id/bClearDo"
+            android:layout_toRightOf="@id/bClearDo"
+            android:src="@drawable/clear"
+            android:visibility="gone" />
+    </RelativeLayout>
 </LinearLayout>

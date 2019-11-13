@@ -124,6 +124,7 @@
     <string name="loaded_katreny">Загруженные Катрены</string>
     <string name="loaded_poslaniya">Загруженные Послания</string>
     <string name="loaded_materials">Загруженные материалы</string>
+    <string name="clear_completed">Очистка завершена</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
     <string name="minutes">минут</string>

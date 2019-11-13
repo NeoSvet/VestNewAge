@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,10 +13,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -39,15 +44,16 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.model.BaseModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 
-public class SettingsFragment extends BackFragment {
+public class SettingsFragment extends BackFragment implements Observer<Data> {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
     private MainActivity act;
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View[] pSections;
-    private View container, bClearDo;
+    private View container, bClearDo, ivClear;
     private View tvCheckOn, tvCheckOff, bCheckSet;
     private View tvPromOn, tvPromOff, bPromSet;
     private ImageView[] imgSections;
@@ -56,6 +62,9 @@ public class SettingsFragment extends BackFragment {
     private RadioButton[] rbsScreen;
     private CheckBox[] cbsClear;
     private SeekBar sbCheckTime, sbPromTime;
+    private BaseModel model;
+    private Animation anRotate;
+    private boolean stopRotate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,8 +75,21 @@ public class SettingsFragment extends BackFragment {
         initSections();
         initViews();
         setViews();
+        initModel();
         restoreState(savedInstanceState);
         return this.container;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -91,6 +113,53 @@ public class SettingsFragment extends BackFragment {
                 imgSections[i].setImageDrawable(getResources().getDrawable(R.drawable.minus));
             }
         }
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(BaseModel.class);
+        if (model.inProgress) {
+            bClearDo.setEnabled(false);
+            initRotate();
+        }
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.FINISH, false)) {
+            stopRotate = true;
+            model.finish();
+            bClearDo.setEnabled(true);
+            Lib.showToast(act, getResources().getString(R.string.clear_completed));
+        }
+    }
+
+    private void initRotate() {
+        stopRotate = false;
+        if (anRotate == null) {
+            ivClear = container.findViewById(R.id.ivClear);
+            anRotate = AnimationUtils.loadAnimation(act, R.anim.rotate);
+            anRotate.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (stopRotate)
+                        ivClear.setVisibility(View.GONE);
+                    else
+                        ivClear.startAnimation(anRotate);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+        }
+        ivClear.setVisibility(View.VISIBLE);
+        ivClear.startAnimation(anRotate);
     }
 
     private void initSections() {
@@ -248,10 +317,18 @@ public class SettingsFragment extends BackFragment {
         bClearDo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO tut
+                initRotate();
+                bClearDo.setEnabled(false);
+                if (cbsClear[0].isChecked()) //katreny
+                    model.startClear(Const.LINK + DataBase.LIKE);
+                if (cbsClear[1].isChecked()) //poslaniya
+                    model.startClear(Const.LINK + " NOT" + DataBase.LIKE);
+                if (cbsClear[2].isChecked()) //materials
+                    model.startClear("00.00");
+                if (cbsClear[3].isChecked()) //markers
+                    model.startClear(DataBase.MARKERS);
                 for (int i = 0; i < cbsClear.length; i++)
                     cbsClear[i].setChecked(false);
-                bClearDo.setEnabled(false);
             }
         });
 
