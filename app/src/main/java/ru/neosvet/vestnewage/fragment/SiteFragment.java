@@ -37,7 +37,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment implements Observer<Data> {
-    public static final String MAIN = "/main", NEWS = "/news", END = "<end>";
+    public static final String MAIN = "/main", NEWS = "/news", NOVOSTI = "novosti.html", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
@@ -160,7 +160,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             public void onTabChanged(String name) {
                 if (name.equals(MAIN))
                     act.setTitle(getResources().getString(R.string.main));
-                else if (name.equals(NEWS))
+                else
                     act.setTitle(getResources().getString(R.string.news));
                 File f = getFile(name);
                 if (f.exists())
@@ -380,7 +380,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         act.status.setError(null);
         String url = Const.SITE;
         if (name.equals(NEWS))
-            url += "novosti.html";
+            url += NOVOSTI;
         fabRefresh.setVisibility(View.GONE);
         model.startLoad(url, getFile(name).toString());
         act.status.setLoad(true);

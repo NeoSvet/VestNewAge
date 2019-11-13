@@ -34,6 +34,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -152,13 +153,10 @@ public class SlashActivity extends AppCompatActivity {
             } else if (link.length() < 2 || link.equals("/index.html")) {
                 main.putExtra(Const.CUR_ID, R.id.nav_main);
                 main.putExtra(Const.TAB, 0);
-            } else if (link.equals("/novosti.html")) {
+            } else if (link.equals(SiteFragment.NOVOSTI)) {
                 main.putExtra(Const.CUR_ID, R.id.nav_main);
                 main.putExtra(Const.TAB, 1);
-            } else if (link.equals("/media.html")) {
-                main.putExtra(Const.CUR_ID, R.id.nav_main);
-                main.putExtra(Const.TAB, 2);
-            } else if (link.contains("html")) {
+            } else if (link.contains(Const.HTML)) {
                 BrowserActivity.openReader(this, link.substring(1), null);
                 main = null;
             } else if (data.getQuery() != null && data.getQuery().contains("date")) { //http://blagayavest.info/poems/?date=11-3-2017
