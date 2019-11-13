@@ -62,7 +62,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private CustomDialog alertRnd;
     private TabHost tabHost;
     private ListView lvBook;
-    private int x, y, tab = 0;
+    private int x, y, year = 0, tab = 0;
     private Tip menuRnd;
     private BookModel model;
     private String dialog = "";
@@ -88,6 +88,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         initTabs();
         initModel();
         restoreState(savedInstanceState);
+        if (year > 0) {
+            DateHelper d = DateHelper.initToday(act);
+            d.setYear(year);
+            year = 0;
+            showDatePicker(d);
+        }
         return this.container;
     }
 
@@ -179,7 +185,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             if (!model.inProgress) {
                 dialog = state.getString(Const.DIALOG);
                 if (dialog.length() == 1)
-                    showDatePicker();
+                    showDatePicker(null);
                 else if (dialog.length() > 1) {
                     String[] m = dialog.split(Const.AND);
                     showRndAlert(m[0], m[1], m[2], m[3], Integer.parseInt(m[4]));
@@ -466,7 +472,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             @Override
             public void onClick(View view) {
                 dialog = "1";
-                showDatePicker();
+                showDatePicker(null);
             }
         });
         fabRndMenu.setOnClickListener(new View.OnClickListener() {
@@ -577,12 +583,16 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         this.tab = tab;
     }
 
-    private void showDatePicker() {
-        DateHelper d;
-        if (tab == 0)
-            d = dKatren;
-        else
-            d = dPoslanie;
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    private void showDatePicker(DateHelper d) {
+        if (d == null)
+            if (tab == 0)
+                d = dKatren;
+            else
+                d = dPoslanie;
         dateDialog = new DateDialog(act, d);
         dateDialog.setResult(BookFragment.this);
         if (tab == 0) { //katreny

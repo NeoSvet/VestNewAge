@@ -213,12 +213,14 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 0) { // main
-                        if (pos == 1 || pos == 5) { //poslaniya
+                        if (link.contains(Const.RSS)) {
+                            act.setFragment(R.id.nav_rss);
+                        } else if (link.contains("/poems")) {
+                            act.openBook(link, true);
+                        } else if (pos == 1) { //tolkovaniya
                             act.setFragment(R.id.nav_book);
-                        } else if (pos == adMain.getCount() - 2) { //rss
-//                            Intent intent = new Intent(SiteFragment.this, Summary Activity.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                            startActivity(intent);
+                        } else if (pos == 5) { //poslaniya
+                            act.openBook(link, false);
                         } else if (pos == 6 || pos == 7) { //no article
                             BrowserActivity.openReader(act, link, null);
                         } else

@@ -374,9 +374,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_book:
-                BookFragment frBook = new BookFragment();
-                frBook.setTab(tab);
-                fragmentTransaction.replace(R.id.my_fragment, frBook);
+                curFragment = new BookFragment();
+                ((BookFragment)curFragment).setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
@@ -518,5 +518,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             menuDownload.show();
         }
+    }
+
+    public void openBook(String link, boolean katren) {
+        tab = katren ? 0 : 1;
+        setFragment(R.id.nav_book);
+        int year = 0;
+        try {
+            link = link.substring(link.length() - 5, link.length() - 1);
+            year = Integer.parseInt(link);
+        } catch (Exception e) { }
+        ((BookFragment)curFragment).setYear(year);
     }
 }
