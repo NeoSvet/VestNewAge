@@ -14,6 +14,11 @@ import ru.neosvet.vestnewage.R;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHolder> {
     private List<CalendarItem> data = new ArrayList<CalendarItem>();
+    private View.OnTouchListener click;
+
+    public CalendarAdapter(View.OnTouchListener click) {
+        this.click = click;
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -36,6 +41,8 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         } else {
             holder.num.setTypeface(null, Typeface.NORMAL);
         }
+        holder.bg.setTag(pos);
+        holder.bg.setOnTouchListener(click);
     }
 
     @Override

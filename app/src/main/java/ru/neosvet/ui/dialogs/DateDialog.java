@@ -15,11 +15,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 
-public class DateDialog extends Dialog {
+public class DateDialog extends Dialog implements View.OnClickListener {
     private Activity act;
     private TextView tvYear;
     private DateHelper date;
@@ -100,7 +99,7 @@ public class DateDialog extends Dialog {
 
         RecyclerView rvMonth = (RecyclerView) findViewById(R.id.rvMonth);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 3);
-        adMonth = new MonthAdapter();
+        adMonth = new MonthAdapter(this);
         for (int i = 0; i < 12; i++) {
             adMonth.addItem(act.getResources().getStringArray(R.array.months)[i]);
         }
@@ -112,15 +111,6 @@ public class DateDialog extends Dialog {
         if (max_month == 0)
             max_month = d.getMonth();
         setCalendar();
-        rvMonth.addOnItemTouchListener(
-                new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, final int pos) {
-                        date.setMonth(pos + 1);
-                        adMonth.setSelect(pos);
-                        adMonth.notifyDataSetChanged();
-                    }
-                }));
 
         findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,6 +143,14 @@ public class DateDialog extends Dialog {
         super.dismiss();
     }
 
+    @Override
+    public void onClick(View v) { //click month item
+        int pos = (int) v.getTag();
+        date.setMonth(pos + 1);
+        adMonth.setSelect(pos);
+        adMonth.notifyDataSetChanged();
+    }
+
     public interface Result {
         void putDate(@Nullable DateHelper date); // null for cancel
     }
@@ -161,6 +159,11 @@ public class DateDialog extends Dialog {
         public static final int NONE_MIN = -1, NONE_MAX = 12;
         private List<String> data = new ArrayList<String>();
         private int select, min_pos = 0, max_pos = 11;
+        private View.OnClickListener click;
+
+        public MonthAdapter(View.OnClickListener click) {
+            this.click = click;
+        }
 
         @Override
         public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -200,8 +203,8 @@ public class DateDialog extends Dialog {
                 holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_k));
             else
                 holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
-
-
+            holder.tv.setTag(pos);
+            holder.tv.setOnClickListener(click);
         }
 
         @Override

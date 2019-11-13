@@ -12,11 +12,13 @@ import ru.neosvet.vestnewage.R;
 public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
     private Context context;
     private int max, select;
+    private View.OnTouchListener click;
 
-    public PageAdapter(Context context, int max, int select) {
+    public PageAdapter(Context context, int max, int select, View.OnTouchListener click) {
         this.context = context;
         this.max = max;
         this.select = select;
+        this.click = click;
     }
 
     @Override
@@ -33,6 +35,8 @@ public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
             holder.bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_bg));
         else
             holder.bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+        holder.bg.setTag(pos);
+        holder.bg.setOnTouchListener(click);
     }
 
     public void setSelect(int select) {

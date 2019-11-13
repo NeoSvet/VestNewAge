@@ -13,6 +13,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -23,7 +24,6 @@ import androidx.work.Data;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
@@ -37,7 +37,7 @@ import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data> {
+public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -183,40 +183,9 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         ivNext = container.findViewById(R.id.ivNext);
         rvCalendar = (RecyclerView) container.findViewById(R.id.rvCalendar);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
-        adCalendar = new CalendarAdapter();
+        adCalendar = new CalendarAdapter(this);
         rvCalendar.setLayoutManager(layoutManager);
         rvCalendar.setAdapter(adCalendar);
-
-        rvCalendar.addOnItemTouchListener(
-                new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, final int pos) {
-                        int k = adCalendar.getItem(pos).getCount();
-                        if (k == 1) {
-                            openLink(adCalendar.getItem(pos).getLink(0));
-                        } else if (k > 1) {
-                            PopupMenu pMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
-                            for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
-                                pMenu.getMenu().add(adCalendar.getItem(pos).getTitle(i));
-                            }
-                            pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                @Override
-                                public boolean onMenuItemClick(MenuItem item) {
-                                    String title = item.getTitle().toString();
-                                    for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
-                                        if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
-                                            openLink(adCalendar.getItem(pos).getLink(i));
-                                            break;
-                                        }
-                                    }
-                                    return true;
-                                }
-                            });
-                            pMenu.show();
-                        }
-                    }
-                })
-        );
 
         ivPrev.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -418,5 +387,39 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     public int getCurrentYear() {
         return dCurrent.getYear();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) { //click calendar item
+        if (event.getAction() != MotionEvent.ACTION_UP)
+            return false;
+        final int pos = (int) v.getTag();
+        int k = adCalendar.getItem(pos).getCount();
+        if (k == 0)
+            return false;
+        if (k == 1) {
+            openLink(adCalendar.getItem(pos).getLink(0));
+            return false;
+        }
+        //k > 1
+        PopupMenu pMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
+        for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
+            pMenu.getMenu().add(adCalendar.getItem(pos).getTitle(i));
+        }
+        pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                String title = item.getTitle().toString();
+                for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
+                    if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
+                        openLink(adCalendar.getItem(pos).getLink(i));
+                        break;
+                    }
+                }
+                return true;
+            }
+        });
+        pMenu.show();
+        return false;
     }
 }

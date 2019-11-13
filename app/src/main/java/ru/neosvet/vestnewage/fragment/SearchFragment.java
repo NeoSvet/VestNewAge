@@ -42,7 +42,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
@@ -61,7 +60,7 @@ import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
 
 
-public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
+public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r";
     private MainActivity act;
     private float density;
@@ -373,8 +372,15 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 return true;
             }
         });
-        fabSettings.setOnClickListener(this);
-        container.findViewById(R.id.bSettings).setOnClickListener(this);
+        View.OnClickListener click = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                softKeyboard.closeSoftKeyboard();
+                visSettings();
+            }
+        };
+        fabSettings.setOnClickListener(click);
+        container.findViewById(R.id.bSettings).setOnClickListener(click);
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -441,16 +447,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                                  int visibleItemCount, int totalItemCount) {
             }
         });
-        rvPages.addOnItemTouchListener(
-                new RecyclerItemClickListener(act, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, final int pos) {
-                        if (page != pos) {
-                            page = pos;
-                            showResult();
-                        }
-                    }
-                }));
         bShow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -591,7 +587,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             if (adPages != null && adPages.getItemCount() == max)
                 adPages.setSelect(page);
             else {
-                adPages = new PageAdapter(act, max, page);
+                adPages = new PageAdapter(act, max, page, this);
                 LinearLayoutManager layoutManager = new LinearLayoutManager(act, LinearLayoutManager.HORIZONTAL, false);
                 rvPages.setLayoutManager(layoutManager);
                 rvPages.setAdapter(adPages);
@@ -619,8 +615,14 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     @Override
-    public void onClick(View view) { //click fabSettings and bSettings
-        softKeyboard.closeSoftKeyboard();
-        visSettings();
+    public boolean onTouch(View v, MotionEvent event) {//click page item
+        if (event.getAction() != MotionEvent.ACTION_UP)
+            return false;
+        int pos = (int) v.getTag();
+        if (page != pos) {
+            page = pos;
+            showResult();
+        }
+        return false;
     }
 }
