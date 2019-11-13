@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public int k_new = 0;
     private int first_fragment;
     private MenuFragment frMenu;
-    private BackFragment curFragment;
+    private BackFragment curFragment, prevFragment;
     private FragmentManager myFragmentManager;
     public Lib lib = new Lib(this);
     private Tip menuDownload;
@@ -153,13 +153,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.putBoolean(Const.FIRST, false);
                 editor.apply();
                 tab = -1;
-                setFragment(R.id.nav_help);
+                setFragment(R.id.nav_help, false);
                 isFirst = true;
             } else {
                 if (pref.getBoolean(Const.START_NEW, false) && k_new > 0)
-                    setFragment(R.id.nav_new);
+                    setFragment(R.id.nav_new, false);
                 else
-                    setFragment(intent.getIntExtra(Const.CUR_ID, first_fragment));
+                    setFragment(intent.getIntExtra(Const.CUR_ID, first_fragment), false);
             }
         } else {
             cur_id = state.getInt(Const.CUR_ID);
@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         if (!item.isChecked())
-            setFragment(item.getItemId());
+            setFragment(item.getItemId(), false);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frMenu.setNew(unread.getNewId(k_new));
     }
 
-    public void setFragment(int id) {
+    public void setFragment(int id, boolean savePrev) {
         statusBack = STATUS_PAGE;
         if (cur_id != id)
             isFirst = false;
@@ -338,6 +338,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(id);
         status.setError(null);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
+        if (savePrev)
+            prevFragment = curFragment;
+        else
+            prevFragment = null;
         curFragment = null;
         if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
             prom.hide();
@@ -365,9 +369,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
             case R.id.nav_main:
-                SiteFragment frSite = new SiteFragment();
-                frSite.setTab(tab);
-                fragmentTransaction.replace(R.id.my_fragment, frSite);
+                curFragment = new SiteFragment();
+                ((SiteFragment) curFragment).setTab(tab);
+                fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_calendar:
                 curFragment = new CalendarFragment();
@@ -375,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_book:
                 curFragment = new BookFragment();
-                ((BookFragment)curFragment).setTab(tab);
+                ((BookFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_search:
@@ -463,7 +467,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFirst) {
-            setFragment(first_fragment);
+            setFragment(first_fragment, false);
+        } else if (prevFragment != null) {
+            if (curFragment != null && !curFragment.onBackPressed())
+                return;
+            curFragment = prevFragment;
+            FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.my_fragment, curFragment);
+            fragmentTransaction.commit();
+            prevFragment = null;
         } else if (curFragment != null) {
             if (curFragment.onBackPressed())
                 exit();
@@ -476,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         } else if (statusBack == STATUS_PAGE && isMenuMode) {
             statusBack = STATUS_MENU;
-            setFragment(R.id.menu_fragment);
+            setFragment(R.id.menu_fragment, false);
         } else { //  statusBack == STATUS_MENU;
             statusBack = STATUS_EXIT;
             Lib.showToast(this, getResources().getString(R.string.click_for_exit));
@@ -522,12 +534,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void openBook(String link, boolean katren) {
         tab = katren ? 0 : 1;
-        setFragment(R.id.nav_book);
+        setFragment(R.id.nav_book, true);
         int year = 0;
         try {
             link = link.substring(link.length() - 5, link.length() - 1);
             year = Integer.parseInt(link);
-        } catch (Exception e) { }
-        ((BookFragment)curFragment).setYear(year);
+        } catch (Exception e) {
+        }
+        ((BookFragment) curFragment).setYear(year);
     }
 }

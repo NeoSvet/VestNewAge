@@ -24,7 +24,6 @@ import java.io.FileReader;
 import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -168,7 +167,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         tvNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                act.setFragment(R.id.nav_new);
+                act.setFragment(R.id.nav_new, true);
             }
         });
         fabRefresh.setOnClickListener(new View.OnClickListener() {

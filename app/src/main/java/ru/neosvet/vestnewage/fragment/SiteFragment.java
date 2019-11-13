@@ -27,7 +27,6 @@ import java.io.FileReader;
 
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -214,11 +213,11 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 0) { // main
                         if (link.contains(Const.RSS)) {
-                            act.setFragment(R.id.nav_rss);
+                            act.setFragment(R.id.nav_rss, true);
                         } else if (link.contains("/poems")) {
                             act.openBook(link, true);
                         } else if (pos == 1) { //tolkovaniya
-                            act.setFragment(R.id.nav_book);
+                            act.setFragment(R.id.nav_book, true);
                         } else if (pos == 5) { //poslaniya
                             act.openBook(link, false);
                         } else if (pos == 6 || pos == 7) { //no article
