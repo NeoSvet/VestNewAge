@@ -92,7 +92,6 @@
     <string name="long_press_for_mark">Долгое нажатие - чтобы добавить в закладки</string>
     <!--SiteFragment-->
     <string name="news">Объявления</string>
-    <string name="media">Видео и пресса</string>
     <string name="to_load">Скачать</string>
     <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->

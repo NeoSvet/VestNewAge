@@ -175,10 +175,8 @@ public class LoaderWorker extends Worker {
         if (isCancelled()) return;
         // подсчёт количества страниц:
         int k = 0;
-        if (id == LoaderModel.ALL || id == R.id.nav_main) {
+        if (id == LoaderModel.ALL || id == R.id.nav_main)
             k = SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
-            k += SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MEDIA).toString());
-        }
         if (id == LoaderModel.ALL || id == R.id.nav_book)
             k += workWithBook(true);
         setProgMax(k);

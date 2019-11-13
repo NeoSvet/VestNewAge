@@ -37,7 +37,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment implements Observer<Data> {
-    public static final String MAIN = "/main", NEWS = "/news", MEDIA = "/media", END = "<end>";
+    public static final String MAIN = "/main", NEWS = "/news", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
@@ -146,12 +146,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
 
-        tabSpec = tabHost.newTabSpec(MEDIA);
-        tabSpec.setIndicator(getResources().getString(R.string.media),
-                getResources().getDrawable(R.drawable.none));
-        tabSpec.setContent(R.id.lvMain);
-        tabHost.addTab(tabSpec);
-
         TabWidget widget = tabHost.getTabWidget();
         for (int i = 0; i < widget.getChildCount(); i++) {
             View v = widget.getChildAt(i);
@@ -168,8 +162,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     act.setTitle(getResources().getString(R.string.main));
                 else if (name.equals(NEWS))
                     act.setTitle(getResources().getString(R.string.news));
-                else if (name.equals(MEDIA))
-                    act.setTitle(getResources().getString(R.string.media));
                 File f = getFile(name);
                 if (f.exists())
                     openList(f, true);
@@ -386,14 +378,8 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private void startLoad(String name) {
         act.status.setError(null);
         String url = Const.SITE;
-        switch (name) {
-            case NEWS:
-                url += "novosti.html";
-                break;
-            case MEDIA:
-                url += "media.html";
-                break;
-        }
+        if (name.equals(NEWS))
+            url += "novosti.html";
         fabRefresh.setVisibility(View.GONE);
         model.startLoad(url, getFile(name).toString());
         act.status.setLoad(true);

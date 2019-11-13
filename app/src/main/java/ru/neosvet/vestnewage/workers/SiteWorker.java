@@ -66,13 +66,11 @@ public class SiteWorker extends Worker {
             String[] url = new String[]{
                     Const.SITE,
                     Const.SITE + "novosti.html",
-                    Const.SITE + "media.html"
             };
             Lib lib = new Lib(context);
             String[] file = new String[]{
                     lib.getFileByName(SiteFragment.MAIN).toString(),
-                    lib.getFileByName(SiteFragment.NEWS).toString(),
-                    lib.getFileByName(SiteFragment.MEDIA).toString()
+                    lib.getFileByName(SiteFragment.NEWS).toString()
             };
             Data progUp = new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
