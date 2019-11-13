@@ -112,8 +112,13 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         }
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
-                initCabinet(getResources().getString(R.string.selected_status),
-                        result.getString(Const.DESCTRIPTION));
+                int select = result.getInt(Const.SELECT, -1);
+                if (select == -1)
+                    initCabinet(getResources().getString(R.string.selected_status),
+                            result.getString(Const.DESCTRIPTION));
+                else
+                    initCabinet(getResources().getString(R.string.selected_status),
+                            adMain.getItem(select).getTitle());
                 break;
             case CabWorker.NO_SELECTED:
                 initCabinet(getResources().getString(R.string.send_status),

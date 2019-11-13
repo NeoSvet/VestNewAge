@@ -40,16 +40,14 @@ public class CabWorker extends Worker {
         try {
             String task = getInputData().getString(Const.TASK);
             Data.Builder result;
-            if (task.equals(Const.LOGIN)) {
+            if (task.equals(Const.LOGIN))
                 result = subLogin(model.getEmail(),
                         getInputData().getString(Const.PASSWORD));
-            } else if (task.equals(Const.GET_WORDS)) {
+            else if (task.equals(Const.GET_WORDS))
                 result = getListWord(false);
-            } else {
+            else
                 result = sendWord(getInputData().getInt(Const.LIST, 0));
-            }
-            result.putString(Const.TASK, task)
-                    .putBoolean(Const.FINISH, true);
+            result.putBoolean(Const.FINISH, true);
             model.postProgress(result.build());
             return Result.success();
         } catch (Exception e) {
@@ -189,7 +187,7 @@ public class CabWorker extends Worker {
         Data.Builder result = new Data.Builder();
         if (s == null) { //no error
             result.putInt(Const.MODE, SELECTED_WORD);
-            result.putInt(Const.DESCTRIPTION, index);
+            result.putInt(Const.SELECT, index);
         } else {
             result.putInt(Const.MODE, ERROR);
             result.putString(Const.DESCTRIPTION, s);
