@@ -117,12 +117,12 @@ public class LoaderModel extends ProgressModel {
         if (id == ALL) {
             k += (d.getYear() - 2016) * 12 + d.getMonth(); //calendar from 01.16
             k += 4; //main, news, media and rss
-        } else if (id == R.id.nav_main) //main, news, media
-            k = 3;
+        } else if (id == R.id.nav_main) //main, news
+            k = 2;
         this.postProgress(new Data.Builder()
                 .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
                 .putString(Const.MSG, msg)
-                .putInt(Const.MAX, max).build());
+                .putInt(Const.MAX, k).build());
         OneTimeWorkRequest task;
         WorkContinuation job = null;
         if (id == ALL) { //Summary
