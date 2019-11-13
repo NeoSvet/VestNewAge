@@ -29,7 +29,6 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 
 public class PromHelper extends LifecycleService {
-    public static final byte ERROR = -1;
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private Context context;
     private TextView tvPromTime = null;
