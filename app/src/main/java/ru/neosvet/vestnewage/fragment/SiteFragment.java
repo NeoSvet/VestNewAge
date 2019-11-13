@@ -169,6 +169,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     startLoad(name);
             }
         });
+        tabHost.setCurrentTab(0);
     }
 
     private void initViews() {
@@ -264,7 +265,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                             if (r > Math.abs(y - (int) event.getY(0))) {
                                 int t = tabHost.getCurrentTab();
                                 if (x > x2) { // next
-                                    if (t < 3)
+                                    if (t < 2)
                                         tabHost.setCurrentTab(t + 1);
                                     notClick = true;
                                 } else if (x < x2) { // prev

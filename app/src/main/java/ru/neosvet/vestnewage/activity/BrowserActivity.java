@@ -648,7 +648,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
                     d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
                     if (dbPage.getName().equals("00.00")) //раз в месяц предлагать обновить статьи
-                        status.checkTime(d.getTimeInSeconds() - DateHelper.MONTH_IN_SEC);
+                        status.checkTime(d.getTimeInSeconds());
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
                     bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
                     bw.flush();

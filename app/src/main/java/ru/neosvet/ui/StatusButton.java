@@ -110,7 +110,7 @@ public class StatusButton {
     public boolean checkTime(long time) {
         if (!stop || isCrash())
             return true;
-        if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC) {
+        if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC * 7) {
             this.time = true;
             panel.setVisibility(View.VISIBLE);
             visible = true;
