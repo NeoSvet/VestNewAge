@@ -22,6 +22,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
@@ -128,20 +129,20 @@ public class BookWorker extends Worker {
         }
         br.close();
         in.close();
-        int prog = 0, m = 8, y = 4;
+        int prog = 0;
+        DateHelper d = DateHelper.putYearMonth(context, 2004, 8);
         DataBase dataBase;
         SQLiteDatabase db;
         ContentValues cv;
         boolean isTitle;
         final long time = System.currentTimeMillis();
-        while (y < 16) {
-            name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
+        while (d.getYear() < 2016) {
+            name = d.getMY();
             if (withDialog) {
                 if (model != null) {
                     model.postProgress(new Data.Builder()
                             .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
-                            .putString(Const.MSG, context.getResources().getStringArray(R.array.months)
-                                    [m - 1] + " " + (2000 + y))
+                            .putString(Const.MSG, d.getMonthString() + " " + d.getYear())
                             .putInt(Const.PROG, prog)
                             .build());
                 }
@@ -174,11 +175,7 @@ public class BookWorker extends Worker {
                 in.close();
                 dataBase.close();
             }
-            if (m == 12) {
-                m = 1;
-                y++;
-            } else
-                m++;
+            d.changeMonth(1);
             prog++;
             if (isCancelled())
                 return name;
