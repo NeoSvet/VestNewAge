@@ -41,7 +41,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
 
-public class SlashActivity extends AppCompatActivity {
+public class SlashActivity extends AppCompatActivity implements Observer<Data>{
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private Intent main;
@@ -113,6 +113,12 @@ public class SlashActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         model.removeObservers(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        model.addObserver(this, this);
     }
 
     @Override
@@ -203,18 +209,6 @@ public class SlashActivity extends AppCompatActivity {
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(SlashModel.class);
-        model.getProgress().observe(this, new Observer<Data>() {
-            @Override
-            public void onChanged(@Nullable Data data) {
-                if (data.getBoolean(Const.TIME, false)) {
-                    model.non_start = false;
-                    //TODO rebuild prom notif
-                }
-                if (data.getBoolean(Const.FINISH, false)) {
-                    finishLoad();
-                }
-            }
-        });
         if (model.inProgress) {
             setStatus();
             return;
@@ -233,6 +227,17 @@ public class SlashActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         model.startLoad(pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_SUMMARY,
                 date.getMonth(), date.getYear());
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.TIME, false)) {
+            model.non_start = false;
+            //TODO rebuild prom notif
+        }
+        if (data.getBoolean(Const.FINISH, false)) {
+            finishLoad();
+        }
     }
 
     public void finishLoad() {

@@ -38,12 +38,16 @@ public class SlashWorker extends Worker {
         try {
             synchronTime();
             loadAds();
-            return Result.success();
+            //return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             Lib.LOG("SlashWorker error: " + e.getMessage());
         }
-        return Result.failure();
+        SlashModel.getInstance().postProgress(new Data.Builder()
+                .putBoolean(Const.FINISH, true)
+                .build());
+        return Result.success();
+        //return Result.failure();
     }
 
     private void loadAds() throws Exception {
