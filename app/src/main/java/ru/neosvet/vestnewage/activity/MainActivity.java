@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,6 +22,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.work.Data;
@@ -28,6 +31,7 @@ import androidx.work.Data;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
@@ -58,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
-    public int k_new = 0;
     private int first_fragment;
     private MenuFragment frMenu;
     private BackFragment curFragment, prevFragment;
@@ -67,13 +70,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Tip menuDownload;
     private NavigationView navigationView;
     private DrawerLayout drawer;
-    private TextView bDownloadIt;
+    private TextView bDownloadIt, tvNew;
     public StatusButton status;
     private PromHelper prom;
     private SharedPreferences pref;
     private UnreadHelper unread;
     private LoaderModel model;
-    private int cur_id, tab = 0, statusBack;
+    private int cur_id, tab = 0, statusBack, k_new = 0;
+    public View fab;
+    public Animation anMin, anMax;
     private Handler updateDialog;
 
     @Override
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         unread = new UnreadHelper(this);
         initInterface();
         initModel();
+        initAnim();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
@@ -111,6 +117,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         updateNew();
         restoreState(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInMultiWindowMode())
+                MultiWindowSupport.resizeFloatTextView(tvNew, true);
+        }
+    }
+
+    private void initAnim() {
+        anMin = AnimationUtils.loadAnimation(this, R.anim.minimize);
+        anMin.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                tvNew.setVisibility(View.GONE);
+                if (fab != null)
+                    fab.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        anMax = AnimationUtils.loadAnimation(this, R.anim.maximize);
     }
 
     private void initModel() {
@@ -183,6 +216,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             prom.resume();
     }
 
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
+    }
+
     public void setProm(View textView) {
         prom = new PromHelper(this, textView);
     }
@@ -195,6 +235,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().getItem(0).setIcon(unread.getNewId(k_new));
         else if (frMenu != null)
             frMenu.setNew(unread.getNewId(k_new));
+        if (k_new == 0)
+            tvNew.setVisibility(View.GONE);
+        else {
+            tvNew.setVisibility(View.VISIBLE);
+            tvNew.setText(String.valueOf(k_new));
+            tvNew.startAnimation(AnimationUtils.loadAnimation(this, R.anim.blink));
+        }
     }
 
     private void initLoad() {
@@ -248,6 +295,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     model.startLoad(LoaderModel.DOWNLOAD_ID, String.valueOf(cur_id));
                 }
                 initLoad();
+            }
+        });
+        tvNew = (TextView) findViewById(R.id.tvNew);
+        tvNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setFragment(R.id.nav_new, true);
             }
         });
 
@@ -351,11 +405,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 frMenu = new MenuFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frMenu);
                 if (isCountInMenu) prom.show();
+                setNew();
                 break;
             case R.id.nav_new:
                 fragmentTransaction.replace(R.id.my_fragment, new NewFragment());
                 if (frMenu != null)
                     frMenu.setSelect(R.id.nav_new);
+                setNew();
                 break;
             case R.id.nav_rss:
                 curFragment = new SummaryFragment();
@@ -367,20 +423,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         notifHelper.cancel(i);
                     getIntent().removeExtra(DataBase.ID);
                 }
+                setNew();
                 break;
             case R.id.nav_main:
                 curFragment = new SiteFragment();
                 ((SiteFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                setNew();
                 break;
             case R.id.nav_calendar:
                 curFragment = new CalendarFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                setNew();
                 break;
             case R.id.nav_book:
                 curFragment = new BookFragment();
                 ((BookFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
@@ -392,35 +452,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 curFragment = search;
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_marker:
                 curFragment = new CollectionsFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_cabinet:
                 curFragment = new CabmainFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_settings:
                 curFragment = new SettingsFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_help:
                 if (tab == -1) { //first start
-                    tab = 0;
                     HelpFragment frHelp = new HelpFragment();
                     fragmentTransaction.replace(R.id.my_fragment, frHelp);
                     frHelp.setOpenHelp(0);
                 } else
                     fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
+                tvNew.setVisibility(View.GONE);
                 break;
         }
 
         tab = 0;
         fragmentTransaction.commit();
+    }
+
+    private void setNew() {
+        if (k_new > 0)
+            tvNew.setVisibility(View.VISIBLE);
+        else
+            tvNew.setVisibility(View.GONE);
     }
 
     public void finishLoad(boolean all, String error) {
@@ -542,5 +614,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } catch (Exception e) {
         }
         ((BookFragment) curFragment).setYear(year);
+    }
+
+    public void startAnimMin() {
+        if (k_new > 0)
+            tvNew.startAnimation(anMin);
+        fab.startAnimation(anMin);
+    }
+
+    public void startAnimMax() {
+        if (k_new > 0) {
+            tvNew.setVisibility(View.VISIBLE);
+            tvNew.startAnimation(anMax);
+        }
+        fab.setVisibility(View.VISIBLE);
+        fab.startAnimation(anMax);
     }
 }

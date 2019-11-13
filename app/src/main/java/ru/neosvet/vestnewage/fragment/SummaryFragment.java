@@ -2,18 +2,15 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.work.Data;
 
@@ -21,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
@@ -36,10 +32,8 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
-    private Animation anMin, anMax;
     private View container;
     private View fabRefresh;
-    private TextView tvNew;
     private SummaryModel model;
 
     @Override
@@ -52,10 +46,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         setViews();
         initModel();
         restoreState(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (act.isInMultiWindowMode())
-                MultiWindowSupport.resizeFloatTextView(tvNew, true);
-        }
         return this.container;
     }
 
@@ -68,7 +58,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onResume() {
         super.onResume();
-        updateNew();
         model.addObserver(act, this);
     }
 
@@ -125,51 +114,15 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             startLoad();
     }
 
-    private void updateNew() {
-        act.updateNew();
-        if (act.k_new == 0)
-            tvNew.setVisibility(View.GONE);
-        else {
-            tvNew.setVisibility(View.VISIBLE);
-            tvNew.setText(String.valueOf(act.k_new));
-            tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-        }
-    }
-
     private void initViews() {
-        tvNew = (TextView) container.findViewById(R.id.tvNew);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         lvSummary = (ListView) container.findViewById(R.id.lvList);
         adSummary = new ListAdapter(act);
         lvSummary.setAdapter(adSummary);
-        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
-        anMin.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                tvNew.setVisibility(View.GONE);
-                fabRefresh.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
+        act.fab = fabRefresh;
     }
 
     private void setViews() {
-        tvNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.setFragment(R.id.nav_new, true);
-            }
-        });
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -200,21 +153,12 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (!act.status.startMin()) {
-                        fabRefresh.startAnimation(anMin);
-                        if (act.k_new > 0)
-                            tvNew.startAnimation(anMin);
-                    }
+                    if (!act.status.startMin())
+                        act.startAnimMin();
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                    if (!act.status.startMax()) {
-                        fabRefresh.setVisibility(View.VISIBLE);
-                        fabRefresh.startAnimation(anMax);
-                        if (act.k_new > 0) {
-                            tvNew.setVisibility(View.VISIBLE);
-                            tvNew.startAnimation(anMax);
-                        }
-                    }
+                    if (!act.status.startMax())
+                        act.startAnimMax();
                 }
                 return false;
             }
@@ -258,7 +202,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     private void finishLoad(String error) {
         model.finish();
-        updateNew();
+        act.updateNew();
         if (error != null) {
             act.status.setError(error);
             return;

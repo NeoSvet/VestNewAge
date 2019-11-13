@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -40,7 +39,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
-    private Animation anMin, anMax;
     private SiteModel model;
     private TabHost tabHost;
     private ListView lvMain;
@@ -174,24 +172,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private void initViews() {
         tvEmptySite = container.findViewById(R.id.tvEmptySite);
         fabRefresh = container.findViewById(R.id.fabRefresh);
-        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
-        anMin.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                fabRefresh.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
+        act.fab = fabRefresh;
     }
 
     private void setViews() {
@@ -255,7 +236,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         if (!act.status.startMin())
-                            fabRefresh.startAnimation(anMin);
+                            act.startAnimMin();
                         x = (int) event.getX(0);
                         y = (int) event.getY(0);
                         break;
@@ -276,10 +257,8 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                                 }
                             }
                     case MotionEvent.ACTION_CANCEL:
-                        if (!act.status.startMax()) {
-                            fabRefresh.setVisibility(View.VISIBLE);
-                            fabRefresh.startAnimation(anMax);
-                        }
+                        if (!act.status.startMax())
+                            act.startAnimMax();
                         break;
                 }
                 return false;

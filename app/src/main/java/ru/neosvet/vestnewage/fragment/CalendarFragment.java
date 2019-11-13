@@ -4,7 +4,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,7 +23,6 @@ import androidx.work.Data;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.RecyclerItemClickListener;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.BackFragment;
@@ -44,7 +42,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
     private DateHelper dCurrent;
-    private TextView tvDate, tvNew;
+    private TextView tvDate;
     private View container, ivPrev, ivNext, fabRefresh;
     private CalendarModel model;
     private MainActivity act;
@@ -68,10 +66,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         initCalendar();
         initModel();
         restoreState(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (act.isInMultiWindowMode())
-                MultiWindowSupport.resizeFloatTextView(tvNew, true);
-        }
         return this.container;
     }
 
@@ -84,7 +78,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onResume() {
         super.onResume();
-        updateNew();
         model.addObserver(act, this);
     }
 
@@ -108,7 +101,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
             model.finish();
-            updateNew();
+            act.updateNew();
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -150,33 +143,15 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         createCalendar(0);
     }
 
-    private void updateNew() {
-        act.updateNew();
-        if (act.k_new == 0)
-            tvNew.setVisibility(View.GONE);
-        else {
-            tvNew.setVisibility(View.VISIBLE);
-            tvNew.setText(String.valueOf(act.k_new));
-            tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-        }
-    }
-
     private void initViews() {
         DateHelper d = DateHelper.initToday(act);
         today_m = d.getMonth();
         today_y = d.getYear();
-        tvNew = (TextView) container.findViewById(R.id.tvNew);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         container.findViewById(R.id.bProm).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openLink("Posyl-na-Edinenie.html");
-            }
-        });
-        tvNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                act.setFragment(R.id.nav_new, true);
             }
         });
         fabRefresh.setOnClickListener(new View.OnClickListener() {
@@ -194,13 +169,12 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick()) {
-                    if (act.k_new > 0)
-                        tvNew.setVisibility(View.VISIBLE);
                     fabRefresh.setVisibility(View.VISIBLE);
                 } else if (act.status.isTime())
                     startLoad();
             }
         });
+        act.fab = fabRefresh;
     }
 
     private void initCalendar() {
@@ -276,7 +250,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    hTimer.sendEmptyMessage(1);
+                    hTimer.sendEmptyMessage(0);
                 }
             }, 300);
             createCalendar(offset);
@@ -402,13 +376,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private void setStatus(boolean load) {
         act.status.setError(null);
         act.status.setLoad(load);
-        if (load) {
-            tvNew.setVisibility(View.GONE);
+        if (load)
             fabRefresh.setVisibility(View.GONE);
-        } else {
-            tvNew.setVisibility(View.VISIBLE);
+        else
             fabRefresh.setVisibility(View.VISIBLE);
-        }
     }
 
     private void showDatePicker() {
@@ -425,13 +396,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             return;
         dCurrent = date;
         createCalendar(0);
-    }
-
-    @Override
-    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
-        super.onMultiWindowModeChanged(isInMultiWindowMode);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
     }
 
     private void blinkDay(int d) {
