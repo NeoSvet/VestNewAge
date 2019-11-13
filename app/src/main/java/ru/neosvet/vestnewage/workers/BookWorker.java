@@ -94,13 +94,11 @@ public class BookWorker extends Worker {
 
     private String loadListOtrk(boolean withDialog) throws Exception {
         if (withDialog) {
-            if (model != null) {
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
-                        .putString(Const.MSG, context.getResources().getString(R.string.start))
-                        .putInt(Const.MAX, 137)
-                        .build());
-            }
+            model.postProgress(new Data.Builder()
+                    .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
+                    .putString(Const.MSG, context.getResources().getString(R.string.start))
+                    .putInt(Const.MAX, 137)
+                    .build());
         }
         final String path = lib.getDBFolder() + "/";
         File f;
@@ -139,13 +137,11 @@ public class BookWorker extends Worker {
         while (d.getYear() < 2016) {
             name = d.getMY();
             if (withDialog) {
-                if (model != null) {
-                    model.postProgress(new Data.Builder()
-                            .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
-                            .putString(Const.MSG, d.getMonthString() + " " + d.getYear())
-                            .putInt(Const.PROG, prog)
-                            .build());
-                }
+                model.postProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                        .putString(Const.MSG, d.getMonthString() + " " + d.getYear())
+                        .putInt(Const.PROG, prog)
+                        .build());
             }
             f = new File(path + name);
             if (!f.exists()) {

@@ -22,6 +22,8 @@ import ru.neosvet.vestnewage.workers.BookWorker;
 public class BookModel extends ProgressModel {
     public static final String TAG = "book";
     private static BookModel current = null;
+    private String msg;
+    private int prog, max;
     private ProgressDialog dialog;
 
     public static BookModel getInstance() {
@@ -62,9 +64,11 @@ public class BookModel extends ProgressModel {
             dialog.dismiss();
     }
 
-    public boolean showDialog(MainActivity act) {
-        Data data = getProgress().getValue();
-        int max = data.getInt(Const.MAX, 0);
+    public boolean showDialog(MainActivity act, int max) {
+        if (dialog != null)
+            dialog.dismiss();
+        if (max > -1)
+            this.max = max;
         if (max == 0)
             return false;
         dialog = new ProgressDialog(act, max);
@@ -75,14 +79,21 @@ public class BookModel extends ProgressModel {
             }
         });
         dialog.show();
-        dialog.setMessage(data.getString(Const.MSG));
-        dialog.setProgress(data.getInt(Const.PROG, 0));
+        dialog.setMessage(msg);
+        dialog.setProgress(prog);
         return true;
     }
 
-    public void updateDialog() {
-        Data data = getProgress().getValue();
-        dialog.setMessage(data.getString(Const.MSG));
-        dialog.setProgress(data.getInt(Const.PROG, 0));
+    public void updateDialog(int prog, String msg) {
+        this.prog = prog;
+        this.msg = msg;
+        dialog.setMessage(msg);
+        dialog.setProgress(prog);
+    }
+
+    public void dismissDialog() {
+        max = 0;
+        if (dialog != null)
+            dialog.dismiss();
     }
 }

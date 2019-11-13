@@ -125,7 +125,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         model = ViewModelProviders.of(act).get(BookModel.class);
         model.getProgress().observe(act, this);
         if (model.inProgress)
-            if (!model.showDialog(act))
+            if (!model.showDialog(act, -1))
                 startLoad();
     }
 
@@ -133,6 +133,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
             model.finish();
+            model.dismissDialog();
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -146,10 +147,10 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         }
         switch (data.getInt(Const.DIALOG, -1)) {
             case LoaderModel.DIALOG_SHOW:
-                model.showDialog(act);
+                model.showDialog(act, data.getInt(Const.MAX, -1));
                 break;
             case LoaderModel.DIALOG_UPDATE:
-                model.updateDialog();
+                model.updateDialog(data.getInt(Const.PROG, 0), data.getString(Const.MSG));
                 break;
         }
     }
