@@ -42,7 +42,7 @@ public class SiteWorker extends Worker {
         if (model == null)
             return false;
         else
-            return !model.inProgress;
+            return model.cancel;
     }
 
     @NonNull

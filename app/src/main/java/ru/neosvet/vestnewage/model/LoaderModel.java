@@ -193,7 +193,7 @@ public class LoaderModel extends ProgressModel {
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                LoaderModel.this.inProgress = false;
+                LoaderModel.this.cancel = true;
             }
         });
         dialog.show();

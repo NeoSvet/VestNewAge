@@ -116,7 +116,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.cancel = true;
             return false;
         }
         return true;

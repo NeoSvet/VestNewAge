@@ -495,15 +495,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void finishLoad(boolean all, String error) {
         model.dismissDialog();
-        model.finish();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (error == null) {
-            if (all)
+            if (model.cancel)
+                builder.setMessage(getResources().getString(R.string.load_cancel));
+            else if (all)
                 builder.setMessage(getResources().getString(R.string.all_load_suc));
             else
                 builder.setMessage(getResources().getString(R.string.it_load_suc));
         } else
             builder.setTitle(getResources().getString(R.string.error)).setMessage(error);
+        model.finish();
         builder.setPositiveButton(getResources().getString(android.R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {

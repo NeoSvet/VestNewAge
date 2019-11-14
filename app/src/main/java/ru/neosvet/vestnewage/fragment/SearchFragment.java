@@ -379,7 +379,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                model.finish();
+                model.cancel = true;
             }
         });
 

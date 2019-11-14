@@ -168,6 +168,7 @@
     <string name="download_materials">Загрузка материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>
     <string name="it_load_suc">Раздел успешно загружен</string>
+    <string name="load_cancel">Загрузка была прервана</string>
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
     <string name="error">Ошибка</string>
     <!--StatusButton-->

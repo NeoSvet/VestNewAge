@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class ProgressModel extends AndroidViewModel {
     public static final String NAME = "CLASS_NAME";
-    public boolean inProgress = false;
+    public boolean inProgress = false, cancel = false;
     private MutableLiveData<Data> progress = new MutableLiveData<Data>();
 
     public ProgressModel(@NonNull Application application) {
@@ -30,6 +30,7 @@ public class ProgressModel extends AndroidViewModel {
 
     public void finish() {
         inProgress = false;
+        cancel = false;
     }
 
     public void postProgress(Data data) {

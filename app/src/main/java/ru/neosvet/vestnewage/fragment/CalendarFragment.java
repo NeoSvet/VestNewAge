@@ -88,7 +88,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.cancel = true;
             return false;
         }
         return true;

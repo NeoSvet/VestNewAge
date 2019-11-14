@@ -77,7 +77,7 @@ public class BookModel extends ProgressModel {
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                BookModel.this.inProgress = false;
+                BookModel.this.cancel = true;
             }
         });
         dialog.show();

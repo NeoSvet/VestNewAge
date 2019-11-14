@@ -64,7 +64,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     @Override
     public boolean onBackPressed() {
         if (model.inProgress) {
-            model.finish();
+            model.cancel = true;
             return false;
         }
         return true;
