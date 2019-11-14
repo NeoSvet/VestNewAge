@@ -24,7 +24,6 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -301,7 +300,6 @@ public class PromHelper {
     public static class Rec extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Lib.LOG("prom notif onReceive");
             PromHelper prom = new PromHelper(context, null);
             prom.showNotif();
         }
