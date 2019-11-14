@@ -202,7 +202,8 @@ public class LoaderWorker extends Worker {
         DateHelper d = DateHelper.initToday(context);
         end_month = d.getMonth();
         end_year = d.getYear();
-        d = DateHelper.putYearMonth(context, 2016, 1);
+        d = DateHelper.initToday(context);
+        d = DateHelper.putYearMonth(context, d.getYear() - 1, 1);
         while (!isCancelled()) {
             for (i = 0; i < list.size(); i++) {
                 if (list.contains(d.getMY())) {

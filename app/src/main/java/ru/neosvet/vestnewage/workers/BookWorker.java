@@ -56,7 +56,7 @@ public class BookWorker extends Worker {
         try {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
-                    name = loadListOtrk(true);
+                    name = loadListUcoz(true, false);
                     model.postProgress(new Data.Builder()
                             .putBoolean(Const.FINISH, true)
                             .putString(Const.TITLE, name)
@@ -65,7 +65,7 @@ public class BookWorker extends Worker {
                 }
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
-                    loadListOtrk(false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+                    loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
                 name = loadListBook(kat);
                 model.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
@@ -79,6 +79,7 @@ public class BookWorker extends Worker {
                     .build();
             loadListBook(false);
             loadListBook(true);
+            loadListUcoz(true, true);
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,19 +93,27 @@ public class BookWorker extends Worker {
         return Result.failure();
     }
 
-    private String loadListOtrk(boolean withDialog) throws Exception {
+    private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
+        int m;
+        DateHelper d = null;
         if (withDialog) {
+            if (bNew) {
+                d = DateHelper.initToday(context);
+                m = (d.getYear() - 2016) * 12;
+            } else
+                m = 137;
             model.postProgress(new Data.Builder()
                     .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
                     .putString(Const.MSG, context.getResources().getString(R.string.start))
-                    .putInt(Const.MAX, 137)
+                    .putInt(Const.MAX, m)
                     .build());
         }
         final String path = lib.getDBFolder() + "/";
         File f;
         String s, name = "";
         long l;
-        BufferedInputStream in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/list.txt"));
+        BufferedInputStream in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/list" +
+                (bNew ? "_new" : "") + ".txt"));
         //list format:
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
@@ -127,13 +136,21 @@ public class BookWorker extends Worker {
         }
         br.close();
         in.close();
-        DateHelper d = DateHelper.putYearMonth(context, 2004, 8);
+        if (bNew) {
+            if (d == null)
+                d = DateHelper.initToday(context);
+            m = d.getYear();
+            d = DateHelper.putYearMonth(context, 2016, 1);
+        } else {
+            m = 2016;
+            d = DateHelper.putYearMonth(context, 2004, 8);
+        }
         DataBase dataBase;
         SQLiteDatabase db;
         ContentValues cv;
         boolean isTitle;
         final long time = System.currentTimeMillis();
-        while (d.getYear() < 2016) {
+        while (d.getYear() < m) {
             name = d.getMY();
             if (withDialog) {
                 model.postProgress(new Data.Builder()
