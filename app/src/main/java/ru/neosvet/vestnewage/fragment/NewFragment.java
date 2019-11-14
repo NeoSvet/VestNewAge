@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -68,6 +69,7 @@ public class NewFragment extends Fragment {
 
     private void initClear() {
         fabClear = container.findViewById(R.id.fabClear);
+        act.fab = fabClear;
         fabClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,12 +106,6 @@ public class NewFragment extends Fragment {
         lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
-            }
-        });
-        lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
                     String link = adNew.getItem(pos).getLink();
                     String des = adNew.getItem(pos).getHead(0);
@@ -122,6 +118,20 @@ public class NewFragment extends Fragment {
                 } else if (!adNew.getItem(pos).getLink().equals("")) {
                     BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
                 }
+            }
+        });
+        lvNew.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (!act.status.startMin())
+                        act.startAnimMin();
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    if (!act.status.startMax())
+                        act.startAnimMax();
+                }
+                return false;
             }
         });
     }
