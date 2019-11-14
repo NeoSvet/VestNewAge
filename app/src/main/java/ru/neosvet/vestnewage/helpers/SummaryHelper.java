@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -145,6 +147,26 @@ public class SummaryHelper {
             }
             if (vibration)
                 notifBuilder.setVibrate(new long[]{500, 1500});
+        }
+    }
+
+    public static void postpone(Context context, String des, String link) {
+        Intent intent = new Intent(context, Rec.class);
+        intent.putExtra(Const.DESCTRIPTION, des);
+        intent.putExtra(Const.LINK, link);
+        PendingIntent piPostpone = PendingIntent.getService(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC, TEN_MIN_IN_MILLS + System.currentTimeMillis(), piPostpone);
+    }
+
+    public static class Rec extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SummaryHelper summaryHelper = new SummaryHelper(context);
+            summaryHelper.createNotification(
+                    intent.getStringExtra(Const.DESCTRIPTION),
+                    intent.getStringExtra(Const.LINK));
+            summaryHelper.showNotification();
         }
     }
 }

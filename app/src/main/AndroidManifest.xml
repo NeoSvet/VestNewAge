@@ -84,6 +84,8 @@
             android:label="@string/check_summary"
             android:process=":check" />
         <receiver android:name=".helpers.PromHelper$Rec" />
+        <receiver android:name=".helpers.SummaryHelper$Rec" />
+        <receiver android:name=".helpers.NotificationHelper$Result" />
     </application>
 
 </manifest>

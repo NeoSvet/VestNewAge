@@ -42,9 +42,9 @@ public class NotificationHelper extends ContextWrapper {
                 notifHelper.cancel(NOTIF_PROM);
             } else if (mode == ID_SUMMARY_POSTPONE) {
                 notifHelper.cancel(intent.getIntExtra(DataBase.ID, 0));
-//                SummaryHelper.postpone(context,
-//                        intent.getStringExtra(Const.DESCTRIPTION),
-//                        intent.getStringExtra(Const.LINK));
+                SummaryHelper.postpone(context,
+                        intent.getStringExtra(Const.DESCTRIPTION),
+                        intent.getStringExtra(Const.LINK));
             }
         }
     }
