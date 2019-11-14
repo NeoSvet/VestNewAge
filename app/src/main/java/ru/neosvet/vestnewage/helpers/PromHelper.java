@@ -24,6 +24,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
@@ -49,6 +50,12 @@ public class PromHelper extends LifecycleService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Lib.LOG("prom notif onCreate");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Lib.LOG("prom notif onStartCommand");
         this.context = getApplicationContext();
     }
 
@@ -291,6 +298,7 @@ public class PromHelper extends LifecycleService {
             d = prom.getPromDate(true);
             d.changeMinutes(-p);
         }
+        Lib.LOG("set prom notif on "+d.toString());
         long time = d.getTimeInMills();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
