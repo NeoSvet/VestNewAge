@@ -114,8 +114,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             prom = new PromHelper(this, navigationView.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         }
-
-        updateNew();
         restoreState(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (isInMultiWindowMode())
@@ -155,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         switch (data.getInt(Const.DIALOG, -1)) {
             case LoaderModel.DIALOG_UP:
@@ -197,6 +195,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (navigationView == null && !isMenuMode)
                 setMenuFragment();
         }
+        updateNew();
+        if (state != null)
+            tvNew.clearAnimation();
     }
 
     @Override
@@ -233,17 +234,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().getItem(0).setIcon(unread.getNewId(k_new));
         else if (frMenu != null)
             frMenu.setNew(unread.getNewId(k_new));
-        if (k_new == 0)
-            tvNew.setVisibility(View.GONE);
-        else {
-            tvNew.setVisibility(View.VISIBLE);
-            tvNew.setText(String.valueOf(k_new));
+        tvNew.setText(String.valueOf(k_new));
+        if (setNew())
             tvNew.startAnimation(AnimationUtils.loadAnimation(this, R.anim.blink));
-        }
     }
 
     private void initLoad() {
-        model.showDialog(this , -1);
+        model.showDialog(this, -1);
         if (updateDialog == null) {
             updateDialog = new Handler(new Handler.Callback() {
                 @Override
@@ -397,19 +394,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         curFragment = null;
         if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
             prom.hide();
+        setNew();
         switch (id) {
             case R.id.menu_fragment:
                 statusBack = STATUS_MENU;
                 frMenu = new MenuFragment();
                 fragmentTransaction.replace(R.id.my_fragment, frMenu);
                 if (isCountInMenu) prom.show();
-                setNew();
                 break;
             case R.id.nav_new:
                 fragmentTransaction.replace(R.id.my_fragment, new NewFragment());
                 if (frMenu != null)
                     frMenu.setSelect(R.id.nav_new);
-                setNew();
                 break;
             case R.id.nav_rss:
                 curFragment = new SummaryFragment();
@@ -421,24 +417,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         notifHelper.cancel(i);
                     getIntent().removeExtra(DataBase.ID);
                 }
-                setNew();
                 break;
             case R.id.nav_main:
                 curFragment = new SiteFragment();
                 ((SiteFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                setNew();
                 break;
             case R.id.nav_calendar:
                 curFragment = new CalendarFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                setNew();
                 break;
             case R.id.nav_book:
                 curFragment = new BookFragment();
                 ((BookFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
@@ -450,26 +442,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 curFragment = search;
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_journal:
                 fragmentTransaction.replace(R.id.my_fragment, new JournalFragment());
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_marker:
                 curFragment = new CollectionsFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_cabinet:
                 curFragment = new CabmainFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_settings:
                 curFragment = new SettingsFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
-                tvNew.setVisibility(View.GONE);
                 break;
             case R.id.nav_help:
                 if (tab == -1) { //first start
@@ -478,7 +465,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     frHelp.setOpenHelp(0);
                 } else
                     fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
-                tvNew.setVisibility(View.GONE);
                 break;
         }
 
@@ -486,11 +472,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
     }
 
-    private void setNew() {
-        if (k_new > 0)
+    private boolean setNew() {
+        if (k_new > 0 && (cur_id == R.id.nav_new || cur_id == R.id.nav_rss
+                || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar)) {
             tvNew.setVisibility(View.VISIBLE);
-        else
-            tvNew.setVisibility(View.GONE);
+            return true;
+        }
+        tvNew.setVisibility(View.GONE);
+        return false;
     }
 
     public void finishLoad(boolean all, String error) {
@@ -627,10 +616,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void startAnimMax() {
         if (fab.getVisibility() == View.VISIBLE)
             return;
-        if (k_new > 0) {
-            tvNew.setVisibility(View.VISIBLE);
+        if (setNew())
             tvNew.startAnimation(anMax);
-        }
         fab.setVisibility(View.VISIBLE);
         fab.startAnimation(anMax);
     }
