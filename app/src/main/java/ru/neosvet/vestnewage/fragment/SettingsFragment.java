@@ -33,6 +33,8 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
@@ -125,6 +127,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if (!model.inProgress)
+            return;
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
             model.finish();
@@ -226,8 +230,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         }
         int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
         rbsScreen[p].setChecked(true);
-        cbsClear = new CheckBox[]{container.findViewById(R.id.cbKatreny),
-                container.findViewById(R.id.cbPoslaniya),
+        cbsClear = new CheckBox[]{container.findViewById(R.id.cbBook2017),
+                container.findViewById(R.id.cbBookNew),
                 container.findViewById(R.id.cbMaterials),
                 container.findViewById(R.id.cbMarkers)};
 
@@ -319,14 +323,16 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             public void onClick(View view) {
                 initRotate();
                 bClearDo.setEnabled(false);
-                if (cbsClear[0].isChecked()) //katreny
-                    model.startClear(Const.LINK + DataBase.LIKE);
-                if (cbsClear[1].isChecked()) //poslaniya
-                    model.startClear(Const.LINK + " NOT" + DataBase.LIKE);
+                List<String> list = new ArrayList<String>();
+                if (cbsClear[0].isChecked()) //book2017
+                    list.add(Const.START);
+                if (cbsClear[1].isChecked()) //book new
+                    list.add(Const.END);
                 if (cbsClear[2].isChecked()) //materials
-                    model.startClear("00.00");
+                    list.add("00.00");
                 if (cbsClear[3].isChecked()) //markers
-                    model.startClear(DataBase.MARKERS);
+                    list.add(DataBase.MARKERS);
+                model.startClear(list.toArray(new String[]{}));
                 for (int i = 0; i < cbsClear.length; i++)
                     cbsClear[i].setChecked(false);
             }

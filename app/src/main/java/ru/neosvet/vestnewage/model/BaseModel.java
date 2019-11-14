@@ -28,14 +28,14 @@ public class BaseModel extends ProgressModel {
         current = this;
     }
 
-    public void startClear(String request) {
+    public void startClear(String[] request) {
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)
                 .build();
         Data data = new Data.Builder()
-                .putString(Const.MSG, request)
+                .putStringArray(Const.MSG, request)
                 .build();
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(BaseWorker.class)

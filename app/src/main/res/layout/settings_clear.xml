@@ -37,28 +37,28 @@
         android:visibility="gone">
 
         <CheckBox
-            android:id="@+id/cbKatreny"
+            android:id="@+id/cbBook2017"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:text="@string/loaded_katreny" />
+            android:text="@string/book2017" />
 
         <CheckBox
-            android:id="@+id/cbPoslaniya"
+            android:id="@+id/cbBookNew"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/cbKatreny"
-            android:text="@string/loaded_poslaniya" />
+            android:layout_below="@id/cbBook2017"
+            android:text="@string/book_new" />
 
         <CheckBox
             android:id="@+id/cbMaterials"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/cbPoslaniya"
-            android:text="@string/loaded_materials" />
+            android:layout_below="@id/cbBookNew"
+            android:text="@string/materials" />
 
         <CheckBox
             android:id="@+id/cbMarkers"

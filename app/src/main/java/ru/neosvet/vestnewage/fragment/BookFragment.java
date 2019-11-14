@@ -184,6 +184,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         dKatren = DateHelper.putDays(act, kat);
         dPoslanie = DateHelper.putDays(act, pos);
         fromOtkr = pref.getBoolean(Const.OTKR, false);
+        if (!fromOtkr && dPoslanie.getYear() < 2016)
+            dPoslanie = DateHelper.putYearMonth(act, 2016, 1);
         if (state != null) {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
