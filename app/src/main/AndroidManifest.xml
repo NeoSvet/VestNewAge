@@ -77,16 +77,13 @@
         <activity
             android:name=".activity.CabpageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <service
             android:name=".helpers.CheckHelper"
             android:icon="@drawable/rss"
             android:label="@string/check_summary"
             android:process=":check" />
-        <service
-            android:name=".helpers.PromHelper"
-            android:icon="@drawable/star"
-            android:label="@string/notif_prom"
-            android:process=":prom" />
+        <receiver android:name=".helpers.PromHelper$Rec" />
     </application>
 
 </manifest>

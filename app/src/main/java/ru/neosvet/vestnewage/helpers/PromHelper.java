@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.helpers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.arch.lifecycle.LifecycleService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 
-public class PromHelper extends LifecycleService {
+public class PromHelper {
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private Context context;
     private TextView tvPromTime = null;
@@ -45,20 +45,6 @@ public class PromHelper extends LifecycleService {
             tvPromTime.setVisibility(View.VISIBLE);
             setViews();
         }
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Lib.LOG("prom notif onCreate");
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Lib.LOG("prom notif onStartCommand");
-        this.context = getApplicationContext();
-        showNotif();
-        return super.onStartCommand(intent, flags, startId);
     }
 
     public void stop() {
@@ -235,7 +221,7 @@ public class PromHelper extends LifecycleService {
         return t;
     }
 
-    private void showNotif() {
+    public void showNotif() {
         SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p == Const.TURN_OFF)
@@ -281,7 +267,7 @@ public class PromHelper extends LifecycleService {
 
     public void initNotif(int p) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, PromHelper.class);
+        Intent intent = new Intent(context, Rec.class);
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(piProm);
         if (p == Const.TURN_OFF)
@@ -294,9 +280,10 @@ public class PromHelper extends LifecycleService {
             d = prom.getPromDate(true);
             d.changeMinutes(-p);
         }
-        Lib.LOG("set prom notif on "+d.toString());
         long time = d.getTimeInMills();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, piProm);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
             am.setAlarmClock(alarmClockInfo, piProm);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
@@ -309,5 +296,14 @@ public class PromHelper extends LifecycleService {
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(Const.TIMEDIFF, 0);
         editor.apply();
+    }
+
+    public static class Rec extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Lib.LOG("prom notif onReceive");
+            PromHelper prom = new PromHelper(context, null);
+            prom.showNotif();
+        }
     }
 }
