@@ -124,13 +124,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         model.addObserver(act, this);
     }
 
-    @Override
-    public boolean onBackPressed() {
-        if (!act.isMenuMode)
-            onDestroy(); //сохранение "истории поиска"
-        return true;
-    }
-
     private void initModel() {
         model = ViewModelProviders.of(act).get(SearchModel.class);
         model.getProgress().observe(act, this);
