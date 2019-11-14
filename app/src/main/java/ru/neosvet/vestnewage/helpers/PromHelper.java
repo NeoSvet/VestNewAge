@@ -57,10 +57,6 @@ public class PromHelper extends LifecycleService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Lib.LOG("prom notif onStartCommand");
         this.context = getApplicationContext();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         showNotif();
         return super.onStartCommand(intent, flags, startId);
     }
