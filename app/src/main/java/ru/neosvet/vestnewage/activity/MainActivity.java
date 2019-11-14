@@ -614,8 +614,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void startAnimMax() {
-        if (fab.getVisibility() == View.VISIBLE)
-            return;
         if (setNew())
             tvNew.startAnimation(anMax);
         fab.setVisibility(View.VISIBLE);
