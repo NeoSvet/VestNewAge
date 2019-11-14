@@ -121,6 +121,7 @@ public class JournalFragment extends Fragment {
                             new String[]{curJ.getString(iID)});
                 }
                 cursor.close();
+				db.close();
                 dataBase.close();
             } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE);
             if (curJ.moveToNext()) {

@@ -78,6 +78,7 @@ public class MarkerActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             }
             cursor.close();
+			db.close();
             dataBase.close();
             if (s.length() > 0) {
                 s.delete(s.length() - 2, s.length());

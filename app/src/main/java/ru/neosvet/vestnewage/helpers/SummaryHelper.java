@@ -58,8 +58,10 @@ public class SummaryHelper {
             br.readLine(); //time
             name = DataBase.getDatePage(link);
             if (dataBase == null || !dataBase.getName().equals(name)) {
-                if (dataBase != null)
+                if (dataBase != null) {
+					db.close();
                     dataBase.close();
+				}
                 dataBase = new DataBase(context, name);
                 db = dataBase.getWritableDatabase();
             }
@@ -75,8 +77,10 @@ public class SummaryHelper {
             cursor.close();
         }
         br.close();
-        if (dataBase != null)
+        if (dataBase != null) {
+			db.close();
             dataBase.close();
+		}
     }
 
     public void createNotification(String text, String link) {

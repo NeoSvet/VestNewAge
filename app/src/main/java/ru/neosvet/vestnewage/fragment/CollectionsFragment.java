@@ -206,6 +206,7 @@ public class CollectionsFragment extends BackFragment {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                 } else { // страница не загружена...
                     cursor.close();
+					db.close();
                     dataBase.close();
                     throw new Exception();
                 }
@@ -225,10 +226,12 @@ public class CollectionsFragment extends BackFragment {
                     } while (cursor.moveToNext());
                 } else { // страница не загружена...
                     cursor.close();
+					db.close();
                     dataBase.close();
                     throw new Exception();
                 }
                 cursor.close();
+				db.close();
                 dataBase.close();
                 b.delete(b.length() - 2, b.length());
             }

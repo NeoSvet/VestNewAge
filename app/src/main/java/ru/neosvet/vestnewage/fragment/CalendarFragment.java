@@ -337,6 +337,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                 }
             }
             cursor.close();
+			db.close();
             dataBase.close();
             adCalendar.notifyDataSetChanged();
 

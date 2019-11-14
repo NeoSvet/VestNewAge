@@ -317,6 +317,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             } else
                 dModList = d;
             cursor.close();
+			db.close();
             dataBase.close();
             DateHelper today = DateHelper.initToday(act);
             if (d.getMonth() == today.getMonth() && d.getYear() == today.getYear()) {

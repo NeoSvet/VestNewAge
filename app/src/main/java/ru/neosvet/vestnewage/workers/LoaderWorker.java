@@ -227,6 +227,7 @@ public class LoaderWorker extends Worker {
         Cursor curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
         int k = curTitle.getCount();
         curTitle.close();
+		db.close();
         dataBase.close();
         return k;
     }
@@ -244,6 +245,7 @@ public class LoaderWorker extends Worker {
             }
         }
         curTitle.close();
+		db.close();
         dataBase.close();
     }
 
@@ -376,6 +378,7 @@ public class LoaderWorker extends Worker {
         }
         br.close();
         response.close();
+		db.close();
         dataBase.close();
         return true;
     }

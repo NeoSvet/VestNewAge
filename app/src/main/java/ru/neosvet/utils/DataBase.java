@@ -120,6 +120,7 @@ public class DataBase extends SQLiteOpenHelper {
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link));
             if (onlyTitle) {
                 cursor.close();
+				db.close();
                 dataBase.close();
                 return pageCon.toString();
             }
@@ -128,6 +129,7 @@ public class DataBase extends SQLiteOpenHelper {
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
         } else { // страница не загружена...
             cursor.close();
+			db.close();
             dataBase.close();
             return null;
         }
@@ -143,10 +145,12 @@ public class DataBase extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         } else { // страница не загружена...
             cursor.close();
+			db.close();
             dataBase.close();
             return null;
         }
         cursor.close();
+		db.close();
         dataBase.close();
         pageCon.delete(pageCon.length() - 2, pageCon.length());
         return pageCon.toString();
@@ -206,6 +210,7 @@ public class DataBase extends SQLiteOpenHelper {
         if (cursor.moveToFirst())
             r = cursor.getInt(0);
         cursor.close();
+		db.close();
         dataBase.close();
         return r;
     }

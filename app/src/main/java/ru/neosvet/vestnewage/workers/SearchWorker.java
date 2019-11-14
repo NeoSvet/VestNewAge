@@ -92,6 +92,7 @@ public class SearchWorker extends Worker {
                     break;
                 d.changeMonth(step);
             }
+			dbS.close();
             dbSearch.close();
             return getResult();
         } catch (Exception e) {
@@ -152,8 +153,10 @@ public class SearchWorker extends Worker {
         for (int i = 0; i < title.size(); i++) {
             name1 = DataBase.getDatePage(link.get(i));
             if (!name1.equals(name2)) {
-                if (dataBase != null)
+                if (dataBase != null) {
+					db.close();
                     dataBase.close();
+				}
                 dataBase = new DataBase(context, name1);
                 db = dataBase.getWritableDatabase();
             }
@@ -188,8 +191,10 @@ public class SearchWorker extends Worker {
                         .build());
             }
         }
-        if (dataBase != null)
+        if (dataBase != null) {
+			db.close();
             dataBase.close();
+		}
         title.clear();
         link.clear();
         id.clear();
@@ -270,6 +275,7 @@ public class SearchWorker extends Worker {
             }
         }
         curSearch.close();
+		db.close();
         dataBase.close();
     }
 

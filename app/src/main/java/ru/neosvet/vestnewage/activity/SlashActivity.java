@@ -221,6 +221,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data>{
         if (cursor.moveToFirst())
             time = cursor.getLong(cursor.getColumnIndex(Const.TIME));
         cursor.close();
+		db.close();
         dataBase.close();
         if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
             return;

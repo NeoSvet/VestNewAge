@@ -184,6 +184,7 @@ public class BookWorker extends Worker {
                 }
                 br.close();
                 in.close();
+				db.close();
                 dataBase.close();
             }
             d.changeMonth(1);
@@ -266,6 +267,7 @@ public class BookWorker extends Worker {
                     db.insert(Const.TITLE, null, cv);
                 }
             }
+            db.close();
             dataBase.close();
             title.clear();
             links.clear();

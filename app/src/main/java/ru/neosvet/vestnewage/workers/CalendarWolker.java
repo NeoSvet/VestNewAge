@@ -137,6 +137,7 @@ public class CalendarWolker extends Worker {
             bw.close();
         }
         curTitle.close();
+		db.close();
         dataBase.close();
         return k;
     }
@@ -178,6 +179,7 @@ public class CalendarWolker extends Worker {
             }
         }
         if (dataBase != null) {
+			db.close();
             dataBase.close();
             dataBase = null;
         }
