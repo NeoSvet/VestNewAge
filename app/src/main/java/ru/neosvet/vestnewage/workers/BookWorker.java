@@ -127,7 +127,6 @@ public class BookWorker extends Worker {
         }
         br.close();
         in.close();
-        int prog = 0;
         DateHelper d = DateHelper.putYearMonth(context, 2004, 8);
         DataBase dataBase;
         SQLiteDatabase db;
@@ -138,9 +137,8 @@ public class BookWorker extends Worker {
             name = d.getMY();
             if (withDialog) {
                 model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
                         .putString(Const.MSG, d.getMonthString() + " " + d.getYear())
-                        .putInt(Const.PROG, prog)
                         .build());
             }
             f = new File(path + name);
@@ -172,7 +170,11 @@ public class BookWorker extends Worker {
                 dataBase.close();
             }
             d.changeMonth(1);
-            prog++;
+            if (withDialog) {
+                model.postProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
+                        .build());
+            }
             if (isCancelled())
                 return name;
         }

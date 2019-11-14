@@ -64,11 +64,13 @@ public class BookModel extends ProgressModel {
             dialog.dismiss();
     }
 
-    public boolean showDialog(MainActivity act, int max) {
+    public boolean showDialog(MainActivity act, int new_max) {
         if (dialog != null)
             dialog.dismiss();
-        if (max > -1)
-            this.max = max;
+        if (new_max > -1) {
+            prog = 0;
+            max = new_max;
+        }
         if (max == 0)
             return false;
         dialog = new ProgressDialog(act, max);
@@ -84,16 +86,23 @@ public class BookModel extends ProgressModel {
         return true;
     }
 
-    public void updateDialog(int prog, String msg) {
-        this.prog = prog;
-        this.msg = msg;
+    public void updateDialog() {
         dialog.setMessage(msg);
         dialog.setProgress(prog);
     }
 
     public void dismissDialog() {
-        max = 0;
         if (dialog != null)
             dialog.dismiss();
+    }
+
+    public void setProgMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public void upProg() {
+        if (prog == max)
+            return;
+        prog++;
     }
 }

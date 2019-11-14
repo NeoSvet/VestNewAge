@@ -156,19 +156,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onChanged(@Nullable Data data) {
         switch (data.getInt(Const.DIALOG, -1)) {
-            case LoaderModel.DIALOG_SHOW:
-                model.showDialog(MainActivity.this);
-                break;
-            case LoaderModel.DIALOG_UPDATE:
-                model.setProgMax(data.getInt(Const.MAX, 0));
-                model.setProgMsg(data.getString(Const.MSG));
-                model.showDialog(MainActivity.this);
-                break;
             case LoaderModel.DIALOG_UP:
                 model.upProg();
                 break;
             case LoaderModel.DIALOG_MSG:
                 model.setProgMsg(data.getString(Const.MSG));
+                break;
+            case LoaderModel.DIALOG_SHOW:
+                model.setProgMsg(data.getString(Const.MSG));
+                model.showDialog(MainActivity.this, data.getInt(Const.MAX, 0));
                 break;
         }
         if (data.getBoolean(Const.FINISH, false)) {
@@ -245,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initLoad() {
-        model.showDialog(this);
+        model.showDialog(this , -1);
         if (updateDialog == null) {
             updateDialog = new Handler(new Handler.Callback() {
                 @Override

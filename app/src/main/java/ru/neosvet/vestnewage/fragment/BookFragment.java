@@ -70,6 +70,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
+    private Handler updateDialog;
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -125,8 +126,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         model = ViewModelProviders.of(act).get(BookModel.class);
         model.getProgress().observe(act, this);
         if (model.inProgress)
-            if (!model.showDialog(act, -1))
-                startLoad();
+            initLoad();
     }
 
     @Override
@@ -146,11 +146,15 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             return;
         }
         switch (data.getInt(Const.DIALOG, -1)) {
-            case LoaderModel.DIALOG_SHOW:
-                model.showDialog(act, data.getInt(Const.MAX, -1));
+            case LoaderModel.DIALOG_UP:
+                model.upProg();
                 break;
-            case LoaderModel.DIALOG_UPDATE:
-                model.updateDialog(data.getInt(Const.PROG, 0), data.getString(Const.MSG));
+            case LoaderModel.DIALOG_MSG:
+                model.setProgMsg(data.getString(Const.MSG));
+                break;
+            case LoaderModel.DIALOG_SHOW:
+                model.setProgMsg(data.getString(Const.MSG));
+                model.showDialog(act, data.getInt(Const.MAX, -1));
                 break;
         }
     }
@@ -534,12 +538,41 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void startLoad() {
-        act.status.setError(null);
-        fabRefresh.setVisibility(View.GONE);
-        fabRndMenu.setVisibility(View.GONE);
-        act.status.setLoad(true);
         if (!model.inProgress)
             model.startLoad(false, fromOtkr, tab == 0);
+        initLoad();
+    }
+
+    private void initLoad() {
+        act.status.setError(null);
+        if (!model.showDialog(act, -1)) {
+            fabRefresh.setVisibility(View.GONE);
+            fabRndMenu.setVisibility(View.GONE);
+            act.status.setLoad(true);
+            return;
+        }
+        if (updateDialog == null) {
+            updateDialog = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message message) {
+                    model.updateDialog();
+                    return false;
+                }
+            });
+        }
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (model.inProgress) {
+                        Thread.sleep(DateHelper.SEC_IN_MILLS);
+                        updateDialog.sendEmptyMessage(0);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Lib.LOG("timer loader error: " + e.getMessage());
+                }
+            }
+        }).start();
     }
 
     private void finishLoad(String result) {

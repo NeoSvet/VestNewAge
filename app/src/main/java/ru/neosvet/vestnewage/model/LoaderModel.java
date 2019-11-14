@@ -32,7 +32,7 @@ public class LoaderModel extends ProgressModel {
     public static final String TAG = "Loader";
     public static final int ALL = -1, DOWNLOAD_ALL = 0, DOWNLOAD_ID = 1, DOWNLOAD_YEAR = 2,
             DOWNLOAD_PAGE = 3, DOWNLOAD_PAGE_WITH_STYLE = 4;
-    public static final int DIALOG_SHOW = 0, DIALOG_UP = 1, DIALOG_UPDATE = 3, DIALOG_MSG = 4;
+    public static final int DIALOG_SHOW = 0, DIALOG_UP = 1, DIALOG_MSG = 2;
     private static LoaderModel current = null;
     private ProgressDialog dialog;
     private Data.Builder data;
@@ -120,8 +120,9 @@ public class LoaderModel extends ProgressModel {
         } else if (id == R.id.nav_main) //main, news
             k = 2;
         this.postProgress(new Data.Builder()
-                .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
-                .putString(Const.MSG, msg)
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
+                .putString(Const.MSG, getApplication().getBaseContext()
+                        .getResources().getString(R.string.download_list))
                 .putInt(Const.MAX, k).build());
         OneTimeWorkRequest task;
         WorkContinuation job = null;
@@ -181,9 +182,13 @@ public class LoaderModel extends ProgressModel {
             dialog.dismiss();
     }
 
-    public void showDialog(MainActivity act) {
+    public void showDialog(MainActivity act, int new_max) {
         if (dialog != null)
             dialog.dismiss();
+        if (new_max > -1) {
+            prog = 0;
+            max = new_max;
+        }
         dialog = new ProgressDialog(act, max);
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
@@ -204,11 +209,6 @@ public class LoaderModel extends ProgressModel {
     public void dismissDialog() {
         if (dialog != null)
             dialog.dismiss();
-    }
-
-    public void setProgMax(int max) {
-        prog = 0;
-        this.max = max;
     }
 
     public void setProgMsg(String msg) {

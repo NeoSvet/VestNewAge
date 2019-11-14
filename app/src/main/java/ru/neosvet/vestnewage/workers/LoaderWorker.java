@@ -473,7 +473,7 @@ public class LoaderWorker extends Worker {
 
     private void setProgMax(int max) {
         model.postProgress(new Data.Builder()
-                .putInt(Const.DIALOG, LoaderModel.DIALOG_UPDATE)
+                .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
                 .putString(Const.MSG, context.getResources().getString(R.string.download_materials))
                 .putInt(Const.MAX, max).build());
     }
