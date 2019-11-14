@@ -135,6 +135,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         if (data.getBoolean(Const.FINISH, false)) {
             finishLoad(data.getString(Const.ERROR));
         }

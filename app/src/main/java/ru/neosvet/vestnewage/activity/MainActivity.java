@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         switch (data.getInt(Const.DIALOG, -1)) {
             case LoaderModel.DIALOG_UP:
                 model.upProg();

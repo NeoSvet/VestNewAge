@@ -231,6 +231,8 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data>{
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         if (data.getBoolean(Const.TIME, false)) {
             model.non_start = false;
             //TODO rebuild prom notif

@@ -103,6 +103,8 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         if (data.getBoolean(Const.FINISH, false)) {
             model.finish();
             act.updateNew();

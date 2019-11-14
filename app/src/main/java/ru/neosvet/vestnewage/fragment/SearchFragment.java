@@ -143,6 +143,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         if (data.getBoolean(Const.FINISH, false)) {
             String error = data.getString(Const.ERROR);
             page = 0;

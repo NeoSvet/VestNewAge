@@ -79,6 +79,8 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if(!model.inProgress)
+            return;
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
             return;
