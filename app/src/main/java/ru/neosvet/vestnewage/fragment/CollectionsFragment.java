@@ -342,7 +342,7 @@ public class CollectionsFragment extends BackFragment {
                 } else {
                     String p;
                     if (adMarker.getItem(pos).getPlace().equals("0"))
-                        p = "";
+                        p = null;
                     else {
                         p = adMarker.getItem(pos).getDes();
                         p = p.substring(p.indexOf(Const.N, p.indexOf(Const.N) + 1) + 1);
