@@ -61,7 +61,7 @@ import ru.neosvet.vestnewage.model.SearchModel;
 
 
 public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
-    private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r";
+    private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
     private MainActivity act;
     private float density;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
@@ -136,7 +136,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             String error = data.getString(Const.ERROR);
@@ -228,6 +228,9 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
                         LAST_RESULTS));
+                adResults.addItem(new ListItem(
+                        getResources().getString(R.string.clear_results_search),
+                        CLEAR_RESULTS));
                 adResults.notifyDataSetChanged();
             }
         }
@@ -350,6 +353,14 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                     page = 0;
                     showResult();
                     tvLabel.setText(pref.getString(LABEL, ""));
+                } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
+                    DataBase dbSearch = new DataBase(act, DataBase.SEARCH);
+                    SQLiteDatabase db = dbSearch.getWritableDatabase();
+                    db.delete(DataBase.SEARCH, null, null);
+                    db.close();
+                    dbSearch.close();
+                    adResults.clear();
+                    adResults.notifyDataSetChanged();
                 } else {
                     Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
                     BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
