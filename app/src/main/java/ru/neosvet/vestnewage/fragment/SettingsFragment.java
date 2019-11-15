@@ -230,8 +230,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         }
         int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
         rbsScreen[p].setChecked(true);
-        cbsClear = new CheckBox[]{container.findViewById(R.id.cbBook2017),
-                container.findViewById(R.id.cbBookNew),
+        cbsClear = new CheckBox[]{container.findViewById(R.id.cbBookPrev),
+                container.findViewById(R.id.cbBookCur),
                 container.findViewById(R.id.cbMaterials),
                 container.findViewById(R.id.cbMarkers)};
 
@@ -324,9 +324,9 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                 initRotate();
                 bClearDo.setEnabled(false);
                 List<String> list = new ArrayList<String>();
-                if (cbsClear[0].isChecked()) //book2017
+                if (cbsClear[0].isChecked()) //book prev years
                     list.add(Const.START);
-                if (cbsClear[1].isChecked()) //book new
+                if (cbsClear[1].isChecked()) //book cur year
                     list.add(Const.END);
                 if (cbsClear[2].isChecked()) //materials
                     list.add("00.00");

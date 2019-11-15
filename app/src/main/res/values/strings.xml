@@ -121,8 +121,8 @@
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>
-    <string name="book2017">Книгу до 2017 года</string>
-    <string name="book_new">Книгу по сегодняшний день</string>
+    <string name="book_prev">Книгу предыдущих лет</string>
+    <string name="book_cur">Книгу текущего года</string>
     <string name="materials">Материалы</string>
     <string name="clear_completed">Очистка завершена</string>
     <string name="from">от</string>

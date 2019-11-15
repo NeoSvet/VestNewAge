@@ -40,23 +40,25 @@ public class BaseWorker extends Worker {
                 if (request[i].equals(Const.START) || request[i].equals(Const.END)) { //book
                     DateHelper d;
                     int max_y, max_m;
-                    if (request[i].equals(Const.START)) { //book2017
+                    if (request[i].equals(Const.START)) { //book prev years
+                        d = DateHelper.initToday(context);
+                        max_y = d.getYear() - 1;
+                        max_m = 12;
                         d = DateHelper.putYearMonth(context, 2004, 8);
-                        max_y = 2017;
-                        max_m = 1;
                         SharedPreferences pref = context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putBoolean(Const.OTKR, false);
                         editor.apply();
-                    } else { //book new
+                    } else { //book cur year
                         d = DateHelper.initToday(context);
                         max_y = d.getYear();
                         max_m = d.getMonth();
-                        d = DateHelper.putYearMonth(context, 2016, 1);
+                        d = DateHelper.putYearMonth(context, max_y, 1);
                     }
                     while (!(d.getYear() == max_y && d.getMonth() > max_m)) {
                         f = new File(path + d.getMY());
-                        f.delete();
+                        if (f.exists())
+                            f.delete();
                         /*dataBase = new DataBase(context, d.getMY());
                         db = dataBase.getWritableDatabase();
                         db.delete(Const.TITLE, null, null);
