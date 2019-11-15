@@ -41,7 +41,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
 
-public class SlashActivity extends AppCompatActivity implements Observer<Data>{
+public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private Intent main;
@@ -140,70 +140,60 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data>{
     }
 
     private void parseUri(Uri data) {
-        String link;
-        if (data.getHost().contains("vk.com")) {
-            link = data.getQuery().substring(3);
-            if (!link.contains(Const.SITE)) {
-                lib.openInApps(link, null);
-                finish();
-                return;
+        String link = data.getPath();
+        if (link == null)
+            return;
+        if (link.contains(Const.RSS)) {
+            main.putExtra(Const.CUR_ID, R.id.nav_rss);
+            if (getIntent().hasExtra(DataBase.ID))
+                main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
+        } else if (link.length() < 2 || link.equals("/index.html")) {
+            main.putExtra(Const.CUR_ID, R.id.nav_main);
+            main.putExtra(Const.TAB, 0);
+        } else if (link.equals(SiteFragment.NOVOSTI)) {
+            main.putExtra(Const.CUR_ID, R.id.nav_main);
+            main.putExtra(Const.TAB, 1);
+        } else if (link.contains(Const.HTML)) {
+            BrowserActivity.openReader(this, link.substring(1), null);
+            main = null;
+        } else if (data.getQuery() != null && data.getQuery().contains("date")) { //http://blagayavest.info/poems/?date=11-3-2017
+            String s = data.getQuery().substring(5);
+            String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
+            link = link.substring(1) + s.substring(0, s.indexOf("-"))
+                    + "." + (m.length() == 1 ? "0" : "") + m
+                    + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML;
+            BrowserActivity.openReader(this, link, null);
+            main = null;
+        } else if (link.contains("/poems")) {
+            main.putExtra(Const.CUR_ID, R.id.nav_book);
+            main.putExtra(Const.TAB, 0);
+        } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
+            main.putExtra(Const.CUR_ID, R.id.nav_book);
+            main.putExtra(Const.TAB, 1);
+        } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
+            link = data.getQuery();
+            int page = 1;
+            if (link.contains("start")) {
+                page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                link = link.substring(0, link.lastIndexOf("&"));
             }
-            link = link.substring(Const.SITE.length() - 1);
-        } else
-            link = data.getPath();
-        if (link != null) {
-            if (link.contains(Const.RSS)) {
-                main.putExtra(Const.CUR_ID, R.id.nav_rss);
-                if (getIntent().hasExtra(DataBase.ID))
-                    main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
-            } else if (link.length() < 2 || link.equals("/index.html")) {
-                main.putExtra(Const.CUR_ID, R.id.nav_main);
-                main.putExtra(Const.TAB, 0);
-            } else if (link.equals(SiteFragment.NOVOSTI)) {
-                main.putExtra(Const.CUR_ID, R.id.nav_main);
-                main.putExtra(Const.TAB, 1);
-            } else if (link.contains(Const.HTML)) {
-                BrowserActivity.openReader(this, link.substring(1), null);
-                main = null;
-            } else if (data.getQuery() != null && data.getQuery().contains("date")) { //http://blagayavest.info/poems/?date=11-3-2017
-                String s = data.getQuery().substring(5);
-                String m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"));
-                link = link.substring(1) + s.substring(0, s.indexOf("-"))
-                        + "." + (m.length() == 1 ? "0" : "") + m
-                        + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML;
-                BrowserActivity.openReader(this, link, null);
-                main = null;
-            } else if (link.contains("/poems")) {
-                main.putExtra(Const.CUR_ID, R.id.nav_book);
-                main.putExtra(Const.TAB, 0);
-            } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
-                main.putExtra(Const.CUR_ID, R.id.nav_book);
-                main.putExtra(Const.TAB, 1);
-            } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
-                link = data.getQuery();
-                int page = 1;
-                if (link.contains("start")) {
-                    page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
-                    link = link.substring(0, link.lastIndexOf("&"));
-                }
-                int mode = 5;
-                if (link.contains("where")) {
-                    mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
-                    link = link.substring(0, link.lastIndexOf("&"));
+            int mode = 5;
+            if (link.contains("where")) {
+                mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
+                link = link.substring(0, link.lastIndexOf("&"));
                     /* <option selected="" value="0">в Посланиях</option> 0
                        <option value="5">в Катренах</option> 1
                        <option value="1">в заголовках</option> 2
                        <option value="2">по всему Сайту</option> 3
                        <option value="3">по дате</option> 4
                        <!-- <option  value="4">в цитатах</option> -->*/
-                    if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
-                    else if (mode > 0) mode++; // поэтому остальное смещается
-                }
-                main.putExtra(Const.PLACE, page);
-                main.putExtra(Const.TAB, mode);
-                main.putExtra(Const.CUR_ID, R.id.nav_search);
-                main.putExtra(Const.LINK, link.substring(link.indexOf("=") + 1));
+                if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
+                else if (mode > 0) mode++; // поэтому остальное смещается
             }
+            main.putExtra(Const.PLACE, page);
+            main.putExtra(Const.TAB, mode);
+            main.putExtra(Const.CUR_ID, R.id.nav_search);
+            main.putExtra(Const.LINK, link.substring(link.indexOf("=") + 1));
         }
     }
 
@@ -221,7 +211,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data>{
         if (cursor.moveToFirst())
             time = cursor.getLong(cursor.getColumnIndex(Const.TIME));
         cursor.close();
-		db.close();
+        db.close();
         dataBase.close();
         if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
             return;
@@ -232,7 +222,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data>{
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         if (data.getBoolean(Const.TIME, false)) {
             model.non_start = false;

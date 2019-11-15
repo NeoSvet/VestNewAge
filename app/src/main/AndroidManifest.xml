@@ -34,32 +34,45 @@
                     android:host="blagayavest.info"
                     android:pathPrefix="/"
                     android:scheme="http" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!--
-                https://vk.com/away.php?utf=1&to=http%3A%2F%2Fblagayavest.info
-                /.*blagayavest\.info.*
-                -->
                 <data
-                    android:host="m.vk.com"
-                    android:pathPrefix="/away"
-                    android:scheme="https" />
-                <data
-                    android:host="vk.com"
-                    android:pathPrefix="/away"
-                    android:scheme="https" />
-                <data
-                    android:host="m.vk.com"
-                    android:pathPrefix="/away"
+                    android:host="otkroveniya.info"
+                    android:pathPrefix="/"
                     android:scheme="http" />
                 <data
-                    android:host="vk.com"
-                    android:pathPrefix="/away"
+                    android:host="otkroveniya.eu"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="otkroveniya.ru"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.blagayavest.info"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.otkroveniya.info"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.otkroveniya.eu"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.otkroveniya.ru"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+                <data
+                    android:host="medicina.softlan.lclients.ru"
+                    android:pathPrefix="/"
                     android:scheme="http" />
             </intent-filter>
         </activity>
@@ -83,6 +96,7 @@
             android:icon="@drawable/rss"
             android:label="@string/check_summary"
             android:process=":check" />
+
         <receiver android:name=".helpers.PromHelper$Rec" />
         <receiver android:name=".helpers.SummaryHelper$Rec" />
         <receiver android:name=".helpers.NotificationHelper$Result" />
