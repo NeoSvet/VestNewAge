@@ -121,7 +121,7 @@
     <string name="book_prev">Книгу предыдущих лет</string>
     <string name="book_cur">Книгу текущего года</string>
     <string name="materials">Материалы</string>
-    <string name="clear_completed">Очистка завершена</string>
+    <string name="completed">Завершено</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
     <string name="minutes">минут</string>

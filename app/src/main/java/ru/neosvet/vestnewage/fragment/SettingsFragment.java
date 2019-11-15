@@ -133,7 +133,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             stopRotate = true;
             model.finish();
             bClearDo.setEnabled(true);
-            Lib.showToast(act, getResources().getString(R.string.clear_completed));
+            Lib.showToast(act, getResources().getString(R.string.completed));
         }
     }
 
