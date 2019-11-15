@@ -23,7 +23,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class CabpageActivity extends AppCompatActivity {
-    private final String HOST = "http://o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =
+    private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =
             "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
     //div main, d31-d35 - for stop log I/chromium: [INFO:CONSOLE(13)] "Uncaught TypeError:...
     private WebView wvBrowser;
