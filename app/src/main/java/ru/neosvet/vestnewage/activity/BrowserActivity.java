@@ -88,7 +88,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
-        boolMain = context instanceof MainActivity;
+        boolMain = !(context instanceof SlashActivity);
         Intent intent = new Intent(context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);
         if (place != null)
@@ -458,7 +458,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                if (!boolMain)
+                    startActivity(new Intent(BrowserActivity.this, MainActivity.class));
+                BrowserActivity.this.finish();
             }
         });
         initTheme();
