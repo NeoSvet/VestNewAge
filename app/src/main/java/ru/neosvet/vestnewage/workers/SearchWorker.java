@@ -56,7 +56,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new DataBase(context, DataBase.SEARCH);
+            dbSearch = new DataBase(context, Const.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
@@ -76,7 +76,7 @@ public class SearchWorker extends Worker {
                 dbSearch.close();
                 return getResult();
             }
-            dbS.delete(DataBase.SEARCH, null, null);
+            dbS.delete(Const.SEARCH, null, null);
             DateHelper d;
             if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
@@ -129,7 +129,7 @@ public class SearchWorker extends Worker {
         List<String> title = new ArrayList<String>();
         List<String> link = new ArrayList<String>();
         List<String> id = new ArrayList<String>();
-        Cursor curSearch = dbS.query(DataBase.SEARCH,
+        Cursor curSearch = dbS.query(Const.SEARCH,
                 null, null, null, null, null,
                 DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
         if (curSearch.moveToFirst()) {
@@ -175,10 +175,10 @@ public class SearchWorker extends Worker {
                     des.append(getDes(cursor.getString(0), find));
                 }
                 cv.put(Const.DESCTRIPTION, des.toString());
-                dbS.update(DataBase.SEARCH, cv, DataBase.ID +
+                dbS.update(Const.SEARCH, cv, DataBase.ID +
                         DataBase.Q, new String[]{id.get(i)});
             } else {
-                dbS.delete(DataBase.SEARCH, DataBase.ID +
+                dbS.delete(Const.SEARCH, DataBase.ID +
                         DataBase.Q, new String[]{id.get(i)});
             }
             cursor.close();
@@ -252,7 +252,7 @@ public class SearchWorker extends Worker {
                                     cv.put(Const.DESCTRIPTION, des.toString());
                                     des = null;
                                 }
-                                dbS.insert(DataBase.SEARCH, null, cv);
+                                dbS.insert(Const.SEARCH, null, cv);
                                 cv = null;
                             }
                             cv = new ContentValues();
@@ -271,7 +271,7 @@ public class SearchWorker extends Worker {
             if (cv != null) {
                 if (des != null)
                     cv.put(Const.DESCTRIPTION, des.toString());
-                dbS.insert(DataBase.SEARCH, null, cv);
+                dbS.insert(Const.SEARCH, null, cv);
             }
         }
         curSearch.close();

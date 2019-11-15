@@ -10,7 +10,7 @@ public interface Const {
     String SITE = "http://blagayavest.info/", SITE2 = "http://medicina.softlan.lclients.ru/";
     String N = "\n", NN = "\n\n", AND = "&", BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”", CHECK = "Check";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", HTML = ".html", PRINT = "?styletpl=print";
-    String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie";
+    String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie", SEARCH = "search";
     String TASK = "task", HREF = "href", DIALOG = "dialog", POEMS = "poems", FIRST = "first", RSS = "/rss";
     String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new", START_SCEEN = "start_screen", CUR_ID = "cur_id";
     String TAB = "tab", MONTH = "Month", YEAR = "Year", UNREAD = "Unread", ERROR = "ERROR", LIST = "list", PAGE = "page";

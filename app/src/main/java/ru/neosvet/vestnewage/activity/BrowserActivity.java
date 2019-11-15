@@ -145,7 +145,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         outState.putString(Const.LINK, link);
         outState.putInt(Const.PLACE, iPlace);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
-        outState.putString(DataBase.SEARCH, string);
+        outState.putString(Const.SEARCH, string);
         super.onSaveInstanceState(outState);
     }
 
@@ -178,7 +178,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 }).start();
             }
             iPlace = state.getInt(Const.PLACE);
-            string = state.getString(DataBase.SEARCH);
+            string = state.getString(Const.SEARCH);
             if (string != null) {
                 etSearch.setText(string);
                 findText(string);

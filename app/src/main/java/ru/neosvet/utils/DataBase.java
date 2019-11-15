@@ -10,9 +10,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class DataBase extends SQLiteOpenHelper {
-    public static final String PARAGRAPH = "par", SEARCH = "search",
-            JOURNAL = "journal", MARKERS = "markers", LIKE = " LIKE ?",
-            Q = " = ?",  COLLECTIONS = "collections", ID = "id",DESC = " DESC";
+    public static final String PARAGRAPH = "par", JOURNAL = "journal",
+            MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?",
+            COLLECTIONS = "collections", ID = "id", DESC = " DESC";
     private Context context;
     private String name = "";
 
@@ -51,8 +51,8 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
                     + Const.LINK + " text primary key,"
                     + Const.TIME + " integer);");
-        } else if (name.equals(SEARCH)) {
-            db.execSQL("create table if not exists " + SEARCH + " ("
+        } else if (name.equals(Const.SEARCH)) {
+            db.execSQL("create table if not exists " + Const.SEARCH + " ("
                     + Const.LINK + " text primary key,"
                     + Const.TITLE + " text,"
                     + ID + " integer," //number for sorting
@@ -120,7 +120,7 @@ public class DataBase extends SQLiteOpenHelper {
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link));
             if (onlyTitle) {
                 cursor.close();
-				db.close();
+                db.close();
                 dataBase.close();
                 return pageCon.toString();
             }
@@ -129,7 +129,7 @@ public class DataBase extends SQLiteOpenHelper {
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
         } else { // страница не загружена...
             cursor.close();
-			db.close();
+            db.close();
             dataBase.close();
             return null;
         }
@@ -145,12 +145,12 @@ public class DataBase extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         } else { // страница не загружена...
             cursor.close();
-			db.close();
+            db.close();
             dataBase.close();
             return null;
         }
         cursor.close();
-		db.close();
+        db.close();
         dataBase.close();
         pageCon.delete(pageCon.length() - 2, pageCon.length());
         return pageCon.toString();
@@ -171,7 +171,7 @@ public class DataBase extends SQLiteOpenHelper {
                 link = link.substring(link.indexOf("-") + 1);
                 if (link.length() == 6)
                     link = "0" + link;
-                link= link.replace("-20", ".");
+                link = link.replace("-20", ".");
             } else if (link.contains("-")) {///2005/01-02.08.05.html
                 link = link.substring(link.indexOf("-") + 4, link.lastIndexOf("."));
             } else { //http://blagayavest.info/poems/11.03.17.html
@@ -210,7 +210,7 @@ public class DataBase extends SQLiteOpenHelper {
         if (cursor.moveToFirst())
             r = cursor.getInt(0);
         cursor.close();
-		db.close();
+        db.close();
         dataBase.close();
         return r;
     }

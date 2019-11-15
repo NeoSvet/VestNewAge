@@ -437,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String s = getIntent().getStringExtra(Const.LINK);
                 if (s != null) {
                     search.setString(s);
-                    search.setPage(getIntent().getIntExtra(DataBase.SEARCH, 1));
+                    search.setPage(getIntent().getIntExtra(Const.SEARCH, 1));
                     search.setMode(tab);
                 }
                 curFragment = search;

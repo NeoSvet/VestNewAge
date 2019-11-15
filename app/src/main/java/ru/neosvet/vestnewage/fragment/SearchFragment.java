@@ -171,7 +171,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             dateDialog.dismiss();
         outState.putInt(Const.START, dStart.getTimeInDays());
         outState.putInt(Const.END, dEnd.getTimeInDays());
-        outState.putInt(DataBase.SEARCH, page);
+        outState.putInt(Const.SEARCH, page);
         if (page > -1) {
             outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
             outState.putString(LABEL, tvLabel.getText().toString());
@@ -202,7 +202,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             act.setCurFragment(this);
             dStart = DateHelper.putDays(act, state.getInt(Const.START));
             dEnd = DateHelper.putDays(act, state.getInt(Const.END));
-            page = state.getInt(DataBase.SEARCH, -1);
+            page = state.getInt(Const.SEARCH, -1);
             if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
                 showResult();
@@ -223,7 +223,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         bStart.setText(formatDate(dStart));
         bEnd.setText(formatDate(dEnd));
         if (adResults.getCount() == 0 && !model.inProgress) {
-            f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
+            f = new File(act.lib.getDBFolder() + "/" + Const.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
@@ -301,7 +301,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void setViews() {
-        File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+        File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
         List<String> liSearch = new ArrayList<String>();
         if (f.exists()) {
             try {
@@ -407,7 +407,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             public void onClick(View view) {
                 adSearch.clear();
                 adSearch.notifyDataSetChanged();
-                File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+                File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
                 if (f.exists()) f.delete();
             }
         });
@@ -466,7 +466,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void deleteBase() {
-        File f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
+        File f = new File(act.lib.getDBFolder() + "/" + Const.SEARCH);
         if (f.exists()) f.delete();
     }
 
@@ -534,7 +534,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         if (needAdd) {
             adSearch.add(s);
             adSearch.notifyDataSetChanged();
-            File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+            File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
                 bw.write(s + Const.N);
@@ -570,9 +570,9 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     private void showResult() {
         adResults.clear();
         adResults.notifyDataSetChanged();
-        DataBase dataBase = new DataBase(act, DataBase.SEARCH);
+        DataBase dataBase = new DataBase(act, Const.SEARCH);
         SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.SEARCH, null, null, null, null, null,
+        Cursor cursor = db.query(Const.SEARCH, null, null, null, null, null,
                 DataBase.ID + (dStart.getTimeInMills() > dEnd.getTimeInMills() ? DataBase.DESC : ""));
         if (cursor.getCount() == 0) {
             bShow.setVisibility(View.GONE);
