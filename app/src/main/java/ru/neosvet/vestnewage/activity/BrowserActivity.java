@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -85,9 +84,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh;
     private Tip tip;
+    private static boolean boolMain;
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
+        boolMain = context instanceof MainActivity;
         Intent intent = new Intent(context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);
         if (place != null)
@@ -103,7 +104,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.browser_activity);
         initViews();
         setViews();
@@ -135,7 +135,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             finishLoad(data.getString(Const.ERROR));
@@ -357,6 +357,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         } else if (history.size() > 0) {
             onBackBrowser();
         } else {
+            if (!boolMain)
+                startActivity(new Intent(this, MainActivity.class));
             super.onBackPressed();
         }
     }
@@ -456,7 +458,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BrowserActivity.super.onBackPressed();
+                onBackPressed();
             }
         });
         initTheme();
