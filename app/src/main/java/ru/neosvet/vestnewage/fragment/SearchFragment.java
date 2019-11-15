@@ -354,11 +354,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                     showResult();
                     tvLabel.setText(pref.getString(LABEL, ""));
                 } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
-                    DataBase dbSearch = new DataBase(act, DataBase.SEARCH);
-                    SQLiteDatabase db = dbSearch.getWritableDatabase();
-                    db.delete(DataBase.SEARCH, null, null);
-                    db.close();
-                    dbSearch.close();
+                    deleteBase();
                     adResults.clear();
                     adResults.notifyDataSetChanged();
                 } else {
@@ -467,6 +463,11 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 pAdditionSet.setVisibility(View.GONE);
             }
         });
+    }
+
+    private void deleteBase() {
+        File f = new File(act.lib.getDBFolder() + "/" + DataBase.SEARCH);
+        if (f.exists()) f.delete();
     }
 
     private void enterSearch() {
@@ -586,6 +587,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                         }
                     });
             builder.create().show();
+            deleteBase();
         } else {
             pPages.setVisibility(View.VISIBLE);
             int max = cursor.getCount() / Const.MAX_ON_PAGE;
