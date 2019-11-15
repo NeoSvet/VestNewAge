@@ -93,8 +93,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         intent.putExtra(Const.LINK, link);
         if (place != null)
             intent.putExtra(Const.PLACE, place);
-        if (!(context instanceof Activity))
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
