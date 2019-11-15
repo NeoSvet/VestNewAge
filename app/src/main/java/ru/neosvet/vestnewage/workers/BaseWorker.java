@@ -55,7 +55,7 @@ public class BaseWorker extends Worker {
                         max_m = d.getMonth();
                         d = DateHelper.putYearMonth(context, max_y, 1);
                     }
-                    while (d.getYear() < max_y || d.getMonth() <= max_m) {
+                    while (d.getYear() < max_y || (d.getYear() == max_y && d.getMonth() <= max_m)) {
                         f = new File(path + d.getMY());
                         if (f.exists())
                             f.delete();
