@@ -12,6 +12,5 @@
     <dimen name="margin_top">48dp</dimen>
     <integer name="top_minus">80</integer>
     <integer name="screen_mode">1</integer>
-    <integer name="height_list">250</integer>
     <dimen name="menu_width">260dp</dimen>
 </resources>

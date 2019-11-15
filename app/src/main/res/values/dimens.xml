@@ -1,6 +1,5 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
@@ -11,17 +10,10 @@
     <dimen name="margin_top">0dp</dimen>
     <integer name="top_minus">180</integer>
     <dimen name="calendar_button">70dp</dimen>
-    <integer name="screen_phone_port">0</integer>
-    <integer name="screen_phone_land">1</integer>
     <integer name="screen_tablet_port">2</integer>
     <integer name="screen_tablet_land">3</integer>
     <integer name="screen_mode">0</integer>
-    <dimen name="app_bar_height">200dp</dimen>
-    <dimen name="item_width">200dp</dimen>
     <dimen name="menu_width">260dp</dimen>
-    <dimen name="text_margin">16dp</dimen>
     <dimen name="calendar_margin_top">8dp</dimen>
-    <integer name="height_list">350</integer>
-    <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="menu_fragment_top">0dp</dimen>
 </resources>

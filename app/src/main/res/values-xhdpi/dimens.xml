@@ -6,7 +6,6 @@
     <dimen name="cell_size">47dp</dimen>
     <dimen name="string_size">34dp</dimen>
     <dimen name="panel_height">44dp</dimen>
-    <dimen name="title_div">40dp</dimen>
     <dimen name="menu_width">320dp</dimen>
     <dimen name="date_table_width">325dp</dimen>
     <dimen name="date_cell_width">105dp</dimen>

@@ -16,7 +16,6 @@
     <string name="new_name">Новое название</string>
     <string name="open_link">Открыть ссылку</string>
     <!--New option-->
-    <string name="new_option">Появилась новая опция!</string>
     <string name="are_you_know">А вы знали?</string>
     <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
     <!--Lib-->
@@ -43,7 +42,6 @@
     <string name="ad">Объявление</string>
     <string name="katren">Катрен</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
-    <string name="no_list">Список ещё не загружен</string>
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
@@ -73,7 +71,6 @@
     <string name="empty_collections">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
     <!--MarkerActivity-->
     <string name="marker">Закладка</string>
-    <string name="enter_name">Введите название</string>
     <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>
     <string name="no_collections">Вне подборок</string>
     <string name="unuse_dot">Запятую нельзя использовать</string>
@@ -159,8 +156,6 @@
     <string name="min">мин</string>
     <string name="prom_for_soul_unite">Посыл на Любовь и Духовное Единение</string>
     <string name="accept">Принято</string>
-    <string name="prom_in_hour">Посыл через %.1f ч.</string>
-    <string name="prom_in_minute">Посыл через %.1f мин.</string>
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
@@ -179,7 +174,6 @@
     <string name="appeared_new_some">Новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
     <string name="postpone">Отложить</string>
-    <string name="postpone_alert">Уведомление отложено на 10-20 минут</string>
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
@@ -189,8 +183,6 @@
     <string name="write_to_dev">Написать разработчику</string>
     <string name="srv_info">\nСлужебная информация:\n</string>
     <!--PresentationActivity-->
-    <string name="next">Далее</string>
-    <string name="finish">Закончить</string>
     <!--SearchFragment-->
     <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>
