@@ -102,6 +102,8 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data result) {
+        if (!model.inProgress)
+            return;
         if (!result.getBoolean(Const.FINISH, false))
             return;
         model.finish();
