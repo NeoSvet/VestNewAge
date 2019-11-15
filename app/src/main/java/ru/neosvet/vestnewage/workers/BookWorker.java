@@ -164,7 +164,7 @@ public class BookWorker extends Worker {
                 db = dataBase.getWritableDatabase();
                 isTitle = true;
                 in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
-                br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
+                br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
                 while ((s = br.readLine()) != null) {
                     if (s.equals(Const.AND)) {
                         isTitle = false;
