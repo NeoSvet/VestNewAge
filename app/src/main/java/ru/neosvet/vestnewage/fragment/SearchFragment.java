@@ -301,7 +301,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void setViews() {
-        final File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
+        File f = new File(act.getFilesDir() + File.separator + DataBase.SEARCH);
         List<String> liSearch = new ArrayList<String>();
         if (f.exists()) {
             try {
