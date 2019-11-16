@@ -143,17 +143,17 @@ public class MarkersWorker extends Worker {
         }
         //определение новых id для закладок
         HashMap<Integer, Integer> hM = new HashMap<>();
-        String p, d, c;
+        String p, d;
         while ((s = br.readLine()) != null) {
             id = Integer.parseInt(s);
             p = br.readLine();
             s = br.readLine();
             d = br.readLine();
-            c = br.readLine();
+            br.readLine(); //col
             cursor = db.query(DataBase.MARKERS, new String[]{DataBase.ID},
-                    Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK + DataBase.Q + DataBase.AND +
-                            Const.DESCTRIPTION + DataBase.Q + DataBase.AND + DataBase.COLLECTIONS + DataBase.Q,
-                    new String[]{p, s, d, c}, null, null, null);
+                    Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
+                            DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
+                    new String[]{p, s, d}, null, null, null);
             if (cursor.moveToFirst()) {
                 nid = cursor.getInt(0);
             } else {
@@ -161,7 +161,6 @@ public class MarkersWorker extends Worker {
                 cv.put(Const.PLACE, p);
                 cv.put(Const.LINK, s);
                 cv.put(Const.DESCTRIPTION, d);
-                cv.put(DataBase.COLLECTIONS, c);
                 nid = (int) db.insert(DataBase.MARKERS, null, cv);
             }
             hM.put(id, nid);
