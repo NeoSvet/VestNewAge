@@ -44,7 +44,7 @@ import ru.neosvet.vestnewage.model.MarkersModel;
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
     public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
-    private View container, fabEdit, fabMenu, pEdit;
+    private View container, fabEdit, fabMenu, pEdit, bExport;
     private TextView tvEmpty;
     private MainActivity act;
     private MarkAdapter adMarker;
@@ -154,7 +154,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 builder.create().show();
                 return;
             }
-            if(data.getBoolean(Const.MODE, false)) { //export
+            if (data.getBoolean(Const.MODE, false)) { //export
                 final String file = data.getString(Const.FILE);
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
                         .setMessage(getResources().getString(R.string.send_file))
@@ -209,9 +209,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void loadMarList() {
         fabEdit.clearAnimation();
-        fabMenu.clearAnimation();
+        if (fabMenu != null)
+            fabMenu.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        fabMenu.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -363,10 +363,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private void loadColList() {
         fabEdit.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        if (fabMenu != null) {
+        if (fabMenu != null)
             fabMenu.clearAnimation();
-            fabMenu.setVisibility(View.GONE);
-        }
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -406,6 +404,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         fabEdit = container.findViewById(R.id.fabEdit);
         fabMenu = container.findViewById(R.id.fabMenu);
         pEdit = container.findViewById(R.id.pEdit);
+        bExport = container.findViewById(R.id.bExport);
         menu = new Tip(act, container.findViewById(R.id.pMenu));
         tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
         lvMarker = (ListView) container.findViewById(R.id.lvMarker);
@@ -421,7 +420,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             @Override
             public void onAnimationEnd(Animation animation) {
                 fabEdit.setVisibility(View.GONE);
-                fabMenu.setVisibility(View.GONE);
+                if (fabMenu != null)
+                    fabMenu.setVisibility(View.GONE);
             }
 
             @Override
@@ -466,13 +466,16 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     return false;
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     fabEdit.startAnimation(anMin);
-                    fabMenu.startAnimation(anMin);
+                    if (fabMenu != null)
+                        fabMenu.startAnimation(anMin);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     fabEdit.setVisibility(View.VISIBLE);
                     fabEdit.startAnimation(anMax);
-                    fabMenu.setVisibility(View.VISIBLE);
-                    fabMenu.startAnimation(anMax);
+                    if (fabMenu != null) {
+                        fabMenu.setVisibility(View.VISIBLE);
+                        fabMenu.startAnimation(anMax);
+                    }
                 }
                 return false;
             }
@@ -554,19 +557,24 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 deleteDialog();
             }
         });
-        fabMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (model.inProgress)
-                    return;
-                if (menu.isShow())
-                    menu.hide();
-                else
-                    menu.show();
-            }
-        });
         if (android.os.Build.VERSION.SDK_INT > 18) {
-            container.findViewById(R.id.bExport).setOnClickListener(new View.OnClickListener() {
+            fabMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (model.inProgress)
+                        return;
+                    if (menu.isShow())
+                        menu.hide();
+                    else {
+                        if (adMarker.getCount() == 0)
+                            bExport.setVisibility(View.GONE);
+                        else
+                            bExport.setVisibility(View.VISIBLE);
+                        menu.show();
+                    }
+                }
+            });
+            bExport.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     selectFile(true);
@@ -690,7 +698,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         adMarker.getItem(iSel).setSelect(true);
         adMarker.notifyDataSetChanged();
         fabEdit.setVisibility(View.GONE);
-        fabMenu.setVisibility(View.GONE);
+        if (fabMenu != null)
+            fabMenu.setVisibility(View.GONE);
         pEdit.setVisibility(View.VISIBLE);
     }
 
@@ -733,27 +742,31 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             //получаем список закладок у удаляемой подборки:
             s = adMarker.getItem(iSel).getData();
             mId = DataBase.getList(s);
+            cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
+                    Const.TITLE + DataBase.Q, new String[]{getResources().getString(R.string.no_collections)},
+                    null, null, null);
+            cursor.moveToFirst();
+            int nc_id = cursor.getInt(0); //id подборки "Вне подборок"
+            cursor.close();
             for (int i = 0; i < mId.length; i++) { //перебираем список закладок.
                 cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
-                        DataBase.ID + DataBase.Q, new String[]{mId[i]}
-                        , null, null, null);
+                        DataBase.ID + DataBase.Q, new String[]{mId[i]},
+                        null, null, null);
                 if (!cursor.moveToFirst()) continue;
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 cursor.close();
-                s = s.replace(DataBase.closeList(id), ""); //убираем удаляемую подборку
-                if (s.length() == 0) { //в списке не осталось подборок
-                    s = "1"; //указываем "Вне подборок"
-                    // добавляем в списк на добавление в "Вне подборок":
+                s = s.replace(DataBase.closeList(id), Const.COMMA); //убираем удаляемую подборку
+                if (s.length() == 1) { //в списке не осталось подборок
+                    s = String.valueOf(nc_id); //указываем "Вне подборок"
+                    // добавляем в список на добавление в "Вне подборок":
                     b.append(mId[i]);
                     b.append(Const.COMMA);
-                } else {
+                } else
                     s = DataBase.openList(s);
-                }
                 //обновляем закладку:
                 cv = new ContentValues();
                 cv.put(DataBase.COLLECTIONS, s);
-                db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q,
-                        new String[]{mId[i]});
+                db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, new String[]{mId[i]});
             }
             //удаляем подборку:
             db.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, new String[]{id});
@@ -761,8 +774,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             if (b.length() > 0) { //список на добавление не пуст
                 //получаем список закладок в "Вне подоборок":
                 cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                        DataBase.ID + DataBase.Q, new String[]{"1"}
-                        , null, null, null);
+                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(nc_id)},
+                        null, null, null);
                 if (cursor.moveToFirst())
                     s = cursor.getString(0);
                 else
@@ -771,32 +784,30 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 //дополняем список:
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, b.toString() + s);
-                db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                        new String[]{"1"});
+                db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{String.valueOf(nc_id)});
                 loadColList(); //обновляем список подборок
             } else //иначе просто удаляем подборку из списка
                 adMarker.removeAt(iSel);
         } else { //удаляем закладку
             n = 0;
             cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
-                    DataBase.ID + DataBase.Q, new String[]{id}
-                    , null, null, null);
+                    DataBase.ID + DataBase.Q, new String[]{id},
+                    null, null, null);
             if (cursor.moveToFirst()) {
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 mId = DataBase.getList(s);
                 for (int i = 0; i < mId.length; i++) { //перебираем список подборок
                     cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                            DataBase.ID + DataBase.Q, new String[]{mId[i]}
-                            , null, null, null);
+                            DataBase.ID + DataBase.Q, new String[]{mId[i]},
+                            null, null, null);
                     if (!cursor.moveToFirst()) continue;
                     s = DataBase.closeList(cursor.getString(0)); //список закладок у подборки
-                    s = s.replace(DataBase.closeList(String.valueOf(id)), ""); //убираем удаляемую закладку
+                    s = s.replace(DataBase.closeList(String.valueOf(id)), Const.COMMA); //убираем удаляемую закладку
                     s = DataBase.openList(s);
                     //обновляем подборку:
                     cv = new ContentValues();
                     cv.put(DataBase.MARKERS, s);
-                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                            new String[]{mId[i]});
+                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{mId[i]});
                 }
             }
             cursor.close();
@@ -821,10 +832,10 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void unSelect() {
         change = false;
-        if (adMarker.getCount() > 0) {
+        if (adMarker.getCount() > 0)
             fabEdit.setVisibility(View.VISIBLE);
+        if (fabMenu != null)
             fabMenu.setVisibility(View.VISIBLE);
-        }
         pEdit.setVisibility(View.GONE);
         iSel = -1;
     }
