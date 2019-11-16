@@ -128,9 +128,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(MarkersModel.class);
-        if (model.inProgress) {
+        if (model.inProgress)
             initRotate();
-        }
     }
 
     @Override
@@ -156,9 +155,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    if (stopRotate)
-                        fabMenu.setVisibility(View.GONE);
-                    else
+                    if (!stopRotate)
                         fabMenu.startAnimation(anRotate);
                 }
 
@@ -844,6 +841,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     }
 
     public void startModel(int code, Uri data) {
+        initRotate();
         model.start(code == EXPORT_REQUEST, data.toString());
     }
 }
