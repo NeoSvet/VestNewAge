@@ -31,6 +31,7 @@ public class ProgressModel extends AndroidViewModel {
     public void finish() {
         inProgress = false;
         cancel = false;
+        progress.setValue(new Data.Builder().build());
     }
 
     public void postProgress(Data data) {
