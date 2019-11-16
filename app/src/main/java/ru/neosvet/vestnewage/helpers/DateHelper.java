@@ -156,11 +156,14 @@ public class DateHelper {
     public String toString() {
         ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
         LocalDateTime dateTime;
-        if (time == null)
+        DateTimeFormatter formatter;
+        if (time == null) {
+            formatter = DateTimeFormatter.ofPattern("dd.MM.yy").withZone(ZoneId.systemDefault());
             dateTime = LocalDateTime.of(date, LocalTime.of(0, 0, 0));
-        else
+        } else {
+            formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy").withZone(ZoneId.systemDefault());
             dateTime = LocalDateTime.of(date, time);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yy").withZone(ZoneId.systemDefault());
+        }
         dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
         return dateTime.format(formatter);
     }
@@ -230,7 +233,7 @@ public class DateHelper {
     public void changeSeconds(int offset) {
         if (time == null) return;
         if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0 && time.getSecond() == 0)
-                this.changeDay(-1);
+            this.changeDay(-1);
         time = time.plusSeconds(offset);
     }
 
