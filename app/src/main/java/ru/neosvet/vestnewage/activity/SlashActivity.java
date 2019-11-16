@@ -114,6 +114,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt("ver", cur);
                 editor.apply();
+                reInitProm();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,10 +239,16 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             return;
         if (data.getBoolean(Const.TIME, false)) {
             model.non_start = false;
-
+            reInitProm();
         }
         if (data.getBoolean(Const.FINISH, false))
             finishLoad();
+    }
+
+    private void reInitProm() {
+        SharedPreferences pref = getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        PromHelper prom = new PromHelper(SlashActivity.this, null);
+        prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF));
     }
 
     public void finishLoad() {
