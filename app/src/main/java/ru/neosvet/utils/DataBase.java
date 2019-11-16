@@ -91,10 +91,12 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public static String openList(String s) {
-        if (s.length() > 0) {
+        if (s != null && s.length() > 0) {
             s = s.trim();
-            if (s.substring(s.length() - 1).equals(Const.COMMA))
+            if (s.lastIndexOf(Const.COMMA) == s.length() - 1)
                 s = s.substring(0, s.length() - 1);
+            if (s.indexOf(Const.COMMA) == 0)
+                s = s.substring(1);
         }
         return s;
     }
