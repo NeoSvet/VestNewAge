@@ -6,7 +6,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -35,22 +34,6 @@ public class Lib {
 
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-    }
-
-    public int getPreviosVer() {
-        SharedPreferences pref = context.getSharedPreferences("main", Context.MODE_PRIVATE);
-        int prev = pref.getInt("ver", 0);
-        try {
-            int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-            if (prev < cur) {
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putInt("ver", cur);
-                editor.apply();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return prev;
     }
 
     public static OkHttpClient createHttpClient() {

@@ -47,7 +47,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     private Intent main;
     private StatusButton status;
     private boolean anim = true;
-    private Lib lib;
     private SlashModel model;
     private NotificationHelper notifHelper;
 
@@ -61,10 +60,9 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         setContentView(R.layout.slash_activity);
         main = new Intent(getApplicationContext(), MainActivity.class);
         status = new StatusButton(this, findViewById(R.id.pStatus));
-        lib = new Lib(this);
 
         initAnimation();
-        int ver = lib.getPreviosVer();
+        int ver = getPreviosVer();
         if (ver < 32)
             adapterNewVersion32();
         if (initData()) {
@@ -97,8 +95,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         }
         if (ver < 10)
             adapterNewVersion10();
-//        if (ver < 19)
-//            rebuildNotif();
         if (ver < 21)
             adapterNewVersion21();
         if (ver < 31) {
@@ -107,6 +103,22 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         }
 
         showSummaryNotif();
+    }
+
+    private int getPreviosVer() {
+        SharedPreferences pref = getSharedPreferences("main", Context.MODE_PRIVATE);
+        int prev = pref.getInt("ver", 0);
+        try {
+            int cur = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+            if (prev < cur) {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt("ver", cur);
+                editor.apply();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return prev;
     }
 
     @Override
@@ -226,11 +238,10 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             return;
         if (data.getBoolean(Const.TIME, false)) {
             model.non_start = false;
-            //TODO rebuild prom notif
+
         }
-        if (data.getBoolean(Const.FINISH, false)) {
+        if (data.getBoolean(Const.FINISH, false))
             finishLoad();
-        }
     }
 
     public void finishLoad() {
@@ -423,6 +434,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
                         cursor.close();
                         dbMar.close();
                         // удаление базы журнала старого образца и базы подборок:
+                        Lib lib = new Lib(SlashActivity.this);
                         dir = lib.getDBFolder();
                         for (File f : dir.listFiles()) {
                             if (f.getName().contains(DataBase.COLLECTIONS) ||
