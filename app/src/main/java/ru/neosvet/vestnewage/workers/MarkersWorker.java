@@ -178,7 +178,7 @@ public class MarkersWorker extends Worker {
             bw.write(hC.get(id) + Const.N);
             br.readLine(); //title
             s = br.readLine();
-            bw.write(getNewId(hM, s.split(Const.COMMA)) + Const.N); //markers
+            bw.write(getNewId(hM, DataBase.getList(s)) + Const.N); //markers
             bw.flush();
         }
         //изменение id в закладках
@@ -190,7 +190,7 @@ public class MarkersWorker extends Worker {
             br.readLine(); //link
             br.readLine(); //des
             s = br.readLine();
-            bw.write(getNewId(hC, s.split(Const.COMMA)) + Const.N); //col
+            bw.write(getNewId(hC, DataBase.getList(s)) + Const.N); //col
             bw.flush();
         }
         bw.close();
@@ -209,7 +209,7 @@ public class MarkersWorker extends Worker {
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
-                cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), p.split(Const.COMMA)));
+                cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), DataBase.getList(p)));
                 db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{s});
             }
             cursor.close();
@@ -222,7 +222,7 @@ public class MarkersWorker extends Worker {
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
-                cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), p.split(Const.COMMA)));
+                cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), DataBase.getList(p)));
                 db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, new String[]{s});
             }
             cursor.close();
@@ -232,9 +232,9 @@ public class MarkersWorker extends Worker {
     private String combineIds(String ids, String[] m) {
         StringBuilder b = new StringBuilder(ids);
         b.append(Const.COMMA);
-        ids = Const.COMMA + ids + Const.COMMA;
+        ids = DataBase.closeList(ids);
         for (int i = 0; i < m.length; i++) {
-            if (!ids.contains(Const.COMMA + m[i] + Const.COMMA)) {
+            if (!ids.contains(DataBase.closeList(m[i]))) {
                 b.append(m[i]);
                 b.append(Const.COMMA);
             }
