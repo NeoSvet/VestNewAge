@@ -203,7 +203,7 @@ public class CalendarWolker extends Worker {
     }
 
 
-    private void initDatebase(String link) {
+    private void initDatebase(String link) throws Exception {
         if (dataBase != null) return;
         dataBase = new DataBase(context, link);
         db = dataBase.getWritableDatabase();
@@ -215,7 +215,7 @@ public class CalendarWolker extends Worker {
         }
     }
 
-    private void addLink(int n, String link) {
+    private void addLink(int n, String link)  throws Exception {
         if (list.get(n).getCount() > 0) {
             String s = link.substring(link.lastIndexOf("/"));
             for (int i = 0; i < list.get(n).getCount(); i++) {
