@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -139,6 +140,20 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
             model.finish();
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
+                        .setTitle(getResources().getString(R.string.error))
+                        .setMessage(error)
+                        .setPositiveButton(getResources().getString(android.R.string.ok),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                builder.create().show();
+                return;
+            }
             Lib.showToast(act, getResources().getString(R.string.completed));
         }
     }
