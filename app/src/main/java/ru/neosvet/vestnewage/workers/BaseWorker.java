@@ -1,9 +1,7 @@
 package ru.neosvet.vestnewage.workers;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import androidx.work.Data;
@@ -13,9 +11,7 @@ import androidx.work.WorkerParameters;
 import java.io.File;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
@@ -59,29 +55,11 @@ public class BaseWorker extends Worker {
                         f = new File(path + d.getMY());
                         if (f.exists())
                             f.delete();
-                        /*dataBase = new DataBase(context, d.getMY());
-                        db = dataBase.getWritableDatabase();
-                        db.delete(Const.TITLE, null, null);
-                        db.delete(DataBase.PARAGRAPH, null, null);
-                        db.close();
-                        dataBase.close();*/
                         d.changeMonth(1);
                     }
-                } else if (request[i].equals(DataBase.MARKERS)) {
-                    DataBase dataBase = new DataBase(context, request[i]);
-                    SQLiteDatabase db = dataBase.getWritableDatabase();
-                    db.delete(request[i], null, null);
-                    db.delete(DataBase.COLLECTIONS, null, null);
-                    ContentValues cv = new ContentValues();
-                    cv.put(Const.TITLE, context.getResources().getString(R.string.no_collections));
-                    db.insert(DataBase.COLLECTIONS, null, cv);
-                    db.close();
-                    dataBase.close();
-                } else {//materials
+                } else {//markers or materials
                     f = new File(path + request[i]);
                     f.delete();
-                  //db.delete(Const.TITLE, null, null);
-                  //db.delete(DataBase.PARAGRAPH, null, null);
                 }
             }
             BaseModel.getInstance().postProgress(new Data.Builder()
