@@ -39,6 +39,7 @@ import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
@@ -262,7 +263,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             return getResources().getString(R.string.page_entirely);
         try {
             StringBuilder b = new StringBuilder();
-            if (p.contains("%")) {
+            if (p.contains("%")) { //позиция
                 b.append(Const.N);
                 b.append(DataBase.getContentPage(act, link, false));
                 int k = 5; // имитация нижнего "колонтитула" страницы
@@ -293,8 +294,11 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                         i--;
                     b.delete(i - 1, b.length());
                 }
-                b.insert(0, getResources().getString(R.string.pos_n) + p + ":" + Const.N);
-            } else {
+                if (b.toString().equals("null"))
+                    b = new StringBuilder(getResources().getString(R.string.not_load_page));
+                b.insert(0, getResources().getString(R.string.pos_n) +
+                        p.replace(".", Const.COMMA) + ":" + Const.N);
+            } else { //абзацы
                 b.append(getResources().getString(R.string.par_n));
                 b.append(p.replace(Const.COMMA, ", "));
                 b.append(":");
@@ -313,7 +317,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     cursor.close();
                     db.close();
                     dataBase.close();
-                    throw new Exception();
+                    b.append(getResources().getString(R.string.not_load_page));
+                    return b.toString();
                 }
                 cursor.close();
                 cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
@@ -349,14 +354,14 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         if (p.contains("%"))
             p = act.getResources().getString(R.string.sel_pos) + p;
         else
-            p = act.getResources().getString(R.string.sel_par) + p.replace(Const.COMMA, ", ");
+            p = act.getResources().getString(R.string.sel_par) + DataBase.openList(p).replace(Const.COMMA, ", ");
         return p;
     }
 
     private String getTitle(String link) {
         String t = DataBase.getContentPage(act, link, true);
         if (t == null)
-            return getResources().getString(R.string.not_found_page);
+            return link;
         return t;
     }
 
@@ -436,6 +441,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if(model.inProgress || LoaderModel.getInstance().inProgress)
+                    return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
                         return;
@@ -448,6 +455,10 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                             + Const.N + adMarker.getItem(pos).getData();
                     loadMarList();
                 } else {
+                    if(adMarker.getItem(pos).getTitle().contains("/")) {
+                        act.downloadPage(adMarker.getItem(pos).getData());
+                        return;
+                    }
                     String p;
                     if (adMarker.getItem(pos).getPlace().equals("0"))
                         p = null;
@@ -846,8 +857,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
             SQLiteDatabase db = dbMarker.getWritableDatabase();
             Cursor cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                    Const.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)}
-                    , null, null, null);
+                    Const.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)},
+                    null, null, null);
             if (cursor.moveToFirst())
                 sCol += Const.N + cursor.getString(0); //список закладок в подборке
             else
@@ -893,5 +904,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     public void startModel(int code, Uri data) {
         initRotate();
         model.start(code == EXPORT_REQUEST, data.toString());
+    }
+
+    public void finishLoad() {
+        loadMarList();
     }
 }

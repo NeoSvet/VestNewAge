@@ -64,7 +64,7 @@
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
     <string name="send_file">Отправить файл?</string>
-    <string name="not_found_page">Страница не найдена</string>
+    <string name="not_load_page">Страница не загружена</string>
     <string name="collections">Подборки</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>

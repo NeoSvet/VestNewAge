@@ -168,8 +168,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            boolean all = data.getInt(Const.MODE, 0) == LoaderModel.ALL;
-            finishLoad(all, data.getString(Const.ERROR));
+            switch (data.getInt(Const.MODE, -1)) {
+                case LoaderModel.DOWNLOAD_ALL:
+                    finishLoad(true, data.getString(Const.ERROR));
+                    break;
+                case LoaderModel.DOWNLOAD_ID:
+                    finishLoad(false, data.getString(Const.ERROR));
+                    break;
+                case LoaderModel.DOWNLOAD_PAGE:
+                    status.setError(data.getString(Const.ERROR));
+                    model.finish();
+                    if (curFragment instanceof CollectionsFragment)
+                        ((CollectionsFragment) curFragment).finishLoad();
+                    break;
+            }
         }
     }
 
@@ -619,5 +631,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvNew.startAnimation(anMax);
         fab.setVisibility(View.VISIBLE);
         fab.startAnimation(anMax);
+    }
+
+    public void downloadPage(String link) {
+        status.setError(null);
+        status.setLoad(true);
+        model.startLoad(LoaderModel.DOWNLOAD_PAGE, link);
     }
 }
