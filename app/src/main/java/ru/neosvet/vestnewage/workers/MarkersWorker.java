@@ -178,7 +178,7 @@ public class MarkersWorker extends Worker {
             bw.write(hC.get(id) + Const.N);
             br.readLine(); //title
             s = br.readLine();
-            bw.write(getNewId(hM, s.split(",")) + Const.N); //markers
+            bw.write(getNewId(hM, s.split(Const.COMMA)) + Const.N); //markers
             bw.flush();
         }
         //изменение id в закладках
@@ -190,7 +190,7 @@ public class MarkersWorker extends Worker {
             br.readLine(); //link
             br.readLine(); //des
             s = br.readLine();
-            bw.write(getNewId(hC, s.split(",")) + Const.N); //col
+            bw.write(getNewId(hC, s.split(Const.COMMA)) + Const.N); //col
             bw.flush();
         }
         bw.close();
@@ -209,7 +209,7 @@ public class MarkersWorker extends Worker {
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
-                cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), p.split(",")));
+                cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), p.split(Const.COMMA)));
                 db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{s});
             }
             cursor.close();
@@ -222,7 +222,7 @@ public class MarkersWorker extends Worker {
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
-                cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), p.split(",")));
+                cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), p.split(Const.COMMA)));
                 db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, new String[]{s});
             }
             cursor.close();
@@ -231,12 +231,12 @@ public class MarkersWorker extends Worker {
 
     private String combineIds(String ids, String[] m) {
         StringBuilder b = new StringBuilder(ids);
-        b.append(",");
-        ids = "," + ids + ",";
+        b.append(Const.COMMA);
+        ids = Const.COMMA + ids + Const.COMMA;
         for (int i = 0; i < m.length; i++) {
-            if (!ids.contains("," + m[i] + ",")) {
+            if (!ids.contains(Const.COMMA + m[i] + Const.COMMA)) {
                 b.append(m[i]);
-                b.append(",");
+                b.append(Const.COMMA);
             }
         }
         b.delete(b.length() - 1, b.length());
@@ -247,7 +247,7 @@ public class MarkersWorker extends Worker {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < m.length; i++) {
             b.append(h.get(Integer.parseInt(m[i])));
-            b.append(",");
+            b.append(Const.COMMA);
         }
         return b.toString();
     }

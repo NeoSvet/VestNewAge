@@ -183,8 +183,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         int iID, iPlace, iLink, iDes;
         String[] mId;
         String link = sCol.substring(sCol.indexOf(Const.N) + 1);
-        if (link.contains(",")) {
-            mId = link.split(",");
+        if (link.contains(Const.COMMA)) {
+            mId = link.split(Const.COMMA);
         } else
             mId = new String[]{link};
         Cursor cursor;
@@ -235,7 +235,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     k++;
                     i = b.indexOf(Const.N, i + 1);
                 }
-                float f = Float.parseFloat(p.substring(0, p.length() - 1).replace(",", ".")) / 100f;
+                float f = Float.parseFloat(p.substring(0, p.length() - 1).replace(Const.COMMA, ".")) / 100f;
                 k = (int) ((float) k * f) + 1;
                 i = 0;
                 int u;
@@ -260,7 +260,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 b.insert(0, getResources().getString(R.string.pos_n) + p + ":" + Const.N);
             } else {
                 b.append(getResources().getString(R.string.par_n));
-                b.append(p.replace(",", ", "));
+                b.append(p.replace(Const.COMMA, ", "));
                 b.append(":");
                 b.append(Const.N);
                 p = DataBase.closeList(p);
@@ -313,7 +313,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         if (p.contains("%"))
             p = act.getResources().getString(R.string.sel_pos) + p;
         else
-            p = act.getResources().getString(R.string.sel_par) + p.replace(",", ", ");
+            p = act.getResources().getString(R.string.sel_par) + p.replace(Const.COMMA, ", ");
         return p;
     }
 
@@ -621,7 +621,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private void renameCol(String name) {
         boolean bCancel = (name.length() == 0);
         if (!bCancel) {
-            if (name.contains(",")) {
+            if (name.contains(Const.COMMA)) {
                 Lib.showToast(act, getResources().getString(R.string.unuse_dot));
                 return;
             }
@@ -709,7 +709,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     s = "1"; //указываем "Вне подборок"
                     // добавляем в списк на добавление в "Вне подборок":
                     b.append(mId[i]);
-                    b.append(",");
+                    b.append(Const.COMMA);
                 } else {
                     s = DataBase.openList(s);
                 }
@@ -824,7 +824,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < adMarker.getCount(); i++) {
             s.append(adMarker.getItem(i).getId());
-            s.append(",");
+            s.append(Const.COMMA);
         }
         s.delete(s.length() - 1, s.length());
         return s.toString();

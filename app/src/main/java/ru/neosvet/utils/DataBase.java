@@ -87,21 +87,21 @@ public class DataBase extends SQLiteOpenHelper {
     // для закладок и подборок:
     public static String closeList(String s) {
         if (s == null) return "";
-        return "," + s + ",";
+        return Const.COMMA + s + Const.COMMA;
     }
 
     public static String openList(String s) {
         if (s.length() > 0) {
             s = s.trim();
-            if (s.substring(s.length() - 1).equals(","))
+            if (s.substring(s.length() - 1).equals(Const.COMMA))
                 s = s.substring(0, s.length() - 1);
         }
         return s;
     }
 
     public static String[] getList(String s) {
-        if (s.contains(","))
-            return s.split(",");
+        if (s.contains(Const.COMMA))
+            return s.split(Const.COMMA);
         else
             return new String[]{s};
     }

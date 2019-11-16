@@ -7,7 +7,7 @@ package ru.neosvet.utils;
 public interface Const {
     int MAX_ON_PAGE = 15, TIMEOUT = 20;
     byte TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
-    String SITE = "http://blagayavest.info/", SITE2 = "http://medicina.softlan.lclients.ru/";
+    String SITE = "http://blagayavest.info/", SITE2 = "http://medicina.softlan.lclients.ru/", COMMA = ",";
     String N = "\n", NN = "\n\n", AND = "&", BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”", CHECK = "Check";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", HTML = ".html", PRINT = "?styletpl=print";
     String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie", SEARCH = "search";

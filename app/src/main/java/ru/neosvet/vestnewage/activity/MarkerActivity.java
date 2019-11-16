@@ -82,7 +82,7 @@ public class MarkerActivity extends AppCompatActivity {
             dataBase.close();
             if (s.length() > 0) {
                 s.delete(s.length() - 2, s.length());
-                if (s.indexOf(",") > 0) {
+                if (s.indexOf(Const.COMMA) > 0) {
                     marker.putExtra(DataBase.PARAGRAPH, s.toString());
                     marker.putExtra(DataBase.ID, -2); //метка о том, что в PARAGRAPH указан список
                 } else
@@ -286,7 +286,7 @@ public class MarkerActivity extends AppCompatActivity {
             String s = cursor.getString(cursor.getColumnIndex(Const.PLACE));
             if (s.contains("%")) {
                 rPos.setChecked(true);
-                setPosText(Float.parseFloat(s.substring(0, s.length() - 1).replace(",", ".")));
+                setPosText(Float.parseFloat(s.substring(0, s.length() - 1).replace(Const.COMMA, ".")));
                 s = getResources().getString(R.string.sel_pos) + s;
                 sel = getResources().getString(R.string.page_entirely);
             } else {
@@ -294,7 +294,7 @@ public class MarkerActivity extends AppCompatActivity {
                 if (s.equals("0"))
                     s = getResources().getString(R.string.page_entirely);
                 else
-                    s = getResources().getString(R.string.sel_par) + s.replace(",", ", ");
+                    s = getResources().getString(R.string.sel_par) + s.replace(Const.COMMA, ", ");
                 sel = getResources().getString(R.string.sel_pos) + "0,0%";
             }
             setPageList(s);
@@ -395,7 +395,7 @@ public class MarkerActivity extends AppCompatActivity {
                     softKeyboard.closeSoftKeyboard();
                     String s = tvSel.getText().toString();
                     s = s.substring(s.indexOf(":") + 2, s.indexOf("%"));
-                    float pos = Float.parseFloat(s.replace(",", "."));
+                    float pos = Float.parseFloat(s.replace(Const.COMMA, "."));
                     sbPos.setProgress((int) (pos * 10));
                     setPosText(pos);
                     posVisible = true;
@@ -458,10 +458,7 @@ public class MarkerActivity extends AppCompatActivity {
                     }
                     tvCol.setText(s);
                 } else if (id > -1) { //edit marker
-//                    Intent data = new Intent();
-//                    data.putExtra()
-//                    setResult(1,data);
-                    setResult(1);
+                    setResult(RESULT_OK);
                     updateMarker();
                 } else {
                     addMarker();
@@ -497,7 +494,7 @@ public class MarkerActivity extends AppCompatActivity {
                     softKeyboard.closeSoftKeyboard();
                     if (view.equals(etCol)) { //add col
                         String s = etCol.getText().toString();
-                        if (s.contains(",")) {
+                        if (s.contains(Const.COMMA)) {
                             Lib.showToast(MarkerActivity.this,
                                     getResources().getString(R.string.unuse_dot));
                             return true;
@@ -583,7 +580,7 @@ public class MarkerActivity extends AppCompatActivity {
                 if (adCol.getItem(i).isCheck()) { //в этой подоборке должна быть
                     if (!DataBase.closeList(s).contains(sid)) { //отсутствует - добавляем
                         if (s != null)
-                            s = "," + s;
+                            s = Const.COMMA + s;
                         else
                             s = "";
                         //добавляем новую закладку в самое начало
@@ -637,7 +634,7 @@ public class MarkerActivity extends AppCompatActivity {
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(0); //список закладок в подборке
                     if (s != null)
-                        s = "," + s;
+                        s = Const.COMMA + s;
                     else
                         s = "";
                     //добавляем новую закладку в самое начало
@@ -656,8 +653,8 @@ public class MarkerActivity extends AppCompatActivity {
         if (s.contains("№")) {
             for (int i = 0; i < adPage.getCount(); i++)
                 adPage.getItem(i).setCheck(false);
-            s = s.substring(s.indexOf(":") + 2).replace(", ", ",");
-            String[] m = s.split(",");
+            s = s.substring(s.indexOf(":") + 2).replace(", ", Const.COMMA);
+            String[] m = s.split(Const.COMMA);
             for (int i = 0; i < m.length; i++)
                 adPage.getItem(Integer.parseInt(m[i])).setCheck(true);
         } else {
@@ -667,7 +664,7 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void setColList(String s) {
-        s = DataBase.closeList(s.substring(getResources().getString(R.string.sel_col).length()).replace(", ", ","));
+        s = DataBase.closeList(s.substring(getResources().getString(R.string.sel_col).length()).replace(", ", Const.COMMA));
         String t;
         for (int i = 0; i < adCol.getCount(); i++) {
             t = DataBase.closeList(adCol.getItem(i).getTitle());
@@ -750,7 +747,7 @@ public class MarkerActivity extends AppCompatActivity {
         //определяем место
         String s = tvSel.getText().toString();
         if (s.contains(":"))
-            s = s.substring(s.indexOf(":") + 2).replace(", ", ",");
+            s = s.substring(s.indexOf(":") + 2).replace(", ", Const.COMMA);
         else
             s = "0";
         cv.put(Const.PLACE, s);
@@ -760,7 +757,7 @@ public class MarkerActivity extends AppCompatActivity {
         for (int i = 0; i < adCol.getCount(); i++) {
             if (adCol.getItem(i).isCheck()) {
                 b.append(adCol.getItem(i).getId());
-                b.append(",");
+                b.append(Const.COMMA);
             }
         }
         b.delete(b.length() - 1, b.length());
