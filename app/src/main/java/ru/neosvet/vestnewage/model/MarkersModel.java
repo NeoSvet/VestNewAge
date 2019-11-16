@@ -16,7 +16,7 @@ import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
 public class MarkersModel extends ProgressModel {
-    public static final String TAG = "base";
+    public static final String TAG = "markers";
     private static MarkersModel current = null;
 
     public static MarkersModel getInstance() {
