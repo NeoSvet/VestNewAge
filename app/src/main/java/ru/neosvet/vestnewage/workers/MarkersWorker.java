@@ -230,19 +230,29 @@ public class MarkersWorker extends Worker {
             }
             cursor.close();
         }
+        br.close();
+        f.delete();
     }
 
     private String combineIds(String ids, String[] m) {
-        StringBuilder b = new StringBuilder(ids);
-        b.append(Const.COMMA);
-        ids = DataBase.closeList(ids);
-        for (int i = 0; i < m.length; i++) {
-            if (!ids.contains(DataBase.closeList(m[i]))) {
-                b.append(m[i]);
+        StringBuilder b;
+        if (ids == null) {
+            b = new StringBuilder();
+            for (int i = 0; i < m.length; i++) {
                 b.append(Const.COMMA);
+                b.append(m[i]);
+            }
+            b.delete(0, 1);
+        } else {
+            b = new StringBuilder(ids);
+            ids = DataBase.closeList(ids);
+            for (int i = 0; i < m.length; i++) {
+                if (!ids.contains(DataBase.closeList(m[i]))) {
+                    b.append(Const.COMMA);
+                    b.append(m[i]);
+                }
             }
         }
-        b.delete(b.length() - 1, b.length());
         return b.toString();
     }
 
@@ -252,6 +262,7 @@ public class MarkersWorker extends Worker {
             b.append(h.get(Integer.parseInt(m[i])));
             b.append(Const.COMMA);
         }
+        b.delete(b.length() - 1, b.length());
         return b.toString();
     }
 }
