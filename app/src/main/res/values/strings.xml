@@ -63,6 +63,7 @@
     <!--CollectionsFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
+    <string name="send_file">Отправить файл?</string>
     <string name="not_found_page">Страница не найдена</string>
     <string name="collections">Подборки</string>
     <string name="cancel_rename">Переименование отменено</string>
@@ -183,7 +184,6 @@
     <string name="system_version">Версия системы:&#160;</string>
     <string name="write_to_dev">Написать разработчику</string>
     <string name="srv_info">\nСлужебная информация:\n</string>
-    <!--PresentationActivity-->
     <!--SearchFragment-->
     <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>

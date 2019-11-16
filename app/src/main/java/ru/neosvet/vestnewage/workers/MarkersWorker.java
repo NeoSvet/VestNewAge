@@ -41,13 +41,16 @@ public class MarkersWorker extends Worker {
         String error;
         try {
             boolean export = getInputData().getBoolean(Const.MODE, false);
+            String file = getInputData().getString(Const.FILE);
             if (export)
-                doExport(Uri.parse(getInputData().getString(Const.FILE)));
+                doExport(Uri.parse(file));
             else
-                doImport(Uri.parse(getInputData().getString(Const.FILE)));
+                doImport(Uri.parse(file));
 
             MarkersModel.getInstance().postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
+                    .putBoolean(Const.MODE, export)
+                    .putString(Const.FILE, file)
                     .build());
             return Result.success();
         } catch (Exception e) {

@@ -154,7 +154,31 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 builder.create().show();
                 return;
             }
-            Lib.showToast(act, getResources().getString(R.string.completed));
+            if(data.getBoolean(Const.MODE, false)) { //export
+                final String file = data.getString(Const.FILE);
+                AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
+                        .setMessage(getResources().getString(R.string.send_file))
+                        .setPositiveButton(getResources().getString(R.string.yes),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                        sendIntent.setType("text/plain");
+                                        sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
+                                        startActivity(sendIntent);
+                                    }
+                                })
+                        .setNegativeButton(getResources().getString(R.string.no),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                builder.create().show();
+            } else { //import
+                sCol = null;
+                loadColList();
+                Lib.showToast(act, getResources().getString(R.string.completed));
+            }
         }
     }
 
