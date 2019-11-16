@@ -1,11 +1,16 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,6 +23,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.work.Data;
+
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.BackFragment;
@@ -28,11 +35,13 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
+import ru.neosvet.vestnewage.model.MarkersModel;
 
-public class CollectionsFragment extends BackFragment {
-    public static final int MARKER_REQUEST = 11;
+public class CollectionsFragment extends BackFragment implements Observer<Data> {
+    public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
     private View container, fabEdit, fabMenu, pEdit;
     private TextView tvEmpty;
@@ -40,9 +49,10 @@ public class CollectionsFragment extends BackFragment {
     private MarkAdapter adMarker;
     private Tip menu;
     private int iSel = -1;
-    private boolean change = false, delete = false;
+    private boolean change = false, delete = false, stopRotate;
     private String sCol = null, sName = null;
-    private Animation anMin, anMax;
+    private Animation anMin, anMax, anRotate;
+    private MarkersModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,7 +83,20 @@ public class CollectionsFragment extends BackFragment {
                 deleteDialog();
         }
 
+        initModel();
         return this.container;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        model.removeObservers(act);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        model.addObserver(act, this);
     }
 
     @Override
@@ -101,6 +124,51 @@ public class CollectionsFragment extends BackFragment {
         outState.putString(Const.RENAME, sName);
         outState.putBoolean(Const.DIALOG, delete);
         super.onSaveInstanceState(outState);
+    }
+
+    private void initModel() {
+        model = ViewModelProviders.of(act).get(MarkersModel.class);
+        if (model.inProgress) {
+            initRotate();
+        }
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (!model.inProgress)
+            return;
+        if (data.getBoolean(Const.FINISH, false)) {
+            stopRotate = true;
+            model.finish();
+            Lib.showToast(act, getResources().getString(R.string.completed));
+        }
+    }
+
+    private void initRotate() {
+        stopRotate = false;
+        if (anRotate == null) {
+            anRotate = AnimationUtils.loadAnimation(act, R.anim.rotate);
+            anRotate.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (stopRotate)
+                        fabMenu.setVisibility(View.GONE);
+                    else
+                        fabMenu.startAnimation(anRotate);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+        }
+        fabMenu.startAnimation(anRotate);
     }
 
     private void loadMarList() {
@@ -148,7 +216,8 @@ public class CollectionsFragment extends BackFragment {
             tvEmpty.setVisibility(View.VISIBLE);
         } else if (iSel == -1) {
             fabEdit.setVisibility(View.VISIBLE);
-            fabMenu.setVisibility(View.VISIBLE);
+            if (fabMenu != null)
+                fabMenu.setVisibility(View.VISIBLE);
         }
     }
 
@@ -206,7 +275,7 @@ public class CollectionsFragment extends BackFragment {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                 } else { // страница не загружена...
                     cursor.close();
-					db.close();
+                    db.close();
                     dataBase.close();
                     throw new Exception();
                 }
@@ -226,12 +295,12 @@ public class CollectionsFragment extends BackFragment {
                     } while (cursor.moveToNext());
                 } else { // страница не загружена...
                     cursor.close();
-					db.close();
+                    db.close();
                     dataBase.close();
                     throw new Exception();
                 }
                 cursor.close();
-				db.close();
+                db.close();
                 dataBase.close();
                 b.delete(b.length() - 2, b.length());
             }
@@ -257,9 +326,11 @@ public class CollectionsFragment extends BackFragment {
 
     private void loadColList() {
         fabEdit.clearAnimation();
-        fabMenu.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        fabMenu.setVisibility(View.GONE);
+        if (fabMenu != null) {
+            fabMenu.clearAnimation();
+            fabMenu.setVisibility(View.GONE);
+        }
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -288,7 +359,8 @@ public class CollectionsFragment extends BackFragment {
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
             fabEdit.setVisibility(View.VISIBLE);
-            fabMenu.setVisibility(View.VISIBLE);
+            if (fabMenu != null)
+                fabMenu.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
         }
         adMarker.notifyDataSetChanged();
@@ -449,24 +521,32 @@ public class CollectionsFragment extends BackFragment {
         fabMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (model.inProgress)
+                    return;
                 if (menu.isShow())
                     menu.hide();
                 else
                     menu.show();
             }
         });
-        container.findViewById(R.id.bExport).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO export collections
-            }
-        });
-        container.findViewById(R.id.bImport).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO import collections
-            }
-        });
+        if (android.os.Build.VERSION.SDK_INT > 18) {
+            container.findViewById(R.id.bExport).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    selectFile(true);
+
+                }
+            });
+            container.findViewById(R.id.bImport).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    selectFile(false);
+                }
+            });
+        } else {
+            fabMenu.setVisibility(View.GONE);
+            fabMenu = null;
+        }
     }
 
     private void deleteDialog() {
@@ -748,5 +828,22 @@ public class CollectionsFragment extends BackFragment {
         }
         s.delete(s.length() - 1, s.length());
         return s.toString();
+    }
+
+    @RequiresApi(19)
+    private void selectFile(boolean export) {
+        menu.hide();
+        Intent intent = new Intent(export ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
+        if (export) {
+            DateHelper date = DateHelper.initToday(act);
+            intent.putExtra(Intent.EXTRA_TITLE, DataBase.MARKERS + " "
+                    + date.toString().replace(".", "-"));
+        }
+        intent.setType("*/*");
+        act.startActivityForResult(intent, export ? EXPORT_REQUEST : IMPORT_REQUEST);
+    }
+
+    public void startModel(int code, Uri data) {
+        model.start(code == EXPORT_REQUEST, data.toString());
     }
 }

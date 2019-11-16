@@ -259,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Lib.LOG("timer loader error: " + e.getMessage());
                 }
             }
         }).start();
@@ -506,20 +505,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (curFragment == null)
+        if (curFragment == null || resultCode != RESULT_OK)
             return;
-        if (requestCode == CollectionsFragment.MARKER_REQUEST) {
-            ((CollectionsFragment) curFragment).putResult(resultCode);
+        if (curFragment instanceof CollectionsFragment) {
+            CollectionsFragment fr = (CollectionsFragment) curFragment;
+            if (requestCode == CollectionsFragment.MARKER_REQUEST)
+                fr.putResult(resultCode);
+            else
+                fr.startModel(requestCode, data.getData());
             return;
         }
         if (curFragment instanceof SettingsFragment) {
-            if (resultCode == RESULT_OK) {
-                SettingsFragment fr = (SettingsFragment) curFragment;
-                if (requestCode == SetNotifDialog.RINGTONE)
-                    fr.putRingtone(data);
-                else if (requestCode == SetNotifDialog.CUSTOM)
-                    fr.putCustom(data);
-            }
+            SettingsFragment fr = (SettingsFragment) curFragment;
+            if (requestCode == SetNotifDialog.RINGTONE)
+                fr.putRingtone(data);
+            else if (requestCode == SetNotifDialog.CUSTOM)
+                fr.putCustom(data);
         }
     }
 

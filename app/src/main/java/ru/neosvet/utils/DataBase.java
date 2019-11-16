@@ -11,7 +11,7 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", JOURNAL = "journal",
-            MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?",
+            MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
             COLLECTIONS = "collections", ID = "id", DESC = " DESC";
     private Context context;
     private String name = "";
