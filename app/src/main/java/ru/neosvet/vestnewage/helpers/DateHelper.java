@@ -66,6 +66,12 @@ public class DateHelper {
     }
 
     public static DateHelper parse(Context context, String s) {
+        if (s.length() == 8) {
+            DateTimeFormatter fDate = DateTimeFormatter
+                    .ofPattern("dd.MM.yy")
+                    .withLocale(Locale.US);
+            return new DateHelper(context, LocalDate.parse(s, fDate), null);
+        }
         //Fri, 15 Jun 2018 07:58:29 GMT or +0300
         boolean offset = s.contains("+0300");
         s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
