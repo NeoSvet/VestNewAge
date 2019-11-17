@@ -14,6 +14,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
 
 public class BaseWorker extends Worker {
@@ -65,7 +66,7 @@ public class BaseWorker extends Worker {
             BaseModel.getInstance().postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
                     .build());
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -75,6 +76,6 @@ public class BaseWorker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 }

@@ -19,6 +19,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabWorker extends Worker {
@@ -49,7 +50,7 @@ public class CabWorker extends Worker {
                 result = sendWord(getInputData().getInt(Const.LIST, 0));
             result.putBoolean(Const.FINISH, true);
             model.postProgress(result.build());
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -59,7 +60,7 @@ public class CabWorker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private Data.Builder subLogin(String email, String pass) throws Exception {

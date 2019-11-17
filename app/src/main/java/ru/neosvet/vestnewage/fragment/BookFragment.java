@@ -45,6 +45,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
@@ -70,7 +71,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
-    private Handler updateDialog;
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -105,12 +105,20 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
+        if (model.inProgress) {
+            ProgressHelper.getInstance().stop();
+            ProgressHelper.getInstance().dismissDialog();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         model.addObserver(act, this);
+        if (model.inProgress) {
+            ProgressHelper.getInstance().showDialog(act);
+            ProgressHelper.getInstance().startTimer();
+        }
     }
 
     @Override
@@ -131,11 +139,15 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
+        if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
+            ProgressHelper.getInstance().showDialog(act);
+        }
         if (data.getBoolean(Const.FINISH, false)) {
+            ProgressHelper.getInstance().setName(null);
             model.finish();
-            model.dismissDialog();
+            ProgressHelper.getInstance().dismissDialog();
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -146,18 +158,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             if (name != null)
                 finishLoad(name);
             return;
-        }
-        switch (data.getInt(Const.DIALOG, -1)) {
-            case LoaderModel.DIALOG_UP:
-                model.upProg();
-                break;
-            case LoaderModel.DIALOG_MSG:
-                model.setProgMsg(data.getString(Const.MSG));
-                break;
-            case LoaderModel.DIALOG_SHOW:
-                model.setProgMsg(data.getString(Const.MSG));
-                model.showDialog(act, data.getInt(Const.MAX, -1));
-                break;
         }
     }
 
@@ -317,7 +317,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             } else
                 dModList = d;
             cursor.close();
-			db.close();
+            db.close();
             dataBase.close();
             DateHelper today = DateHelper.initToday(act);
             if (d.getMonth() == today.getMonth() && d.getYear() == today.getYear()) {
@@ -500,84 +500,67 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void openMonth(boolean plus) {
-        if (!model.inProgress) {
-            if (!plus && tab == 1) {
-                if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
-                    builder.setMessage(getResources().getString(R.string.alert_download_otkr));
-                    builder.setNegativeButton(getResources().getString(R.string.no),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    builder.setPositiveButton(getResources().getString(R.string.yes),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    model.startLoad(true, false, false);
-                                    dialog.dismiss();
-                                }
-                            });
-                    builder.create().show();
-                    return;
-                }
+        if (ProgressHelper.getInstance().isBusy())
+            return;
+        if (!plus && tab == 1) {
+            if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
+                builder.setMessage(getResources().getString(R.string.alert_download_otkr));
+                builder.setNegativeButton(getResources().getString(R.string.no),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.setPositiveButton(getResources().getString(R.string.yes),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                model.startLoad(true, false, false);
+                                ProgressHelper.getInstance().startProgress(act, BookModel.class.getSimpleName());
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+                return;
             }
-            DateHelper d;
-            if (tab == 0)
-                d = dKatren;
-            else
-                d = dPoslanie;
-            if (plus)
-                d.changeMonth(1);
-            else
-                d.changeMonth(-1);
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    hTimer.sendEmptyMessage(1);
-                }
-            }, 300);
-            openList(true);
         }
+        DateHelper d;
+        if (tab == 0)
+            d = dKatren;
+        else
+            d = dPoslanie;
+        if (plus)
+            d.changeMonth(1);
+        else
+            d.changeMonth(-1);
+        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hTimer.sendEmptyMessage(1);
+            }
+        }, 300);
+        openList(true);
     }
 
     private void startLoad() {
-        if (!model.inProgress)
-            model.startLoad(false, fromOtkr, tab == 0);
+        if (ProgressHelper.getInstance().isBusy())
+            return;
+        ProgressHelper.getInstance().startProgress(act, BookModel.class.getSimpleName());
+        model.startLoad(false, fromOtkr, tab == 0);
         initLoad();
     }
 
     private void initLoad() {
         act.status.setError(null);
-        if (!model.showDialog(act, -1)) {
+        if (model.isDialog()) {
+            ProgressHelper.getInstance().showDialog(act);
+            ProgressHelper.getInstance().startTimer();
+        } else {
             fabRefresh.setVisibility(View.GONE);
             fabRndMenu.setVisibility(View.GONE);
             act.status.setLoad(true);
-            return;
         }
-        if (updateDialog == null) {
-            updateDialog = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message message) {
-                    model.updateDialog();
-                    return false;
-                }
-            });
-        }
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (model.inProgress) {
-                        Thread.sleep(DateHelper.SEC_IN_MILLS);
-                        updateDialog.sendEmptyMessage(0);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Lib.LOG("timer loader error: " + e.getMessage());
-                }
-            }
-        }).start();
     }
 
     private void finishLoad(String result) {

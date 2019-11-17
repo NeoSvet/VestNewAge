@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 
 import androidx.work.Data;
 
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.model.CalendarModel;
@@ -31,7 +32,6 @@ public class ProgressModel extends AndroidViewModel {
     public void finish() {
         inProgress = false;
         cancel = false;
-        progress.setValue(new Data.Builder().build());
     }
 
     public void postProgress(Data data) {
@@ -43,16 +43,17 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public void removeObservers(LifecycleOwner owner) {
+        ProgressHelper.getInstance().dismissDialog();
         progress.removeObservers(owner);
     }
 
     public void addObserver(LifecycleOwner owner, Observer<Data> observer) {
         if (!progress.hasObservers())
             progress.observe(owner, observer);
-
     }
 
     public static ProgressModel getModelByName(@Nullable String name) {
+        Lib.LOG("getModelByName " + name);
         if (name == null)
             return null;
         if (name.equals(SlashModel.class.getSimpleName()))

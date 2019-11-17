@@ -19,6 +19,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class SearchWorker extends Worker {
     private Context context;
@@ -104,7 +105,7 @@ public class SearchWorker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private Result getResult() {
@@ -115,7 +116,7 @@ public class SearchWorker extends Worker {
                 .putInt(Const.START, count1)
                 .putInt(Const.END, count2)
                 .build());
-        return Result.success();
+        return ProgressHelper.success();
     }
 
     private void publishProgress(int time) {

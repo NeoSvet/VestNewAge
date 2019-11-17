@@ -29,6 +29,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -38,7 +39,6 @@ public class CalendarWolker extends Worker {
     private DataBase dataBase;
     private SQLiteDatabase db;
     private Lib lib;
-    private Data progUp;
     private List<ListItem> list = new ArrayList<ListItem>();
     private ProgressModel model;
 
@@ -69,25 +69,16 @@ public class CalendarWolker extends Worker {
                 model.postProgress(new Data.Builder()
                         .putBoolean(Const.LIST, true)
                         .build());
-                return Result.success();
+                return ProgressHelper.success();
             }
             //LoaderModel
-            progUp = new Data.Builder()
-                    .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
-                    .build();
             DateHelper d = DateHelper.initToday(context);
             if (getInputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_YEAR) {
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
-                        .putString(Const.MSG, context.getResources().getString(R.string.download_list))
-                        .putInt(Const.MAX, d.getMonth()).build());
+                ProgressHelper.getInstance().setMessage(context.getResources().getString(R.string.download_list));
+                ProgressHelper.getInstance().setMax(d.getMonth());
+                model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
                 loadListYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
             } else { //all calendar
-                int k = (d.getYear() - 2016) * 12 + d.getMonth();
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
-                        .putString(Const.MSG, context.getResources().getString(R.string.download_list))
-                        .putInt(Const.MAX, k).build());
                 int max_y = d.getYear() + 1, max_m = 13;
                 for (int y = 2016; y < max_y && !isCancelled(); y++) {
                     if (y == d.getYear())
@@ -95,7 +86,7 @@ public class CalendarWolker extends Worker {
                     loadListYear(y, max_m);
                 }
             }
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -105,13 +96,13 @@ public class CalendarWolker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private void loadListYear(int year, int max_m) throws Exception {
         for (int m = 1; m < max_m && !isCancelled(); m++) {
             loadListMonth(year, m, false);
-            model.postProgress(progUp);
+            ProgressHelper.getInstance().upProg();
         }
     }
 
@@ -137,7 +128,7 @@ public class CalendarWolker extends Worker {
             bw.close();
         }
         curTitle.close();
-		db.close();
+        db.close();
         dataBase.close();
         return k;
     }
@@ -152,6 +143,7 @@ public class CalendarWolker extends Worker {
         JSONObject json, jsonI;
         JSONArray jsonA;
         String link;
+        initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
         json = new JSONObject(s);
         int n;
         for (int i = 0; i < json.names().length() && !isCancelled(); i++) {
@@ -179,7 +171,7 @@ public class CalendarWolker extends Worker {
             }
         }
         if (dataBase != null) {
-			db.close();
+            db.close();
             dataBase.close();
             dataBase = null;
         }
@@ -203,9 +195,12 @@ public class CalendarWolker extends Worker {
     }
 
 
-    private void initDatebase(String link) throws Exception {
-        if (dataBase != null) return;
-        dataBase = new DataBase(context, link);
+    private void initDatebase(String name) throws Exception {
+        if (dataBase != null) {
+            db.close();
+            dataBase.close();
+        }
+        dataBase = new DataBase(context, name);
         db = dataBase.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(Const.TIME, System.currentTimeMillis());
@@ -215,7 +210,7 @@ public class CalendarWolker extends Worker {
         }
     }
 
-    private void addLink(int n, String link)  throws Exception {
+    private void addLink(int n, String link) throws Exception {
         if (list.get(n).getCount() > 0) {
             String s = link.substring(link.lastIndexOf("/"));
             for (int i = 0; i < list.get(n).getCount(); i++) {
@@ -224,7 +219,6 @@ public class CalendarWolker extends Worker {
             }
         }
         list.get(n).addLink(link);
-        initDatebase(link);
         ContentValues cv = new ContentValues();
         cv.put(Const.LINK, link);
         // пытаемся обновить запись:

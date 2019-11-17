@@ -30,6 +30,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
@@ -71,57 +72,53 @@ public class LoaderWorker extends Worker {
             if (name.equals(CheckHelper.class.getSimpleName())) {
                 downloadList();
                 CheckHelper.postCommand(context, false);
-                return Result.success();
+                return ProgressHelper.success();
             }
             model = ProgressModel.getModelByName(name);
             if (name.equals(CalendarModel.class.getSimpleName())) {
-                int k = CalendarWolker.getListLink(context,
+                CalendarWolker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0));
-                setProgMax(k);
                 downloadList();
                 return postFinish();
             }
             if (name.equals(SummaryModel.class.getSimpleName())) {
-                int k = SummaryWorker.getListLink(context);
-                setProgMax(k);
+                SummaryWorker.getListLink(context);
                 downloadList();
                 return postFinish();
             }
             if (name.equals(SiteModel.class.getSimpleName())) {
-                int k = SiteWorker.getListLink(context, lib.getFileByName(
+                SiteWorker.getListLink(context, lib.getFileByName(
                         getInputData().getString(Const.FILE)).toString());
-                setProgMax(k);
                 downloadList();
                 return postFinish();
             }
-            if (isCancelled())
-                return postFinish();
             int mode = getInputData().getInt(Const.MODE, 0);
             Data.Builder result = new Data.Builder()
                     .putInt(Const.MODE, mode)
                     .putBoolean(Const.FINISH, true);
-            switch (mode) {
-                case LoaderModel.DOWNLOAD_ALL:
-                    download(LoaderModel.ALL);
-                    break;
-                case LoaderModel.DOWNLOAD_ID:
-                    int p = getInputData().getInt(Const.SELECT, 0);
-                    download(p);
-                    break;
-                case LoaderModel.DOWNLOAD_YEAR:
-                    downloadYear(getInputData().getInt(Const.YEAR, 0));
-                    break;
-                default://page
-                    String link = getInputData().getString(Const.LINK);
-                    downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
-                    if (link != null)
-                        downloadPage(link, true);
-                    result.putString(Const.LINK, link); //non-use
-                    break;
-            }
+            if (!isCancelled())
+                switch (mode) {
+                    case LoaderModel.DOWNLOAD_ALL:
+                        download(LoaderModel.ALL);
+                        break;
+                    case LoaderModel.DOWNLOAD_ID:
+                        int p = getInputData().getInt(Const.SELECT, 0);
+                        download(p);
+                        break;
+                    case LoaderModel.DOWNLOAD_YEAR:
+                        downloadYear(getInputData().getInt(Const.YEAR, 0));
+                        break;
+                    default://page
+                        String link = getInputData().getString(Const.LINK);
+                        downloadStyle(mode == LoaderModel.DOWNLOAD_PAGE_WITH_STYLE);
+                        if (link != null)
+                            downloadPage(link, true);
+                        result.putString(Const.LINK, link); //non-use
+                        break;
+                }
             model.postProgress(result.build());
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -129,20 +126,21 @@ public class LoaderWorker extends Worker {
         }
         if (name.equals(CheckHelper.class.getSimpleName())) {
             CheckHelper.postCommand(context, false);
-            return Result.failure();
+            return ProgressHelper.failure();
         }
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private Result postFinish() {
+        Lib.LOG("postFinish loader");
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .build());
-        return Result.success();
+        return ProgressHelper.success();
     }
 
     private void downloadYear(int year) throws Exception {
@@ -154,7 +152,7 @@ public class LoaderWorker extends Worker {
         for (int m = 1; m < k && !isCancelled(); m++) {
             CalendarWolker.getListLink(context, year, m);
             downloadList();
-            upProg();
+            ProgressHelper.getInstance().upProg();
         }
     }
 
@@ -227,7 +225,7 @@ public class LoaderWorker extends Worker {
         Cursor curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
         int k = curTitle.getCount();
         curTitle.close();
-		db.close();
+        db.close();
         dataBase.close();
         return k;
     }
@@ -241,21 +239,24 @@ public class LoaderWorker extends Worker {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
                 downloadPage(curTitle.getString(0), false);
-                upProg();
+                ProgressHelper.getInstance().upProg();
             }
         }
         curTitle.close();
-		db.close();
+        db.close();
         dataBase.close();
     }
 
     private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (model != null) {
-            model.postProgress(new Data.Builder()
-                    .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
-                    .putString(Const.MSG, link)
-                    .build());
+            if (model instanceof LoaderModel)
+                ProgressHelper.getInstance().setMessage(link);
+            else
+                model.postProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                        .putString(Const.MSG, link)
+                        .build());
         }
         DataBase dataBase = new DataBase(context, link);
         if (!singlePage && dataBase.existsPage(link)) {
@@ -378,7 +379,7 @@ public class LoaderWorker extends Worker {
         }
         br.close();
         response.close();
-		db.close();
+        db.close();
         dataBase.close();
         return true;
     }
@@ -476,15 +477,7 @@ public class LoaderWorker extends Worker {
     }
 
     private void setProgMax(int max) {
-        model.postProgress(new Data.Builder()
-                .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
-                .putString(Const.MSG, context.getResources().getString(R.string.download_materials))
-                .putInt(Const.MAX, max).build());
-    }
-
-    private void upProg() {
-        model.postProgress(new Data.Builder()
-                .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
-                .build());
+        ProgressHelper.getInstance().setMax(max);
+        model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
     }
 }

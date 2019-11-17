@@ -12,6 +12,7 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.SearchWorker;
 
 public class SearchModel extends ProgressModel {
@@ -28,6 +29,7 @@ public class SearchModel extends ProgressModel {
     }
 
     public void search(String str, int mode, String start, String end) {
+        ProgressHelper.getInstance().setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiresBatteryNotLow(false)

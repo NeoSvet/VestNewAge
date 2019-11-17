@@ -13,6 +13,7 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 import ru.neosvet.vestnewage.workers.SlashWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
@@ -32,6 +33,7 @@ public class SlashModel extends ProgressModel {
     }
 
     public void startLoad(boolean boolSummary, int month, int year) {
+        ProgressHelper.getInstance().setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

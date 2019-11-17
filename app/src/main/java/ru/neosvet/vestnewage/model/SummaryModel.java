@@ -12,6 +12,7 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
@@ -29,6 +30,7 @@ public class SummaryModel extends ProgressModel {
     }
 
     public void startLoad() {
+        ProgressHelper.getInstance().setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

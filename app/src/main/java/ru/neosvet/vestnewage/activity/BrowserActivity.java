@@ -53,6 +53,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -87,6 +88,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
+        if(ProgressHelper.getInstance().isBusy())
+            return;
         boolMain = !(context instanceof SlashActivity);
         Intent intent = new Intent(context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);

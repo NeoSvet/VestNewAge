@@ -24,6 +24,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
@@ -60,7 +61,7 @@ public class SiteWorker extends Worker {
                         .putBoolean(Const.FINISH, true)
                         .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
                         .build());
-                return Result.success();
+                return ProgressHelper.success();
             }
             //loader
             String[] url = new String[]{
@@ -72,15 +73,12 @@ public class SiteWorker extends Worker {
                     lib.getFileByName(SiteFragment.MAIN).toString(),
                     lib.getFileByName(SiteFragment.NEWS).toString()
             };
-            Data progUp = new Data.Builder()
-                    .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
-                    .build();
             for (int i = 0; i < url.length && !isCancelled(); i++) {
                 loadList(url[i]);
                 saveList(file[i]);
-                model.postProgress(progUp);
+                ProgressHelper.getInstance().upProg();
             }
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -90,7 +88,7 @@ public class SiteWorker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private void saveList(String file) throws Exception {
@@ -127,9 +125,7 @@ public class SiteWorker extends Worker {
         int i, n;
         String s, d = "";
         String[] m;
-        while ((line = br.readLine()) != null) {
-            if (isCancelled())
-                break;
+        while ((line = br.readLine()) != null && !isCancelled()) {
             if (!begin) {
                 begin = line.contains("h2") || line.contains("h3");//razdel
             }

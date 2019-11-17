@@ -13,6 +13,7 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
@@ -30,6 +31,7 @@ public class CalendarModel extends ProgressModel {
     }
 
     public void startLoad(int month, int year, boolean updateUnread) {
+        ProgressHelper.getInstance().setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

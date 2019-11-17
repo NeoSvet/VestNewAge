@@ -21,8 +21,8 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
@@ -32,7 +32,6 @@ public class BookWorker extends Worker {
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private Lib lib;
-    private Data progUp;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -56,12 +55,13 @@ public class BookWorker extends Worker {
         try {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
+                    Lib.LOG("OTKR");
                     name = loadListUcoz(true, false);
                     model.postProgress(new Data.Builder()
                             .putBoolean(Const.FINISH, true)
                             .putString(Const.TITLE, name)
                             .build());
-                    return Result.success();
+                    return ProgressHelper.success();
                 }
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
@@ -71,16 +71,17 @@ public class BookWorker extends Worker {
                         .putBoolean(Const.FINISH, true)
                         .putString(Const.TITLE, name)
                         .build());
-                return Result.success();
+                return ProgressHelper.success();
             }
             //loader
-            progUp = new Data.Builder()
-                    .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
-                    .build();
+            if (isCancelled())
+                return ProgressHelper.success();
             loadListBook(false);
             loadListBook(true);
+            if (isCancelled())
+                return ProgressHelper.success();
             loadListUcoz(true, true);
-            return Result.success();
+            return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
@@ -90,7 +91,7 @@ public class BookWorker extends Worker {
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return Result.failure();
+        return ProgressHelper.failure();
     }
 
     private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
@@ -102,11 +103,8 @@ public class BookWorker extends Worker {
                 m = (d.getYear() - 2016) * 12;
             } else
                 m = 137;
-            model.postProgress(new Data.Builder()
-                    .putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW)
-                    .putString(Const.MSG, context.getResources().getString(R.string.start))
-                    .putInt(Const.MAX, m)
-                    .build());
+            ProgressHelper.getInstance().setMax(m);
+            model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
         }
         final String path = lib.getDBFolder() + "/";
         File f;
@@ -152,12 +150,7 @@ public class BookWorker extends Worker {
         final long time = System.currentTimeMillis();
         while (d.getYear() < m) {
             name = d.getMY();
-            if (withDialog) {
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
-                        .putString(Const.MSG, d.getMonthString() + " " + d.getYear())
-                        .build());
-            }
+            ProgressHelper.getInstance().setMessage(d.getMonthString() + " " + d.getYear());
             f = new File(path + name);
             if (!f.exists()) {
                 dataBase = new DataBase(context, name);
@@ -184,15 +177,11 @@ public class BookWorker extends Worker {
                 }
                 br.close();
                 in.close();
-				db.close();
+                db.close();
                 dataBase.close();
             }
             d.changeMonth(1);
-            if (withDialog) {
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_UP)
-                        .build());
-            }
+            ProgressHelper.getInstance().upProg();
             if (isCancelled())
                 return name;
         }
@@ -227,8 +216,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        if (progUp != null)
-                            model.postProgress(progUp);
+                        ProgressHelper.getInstance().upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

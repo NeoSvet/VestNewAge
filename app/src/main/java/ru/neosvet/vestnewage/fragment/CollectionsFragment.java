@@ -37,9 +37,9 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
-import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
@@ -440,7 +440,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (model.inProgress || LoaderModel.getInstance().inProgress)
+                if (ProgressHelper.getInstance().isBusy())
                     return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
@@ -583,7 +583,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             fabMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (model.inProgress)
+                    if (ProgressHelper.getInstance().isBusy())
                         return;
                     if (menu.isShow())
                         menu.hide();

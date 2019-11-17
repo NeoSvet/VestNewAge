@@ -13,6 +13,7 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
 public class MarkersModel extends ProgressModel {
@@ -29,6 +30,7 @@ public class MarkersModel extends ProgressModel {
     }
 
     public void start(boolean export, String file) {
+        ProgressHelper.getInstance().setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)

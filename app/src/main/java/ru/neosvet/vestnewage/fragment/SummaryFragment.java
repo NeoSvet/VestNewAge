@@ -26,6 +26,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryFragment extends BackFragment implements Observer<Data> {
@@ -79,7 +80,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
@@ -89,6 +90,8 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             finishLoad(data.getString(Const.ERROR));
             return;
         }
+        if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
+            return;
         String link = data.getString(Const.MSG);
         for (int i = 0; i < adSummary.getCount(); i++) {
             if (adSummary.getItem(i).getLink().equals(link)) {
