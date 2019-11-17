@@ -45,7 +45,7 @@ import ru.neosvet.vestnewage.model.MarkersModel;
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
     public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
-    private View container, fabEdit, fabMenu, pEdit, bExport;
+    private View container, fabEdit, fabMenu, fabBack, pEdit, bExport;
     private TextView tvEmpty;
     private MainActivity act;
     private MarkAdapter adMarker;
@@ -109,10 +109,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 loadColList();
             else
                 loadMarList();
-            return false;
-        } else if (sCol != null) {
-            sCol = null;
-            loadColList();
             return false;
         }
         return true;
@@ -210,9 +206,11 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void loadMarList() {
         fabEdit.clearAnimation();
-        if (fabMenu != null)
+        if (fabMenu != null) {
             fabMenu.clearAnimation();
-        fabEdit.setVisibility(View.GONE);
+            fabMenu.setVisibility(View.GONE);
+        }
+        fabBack.setVisibility(View.VISIBLE);
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -229,8 +227,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         int k = 0;
         for (int i = 0; i < mId.length; i++) {
             cursor = db.query(DataBase.MARKERS, null,
-                    DataBase.ID + DataBase.Q, new String[]{mId[i]}
-                    , null, null, null);
+                    DataBase.ID + DataBase.Q, new String[]{mId[i]},
+                    null, null, null);
             if (cursor.moveToFirst()) {
                 iID = cursor.getColumnIndex(DataBase.ID);
                 iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -251,10 +249,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         if (adMarker.getCount() == 0) {
             tvEmpty.setText(getResources().getString(R.string.collection_is_empty));
             tvEmpty.setVisibility(View.VISIBLE);
-        } else if (iSel == -1) {
-            fabEdit.setVisibility(View.VISIBLE);
-            if (fabMenu != null)
-                fabMenu.setVisibility(View.VISIBLE);
         }
     }
 
@@ -368,8 +362,11 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private void loadColList() {
         fabEdit.clearAnimation();
         fabEdit.setVisibility(View.GONE);
-        if (fabMenu != null)
+        if (fabMenu != null) {
             fabMenu.clearAnimation();
+            fabMenu.setVisibility(View.VISIBLE);
+        }
+        fabBack.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -408,6 +405,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private void initViews() {
         fabEdit = container.findViewById(R.id.fabEdit);
         fabMenu = container.findViewById(R.id.fabMenu);
+        fabBack = container.findViewById(R.id.fabBack);
         pEdit = container.findViewById(R.id.pEdit);
         bExport = container.findViewById(R.id.bExport);
         menu = new Tip(act, container.findViewById(R.id.pMenu));
@@ -425,6 +423,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             @Override
             public void onAnimationEnd(Animation animation) {
                 fabEdit.setVisibility(View.GONE);
+                fabBack.setVisibility(View.GONE);
                 if (fabMenu != null)
                     fabMenu.setVisibility(View.GONE);
             }
@@ -441,7 +440,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if(model.inProgress || LoaderModel.getInstance().inProgress)
+                if (model.inProgress || LoaderModel.getInstance().inProgress)
                     return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
@@ -455,7 +454,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                             + Const.N + adMarker.getItem(pos).getData();
                     loadMarList();
                 } else {
-                    if(adMarker.getItem(pos).getTitle().contains("/")) {
+                    if (adMarker.getItem(pos).getTitle().contains("/")) {
                         act.downloadPage(adMarker.getItem(pos).getData());
                         return;
                     }
@@ -477,13 +476,18 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     return false;
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     fabEdit.startAnimation(anMin);
-                    if (fabMenu != null)
+                    if (sCol != null)
+                        fabBack.startAnimation(anMin);
+                    else if (fabMenu != null)
                         fabMenu.startAnimation(anMin);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
                         || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     fabEdit.setVisibility(View.VISIBLE);
                     fabEdit.startAnimation(anMax);
-                    if (fabMenu != null) {
+                    if (sCol != null) {
+                        fabBack.setVisibility(View.VISIBLE);
+                        fabBack.startAnimation(anMax);
+                    } else if (fabMenu != null) {
                         fabMenu.setVisibility(View.VISIBLE);
                         fabMenu.startAnimation(anMax);
                     }
@@ -503,6 +507,13 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 } else
                     iSel = 0;
                 goToEdit();
+            }
+        });
+        fabBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sCol = null;
+                loadColList();
             }
         });
         container.findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
@@ -709,6 +720,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         adMarker.getItem(iSel).setSelect(true);
         adMarker.notifyDataSetChanged();
         fabEdit.setVisibility(View.GONE);
+        fabBack.setVisibility(View.GONE);
         if (fabMenu != null)
             fabMenu.setVisibility(View.GONE);
         pEdit.setVisibility(View.VISIBLE);
@@ -845,7 +857,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         change = false;
         if (adMarker.getCount() > 0)
             fabEdit.setVisibility(View.VISIBLE);
-        if (fabMenu != null)
+        if (sCol != null)
+            fabBack.setVisibility(View.VISIBLE);
+        else if (fabMenu != null)
             fabMenu.setVisibility(View.VISIBLE);
         pEdit.setVisibility(View.GONE);
         iSel = -1;
