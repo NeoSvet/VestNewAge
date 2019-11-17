@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.helpers;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -22,6 +21,7 @@ import java.io.FileReader;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 
@@ -151,12 +151,12 @@ public class SummaryHelper {
     }
 
     public static void postpone(Context context, String des, String link) {
+        Lib.showToast(context, context.getResources().getString(R.string.postpone_alert));
         Intent intent = new Intent(context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
         PendingIntent piPostpone = PendingIntent.getService(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC, TEN_MIN_IN_MILLS + System.currentTimeMillis(), piPostpone);
+        NotificationHelper.setAlarm(context, piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
     }
 
     public static class Rec extends BroadcastReceiver {
