@@ -119,8 +119,8 @@
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>
-    <string name="book_prev">Книгу предыдущих лет</string>
-    <string name="book_cur">Книгу текущего года</string>
+    <string name="book_prev">Книга предыдущих лет</string>
+    <string name="book_cur">Книга текущего года</string>
     <string name="materials">Материалы</string>
     <string name="completed">Завершено</string>
     <string name="from">от</string>
