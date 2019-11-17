@@ -20,6 +20,7 @@ public class StatusButton {
     private TextView tv;
     private ImageView iv;
     private Animation anMin, anMax;
+    private ResizeAnim resizeMax = null;
     private String error = null;
     private boolean stop = true, time = false, visible;
 
@@ -111,7 +112,7 @@ public class StatusButton {
             return true;
         if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC * 7) {
             this.time = true;
-            panel.setVisibility(View.VISIBLE);
+            initResizeMax();
             visible = true;
             tv.setText(context.getResources().getString(R.string.refresh) + "?");
             return true;
@@ -122,6 +123,17 @@ public class StatusButton {
             restoreText();
         }
         return false;
+    }
+
+    private void initResizeMax() {
+        panel.setVisibility(View.VISIBLE);
+        if (resizeMax == null) {
+            resizeMax = new ResizeAnim(panel, true, (int) (210f * context.getResources().getDisplayMetrics().density));
+            resizeMax.setStart(50);
+            resizeMax.setDuration(800);
+        }
+        panel.clearAnimation();
+        panel.startAnimation(resizeMax);
     }
 
     private boolean isCrash() {
