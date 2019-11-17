@@ -63,7 +63,6 @@ import ru.neosvet.vestnewage.model.SearchModel;
 public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
     private MainActivity act;
-    private float density;
     private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
     private PageAdapter adPages;
@@ -78,6 +77,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     private SearchModel model;
     private DateHelper dStart, dEnd;
     private ListAdapter adResults;
+    private ResizeAnim anim;
     private int min_m = 1, min_y = 2016, dialog = -1, mode = 5, page = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
@@ -104,7 +104,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         this.container = inflater.inflate(R.layout.search_fragment, container, false);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.search));
-        density = getResources().getDisplayMetrics().density;
         initViews();
         setViews();
         initModel();
@@ -243,25 +242,32 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         pSettings.setVisibility(View.VISIBLE);
         softKeyboard.closeSoftKeyboard();
         pPages.setVisibility(View.GONE);
-        ResizeAnim anim = new ResizeAnim(pSettings, false, (int) (270 * density));
-        anim.setDuration(800);
-        anim.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
+        initResizeAnim();
+    }
 
-            }
+    private void initResizeAnim() {
+        if (anim == null) {
+            anim = new ResizeAnim(pSettings, false, (int) (270 * getResources().getDisplayMetrics().density));
+            anim.setStart(10);
+            anim.setDuration(800);
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                pSettings.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                pSettings.requestLayout();
-            }
+                }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    pSettings.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    pSettings.requestLayout();
+                }
 
-            }
-        });
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+        }
         pSettings.clearAnimation();
         pSettings.startAnimation(anim);
     }

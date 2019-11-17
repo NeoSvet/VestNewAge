@@ -7,24 +7,29 @@ import android.view.animation.Transformation;
 public class ResizeAnim extends Animation {
     private int iStart, iSize;
     private View mView;
-    private boolean square;
+    private boolean hor;
 
-    public ResizeAnim(View view, boolean square, int size) {
+    public ResizeAnim(View view, boolean hor, int size) {
         mView = view;
         iSize = size;
-        this.square = square;
-        if (square || size == 10)
-            iStart = view.getHeight();
+        this.hor = hor;
+        if (hor)
+            iStart = view.getWidth();
         else
-            iStart = 10;
+            iStart = view.getHeight();
+    }
+
+    public void setStart(int i) {
+        iStart = i;
     }
 
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         int size = iStart + (int) ((iSize - iStart) * interpolatedTime);
-        if (square)
+        if (hor)
             mView.getLayoutParams().width = size;
-        mView.getLayoutParams().height = size;
+        else
+            mView.getLayoutParams().height = size;
         mView.requestLayout();
     }
 
