@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.helpers;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -265,12 +264,12 @@ public class PromHelper {
     }
 
     public void initNotif(int p) {
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, Rec.class);
         PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        am.cancel(piProm);
-        if (p == Const.TURN_OFF)
+        if (p == Const.TURN_OFF) {
+            NotificationHelper.setAlarm(context, piProm, p);
             return;
+        }
         PromHelper prom = new PromHelper(context, null);
         DateHelper d = prom.getPromDate(false);
         p++;
@@ -279,16 +278,7 @@ public class PromHelper {
             d = prom.getPromDate(true);
             d.changeMinutes(-p);
         }
-        long time = d.getTimeInMills();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, piProm);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, piProm);
-            am.setAlarmClock(alarmClockInfo, piProm);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-            am.setExact(AlarmManager.RTC_WAKEUP, time, piProm);
-        else
-            am.set(AlarmManager.RTC_WAKEUP, time, piProm);
+        NotificationHelper.setAlarm(context, piProm, d.getTimeInMills());
     }
 
     public void clearTimeDiff() {

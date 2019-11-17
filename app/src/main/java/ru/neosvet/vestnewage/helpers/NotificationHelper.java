@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -32,6 +33,22 @@ public class NotificationHelper extends ContextWrapper {
             CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
     private List<String> notifList;
+
+    public static void setAlarm(Context context, PendingIntent pi, long time) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.cancel(pi);
+        if (time == Const.TURN_OFF)
+            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(time, pi);
+            am.setAlarmClock(alarmClockInfo, pi);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            am.setExact(AlarmManager.RTC_WAKEUP, time, pi);
+        else
+            am.set(AlarmManager.RTC_WAKEUP, time, pi);
+    }
 
     public static class Result extends BroadcastReceiver {
         @Override
