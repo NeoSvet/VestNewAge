@@ -352,7 +352,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private void checkTime(int sec) {
         if (isCurMonth()) {
-            act.status.checkTime(sec);
+            if(act.status.checkTime(sec))
+                fabRefresh.setVisibility(View.GONE);
+            else
+                fabRefresh.setVisibility(View.VISIBLE);
             return;
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
