@@ -12,8 +12,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,10 +24,7 @@ import android.view.animation.AnimationUtils;
 import androidx.work.Data;
 
 import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -45,7 +40,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private Intent main;
-    private StatusButton status;
     private boolean anim = true;
     private SlashModel model;
     private NotificationHelper notifHelper;
@@ -59,7 +53,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
 
         setContentView(R.layout.slash_activity);
         main = new Intent(getApplicationContext(), MainActivity.class);
-        status = new StatusButton(this, findViewById(R.id.pStatus));
 
         initAnimation();
         int ver = getPreviosVer();
@@ -212,10 +205,8 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
 
     private void initModel() {
         model = ViewModelProviders.of(this).get(SlashModel.class);
-        if (model.inProgress) {
-            setStatus();
+        if (model.inProgress)
             return;
-        }
         DateHelper date = DateHelper.initToday(SlashActivity.this);
         DataBase dataBase = new DataBase(SlashActivity.this, date.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -270,11 +261,10 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             @Override
             public void onAnimationEnd(Animation animation) {
                 anim = false;
-                if (!model.inProgress || model.non_start) {
-                    startActivity(main);
-                    finish();
-                } else
-                    setStatus();
+                //TODO send model to MainActivity if it inProgress
+                // if (!model.inProgress || model.non_start) {
+                startActivity(main);
+                finish();
             }
 
             @Override
@@ -283,31 +273,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         });
         View ivStar = findViewById(R.id.ivStar);
         ivStar.startAnimation(anStar);
-    }
-
-    private void setStatus() {
-        status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-        //костыль, чтобы крутилось нормально:
-        findViewById(R.id.pStatus).setVisibility(View.VISIBLE);
-        final Handler hStatus = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                status.setLoad(true);
-                return false;
-            }
-        });
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                hStatus.sendEmptyMessage(0);
-            }
-        }, 10);
-
     }
 
     private void showNotifTip(String title, String msg, Intent intent) {
