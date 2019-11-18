@@ -133,4 +133,8 @@ public class ProgressHelper {
         if (dialog != null)
             dialog.dismiss();
     }
+
+    public static int getProcent(float cur, float max) {
+        return (int) (cur / max * 100f);
+    }
 }

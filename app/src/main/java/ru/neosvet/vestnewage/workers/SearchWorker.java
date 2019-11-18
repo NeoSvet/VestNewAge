@@ -183,7 +183,7 @@ public class SearchWorker extends Worker {
                         DataBase.Q, new String[]{id.get(i)});
             }
             cursor.close();
-            p2 = ProgressModel.getProcent(i, title.size());
+            p2 = ProgressHelper.getProcent(i, title.size());
             if (p1 < p2) {
                 p1 = p2;
                 model.postProgress(new Data.Builder()
