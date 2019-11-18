@@ -15,8 +15,8 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.HelpAdapter;
 
 public class HelpFragment extends Fragment {
-    private final int COUNT = 8, FEEDBACK = 1, FEEDBACK_COUNT = 3,
-            WRITE_TO_DEV = 1, LINK_ON_APP = 2, CHANGELOG = 3;
+    private final int COUNT = 8, FEEDBACK = 1, FEEDBACK_COUNT = 5,
+            WRITE_TO_DEV = 1, LINK_ON_APP = 2, LINK_ON_YM = 3, LINK_ON_QW = 4, CHANGELOG = 5;
     private boolean feedback = false;
     private MainActivity act;
     private View container;
@@ -102,6 +102,12 @@ public class HelpFragment extends Fragment {
             case LINK_ON_APP:
                 act.lib.copyAddress(getResources().getString(R.string.url_on_app));
                 break;
+            case LINK_ON_YM:
+                act.lib.openInApps("https://money.yandex.ru/to/410012986244848", null);
+                break;
+            case LINK_ON_QW:
+                act.lib.openInApps("https://qiwi.com/p/79500016793", null);
+                break;
             default: //CHANGELOG
                 act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
         }
@@ -112,6 +118,8 @@ public class HelpFragment extends Fragment {
         if (feedback) {
             adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getResources().getString(R.string.write_to_dev), R.drawable.gm);
             adHelp.insertItem(FEEDBACK + LINK_ON_APP, getResources().getString(R.string.link_on_app), R.drawable.play_store);
+            adHelp.insertItem(FEEDBACK + LINK_ON_YM, getResources().getString(R.string.support), R.drawable.ymoney);
+            adHelp.insertItem(FEEDBACK + LINK_ON_QW, getResources().getString(R.string.support), R.drawable.qiwi);
             adHelp.insertItem(FEEDBACK + CHANGELOG, getResources().getString(R.string.changelog), 0);
             try {
                 StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));
