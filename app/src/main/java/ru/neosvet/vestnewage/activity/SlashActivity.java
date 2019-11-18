@@ -289,17 +289,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         notifHelper.notify(++notif_id, notifBuilder);
     }
 
-   /* private void rebuildNotif() {
-        SharedPreferences pref = getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
-        int p = pref.getInt(Const.TIME, Const.TURN_OFF);
-        if (p != Const.TURN_OFF)
-            SummaryHelper.setReceiver(this, p);
-        pref = getSharedPreferences(Const.PROM, MODE_PRIVATE);
-        p = pref.getInt(Const.TIME, Const.TURN_OFF);
-        if (p != Const.TURN_OFF)
-            PromReceiver.setReceiver(this, p);
-    }*/
-
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
         NotificationCompat.Builder notifBuilder = notifHelper.getSummaryNotif(
