@@ -78,7 +78,7 @@ public class SiteWorker extends Worker {
                 saveList(file[i]);
                 ProgressHelper.getInstance().upProg();
             }
-            return ProgressHelper.success();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();

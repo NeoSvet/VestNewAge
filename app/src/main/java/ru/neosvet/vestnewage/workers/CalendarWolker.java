@@ -86,7 +86,7 @@ public class CalendarWolker extends Worker {
                     loadListYear(y, max_m);
                 }
             }
-            return ProgressHelper.success();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();

@@ -81,7 +81,7 @@ public class BookWorker extends Worker {
             if (isCancelled())
                 return ProgressHelper.success();
             loadListUcoz(true, true);
-            return ProgressHelper.success();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();

@@ -57,7 +57,10 @@ public class SummaryWorker extends Worker {
             model.postProgress(new Data.Builder()
                     .putBoolean(Const.LIST, true)
                     .build());
-            return ProgressHelper.success();
+            if (name.equals(LoaderModel.class.getSimpleName()))
+                return Result.success();
+            else
+                return ProgressHelper.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();

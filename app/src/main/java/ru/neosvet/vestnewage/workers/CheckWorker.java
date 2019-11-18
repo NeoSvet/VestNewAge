@@ -21,7 +21,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -50,14 +49,14 @@ public class CheckWorker extends Worker {
                     makeNotification();
                 }
             }
-            return ProgressHelper.success();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
             Lib.LOG("CheckWorker error: " + error);
         }
         CheckHelper.postCommand(context, false);
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private boolean checkSummary() throws Exception {
