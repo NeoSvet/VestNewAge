@@ -68,6 +68,15 @@ public class SlashWorker extends Worker {
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write(System.currentTimeMillis() + Const.N);
             while ((s = br.readLine()) != null) {
+                if (s.contains("<u>")) {
+                    int a = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
+                    int b = Integer.parseInt(s.substring(3));
+                    if (b <= a) {
+                        br.readLine(); //<d>
+                        br.readLine(); //<e>
+                        continue;
+                    }
+                }
                 bw.write(s + Const.N);
                 bw.flush();
             }
