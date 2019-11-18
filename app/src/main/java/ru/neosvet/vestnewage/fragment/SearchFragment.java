@@ -222,7 +222,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         bStart.setText(formatDate(dStart));
         bEnd.setText(formatDate(dEnd));
         if (adResults.getCount() == 0 && !model.inProgress) {
-            f = new File(act.lib.getDBFolder() + "/" + Const.SEARCH);
+            f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getResources().getString(R.string.results_last_search),
@@ -472,7 +472,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void deleteBase() {
-        File f = new File(act.lib.getDBFolder() + "/" + Const.SEARCH);
+        File f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
         if (f.exists()) f.delete();
     }
 

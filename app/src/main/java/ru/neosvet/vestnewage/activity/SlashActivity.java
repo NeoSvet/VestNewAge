@@ -309,10 +309,10 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         File f = new File("/data/data/" + this.getPackageName() + "/shared_prefs/activity."
                 + MainActivity.class.getSimpleName() + ".xml");
         if (f.exists())
-            f.renameTo(new File(f.getParent() + "/" + MainActivity.class.getSimpleName() + ".xml"));
+            f.renameTo(new File(f.getParent() + File.separator + MainActivity.class.getSimpleName() + ".xml"));
         f = new File(f.toString().replace(MainActivity.class.getSimpleName(), BrowserActivity.class.getSimpleName()));
         if (f.exists())
-            f.renameTo(new File(f.getParent() + "/" + BrowserActivity.class.getSimpleName() + ".xml"));
+            f.renameTo(new File(f.getParent() + File.separator + BrowserActivity.class.getSimpleName() + ".xml"));
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         if (pref.getBoolean("menu_mode", false)) {
             SharedPreferences.Editor editor = pref.edit();
