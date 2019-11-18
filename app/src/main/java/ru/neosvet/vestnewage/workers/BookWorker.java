@@ -59,6 +59,7 @@ public class BookWorker extends Worker {
                     name = loadListUcoz(true, false);
                     model.postProgress(new Data.Builder()
                             .putBoolean(Const.FINISH, true)
+                            .putBoolean(Const.OTKR, true)
                             .putString(Const.TITLE, name)
                             .build());
                     return ProgressHelper.success();
@@ -195,7 +196,8 @@ public class BookWorker extends Worker {
                 dataBase.close();
             }
             d.changeMonth(1);
-            ProgressHelper.upProg();
+            if (withDialog)
+                ProgressHelper.upProg();
             if (isCancelled())
                 return name;
         }

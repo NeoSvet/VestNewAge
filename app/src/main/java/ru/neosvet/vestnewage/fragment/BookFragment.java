@@ -159,9 +159,13 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 return;
             }
             act.status.setLoad(false);
+            if (data.getBoolean(Const.OTKR, false)) {
+                fromOtkr = true;
+                editor.putBoolean(Const.OTKR, fromOtkr);
+                dPoslanie.setYear(DEF_YEAR);
+            }
             String name = data.getString(Const.TITLE);
-            if (name != null)
-                finishLoad(name);
+            finishLoad(name);
             return;
         }
     }
@@ -523,6 +527,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                                 ProgressHelper.startProgress(act, BookModel.class.getSimpleName());
                                 model.startLoad(true, false, false);
                                 dialog.dismiss();
+                                initLoad();
                             }
                         });
                 builder.create().show();
@@ -576,14 +581,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             d = dKatren;
         else
             d = dPoslanie;
-        if (result.length() == 6) { //значит была загрузка с сайта Откровений
-            if (result.substring(5).equals("0")) // загрузка не была завершена
-                return;
-            fromOtkr = true;
-            editor.putBoolean(Const.OTKR, fromOtkr);
-            result = result.substring(0, 5);
-            d.setYear(DEF_YEAR);
-        }
         fabRefresh.setVisibility(View.VISIBLE);
         fabRndMenu.setVisibility(View.VISIBLE);
         if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
