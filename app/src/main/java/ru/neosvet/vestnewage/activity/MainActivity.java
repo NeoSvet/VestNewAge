@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
         }
-        if (ProgressHelper.getInstance().isBusy() && SlashModel.getInstance().inProgress) {
+        if (ProgressHelper.isBusy() && SlashModel.getInstance().inProgress) {
             status.setLoad(true);
             //SlashModel.getInstance().getProgress().observe(this, this);
         }
@@ -159,10 +159,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!model.inProgress)
             return;
         if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
-            ProgressHelper.getInstance().showDialog(this);
+            ProgressHelper.showDialog(this);
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.getInstance().setName(null);
+            ProgressHelper.setName(null);
             switch (data.getInt(Const.MODE, -1)) {
                 case LoaderModel.DOWNLOAD_ALL:
                     finishLoad(true, data.getString(Const.ERROR));
@@ -213,8 +213,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         prom.stop();
         model.removeObservers(this);
         if (model.inProgress) {
-            ProgressHelper.getInstance().stop();
-            ProgressHelper.getInstance().dismissDialog();
+            ProgressHelper.stop();
+            ProgressHelper.dismissDialog();
         }
     }
 
@@ -223,8 +223,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         model.addObserver(this, this);
         if (model.inProgress) {
-            ProgressHelper.getInstance().showDialog(this);
-            ProgressHelper.getInstance().startTimer();
+            ProgressHelper.showDialog(this);
+            ProgressHelper.startTimer();
         }
         if (prom != null)
             prom.resume();
@@ -255,8 +255,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initLoad() {
-        ProgressHelper.getInstance().showDialog(this);
-        ProgressHelper.getInstance().startTimer();
+        ProgressHelper.showDialog(this);
+        ProgressHelper.startTimer();
     }
 
     private void initInterface() {
@@ -264,10 +264,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                if (ProgressHelper.getInstance().isBusy())
+                if (ProgressHelper.isBusy())
                     return;
+                ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 model.startLoad(LoaderModel.DOWNLOAD_ALL, "");
-                ProgressHelper.getInstance().startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 initLoad();
             }
         });
@@ -276,9 +276,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                if (ProgressHelper.getInstance().isBusy())
+                if (ProgressHelper.isBusy())
                     return;
-                ProgressHelper.getInstance().startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
+                ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 if (cur_id == R.id.nav_calendar) {
                     model.startLoad(LoaderModel.DOWNLOAD_YEAR, String.valueOf(
                             ((CalendarFragment) curFragment).getCurrentYear()));
@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        if (ProgressHelper.getInstance().isBusy())
+        if (ProgressHelper.isBusy())
             return true;
         if (!item.isChecked())
             setFragment(item.getItemId(), false);
@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void finishLoad(boolean all, String error) {
-        ProgressHelper.getInstance().dismissDialog();
+        ProgressHelper.dismissDialog();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
         if (error == null) {
             if (model.cancel)

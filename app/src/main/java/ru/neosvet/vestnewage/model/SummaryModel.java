@@ -30,7 +30,7 @@ public class SummaryModel extends ProgressModel {
     }
 
     public void startLoad() {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

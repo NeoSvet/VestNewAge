@@ -31,7 +31,7 @@ public class CalendarModel extends ProgressModel {
     }
 
     public void startLoad(int month, int year, boolean updateUnread) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

@@ -29,7 +29,7 @@ public class SearchModel extends ProgressModel {
     }
 
     public void search(String str, int mode, String start, String end) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiresBatteryNotLow(false)

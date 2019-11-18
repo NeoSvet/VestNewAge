@@ -74,8 +74,8 @@ public class CalendarWolker extends Worker {
             //LoaderModel
             DateHelper d = DateHelper.initToday(context);
             if (getInputData().getInt(Const.MODE, 0) == LoaderModel.DOWNLOAD_YEAR) {
-                ProgressHelper.getInstance().setMessage(context.getResources().getString(R.string.download_list));
-                ProgressHelper.getInstance().setMax(d.getMonth());
+                ProgressHelper.setMessage(context.getResources().getString(R.string.download_list));
+                ProgressHelper.setMax(d.getMonth());
                 model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
                 loadListYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
             } else { //all calendar
@@ -102,7 +102,7 @@ public class CalendarWolker extends Worker {
     private void loadListYear(int year, int max_m) throws Exception {
         for (int m = 1; m < max_m && !isCancelled(); m++) {
             loadListMonth(year, m, false);
-            ProgressHelper.getInstance().upProg();
+            ProgressHelper.upProg();
         }
     }
 

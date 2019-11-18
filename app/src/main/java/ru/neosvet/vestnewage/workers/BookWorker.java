@@ -55,7 +55,6 @@ public class BookWorker extends Worker {
         try {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
-                    Lib.LOG("OTKR");
                     name = loadListUcoz(true, false);
                     model.postProgress(new Data.Builder()
                             .putBoolean(Const.FINISH, true)
@@ -103,7 +102,7 @@ public class BookWorker extends Worker {
                 m = (d.getYear() - 2016) * 12;
             } else
                 m = 137;
-            ProgressHelper.getInstance().setMax(m);
+            ProgressHelper.setMax(m);
             model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
         }
         final String path = lib.getDBFolder() + "/";
@@ -150,7 +149,7 @@ public class BookWorker extends Worker {
         final long time = System.currentTimeMillis();
         while (d.getYear() < m) {
             name = d.getMY();
-            ProgressHelper.getInstance().setMessage(d.getMonthString() + " " + d.getYear());
+            ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
             f = new File(path + name);
             if (!f.exists()) {
                 dataBase = new DataBase(context, name);
@@ -181,7 +180,7 @@ public class BookWorker extends Worker {
                 dataBase.close();
             }
             d.changeMonth(1);
-            ProgressHelper.getInstance().upProg();
+            ProgressHelper.upProg();
             if (isCancelled())
                 return name;
         }
@@ -216,7 +215,7 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        ProgressHelper.getInstance().upProg();
+                        ProgressHelper.upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

@@ -46,7 +46,7 @@ public class LoaderModel extends ProgressModel {
     }
 
     public void startLoad(int mode, String request) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -111,8 +111,8 @@ public class LoaderModel extends ProgressModel {
             k += 4; //main, news, media and rss
         } else if (id == R.id.nav_main) //main, news
             k = 2;
-        ProgressHelper.getInstance().setMessage(getApplication().getBaseContext().getResources().getString(R.string.download_list));
-        ProgressHelper.getInstance().setMax(k);
+        ProgressHelper.setMessage(getApplication().getBaseContext().getResources().getString(R.string.download_list));
+        ProgressHelper.setMax(k);
         postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
         OneTimeWorkRequest task;
         WorkContinuation job = null;

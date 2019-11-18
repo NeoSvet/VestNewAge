@@ -30,7 +30,7 @@ public class MarkersModel extends ProgressModel {
     }
 
     public void start(boolean export, String file) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)

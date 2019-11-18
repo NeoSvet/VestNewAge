@@ -32,7 +32,7 @@ public class CabModel extends ProgressModel {
     }
 
     private void startWorker(Data.Builder data) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

@@ -33,7 +33,7 @@ public class SlashModel extends ProgressModel {
     }
 
     public void startLoad(boolean boolSummary, int month, int year) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

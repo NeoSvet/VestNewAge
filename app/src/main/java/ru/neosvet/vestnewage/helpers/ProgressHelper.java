@@ -17,33 +17,25 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class ProgressHelper {
-    private static ProgressHelper helper;
-    private boolean start, busy;
-    private String msg, name;
-    private int prog, max;
-    private ProgressDialog dialog;
-
-    public static ProgressHelper getInstance() {
-        if (helper == null)
-            helper = new ProgressHelper();
-        return helper;
-    }
+    private static boolean start, busy;
+    private static String msg, name;
+    private static int prog, max;
+    private static ProgressDialog dialog;
 
     private ProgressHelper() {
     }
 
-    public void startTimer() {
+    public static void startTimer() {
         start = true;
         final Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message message) {
                 ProgressModel model = ProgressModel.getModelByName(name);
-                Lib.LOG("handler: " + name + "=" + (model == null));
                 if (model != null && model.inProgress && !model.cancel) {
                     if (!updateDialog())
                         model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
                 } else
-                    ProgressHelper.getInstance().stop();
+                    ProgressHelper.stop();
                 return false;
             }
         });
@@ -61,76 +53,65 @@ public class ProgressHelper {
         }).start();
     }
 
-    public void stop() {
+    public static void stop() {
         start = false;
     }
 
-    public boolean isStoped() {
-        return !start;
-    }
-
-    public boolean isBusy() {
+    public static boolean isBusy() {
         return busy;
     }
 
-    public void setBusy(boolean busy) {
-        this.busy = busy;
+    public static void setBusy(boolean v) {
+        busy = v;
     }
 
     public static ListenableWorker.Result success() {
-        Lib.LOG("result success");
-        ProgressHelper.getInstance().setBusy(false);
+        ProgressHelper.setBusy(false);
         return ListenableWorker.Result.success();
     }
 
     public static ListenableWorker.Result failure() {
-        Lib.LOG("result failure");
-        ProgressHelper.getInstance().setBusy(false);
+        ProgressHelper.setBusy(false);
         return ListenableWorker.Result.failure();
     }
 
-    public void startProgress(Context context, String name) {
+    public static void startProgress(Context context, String n_name) {
         prog = 0;
         max = 0;
         msg = context.getResources().getString(R.string.start);
-        this.name = name;
-        Lib.LOG("startProgress " + name);
+        name = n_name;
     }
 
-    public void upProg() {
+    public static void upProg() {
         prog++;
     }
 
-    public void setMax(int max) {
+    public static void setMax(int n_max) {
         dismissDialog();
-        Lib.LOG("setMax "+max);
         prog = 0;
-        this.max = max;
+        max = n_max;
     }
 
-    public int getMax() {
+    public static int getMax() {
         return max;
     }
 
-    public void setMessage(String msg) {
+    public static void setMessage(String n_msg) {
         if (name != null && name.equals(LoaderModel.class.getSimpleName())) {
-            this.msg = LoaderModel.getInstance().initMsg(msg);
+            msg = LoaderModel.getInstance().initMsg(n_msg);
         } else
-            this.msg = msg;
+            msg = n_msg;
     }
 
-    public void setName(String name) {
-        Lib.LOG("setName " + name);
-        this.name = name;
+    public static void setName(String n_name) {
+        name = n_name;
     }
 
-    public void showDialog(Activity act) {
-        Lib.LOG("showDialog " + name);
+    public static void showDialog(Activity act) {
         if (name == null)
             return;
         if (dialog != null)
             dialog.dismiss();
-        Lib.LOG("showDialog " + prog + " / " + max);
         dialog = new ProgressDialog(act, max);
         dialog.setOnCancelListener(new ProgressDialog.OnCancelListener() {
             @Override
@@ -143,7 +124,7 @@ public class ProgressHelper {
         dialog.setProgress(prog);
     }
 
-    public boolean updateDialog() {
+    public static boolean updateDialog() {
         if (dialog == null)
             return false;
         dialog.setMessage(msg);
@@ -151,7 +132,7 @@ public class ProgressHelper {
         return true;
     }
 
-    public void dismissDialog() {
+    public static void dismissDialog() {
         if (dialog != null)
             dialog.dismiss();
     }

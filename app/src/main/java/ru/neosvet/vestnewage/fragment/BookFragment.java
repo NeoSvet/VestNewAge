@@ -106,8 +106,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
         if (model.inProgress) {
-            ProgressHelper.getInstance().stop();
-            ProgressHelper.getInstance().dismissDialog();
+            ProgressHelper.stop();
+            ProgressHelper.dismissDialog();
         }
     }
 
@@ -116,8 +116,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         super.onResume();
         model.addObserver(act, this);
         if (model.inProgress) {
-            ProgressHelper.getInstance().showDialog(act);
-            ProgressHelper.getInstance().startTimer();
+            ProgressHelper.showDialog(act);
+            ProgressHelper.startTimer();
         }
     }
 
@@ -142,12 +142,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (!model.inProgress)
             return;
         if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
-            ProgressHelper.getInstance().showDialog(act);
+            ProgressHelper.showDialog(act);
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.getInstance().setName(null);
+            ProgressHelper.setName(null);
             model.finish();
-            ProgressHelper.getInstance().dismissDialog();
+            ProgressHelper.dismissDialog();
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -500,7 +500,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void openMonth(boolean plus) {
-        if (ProgressHelper.getInstance().isBusy())
+        if (ProgressHelper.isBusy())
             return;
         if (!plus && tab == 1) {
             if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
@@ -515,8 +515,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 builder.setPositiveButton(getResources().getString(R.string.yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                ProgressHelper.startProgress(act, BookModel.class.getSimpleName());
                                 model.startLoad(true, false, false);
-                                ProgressHelper.getInstance().startProgress(act, BookModel.class.getSimpleName());
                                 dialog.dismiss();
                             }
                         });
@@ -544,9 +544,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void startLoad() {
-        if (ProgressHelper.getInstance().isBusy())
+        if (ProgressHelper.isBusy())
             return;
-        ProgressHelper.getInstance().startProgress(act, BookModel.class.getSimpleName());
+        ProgressHelper.startProgress(act, BookModel.class.getSimpleName());
         model.startLoad(false, fromOtkr, tab == 0);
         initLoad();
     }
@@ -554,8 +554,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void initLoad() {
         act.status.setError(null);
         if (model.isDialog()) {
-            ProgressHelper.getInstance().showDialog(act);
-            ProgressHelper.getInstance().startTimer();
+            ProgressHelper.showDialog(act);
+            ProgressHelper.startTimer();
         } else {
             fabRefresh.setVisibility(View.GONE);
             fabRndMenu.setVisibility(View.GONE);

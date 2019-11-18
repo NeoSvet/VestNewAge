@@ -88,7 +88,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
-        if(ProgressHelper.getInstance().isBusy())
+        if(ProgressHelper.isBusy())
             return;
         boolMain = !(context instanceof SlashActivity);
         Intent intent = new Intent(context, BrowserActivity.class);

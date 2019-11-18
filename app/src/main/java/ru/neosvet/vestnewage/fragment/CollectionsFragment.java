@@ -440,7 +440,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (ProgressHelper.getInstance().isBusy())
+                if (ProgressHelper.isBusy())
                     return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
@@ -583,7 +583,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             fabMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (ProgressHelper.getInstance().isBusy())
+                    if (ProgressHelper.isBusy())
                         return;
                     if (menu.isShow())
                         menu.hide();

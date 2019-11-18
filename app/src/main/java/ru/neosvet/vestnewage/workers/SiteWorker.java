@@ -76,7 +76,7 @@ public class SiteWorker extends Worker {
             for (int i = 0; i < url.length && !isCancelled(); i++) {
                 loadList(url[i]);
                 saveList(file[i]);
-                ProgressHelper.getInstance().upProg();
+                ProgressHelper.upProg();
             }
             return Result.success();
         } catch (Exception e) {

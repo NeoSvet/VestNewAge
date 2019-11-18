@@ -31,7 +31,7 @@ public class BookModel extends ProgressModel {
     }
 
     public void startLoad(boolean OTKR, boolean FROM_OTKR, boolean KATRENY) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         dialog = OTKR;
         inProgress = true;
         Constraints constraints = new Constraints.Builder()

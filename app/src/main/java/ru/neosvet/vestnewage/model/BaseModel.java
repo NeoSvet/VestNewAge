@@ -30,7 +30,7 @@ public class BaseModel extends ProgressModel {
     }
 
     public void startClear(String[] request) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)

@@ -31,7 +31,7 @@ public class SiteModel extends ProgressModel {
     }
 
     public void startLoad(String url, String file) {
-        ProgressHelper.getInstance().setBusy(true);
+        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

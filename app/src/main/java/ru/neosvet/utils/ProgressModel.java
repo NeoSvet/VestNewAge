@@ -43,7 +43,7 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public void removeObservers(LifecycleOwner owner) {
-        ProgressHelper.getInstance().dismissDialog();
+        ProgressHelper.dismissDialog();
         progress.removeObservers(owner);
     }
 
@@ -53,7 +53,6 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public static ProgressModel getModelByName(@Nullable String name) {
-        Lib.LOG("getModelByName " + name);
         if (name == null)
             return null;
         if (name.equals(SlashModel.class.getSimpleName()))
