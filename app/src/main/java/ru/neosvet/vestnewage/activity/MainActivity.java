@@ -26,6 +26,9 @@ import android.widget.TextView;
 
 import androidx.work.Data;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -246,6 +249,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         unread.open();
         k_new = unread.getCount();
         unread.close();
+        try {
+            File file = new File(getFilesDir() + File.separator + Const.ADS);
+            if (file.exists()) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                br.readLine(); //time
+                String s;
+                while ((s = br.readLine()) != null) {
+                    if (s.equals("<e>"))
+                        k_new++;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (navigationView != null)
             navigationView.getMenu().getItem(0).setIcon(unread.getNewId(k_new));
         else if (frMenu != null)
