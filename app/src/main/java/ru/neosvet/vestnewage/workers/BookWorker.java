@@ -32,6 +32,7 @@ public class BookWorker extends Worker {
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private Lib lib;
+    private int cur, max;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -63,7 +64,14 @@ public class BookWorker extends Worker {
                     return ProgressHelper.success();
                 }
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
-                if (!kat && getInputData().getBoolean(Const.FROM_OTKR, false))
+                boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
+                DateHelper d = DateHelper.initToday(context);
+                if (fromOtkr)
+                    max = (d.getYear() - 2004) * 12 + d.getMonth() - 1;
+                else
+                    max = (d.getYear() - 2016) * 12 + d.getMonth() - 1;
+                cur = 0;
+                if (!kat && fromOtkr)
                     loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
                 name = loadListBook(kat);
                 model.postProgress(new Data.Builder()
@@ -149,7 +157,14 @@ public class BookWorker extends Worker {
         final long time = System.currentTimeMillis();
         while (d.getYear() < m) {
             name = d.getMY();
-            ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
+            if (max > 0) {
+                model.postProgress(new Data.Builder()
+                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                        .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
+                        .build());
+                cur++;
+            } else
+                ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
             f = new File(path + name);
             if (!f.exists()) {
                 dataBase = new DataBase(context, name);
@@ -215,7 +230,14 @@ public class BookWorker extends Worker {
                     date2 = s.substring(i, i + 5);
                     if (!date2.equals(date1)) {
                         saveData(date1);
-                        ProgressHelper.upProg();
+                        if (max > 0) {
+                            model.postProgress(new Data.Builder()
+                                    .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                                    .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
+                                    .build());
+                            cur++;
+                        } else
+                            ProgressHelper.upProg();
                         date1 = date2;
                     }
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));

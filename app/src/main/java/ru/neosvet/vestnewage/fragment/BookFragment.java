@@ -141,8 +141,13 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     public void onChanged(@Nullable Data data) {
         if (!model.inProgress)
             return;
-        if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
-            ProgressHelper.showDialog(act);
+        switch (data.getInt(Const.DIALOG, -1)) {
+            case LoaderModel.DIALOG_SHOW:
+                ProgressHelper.showDialog(act);
+                break;
+            case LoaderModel.DIALOG_MSG:
+                act.status.setText(data.getString(Const.MSG));
+                break;
         }
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.setName(null);
