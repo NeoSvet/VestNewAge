@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     finishLoad(true, data.getString(Const.ERROR));
                     break;
                 case LoaderModel.DOWNLOAD_ID:
+                case LoaderModel.DOWNLOAD_YEAR:
                     finishLoad(false, data.getString(Const.ERROR));
                     break;
                 case LoaderModel.DOWNLOAD_PAGE:

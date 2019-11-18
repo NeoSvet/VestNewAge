@@ -136,7 +136,6 @@ public class LoaderWorker extends Worker {
     }
 
     private Result postFinish() {
-        Lib.LOG("postFinish loader");
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .build());
@@ -145,14 +144,21 @@ public class LoaderWorker extends Worker {
 
     private void downloadYear(int year) throws Exception {
         DateHelper d = DateHelper.initToday(context);
-        int k = 13;
+        int k;
         if (year == d.getYear())
-            k -= d.getMonth();
-        setProgMax(k);
-        for (int m = 1; m < k && !isCancelled(); m++) {
+            k = d.getMonth() + 1;
+        else
+            k = 13;
+        d.setYear(year);
+        int m, n = 0;
+        for (m = 1; m < k; m++) {
+            d.setMonth(m);
+            n += countBookList(d.getMY());
+        }
+        setProgMax(n);
+        for (m = 1; m < k && !isCancelled(); m++) {
             CalendarWolker.getListLink(context, year, m);
             downloadList();
-            ProgressHelper.getInstance().upProg();
         }
     }
 
@@ -164,6 +170,7 @@ public class LoaderWorker extends Worker {
         String s;
         while ((s = br.readLine()) != null && !isCancelled()) {
             downloadPage(s, false);
+            ProgressHelper.upProg();
         }
         br.close();
         file.delete();
@@ -223,7 +230,7 @@ public class LoaderWorker extends Worker {
         DataBase dataBase = new DataBase(context, name);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
-        int k = curTitle.getCount();
+        int k = curTitle.getCount() - 1;
         curTitle.close();
         db.close();
         dataBase.close();
@@ -239,7 +246,7 @@ public class LoaderWorker extends Worker {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
                 downloadPage(curTitle.getString(0), false);
-                ProgressHelper.getInstance().upProg();
+                ProgressHelper.upProg();
             }
         }
         curTitle.close();
@@ -251,7 +258,7 @@ public class LoaderWorker extends Worker {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (model != null) {
             if (model instanceof LoaderModel)
-                ProgressHelper.getInstance().setMessage(link);
+                ProgressHelper.setMessage(link);
             else
                 model.postProgress(new Data.Builder()
                         .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
@@ -384,14 +391,13 @@ public class LoaderWorker extends Worker {
         return true;
     }
 
-    private void checkRequests() {
+    private void checkRequests() { //TODO no work?
         k_requests++;
         if (k_requests == 20) {
             long now = System.currentTimeMillis();
             k_requests = 0;
             if (now - time_requests < DateHelper.SEC_IN_MILLS) {
                 try {
-                    Lib.LOG("sleep loader");
                     Thread.sleep(DateHelper.SEC_IN_MILLS);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -477,7 +483,7 @@ public class LoaderWorker extends Worker {
     }
 
     private void setProgMax(int max) {
-        ProgressHelper.getInstance().setMax(max);
+        ProgressHelper.setMax(max);
         model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
     }
 }
