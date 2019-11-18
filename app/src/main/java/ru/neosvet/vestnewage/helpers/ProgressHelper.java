@@ -22,9 +22,6 @@ public class ProgressHelper {
     private static int prog, max;
     private static ProgressDialog dialog;
 
-    private ProgressHelper() {
-    }
-
     public static void startTimer() {
         start = true;
         final Handler handler = new Handler(new Handler.Callback() {
