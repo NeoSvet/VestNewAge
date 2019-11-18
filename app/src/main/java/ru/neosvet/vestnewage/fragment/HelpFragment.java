@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -100,7 +101,10 @@ public class HelpFragment extends Fragment {
                         + adHelp.getItem(FEEDBACK + CHANGELOG).getDes(), null);
                 break;
             case LINK_ON_APP:
-                act.lib.copyAddress(getResources().getString(R.string.url_on_app));
+                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                sendIntent.setType("text/plain");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.url_on_app));
+                startActivity(sendIntent);
                 break;
             case LINK_ON_YM:
                 act.lib.openInApps("https://money.yandex.ru/to/410012986244848", null);
