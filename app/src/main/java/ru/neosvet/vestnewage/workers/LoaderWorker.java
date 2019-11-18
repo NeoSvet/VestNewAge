@@ -256,15 +256,8 @@ public class LoaderWorker extends Worker {
 
     private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        if (model != null) {
-            if (model instanceof LoaderModel)
-                ProgressHelper.setMessage(link);
-            else
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
-                        .putString(Const.MSG, link)
-                        .build());
-        }
+        if (model instanceof LoaderModel)
+            ProgressHelper.setMessage(link);
         DataBase dataBase = new DataBase(context, link);
         if (!singlePage && dataBase.existsPage(link)) {
             dataBase.close();
@@ -388,6 +381,12 @@ public class LoaderWorker extends Worker {
         response.close();
         db.close();
         dataBase.close();
+        if (!(model instanceof LoaderModel)) {
+            model.postProgress(new Data.Builder()
+                    .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                    .putString(Const.MSG, link)
+                    .build());
+        }
         return true;
     }
 
