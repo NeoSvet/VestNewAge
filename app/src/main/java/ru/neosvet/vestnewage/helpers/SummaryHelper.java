@@ -61,9 +61,9 @@ public class SummaryHelper {
             name = DataBase.getDatePage(link);
             if (dataBase == null || !dataBase.getName().equals(name)) {
                 if (dataBase != null) {
-					db.close();
+                    db.close();
                     dataBase.close();
-				}
+                }
                 dataBase = new DataBase(context, name);
                 db = dataBase.getWritableDatabase();
             }
@@ -80,9 +80,9 @@ public class SummaryHelper {
         }
         br.close();
         if (dataBase != null) {
-			db.close();
+            db.close();
             dataBase.close();
-		}
+        }
     }
 
     public void createNotification(String text, String link) {
@@ -155,7 +155,7 @@ public class SummaryHelper {
         Intent intent = new Intent(context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
-        PendingIntent piPostpone = PendingIntent.getService(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationHelper.setAlarm(context, piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
     }
 
