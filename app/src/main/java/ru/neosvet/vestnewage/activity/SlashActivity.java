@@ -219,8 +219,8 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         cursor.close();
         db.close();
         dataBase.close();
-//        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
-//            return; tut
+        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
+            return;
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         model.startLoad(pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_SUMMARY,
                 date.getMonth(), date.getYear());
