@@ -125,8 +125,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkSlashModel(boolean observe) {
+        if (SlashModel.getInstance() == null)
+            return;
         if (ProgressHelper.isBusy() && SlashModel.getInstance().inProgress) {
-            if(observe) {
+            if (observe) {
                 status.setLoad(true);
                 SlashModel.getInstance().getProgress().observe(this, this);
             } else
@@ -167,6 +169,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.LIST, false)) { //SlashModel
+            if (SlashModel.getInstance() == null)
+                return;
             status.setLoad(false);
             SlashModel.getInstance().finish();
             return;
