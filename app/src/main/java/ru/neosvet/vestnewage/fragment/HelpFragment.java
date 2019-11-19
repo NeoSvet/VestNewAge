@@ -110,7 +110,7 @@ public class HelpFragment extends Fragment {
                 act.lib.openInApps("https://money.yandex.ru/to/410012986244848", null);
                 break;
             case LINK_ON_QW:
-                act.lib.openInApps("https://qiwi.com/p/79500016793", null);
+                act.lib.openInApps("https://qiwi.com/n/neosvet", null);
                 break;
             default: //CHANGELOG
                 act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
@@ -122,8 +122,8 @@ public class HelpFragment extends Fragment {
         if (feedback) {
             adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getResources().getString(R.string.write_to_dev), R.drawable.gm);
             adHelp.insertItem(FEEDBACK + LINK_ON_APP, getResources().getString(R.string.link_on_app), R.drawable.play_store);
-            adHelp.insertItem(FEEDBACK + LINK_ON_YM, getResources().getString(R.string.support), R.drawable.ymoney);
-            adHelp.insertItem(FEEDBACK + LINK_ON_QW, getResources().getString(R.string.support), R.drawable.qiwi);
+            adHelp.insertItem(FEEDBACK + LINK_ON_YM, getResources().getString(R.string.support_ym), R.drawable.ymoney);
+            adHelp.insertItem(FEEDBACK + LINK_ON_QW, getResources().getString(R.string.support_qiwi), R.drawable.qiwi);
             adHelp.insertItem(FEEDBACK + CHANGELOG, getResources().getString(R.string.changelog), 0);
             try {
                 StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));
