@@ -30,6 +30,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
@@ -269,6 +270,11 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!act.status.isStop()) {
+                    if (model.inProgress)
+                        model.cancel = true;
+                    return;
+                }
                 if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
@@ -359,6 +365,8 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void startLoad(String name) {
+        if (ProgressHelper.isBusy())
+            return;
         act.status.setError(null);
         String url = Const.SITE;
         if (name.equals(NEWS))

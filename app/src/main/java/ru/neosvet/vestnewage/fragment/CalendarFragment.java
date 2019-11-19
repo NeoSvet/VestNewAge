@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
@@ -103,7 +104,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!model.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             model.finish();
@@ -171,7 +172,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish();
+                        model.cancel = true;
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick()) {
@@ -233,22 +234,18 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void openLink(String link) {
-        if (model.inProgress)
-            model.finish();
         BrowserActivity.openReader(act, link, null);
     }
 
     private void openMonth(int offset) {
-        if (!model.inProgress) {
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    hTimer.sendEmptyMessage(0);
-                }
-            }, 300);
-            createCalendar(offset);
-        }
+        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hTimer.sendEmptyMessage(0);
+            }
+        }, 300);
+        createCalendar(offset);
     }
 
     private void createCalendar(int offsetMonth) {
@@ -302,8 +299,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private void openCalendar(boolean loadIfNeed) {
         try {
-            if (model.inProgress)
-                return;
             for (int i = 0; i < adCalendar.getItemCount(); i++)
                 adCalendar.getItem(i).clear(false);
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
@@ -337,7 +332,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                 }
             }
             cursor.close();
-			db.close();
+            db.close();
             dataBase.close();
             adCalendar.notifyDataSetChanged();
 
@@ -352,7 +347,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private void checkTime(int sec) {
         if (isCurMonth()) {
-            if(act.status.checkTime(sec))
+            if (act.status.checkTime(sec))
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
@@ -367,6 +362,8 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void startLoad() {
+        if (ProgressHelper.isBusy())
+            return;
         setStatus(true);
         model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }

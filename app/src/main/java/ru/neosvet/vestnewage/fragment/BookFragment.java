@@ -480,6 +480,11 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!act.status.isStop()) {
+                    if (model.inProgress)
+                        model.cancel = true;
+                    return;
+                }
                 if (act.status.onClick()) {
                     fabRefresh.setVisibility(View.VISIBLE);
                     fabRndMenu.setVisibility(View.VISIBLE);

@@ -32,6 +32,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CabModel;
@@ -74,6 +75,10 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public boolean onBackPressed() {
+        if (model.inProgress) {
+            model.cancel = true;
+            return false;
+        }
         if (mode_list == CabModel.LOGIN)
             return true;
         else {
@@ -212,6 +217,8 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (ProgressHelper.isBusy())
+                    return;
                 if (act.status.isVisible()) return;
                 if (mode_list == CabModel.LOGIN) {
                     String s;
@@ -371,7 +378,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     private void subLogin() {
         softKeyboard.closeSoftKeyboard();
-        if (model.inProgress)
+        if (ProgressHelper.isBusy())
             return;
         if (adMain.getCount() == 1) {
             adMain.clear();

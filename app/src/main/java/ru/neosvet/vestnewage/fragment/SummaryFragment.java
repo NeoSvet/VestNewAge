@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -139,7 +140,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             public void onClick(View view) {
                 if (!act.status.isStop()) {
                     if (model.inProgress)
-                        model.finish();
+                        model.cancel = true;
                     else
                         act.status.setLoad(false);
                 } else if (act.status.onClick())
@@ -199,6 +200,8 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     }
 
     private void startLoad() {
+        if (ProgressHelper.isBusy())
+            return;
         act.status.setError(null);
         fabRefresh.setVisibility(View.GONE);
         act.status.setLoad(true);

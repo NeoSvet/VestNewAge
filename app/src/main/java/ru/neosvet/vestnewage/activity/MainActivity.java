@@ -282,8 +282,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                if (ProgressHelper.isBusy())
-                    return;
                 ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 model.startLoad(LoaderModel.DOWNLOAD_ALL, "");
                 initLoad();
@@ -294,8 +292,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                if (ProgressHelper.isBusy())
-                    return;
                 ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 if (cur_id == R.id.nav_calendar) {
                     model.startLoad(LoaderModel.DOWNLOAD_YEAR, String.valueOf(
@@ -367,8 +363,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        if (ProgressHelper.isBusy())
-            return true;
         if (!item.isChecked())
             setFragment(item.getItemId(), false);
         drawer.closeDrawer(GravityCompat.START);
@@ -585,6 +579,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuDownload.isShow())
             menuDownload.hide();
         else {
+            if (ProgressHelper.isBusy())
+                return;
             switch (cur_id) {
                 case R.id.nav_main:
                     bDownloadIt.setVisibility(View.VISIBLE);
@@ -633,6 +629,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void downloadPage(String link) {
+        if (ProgressHelper.isBusy())
+            return;
         status.setError(null);
         status.setLoad(true);
         model.startLoad(LoaderModel.DOWNLOAD_PAGE, link);
