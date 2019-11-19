@@ -61,6 +61,7 @@
         android:layout_margin="10dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
+        android:onClick="clickMin"
         android:text="@string/minimize" />
 
 </LinearLayout>

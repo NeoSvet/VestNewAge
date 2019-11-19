@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
-import android.view.View;
 
 import androidx.work.Data;
 import androidx.work.ListenableWorker;
@@ -122,6 +121,10 @@ public class ProgressHelper {
         return msg;
     }
 
+    public static String getName() {
+        return name;
+    }
+
     public static void setMessage(String n_msg) {
         if (name != null && name.equals(LoaderModel.class.getSimpleName())) {
             msg = LoaderModel.getInstance().initMsg(n_msg);
@@ -143,12 +146,6 @@ public class ProgressHelper {
             @Override
             public void onCancel(DialogInterface dialog) {
                 ProgressModel.getModelByName(name).cancel = true;
-            }
-        });
-        dialog.setMinButton(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LoaderHelper.postCommand(v.getContext(), name, true);
             }
         });
         dialog.show();

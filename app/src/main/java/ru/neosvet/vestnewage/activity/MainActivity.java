@@ -40,6 +40,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -54,6 +55,7 @@ import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -250,6 +252,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (prom != null)
             prom.resume();
         checkSlashModel(true);
+        ProgressModel model = ProgressModel.getModelByName(ProgressHelper.getName());
+        if (model != null)
+            LoaderHelper.checkObserve(model);
     }
 
     @Override
@@ -261,6 +266,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setProm(View textView) {
         prom = new PromHelper(this, textView);
+    }
+
+    public void clickMin(View v) {
+        ProgressModel model = ProgressModel.getModelByName(ProgressHelper.getName());
+        if (model != null)
+            model.removeObservers(this);
+        ProgressHelper.dismissDialog();
+        LoaderHelper.postCommand(v.getContext(), ProgressHelper.getName(), false);
     }
 
     public void updateNew() {
