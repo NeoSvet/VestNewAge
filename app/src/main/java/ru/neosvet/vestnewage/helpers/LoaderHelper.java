@@ -14,6 +14,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 /**
  * Created by NeoSvet on 19.11.2019.
@@ -33,10 +34,14 @@ public class LoaderHelper extends LifecycleService {
         Context context = getApplicationContext();
         NotificationHelper notifHelper = new NotificationHelper(context);
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent main = new Intent(context, MainActivity.class);
+        PendingIntent pMain = PendingIntent.getActivity(context, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
         notif = notifHelper.getNotification(
                 context.getResources().getString(R.string.load),
                 context.getResources().getString(R.string.start),
                 NotificationHelper.CHANNEL_MUTE)
+                .setContentIntent(pMain)
+                .setAutoCancel(false)
                 .setProgress(0, 0, true)
                 .setFullScreenIntent(piEmpty, true);
         startForeground(notif_id, notif.build());
