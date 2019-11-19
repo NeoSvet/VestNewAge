@@ -8,12 +8,14 @@ import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class ProgressDialog extends Dialog {
     private Context context;
     private int max;
     private TextView tvTitle, tvMessage;
+    private View bMinimize;
     private ProgressBar progressBar;
 
     public ProgressDialog(Context context, int max) {
@@ -32,6 +34,7 @@ public class ProgressDialog extends Dialog {
         tvTitle.setText(context.getResources().getString(R.string.load));
         tvMessage = (TextView) findViewById(R.id.message);
         progressBar = (ProgressBar) findViewById(R.id.progress);
+        bMinimize = findViewById(R.id.bMinimize);
         if (max == 0) {
             progressBar.setVisibility(View.GONE);
             findViewById(R.id.circle).setVisibility(View.VISIBLE);
@@ -49,5 +52,10 @@ public class ProgressDialog extends Dialog {
 
     public void setMessage(String message) {
         tvMessage.setText(message);
+    }
+
+    public void setMinButton(View.OnClickListener click) {
+        Lib.LOG("bMinimize: " + (bMinimize==null));
+        //TODO bMinimize.setOnClickListener(click);
     }
 }

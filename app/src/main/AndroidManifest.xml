@@ -96,6 +96,10 @@
             android:icon="@drawable/rss"
             android:label="@string/check_summary"
             android:process=":check" />
+        <service
+            android:name=".helpers.LoaderHelper"
+            android:icon="@drawable/download"
+            android:label="@string/load" />
 
         <receiver android:name=".helpers.PromHelper$Rec" />
         <receiver android:name=".helpers.SummaryHelper$Rec" />

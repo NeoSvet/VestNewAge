@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 
 import androidx.work.Data;
 
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.CabModel;
@@ -72,5 +73,9 @@ public class ProgressModel extends AndroidViewModel {
         if (name.equals(LoaderModel.class.getSimpleName()))
             return LoaderModel.getInstance();
         return null;
+    }
+
+    public void startService(String name) {
+        LoaderHelper.start(getApplication().getBaseContext(), name);
     }
 }

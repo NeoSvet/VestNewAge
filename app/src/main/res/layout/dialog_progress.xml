@@ -31,8 +31,6 @@
             android:id="@+id/circle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
             android:layout_margin="10dp"
             android:visibility="gone" />
 
@@ -51,10 +49,18 @@
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
         android:indeterminate="false"
         android:progressDrawable="@drawable/progress_bar" />
+
+    <Button
+        android:id="@+id/bMinimize"
+        style="@style/Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/minimize" />
 
 </LinearLayout>

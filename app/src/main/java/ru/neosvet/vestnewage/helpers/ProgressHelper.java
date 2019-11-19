@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 
 import androidx.work.Data;
 import androidx.work.ListenableWorker;
 
 import ru.neosvet.ui.dialogs.ProgressDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -52,6 +52,26 @@ public class ProgressHelper {
 
     public static void stop() {
         start = false;
+        final Handler handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                if (!start) {
+                    ProgressModel model = ProgressModel.getModelByName(name);
+                    model.startService(name);
+                }
+                return false;
+            }
+        });
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(2 * DateHelper.SEC_IN_MILLS);
+                    handler.sendEmptyMessage(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public static boolean isBusy() {
@@ -93,6 +113,14 @@ public class ProgressHelper {
         return max;
     }
 
+    public static int getProg() {
+        return prog;
+    }
+
+    public static String getMessage() {
+        return msg;
+    }
+
     public static void setMessage(String n_msg) {
         if (name != null && name.equals(LoaderModel.class.getSimpleName())) {
             msg = LoaderModel.getInstance().initMsg(n_msg);
@@ -114,6 +142,12 @@ public class ProgressHelper {
             @Override
             public void onCancel(DialogInterface dialog) {
                 ProgressModel.getModelByName(name).cancel = true;
+            }
+        });
+        dialog.setMinButton(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoaderHelper.start(v.getContext(), name);
             }
         });
         dialog.show();
