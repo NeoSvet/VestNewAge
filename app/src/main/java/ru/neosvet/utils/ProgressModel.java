@@ -76,6 +76,6 @@ public class ProgressModel extends AndroidViewModel {
     }
 
     public void startService(String name) {
-        LoaderHelper.start(getApplication().getBaseContext(), name);
+        LoaderHelper.postCommand(getApplication().getBaseContext(), name, false);
     }
 }

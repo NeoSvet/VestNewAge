@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.helpers;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
@@ -31,27 +32,58 @@ public class LoaderHelper extends LifecycleService {
         super.onCreate();
         Context context = getApplicationContext();
         NotificationHelper notifHelper = new NotificationHelper(context);
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         notif = notifHelper.getNotification(
-                context.getResources().getString(R.string.site_name),
                 context.getResources().getString(R.string.load),
-                NotificationHelper.CHANNEL_MUTE);
-        notif.setProgress(0, 0, true);
+                context.getResources().getString(R.string.start),
+                NotificationHelper.CHANNEL_MUTE)
+                .setProgress(0, 0, true)
+                .setFullScreenIntent(piEmpty, true);
         startForeground(notif_id, notif.build());
     }
 
-    public static void start(Context context, String name) {
+    public static void postCommand(Context context, String name, boolean stop) {
         Intent intent = new Intent(context, LoaderHelper.class);
         intent.putExtra(Const.TITLE, name);
+        if (stop)
+            intent.putExtra(Const.CHECK, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             context.startForegroundService(intent);
         else
             context.startService(intent);
     }
 
+    public static void checkObserve(ProgressModel model) {
+        if (!model.getProgress().hasObservers())
+            postCommand(model.getApplication().getBaseContext(), model.getClass().getSimpleName(), true);
+    }
+
     @Override
     public int onStartCommand(Intent intent, final int flags, int startId) {
-        Lib.LOG("LoaderHelper start");
         name = intent.getStringExtra(Const.TITLE);
+        if (intent.getBooleanExtra(Const.CHECK, false)) {
+            Lib.LOG("LoaderHelper finish");
+            start = false;
+            ProgressModel model = ProgressModel.getModelByName(name);
+            if (model != null)
+                model.finish();
+            return super.onStartCommand(intent, flags, startId);
+        }
+        if (intent.getBooleanExtra(Const.END, false)) {
+            Lib.LOG("LoaderHelper cancel");
+            start = false;
+            ProgressModel model = ProgressModel.getModelByName(name);
+            if (model != null)
+                model.cancel = true;
+            return super.onStartCommand(intent, flags, startId);
+        }
+        Lib.LOG("LoaderHelper start");
+        Context context = getApplicationContext();
+        Intent iStop = new Intent(context, LoaderHelper.class);
+        iStop.putExtra(Const.TITLE, name);
+        iStop.putExtra(Const.END, true);
+        PendingIntent piStop = PendingIntent.getService(context, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
+        notif.addAction(0, context.getResources().getString(R.string.stop), piStop);
         start = true;
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(new Handler.Callback() {
@@ -64,7 +96,6 @@ public class LoaderHelper extends LifecycleService {
                     manager.notify(notif_id, notif.build());
                 } else {
                     start = false;
-                    stopForeground(true);
                 }
                 return false;
             }
@@ -76,6 +107,7 @@ public class LoaderHelper extends LifecycleService {
                         Thread.sleep(DateHelper.SEC_IN_MILLS);
                         handler.sendEmptyMessage(0);
                     }
+                    stopForeground(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

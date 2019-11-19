@@ -162,6 +162,7 @@
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
     <string name="minimize">Свернуть</string>
+    <string name="stop">Остановить</string>
     <string name="download_list">Загрузка списков</string>
     <string name="download_materials">Загрузка материалов</string>
     <string name="all_load_suc">Все списки и материалы успешно загружены</string>

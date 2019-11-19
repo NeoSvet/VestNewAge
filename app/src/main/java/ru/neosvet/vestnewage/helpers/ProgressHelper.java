@@ -57,7 +57,8 @@ public class ProgressHelper {
             public boolean handleMessage(Message message) {
                 if (!start) {
                     ProgressModel model = ProgressModel.getModelByName(name);
-                    model.startService(name);
+                    if (model != null)
+                        model.startService(name);
                 }
                 return false;
             }
@@ -147,7 +148,7 @@ public class ProgressHelper {
         dialog.setMinButton(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoaderHelper.start(v.getContext(), name);
+                LoaderHelper.postCommand(v.getContext(), name, true);
             }
         });
         dialog.show();

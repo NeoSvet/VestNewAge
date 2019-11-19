@@ -30,6 +30,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -117,6 +118,7 @@ public class LoaderWorker extends Worker {
                         result.putString(Const.LINK, link); //non-use
                         break;
                 }
+            LoaderHelper.checkObserve(model);
             model.postProgress(result.build());
             return ProgressHelper.success();
         } catch (Exception e) {
@@ -128,6 +130,7 @@ public class LoaderWorker extends Worker {
             CheckHelper.postCommand(context, false);
             return ProgressHelper.failure();
         }
+        LoaderHelper.checkObserve(model);
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)

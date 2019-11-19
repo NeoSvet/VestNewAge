@@ -22,6 +22,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -57,6 +58,7 @@ public class BookWorker extends Worker {
             if (name.equals(BookModel.class.getSimpleName())) {
                 if (getInputData().getBoolean(Const.OTKR, false)) {
                     name = loadListUcoz(true, false);
+                    LoaderHelper.checkObserve(model);
                     model.postProgress(new Data.Builder()
                             .putBoolean(Const.FINISH, true)
                             .putBoolean(Const.OTKR, true)
@@ -95,6 +97,7 @@ public class BookWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("BookWolker error: " + error);
         }
+        LoaderHelper.checkObserve(model);
         model.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
