@@ -121,9 +121,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
         }
+        checkSlashModel(true);
+    }
+
+    private void checkSlashModel(boolean observe) {
         if (ProgressHelper.isBusy() && SlashModel.getInstance().inProgress) {
-            status.setLoad(true);
-            //SlashModel.getInstance().getProgress().observe(this, this);
+            if(observe) {
+                status.setLoad(true);
+                SlashModel.getInstance().getProgress().observe(this, this);
+            } else
+                SlashModel.getInstance().getProgress().removeObservers(this);
         }
     }
 
@@ -159,6 +166,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.LIST, false)) { //SlashModel
+            status.setLoad(false);
+            SlashModel.getInstance().finish();
+            return;
+        }
         if (!model.inProgress)
             return;
         if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
@@ -220,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ProgressHelper.stop();
             ProgressHelper.dismissDialog();
         }
+        checkSlashModel(false);
     }
 
     @Override
@@ -232,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if (prom != null)
             prom.resume();
+        checkSlashModel(true);
     }
 
     @Override

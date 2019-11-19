@@ -40,7 +40,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private Intent main;
-    private boolean anim = true;
     private SlashModel model;
     private NotificationHelper notifHelper;
 
@@ -54,7 +53,6 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         setContentView(R.layout.slash_activity);
         main = new Intent(getApplicationContext(), MainActivity.class);
 
-        initAnimation();
         int ver = getPreviosVer();
         if (ver < 32)
             adapterNewVersion32();
@@ -64,6 +62,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             finish();
             return;
         }
+        initAnimation();
 
         notifHelper = new NotificationHelper(SlashActivity.this);
         if (ver < 21) {
@@ -130,8 +129,11 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (model.inProgress)
-            model.finish();
+        startMain();
+    }
+
+    private void startMain() {
+        model.removeObservers(this);
         startActivity(main);
         finish();
     }
@@ -217,8 +219,8 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         cursor.close();
         db.close();
         dataBase.close();
-        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
-            return;
+//        if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
+//            return; tut
         SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         model.startLoad(pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_SUMMARY,
                 date.getMonth(), date.getYear());
@@ -233,22 +235,13 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             reInitProm();
         }
         if (data.getBoolean(Const.FINISH, false))
-            finishLoad();
+            model.finish();
     }
 
     private void reInitProm() {
         SharedPreferences pref = getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         PromHelper prom = new PromHelper(SlashActivity.this, null);
         prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF));
-    }
-
-    public void finishLoad() {
-        model.finish();
-        model.removeObservers(this);
-        if (!anim) {
-            startActivity(main);
-            finish();
-        }
     }
 
     private void initAnimation() {
@@ -260,11 +253,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                anim = false;
-                //TODO send model to MainActivity if it inProgress
-                // if (!model.inProgress || model.non_start) {
-                startActivity(main);
-                finish();
+                startMain();
             }
 
             @Override
