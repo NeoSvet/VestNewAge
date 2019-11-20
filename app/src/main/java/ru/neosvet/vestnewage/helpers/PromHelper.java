@@ -215,9 +215,11 @@ public class PromHelper {
         int delay;
         if (t.contains(context.getResources().getString(R.string.sec)))
             delay = DateHelper.SEC_IN_MILLS; // 1 sec
-        else if (t.contains(context.getResources().getString(R.string.min)))
+        else if (t.contains(context.getResources().getString(R.string.min))) {
+            t = t.replace(context.getResources().getStringArray(R.array.time)[3],
+                    context.getResources().getString(R.string.minute));
             delay = 6 * DateHelper.SEC_IN_MILLS; // 1/10 of min in sec
-        else
+        } else
             delay = 360 * DateHelper.SEC_IN_MILLS; // 1/10 of hour in sec
         if (hTime != null) {
             timer = new Timer();
