@@ -158,6 +158,7 @@ public class PromHelper {
     private void setPromTime() {
         String t = getPromText();
         if (t == null) { //t.contains("-")
+            tvPromTime.setText(context.getResources().getString(R.string.prom));
             Animation an = AnimationUtils.loadAnimation(context, R.anim.hide);
             an.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -176,6 +177,7 @@ public class PromHelper {
 
                 }
             });
+            an.setDuration(DateHelper.SEC_IN_MILLS);
             tvPromTime.startAnimation(an);
             return;
         }
