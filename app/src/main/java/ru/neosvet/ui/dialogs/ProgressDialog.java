@@ -21,9 +21,6 @@ public class ProgressDialog extends Dialog {
         this.context = context;
         this.max = max;
     }
-    public void onClick(View v) {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
