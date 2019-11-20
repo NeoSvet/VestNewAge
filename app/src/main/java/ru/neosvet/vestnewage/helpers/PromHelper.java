@@ -24,7 +24,6 @@ import java.util.TimerTask;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.SlashActivity;
 
 public class PromHelper {
@@ -70,7 +69,7 @@ public class PromHelper {
     }
 
     private void setViews() {
-        if (context instanceof MainActivity) {
+        if (tvPromTime.getId() == R.id.tvPromTime) {
             final Animation anMin = AnimationUtils.loadAnimation(context, R.anim.minimize);
             anMin.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -105,16 +104,16 @@ public class PromHelper {
             hTime = new Handler(new Handler.Callback() {
                 @Override
                 public boolean handleMessage(Message message) {
-                    if (message.what == 0)
+                    if (message.what == SET_PROM_TEXT) {
                         setPromTime();
-                    else {
+                    } else { //START_ANIM
                         tvPromTime.setVisibility(View.VISIBLE);
                         tvPromTime.startAnimation(anMax);
                     }
                     return false;
                 }
             });
-        } else {
+        } else { //R.id.tvPromTimeInMenu
             hTime = new Handler(new Handler.Callback() {
                 @Override
                 public boolean handleMessage(Message message) {
@@ -181,6 +180,19 @@ public class PromHelper {
             return;
         }
         tvPromTime.setText(t);
+        if (tvPromTime.getId() == R.id.tvPromTime &&
+                t.contains(context.getResources().getStringArray(R.array.time)[6])) {
+            t = t.substring(context.getResources().getString(R.string.to_prom).length() + 1);
+            if (t.contains(","))
+                t = t.substring(0, t.indexOf(","));
+            else
+                t = t.substring(0, t.indexOf(" "));
+            if (Integer.parseInt(t) > 3) {
+                tvPromTime.setVisibility(View.GONE);
+                return;
+            }
+            tvPromTime.setVisibility(View.VISIBLE);
+        }
         if (t.equals(context.getResources().getString(R.string.prom))) {
             timer = new Timer();
             timer.schedule(new TimerTask() {
