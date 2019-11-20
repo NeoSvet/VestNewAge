@@ -60,6 +60,8 @@
     <string name="hide_menu">Скрыть кнопку меню</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
+    <string name="load_unavailable_t">Загрузка недоступна</string>
+    <string name="load_unavailable_m">Потому что имеется активная загрузка в фоне (смотрите уведомления). Остановите её или дождитесь её завершения прежде, чем повторить попытку.</string>
     <!--CollectionsFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
