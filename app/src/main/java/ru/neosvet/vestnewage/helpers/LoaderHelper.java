@@ -82,13 +82,15 @@ public class LoaderHelper extends LifecycleService {
                 model.cancel = true;
             return super.onStartCommand(intent, flags, startId);
         }
+        if (!start) {
+            Context context = getApplicationContext();
+            Intent iStop = new Intent(context, LoaderHelper.class);
+            iStop.putExtra(Const.TITLE, name);
+            iStop.putExtra(Const.END, true);
+            PendingIntent piStop = PendingIntent.getService(context, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
+            notif.addAction(0, context.getResources().getString(R.string.stop), piStop);
+        }
         Lib.LOG("LoaderHelper start");
-        Context context = getApplicationContext();
-        Intent iStop = new Intent(context, LoaderHelper.class);
-        iStop.putExtra(Const.TITLE, name);
-        iStop.putExtra(Const.END, true);
-        PendingIntent piStop = PendingIntent.getService(context, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
-        notif.addAction(0, context.getResources().getString(R.string.stop), piStop);
         start = true;
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(new Handler.Callback() {
