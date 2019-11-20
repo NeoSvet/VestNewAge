@@ -125,7 +125,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SearchModel.class);
-        model.getProgress().observe(act, this);
         if (model.inProgress) {
             pStatus.setVisibility(View.VISIBLE);
             fabSettings.setVisibility(View.GONE);

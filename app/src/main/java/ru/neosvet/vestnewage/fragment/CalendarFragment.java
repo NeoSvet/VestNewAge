@@ -97,7 +97,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CalendarModel.class);
-        model.getProgress().observe(act, this);
         if (model.inProgress)
             setStatus(true);
     }

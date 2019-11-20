@@ -100,7 +100,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CabModel.class);
-        model.getProgress().observe(act, this);
         if (model.inProgress)
             act.status.setLoad(true);
     }

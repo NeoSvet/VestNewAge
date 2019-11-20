@@ -82,7 +82,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SiteModel.class);
-        model.getProgress().observe(act, this);
         if (model.inProgress) {
             fabRefresh.setVisibility(View.GONE);
             act.status.setLoad(true);
