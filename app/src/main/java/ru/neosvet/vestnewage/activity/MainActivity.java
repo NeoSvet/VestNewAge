@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         unread = new UnreadHelper(this);
         initInterface();
-        initModel();
+        model = ViewModelProviders.of(this).get(LoaderModel.class);
         initAnim();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
@@ -159,13 +159,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         anMax = AnimationUtils.loadAnimation(this, R.anim.maximize);
-    }
-
-    private void initModel() {
-        model = ViewModelProviders.of(this).get(LoaderModel.class);
-        model.getProgress().observe(this, this);
-        if (model.inProgress)
-            initLoad();
     }
 
     @Override
@@ -245,10 +238,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         model.addObserver(this, this);
-        if (model.inProgress) {
-            ProgressHelper.showDialog(this);
-            ProgressHelper.startTimer();
-        }
+        if (model.inProgress)
+            initLoad();
         if (prom != null)
             prom.resume();
         checkSlashModel(true);

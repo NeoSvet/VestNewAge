@@ -87,7 +87,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         initViews();
         setViews();
         initTabs();
-        initModel();
+        model = ViewModelProviders.of(act).get(BookModel.class);
         restoreState(savedInstanceState);
         if (year > 0) {
             DateHelper d = DateHelper.initToday(act);
@@ -115,10 +115,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     public void onResume() {
         super.onResume();
         model.addObserver(act, this);
-        if (model.inProgress) {
-            ProgressHelper.showDialog(act);
-            ProgressHelper.startTimer();
-        }
+        if (model.inProgress)
+            initLoad();
     }
 
     @Override
@@ -128,13 +126,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             return false;
         }
         return true;
-    }
-
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(BookModel.class);
-        model.getProgress().observe(act, this);
-        if (model.inProgress)
-            initLoad();
     }
 
     @Override
@@ -514,8 +505,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void openMonth(boolean plus) {
-        if (ProgressHelper.isBusy())
-            return;
         if (!plus && tab == 1) {
             if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
