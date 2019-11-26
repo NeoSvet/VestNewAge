@@ -22,6 +22,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -137,6 +138,8 @@ public class NewFragment extends Fragment {
     }
 
     private void loadList() {
+        NotificationHelper notifHelper = new NotificationHelper(act);
+        notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         try {
             String t, s;
             int n;
