@@ -189,7 +189,7 @@ public class PromHelper {
                 t = t.substring(0, t.indexOf(","));
             else
                 t = t.substring(0, t.indexOf(" "));
-            if (Integer.parseInt(t) > 3) {
+            if (Integer.parseInt(t) > 2) {
                 tvPromTime.setVisibility(View.GONE);
                 return;
             }
