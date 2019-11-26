@@ -64,19 +64,21 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.addObserver(act, this);
     }
 
     @Override
     public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.cancel = true;
+        if (ProgressHelper.isBusy()) {
+            ProgressHelper.cancelled();
             return false;
         }
         if (mode_list == CabModel.LOGIN)
@@ -92,7 +94,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             } else { //CabModel.CABINET
                 mode_list = CabModel.LOGIN;
                 model.login(etEmail.getText().toString(), etPassword.getText().toString());
-                act.status.setLoad(true);
+                initLoad();
             }
             return false;
         }
@@ -100,17 +102,18 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CabModel.class);
-        if (model.inProgress)
-            act.status.setLoad(true);
+        if (ProgressHelper.isBusy())
+            initLoad();
     }
 
     @Override
     public void onChanged(@Nullable Data result) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
         if (!result.getBoolean(Const.FINISH, false))
             return;
-        model.finish();
+        ProgressHelper.setBusy(false);
+        ProgressHelper.removeObservers(act);
         String error = result.getString(Const.ERROR);
         if (error != null) {
             act.status.setError(error);
@@ -238,32 +241,37 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                             s = "trans.html";
                             break;
                     }
-                    CabpageActivity.openPage(act, s, null);
+                    CabpageActivity.openPage(act, s);
                 } else if (mode_list == CabModel.CABINET) {
                     switch (pos) {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
                                     getResources().getString(R.string.select_status))) {
                                 model.getListWord();
-                                act.status.setLoad(true);
+                                initLoad();
                             } else
                                 Lib.showToast(act, getResources().getString(R.string.send_unlivable));
                             break;
                         case 1: //анкета
-                            CabpageActivity.openPage(act, "edinenie/anketa.html", model.getCookie());
+                            CabpageActivity.openPage(act, "edinenie/anketa.html");
                             break;
                         case 2: //единомышленники
-                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html", model.getCookie());
+                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html");
                             break;
                         default:
                             break;
                     }
                 } else if (mode_list == CabModel.WORDS) {
                     model.selectWord(pos);
-                    act.status.setLoad(true);
+                    initLoad();
                 }
             }
         });
+    }
+
+    private void initLoad() {
+        ProgressHelper.addObserver(act, this);
+        act.status.setLoad(true);
     }
 
     private void loginList() {
@@ -329,7 +337,8 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             @Override
             public void onClick(View view) {
                 mode_list = CabModel.LOGIN;
-                model.setCookie("");
+                CabModel.cookie = null;
+                CabModel.email = "";
                 adMain.clear();
                 loginList();
                 fabEnter.setVisibility(View.VISIBLE);
@@ -393,7 +402,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             editor.commit();
         }
         model.login(etEmail.getText().toString(), etPassword.getText().toString());
-        act.status.setLoad(true);
+        initLoad();
     }
 
     private void initWordList(String[] words) {

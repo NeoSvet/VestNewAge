@@ -17,7 +17,6 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
@@ -66,6 +65,8 @@ public class CheckHelper extends LifecycleService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Data data = new Data.Builder()
+                .putString(Const.TASK, TAG).build();
         WorkManager work = WorkManager.getInstance();
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -77,13 +78,10 @@ public class CheckHelper extends LifecycleService {
                 .build();
         WorkContinuation job = work.beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
-        Data data = new Data.Builder()
-                .putString(ProgressModel.NAME, this.getClass().getSimpleName())
-                .build();
         task = new OneTimeWorkRequest
                 .Builder(LoaderWorker.class)
-                .setConstraints(constraints)
                 .setInputData(data)
+                .setConstraints(constraints)
                 .build();
         job = job.then(task);
         job.enqueue();

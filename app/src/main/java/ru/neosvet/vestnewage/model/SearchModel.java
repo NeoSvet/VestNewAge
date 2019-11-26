@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -11,31 +13,24 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.SearchWorker;
 
-public class SearchModel extends ProgressModel {
+public class SearchModel extends AndroidViewModel {
     public static final String TAG = "search";
-    private static SearchModel current = null;
-
-    public static SearchModel getInstance() {
-        return current;
-    }
+    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
+    public boolean inProgress;
+    public static boolean cancel;
 
     public SearchModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     public void search(String str, int mode, String start, String end) {
-        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiresBatteryNotLow(false)
                 .build();
         Data.Builder data = new Data.Builder()
-                .putString(ProgressModel.NAME, this.getClass().getSimpleName())
                 .putString(Const.STRING, str)
                 .putInt(Const.MODE, mode)
                 .putString(Const.START, start)

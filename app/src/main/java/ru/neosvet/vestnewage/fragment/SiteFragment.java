@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment implements Observer<Data> {
@@ -54,7 +55,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         initViews();
         setViews();
         initTabs();
-        initModel();
+        model = ViewModelProviders.of(act).get(SiteModel.class);
         restoreState(savedInstanceState);
         return this.container;
     }
@@ -62,44 +63,48 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        if (ProgressHelper.isBusy())
+            initLoad();
     }
 
     @Override
     public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.cancel = true;
+        if (ProgressHelper.isBusy()) {
+            ProgressHelper.cancelled();
             return false;
         }
         return true;
     }
 
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(SiteModel.class);
-        if (model.inProgress) {
-            fabRefresh.setVisibility(View.GONE);
-            act.status.setLoad(true);
-        }
+    private void initLoad() {
+        ProgressHelper.addObserver(act, this);
+        fabRefresh.setVisibility(View.GONE);
+        act.status.setLoad(true);
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if(!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
+        if (data.getBoolean(Const.LIST, false))
+            openList(getFile(data.getString(Const.FILE)), false);
         if (data.getBoolean(Const.FINISH, false)) {
-            model.finish();
             String error = data.getString(Const.ERROR);
+            ProgressHelper.removeObservers(act);
             if (error != null) {
                 act.status.setError(error);
                 return;
             }
-            finishLoad(data.getString(Const.FILE));
+            fabRefresh.setVisibility(View.VISIBLE);
+            act.status.setLoad(false);
+            ProgressHelper.setBusy(false);
         }
         String link = data.getString(Const.MSG);
         for (int i = 0; i < adMain.getCount(); i++) {
@@ -269,9 +274,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!act.status.isStop()) {
-                    if (model.inProgress)
-                        model.cancel = true;
+                if (!act.status.isStop()) {
+                    act.status.setLoad(false);
+                    ProgressHelper.cancelled();
                     return;
                 }
                 if (act.status.onClick())
@@ -344,7 +349,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             if (loadIfNeed)
                 startLoad(tabHost.getCurrentTabTag());
         }
-
+        adMain.notifyDataSetChanged();
         if (adMain.getCount() == 0)
             tvEmptySite.setVisibility(View.VISIBLE);
         else
@@ -366,23 +371,15 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private void startLoad(String name) {
         if (ProgressHelper.isBusy())
             return;
-        act.status.setError(null);
         String url = Const.SITE;
         if (name.equals(NEWS))
             url += NOVOSTI;
-        fabRefresh.setVisibility(View.GONE);
         model.startLoad(url, getFile(name).toString());
-        act.status.setLoad(true);
+        initLoad();
     }
 
     private File getFile(String name) {
         return new File(act.getFilesDir() + name);
-    }
-
-    private void finishLoad(String file) {
-        fabRefresh.setVisibility(View.VISIBLE);
-        act.status.setLoad(false);
-        openList(getFile(file), false);
     }
 
     public void setTab(int tab) {

@@ -45,6 +45,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -101,28 +102,24 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
-        if (model.inProgress) {
-            ProgressHelper.stop();
-            ProgressHelper.dismissDialog();
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
-        if (model.inProgress)
+        if (ProgressHelper.isBusy())
             initLoad();
     }
 
     @Override
     public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.cancel = true;
+        if (ProgressHelper.isBusy()) {
+            ProgressHelper.cancelled();
             return false;
         }
         return true;
@@ -130,20 +127,15 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
-        switch (data.getInt(Const.DIALOG, -1)) {
-            case LoaderModel.DIALOG_SHOW:
-                ProgressHelper.showDialog(act);
-                break;
-            case LoaderModel.DIALOG_MSG:
-                act.status.setText(data.getString(Const.MSG));
-                break;
+        if (data.getBoolean(Const.DIALOG, false)) {
+            act.status.setText(data.getString(Const.MSG));
+            return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.setName(null);
-            model.finish();
-            ProgressHelper.dismissDialog();
+            ProgressHelper.setBusy(false);
+            ProgressHelper.removeObservers(act);
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -191,7 +183,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (state != null) {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
-            if (!model.inProgress) {
+            if (!ProgressHelper.isBusy()) {
                 dialog = state.getString(Const.DIALOG);
                 if (dialog.length() == 1)
                     showDatePicker(null);
@@ -234,7 +226,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         tabHost.setCurrentTab(1);
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
-                if (model.inProgress) return;
+                if (ProgressHelper.isBusy()) return;
                 if (name.equals(Const.KATRENY))
                     act.setTitle(getResources().getString(R.string.katreny));
                 else
@@ -471,9 +463,11 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         act.status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!act.status.isStop()) {
-                    if (model.inProgress)
-                        model.cancel = true;
+                if (!act.status.isStop()) {
+                    act.status.setLoad(false);
+                    ProgressHelper.cancelled();
+                    fabRefresh.setVisibility(View.VISIBLE);
+                    fabRndMenu.setVisibility(View.VISIBLE);
                     return;
                 }
                 if (act.status.onClick()) {
@@ -518,10 +512,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 builder.setPositiveButton(getResources().getString(R.string.yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                ProgressHelper.startProgress(act, BookModel.class.getSimpleName());
-                                model.startLoad(true, false, false);
-                                dialog.dismiss();
-                                initLoad();
+                                LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
                             }
                         });
                 builder.create().show();
@@ -550,21 +541,15 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        ProgressHelper.startProgress(act, BookModel.class.getSimpleName());
-        model.startLoad(false, fromOtkr, tab == 0);
+        model.startLoad(fromOtkr, tab == 0);
         initLoad();
     }
 
     private void initLoad() {
-        act.status.setError(null);
-        if (model.isDialog()) {
-            ProgressHelper.showDialog(act);
-            ProgressHelper.startTimer();
-        } else {
-            fabRefresh.setVisibility(View.GONE);
-            fabRndMenu.setVisibility(View.GONE);
-            act.status.setLoad(true);
-        }
+        ProgressHelper.addObserver(act, this);
+        fabRefresh.setVisibility(View.GONE);
+        fabRndMenu.setVisibility(View.GONE);
+        act.status.setLoad(true);
     }
 
     private void finishLoad(String result) {

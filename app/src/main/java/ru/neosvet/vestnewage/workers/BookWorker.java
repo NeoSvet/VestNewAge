@@ -20,20 +20,18 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
-import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookWorker extends Worker {
     private Context context;
-    private ProgressModel model;
     private List<String> title = new ArrayList<String>();
     private List<String> links = new ArrayList<String>();
     private Lib lib;
     private int cur, max;
+    private boolean BOOK;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -42,30 +40,27 @@ public class BookWorker extends Worker {
     }
 
     private boolean isCancelled() {
-        if (model == null)
-            return false;
-        else
-            return model.cancel;
+        if (BOOK)
+            return ProgressHelper.isCancelled();
+        return !LoaderHelper.start;
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        String error, name;
-        name = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(name);
+        String error;
+        BOOK = getInputData().getString(Const.TASK).equals(BookModel.class.getSimpleName());
         try {
-            if (name.equals(BookModel.class.getSimpleName())) {
-                if (getInputData().getBoolean(Const.OTKR, false)) {
-                    name = loadListUcoz(true, false);
-                    LoaderHelper.checkObserve(model);
-                    model.postProgress(new Data.Builder()
-                            .putBoolean(Const.FINISH, true)
-                            .putBoolean(Const.OTKR, true)
-                            .putString(Const.TITLE, name)
-                            .build());
-                    return ProgressHelper.success();
-                }
+            if (getInputData().getBoolean(Const.OTKR, false)) {
+                String s = loadListUcoz(true, false);
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.FINISH, true)
+                        .putBoolean(Const.OTKR, true)
+                        .putString(Const.TITLE, s)
+                        .build());
+                return Result.success();
+            }
+            if (BOOK) {
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
@@ -76,20 +71,20 @@ public class BookWorker extends Worker {
                 cur = 0;
                 if (!kat && fromOtkr)
                     loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-                name = loadListBook(kat);
-                model.postProgress(new Data.Builder()
+                String s = loadListBook(kat);
+                ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
-                        .putString(Const.TITLE, name)
+                        .putString(Const.TITLE, s)
                         .build());
-                return ProgressHelper.success();
+                return Result.success();
             }
-            //loader
-            if (isCancelled())
-                return ProgressHelper.success();
+            //LoaderHelper
+            if (!LoaderHelper.start)
+                return Result.success();
             loadListBook(false);
             loadListBook(true);
-            if (isCancelled())
-                return ProgressHelper.success();
+            if (!LoaderHelper.start)
+                return Result.success();
             loadListUcoz(true, true);
             return Result.success();
         } catch (Exception e) {
@@ -97,12 +92,11 @@ public class BookWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("BookWolker error: " + error);
         }
-        LoaderHelper.checkObserve(model);
-        model.postProgress(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
@@ -115,7 +109,6 @@ public class BookWorker extends Worker {
             } else
                 m = 137;
             ProgressHelper.setMax(m);
-            model.postProgress(new Data.Builder().putInt(Const.DIALOG, LoaderModel.DIALOG_SHOW).build());
         }
         final String path = lib.getDBFolder() + "/";
         File f;
@@ -162,8 +155,8 @@ public class BookWorker extends Worker {
         while (d.getYear() < m) {
             name = d.getMY();
             if (max > 0) {
-                model.postProgress(new Data.Builder()
-                        .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.DIALOG, true)
                         .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
                         .build());
                 cur++;
@@ -236,8 +229,8 @@ public class BookWorker extends Worker {
                     if (!date2.equals(date1)) {
                         saveData(date1);
                         if (max > 0) {
-                            model.postProgress(new Data.Builder()
-                                    .putInt(Const.DIALOG, LoaderModel.DIALOG_MSG)
+                            ProgressHelper.postProgress(new Data.Builder()
+                                    .putBoolean(Const.DIALOG, true)
                                     .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
                                     .build());
                             cur++;

@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -12,25 +14,18 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.BaseWorker;
 
-public class BaseModel extends ProgressModel {
+public class BaseModel extends AndroidViewModel {
     public static final String TAG = "base";
-    private static BaseModel current = null;
-
-    public static BaseModel getInstance() {
-        return current;
-    }
+    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
+    public boolean inProgress;
 
     public BaseModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     public void startClear(String[] request) {
-        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)

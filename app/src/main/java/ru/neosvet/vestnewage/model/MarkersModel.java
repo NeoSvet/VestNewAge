@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -12,25 +14,18 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.ProgressModel;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
-public class MarkersModel extends ProgressModel {
+public class MarkersModel extends AndroidViewModel {
     public static final String TAG = "markers";
-    private static MarkersModel current = null;
-
-    public static MarkersModel getInstance() {
-        return current;
-    }
+    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
+    public boolean inProgress;
 
     public MarkersModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     public void start(boolean export, String file) {
-        ProgressHelper.setBusy(true);
         inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)

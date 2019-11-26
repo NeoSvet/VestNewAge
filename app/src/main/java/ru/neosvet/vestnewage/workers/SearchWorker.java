@@ -17,13 +17,12 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
+import ru.neosvet.vestnewage.model.SearchModel;
 
 public class SearchWorker extends Worker {
     private Context context;
-    private ProgressModel model;
     private DataBase dbSearch;
     private SQLiteDatabase dbS;
     private String str;
@@ -34,25 +33,17 @@ public class SearchWorker extends Worker {
         this.context = context;
     }
 
-    private boolean isCancelled() {
-        if (model == null)
-            return false;
-        else
-            return model.cancel;
-    }
-
     @NonNull
     @Override
     public Result doWork() {
         String error;
-        model = ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             Lib lib = new Lib(context);
             List<String> list = new ArrayList<String>();
             for (File f : lib.getDBFolder().listFiles()) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
-                if (isCancelled())
+                if (SearchModel.cancel)
                     return getResult();
             }
             if (list.size() == 0) //empty list
@@ -84,7 +75,7 @@ public class SearchWorker extends Worker {
                 searchList("00.00", str, mode);
             }
             d = DateHelper.putYearMonth(context, start_year, start_month);
-            while (!isCancelled()) {
+            while (!SearchModel.cancel) {
                 if (list.contains(d.getMY())) {
                     publishProgress(d.getTimeInDays());
                     searchList(d.getMY(), str, mode);
@@ -93,7 +84,7 @@ public class SearchWorker extends Worker {
                     break;
                 d.changeMonth(step);
             }
-			dbS.close();
+            dbS.close();
             dbSearch.close();
             return getResult();
         } catch (Exception e) {
@@ -101,29 +92,29 @@ public class SearchWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("SearchWolker error: " + error);
         }
-        model.postProgress(new Data.Builder()
+        SearchModel.live.postValue(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private Result getResult() {
-        model.postProgress(new Data.Builder()
+        SearchModel.live.postValue(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putInt(Const.MODE, mode)
                 .putString(Const.STRING, str)
                 .putInt(Const.START, count1)
                 .putInt(Const.END, count2)
                 .build());
-        return ProgressHelper.success();
+        return Result.success();
     }
 
     private void publishProgress(int time) {
-            model.postProgress(new Data.Builder()
-                    .putString(Const.MODE, Const.TIME)
-                    .putInt(Const.TIME, time)
-                    .build());
+        SearchModel.live.postValue(new Data.Builder()
+                .putString(Const.MODE, Const.TIME)
+                .putInt(Const.TIME, time)
+                .build());
     }
 
     private void searchInResults(String find, boolean reverseOrder) throws Exception {
@@ -155,9 +146,9 @@ public class SearchWorker extends Worker {
             name1 = DataBase.getDatePage(link.get(i));
             if (!name1.equals(name2)) {
                 if (dataBase != null) {
-					db.close();
+                    db.close();
                     dataBase.close();
-				}
+                }
                 dataBase = new DataBase(context, name1);
                 db = dataBase.getWritableDatabase();
             }
@@ -186,16 +177,16 @@ public class SearchWorker extends Worker {
             p2 = ProgressHelper.getProcent(i, title.size());
             if (p1 < p2) {
                 p1 = p2;
-                model.postProgress(new Data.Builder()
+                SearchModel.live.postValue(new Data.Builder()
                         .putString(Const.MODE, Const.PROG)
                         .putInt(Const.PROG, p1)
                         .build());
             }
         }
         if (dataBase != null) {
-			db.close();
+            db.close();
             dataBase.close();
-		}
+        }
         title.clear();
         link.clear();
         id.clear();
@@ -276,7 +267,7 @@ public class SearchWorker extends Worker {
             }
         }
         curSearch.close();
-		db.close();
+        db.close();
         dataBase.close();
     }
 

@@ -21,6 +21,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -38,7 +39,6 @@ public class CheckWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String error;
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
                 CheckHelper.postCommand(context, true);
@@ -52,8 +52,7 @@ public class CheckWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            error = e.getMessage();
-            Lib.LOG("CheckWorker error: " + error);
+            Lib.LOG("CheckWorker error: " + e.getMessage());
         }
         CheckHelper.postCommand(context, false);
         return Result.failure();
@@ -83,7 +82,7 @@ public class CheckWorker extends Worker {
             return false;
         }
         BufferedWriter bwRSS = new BufferedWriter(new FileWriter(file));
-        file = LoaderModel.getFileList(context);
+        file = LoaderHelper.getFileList(context);
         BufferedWriter bwList = new BufferedWriter(new FileWriter(file));
         UnreadHelper unread = new UnreadHelper(context);
         DateHelper d;

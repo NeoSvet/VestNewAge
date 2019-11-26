@@ -22,7 +22,7 @@ import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.model.SlashModel;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class SlashWorker extends Worker {
     private Context context;
@@ -43,7 +43,7 @@ public class SlashWorker extends Worker {
             e.printStackTrace();
             Lib.LOG("SlashWorker error: " + e.getMessage());
         }
-        SlashModel.getInstance().postProgress(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .build());
         return Result.success();
@@ -102,7 +102,7 @@ public class SlashWorker extends Worker {
             SharedPreferences.Editor editor = pref.edit();
             editor.putInt(Const.TIMEDIFF, timeDiff);
             editor.apply();
-            SlashModel.getInstance().postProgress(new Data.Builder()
+            ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.TIME, true)
                     .build());
         }

@@ -164,14 +164,13 @@
     <!--Загрузка-->
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
-    <string name="minimize">Свернуть</string>
+    <string name="load_background">Загрузка запущена в фоне (см. уведомления)</string>
     <string name="stop">Остановить</string>
     <string name="download_list">Загрузка списков</string>
     <string name="download_materials">Загрузка материалов</string>
-    <string name="all_load_suc">Все списки и материалы успешно загружены</string>
-    <string name="it_load_suc">Раздел успешно загружен</string>
-    <string name="load_cancel">Загрузка была прервана</string>
+    <string name="load_suc_finish">Загрузка успешно завершена</string>
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
+    <string name="error_load">Ошибка при загрузке</string>
     <string name="error">Ошибка</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>

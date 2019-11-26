@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -11,48 +12,44 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
-import ru.neosvet.utils.ProgressModel;
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
 
-public class SummaryModel extends ProgressModel {
+public class SummaryModel extends AndroidViewModel {
     public static final String TAG = "summary";
-    private static SummaryModel current = null;
-
-    public static SummaryModel getInstance() {
-        return current;
-    }
 
     public SummaryModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     public void startLoad() {
         ProgressHelper.setBusy(true);
-        inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
                 .build();
-        Data.Builder data = new Data.Builder()
-                .putString(ProgressModel.NAME, this.getClass().getSimpleName());
+        Data data = new Data.Builder()
+                .putString(Const.TASK, this.getClass().getSimpleName())
+                .build();
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(SummaryWorker.class)
-                .setInputData(data.build())
+                .setInputData(data)
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
         WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
-        task = new OneTimeWorkRequest
-                .Builder(LoaderWorker.class)
-                .setInputData(data.build())
-                .setConstraints(constraints)
-                .addTag(TAG)
-                .build();
-        job = job.then(task);
+        if (!LoaderModel.inProgress) {
+            task = new OneTimeWorkRequest
+                    .Builder(LoaderWorker.class)
+                    .setInputData(data)
+                    .setConstraints(constraints)
+                    .addTag(TAG)
+                    .build();
+            job = job.then(task);
+        }
         job.enqueue();
     }
 }

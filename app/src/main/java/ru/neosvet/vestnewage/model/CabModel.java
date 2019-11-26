@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -12,33 +13,24 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
-public class CabModel extends ProgressModel {
+public class CabModel extends AndroidViewModel {
     public static final String TAG = "cab";
     public static final byte LOGIN = 0, CABINET = 1, WORDS = 2;
-    private String email, cookie = "";
-    private static CabModel current = null;
-
-    public static CabModel getInstance() {
-        return current;
-    }
+    public static String email, cookie = null;
 
     public CabModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     private void startWorker(Data.Builder data) {
         ProgressHelper.setBusy(true);
-        inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
                 .build();
-        data.putString(ProgressModel.NAME, this.getClass().getSimpleName());
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(CabWorker.class)
                 .setInputData(data.build())
@@ -50,8 +42,8 @@ public class CabModel extends ProgressModel {
         job.enqueue();
     }
 
-    public void login(String email, String password) {
-        this.email = email;
+    public void login(String n_email, String password) {
+        email = n_email;
         Data.Builder data = new Data.Builder()
                 .putString(Const.TASK, Const.LOGIN)
                 .putString(Const.PASSWORD, password);
@@ -69,17 +61,5 @@ public class CabModel extends ProgressModel {
                 .putString(Const.TASK, Const.SELECT_WORD)
                 .putInt(Const.LIST, index);
         startWorker(data);
-    }
-
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
-    }
-
-    public String getCookie() {
-        return cookie;
-    }
-
-    public String getEmail() {
-        return email;
     }
 }

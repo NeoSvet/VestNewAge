@@ -77,7 +77,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         initSections();
         initViews();
         setViews();
-        initModel();
+        model = ViewModelProviders.of(act).get(BaseModel.class);
         restoreState(savedInstanceState);
         return this.container;
     }
@@ -85,13 +85,21 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (model.inProgress)
+            model.live.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        if (model.inProgress)
+            initProgress();
+    }
+
+    private void initProgress() {
+        bClearDo.setEnabled(false);
+        initRotate();
+        model.live.observe(act, this);
     }
 
     @Override
@@ -117,21 +125,14 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         }
     }
 
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(BaseModel.class);
-        if (model.inProgress) {
-            bClearDo.setEnabled(false);
-            initRotate();
-        }
-    }
-
     @Override
     public void onChanged(@Nullable Data data) {
         if (!model.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
-            model.finish();
+            model.inProgress = false;
+            BaseModel.live.setValue(new Data.Builder().build());
             bClearDo.setEnabled(true);
             Lib.showToast(act, getResources().getString(R.string.completed));
         }
@@ -332,6 +333,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                     list.add("00.00");
                 if (cbsClear[3].isChecked()) //markers
                     list.add(DataBase.MARKERS);
+                initProgress();
                 model.startClear(list.toArray(new String[]{}));
                 for (int i = 0; i < cbsClear.length; i++)
                     cbsClear[i].setChecked(false);

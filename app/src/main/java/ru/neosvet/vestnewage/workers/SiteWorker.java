@@ -22,8 +22,8 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -31,7 +31,6 @@ import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
     private Context context;
-    private ProgressModel model;
     List<ListItem> list = new ArrayList<ListItem>();
 
     public SiteWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -39,31 +38,22 @@ public class SiteWorker extends Worker {
         this.context = context;
     }
 
-    private boolean isCancelled() {
-        if (model == null)
-            return false;
-        else
-            return model.cancel;
-    }
-
     @NonNull
     @Override
     public Result doWork() {
-        String error, s;
-        s = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(s);
+        String error, s = getInputData().getString(Const.TASK);
         try {
             if (s.equals(SiteModel.class.getSimpleName())) {
                 loadList(getInputData().getString(Const.LINK));
                 s = getInputData().getString(Const.FILE);
                 saveList(s);
-                model.postProgress(new Data.Builder()
-                        .putBoolean(Const.FINISH, true)
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.LIST, true)
                         .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
                         .build());
-                return ProgressHelper.success();
+                return Result.success();
             }
-            //loader
+            //LoaderHelper
             String[] url = new String[]{
                     Const.SITE,
                     Const.SITE + "novosti.html",
@@ -73,7 +63,7 @@ public class SiteWorker extends Worker {
                     lib.getFileByName(SiteFragment.MAIN).toString(),
                     lib.getFileByName(SiteFragment.NEWS).toString()
             };
-            for (int i = 0; i < url.length && !isCancelled(); i++) {
+            for (int i = 0; i < url.length && !ProgressHelper.isCancelled(); i++) {
                 loadList(url[i]);
                 saveList(file[i]);
                 ProgressHelper.upProg();
@@ -84,11 +74,11 @@ public class SiteWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("SiteWolker error: " + error);
         }
-        model.postProgress(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private void saveList(String file) throws Exception {
@@ -125,7 +115,7 @@ public class SiteWorker extends Worker {
         int i, n;
         String s, d = "";
         String[] m;
-        while ((line = br.readLine()) != null && !isCancelled()) {
+        while ((line = br.readLine()) != null && !ProgressHelper.isCancelled()) {
             if (!begin) {
                 begin = line.contains("h2") || line.contains("h3");//razdel
             }
@@ -208,7 +198,7 @@ public class SiteWorker extends Worker {
 
     public static int getListLink(Context context, String file) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(file));
-        File f = LoaderModel.getFileList(context);
+        File f = LoaderHelper.getFileList(context);
         BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
         String s;
         int k = 0;

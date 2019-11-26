@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -17,7 +16,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -116,31 +114,28 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     protected void onPause() {
         super.onPause();
         prom.stop();
-        if (model != null)
-            model.removeObservers(this);
+        ProgressHelper.removeObservers(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         prom.resume();
-        if (model != null)
-            model.addObserver(this, this);
+        ProgressHelper.addObserver(this, this);
     }
 
     private void initModel() {
-        if (ProgressHelper.isBusy())
-            return;
         model = ViewModelProviders.of(this).get(LoaderModel.class);
-        if (model.inProgress)
+        if (LoaderModel.inProgress)
             status.setLoad(true);
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!LoaderModel.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
+            LoaderModel.inProgress = false;
             finishLoad(data.getString(Const.ERROR));
         }
     }
@@ -162,7 +157,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         } else {
             link = state.getString(Const.LINK);
             dbPage = new DataBase(this, link);
-            if (!model.inProgress) {
+            if (!LoaderModel.inProgress) {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);
                 final Handler h = new Handler() {
@@ -259,37 +254,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void downloadPage(boolean replaceStyle) {
-        if (checkBackgroundLoad())
-            return;
         wvBrowser.clearCache(true);
         restoreStyle();
-        status.setError(null);
         status.setLoad(true);
-        if (replaceStyle)
-            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, link);
-        else
-            model.startLoad(LoaderModel.DOWNLOAD_PAGE, link);
-    }
-
-    private boolean checkBackgroundLoad() {
-        if (!ProgressHelper.isBusy()) {
-            if (model == null) {
-                initModel();
-                model.addObserver(this, this);
-            }
-            return false;
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog)
-                .setTitle(getResources().getString(R.string.load_unavailable_t))
-                .setMessage(getResources().getString(R.string.load_unavailable_m))
-                .setPositiveButton(getResources().getString(android.R.string.ok),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        });
-        builder.create().show();
-        return true;
+        model.startLoad(replaceStyle, link);
     }
 
     private void initViews() {
@@ -640,11 +608,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
-            if (checkBackgroundLoad())
-                return;
-            status.setError(null);
             status.setLoad(true);
-            model.startLoad(LoaderModel.DOWNLOAD_PAGE_WITH_STYLE, null);
+            model.startLoad(true, null);
             return;
         }
         final File fStyle = lib.getFile(STYLE);
@@ -782,7 +747,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void finishLoad(String error) {
-        model.finish();
         if (error != null) {
             status.setError(error);
             return;

@@ -40,6 +40,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
@@ -92,13 +93,17 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        MarkersModel.live.removeObservers(act);
+        if (LoaderModel.inProgress)
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        MarkersModel.live.observe(act, this);
+        if (LoaderModel.inProgress)
+            ProgressHelper.addObserver(act, this);
     }
 
     @Override
@@ -132,11 +137,14 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!model.inProgress || !LoaderModel.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
-            model.finish();
+            model.inProgress = false;
+            LoaderModel.inProgress = false;
+            MarkersModel.live.setValue(new Data.Builder().build());
+            act.status.setLoad(false);
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
@@ -151,6 +159,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 builder.create().show();
                 return;
             }
+            if (data.getString(Const.LINK) != null) { //finish download page
+                ProgressHelper.removeObservers(act);
+                loadMarList();
+                return;
+            }
+            ProgressHelper.setBusy(false);
             if (data.getBoolean(Const.MODE, false)) { //export
                 final String file = data.getString(Const.FILE);
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
@@ -440,7 +454,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (ProgressHelper.isBusy())
+                if (model.inProgress)
                     return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
@@ -455,7 +469,13 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     loadMarList();
                 } else {
                     if (adMarker.getItem(pos).getTitle().contains("/")) {
-                        act.downloadPage(adMarker.getItem(pos).getData());
+                        if (ProgressHelper.isBusy())
+                            return;
+                        act.status.setLoad(true);
+                        ProgressHelper.addObserver(act, CollectionsFragment.this);
+                        LoaderModel load = ViewModelProviders.of(act).get(LoaderModel.class);
+                        load.startLoad(false, adMarker.getItem(pos).getData());
+                        act.status.setLoad(true);
                         return;
                     }
                     String p;
@@ -583,7 +603,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             fabMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (ProgressHelper.isBusy())
+                    if (model.inProgress)
                         return;
                     if (menu.isShow())
                         menu.hide();
@@ -918,9 +938,5 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     public void startModel(int code, Uri data) {
         initRotate();
         model.start(code == EXPORT_REQUEST, data.toString());
-    }
-
-    public void finishLoad() {
-        loadMarList();
     }
 }

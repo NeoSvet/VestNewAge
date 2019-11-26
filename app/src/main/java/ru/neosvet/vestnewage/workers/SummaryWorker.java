@@ -18,59 +18,47 @@ import java.io.InputStreamReader;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
     private Context context;
-    private ProgressModel model;
 
     public SummaryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.context = context;
     }
 
-    private boolean isCancelled() {
-        if (model == null)
-            return false;
-        else
-            return model.cancel;
-    }
-
     @NonNull
     @Override
     public Result doWork() {
-        String error, name;
-        name = getInputData().getString(ProgressModel.NAME);
-        model = ProgressModel.getModelByName(name);
+        String error;
         try {
-            loadList();
-            if (!name.equals(LoaderModel.class.getSimpleName())) { //SummaryModel or SlashModel
+            loadList();;
+            if (getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName())) {
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();
             }
-            model.postProgress(new Data.Builder()
+            ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.LIST, true)
                     .build());
-            if (name.equals(LoaderModel.class.getSimpleName()))
-                return Result.success();
-            else
-                return ProgressHelper.success();
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
             Lib.LOG("SummaryWorker error: " + error);
         }
-        model.postProgress(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private String withOutTag(String s) {
@@ -80,8 +68,6 @@ public class SummaryWorker extends Worker {
     }
 
     private void loadList() throws Exception {
-        NotificationHelper notifHelper = new NotificationHelper(context);
-        notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         String line;
         Lib lib = new Lib(context);
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
@@ -89,7 +75,7 @@ public class SummaryWorker extends Worker {
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
         DateHelper now = DateHelper.initNow(context);
         UnreadHelper unread = new UnreadHelper(context);
-        while ((line = br.readLine()) != null && !isCancelled()) {
+        while ((line = br.readLine()) != null) {
             if (line.contains("</channel>")) break;
             if (line.contains("<item>")) {
                 bw.write(withOutTag(br.readLine())); //title
@@ -117,7 +103,7 @@ public class SummaryWorker extends Worker {
 
     public static int getListLink(Context context) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(context.getFilesDir() + Const.RSS));
-        File file = LoaderModel.getFileList(context);
+        File file = LoaderHelper.getFileList(context);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         String s;
         int k = 0;

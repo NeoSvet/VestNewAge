@@ -114,13 +114,13 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        model.live.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        model.live.observe(act, this);
     }
 
     private void initModel() {
@@ -141,7 +141,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             page = 0;
             etSearch.setEnabled(true);
             pStatus.setVisibility(View.GONE);
-            model.finish();
+            model.inProgress = false;
+            SearchModel.live.setValue(new Data.Builder().build());
             if (error != null) {
                 act.status.setError(error);
                 return;

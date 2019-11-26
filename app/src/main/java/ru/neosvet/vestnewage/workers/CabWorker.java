@@ -17,7 +17,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.CabModel;
@@ -26,7 +25,6 @@ public class CabWorker extends Worker {
     private Context context;
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
     private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
-    private CabModel model;
 
     public CabWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -37,30 +35,29 @@ public class CabWorker extends Worker {
     @Override
     public Result doWork() {
         String error;
-        model = (CabModel) ProgressModel.getModelByName(getInputData().getString(ProgressModel.NAME));
         try {
             String task = getInputData().getString(Const.TASK);
             Data.Builder result;
             if (task.equals(Const.LOGIN))
-                result = subLogin(model.getEmail(),
+                result = subLogin(CabModel.email,
                         getInputData().getString(Const.PASSWORD));
             else if (task.equals(Const.GET_WORDS))
                 result = getListWord(false);
             else
                 result = sendWord(getInputData().getInt(Const.LIST, 0));
             result.putBoolean(Const.FINISH, true);
-            model.postProgress(result.build());
-            return ProgressHelper.success();
+            ProgressHelper.postProgress(result.build());
+            return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
             Lib.LOG("CabWolker error: " + error);
         }
-        model.postProgress(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
-        return ProgressHelper.failure();
+        return Result.failure();
     }
 
     private Data.Builder subLogin(String email, String pass) throws Exception {
@@ -73,7 +70,7 @@ public class CabWorker extends Worker {
 
         String cookie = response.header(Const.SET_COOKIE);
         cookie = cookie.substring(0, cookie.indexOf(";"));
-        model.setCookie(cookie);
+        CabModel.cookie = cookie;
         response.close();
 
         RequestBody requestBody = new FormBody.Builder()
@@ -106,7 +103,7 @@ public class CabWorker extends Worker {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST + "edinenie/anketa.html");
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
-        builderRequest.addHeader(Const.COOKIE, model.getCookie());
+        builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
 
         OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
@@ -169,10 +166,10 @@ public class CabWorker extends Worker {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(HOST + "savedata.php");
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
-        builderRequest.addHeader(Const.COOKIE, model.getCookie());
+        builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
         RequestBody requestBody = new FormBody.Builder()
                 .add("keyw", String.valueOf(index + 1))
-                .add("login", model.getEmail())
+                .add("login", CabModel.email)
                 .add("hash", "")
                 .build();
         builderRequest.post(requestBody);

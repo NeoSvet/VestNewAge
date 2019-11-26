@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -12,51 +13,46 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.CalendarWolker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
-public class CalendarModel extends ProgressModel {
+public class CalendarModel extends AndroidViewModel {
     public static final String TAG = "calendar";
-    private static CalendarModel current = null;
-
-    public static CalendarModel getInstance() {
-        return current;
-    }
 
     public CalendarModel(@NonNull Application application) {
         super(application);
-        current = this;
     }
 
     public void startLoad(int month, int year, boolean updateUnread) {
         ProgressHelper.setBusy(true);
-        inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
                 .build();
-        Data.Builder data = new Data.Builder()
-                .putString(ProgressModel.NAME, this.getClass().getSimpleName())
+        Data data = new Data.Builder()
+                .putString(Const.TASK, this.getClass().getSimpleName())
                 .putInt(Const.MONTH, month)
                 .putInt(Const.YEAR, year)
-                .putBoolean(Const.UNREAD, updateUnread);
+                .putBoolean(Const.UNREAD, updateUnread)
+                .build();
         OneTimeWorkRequest task = new OneTimeWorkRequest
                 .Builder(CalendarWolker.class)
-                .setInputData(data.build())
+                .setInputData(data)
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
         WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
                 ExistingWorkPolicy.REPLACE, task);
-        task = new OneTimeWorkRequest
-                .Builder(LoaderWorker.class)
-                .setInputData(data.build())
-                .setConstraints(constraints)
-                .addTag(TAG)
-                .build();
-        job = job.then(task);
+        if (!LoaderModel.inProgress) {
+            task = new OneTimeWorkRequest
+                    .Builder(LoaderWorker.class)
+                    .setInputData(data)
+                    .setConstraints(constraints)
+                    .addTag(TAG)
+                    .build();
+            job = job.then(task);
+        }
         job.enqueue();
     }
 }

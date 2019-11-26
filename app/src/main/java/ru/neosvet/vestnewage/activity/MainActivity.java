@@ -3,8 +3,6 @@ package ru.neosvet.vestnewage.activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -14,7 +12,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -40,7 +37,6 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.ProgressModel;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -60,10 +56,9 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SlashModel;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
@@ -80,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private PromHelper prom;
     private SharedPreferences pref;
     private UnreadHelper unread;
-    private LoaderModel model;
     private int cur_id, tab = 0, statusBack, k_new = 0;
     public View fab;
     public Animation anMin, anMax;
@@ -108,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         unread = new UnreadHelper(this);
         initInterface();
-        model = ViewModelProviders.of(this).get(LoaderModel.class);
         initAnim();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
@@ -122,19 +115,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
-        }
-        checkSlashModel(true);
-    }
-
-    private void checkSlashModel(boolean observe) {
-        if (SlashModel.getInstance() == null)
-            return;
-        if (ProgressHelper.isBusy() && SlashModel.getInstance().inProgress) {
-            if (observe) {
-                status.setLoad(true);
-                SlashModel.getInstance().getProgress().observe(this, this);
-            } else
-                SlashModel.getInstance().getProgress().removeObservers(this);
         }
     }
 
@@ -159,40 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         anMax = AnimationUtils.loadAnimation(this, R.anim.maximize);
-    }
-
-    @Override
-    public void onChanged(@Nullable Data data) {
-        if (data.getBoolean(Const.LIST, false)) { //SlashModel
-            if (SlashModel.getInstance() == null)
-                return;
-            status.setLoad(false);
-            SlashModel.getInstance().finish();
-            return;
-        }
-        if (!model.inProgress)
-            return;
-        if (data.getInt(Const.DIALOG, -1) == LoaderModel.DIALOG_SHOW) {
-            ProgressHelper.showDialog(this);
-        }
-        if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.setName(null);
-            switch (data.getInt(Const.MODE, -1)) {
-                case LoaderModel.DOWNLOAD_ALL:
-                    finishLoad(true, data.getString(Const.ERROR));
-                    break;
-                case LoaderModel.DOWNLOAD_ID:
-                case LoaderModel.DOWNLOAD_YEAR:
-                    finishLoad(false, data.getString(Const.ERROR));
-                    break;
-                case LoaderModel.DOWNLOAD_PAGE:
-                    status.setError(data.getString(Const.ERROR));
-                    model.finish();
-                    if (curFragment instanceof CollectionsFragment)
-                        ((CollectionsFragment) curFragment).finishLoad();
-                    break;
-            }
-        }
     }
 
     private void restoreState(Bundle state) {
@@ -226,26 +172,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onPause() {
         super.onPause();
         prom.stop();
-        model.removeObservers(this);
-        if (model.inProgress) {
-            ProgressHelper.stop();
-            ProgressHelper.dismissDialog();
-        }
-        checkSlashModel(false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        model.addObserver(this, this);
-        if (model.inProgress)
-            initLoad();
         if (prom != null)
             prom.resume();
-        checkSlashModel(true);
-        ProgressModel model = ProgressModel.getModelByName(ProgressHelper.getName());
-        if (model != null)
-            LoaderHelper.checkObserve(model);
     }
 
     @Override
@@ -257,14 +190,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setProm(View textView) {
         prom = new PromHelper(this, textView);
-    }
-
-    public void clickMin(View v) {
-        ProgressModel model = ProgressModel.getModelByName(ProgressHelper.getName());
-        if (model != null)
-            model.removeObservers(this);
-        ProgressHelper.dismissDialog();
-        LoaderHelper.postCommand(v.getContext(), ProgressHelper.getName(), false);
     }
 
     public void updateNew() {
@@ -294,19 +219,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvNew.startAnimation(AnimationUtils.loadAnimation(this, R.anim.blink));
     }
 
-    private void initLoad() {
-        ProgressHelper.showDialog(this);
-        ProgressHelper.startTimer();
-    }
-
     private void initInterface() {
         findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
-                model.startLoad(LoaderModel.DOWNLOAD_ALL, "");
-                initLoad();
+                LoaderHelper.postCommand(MainActivity.this,
+                        LoaderHelper.DOWNLOAD_ALL, "");
             }
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
@@ -314,14 +233,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 menuDownload.hide();
-                ProgressHelper.startProgress(MainActivity.this, LoaderModel.class.getSimpleName());
                 if (cur_id == R.id.nav_calendar) {
-                    model.startLoad(LoaderModel.DOWNLOAD_YEAR, String.valueOf(
-                            ((CalendarFragment) curFragment).getCurrentYear()));
+                    LoaderHelper.postCommand(MainActivity.this,
+                            LoaderHelper.DOWNLOAD_YEAR,
+                            String.valueOf(((CalendarFragment) curFragment).getCurrentYear()));
                 } else {
-                    model.startLoad(LoaderModel.DOWNLOAD_ID, String.valueOf(cur_id));
+                    LoaderHelper.postCommand(MainActivity.this,
+                            LoaderHelper.DOWNLOAD_ID,
+                            String.valueOf(cur_id));
                 }
-                initLoad();
             }
         });
         tvNew = (TextView) findViewById(R.id.tvNew);
@@ -508,28 +428,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    public void finishLoad(boolean all, String error) {
-        ProgressHelper.dismissDialog();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog);
-        if (error == null) {
-            if (model.cancel)
-                builder.setMessage(getResources().getString(R.string.load_cancel));
-            else if (all)
-                builder.setMessage(getResources().getString(R.string.all_load_suc));
-            else
-                builder.setMessage(getResources().getString(R.string.it_load_suc));
-        } else
-            builder.setTitle(getResources().getString(R.string.error)).setMessage(error);
-        model.finish();
-        builder.setPositiveButton(getResources().getString(android.R.string.ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                    }
-                });
-        builder.create().show();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (curFragment == null || resultCode != RESULT_OK)
@@ -648,13 +546,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvNew.startAnimation(anMax);
         fab.setVisibility(View.VISIBLE);
         fab.startAnimation(anMax);
-    }
-
-    public void downloadPage(String link) {
-        if (ProgressHelper.isBusy())
-            return;
-        status.setError(null);
-        status.setLoad(true);
-        model.startLoad(LoaderModel.DOWNLOAD_PAGE, link);
     }
 }

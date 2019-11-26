@@ -29,6 +29,7 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -37,7 +38,6 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
-import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
     private int today_m, today_y;
@@ -77,19 +77,21 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.addObserver(act, this);
     }
 
     @Override
     public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.cancel = true;
+        if (ProgressHelper.isBusy()) {
+            ProgressHelper.cancelled();
             return false;
         }
         return true;
@@ -97,29 +99,33 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(CalendarModel.class);
-        if (model.inProgress)
+        if (ProgressHelper.isBusy())
             setStatus(true);
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
-        if (data.getBoolean(Const.FINISH, false)) {
-            model.finish();
-            act.updateNew();
-            String error = data.getString(Const.ERROR);
-            if (error != null) {
-                act.status.setError(error);
-                return;
-            }
-            setStatus(false);
+        if (data.getBoolean(Const.LIST, false)) {
+            Lib.LOG("list");
             openCalendar(false);
             return;
         }
-        if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
+        if (data.getBoolean(Const.FINISH, false)) {
+            Lib.LOG("finish");
+            ProgressHelper.setBusy(false);
+            act.updateNew();
+            setStatus(false);
+            String error = data.getString(Const.ERROR);
+            if (error != null)
+                act.status.setError(error);
+            return;
+        }
+        if (!data.getBoolean(Const.DIALOG, false))
             return;
         String s = data.getString(Const.MSG);
+        Lib.LOG("link: " + s);
         if (s == null)
             return;
         int i = s.lastIndexOf("/") + 1;
@@ -170,11 +176,12 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             @Override
             public void onClick(View view) {
                 if (!act.status.isStop()) {
-                    if (model.inProgress)
-                        model.cancel = true;
-                    else
-                        act.status.setLoad(false);
-                } else if (act.status.onClick()) {
+                    act.status.setLoad(false);
+                    ProgressHelper.cancelled();
+                    fabRefresh.setVisibility(View.VISIBLE);
+                    return;
+                }
+                if (act.status.onClick()) {
                     fabRefresh.setVisibility(View.VISIBLE);
                 } else if (act.status.isTime())
                     startLoad();
@@ -368,12 +375,14 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void setStatus(boolean load) {
-        act.status.setError(null);
         act.status.setLoad(load);
-        if (load)
+        if (load) {
             fabRefresh.setVisibility(View.GONE);
-        else
+            ProgressHelper.addObserver(act, this);
+        } else {
             fabRefresh.setVisibility(View.VISIBLE);
+            ProgressHelper.removeObservers(act);
+        }
     }
 
     private void showDatePicker() {

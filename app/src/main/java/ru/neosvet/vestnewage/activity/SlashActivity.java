@@ -32,6 +32,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
@@ -117,13 +118,13 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(this);
+        ProgressHelper.removeObservers(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        model.addObserver(this, this);
+        ProgressHelper.addObserver(this, this);
     }
 
     @Override
@@ -133,7 +134,7 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     }
 
     private void startMain() {
-        model.removeObservers(this);
+        ProgressHelper.removeObservers(this);
         startActivity(main);
         finish();
     }
@@ -221,21 +222,19 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
         dataBase.close();
         if (System.currentTimeMillis() - time < DateHelper.HOUR_IN_MILLS)
             return;
-        SharedPreferences pref = getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-        model.startLoad(pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_SUMMARY,
-                date.getMonth(), date.getYear());
+        model.startLoad();
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!SlashModel.inProgress)
             return;
         if (data.getBoolean(Const.TIME, false)) {
             model.non_start = false;
             reInitProm();
         }
         if (data.getBoolean(Const.FINISH, false))
-            model.finish();
+            SlashModel.inProgress = false;
     }
 
     private void reInitProm() {

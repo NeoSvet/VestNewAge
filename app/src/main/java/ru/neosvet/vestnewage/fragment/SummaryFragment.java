@@ -20,6 +20,7 @@ import java.io.FileReader;
 
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -46,7 +47,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         act.setTitle(getResources().getString(R.string.rss));
         initViews();
         setViews();
-        initModel();
+        model = ViewModelProviders.of(act).get(SummaryModel.class);
         restoreState(savedInstanceState);
         return this.container;
     }
@@ -54,43 +55,46 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        model.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.addObserver(act, this);
+        if (ProgressHelper.isBusy())
+            initLoad();
     }
 
     @Override
     public boolean onBackPressed() {
-        if (model.inProgress) {
-            model.cancel = true;
+        if (ProgressHelper.isBusy()) {
+            ProgressHelper.cancelled();
             return false;
         }
         return true;
     }
 
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(SummaryModel.class);
-        if (model.inProgress)
-            act.status.setLoad(true);
+    private void initLoad() {
+        ProgressHelper.addObserver(act, this);
+        fabRefresh.setVisibility(View.GONE);
+        act.status.setLoad(true);
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
+            ProgressHelper.setBusy(false);
             finishLoad(data.getString(Const.ERROR));
             return;
         }
-        if (data.getInt(Const.DIALOG, 0) != LoaderModel.DIALOG_MSG)
+        if (!data.getBoolean(Const.DIALOG, false))
             return;
         String link = data.getString(Const.MSG);
         for (int i = 0; i < adSummary.getCount(); i++) {
@@ -138,11 +142,12 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             @Override
             public void onClick(View view) {
                 if (!act.status.isStop()) {
-                    if (model.inProgress)
-                        model.cancel = true;
-                    else
-                        act.status.setLoad(false);
-                } else if (act.status.onClick())
+                    act.status.setLoad(false);
+                    ProgressHelper.cancelled();
+                    fabRefresh.setVisibility(View.VISIBLE);
+                    return;
+                }
+                if (act.status.onClick())
                     fabRefresh.setVisibility(View.VISIBLE);
                 else if (act.status.isTime())
                     startLoad();
@@ -201,14 +206,12 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     private void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        act.status.setError(null);
-        fabRefresh.setVisibility(View.GONE);
-        act.status.setLoad(true);
+        initLoad();
         model.startLoad();
     }
 
     private void finishLoad(String error) {
-        model.finish();
+        ProgressHelper.removeObservers(act);
         act.updateNew();
         if (error != null) {
             act.status.setError(error);

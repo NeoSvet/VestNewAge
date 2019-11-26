@@ -21,6 +21,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabpageActivity extends AppCompatActivity {
     private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru", SCRIPT =
@@ -31,10 +32,9 @@ public class CabpageActivity extends AppCompatActivity {
     private View fabClose;
     private boolean twoPointers = false;
 
-    public static void openPage(Context context, String link, @Nullable String cookie) {
+    public static void openPage(Context context, String link) {
         Intent intent = new Intent(context, CabpageActivity.class);
         intent.putExtra(Const.LINK, link);
-        intent.putExtra(Const.COOKIE, cookie);
         if (!(context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -45,13 +45,12 @@ public class CabpageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cabpage_activity);
         initView();
-        String cookie = getIntent().getStringExtra(Const.COOKIE);
-        if (cookie != null) {
+        if (CabModel.cookie != null) {
             CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvBrowser.getContext());
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
             cookieManager.removeSessionCookie();
-            cookieManager.setCookie(HOST, cookie + "; domain=" + HOST.substring(7));
+            cookieManager.setCookie(HOST, CabModel.cookie + "; domain=" + HOST.substring(7));
             cookieSyncManager.getInstance().sync();
 //            cookieManager.getCookie(HOST);
         }
