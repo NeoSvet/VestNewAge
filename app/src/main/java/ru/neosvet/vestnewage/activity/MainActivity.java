@@ -2,12 +2,10 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,8 +18,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-
-import androidx.work.Data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,7 +52,6 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.model.SlashModel;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
@@ -64,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean isMenuMode = false;
     private int first_fragment;
     private MenuFragment frMenu;
-    private BackFragment curFragment, prevFragment;
+    private BackFragment curFragment;
     private FragmentManager myFragmentManager;
     public Lib lib = new Lib(this);
     private Tip menuDownload;
@@ -75,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private PromHelper prom;
     private SharedPreferences pref;
     private UnreadHelper unread;
-    private int cur_id, tab = 0, statusBack, k_new = 0;
+    private int cur_id, prev_id = 0, tab = 0, statusBack, k_new = 0;
     public View fab;
     public Animation anMin, anMax;
 
@@ -325,6 +320,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (cur_id != id)
             isFirst = false;
         menuDownload.hide();
+        if (savePrev)
+            prev_id = cur_id;
+        else
+            prev_id = 0;
         cur_id = id;
         if (navigationView == null) {
             if (!isMenuMode)
@@ -333,10 +332,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(id);
         status.setError(null);
         FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
-        if (savePrev)
-            prevFragment = curFragment;
-        else
-            prevFragment = null;
         curFragment = null;
         if (isMenuMode && isCountInMenu && id != R.id.menu_fragment)
             prom.hide();
@@ -455,14 +450,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFirst) {
             setFragment(first_fragment, false);
-        } else if (prevFragment != null) {
+        } else if (prev_id != 0) {
             if (curFragment != null && !curFragment.onBackPressed())
                 return;
-            curFragment = prevFragment;
-            FragmentTransaction fragmentTransaction = myFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.my_fragment, curFragment);
-            fragmentTransaction.commit();
-            prevFragment = null;
+            setFragment(prev_id, false);
         } else if (curFragment != null) {
             if (curFragment.onBackPressed())
                 exit();
