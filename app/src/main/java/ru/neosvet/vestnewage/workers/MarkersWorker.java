@@ -25,6 +25,7 @@ import java.util.HashMap;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class MarkersWorker extends Worker {
@@ -47,7 +48,7 @@ public class MarkersWorker extends Worker {
             else
                 doImport(Uri.parse(file));
 
-            MarkersModel.live.postValue(new Data.Builder()
+            ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
                     .putBoolean(Const.MODE, export)
                     .putString(Const.FILE, file)
@@ -58,7 +59,7 @@ public class MarkersWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("MarkersWorker error: " + error);
         }
-        MarkersModel.live.postValue(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());

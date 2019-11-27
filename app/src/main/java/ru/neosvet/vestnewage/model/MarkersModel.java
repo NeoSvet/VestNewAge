@@ -14,19 +14,18 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
 public class MarkersModel extends AndroidViewModel {
     public static final String TAG = "markers";
-    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
-    public boolean inProgress;
 
     public MarkersModel(@NonNull Application application) {
         super(application);
     }
 
     public void start(boolean export, String file) {
-        inProgress = true;
+        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)

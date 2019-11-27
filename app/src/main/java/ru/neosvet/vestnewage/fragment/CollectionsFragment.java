@@ -93,7 +93,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     @Override
     public void onPause() {
         super.onPause();
-        MarkersModel.live.removeObservers(act);
+        ProgressHelper.removeObservers(act);
         if (LoaderModel.inProgress)
             ProgressHelper.removeObservers(act);
     }
@@ -101,7 +101,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     @Override
     public void onResume() {
         super.onResume();
-        MarkersModel.live.observe(act, this);
+        ProgressHelper.addObserver(act, this);
         if (LoaderModel.inProgress)
             ProgressHelper.addObserver(act, this);
     }
@@ -131,19 +131,18 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(MarkersModel.class);
-        if (model.inProgress)
+        if (ProgressHelper.isBusy())
             initRotate();
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress || !LoaderModel.inProgress)
+        if (!ProgressHelper.isBusy() || !LoaderModel.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
-            model.inProgress = false;
+            ProgressHelper.setBusy(false);
             LoaderModel.inProgress = false;
-            MarkersModel.live.setValue(new Data.Builder().build());
             act.status.setLoad(false);
             String error = data.getString(Const.ERROR);
             if (error != null) {
@@ -602,8 +601,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             fabMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (model.inProgress)
-                        return;
+                    if (ProgressHelper.isBusy()) return;
                     if (menu.isShow())
                         menu.hide();
                     else {

@@ -14,19 +14,18 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.BaseWorker;
 
 public class BaseModel extends AndroidViewModel {
     public static final String TAG = "base";
-    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
-    public boolean inProgress;
 
     public BaseModel(@NonNull Application application) {
         super(application);
     }
 
     public void startClear(String[] request) {
-        inProgress = true;
+        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)

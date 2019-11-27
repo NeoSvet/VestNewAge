@@ -45,6 +45,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
@@ -85,21 +86,21 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        if (model.inProgress)
-            model.live.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (model.inProgress)
+        if (ProgressHelper.isBusy())
             initProgress();
     }
 
     private void initProgress() {
         bClearDo.setEnabled(false);
         initRotate();
-        model.live.observe(act, this);
+        ProgressHelper.addObserver(act, this);
     }
 
     @Override
@@ -127,12 +128,11 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             stopRotate = true;
-            model.inProgress = false;
-            BaseModel.live.setValue(new Data.Builder().build());
+            ProgressHelper.setBusy(false);
             bClearDo.setEnabled(true);
             Lib.showToast(act, getResources().getString(R.string.completed));
         }

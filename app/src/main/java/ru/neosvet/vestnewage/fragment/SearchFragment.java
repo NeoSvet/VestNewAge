@@ -54,6 +54,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.list.PageAdapter;
@@ -114,18 +115,18 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onPause() {
         super.onPause();
-        model.live.removeObservers(act);
+        ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        model.live.observe(act, this);
+        ProgressHelper.addObserver(act, this);
     }
 
     private void initModel() {
         model = ViewModelProviders.of(act).get(SearchModel.class);
-        if (model.inProgress) {
+        if (ProgressHelper.isBusy()) {
             pStatus.setVisibility(View.VISIBLE);
             fabSettings.setVisibility(View.GONE);
             etSearch.setEnabled(false);
@@ -134,15 +135,14 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!model.inProgress)
+        if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.FINISH, false)) {
-            String error = data.getString(Const.ERROR);
+            ProgressHelper.setBusy(false);
             page = 0;
             etSearch.setEnabled(true);
             pStatus.setVisibility(View.GONE);
-            model.inProgress = false;
-            SearchModel.live.setValue(new Data.Builder().build());
+            String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
                 return;
@@ -221,7 +221,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         }
         bStart.setText(formatDate(dStart));
         bEnd.setText(formatDate(dEnd));
-        if (adResults.getCount() == 0 && !model.inProgress) {
+        if (adResults.getCount() == 0 && !ProgressHelper.isBusy()) {
             f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(

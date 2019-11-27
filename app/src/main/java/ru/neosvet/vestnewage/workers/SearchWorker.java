@@ -92,7 +92,7 @@ public class SearchWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("SearchWolker error: " + error);
         }
-        SearchModel.live.postValue(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
@@ -100,7 +100,7 @@ public class SearchWorker extends Worker {
     }
 
     private Result getResult() {
-        SearchModel.live.postValue(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putInt(Const.MODE, mode)
                 .putString(Const.STRING, str)
@@ -111,7 +111,7 @@ public class SearchWorker extends Worker {
     }
 
     private void publishProgress(int time) {
-        SearchModel.live.postValue(new Data.Builder()
+        ProgressHelper.postProgress(new Data.Builder()
                 .putString(Const.MODE, Const.TIME)
                 .putInt(Const.TIME, time)
                 .build());
@@ -177,7 +177,7 @@ public class SearchWorker extends Worker {
             p2 = ProgressHelper.getProcent(i, title.size());
             if (p1 < p2) {
                 p1 = p2;
-                SearchModel.live.postValue(new Data.Builder()
+                ProgressHelper.postProgress(new Data.Builder()
                         .putString(Const.MODE, Const.PROG)
                         .putInt(Const.PROG, p1)
                         .build());

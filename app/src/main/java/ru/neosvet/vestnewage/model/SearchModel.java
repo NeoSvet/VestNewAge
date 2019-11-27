@@ -13,12 +13,11 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.SearchWorker;
 
 public class SearchModel extends AndroidViewModel {
     public static final String TAG = "search";
-    public static MutableLiveData<Data> live = new MutableLiveData<Data>();
-    public boolean inProgress;
     public static boolean cancel;
 
     public SearchModel(@NonNull Application application) {
@@ -26,7 +25,7 @@ public class SearchModel extends AndroidViewModel {
     }
 
     public void search(String str, int mode, String start, String end) {
-        inProgress = true;
+        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiresBatteryNotLow(false)
                 .build();
