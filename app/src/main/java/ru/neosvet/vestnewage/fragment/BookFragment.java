@@ -405,6 +405,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (notClick) return;
+                if (act.checkBusy()) return;
                 BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), null);
             }
         });
@@ -480,6 +481,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         tvDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (act.checkBusy()) return;
                 dialog = "1";
                 showDatePicker(null);
             }
@@ -499,6 +501,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void openMonth(boolean plus) {
+        if (act.checkBusy()) return;
         if (!plus && tab == 1) {
             if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);

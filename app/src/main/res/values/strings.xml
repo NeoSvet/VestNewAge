@@ -36,6 +36,7 @@
     <string name="cabinet">Кабинет</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
+    <string name="app_is_busy">Приложение занято. Дождитесь завершения задачи или прервите её.</string>
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>
     <!--CalendarFragment-->

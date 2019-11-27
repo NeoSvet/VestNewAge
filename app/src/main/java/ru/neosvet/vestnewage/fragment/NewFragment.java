@@ -107,6 +107,7 @@ public class NewFragment extends Fragment {
         lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (act.checkBusy()) return;
                 if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
                     String link = adNew.getItem(pos).getLink();
                     String des = adNew.getItem(pos).getHead(0);

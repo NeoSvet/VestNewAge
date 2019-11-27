@@ -454,8 +454,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (model.inProgress)
-                    return;
+                if (act.checkBusy()) return;
                 if (iSel > -1) {
                     if (sCol == null && pos == 0)
                         return;

@@ -230,6 +230,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         tvDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (act.checkBusy()) return;
                 showDatePicker();
             }
         });
@@ -240,6 +241,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void openMonth(int offset) {
+        if (act.checkBusy()) return;
         tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
         new Timer().schedule(new TimerTask() {
             @Override
@@ -423,6 +425,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     public boolean onTouch(View v, MotionEvent event) { //click calendar item
         if (event.getAction() != MotionEvent.ACTION_UP)
             return false;
+        if (act.checkBusy()) return false;
         final int pos = (int) v.getTag();
         int k = adCalendar.getItem(pos).getCount();
         if (k == 0)

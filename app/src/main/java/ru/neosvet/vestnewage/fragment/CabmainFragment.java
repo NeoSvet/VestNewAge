@@ -219,9 +219,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (ProgressHelper.isBusy())
-                    return;
-                if (act.status.isVisible()) return;
+                if (act.checkBusy()) return;
                 if (mode_list == CabModel.LOGIN) {
                     String s;
                     switch (pos) {

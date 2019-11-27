@@ -9,8 +9,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.MenuAdapter;
 
 public class MenuFragment extends Fragment {
@@ -72,6 +74,7 @@ public class MenuFragment extends Fragment {
                     return;
                 }
                 if (adMenu.getItem(pos).isSelect()) return;
+                if (act.checkBusy()) return;
                 iSelect = pos - (isFullScreen ? 0 : 1);
                 act.setFragment(mMenu[iSelect], false);
                 if (isFullScreen) return;

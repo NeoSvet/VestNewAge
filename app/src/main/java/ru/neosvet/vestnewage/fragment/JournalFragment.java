@@ -197,6 +197,7 @@ public class JournalFragment extends Fragment {
         lvJournal.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (act.checkBusy()) return;
                 String link = adJournal.getItem(pos).getLink();
                 String s = adJournal.getItem(pos).getDes();
                 if (s.contains(getResources().getString(R.string.rnd_stih))) {

@@ -196,6 +196,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (notClick) return;
+                if (act.checkBusy()) return;
                 if (adMain.getItem(pos).getCount() == 1) {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;

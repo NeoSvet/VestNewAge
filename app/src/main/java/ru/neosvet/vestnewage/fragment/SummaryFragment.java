@@ -156,6 +156,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                if (act.checkBusy()) return;
                 BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
             }
         });

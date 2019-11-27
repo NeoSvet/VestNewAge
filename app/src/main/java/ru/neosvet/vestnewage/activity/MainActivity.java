@@ -300,9 +300,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        drawer.closeDrawer(GravityCompat.START);
+        if (checkBusy())
+            return false;
         if (!item.isChecked())
             setFragment(item.getItemId(), false);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -537,5 +539,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvNew.startAnimation(anMax);
         fab.setVisibility(View.VISIBLE);
         fab.startAnimation(anMax);
+    }
+
+    public boolean checkBusy() {
+        if (ProgressHelper.isBusy()) {
+            Lib.showToast(this, getResources().getString(R.string.app_is_busy));
+            return true;
+        }
+        return false;
     }
 }

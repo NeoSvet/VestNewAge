@@ -352,7 +352,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (model.inProgress) return;
+                if (act.checkBusy()) return;
                 if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
                     fabSettings.setVisibility(View.GONE);
                     bShow.setVisibility(View.VISIBLE);
