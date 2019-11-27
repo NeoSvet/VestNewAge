@@ -60,7 +60,7 @@ public class MenuFragment extends Fragment {
                 R.drawable.calendar, R.drawable.book, R.drawable.search, R.drawable.marker,
                 R.drawable.journal, R.drawable.cabinet, R.drawable.settings, R.drawable.help};
         int[] mTitle = new int[]{R.string.download_title, R.string.new_section, R.string.rss,
-                R.string.main, R.string.calendar, R.string.book, R.string.search, R.string.markers,
+                R.string.news, R.string.calendar, R.string.book, R.string.search, R.string.markers,
                 R.string.journal, R.string.cabinet, R.string.settings, R.string.help};
         for (; i < mImage.length; i++) {
             adMenu.addItem(mImage[i], act.getResources().getString(mTitle[i]));

@@ -27,7 +27,7 @@
     <!--Menu-->
     <string name="new_section">Новое</string>
     <string name="rss">Сводка</string>
-    <string name="main">Главная</string>
+    <string name="news">Объявления</string>
     <string name="calendar">Календарь</string>
     <string name="book">Книга</string>
     <string name="markers">Закладки</string>
@@ -92,7 +92,7 @@
     <string name="par_n">Абзацы №№&#160;</string>
     <string name="long_press_for_mark">Долгое нажатие - чтобы добавить в закладки</string>
     <!--SiteFragment-->
-    <string name="news">Объявления</string>
+    <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
     <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->

@@ -138,14 +138,14 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
-        tabSpec = tabHost.newTabSpec(MAIN);
-        tabSpec.setIndicator(getResources().getString(R.string.main),
+        tabSpec = tabHost.newTabSpec(NEWS);
+        tabSpec.setIndicator(getResources().getString(R.string.news),
                 getResources().getDrawable(R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
 
-        tabSpec = tabHost.newTabSpec(NEWS);
-        tabSpec.setIndicator(getResources().getString(R.string.news),
+        tabSpec = tabHost.newTabSpec(MAIN);
+        tabSpec.setIndicator(getResources().getString(R.string.site),
                 getResources().getDrawable(R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
@@ -163,7 +163,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String name) {
                 if (name.equals(MAIN))
-                    act.setTitle(getResources().getString(R.string.main));
+                    act.setTitle(getResources().getString(R.string.site));
                 else
                     act.setTitle(getResources().getString(R.string.news));
                 File f = getFile(name);
