@@ -29,7 +29,6 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -108,12 +107,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.LIST, false)) {
-            Lib.LOG("list");
             openCalendar(false);
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            Lib.LOG("finish");
             ProgressHelper.setBusy(false);
             act.updateNew();
             setStatus(false);
@@ -125,7 +122,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         if (!data.getBoolean(Const.DIALOG, false))
             return;
         String s = data.getString(Const.MSG);
-        Lib.LOG("link: " + s);
         if (s == null)
             return;
         int i = s.lastIndexOf("/") + 1;
