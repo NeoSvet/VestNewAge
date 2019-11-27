@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -58,6 +60,11 @@ public class BookWorker extends Worker {
                         .putBoolean(Const.OTKR, true)
                         .putString(Const.TITLE, s)
                         .build());
+                SharedPreferences pref = context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean(Const.OTKR, true);
+                editor.apply();
+                LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
                 return Result.success();
             }
             if (BOOK) {

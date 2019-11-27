@@ -71,7 +71,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private boolean notClick = false, fromOtkr;
     private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
     final Handler hTimer = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -102,8 +101,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onPause() {
         super.onPause();
-        if (ProgressHelper.isBusy())
+        if (ProgressHelper.isBusy() || LoaderModel.inProgress)
             ProgressHelper.removeObservers(act);
+        SharedPreferences.Editor editor = pref.edit();
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
@@ -114,6 +114,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         super.onResume();
         if (ProgressHelper.isBusy())
             initLoad();
+        else if (LoaderModel.inProgress)
+            ProgressHelper.addObserver(act, this);
     }
 
     @Override
@@ -144,7 +146,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             act.status.setLoad(false);
             if (data.getBoolean(Const.OTKR, false)) {
                 fromOtkr = true;
+                SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean(Const.OTKR, fromOtkr);
+                editor.apply();
                 dPoslanie.setYear(DEF_YEAR);
             }
             String name = data.getString(Const.TITLE);
@@ -363,7 +367,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     private void initViews() {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
-        editor = pref.edit();
         menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
         fabRefresh = container.findViewById(R.id.fabRefresh);
         fabRndMenu = container.findViewById(R.id.fabRndMenu);
@@ -515,6 +518,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 builder.setPositiveButton(getResources().getString(R.string.yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                ProgressHelper.addObserver(act, BookFragment.this);
                                 LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
                             }
                         });
