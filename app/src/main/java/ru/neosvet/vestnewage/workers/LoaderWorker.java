@@ -113,11 +113,10 @@ public class LoaderWorker extends Worker {
                         downloadStyle(getInputData().getBoolean(Const.STYLE, false));
                         if (link != null)
                             downloadPage(link, true);
-                        Data result = new Data.Builder()
+                        ProgressHelper.postProgress(new Data.Builder()
                                 .putBoolean(Const.FINISH, true)
                                 .putString(Const.LINK, link) // use only in CollectionsFragment
-                                .build();
-                        ProgressHelper.postProgress(result);
+                                .build());
                         return Result.success();
                 }
             LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
