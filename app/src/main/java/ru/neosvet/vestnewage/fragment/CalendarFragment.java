@@ -106,6 +106,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     public void onChanged(@Nullable Data data) {
         if (!ProgressHelper.isBusy())
             return;
+        if (data.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             openCalendar(false);
             return;
@@ -369,6 +373,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);
+        act.status.startText();
         model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }
 

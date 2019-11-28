@@ -472,8 +472,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                         act.status.setLoad(true);
                         ProgressHelper.addObserver(act, CollectionsFragment.this);
                         LoaderModel load = ViewModelProviders.of(act).get(LoaderModel.class);
-                        load.startLoad(false, adMarker.getItem(pos).getData());
                         act.status.setLoad(true);
+                        act.status.startText();
+                        load.startLoad(false, adMarker.getItem(pos).getData());
                         return;
                     }
                     String p;

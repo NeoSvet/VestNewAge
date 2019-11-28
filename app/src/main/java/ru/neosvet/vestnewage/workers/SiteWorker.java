@@ -41,6 +41,9 @@ public class SiteWorker extends Worker {
     @Override
     public Result doWork() {
         ProgressHelper.setBusy(true);
+        ProgressHelper.postProgress(new Data.Builder()
+                .putBoolean(Const.START, true)
+                .build());
         String error, s = getInputData().getString(Const.TASK);
         try {
             if (s.equals(SiteModel.class.getSimpleName())) {

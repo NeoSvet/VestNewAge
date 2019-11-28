@@ -35,6 +35,9 @@ public class CabWorker extends Worker {
     @Override
     public Result doWork() {
         ProgressHelper.setBusy(true);
+        ProgressHelper.postProgress(new Data.Builder()
+                .putBoolean(Const.START, true)
+                .build());
         String error;
         try {
             String task = getInputData().getString(Const.TASK);

@@ -99,7 +99,7 @@ public class StatusButton {
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
         } else {
-            restoreText();
+            loadText();
             panel.setVisibility(View.GONE);
             visible = false;
             panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_norm));
@@ -120,7 +120,7 @@ public class StatusButton {
             this.time = false;
             visible = false;
             panel.setVisibility(View.GONE);
-            restoreText();
+            loadText();
         }
         return false;
     }
@@ -144,7 +144,11 @@ public class StatusButton {
         tv.setText(s);
     }
 
-    private void restoreText() {
+    public void startText() {
+        tv.setText(context.getResources().getString(R.string.start));
+    }
+
+    public void loadText() {
         tv.setText(context.getResources().getString(R.string.load));
     }
 

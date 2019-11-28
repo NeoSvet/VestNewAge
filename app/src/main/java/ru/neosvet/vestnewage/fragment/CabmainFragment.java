@@ -93,8 +93,9 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                 loginList();
             } else { //CabModel.CABINET
                 mode_list = CabModel.LOGIN;
-                model.login(etEmail.getText().toString(), etPassword.getText().toString());
                 initLoad();
+                act.status.startText();
+                model.login(etEmail.getText().toString(), etPassword.getText().toString());
             }
             return false;
         }
@@ -110,6 +111,10 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     public void onChanged(@Nullable Data result) {
         if (!ProgressHelper.isBusy())
             return;
+        if (result.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
         if (!result.getBoolean(Const.FINISH, false))
             return;
         ProgressHelper.setBusy(false);
@@ -245,8 +250,9 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                         case 0: //передача ощущений
                             if (adMain.getItem(pos).getDes().equals(
                                     getResources().getString(R.string.select_status))) {
-                                model.getListWord();
                                 initLoad();
+                                act.status.startText();
+                                model.getListWord();
                             } else
                                 Lib.showToast(act, getResources().getString(R.string.send_unlivable));
                             break;
@@ -260,8 +266,9 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                             break;
                     }
                 } else if (mode_list == CabModel.WORDS) {
-                    model.selectWord(pos);
                     initLoad();
+                    act.status.startText();
+                    model.selectWord(pos);
                 }
             }
         });
@@ -399,8 +406,9 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             }
             editor.commit();
         }
-        model.login(etEmail.getText().toString(), etPassword.getText().toString());
         initLoad();
+        act.status.startText();
+        model.login(etEmail.getText().toString(), etPassword.getText().toString());
     }
 
     private void initWordList(String[] words) {

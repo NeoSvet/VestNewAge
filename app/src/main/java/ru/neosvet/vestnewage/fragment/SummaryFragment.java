@@ -85,6 +85,10 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     public void onChanged(@Nullable Data data) {
         if (!ProgressHelper.isBusy())
             return;
+        if (data.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
             return;
@@ -208,6 +212,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         if (ProgressHelper.isBusy())
             return;
         initLoad();
+        act.status.startText();
         model.startLoad();
     }
 

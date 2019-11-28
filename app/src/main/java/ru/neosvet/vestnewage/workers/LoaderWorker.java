@@ -106,6 +106,9 @@ public class LoaderWorker extends Worker {
                         downloadYear(getInputData().getInt(Const.YEAR, 0));
                         break;
                     case LoaderHelper.DOWNLOAD_PAGE:
+                        ProgressHelper.postProgress(new Data.Builder()
+                                .putBoolean(Const.START, true)
+                                .build());
                         String link = getInputData().getString(Const.LINK);
                         downloadStyle(getInputData().getBoolean(Const.STYLE, false));
                         if (link != null)

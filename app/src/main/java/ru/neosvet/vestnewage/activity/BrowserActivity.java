@@ -257,6 +257,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         wvBrowser.clearCache(true);
         restoreStyle();
         status.setLoad(true);
+        status.startText();
         model.startLoad(replaceStyle, link);
     }
 

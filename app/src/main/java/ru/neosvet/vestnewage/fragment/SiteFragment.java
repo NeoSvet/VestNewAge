@@ -93,8 +93,14 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     public void onChanged(@Nullable Data data) {
         if (!ProgressHelper.isBusy())
             return;
-        if (data.getBoolean(Const.LIST, false))
+        if (data.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
+        if (data.getBoolean(Const.LIST, false)) {
             openList(getFile(data.getString(Const.FILE)), false);
+            return;
+        }
         if (data.getBoolean(Const.FINISH, false)) {
             String error = data.getString(Const.ERROR);
             ProgressHelper.removeObservers(act);
@@ -375,8 +381,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         String url = Const.SITE;
         if (name.equals(NEWS))
             url += NOVOSTI;
-        model.startLoad(url, getFile(name).toString());
         initLoad();
+        act.status.startText();
+        model.startLoad(url, getFile(name).toString());
     }
 
     private File getFile(String name) {

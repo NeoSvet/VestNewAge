@@ -131,6 +131,10 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     public void onChanged(@Nullable Data data) {
         if (!ProgressHelper.isBusy())
             return;
+        if (data.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
         if (data.getBoolean(Const.DIALOG, false)) {
             act.status.setText(data.getString(Const.MSG));
             return;
@@ -548,8 +552,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        model.startLoad(fromOtkr, tab == 0);
         initLoad();
+        act.status.startText();
+        model.startLoad(fromOtkr, tab == 0);
     }
 
     private void initLoad() {
