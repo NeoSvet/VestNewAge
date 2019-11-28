@@ -52,7 +52,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private MarkAdapter adMarker;
     private Tip menu;
     private int iSel = -1;
-    private boolean change = false, delete = false, stopRotate;
+    private boolean change = false, delete = false, stopRotate, load;
     private String sCol = null, sName = null;
     private Animation anMin, anMax, anRotate;
     private MarkersModel model;
@@ -71,6 +71,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             iSel = savedInstanceState.getInt(Const.SELECT, -1);
             sName = savedInstanceState.getString(Const.RENAME, null);
             delete = savedInstanceState.getBoolean(Const.DIALOG, false);
+            if (savedInstanceState.getBoolean(Const.PAGE, false)
+                    && LoaderModel.inProgress)
+                initLoad();
         }
 
         if (sCol == null)
@@ -94,16 +97,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     public void onPause() {
         super.onPause();
         ProgressHelper.removeObservers(act);
-        if (LoaderModel.inProgress)
-            ProgressHelper.removeObservers(act);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         ProgressHelper.addObserver(act, this);
-        if (LoaderModel.inProgress)
-            ProgressHelper.addObserver(act, this);
     }
 
     @Override
@@ -126,6 +125,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         outState.putInt(Const.SELECT, iSel);
         outState.putString(Const.RENAME, sName);
         outState.putBoolean(Const.DIALOG, delete);
+        outState.putBoolean(Const.PAGE, load);
         super.onSaveInstanceState(outState);
     }
 
@@ -137,30 +137,42 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy() || !LoaderModel.inProgress)
+        if (!ProgressHelper.isBusy() && !load)
             return;
+        if (data.getBoolean(Const.START, false)) {
+            act.status.loadText();
+            return;
+        }
         if (data.getBoolean(Const.FINISH, false)) {
-            stopRotate = true;
-            ProgressHelper.setBusy(false);
-            LoaderModel.inProgress = false;
-            act.status.setLoad(false);
             String error = data.getString(Const.ERROR);
-            if (error != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
-                        .setTitle(getResources().getString(R.string.error))
-                        .setMessage(error)
-                        .setPositiveButton(getResources().getString(android.R.string.ok),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
+            if (load) {
+                load = false;
+                LoaderModel.inProgress = false;
+                act.status.setLoad(false);
+                if (error != null)
+                    act.status.setError(error);
+                fabBack.setVisibility(View.VISIBLE);
+            } else {
+                stopRotate = true;
+                ProgressHelper.setBusy(false);
+                if (error != null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
+                            .setTitle(getResources().getString(R.string.error))
+                            .setMessage(error)
+                            .setPositiveButton(getResources().getString(android.R.string.ok),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
 
-                                    }
-                                });
-                builder.create().show();
-                return;
+                                        }
+                                    });
+                    builder.create().show();
+                    return;
+                }
             }
             if (data.getString(Const.LINK) != null) { //finish download page
                 ProgressHelper.removeObservers(act);
                 loadMarList();
+                act.status.setLoad(false);
                 return;
             }
             ProgressHelper.setBusy(false);
@@ -467,13 +479,11 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     loadMarList();
                 } else {
                     if (adMarker.getItem(pos).getTitle().contains("/")) {
-                        if (ProgressHelper.isBusy())
+                        if (ProgressHelper.isBusy() || load)
                             return;
-                        act.status.setLoad(true);
-                        ProgressHelper.addObserver(act, CollectionsFragment.this);
-                        LoaderModel load = ViewModelProviders.of(act).get(LoaderModel.class);
-                        act.status.setLoad(true);
+                        initLoad();
                         act.status.startText();
+                        LoaderModel load = ViewModelProviders.of(act).get(LoaderModel.class);
                         load.startLoad(false, adMarker.getItem(pos).getData());
                         return;
                     }
@@ -631,6 +641,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             fabMenu.setVisibility(View.GONE);
             fabMenu = null;
         }
+    }
+
+    private void initLoad() {
+        fabBack.setVisibility(View.GONE);
+        load = true;
+        act.status.setLoad(true);
     }
 
     private void deleteDialog() {
