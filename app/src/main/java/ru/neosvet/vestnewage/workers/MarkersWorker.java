@@ -26,7 +26,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
-import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class MarkersWorker extends Worker {
     private Context context;
@@ -39,6 +38,7 @@ public class MarkersWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
             boolean export = getInputData().getBoolean(Const.MODE, false);

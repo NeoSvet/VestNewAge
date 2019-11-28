@@ -50,6 +50,7 @@ public class BookWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         BOOK = getInputData().getString(Const.TASK).equals(BookModel.class.getSimpleName());
         try {

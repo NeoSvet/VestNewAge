@@ -62,6 +62,7 @@ public class LoaderWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        LoaderModel.inProgress = true;
         String error;
         name = getInputData().getString(Const.TASK);
         try {

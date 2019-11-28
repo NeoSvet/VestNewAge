@@ -91,8 +91,8 @@ public class StatusButton {
 
     public void setError(String error) {
         this.error = error;
+        stop = true;
         if (error != null) {
-            stop = true;
             time = false;
             tv.setText(context.getResources().getString(R.string.crash));
             panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_red));

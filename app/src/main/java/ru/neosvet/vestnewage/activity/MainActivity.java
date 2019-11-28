@@ -410,7 +410,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragmentTransaction.replace(R.id.my_fragment, new HelpFragment());
                 break;
         }
-
         tab = 0;
         fragmentTransaction.commit();
     }

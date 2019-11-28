@@ -26,7 +26,6 @@ import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
@@ -41,6 +40,7 @@ public class SiteWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error, s = getInputData().getString(Const.TASK);
         try {
             if (s.equals(SiteModel.class.getSimpleName())) {

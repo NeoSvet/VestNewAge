@@ -20,11 +20,9 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
-import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
@@ -38,9 +36,11 @@ public class SummaryWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
-            loadList();;
+            loadList();
+            ;
             if (getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName())) {
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();

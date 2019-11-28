@@ -24,7 +24,6 @@ public class BookModel extends AndroidViewModel {
     }
 
     public void startLoad(boolean FROM_OTKR, boolean KATRENY) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)

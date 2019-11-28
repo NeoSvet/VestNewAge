@@ -25,7 +25,6 @@ public class BaseModel extends AndroidViewModel {
     }
 
     public void startClear(String[] request) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)

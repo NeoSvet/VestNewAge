@@ -23,6 +23,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
+import ru.neosvet.vestnewage.model.SlashModel;
 
 public class SlashWorker extends Worker {
     private Context context;
@@ -35,6 +36,7 @@ public class SlashWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        SlashModel.inProgress = true;
         try {
             synchronTime();
             loadAds();

@@ -25,7 +25,6 @@ public class LoaderModel extends AndroidViewModel {
     }
 
     public void startLoad(boolean withStyle, String link) {
-        inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)

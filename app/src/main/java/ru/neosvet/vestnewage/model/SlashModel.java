@@ -15,7 +15,6 @@ import ru.neosvet.vestnewage.workers.SlashWorker;
 
 public class SlashModel extends AndroidViewModel {
     public static final String TAG = "slash";
-    public boolean non_start = true;
     public static boolean inProgress;
 
     public SlashModel(@NonNull Application application) {
@@ -23,7 +22,6 @@ public class SlashModel extends AndroidViewModel {
     }
 
     public void startLoad() {
-        inProgress = true;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)

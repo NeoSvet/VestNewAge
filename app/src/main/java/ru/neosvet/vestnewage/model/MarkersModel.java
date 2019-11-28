@@ -25,7 +25,6 @@ public class MarkersModel extends AndroidViewModel {
     }
 
     public void start(boolean export, String file) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)

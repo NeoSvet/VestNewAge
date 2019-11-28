@@ -229,10 +229,8 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
     public void onChanged(@Nullable Data data) {
         if (!SlashModel.inProgress)
             return;
-        if (data.getBoolean(Const.TIME, false)) {
-            model.non_start = false;
+        if (data.getBoolean(Const.TIME, false))
             reInitProm();
-        }
         if (data.getBoolean(Const.FINISH, false))
             SlashModel.inProgress = false;
     }

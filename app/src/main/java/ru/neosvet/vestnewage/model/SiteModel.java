@@ -25,7 +25,6 @@ public class SiteModel extends AndroidViewModel {
     }
 
     public void startLoad(String url, String file) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)

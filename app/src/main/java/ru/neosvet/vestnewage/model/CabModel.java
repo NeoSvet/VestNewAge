@@ -26,7 +26,6 @@ public class CabModel extends AndroidViewModel {
     }
 
     private void startWorker(Data.Builder data) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)

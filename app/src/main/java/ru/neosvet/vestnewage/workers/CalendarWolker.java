@@ -33,7 +33,6 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
-import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarWolker extends Worker {
     private Context context;
@@ -51,6 +50,7 @@ public class CalendarWolker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
             if (getInputData().getString(Const.TASK).equals(CalendarModel.class.getSimpleName())) {

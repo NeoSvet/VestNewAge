@@ -36,6 +36,7 @@ public class SearchWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
             Lib lib = new Lib(context);

@@ -25,7 +25,6 @@ public class SummaryModel extends AndroidViewModel {
     }
 
     public void startLoad() {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)

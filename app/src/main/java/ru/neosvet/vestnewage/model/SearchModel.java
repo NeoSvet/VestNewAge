@@ -25,7 +25,6 @@ public class SearchModel extends AndroidViewModel {
     }
 
     public void search(String str, int mode, String start, String end) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiresBatteryNotLow(false)
                 .build();

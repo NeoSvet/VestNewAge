@@ -15,7 +15,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
-import ru.neosvet.vestnewage.model.BaseModel;
 
 public class BaseWorker extends Worker {
     private Context context;
@@ -28,6 +27,7 @@ public class BaseWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
             String[] request = getInputData().getStringArray(Const.MSG);

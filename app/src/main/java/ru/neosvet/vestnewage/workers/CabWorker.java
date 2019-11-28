@@ -34,6 +34,7 @@ public class CabWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        ProgressHelper.setBusy(true);
         String error;
         try {
             String task = getInputData().getString(Const.TASK);

@@ -25,7 +25,6 @@ public class CalendarModel extends AndroidViewModel {
     }
 
     public void startLoad(int month, int year, boolean updateUnread) {
-        ProgressHelper.setBusy(true);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
