@@ -81,16 +81,20 @@ public class LoaderHelper extends LifecycleService {
                 return super.onStartCommand(intent, flags, startId);
             start = false;
             if (intent.getIntExtra(Const.MODE, 0) != STOP) {
-                String error = intent.getStringExtra(Const.ERROR);
-                if (error == null) {
-                    notif.setContentTitle(getResources().getString(R.string.load_suc_finish));
-                    notif.setContentText("");
-                } else {
-                    notif.setContentTitle(getResources().getString(R.string.error_load));
-                    notif.setContentText(error);
-                }
-                notif.setSmallIcon(R.drawable.star)
-                        .setProgress(0, 0, false);
+                String msg = intent.getStringExtra(Const.ERROR);
+                String title;
+                if (msg == null)
+                    title = getResources().getString(R.string.load_suc_finish);
+                else
+                    title = getResources().getString(R.string.error_load);
+                NotificationHelper notifHelper = new NotificationHelper(this);
+                Intent main = new Intent(this, MainActivity.class);
+                PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+                notif = notifHelper.getNotification(title, msg,
+                        NotificationHelper.CHANNEL_TIPS)
+                        .setContentIntent(piMain)
+                        .setFullScreenIntent(piEmpty, true);
                 manager.notify(notif_id + 1, notif.build());
             }
             return super.onStartCommand(intent, flags, startId);
@@ -136,23 +140,22 @@ public class LoaderHelper extends LifecycleService {
     }
 
     private void initNotif() {
-        Context context = getApplicationContext();
-        NotificationHelper notifHelper = new NotificationHelper(context);
-        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        Intent main = new Intent(context, MainActivity.class);
-        PendingIntent pMain = PendingIntent.getActivity(context, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
-        Intent iStop = new Intent(context, LoaderHelper.class);
+        NotificationHelper notifHelper = new NotificationHelper(this);
+        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent main = new Intent(this, MainActivity.class);
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent iStop = new Intent(this, LoaderHelper.class);
         iStop.putExtra(Const.FINISH, true);
         iStop.putExtra(Const.MODE, STOP);
-        PendingIntent piStop = PendingIntent.getService(context, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent piStop = PendingIntent.getService(this, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
         notif = notifHelper.getNotification(
-                context.getResources().getString(R.string.load),
-                context.getResources().getString(R.string.start),
+                getResources().getString(R.string.load),
+                getResources().getString(R.string.start),
                 NotificationHelper.CHANNEL_MUTE)
                 .setSmallIcon(R.drawable.star_anim)
-                .setContentIntent(pMain)
+                .setContentIntent(piMain)
                 .setAutoCancel(false)
-                .addAction(0, context.getResources().getString(R.string.stop), piStop)
+                .addAction(0, getResources().getString(R.string.stop), piStop)
                 .setProgress(0, 0, true)
                 .setFullScreenIntent(piEmpty, true);
         startForeground(notif_id, notif.build());
