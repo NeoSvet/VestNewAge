@@ -270,7 +270,8 @@ public class LoaderWorker extends Worker {
             dataBase.close();
             return false;
         }
-        checkRequests();
+        if (!singlePage)
+            checkRequests();
         String line, s = link;
         final String par = "</p>";
         if (link.contains("#")) {
@@ -411,14 +412,14 @@ public class LoaderWorker extends Worker {
         return s;
     }
 
-    private void checkRequests() { //TODO no work?
+    private void checkRequests() {
         k_requests++;
-        if (k_requests == 20) {
+        if (k_requests == 5) {
             long now = System.currentTimeMillis();
             k_requests = 0;
             if (now - time_requests < DateHelper.SEC_IN_MILLS) {
                 try {
-                    Thread.sleep(DateHelper.SEC_IN_MILLS);
+                    Thread.sleep(400);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
