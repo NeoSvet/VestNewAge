@@ -54,6 +54,7 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final int DEF_YEAR = 100;
+    private final String DIALOG_DATE = "date";
     private MainActivity act;
     private View container;
     private Animation anMin, anMax;
@@ -93,6 +94,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             DateHelper d = DateHelper.initToday(act);
             d.setYear(year);
             year = 0;
+            dialog = DIALOG_DATE + d.toString();
             showDatePicker(d);
         }
         return this.container;
@@ -164,7 +166,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Const.DIALOG, dialog);
-        if (dialog.length() == 1)
+        if (dialog.contains(DIALOG_DATE))
             dateDialog.dismiss();
         else if (dialog.length() > 1)
             alertRnd.dismiss();
@@ -193,9 +195,13 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             tab = state.getInt(Const.TAB);
             if (!ProgressHelper.isBusy()) {
                 dialog = state.getString(Const.DIALOG);
-                if (dialog.length() == 1)
-                    showDatePicker(null);
-                else if (dialog.length() > 1) {
+                if (dialog.contains(DIALOG_DATE)) {
+                    if (!dialog.equals(DIALOG_DATE)) {
+                        d = DateHelper.parse(act, dialog.substring(DIALOG_DATE.length()));
+                        showDatePicker(d);
+                    } else
+                        showDatePicker(null);
+                } else if (dialog.length() > 1) {
                     String[] m = dialog.split(Const.AND);
                     showRndAlert(m[0], m[1], m[2], m[3], Integer.parseInt(m[4]));
                 }
@@ -489,7 +495,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             @Override
             public void onClick(View view) {
                 if (act.checkBusy()) return;
-                dialog = "1";
+                dialog = DIALOG_DATE;
                 showDatePicker(null);
             }
         });

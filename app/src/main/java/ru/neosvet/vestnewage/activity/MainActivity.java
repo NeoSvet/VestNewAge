@@ -518,7 +518,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void openBook(String link, boolean katren) {
         tab = katren ? 0 : 1;
         setFragment(R.id.nav_book, true);
-        int year = 0;
+        int year = 2016;
         try {
             link = link.substring(link.length() - 5, link.length() - 1);
             year = Integer.parseInt(link);
