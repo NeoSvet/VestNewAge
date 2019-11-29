@@ -77,7 +77,7 @@ public class StatusButton {
     public void setLoad(boolean start) {
         stop = !start;
         if (start) {
-            error = null;
+            setError(null);
             time = false;
             panel.setVisibility(View.VISIBLE);
             visible = true;
