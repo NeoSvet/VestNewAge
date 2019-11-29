@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.helpers;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
@@ -74,18 +75,19 @@ public class LoaderHelper extends LifecycleService {
     @Override
     public int onStartCommand(Intent intent, final int flags, int startId) {
         if (intent == null)
-            return super.onStartCommand(intent, flags, startId);
+            return Service.START_NOT_STICKY;
         if (intent.getBooleanExtra(Const.FINISH, false)) {
             Lib.LOG("LoaderHelper FINISH");
             if (!start)
-                return super.onStartCommand(intent, flags, startId);
+                return Service.START_NOT_STICKY;
             start = false;
             if (intent.getIntExtra(Const.MODE, 0) != STOP) {
                 String msg = intent.getStringExtra(Const.ERROR);
                 String title;
-                if (msg == null)
+                if (msg == null) {
                     title = getResources().getString(R.string.load_suc_finish);
-                else
+                    msg = "";
+                } else
                     title = getResources().getString(R.string.error_load);
                 NotificationHelper notifHelper = new NotificationHelper(this);
                 Intent main = new Intent(this, MainActivity.class);
@@ -97,15 +99,18 @@ public class LoaderHelper extends LifecycleService {
                         .setFullScreenIntent(piEmpty, true);
                 manager.notify(notif_id + 1, notif.build());
             }
-            return super.onStartCommand(intent, flags, startId);
+            return Service.START_NOT_STICKY;
         }
         Lib.LOG("LoaderHelper START");
+        int mode = intent.getIntExtra(Const.MODE, STOP);
+        if (mode == STOP)
+            return Service.START_NOT_STICKY;
         ProgressHelper.setMax(0);
         ProgressHelper.setMessage(getResources().getString(R.string.start));
         initNotif();
         start = true;
         Lib.showToast(getApplicationContext(), getResources().getString(R.string.load_background));
-        startLoad(intent.getIntExtra(Const.MODE, 0), intent.getStringExtra(Const.TASK));
+        startLoad(mode, intent.getStringExtra(Const.TASK));
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(new Handler.Callback() {
             @Override
