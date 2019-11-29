@@ -43,7 +43,6 @@ public class SummaryWorker extends Worker {
         String error;
         try {
             loadList();
-            ;
             if (getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName())) {
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();
