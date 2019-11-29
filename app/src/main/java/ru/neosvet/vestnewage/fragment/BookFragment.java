@@ -103,8 +103,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onPause() {
         super.onPause();
-        if (ProgressHelper.isBusy() || LoaderModel.inProgress)
-            ProgressHelper.removeObservers(act);
+        ProgressHelper.removeObservers(act);
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());

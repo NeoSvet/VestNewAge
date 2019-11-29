@@ -33,7 +33,6 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment implements Observer<Data> {
@@ -63,8 +62,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
+        ProgressHelper.removeObservers(act);
     }
 
     @Override

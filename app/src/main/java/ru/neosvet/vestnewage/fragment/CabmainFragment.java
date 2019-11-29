@@ -64,8 +64,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
+        ProgressHelper.removeObservers(act);
     }
 
     @Override
