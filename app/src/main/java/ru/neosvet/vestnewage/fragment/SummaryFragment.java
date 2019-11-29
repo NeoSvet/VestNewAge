@@ -20,7 +20,6 @@ import java.io.FileReader;
 
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -91,9 +90,14 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         }
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
+            if (LoaderModel.inProgress) {
+                ProgressHelper.setBusy(false);
+                finishLoad(null);
+            }
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
+            LoaderModel.inProgress = false;
             ProgressHelper.setBusy(false);
             finishLoad(data.getString(Const.ERROR));
             return;

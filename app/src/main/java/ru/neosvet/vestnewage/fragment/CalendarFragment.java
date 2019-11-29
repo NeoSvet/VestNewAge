@@ -37,6 +37,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
     private int today_m, today_y;
@@ -112,9 +113,14 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         }
         if (data.getBoolean(Const.LIST, false)) {
             openCalendar(false);
+            if (LoaderModel.inProgress) {
+                ProgressHelper.setBusy(false);
+                setStatus(false);
+            }
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
+            LoaderModel.inProgress = false;
             ProgressHelper.setBusy(false);
             act.updateNew();
             setStatus(false);
