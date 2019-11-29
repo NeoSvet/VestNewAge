@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
@@ -18,8 +17,6 @@ import android.webkit.WebViewClient;
 
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.model.CabModel;
 
@@ -119,6 +116,7 @@ public class CabpageActivity extends AppCompatActivity {
                 wvBrowser.loadUrl("javascript: " + SCRIPT + " return false;");
                 wvBrowser.setVisibility(View.VISIBLE);
             }
+            status.setLoad(false);
             String s = wvBrowser.getTitle();
             if (!s.contains(":")) {
                 status.setError(getResources().getString(R.string.load_fail));
@@ -126,7 +124,6 @@ public class CabpageActivity extends AppCompatActivity {
                 return;
             }
             CabpageActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
-            status.setLoad(false);
             fabClose.setVisibility(View.VISIBLE);
             super.onPageFinished(view, url);
         }

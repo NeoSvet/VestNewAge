@@ -119,6 +119,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             return;
         ProgressHelper.setBusy(false);
         ProgressHelper.removeObservers(act);
+        act.status.setLoad(false);
         String error = result.getString(Const.ERROR);
         if (error != null) {
             act.status.setError(error);
@@ -150,7 +151,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                 tvError.setVisibility(View.VISIBLE);
                 break;
         }
-        act.status.setLoad(false);
         pMain.setVisibility(View.GONE);
         fabEnter.setVisibility(View.GONE);
         fabExit.setVisibility(View.VISIBLE);

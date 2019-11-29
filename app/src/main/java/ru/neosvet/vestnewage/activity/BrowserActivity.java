@@ -748,11 +748,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void finishLoad(String error) {
+        status.setLoad(false);
         if (error != null) {
             status.setError(error);
             return;
         }
-        status.setLoad(false);
         status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
         openPage(true);
     }
