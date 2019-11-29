@@ -148,6 +148,7 @@ public class LoaderHelper extends LifecycleService {
                 context.getResources().getString(R.string.load),
                 context.getResources().getString(R.string.start),
                 NotificationHelper.CHANNEL_MUTE)
+                .setSmallIcon(R.drawable.star_anim)
                 .setContentIntent(pMain)
                 .setAutoCancel(false)
                 .addAction(0, context.getResources().getString(R.string.stop), piStop)
