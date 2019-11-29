@@ -157,10 +157,10 @@ public class SlashActivity extends AppCompatActivity implements Observer<Data> {
             if (getIntent().hasExtra(DataBase.ID))
                 main.putExtra(DataBase.ID, getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY));
         } else if (link.length() < 2 || link.equals("/index.html")) {
-            main.putExtra(Const.CUR_ID, R.id.nav_main);
+            main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 0);
         } else if (link.equals(SiteFragment.NOVOSTI)) {
-            main.putExtra(Const.CUR_ID, R.id.nav_main);
+            main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 1);
         } else if (link.contains(Const.HTML)) {
             BrowserActivity.openReader(this, link.substring(1), null);

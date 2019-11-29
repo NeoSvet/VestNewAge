@@ -224,7 +224,7 @@ public class LoaderHelper extends LifecycleService {
         if (id == ALL) {
             k += (d.getYear() - 2016) * 12 + d.getMonth(); //calendar from 01.16
             k += 4; //main, news, media and rss
-        } else if (id == R.id.nav_main) //main, news
+        } else if (id == R.id.nav_site) //main, news
             k = 2;
         ProgressHelper.setMessage(getApplication().getBaseContext().getResources().getString(R.string.download_list));
         ProgressHelper.setMax(k);
@@ -240,7 +240,7 @@ public class LoaderHelper extends LifecycleService {
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL || id == R.id.nav_main) { //Site
+        if (id == ALL || id == R.id.nav_site) { //Site
             task = new OneTimeWorkRequest
                     .Builder(SiteWorker.class)
                     .setInputData(data.build())

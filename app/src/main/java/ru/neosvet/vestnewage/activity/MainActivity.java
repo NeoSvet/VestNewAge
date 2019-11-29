@@ -361,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     getIntent().removeExtra(DataBase.ID);
                 }
                 break;
-            case R.id.nav_main:
+            case R.id.nav_site:
                 curFragment = new SiteFragment();
                 ((SiteFragment) curFragment).setTab(tab);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean setNew() {
         if (k_new > 0 && (cur_id == R.id.nav_new || cur_id == R.id.nav_rss
-                || cur_id == R.id.nav_main || cur_id == R.id.nav_calendar)) {
+                || cur_id == R.id.nav_site || cur_id == R.id.nav_calendar)) {
             tvNew.setVisibility(View.VISIBLE);
             return true;
         }
@@ -454,6 +454,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (prev_id != 0) {
             if (curFragment != null && !curFragment.onBackPressed())
                 return;
+            if (prev_id == R.id.nav_site)
+                tab = 1;
             setFragment(prev_id, false);
         } else if (curFragment != null) {
             if (curFragment.onBackPressed())
@@ -494,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (ProgressHelper.isBusy())
                 return;
             switch (cur_id) {
-                case R.id.nav_main:
+                case R.id.nav_site:
                     bDownloadIt.setVisibility(View.VISIBLE);
                     bDownloadIt.setText(getResources().getString(R.string.download_it_main));
                     break;

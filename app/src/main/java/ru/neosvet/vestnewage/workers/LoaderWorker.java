@@ -187,13 +187,13 @@ public class LoaderWorker extends Worker {
             return;
         // подсчёт количества страниц:
         int k = 0;
-        if (id == LoaderHelper.ALL || id == R.id.nav_main)
+        if (id == LoaderHelper.ALL || id == R.id.nav_site)
             k = SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
             k += workWithBook(true);
         ProgressHelper.setMax(k);
         // загрузка страниц:
-        if (id == LoaderHelper.ALL || id == R.id.nav_main)
+        if (id == LoaderHelper.ALL || id == R.id.nav_site)
             downloadList();
         if (isCancelled())
             return;

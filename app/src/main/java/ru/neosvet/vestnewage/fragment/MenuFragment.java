@@ -9,15 +9,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.MenuAdapter;
 
 public class MenuFragment extends Fragment {
     private final int MAX = 12;
-    private final int[] mMenu = new int[]{R.id.nav_new, R.id.nav_rss, R.id.nav_main, R.id.nav_calendar,
+    private final int[] mMenu = new int[]{R.id.nav_new, R.id.nav_rss, R.id.nav_site, R.id.nav_calendar,
             R.id.nav_book, R.id.nav_search, R.id.nav_marker, R.id.nav_journal,
             R.id.nav_cabinet, R.id.nav_settings, R.id.nav_help};
     private MainActivity act;

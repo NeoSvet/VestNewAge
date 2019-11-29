@@ -206,7 +206,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 if (adMain.getItem(pos).getCount() == 1) {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
-                    if (tabHost.getCurrentTab() == 0) { // main
+                    if (tabHost.getCurrentTab() == 1) { // site
                         if (link.contains(Const.RSS)) {
                             act.setFragment(R.id.nav_rss, true);
                         } else if (link.contains("/poems")) {
