@@ -40,15 +40,16 @@ public class SiteWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        ProgressHelper.setBusy(true);
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.START, true)
-                .build());
-        String error, s = getInputData().getString(Const.TASK);
+        boolean SITE = getInputData().getString(Const.TASK).equals(SiteModel.class.getSimpleName());
+        String error;
         try {
-            if (s.equals(SiteModel.class.getSimpleName())) {
+            if (SITE) {
+                ProgressHelper.setBusy(true);
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.START, true)
+                        .build());
                 loadList(getInputData().getString(Const.LINK));
-                s = getInputData().getString(Const.FILE);
+                String s = getInputData().getString(Const.FILE);
                 saveList(s);
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.LIST, true)
@@ -57,6 +58,8 @@ public class SiteWorker extends Worker {
                 return Result.success();
             }
             //LoaderHelper
+            if (!LoaderHelper.start)
+                return Result.success();
             String[] url = new String[]{
                     Const.SITE,
                     Const.SITE + "novosti.html",
@@ -77,10 +80,15 @@ public class SiteWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("SiteWolker error: " + error);
         }
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, error)
-                .build());
+        if (SITE) {
+            ProgressHelper.postProgress(new Data.Builder()
+                    .putBoolean(Const.FINISH, true)
+                    .putString(Const.ERROR, error)
+                    .build());
+        } else {
+            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            return Result.failure();
+        }
         return Result.failure();
     }
 

@@ -50,12 +50,14 @@ public class BookWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        ProgressHelper.setBusy(true);
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.START, true)
-                .build());
         String error;
         BOOK = getInputData().getString(Const.TASK).equals(BookModel.class.getSimpleName());
+        if (BOOK) {
+            ProgressHelper.setBusy(true);
+            ProgressHelper.postProgress(new Data.Builder()
+                    .putBoolean(Const.START, true)
+                    .build());
+        }
         try {
             if (getInputData().getBoolean(Const.OTKR, false)) {
                 String s = loadListUcoz(true, false);
@@ -103,10 +105,15 @@ public class BookWorker extends Worker {
             error = e.getMessage();
             Lib.LOG("BookWolker error: " + error);
         }
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, error)
-                .build());
+        if (BOOK) {
+            ProgressHelper.postProgress(new Data.Builder()
+                    .putBoolean(Const.FINISH, true)
+                    .putString(Const.ERROR, error)
+                    .build());
+        } else {
+            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            return Result.failure();
+        }
         return Result.failure();
     }
 

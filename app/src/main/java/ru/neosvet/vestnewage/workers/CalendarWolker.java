@@ -50,13 +50,14 @@ public class CalendarWolker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        ProgressHelper.setBusy(true);
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.START, true)
-                .build());
+        boolean CALENDAR = getInputData().getString(Const.TASK).equals(CalendarModel.class.getSimpleName());
         String error;
         try {
-            if (getInputData().getString(Const.TASK).equals(CalendarModel.class.getSimpleName())) {
+            if (CALENDAR) {
+                ProgressHelper.setBusy(true);
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.START, true)
+                        .build());
                 loadListMonth(getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0),
                         getInputData().getBoolean(Const.UNREAD, false));
@@ -66,6 +67,8 @@ public class CalendarWolker extends Worker {
                 return Result.success();
             }
             //LoaderHelper
+            if (!LoaderHelper.start)
+                return Result.success();
             DateHelper d = DateHelper.initToday(context);
             if (getInputData().getInt(Const.MODE, 0) == LoaderHelper.DOWNLOAD_YEAR) {
                 ProgressHelper.setMessage(context.getResources().getString(R.string.download_list));
@@ -85,10 +88,15 @@ public class CalendarWolker extends Worker {
             error = e.getMessage();
             Lib.LOG("CalendarWolker error: " + error);
         }
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, error)
-                .build());
+        if (CALENDAR) {
+            ProgressHelper.postProgress(new Data.Builder()
+                    .putBoolean(Const.FINISH, true)
+                    .putString(Const.ERROR, error)
+                    .build());
+        } else {
+            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            return Result.failure();
+        }
         return Result.failure();
     }
 

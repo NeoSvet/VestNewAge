@@ -36,30 +36,41 @@ public class SummaryWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        ProgressHelper.setBusy(true);
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.START, true)
-                .build());
+        boolean SUMMARY = getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName());
         String error;
         try {
-            loadList();
-            if (getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName())) {
+            if (SUMMARY) {
+                ProgressHelper.setBusy(true);
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.START, true)
+                        .build());
+                loadList();
                 SummaryHelper summaryHelper = new SummaryHelper(context);
                 summaryHelper.updateBook();
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.LIST, true)
+                        .build());
+                return Result.success();
             }
-            ProgressHelper.postProgress(new Data.Builder()
-                    .putBoolean(Const.LIST, true)
-                    .build());
+            //LoaderHelper
+            if (!LoaderHelper.start)
+                return Result.success();
+            loadList();
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
             Lib.LOG("SummaryWorker error: " + error);
         }
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.FINISH, true)
-                .putString(Const.ERROR, error)
-                .build());
+        if (SUMMARY) {
+            ProgressHelper.postProgress(new Data.Builder()
+                    .putBoolean(Const.FINISH, true)
+                    .putString(Const.ERROR, error)
+                    .build());
+        } else {
+            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            return Result.failure();
+        }
         return Result.failure();
     }
 
