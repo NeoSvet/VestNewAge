@@ -89,7 +89,8 @@ public class LoaderHelper extends LifecycleService {
                     notif.setContentTitle(getResources().getString(R.string.error_load));
                     notif.setContentText(error);
                 }
-                notif.setProgress(0, 0, false);
+                notif.setSmallIcon(R.drawable.star)
+                        .setProgress(0, 0, false);
                 manager.notify(notif_id + 1, notif.build());
             }
             return super.onStartCommand(intent, flags, startId);
