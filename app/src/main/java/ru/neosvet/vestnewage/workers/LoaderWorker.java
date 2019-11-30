@@ -124,7 +124,6 @@ public class LoaderWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("LoaderWolker error: " + error);
         }
         if (name.equals(CheckHelper.class.getSimpleName())) {
             CheckHelper.postCommand(context, false);

@@ -86,7 +86,6 @@ public class CalendarWolker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("CalendarWolker error: " + error);
         }
         if (CALENDAR) {
             ProgressHelper.postProgress(new Data.Builder()

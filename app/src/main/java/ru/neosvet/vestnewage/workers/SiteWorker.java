@@ -78,7 +78,6 @@ public class SiteWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("SiteWolker error: " + error);
         }
         if (SITE) {
             ProgressHelper.postProgress(new Data.Builder()

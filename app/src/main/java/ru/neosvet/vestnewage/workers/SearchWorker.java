@@ -91,7 +91,6 @@ public class SearchWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("SearchWolker error: " + error);
         }
         ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)

@@ -51,7 +51,6 @@ public class CheckWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.LOG("CheckWorker error: " + e.getMessage());
         }
         CheckHelper.postCommand(context, false);
         return Result.failure();

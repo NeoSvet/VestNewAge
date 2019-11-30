@@ -55,7 +55,6 @@ public class CabWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("CabWolker error: " + error);
         }
         ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)

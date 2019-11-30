@@ -43,7 +43,6 @@ public class SlashWorker extends Worker {
             //return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.LOG("SlashWorker error: " + e.getMessage());
         }
         ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)

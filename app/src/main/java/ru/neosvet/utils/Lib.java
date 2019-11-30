@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -28,9 +27,9 @@ public class Lib {
         this.context = context;
     }
 
-    public static void LOG(String msg) {
-        Log.d("neotag", msg);
-    }
+//    public static void LOG(String msg) {
+//        Log.d("neotag", msg);
+//    }
 
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();

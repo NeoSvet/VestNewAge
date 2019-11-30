@@ -17,7 +17,6 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
@@ -54,11 +53,9 @@ public class CheckHelper extends LifecycleService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!intent.getBooleanExtra(Const.START, false)) {
-            Lib.LOG("CheckHelper finish");
             stopForeground(true);
             return Service.START_NOT_STICKY;
         }
-        Lib.LOG("CheckHelper start");
         try {
             Configuration configuration = new Configuration.Builder()
                     .setMinimumLoggingLevel(android.util.Log.INFO)

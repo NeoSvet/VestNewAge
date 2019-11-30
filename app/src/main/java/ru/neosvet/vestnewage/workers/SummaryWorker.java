@@ -60,7 +60,6 @@ public class SummaryWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("SummaryWorker error: " + error);
         }
         if (SUMMARY) {
             ProgressHelper.postProgress(new Data.Builder()

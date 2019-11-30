@@ -77,7 +77,6 @@ public class LoaderHelper extends LifecycleService {
         if (intent == null)
             return Service.START_NOT_STICKY;
         if (intent.getBooleanExtra(Const.FINISH, false)) {
-            Lib.LOG("LoaderHelper FINISH");
             if (!start)
                 return Service.START_NOT_STICKY;
             start = false;
@@ -101,7 +100,6 @@ public class LoaderHelper extends LifecycleService {
             }
             return Service.START_NOT_STICKY;
         }
-        Lib.LOG("LoaderHelper START");
         int mode = intent.getIntExtra(Const.MODE, STOP);
         if (mode == STOP)
             return Service.START_NOT_STICKY;

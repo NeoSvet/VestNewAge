@@ -11,7 +11,6 @@ import androidx.work.WorkerParameters;
 import java.io.File;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -70,7 +69,6 @@ public class BaseWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("BaseWorker error: " + error);
         }
         ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)

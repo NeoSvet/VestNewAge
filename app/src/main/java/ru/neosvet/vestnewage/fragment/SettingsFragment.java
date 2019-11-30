@@ -460,7 +460,6 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
         if (p == Const.TURN_OFF)
             return;
-        Lib.LOG("Check Summary: " + p + " min");
         if (p == 15) p = 20;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

@@ -103,7 +103,6 @@ public class BookWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
-            Lib.LOG("BookWolker error: " + error);
         }
         if (BOOK) {
             ProgressHelper.postProgress(new Data.Builder()
