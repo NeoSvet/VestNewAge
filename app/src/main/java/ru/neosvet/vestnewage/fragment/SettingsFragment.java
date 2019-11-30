@@ -134,7 +134,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             ProgressHelper.removeObservers(act);
             stopRotate = true;
             ProgressHelper.setBusy(false);
-            bClearDo.setEnabled(true);
+            bClearDo.setEnabled(false);
             Lib.showToast(act, getResources().getString(R.string.completed));
         }
     }
