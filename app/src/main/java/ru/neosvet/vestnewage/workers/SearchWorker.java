@@ -65,7 +65,7 @@ public class SearchWorker extends Worker {
             else
                 step = -1;
             if (mode == 6) { // поиск в результатах
-                searchInResults(getInputData().getString(Const.STRING), step == -1);
+                searchInResults(str, step == -1);
                 dbSearch.close();
                 return getResult();
             }
@@ -208,7 +208,7 @@ public class SearchWorker extends Worker {
                     Const.LINK + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
         } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
-            // фильтрация по 0 и 1 будет позже
+            //фильтрация по 0 и 1 будет позже
             curSearch = db.query(DataBase.PARAGRAPH, null,
                     DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + find + "%"}
                     , null, null, null);
