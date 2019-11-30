@@ -54,8 +54,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/cell_size"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="45dp"
         android:orientation="horizontal">
 
         <RelativeLayout
@@ -112,7 +112,7 @@
         <ListView
             android:id="@+id/lvResult"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>
