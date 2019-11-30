@@ -115,7 +115,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onPause() {
         super.onPause();
-        ProgressHelper.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override

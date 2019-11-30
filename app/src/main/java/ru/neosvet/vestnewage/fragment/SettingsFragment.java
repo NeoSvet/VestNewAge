@@ -86,7 +86,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onPause() {
         super.onPause();
-        ProgressHelper.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override
@@ -130,6 +131,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.FINISH, false)) {
+            ProgressHelper.removeObservers(act);
             stopRotate = true;
             ProgressHelper.setBusy(false);
             bClearDo.setEnabled(true);

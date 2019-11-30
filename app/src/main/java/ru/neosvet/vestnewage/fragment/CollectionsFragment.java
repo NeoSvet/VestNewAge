@@ -96,7 +96,8 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     @Override
     public void onPause() {
         super.onPause();
-        ProgressHelper.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override

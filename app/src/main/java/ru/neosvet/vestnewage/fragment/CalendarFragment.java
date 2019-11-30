@@ -77,7 +77,8 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onPause() {
         super.onPause();
-        ProgressHelper.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
     }
 
     @Override

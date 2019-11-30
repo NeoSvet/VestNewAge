@@ -103,7 +103,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onPause() {
         super.onPause();
-        ProgressHelper.removeObservers(act);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.removeObservers(act);
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
@@ -140,26 +141,25 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             act.status.setText(data.getString(Const.MSG));
             return;
         }
-        if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.setBusy(false);
-            ProgressHelper.removeObservers(act);
-            act.status.setLoad(false);
-            String error = data.getString(Const.ERROR);
-            if (error != null) {
-                act.status.setError(error);
-                return;
-            }
-            if (data.getBoolean(Const.OTKR, false)) {
-                fromOtkr = true;
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean(Const.OTKR, fromOtkr);
-                editor.apply();
-                dPoslanie.setYear(DEF_YEAR);
-            }
-            String name = data.getString(Const.TITLE);
-            finishLoad(name);
+        if (!data.getBoolean(Const.FINISH, false))
+            return;
+        ProgressHelper.setBusy(false);
+        ProgressHelper.removeObservers(act);
+        act.status.setLoad(false);
+        String error = data.getString(Const.ERROR);
+        if (error != null) {
+            act.status.setError(error);
             return;
         }
+        if (data.getBoolean(Const.OTKR, false)) {
+            fromOtkr = true;
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean(Const.OTKR, fromOtkr);
+            editor.apply();
+            dPoslanie.setYear(DEF_YEAR);
+        }
+        String name = data.getString(Const.TITLE);
+        finishLoad(name);
     }
 
     @Override
@@ -207,7 +207,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             }
         }
         tabHost.setCurrentTab(tab);
-        openList(true);
     }
 
     private void initTabs() {
