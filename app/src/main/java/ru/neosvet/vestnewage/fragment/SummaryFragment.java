@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -88,6 +87,10 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             act.status.loadText();
             return;
         }
+        if (data.getBoolean(Const.DIALOG, false)) {
+            act.status.setText(data.getString(Const.MSG));
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
             if (LoaderModel.inProgress) {
@@ -100,20 +103,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             LoaderModel.inProgress = false;
             ProgressHelper.setBusy(false);
             finishLoad(data.getString(Const.ERROR));
-            return;
-        }
-        if (!data.getBoolean(Const.DIALOG, false))
-            return;
-        String link = data.getString(Const.MSG);
-        for (int i = 0; i < adSummary.getCount(); i++) {
-            if (adSummary.getItem(i).getLink().equals(link)) {
-                lvSummary.smoothScrollToPosition(i);
-                View item = lvSummary.getChildAt(i);
-                if (item == null)
-                    break;
-                item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-                break;
-            }
         }
     }
 

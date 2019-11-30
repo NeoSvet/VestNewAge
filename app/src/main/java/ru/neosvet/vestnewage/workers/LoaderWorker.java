@@ -41,7 +41,7 @@ public class LoaderWorker extends Worker {
     private Lib lib;
     private Request.Builder builderRequest;
     private OkHttpClient client;
-    private int k_requests = 0;
+    private int cur, max, k_requests = 0;
     private long time_requests = 0;
     private String name;
 
@@ -77,19 +77,19 @@ public class LoaderWorker extends Worker {
                 return Result.success();
             }
             if (name.equals(CalendarModel.class.getSimpleName())) {
-                CalendarWolker.getListLink(context,
+                max = CalendarWolker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0));
                 downloadList();
                 return postFinish();
             }
             if (name.equals(SummaryModel.class.getSimpleName())) {
-                SummaryWorker.getListLink(context);
+                max = SummaryWorker.getListLink(context);
                 downloadList();
                 return postFinish();
             }
             if (name.equals(SiteModel.class.getSimpleName())) {
-                SiteWorker.getListLink(context, getInputData().getString(Const.FILE));
+                max = SiteWorker.getListLink(context, getInputData().getString(Const.FILE));
                 downloadList();
                 return postFinish();
             }
@@ -177,7 +177,14 @@ public class LoaderWorker extends Worker {
         String s;
         while ((s = br.readLine()) != null && !isCancelled()) {
             downloadPage(s, false);
-            ProgressHelper.upProg();
+            if (max > 0) {
+                cur++;
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.DIALOG, true)
+                        .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
+                        .build());
+            } else
+                ProgressHelper.upProg();
         }
         br.close();
         file.delete();
@@ -391,12 +398,6 @@ public class LoaderWorker extends Worker {
         response.close();
         db.close();
         dataBase.close();
-        if (!name.contains(LoaderModel.TAG)) {
-            ProgressHelper.postProgress(new Data.Builder()
-                    .putBoolean(Const.DIALOG, true)
-                    .putString(Const.MSG, link)
-                    .build());
-        }
         return true;
     }
 

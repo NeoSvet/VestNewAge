@@ -111,6 +111,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             act.status.loadText();
             return;
         }
+        if (data.getBoolean(Const.DIALOG, false)) {
+            act.status.setText(data.getString(Const.MSG));
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             openCalendar(false);
             if (LoaderModel.inProgress) {
@@ -127,15 +131,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             String error = data.getString(Const.ERROR);
             if (error != null)
                 act.status.setError(error);
-            return;
         }
-        if (!data.getBoolean(Const.DIALOG, false))
-            return;
-        String s = data.getString(Const.MSG);
-        if (s == null)
-            return;
-        int i = s.lastIndexOf("/") + 1;
-        blinkDay(Integer.parseInt(s.substring(i, i + 2)));
     }
 
     @Override

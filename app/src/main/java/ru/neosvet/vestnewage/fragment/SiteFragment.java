@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -96,6 +95,10 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             act.status.loadText();
             return;
         }
+        if (data.getBoolean(Const.DIALOG, false)) {
+            act.status.setText(data.getString(Const.MSG));
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             openList(getFile(data.getString(Const.FILE)), false);
             return;
@@ -110,13 +113,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             ProgressHelper.setBusy(false);
-        }
-        String link = data.getString(Const.MSG);
-        for (int i = 0; i < adMain.getCount(); i++) {
-            if (adMain.getItem(i).equals(link)) {
-                View item = (View) lvMain.getItemAtPosition(i);
-                item.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-            }
         }
     }
 
