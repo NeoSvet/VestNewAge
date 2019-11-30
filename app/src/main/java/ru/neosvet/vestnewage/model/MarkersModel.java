@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
 import androidx.work.Constraints;
@@ -14,7 +13,6 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
 public class MarkersModel extends AndroidViewModel {

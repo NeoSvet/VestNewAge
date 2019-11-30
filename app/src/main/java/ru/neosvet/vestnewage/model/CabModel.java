@@ -13,7 +13,6 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
 public class CabModel extends AndroidViewModel {
