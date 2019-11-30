@@ -53,8 +53,8 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         act = (MainActivity) getActivity();
         initViews();
         setViews();
-        initTabs();
         model = ViewModelProviders.of(act).get(SiteModel.class);
+        initTabs();
         restoreState(savedInstanceState);
         return this.container;
     }
