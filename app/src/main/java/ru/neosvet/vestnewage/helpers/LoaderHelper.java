@@ -146,7 +146,6 @@ public class LoaderHelper extends LifecycleService {
 
     private void initNotif() {
         NotificationHelper notifHelper = new NotificationHelper(this);
-        PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         Intent main = new Intent(this, MainActivity.class);
         PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
         Intent iStop = new Intent(this, LoaderHelper.class);
@@ -161,8 +160,7 @@ public class LoaderHelper extends LifecycleService {
                 .setContentIntent(piMain)
                 .setAutoCancel(false)
                 .addAction(0, getResources().getString(R.string.stop), piStop)
-                .setProgress(0, 0, true)
-                .setFullScreenIntent(piEmpty, true);
+                .setProgress(0, 0, true);
         startForeground(notif_id, notif.build());
     }
 
