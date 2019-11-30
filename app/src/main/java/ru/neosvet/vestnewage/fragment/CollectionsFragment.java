@@ -145,6 +145,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
+            ProgressHelper.removeObservers(act);
             String error = data.getString(Const.ERROR);
             if (load) {
                 load = false;

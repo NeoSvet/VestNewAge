@@ -140,6 +140,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.setBusy(false);
+            ProgressHelper.removeObservers(act);
             page = 0;
             etSearch.setEnabled(true);
             pStatus.setVisibility(View.GONE);
