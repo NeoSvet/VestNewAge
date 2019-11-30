@@ -122,7 +122,8 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onResume() {
         super.onResume();
-        ProgressHelper.addObserver(act, this);
+        if (ProgressHelper.isBusy())
+            ProgressHelper.addObserver(act, this);
     }
 
     private void initModel() {
@@ -531,6 +532,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             tvStatus.setText(getResources().getString(R.string.search));
         } else
             mode = sMode.getSelectedItemPosition();
+        ProgressHelper.addObserver(act, this);
         model.search(s, mode, dStart.getMY(), dEnd.getMY());
         boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
