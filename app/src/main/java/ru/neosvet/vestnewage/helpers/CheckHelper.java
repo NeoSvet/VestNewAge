@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.app.Service;
 import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
@@ -55,7 +56,7 @@ public class CheckHelper extends LifecycleService {
         if (!intent.getBooleanExtra(Const.START, false)) {
             Lib.LOG("CheckHelper finish");
             stopForeground(true);
-            return super.onStartCommand(intent, flags, startId);
+            return Service.START_NOT_STICKY;
         }
         Lib.LOG("CheckHelper start");
         try {
