@@ -714,7 +714,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                         new String[]{DataBase.PARAGRAPH},
                         DataBase.ID + DataBase.Q,
                         new String[]{s}, null, null, null);
-                if (curPar.getCount() > 0) { //если текст скачен
+                if (curPar.getCount() > 1) { //если текст скачен
                     g = new Random();
                     n = curPar.getCount(); //номер случайного стиха
                     if (y > 13 || (y == 13 && m > 7))
