@@ -1,0 +1,18 @@
+<resources>
+<!-- for Tablet 10" -->
+    <dimen name="activity_horizontal_margin">20dp</dimen>
+    <dimen name="activity_vertical_margin">20dp</dimen>
+    <dimen name="cell_size">65dp</dimen>
+    <dimen name="cell_font">40dp</dimen>
+    <dimen name="string_size">36dp</dimen>
+    <dimen name="panel_height">46dp</dimen>
+    <dimen name="calendar_title">465dp</dimen>
+    <dimen name="calendar_button">70dp</dimen>
+    <dimen name="calendar_margin_top">9dp</dimen>
+    <dimen name="margin_top">65dp</dimen>
+    <integer name="top_minus">100</integer>
+    <integer name="screen_mode">3</integer>
+    <dimen name="menu_width">350dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="menu_fragment_top">201dp</dimen>
+</resources>
