@@ -298,6 +298,10 @@ public class LoaderWorker extends Worker {
                 if (line.contains("<!--/row-->") || line.contains("<h1>")) {
                     break;
                 } else if (line.contains("<")) {
+                    if (line.contains("<a")) {
+                        while (!line.contains("</a"))
+                            line += br.readLine();
+                    }
                     line = line.trim();
                     if (line.length() < 7) continue;
                     line = line.replace("<br />", Const.BR).replace("color", "cvet");
@@ -331,6 +335,8 @@ public class LoaderWorker extends Worker {
                             line = line.substring(0, line.indexOf(par)) + Const.BR +
                                     line.substring(line.indexOf("\">", line.indexOf(par)) + 2);
                         }
+                    } else if (line.contains(".jpg")) {
+                        line = line.replace("=\"/", "=\"http://blagayavest.info/");
                     } else {
                         while (line.indexOf(par) < line.lastIndexOf(par)) {
                             // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)

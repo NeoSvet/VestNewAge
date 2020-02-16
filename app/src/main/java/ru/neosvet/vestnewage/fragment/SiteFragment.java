@@ -35,7 +35,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends BackFragment implements Observer<Data> {
-    public static final String MAIN = "/main", NEWS = "/news", NOVOSTI = "novosti.html", END = "<end>";
+    public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
     private View container, fabRefresh, tvEmptySite;
@@ -312,6 +312,10 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
+            if(tabHost.getCurrentTab() == 1) { //main
+                adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
+                adMain.getItem(0).addLink(FORUM);
+            }
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
