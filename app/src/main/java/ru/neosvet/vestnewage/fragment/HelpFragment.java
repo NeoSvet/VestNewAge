@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.list.HelpAdapter;
 
 public class HelpFragment extends Fragment {
     private final int COUNT = 7, FEEDBACK = 1, FEEDBACK_COUNT = 5,
-            WRITE_TO_DEV = 1, LINK_ON_APP = 2, LINK_ON_YM = 3, LINK_ON_QW = 4, CHANGELOG = 5;
+            WRITE_TO_DEV = 1, LINK_ON_APP = 2, LINK_ON_SITE = 3, CHANGELOG = 4;
     private boolean feedback = false;
     private MainActivity act;
     private View container;
@@ -106,11 +106,8 @@ public class HelpFragment extends Fragment {
                 sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.url_on_app));
                 startActivity(sendIntent);
                 break;
-            case LINK_ON_YM:
-                act.lib.openInApps("https://money.yandex.ru/to/410012986244848", null);
-                break;
-            case LINK_ON_QW:
-                act.lib.openInApps("https://qiwi.com/n/neosvet", null);
+            case LINK_ON_SITE:
+                act.lib.openInApps("http://neosvet.ucoz.ru/vna/", null);
                 break;
             default: //CHANGELOG
                 act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
@@ -122,8 +119,7 @@ public class HelpFragment extends Fragment {
         if (feedback) {
             adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getResources().getString(R.string.write_to_dev), R.drawable.gm);
             adHelp.insertItem(FEEDBACK + LINK_ON_APP, getResources().getString(R.string.link_on_app), R.drawable.play_store);
-            adHelp.insertItem(FEEDBACK + LINK_ON_YM, getResources().getString(R.string.support_ym), R.drawable.ymoney);
-            adHelp.insertItem(FEEDBACK + LINK_ON_QW, getResources().getString(R.string.support_qiwi), R.drawable.qiwi);
+            adHelp.insertItem(FEEDBACK + LINK_ON_SITE, getResources().getString(R.string.page_app), R.drawable.www);
             adHelp.insertItem(FEEDBACK + CHANGELOG, getResources().getString(R.string.changelog), 0);
             try {
                 StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));

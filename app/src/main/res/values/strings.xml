@@ -184,9 +184,8 @@
     <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
+    <string name="page_app">Страница приложения</string>
     <string name="url_on_app">Приложение «Благая Весть» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
-    <string name="support_ym">Поддержать (Яндекс)</string>
-    <string name="support_qiwi">Поддержать (QIWI)</string>
     <string name="changelog">Список изменений</string>
     <string name="app_version">Версия приложения:&#160;</string>
     <string name="system_version">Версия системы:&#160;</string>
