@@ -286,7 +286,7 @@ public class LoaderWorker extends Worker {
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
-        builderRequest.url(Const.SITE2 + s + Const.PRINT);
+        builderRequest.url(Const.SITE + s + Const.PRINT);
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         SQLiteDatabase db = dataBase.getWritableDatabase();
@@ -471,7 +471,7 @@ public class LoaderWorker extends Worker {
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
             String line = "";
             int i;
-            builderRequest.url(Const.SITE2 + "org/otk/tpl/otk/css/style-print.css");
+            builderRequest.url(Const.SITE + "org/otk/tpl/otk/css/style-print.css");
             Response response = client.newCall(builderRequest.build()).execute();
             BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
             BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));

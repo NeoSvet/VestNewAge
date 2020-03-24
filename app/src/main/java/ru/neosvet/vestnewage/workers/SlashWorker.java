@@ -89,7 +89,7 @@ public class SlashWorker extends Worker {
 
     private void synchronTime() throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(Const.SITE2);
+        builderRequest.url(Const.SITE);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();

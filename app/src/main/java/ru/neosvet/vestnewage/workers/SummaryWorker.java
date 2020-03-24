@@ -93,9 +93,7 @@ public class SummaryWorker extends Worker {
                 bw.write(withOutTag(br.readLine())); //title
                 bw.write(Const.N);
                 line = withOutTag(br.readLine()); //link
-                if (line.contains(Const.SITE2))
-                    line = line.substring(Const.SITE2.length());
-                else if (line.contains(Const.SITE))
+                if (line.contains(Const.SITE))
                     line = line.substring(Const.SITE.length());
                 unread.addLink(line, now);
                 bw.write(line);

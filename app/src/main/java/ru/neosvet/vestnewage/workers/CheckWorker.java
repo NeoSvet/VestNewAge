@@ -135,9 +135,7 @@ public class CheckWorker extends Worker {
 
     private String parseLink(String s) {
         s = withOutTag(s);
-        if (s.contains(Const.SITE2))
-            s = s.substring(Const.SITE2.length());
-        else if (s.contains(Const.SITE))
+        if (s.contains(Const.SITE))
             s = s.substring(Const.SITE.length());
         return s;
     }
