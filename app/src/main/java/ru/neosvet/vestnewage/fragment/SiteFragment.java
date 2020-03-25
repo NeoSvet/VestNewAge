@@ -270,6 +270,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 if (!act.status.isStop()) {
                     act.status.setLoad(false);
                     ProgressHelper.cancelled();
+                    ProgressHelper.setBusy(false);
                     return;
                 }
                 if (act.status.onClick())

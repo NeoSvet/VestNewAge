@@ -471,6 +471,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                     ProgressHelper.cancelled();
                     fabRefresh.setVisibility(View.VISIBLE);
                     fabRndMenu.setVisibility(View.VISIBLE);
+                    ProgressHelper.setBusy(false);
                     return;
                 }
                 if (act.status.onClick()) {

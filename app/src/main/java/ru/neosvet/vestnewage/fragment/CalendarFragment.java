@@ -176,6 +176,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                     act.status.setLoad(false);
                     ProgressHelper.cancelled();
                     fabRefresh.setVisibility(View.VISIBLE);
+                    ProgressHelper.setBusy(false);
                     return;
                 }
                 if (act.status.onClick()) {

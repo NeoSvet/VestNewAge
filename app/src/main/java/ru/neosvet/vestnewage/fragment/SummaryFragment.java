@@ -136,6 +136,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
                     act.status.setLoad(false);
                     ProgressHelper.cancelled();
                     fabRefresh.setVisibility(View.VISIBLE);
+                    ProgressHelper.setBusy(false);
                     return;
                 }
                 if (act.status.onClick())
