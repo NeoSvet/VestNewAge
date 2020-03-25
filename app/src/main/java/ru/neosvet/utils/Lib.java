@@ -45,6 +45,7 @@ public class Lib {
 
     public InputStream getStream(String url) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
+        builderRequest.url(url);
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         if (url.contains(Const.SITE)) {
             builderRequest.header("Referer", Const.SITE);
