@@ -121,15 +121,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     @Override
-    public boolean onBackPressed() {
-        if (ProgressHelper.isBusy()) {
-            ProgressHelper.cancelled();
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public void onChanged(@Nullable Data data) {
         if (!ProgressHelper.isBusy())
             return;

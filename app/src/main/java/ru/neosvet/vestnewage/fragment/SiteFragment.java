@@ -72,15 +72,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             initLoad();
     }
 
-    @Override
-    public boolean onBackPressed() {
-        if (ProgressHelper.isBusy()) {
-            ProgressHelper.cancelled();
-            return false;
-        }
-        return true;
-    }
-
     private void initLoad() {
         ProgressHelper.addObserver(act, this);
         fabRefresh.setVisibility(View.GONE);

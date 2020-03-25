@@ -88,15 +88,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             ProgressHelper.addObserver(act, this);
     }
 
-    @Override
-    public boolean onBackPressed() {
-        if (ProgressHelper.isBusy()) {
-            ProgressHelper.cancelled();
-            return false;
-        }
-        return true;
-    }
-
     private void initModel() {
         model = ViewModelProviders.of(act).get(CalendarModel.class);
         if (ProgressHelper.isBusy())
