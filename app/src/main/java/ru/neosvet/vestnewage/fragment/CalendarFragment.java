@@ -29,6 +29,7 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -115,13 +116,16 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            LoaderModel.inProgress = false;
-            ProgressHelper.setBusy(false);
             act.updateNew();
-            setStatus(false);
             String error = data.getString(Const.ERROR);
-            if (error != null)
+            ProgressHelper.removeObservers(act);
+            if (error != null) {
                 act.status.setError(error);
+                return;
+            }
+            fabRefresh.setVisibility(View.VISIBLE);
+            act.status.setLoad(false);
+            ProgressHelper.setBusy(false);
         }
     }
 

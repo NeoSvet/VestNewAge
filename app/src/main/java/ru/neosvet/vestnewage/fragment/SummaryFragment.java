@@ -84,16 +84,19 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         }
         if (data.getBoolean(Const.LIST, false)) {
             openList(false);
-            if (LoaderModel.inProgress) {
-                ProgressHelper.setBusy(false);
-                finishLoad(null);
-            }
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            LoaderModel.inProgress = false;
+            ProgressHelper.removeObservers(act);
+            act.updateNew();
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                act.status.setError(error);
+                return;
+            }
+            act.status.setLoad(false);
             ProgressHelper.setBusy(false);
-            finishLoad(data.getString(Const.ERROR));
+            fabRefresh.setVisibility(View.VISIBLE);
         }
     }
 
@@ -198,16 +201,5 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         initLoad();
         act.status.startText();
         model.startLoad();
-    }
-
-    private void finishLoad(String error) {
-        ProgressHelper.removeObservers(act);
-        act.updateNew();
-        act.status.setLoad(false);
-        if (error != null) {
-            act.status.setError(error);
-            return;
-        }
-        fabRefresh.setVisibility(View.VISIBLE);
     }
 }

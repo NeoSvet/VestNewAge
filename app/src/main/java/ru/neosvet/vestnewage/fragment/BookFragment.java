@@ -136,12 +136,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             return;
         ProgressHelper.setBusy(false);
         ProgressHelper.removeObservers(act);
-        act.status.setLoad(false);
         String error = data.getString(Const.ERROR);
         if (error != null) {
             act.status.setError(error);
             return;
         }
+        act.status.setLoad(false);
         if (data.getBoolean(Const.OTKR, false)) {
             fromOtkr = true;
             SharedPreferences.Editor editor = pref.edit();
