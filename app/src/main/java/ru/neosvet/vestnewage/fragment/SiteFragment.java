@@ -193,16 +193,16 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 1) { // site
-                        if (link.contains(Const.RSS)) {
+                        if (link.contains(".html")) {
+                            BrowserActivity.openReader(act, link, null);
+                        } else if (link.contains(Const.RSS)) {
                             act.setFragment(R.id.nav_rss, true);
                         } else if (link.contains("/poems")) {
                             act.openBook(link, true);
-                        } else if (pos == 1) { //tolkovaniya
-                            act.setFragment(R.id.nav_book, true);
-                        } else if (pos == 5) { //poslaniya
+                        } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
                             act.openBook(link, false);
-                        } else if (pos == 6 || pos == 7) { //no article
-                            BrowserActivity.openReader(act, link, null);
+                        } else if (link.contains("files") && !link.contains("http")) {
+                            openPage(Const.SITE + link);
                         } else
                             openPage(link);
                     } else {
@@ -304,13 +304,13 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 fabRefresh.setVisibility(View.GONE);
             else
                 fabRefresh.setVisibility(View.VISIBLE);
-            if(tabHost.getCurrentTab() == 1) { //main
-                adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
-                adMain.getItem(0).addLink(FORUM);
-            }
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
+            if (tabHost.getCurrentTab() == 1) { //main
+                adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
+                adMain.getItem(i++).addLink(FORUM);
+            }
             while ((t = br.readLine()) != null) {
                 d = br.readLine();
                 l = br.readLine();
