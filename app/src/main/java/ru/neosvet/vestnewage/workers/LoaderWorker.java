@@ -469,43 +469,39 @@ public class LoaderWorker extends Worker {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
-            String line = "";
-            int i;
-            builderRequest.url(Const.SITE + "org/otk/tpl/otk/css/style-print.css");
+            builderRequest.url(Const.SITE + "_content/BV/style-print.min.css");
             Response response = client.newCall(builderRequest.build()).execute();
             BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
             BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
             BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
-            for (i = 0; i < 7; i++) {
-                br.readLine();
-            }
-            while ((line = br.readLine()) != null) {
-                if (line.contains("P B {")) { //correct bold
-                    br.readLine(); //font-weight:600;
-                    br.readLine(); //}
-                    line = br.readLine();
+            String s = br.readLine();
+            br.close();
+            response.close();
+            int u;
+            String m[] = s.split("#");
+            for (int i = 1; i < m.length; i++) {
+                if (i == 1)
+                    s = m[i].substring(m[i].indexOf("body"));
+                else
+                    s = "#" + m[i];
+                if (s.contains("P B {")) { //correct bold
+                    u = s.indexOf("P B {");
+                    s = s.substring(0, u) + s.substring(s.indexOf("}", u) + 1);
                 }
-                line = line.replace("333333", "333").replace("#333", "#ccc");
-                bwLight.write(line + Const.N);
-                if (line.contains("#000")) {
-                    line = line.replace("000000", "000").replace("#000", "#fff");
-                } else
-                    line = line.replace("#fff", "#000");
-                bwDark.write(line + Const.N);
-                if (line.contains("body")) {
-                    line = "    padding-left: 5px;\n    padding-right: 5px;";
-                    bwLight.write(line + Const.N);
-                    bwDark.write(line + Const.N);
-                } else if (line.contains("print2")) {
-                    line = br.readLine().replace("8pt/9pt", "12pt");
-                    bwLight.write(line + Const.N);
-                    bwDark.write(line + Const.N);
-                }
+                if (s.contains("content"))
+                    s = s.replace("15px", "5px");
+                else if (s.contains("print2"))
+                    s = s.replace("8pt/9pt", "12pt");
+                s = s.replace("#333", "#ccc");
+                bwLight.write(s);
+                if (s.contains("#000"))
+                    s = s.replace("#000", "#fff");
+                else
+                    s = s.replace("#fff", "#000");
+                bwDark.write(s);
                 bwLight.flush();
                 bwDark.flush();
             }
-            br.close();
-            response.close();
             bwLight.close();
             bwDark.close();
         }
