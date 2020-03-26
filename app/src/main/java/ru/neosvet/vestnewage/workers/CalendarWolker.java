@@ -135,7 +135,7 @@ public class CalendarWolker extends Worker {
 
     private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
-                + "?json&year=" + year + "&month=" + month));
+                + "AjaxData/Calendar?year=" + year + "&month=" + month));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
         br.close();
