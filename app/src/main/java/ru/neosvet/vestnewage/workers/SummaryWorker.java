@@ -92,13 +92,13 @@ public class SummaryWorker extends Worker {
         for (int i = 1; i < m.length; i++) {
             a = m[i].indexOf("</link");
             line = withOutTag(m[i].substring(0, a));
+            if (line.contains(Const.SITE.substring(8)))
+                line = line.substring(line.indexOf("info/") + 5);
             b = m[i].indexOf("</title");
             bw.write(withOutTag(m[i].substring(a + 10, b))); //title
             bw.write(Const.N);
             bw.write(withOutTag(line)); //link
             bw.write(Const.N);
-            if (line.contains(Const.SITE))
-                line = line.substring(Const.SITE.length());
             unread.addLink(line, now);
             a = m[i].indexOf("</des");
             bw.write(withOutTag(m[i].substring(b + 10, a))); //des
