@@ -84,7 +84,11 @@ public class BookWorker extends Worker {
                 cur = 0;
                 if (!kat && fromOtkr)
                     loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-                String s = loadListBook(kat);
+                String s;
+                if (kat)
+                    s = loadPoems();
+                else
+                    s = loadListBook("tolkovaniya");
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
                         .putString(Const.TITLE, s)
@@ -94,8 +98,8 @@ public class BookWorker extends Worker {
             //LoaderHelper
             if (!LoaderHelper.start)
                 return Result.success();
-            loadListBook(false);
-            loadListBook(true);
+            loadListBook("tolkovaniya");
+            loadPoems();
             if (!LoaderHelper.start)
                 return Result.success();
             loadListUcoz(true, true);
@@ -217,14 +221,23 @@ public class BookWorker extends Worker {
         return name;
     }
 
-    private String loadListBook(boolean katren) throws Exception {
-        String url = Const.SITE + (katren ? Const.POEMS : "tolkovaniya") + Const.PRINT;
+    private String loadPoems() throws Exception {
+        String s = null;
+        for (int i = 2016; i <= DateHelper.initToday(context).getYear(); i++) {
+            s = loadListBook(Const.POEMS + "/" + i);
+        }
+        return s;
+    }
+
+    private String loadListBook(String url) throws Exception {
+        url = Const.SITE + url + Const.PRINT;
         InputStream in = new BufferedInputStream(lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         boolean begin = false;
         int i, n;
         String line, t, s, date1 = "", date2;
-        while ((line = br.readLine()) != null) {
+        line = br.readLine();
+        while (!line.contains("container--")) {
             if (isCancelled()) {
                 br.close();
                 in.close();
@@ -258,15 +271,22 @@ public class BookWorker extends Worker {
                     t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
                     if (t.contains("(")) //poems
                         t = t.substring(0, t.indexOf(" ("));
-                    title.add(t);
+                    title.add(Decoding(t));
                     links.add(s);
                 }
                 saveData(date1);
             }
+            line = br.readLine();
         }
         br.close();
         in.close();
         return date1;
+    }
+
+    private String Decoding(String s) {
+        if (!s.contains("&#x"))
+            return s;
+        return android.text.Html.fromHtml(s).toString();
     }
 
     private void saveData(String date) throws Exception {
