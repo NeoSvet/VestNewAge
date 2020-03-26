@@ -74,39 +74,41 @@ public class SummaryWorker extends Worker {
     }
 
     private String withOutTag(String s) {
-        int i = s.indexOf(">") + 1;
-        s = s.substring(i, s.indexOf("<", i));
-        return s;
+        return s.substring(s.indexOf(">") + 1);
     }
 
     private void loadList() throws Exception {
-        String line;
         Lib lib = new Lib(context);
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
         DateHelper now = DateHelper.initNow(context);
         UnreadHelper unread = new UnreadHelper(context);
-        while ((line = br.readLine()) != null) {
-            if (line.contains("</channel>")) break;
-            if (line.contains("<item>")) {
-                bw.write(withOutTag(br.readLine())); //title
-                bw.write(Const.N);
-                line = withOutTag(br.readLine()); //link
-                if (line.contains(Const.SITE))
-                    line = line.substring(Const.SITE.length());
-                unread.addLink(line, now);
-                bw.write(line);
-                bw.write(Const.N);
-                bw.write(withOutTag(br.readLine())); //des
-                bw.write(Const.N);
-                bw.write(DateHelper.parse(context, withOutTag(br.readLine())).getTimeInMills() + Const.N); //time
-                bw.flush();
-            }
-        }
-        bw.close();
+        String m[] = br.readLine().split("<item>");
         br.close();
         in.close();
+        String line;
+        int a, b;
+        for (int i = 1; i < m.length; i++) {
+            a = m[i].indexOf("</link");
+            line = withOutTag(m[i].substring(0, a));
+            b = m[i].indexOf("</title");
+            bw.write(withOutTag(m[i].substring(a + 10, b))); //title
+            bw.write(Const.N);
+            bw.write(withOutTag(line)); //link
+            bw.write(Const.N);
+            if (line.contains(Const.SITE))
+                line = line.substring(Const.SITE.length());
+            unread.addLink(line, now);
+            a = m[i].indexOf("</des");
+            bw.write(withOutTag(m[i].substring(b + 10, a))); //des
+            bw.write(Const.N);
+            b = m[i].indexOf("</a10");
+            bw.write(DateHelper.parse(context, withOutTag(m[i].substring(a + 15, b)))
+                    .getTimeInMills() + Const.N); //time
+            bw.flush();
+        }
+        bw.close();
         unread.setBadge();
         unread.close();
     }

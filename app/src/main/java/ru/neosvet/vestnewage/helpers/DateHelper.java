@@ -72,12 +72,19 @@ public class DateHelper {
                     .withLocale(Locale.US);
             return new DateHelper(context, LocalDate.parse(s, fDate), null);
         }
-        //Fri, 15 Jun 2018 07:58:29 GMT or +0300
         boolean offset = s.contains("+0300");
-        s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
-        DateTimeFormatter fDate = DateTimeFormatter
-                .ofPattern("EEE, dd MMM yyyy HH:mm:ss")
-                .withLocale(Locale.US);
+        DateTimeFormatter fDate;
+        if (s.contains("-")) { //2020-03-25T00:00:00+03:00
+            s = s.substring(0, s.length() - 6).replace("T", " ");
+            fDate = DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm:ss")
+                    .withLocale(Locale.US);
+        } else {  //Fri, 15 Jun 2018 07:58:29 GMT or +0300
+            s = s.substring(0, s.lastIndexOf(" ")); //remove GMT
+            fDate = DateTimeFormatter
+                    .ofPattern("EEE, dd MMM yyyy HH:mm:ss")
+                    .withLocale(Locale.US);
+        }
         LocalDateTime dateTime = LocalDateTime.parse(s, fDate);
         if (offset)
             dateTime = dateTime.minusHours(3);
