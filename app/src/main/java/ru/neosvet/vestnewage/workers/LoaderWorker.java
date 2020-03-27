@@ -74,6 +74,7 @@ public class LoaderWorker extends Worker {
             if (name.equals(CheckHelper.class.getSimpleName())) {
                 downloadList();
                 CheckHelper.postCommand(context, false);
+                LoaderModel.inProgress = false;
                 return Result.success();
             }
             if (name.equals(CalendarModel.class.getSimpleName())) {
@@ -117,14 +118,17 @@ public class LoaderWorker extends Worker {
                                 .putBoolean(Const.FINISH, true)
                                 .putString(Const.LINK, link) // use only in CollectionsFragment
                                 .build());
+                        LoaderModel.inProgress = false;
                         return Result.success();
                 }
             LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
+            LoaderModel.inProgress = false;
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             error = e.getMessage();
         }
+        LoaderModel.inProgress = false;
         if (name.equals(CheckHelper.class.getSimpleName())) {
             CheckHelper.postCommand(context, false);
             return Result.failure();
@@ -141,6 +145,7 @@ public class LoaderWorker extends Worker {
     }
 
     private Result postFinish() {
+        LoaderModel.inProgress = false;
         ProgressHelper.postProgress(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .build());
@@ -271,6 +276,7 @@ public class LoaderWorker extends Worker {
 
     private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
+        Lib.LOG("downloadPage: " + link);
         if (name.contains(LoaderModel.TAG))
             ProgressHelper.setMessage(initMessage(link));
         DataBase dataBase = new DataBase(context, link);

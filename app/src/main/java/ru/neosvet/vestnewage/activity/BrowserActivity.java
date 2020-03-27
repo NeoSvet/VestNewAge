@@ -135,7 +135,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (!LoaderModel.inProgress)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
-            LoaderModel.inProgress = false;
             finishLoad(data.getString(Const.ERROR));
         }
     }

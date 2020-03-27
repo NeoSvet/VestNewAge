@@ -91,7 +91,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
-            LoaderModel.inProgress = false;
             ProgressHelper.setBusy(false);
             finishLoad(data.getString(Const.ERROR));
         }

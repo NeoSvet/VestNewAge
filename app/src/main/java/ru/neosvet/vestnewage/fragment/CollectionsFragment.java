@@ -150,7 +150,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             String error = data.getString(Const.ERROR);
             if (load) {
                 load = false;
-                LoaderModel.inProgress = false;
                 act.status.setLoad(false);
                 if (error != null)
                     act.status.setError(error);
