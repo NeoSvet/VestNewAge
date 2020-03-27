@@ -276,7 +276,6 @@ public class LoaderWorker extends Worker {
 
     private boolean downloadPage(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        Lib.LOG("downloadPage: " + link);
         if (name.contains(LoaderModel.TAG))
             ProgressHelper.setMessage(initMessage(link));
         DataBase dataBase = new DataBase(context, link);
@@ -312,13 +311,14 @@ public class LoaderWorker extends Worker {
                     if (line.length() < 7) continue;
                     line = line.replace("<br />", Const.BR).replace("color", "cvet");
                     if (line.contains("<p")) {
+                        line = line.replace(" class=\"poem\"", "");
                         while (!line.contains(par)) {
                             line += br.readLine();
                         }
                         if (line.contains("noind")) {
                             cv = new ContentValues();
                             cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, line.substring(0, line.indexOf(par) + par.length()));
+                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line.substring(0, line.indexOf(par) + par.length())));
                             db.insert(DataBase.PARAGRAPH, null, cv);
                             line = line.substring(line.lastIndexOf("<p"));
                         }
@@ -356,14 +356,14 @@ public class LoaderWorker extends Worker {
                             s = line.substring(0, line.indexOf(par) + par.length());
                             cv = new ContentValues();
                             cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, s);
+                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(s));
                             db.insert(DataBase.PARAGRAPH, null, cv);
                             line = line.substring(s.length());
                         }
                     }
                     cv = new ContentValues();
                     cv.put(DataBase.ID, id);
-                    cv.put(DataBase.PARAGRAPH, line);
+                    cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line));
                     db.insert(DataBase.PARAGRAPH, null, cv);
                 }
             } else if (line.contains("<h1")) {
@@ -416,6 +416,15 @@ public class LoaderWorker extends Worker {
         db.close();
         dataBase.close();
         return true;
+    }
+
+    private String ConvertHTMLcode(String s) {
+        int a, b;
+        while ((a = s.indexOf("&")) > -1) {
+            b = s.indexOf(";", a) + 1;
+            s = s.substring(0, a) + android.text.Html.fromHtml(s.substring(a, b)) + s.substring(b);
+        }
+        return s;
     }
 
     private String initMessage(String s) {
