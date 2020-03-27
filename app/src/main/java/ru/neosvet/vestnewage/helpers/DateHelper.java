@@ -66,14 +66,27 @@ public class DateHelper {
     }
 
     public static DateHelper parse(Context context, String s) {
-        if (s.length() == 8) {
-            DateTimeFormatter fDate = DateTimeFormatter
-                    .ofPattern("dd.MM.yy")
-                    .withLocale(Locale.US);
-            return new DateHelper(context, LocalDate.parse(s, fDate), null);
+        DateTimeFormatter fDate = null;
+        switch (s.length()) {
+            case 8:
+                fDate = DateTimeFormatter
+                        .ofPattern("dd.MM.yy")
+                        .withLocale(Locale.US);
+                break;
+            case 9:
+                fDate = DateTimeFormatter
+                        .ofPattern("yyyy-M-dd")
+                        .withLocale(Locale.US);
+                break;
+            case 10:
+                fDate = DateTimeFormatter
+                        .ofPattern("yyyy-MM-dd")
+                        .withLocale(Locale.US);
+                break;
         }
+        if (fDate != null)
+            return new DateHelper(context, LocalDate.parse(s, fDate), null);
         boolean offset = s.contains("+0300");
-        DateTimeFormatter fDate;
         if (s.contains("-")) { //2020-03-25T00:00:00+03:00
             s = s.substring(0, s.length() - 6).replace("T", " ");
             fDate = DateTimeFormatter
