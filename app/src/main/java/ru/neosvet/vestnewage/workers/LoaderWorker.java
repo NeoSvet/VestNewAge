@@ -309,6 +309,13 @@ public class LoaderWorker extends Worker {
                         while (!line.contains(par)) {
                             line += br.readLine();
                         }
+                        if (line.contains("noind")) {
+                            cv = new ContentValues();
+                            cv.put(DataBase.ID, id);
+                            cv.put(DataBase.PARAGRAPH, line.substring(0, line.indexOf(par) + par.length()));
+                            db.insert(DataBase.PARAGRAPH, null, cv);
+                            line = line.substring(line.lastIndexOf("<p"));
+                        }
                     }
                     if (line.contains("iframe")) {
                         if (!line.contains("</iframe"))
@@ -393,7 +400,6 @@ public class LoaderWorker extends Worker {
                     db.delete(DataBase.PARAGRAPH, DataBase.ID +
                             DataBase.Q, new String[]{String.valueOf(id)});
                 }
-                br.readLine();
                 begin = true;
             } else if (line.contains("counter") && singlePage) { // счетчики
                 sendCounter(line);
