@@ -72,8 +72,13 @@ public class CalendarWolker extends Worker {
             DateHelper d = DateHelper.initToday(context);
             if (getInputData().getInt(Const.MODE, 0) == LoaderHelper.DOWNLOAD_YEAR) {
                 ProgressHelper.setMessage(context.getResources().getString(R.string.download_list));
-                ProgressHelper.setMax(d.getMonth());
-                loadListYear(getInputData().getInt(Const.YEAR, 0), d.getMonth() + 1);
+                int m, y = getInputData().getInt(Const.YEAR, 0);
+                if (d.getYear() != y)
+                    m = 12;
+                else
+                    m = d.getMonth();
+                ProgressHelper.setMax(m);
+                loadListYear(y, m + 1);
             } else { //all calendar
                 int max_y = d.getYear() + 1, max_m = 13;
                 for (int y = 2016; y < max_y && LoaderHelper.start; y++) {
