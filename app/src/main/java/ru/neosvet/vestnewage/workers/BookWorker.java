@@ -223,7 +223,7 @@ public class BookWorker extends Worker {
 
     private String loadPoems() throws Exception {
         String s = null;
-        for (int i = 2016; i <= DateHelper.initToday(context).getYear(); i++) {
+        for (int i = 2016; i <= DateHelper.initToday(context).getYear() && !isCancelled(); i++) {
             s = loadListBook(Const.POEMS + "/" + i);
         }
         return s;
