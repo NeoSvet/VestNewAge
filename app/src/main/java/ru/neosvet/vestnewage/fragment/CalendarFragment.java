@@ -116,6 +116,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         }
         if (data.getBoolean(Const.FINISH, false)) {
             act.updateNew();
+            openCalendar(false);
             String error = data.getString(Const.ERROR);
             ProgressHelper.removeObservers(act);
             if (error != null) {
@@ -323,15 +324,21 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                 while (cursor.moveToNext()) {
                     title = cursor.getString(iTitle);
                     link = cursor.getString(iLink);
-                    i = link.lastIndexOf("/") + 1;
-                    i = Integer.parseInt(link.substring(i, i + 2));
+                    if (link.contains("@")) {
+                        i = Integer.parseInt(link.substring(0, 2));
+                        link = link.substring(9);
+                    } else {
+                        i = link.lastIndexOf("/") + 1;
+                        i = Integer.parseInt(link.substring(i, i + 2));
+                    }
                     i = adCalendar.indexOf(i);
                     adCalendar.getItem(i).addLink(link);
-                    if (title.contains("/"))
-                        adCalendar.getItem(i).addTitle(title);
-                    else {
+                    if (dataBase.existsPage(link)) {
                         title = dataBase.getPageTitle(title, link);
                         adCalendar.getItem(i).addTitle(title.substring(title.indexOf(" ") + 1));
+                    } else {
+                        title = getTitleByLink(link);
+                        adCalendar.getItem(i).addTitle(title);
                     }
                     empty = false;
                 }
@@ -348,6 +355,19 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             if (loadIfNeed)
                 startLoad();
         }
+    }
+
+    private String getTitleByLink(String s) {
+        DataBase dataBase = new DataBase(act, "00.00");
+        SQLiteDatabase db = dataBase.getWritableDatabase();
+        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.TITLE},
+                Const.LINK + DataBase.Q, new String[]{s}, null, null, null);
+        if (curTitle.moveToFirst())
+            s = curTitle.getString(0);
+        curTitle.close();
+        db.close();
+        dataBase.close();
+        return s;
     }
 
     private void checkTime(int sec) {

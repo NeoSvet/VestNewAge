@@ -150,6 +150,7 @@ public class CalendarWolker extends Worker {
         String link;
         initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
         json = new JSONObject(s);
+        DateHelper d;
         int n;
         for (int i = 0; i < json.names().length() && !ProgressHelper.isCancelled(); i++) {
             s = json.names().get(i).toString();
@@ -157,11 +158,15 @@ public class CalendarWolker extends Worker {
             n = list.size();
             list.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
             if (jsonI == null) { // несколько материалов за день
+                d = DateHelper.parse(context, s);
                 jsonA = json.optJSONArray(s);
                 for (int j = 0; j < jsonA.length(); j++) {
                     jsonI = jsonA.getJSONObject(j);
                     link = jsonI.getString(Const.LINK) + Const.HTML;
-                    addLink(n, link);
+                    if (link.contains(d.toString()))
+                        addLink(n, link);
+                    else
+                        addLink(n, d.toString() + "@" + link);
                 }
             } else { // один материал за день
                 link = jsonI.getString(Const.LINK) + Const.HTML;
@@ -217,9 +222,8 @@ public class CalendarWolker extends Worker {
 
     private void addLink(int n, String link) throws Exception {
         if (list.get(n).getCount() > 0) {
-            String s = link.substring(link.lastIndexOf("/"));
             for (int i = 0; i < list.get(n).getCount(); i++) {
-                if (list.get(n).getLink(i).contains(s))
+                if (list.get(n).getLink(i).contains(link))
                     return;
             }
         }
@@ -231,7 +235,10 @@ public class CalendarWolker extends Worker {
                 Const.LINK + DataBase.Q,
                 new String[]{link}) == 0) {
             // обновить не получилось, добавляем:
-            cv.put(Const.TITLE, link);
+            if (link.contains("@"))
+                cv.put(Const.TITLE, link.substring(9));
+            else
+                cv.put(Const.TITLE, link);
             db.insert(Const.TITLE, null, cv);
         }
     }
