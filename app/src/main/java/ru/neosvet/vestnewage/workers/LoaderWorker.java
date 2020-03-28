@@ -286,7 +286,7 @@ public class LoaderWorker extends Worker {
         if (!singlePage)
             checkRequests();
         String line, s = link;
-        final String par = "</p>";
+        final String parS = "<p", parE = "</p>";
         if (link.contains("#")) {
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
@@ -297,7 +297,7 @@ public class LoaderWorker extends Worker {
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         boolean begin = false;
-        int id = 0;
+        int id = 0, i;
         while ((line = br.readLine()) != null) {
             if (begin) {
                 if (line.contains("<!--/row-->") || line.contains("<h1>")) {
@@ -310,17 +310,20 @@ public class LoaderWorker extends Worker {
                     line = line.trim();
                     if (line.length() < 7) continue;
                     line = line.replace("<br />", Const.BR).replace("color", "cvet");
-                    if (line.contains("<p")) {
-                        line = line.replace(" class=\"poem\"", "");
-                        while (!line.contains(par)) {
+                    if (line.contains(parS)) {
+                        line = line.replace(" class=\"noind\"", "")
+                                .replace(" class='poem'", "")
+                                .replace(" class=\"poem\"", "");
+                        while (!line.contains(parE)) {
                             line += br.readLine();
                         }
-                        if (line.contains("noind")) {
+                        while (line.indexOf(parS) < line.lastIndexOf(parS)) {
                             cv = new ContentValues();
                             cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line.substring(0, line.indexOf(par) + par.length())));
+                            i = line.indexOf(parE) + parE.length();
+                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line.substring(0, i)));
                             db.insert(DataBase.PARAGRAPH, null, cv);
-                            line = line.substring(line.lastIndexOf("<p"));
+                            line = line.substring(i).trim();
                         }
                     }
                     if (line.contains("iframe")) {
@@ -344,16 +347,16 @@ public class LoaderWorker extends Worker {
                             line += s;
                             s = br.readLine();
                         }
-                        while (line.indexOf(par) < line.lastIndexOf(par)) {
-                            line = line.substring(0, line.indexOf(par)) + Const.BR +
-                                    line.substring(line.indexOf("\">", line.indexOf(par)) + 2);
+                        while (line.indexOf(parE) < line.lastIndexOf(parE)) {
+                            line = line.substring(0, line.indexOf(parE)) + Const.BR +
+                                    line.substring(line.indexOf("\">", line.indexOf(parE)) + 2);
                         }
                     } else if (line.contains(".jpg")) {
                         line = line.replace("=\"/", "=\"http://blagayavest.info/");
                     } else {
-                        while (line.indexOf(par) < line.lastIndexOf(par)) {
+                        while (line.indexOf(parE) < line.lastIndexOf(parE)) {
                             // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
-                            s = line.substring(0, line.indexOf(par) + par.length());
+                            s = line.substring(0, line.indexOf(parE) + parE.length());
                             cv = new ContentValues();
                             cv.put(DataBase.ID, id);
                             cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(s));
