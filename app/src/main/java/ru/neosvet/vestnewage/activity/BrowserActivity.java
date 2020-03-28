@@ -132,6 +132,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.START, false)) {
+            status.loadText();
+            return;
+        }
         if (data.getBoolean(Const.FINISH, false)) {
             String error = data.getString(Const.ERROR);
             if (error != null) {
