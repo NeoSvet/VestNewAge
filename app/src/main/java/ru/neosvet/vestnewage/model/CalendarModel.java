@@ -13,7 +13,7 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.workers.CalendarWolker;
+import ru.neosvet.vestnewage.workers.CalendarWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class CalendarModel extends AndroidViewModel {
@@ -35,7 +35,7 @@ public class CalendarModel extends AndroidViewModel {
                 .putBoolean(Const.UNREAD, updateUnread)
                 .build();
         OneTimeWorkRequest task = new OneTimeWorkRequest
-                .Builder(CalendarWolker.class)
+                .Builder(CalendarWorker.class)
                 .setInputData(data)
                 .setConstraints(constraints)
                 .addTag(TAG)

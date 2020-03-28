@@ -30,7 +30,7 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.workers.BookWorker;
-import ru.neosvet.vestnewage.workers.CalendarWolker;
+import ru.neosvet.vestnewage.workers.CalendarWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 import ru.neosvet.vestnewage.workers.SiteWorker;
 import ru.neosvet.vestnewage.workers.SummaryWorker;
@@ -195,7 +195,7 @@ public class LoaderHelper extends LifecycleService {
             case DOWNLOAD_YEAR:// refresh list for year
                 data.putInt(Const.YEAR, Integer.parseInt(request));
                 task = new OneTimeWorkRequest
-                        .Builder(CalendarWolker.class)
+                        .Builder(CalendarWorker.class)
                         .setInputData(data.build())
                         .setConstraints(constraints)
                         .addTag(CalendarModel.TAG)
@@ -262,7 +262,7 @@ public class LoaderHelper extends LifecycleService {
         if (id == ALL) { //Calendar
             data = data.putInt(Const.YEAR, ALL);
             task = new OneTimeWorkRequest
-                    .Builder(CalendarWolker.class)
+                    .Builder(CalendarWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
                     .addTag(CalendarModel.TAG)

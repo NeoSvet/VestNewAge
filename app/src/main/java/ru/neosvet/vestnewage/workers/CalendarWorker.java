@@ -34,14 +34,14 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 
-public class CalendarWolker extends Worker {
+public class CalendarWorker extends Worker {
     private Context context;
     private DataBase dataBase;
     private SQLiteDatabase db;
     private Lib lib;
     private List<ListItem> list = new ArrayList<ListItem>();
 
-    public CalendarWolker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public CalendarWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.context = context;
         lib = new Lib(context);

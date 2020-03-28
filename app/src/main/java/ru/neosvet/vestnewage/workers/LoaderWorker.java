@@ -78,7 +78,7 @@ public class LoaderWorker extends Worker {
                 return Result.success();
             }
             if (name.equals(CalendarModel.class.getSimpleName())) {
-                max = CalendarWolker.getListLink(context,
+                max = CalendarWorker.getListLink(context,
                         getInputData().getInt(Const.YEAR, 0),
                         getInputData().getInt(Const.MONTH, 0));
                 downloadList();
@@ -168,7 +168,7 @@ public class LoaderWorker extends Worker {
         }
         ProgressHelper.setMax(n);
         for (m = 1; m < k && !isCancelled(); m++) {
-            CalendarWolker.getListLink(context, year, m);
+            CalendarWorker.getListLink(context, year, m);
             downloadList();
         }
     }
