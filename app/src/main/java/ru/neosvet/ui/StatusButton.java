@@ -16,11 +16,10 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class StatusButton {
     private Context context;
-    private Animation anRotate;
+    private Animation anRotate, anMin, anMax, anHide;
     private View panel;
     private TextView tv;
     private ImageView iv;
-    private Animation anMin, anMax;
     private ResizeAnim resizeMax = null;
     private String error = null;
     private boolean stop = true, time = false, visible;
@@ -42,6 +41,23 @@ public class StatusButton {
             public void onAnimationEnd(Animation animation) {
                 if (!stop) //panel.getVisibility() == View.VISIBLE
                     iv.startAnimation(anRotate);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        anHide = AnimationUtils.loadAnimation(context, R.anim.hide);
+        anHide.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                panel.setVisibility(View.GONE);
             }
 
             @Override
@@ -79,14 +95,16 @@ public class StatusButton {
         setError(null);
         stop = !start;
         if (start) {
+            loadText();
             time = false;
             panel.setVisibility(View.VISIBLE);
             visible = true;
             iv.startAnimation(anRotate);
         } else {
-            panel.setVisibility(View.GONE);
             visible = false;
             iv.clearAnimation();
+            tv.setText(context.getResources().getString(R.string.done));
+            panel.startAnimation(anHide);
         }
     }
 
@@ -100,7 +118,6 @@ public class StatusButton {
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
         } else {
-            loadText();
             panel.setVisibility(View.GONE);
             visible = false;
             panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_norm));
@@ -121,7 +138,6 @@ public class StatusButton {
             this.time = false;
             visible = false;
             panel.setVisibility(View.GONE);
-            loadText();
         }
         return false;
     }

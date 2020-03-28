@@ -176,6 +176,7 @@
     <string name="error">Ошибка</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
+    <string name="done">Готово</string>
     <!--SummaryNotif-->
     <string name="check_new">Проверка на наличие нового</string>
     <string name="appeared_new">Новое:&#160;</string>
