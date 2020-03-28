@@ -133,7 +133,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     @Override
     public void onChanged(@Nullable Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
-            finishLoad(data.getString(Const.ERROR));
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                status.setError(error);
+                return;
+            }
+            status.setLoad(false);
+            status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
+            openPage(true);
         }
     }
 
@@ -742,16 +749,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     public void openInApps(String url) {
         lib.openInApps(url, null);
-    }
-
-    private void finishLoad(String error) {
-        status.setLoad(false);
-        if (error != null) {
-            status.setError(error);
-            return;
-        }
-        status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
-        openPage(true);
     }
 
     private float getPositionOnPage() {
