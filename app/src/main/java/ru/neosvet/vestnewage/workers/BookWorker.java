@@ -59,7 +59,7 @@ public class BookWorker extends Worker {
                     .build());
         }
         try {
-            if (getInputData().getBoolean(Const.OTKR, false)) {
+            if (getInputData().getBoolean(Const.OTKR, false)) { //загрузка Посланий за 2004-2015
                 String s = loadListUcoz(true, false);
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
@@ -73,7 +73,7 @@ public class BookWorker extends Worker {
                 LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
                 return Result.success();
             }
-            if (BOOK) {
+            if (BOOK) { // book section
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
