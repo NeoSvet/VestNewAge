@@ -122,6 +122,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if (data.getBoolean(Const.OTKR, false)) {
+            fromOtkr = true;
+            if (tab == 1 && dPoslanie.getYear() == 2016 && dPoslanie.getMonth() == 1)
+                ivPrev.setEnabled(true);
+            return;
+        }
         if (!ProgressHelper.isBusy())
             return;
         if (data.getBoolean(Const.START, false)) {
@@ -142,13 +148,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             return;
         }
         act.status.setLoad(false);
-        if (data.getBoolean(Const.OTKR, false)) {
-            fromOtkr = true;
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putBoolean(Const.OTKR, fromOtkr);
-            editor.apply();
-            dPoslanie.setYear(DEF_YEAR);
-        }
         String name = data.getString(Const.TITLE);
         finishLoad(name);
     }
@@ -260,7 +259,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             tvDate.setText(d.getMonthString() + Const.N + d.getYear());
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
-                ivPrev.setEnabled(true);
+                ivPrev.setEnabled(!LoaderHelper.start);
                 d.changeMonth(1);
             } else {
                 d.changeMonth(-1);
@@ -519,6 +518,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 ProgressHelper.addObserver(act, BookFragment.this);
+                                ivPrev.setEnabled(false);
                                 LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
                             }
                         });
@@ -570,6 +570,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             d = dPoslanie;
         fabRefresh.setVisibility(View.VISIBLE);
         fabRndMenu.setVisibility(View.VISIBLE);
+        if (result == null)
+            return;
+
         if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
             d = DateHelper.putYearMonth(act,
                     2000 + Integer.parseInt(result.substring(3, 5)),
