@@ -115,13 +115,9 @@ public class Lib {
 
     public static String withOutTags(String s) {
         int i;
-        s = s.replace("&ldquo;", "“").replace("&rdquo;", "”").replace(Const.BR, Const.N)
-                .replace("&laquo;", "«").replace("&raquo;", "»").replace(Const.N + " ", Const.N)
-                .replace("&ndash;", "–").replace("&nbsp;", " ");
-
         while ((i = s.indexOf("<")) > -1) {
             s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
         }
-        return s.trim().replace("&gt;", ">");
+        return s.trim();
     }
 }
