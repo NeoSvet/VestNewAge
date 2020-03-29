@@ -66,15 +66,7 @@
 
         <TextView
             android:id="@+id/tvStatus"
-            style="@style/Label"
-            android:layout_width="wrap_content"
-            android:layout_height="56dp"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:paddingLeft="30dp"
-            android:paddingRight="10dp"
-            android:text="@string/load"
-            android:textSize="20sp" />
+            style="@style/StatusLabel" />
 
         <ImageView
             android:id="@+id/ivStatus"
