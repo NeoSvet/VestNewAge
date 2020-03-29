@@ -114,10 +114,6 @@ public class Lib {
     }
 
     public static String withOutTags(String s) {
-        int i;
-        while ((i = s.indexOf("<")) > -1) {
-            s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1);
-        }
-        return s.trim();
+        return android.text.Html.fromHtml(s).toString().trim();
     }
 }
