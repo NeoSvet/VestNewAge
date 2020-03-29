@@ -21,11 +21,11 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.work.Data;
 
 import ru.neosvet.ui.SoftKeyboard;
+import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
@@ -43,7 +43,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
-    private TextView tvError;
     private EditText etEmail, etPassword;
     private View container, fabEnter, fabExit, pMain;
     private byte mode_list = 0;
@@ -147,9 +146,17 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                         result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.ERROR:
-                tvError.setText(result.getString(Const.DESCTRIPTION));
-                tvError.setVisibility(View.VISIBLE);
-                break;
+                final CustomDialog alert = new CustomDialog(act);
+                alert.setTitle(getResources().getString(R.string.error));
+                alert.setMessage(result.getString(Const.DESCTRIPTION));
+                alert.setRightButton(getResources().getString(android.R.string.ok), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alert.dismiss();
+                    }
+                });
+                alert.show(null);
+                return;
         }
         pMain.setVisibility(View.GONE);
         fabEnter.setVisibility(View.GONE);
@@ -210,7 +217,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
-        tvError = (TextView) container.findViewById(R.id.tvError);
         etEmail = (EditText) container.findViewById(R.id.etEmail);
         etPassword = (EditText) container.findViewById(R.id.etPassword);
         cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
@@ -280,7 +286,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     }
 
     private void loginList() {
-        tvError.setVisibility(View.GONE);
         for (int i = 0; i < getResources().getStringArray(R.array.cabinet_main).length; i += 2) {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_main)[i]),
                     getResources().getStringArray(R.array.cabinet_main)[i + 1]);
