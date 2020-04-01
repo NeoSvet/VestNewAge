@@ -78,27 +78,38 @@
             android:gravity="center"
             android:textSize="20sp" />
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/pStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="201dp"
+            android:layout_height="56dp"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:background="@drawable/shape_norm"
             android:orientation="horizontal"
             android:visibility="gone">
 
+            <ProgressBar
+                android:id="@+id/progStatus"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progressDrawable="@drawable/status_progressbar"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/tvStatus"
-                style="@style/StatusLabel" />
+                style="@style/StatusLabel"
+                android:layout_alignParentLeft="true" />
 
             <ImageView
                 android:id="@+id/ivStatus"
                 android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
                 android:padding="15dp"
                 android:src="@drawable/refresh" />
-        </LinearLayout>
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/tvPromTime"

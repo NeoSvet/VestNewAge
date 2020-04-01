@@ -177,7 +177,7 @@ public class BookWorker extends Worker {
             if (max > 0) {
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.DIALOG, true)
-                        .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
+                        .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
                         .build());
                 cur++;
             } else
@@ -260,7 +260,7 @@ public class BookWorker extends Worker {
                         if (max > 0) {
                             ProgressHelper.postProgress(new Data.Builder()
                                     .putBoolean(Const.DIALOG, true)
-                                    .putString(Const.MSG, ProgressHelper.getProcent(cur, max) + "%")
+                                    .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
                                     .build());
                             cur++;
                         } else

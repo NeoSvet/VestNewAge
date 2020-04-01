@@ -87,7 +87,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             return;
         }
         if (data.getBoolean(Const.DIALOG, false)) {
-            act.status.setText(data.getString(Const.MSG));
+            act.status.setProgress(data.getInt(Const.PROG, 0));
             return;
         }
         if (data.getBoolean(Const.LIST, false)) {

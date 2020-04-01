@@ -135,7 +135,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             return;
         }
         if (data.getBoolean(Const.DIALOG, false)) {
-            act.status.setText(data.getString(Const.MSG));
+            act.status.setProgress(data.getInt(Const.PROG, 0));
             return;
         }
         if (!data.getBoolean(Const.FINISH, false))

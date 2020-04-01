@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ru.neosvet.vestnewage.R;
@@ -20,15 +21,17 @@ public class StatusButton {
     private View panel;
     private TextView tv;
     private ImageView iv;
+    private ProgressBar progBar;
     private ResizeAnim resizeMax = null;
     private String error = null;
-    private boolean stop = true, time = false, visible;
+    private boolean stop = true, time = false, visible, prog = false;
 
     public StatusButton(Context context, View p) {
         this.context = context;
         this.panel = p;
         tv = (TextView) panel.findViewById(R.id.tvStatus);
         iv = (ImageView) panel.findViewById(R.id.ivStatus);
+        progBar = (ProgressBar) panel.findViewById(R.id.progStatus);
 
         anRotate = AnimationUtils.loadAnimation(context, R.anim.rotate);
         anRotate.setAnimationListener(new Animation.AnimationListener() {
@@ -101,6 +104,11 @@ public class StatusButton {
             visible = true;
             iv.startAnimation(anRotate);
         } else {
+            if(prog) {
+                prog = false;
+                progBar.setProgress(0);
+                progBar.setVisibility(View.GONE);
+            }
             visible = false;
             iv.clearAnimation();
             tv.setText(context.getResources().getString(R.string.done));
@@ -157,10 +165,6 @@ public class StatusButton {
         return error != null;
     }
 
-    public void setText(String s) {
-        tv.setText(s);
-    }
-
     public void startText() {
         tv.setText(context.getResources().getString(R.string.start));
     }
@@ -213,5 +217,13 @@ public class StatusButton {
             panel.startAnimation(anMax);
         }
         return visible;
+    }
+
+    public void setProgress(int p) {
+        if (!prog) {
+            progBar.setVisibility(View.VISIBLE);
+            prog = true;
+        }
+        progBar.setProgress(p);
     }
 }
