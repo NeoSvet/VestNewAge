@@ -554,10 +554,10 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void initLoad() {
-        ProgressHelper.addObserver(act, this);
         fabRefresh.setVisibility(View.GONE);
         fabRndMenu.setVisibility(View.GONE);
         act.status.setLoad(true);
+        ProgressHelper.addObserver(act, this);
     }
 
     private void finishLoad(String result) {

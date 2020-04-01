@@ -69,7 +69,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         act.setTitle(getResources().getString(R.string.calendar));
         initViews();
         initCalendar();
-        initModel();
+        model = ViewModelProviders.of(act).get(CalendarModel.class);
         restoreState(savedInstanceState);
         return this.container;
     }
@@ -84,14 +84,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onResume() {
         super.onResume();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.addObserver(act, this);
-    }
-
-    private void initModel() {
-        model = ViewModelProviders.of(act).get(CalendarModel.class);
-        if (ProgressHelper.isBusy())
+        if (ProgressHelper.isBusy()) {
             setStatus(true);
+            ProgressHelper.addObserver(act, this);
+        }
     }
 
     @Override

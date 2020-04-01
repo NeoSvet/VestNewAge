@@ -73,9 +73,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void initLoad() {
-        ProgressHelper.addObserver(act, this);
         fabRefresh.setVisibility(View.GONE);
         act.status.setLoad(true);
+        ProgressHelper.addObserver(act, this);
     }
 
     @Override
