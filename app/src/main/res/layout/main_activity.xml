@@ -80,7 +80,7 @@
 
         <RelativeLayout
             android:id="@+id/pStatus"
-            android:layout_width="201dp"
+            android:layout_width="210dp"
             android:layout_height="56dp"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
