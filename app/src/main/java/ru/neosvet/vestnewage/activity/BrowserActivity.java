@@ -674,9 +674,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                         DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
                         null, null, null);
+                boolean poems = link.contains("poems/");
                 if (cursor.moveToFirst()) {
                     do {
-                        bw.write(cursor.getString(0));
+                        if (poems) {
+                            bw.write("<p class='poem'");
+                            bw.write(cursor.getString(0).substring(2));
+                        } else
+                            bw.write(cursor.getString(0));
                         bw.write(Const.N);
                         bw.flush();
                     } while (cursor.moveToNext());
