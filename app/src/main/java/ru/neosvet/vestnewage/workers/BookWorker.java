@@ -77,13 +77,12 @@ public class BookWorker extends Worker {
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
-                if (fromOtkr)
+                if (!kat && fromOtkr) {
                     max = (d.getYear() - 2004) * 12 + d.getMonth() - 1;
-                else
+                    loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
+                } else
                     max = (d.getYear() - 2016) * 12 + d.getMonth() - 1;
                 cur = 0;
-                if (!kat && fromOtkr)
-                    loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
                 String s;
                 if (kat)
                     s = loadPoems();
