@@ -160,6 +160,8 @@ public class CalendarWorker extends Worker {
             if (jsonI == null) { // несколько материалов за день
                 d = DateHelper.parse(context, s);
                 jsonA = json.optJSONArray(s);
+                if(jsonA == null)
+                    continue;
                 for (int j = 0; j < jsonA.length(); j++) {
                     jsonI = jsonA.getJSONObject(j);
                     link = jsonI.getString(Const.LINK) + Const.HTML;
