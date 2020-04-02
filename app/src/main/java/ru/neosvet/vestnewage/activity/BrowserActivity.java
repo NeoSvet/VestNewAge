@@ -279,9 +279,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
         miRefresh = navMenu.getMenu().getItem(0);
-        miNomenu = navMenu.getMenu().getItem(3);
-        miThemeL = navMenu.getMenu().getItem(6);
-        miThemeD = navMenu.getMenu().getItem(7);
+        miNomenu = navMenu.getMenu().getItem(4);
+        miThemeL = navMenu.getMenu().getItem(7);
+        miThemeD = navMenu.getMenu().getItem(8);
 
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         tip = new Tip(this, findViewById(R.id.tvFinish));
@@ -514,6 +514,15 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             case R.id.nav_refresh:
                 downloadPage(true);
                 break;
+            case R.id.nav_share:
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                shareIntent.setType("text/plain");
+                String s = wvBrowser.getTitle();
+                s = s.substring(9) + " (" + getResources().getString(R.string.from) + " " + s.substring(0, 8) + ")";
+                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, s + Const.N + Const.SITE + link);
+                startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share)));
+                break;
             case R.id.nav_nomenu:
                 nomenu = !nomenu;
                 setCheckItem(item, nomenu);
@@ -657,6 +666,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     if (dbPage.getName().equals("00.00")) //раз в неделю предлагать обновить статьи
                         status.checkTime(d.getTimeInSeconds());
                     bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
+                    bw.write("<title>");
+                    bw.write(s);
+                    bw.write("</title>\n");
                     bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
                     bw.flush();
                     bw.write(STYLE.substring(1));
