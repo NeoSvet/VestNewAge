@@ -390,6 +390,8 @@ public class LoaderWorker extends Worker {
                 cursor.close();
                 cv = new ContentValues();
                 cv.put(Const.TIME, System.currentTimeMillis());
+                if (!line.contains("</h1")) //в случае нескольких катренов за день
+                    line += " " + br.readLine() + br.readLine();
                 if (id == 0) { // id не найден, материала нет - добавляем
                     cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
                     cv.put(Const.LINK, link);

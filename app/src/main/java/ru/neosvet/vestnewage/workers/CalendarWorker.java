@@ -157,10 +157,10 @@ public class CalendarWorker extends Worker {
             jsonI = json.optJSONObject(s);
             n = list.size();
             list.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
-            if (jsonI == null) { // несколько материалов за день
+            if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
                 d = DateHelper.parse(context, s);
                 jsonA = json.optJSONArray(s);
-                if(jsonA == null)
+                if (jsonA == null)
                     continue;
                 for (int j = 0; j < jsonA.length(); j++) {
                     jsonI = jsonA.getJSONObject(j);
@@ -170,15 +170,14 @@ public class CalendarWorker extends Worker {
                     else
                         addLink(n, d.toString() + "@" + link);
                 }
-            } else { // один материал за день
+            } else { // один элемент за день (один или несколько катренов)
                 link = jsonI.getString(Const.LINK) + Const.HTML;
                 addLink(n, link);
-                jsonI = jsonI.getJSONObject("data");
-                if (jsonI != null) {
-                    if (jsonI.has("title2")) {
-                        if (!jsonI.getString("title2").equals(""))
-                            addLink(n, link + "#2");
-                    }
+                jsonA = jsonI.getJSONObject("data").optJSONArray("titles");
+                if (jsonA == null)
+                    continue;
+                for (int j = 0; j < jsonA.length(); j++) {
+                    addLink(n, link + "#" + (j + 2));
                 }
             }
         }
