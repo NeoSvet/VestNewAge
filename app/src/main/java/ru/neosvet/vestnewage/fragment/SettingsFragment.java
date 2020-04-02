@@ -135,6 +135,12 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             stopRotate = true;
             ProgressHelper.setBusy(false);
             bClearDo.setEnabled(false);
+            String error = data.getString(Const.ERROR);
+            if (error != null) {
+                Lib.showToast(act, getResources().getString(R.string.error)
+                        + ": " + error);
+                return;
+            }
             float size = data.getLong(Const.PROG, 0) / 1024 / 1024f;
             Lib.showToast(act, getResources().getString(R.string.freed)
                     + String.format("%.2f", size) + getResources().getString(R.string.mb));
