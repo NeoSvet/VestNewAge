@@ -243,8 +243,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         cbsClear = new CheckBox[]{container.findViewById(R.id.cbBookPrev),
                 container.findViewById(R.id.cbBookCur),
                 container.findViewById(R.id.cbMaterials),
-                container.findViewById(R.id.cbMarkers)};
-
+                container.findViewById(R.id.cbMarkers),
+                container.findViewById(R.id.cbCache)};
         tvCheck = container.findViewById(R.id.tvCheck);
         tvCheckOn = container.findViewById(R.id.tvCheckOn);
         tvCheckOff = container.findViewById(R.id.tvCheckOff);
@@ -342,6 +342,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                     list.add("00.00");
                 if (cbsClear[3].isChecked()) //markers
                     list.add(DataBase.MARKERS);
+                if (cbsClear[4].isChecked()) //cache
+                    list.add(Const.FILE);
                 initProgress();
                 model.startClear(list.toArray(new String[]{}));
                 for (int i = 0; i < cbsClear.length; i++)

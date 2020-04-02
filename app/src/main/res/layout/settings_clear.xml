@@ -68,12 +68,20 @@
             android:layout_below="@id/cbMaterials"
             android:text="@string/markers" />
 
+        <CheckBox
+            android:id="@+id/cbCache"
+            style="@style/CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/cbMarkers"
+            android:text="@string/cache" />
+
         <Button
             android:id="@+id/bClearDo"
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/cbMarkers"
+            android:layout_below="@id/cbCache"
             android:layout_margin="10dp"
             android:enabled="false"
             android:paddingLeft="20dp"

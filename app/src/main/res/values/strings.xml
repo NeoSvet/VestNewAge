@@ -124,6 +124,7 @@
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>
+    <string name="cache">Кэш (временные файлы)</string>
     <string name="freed">Освобождено:&#160;</string>
     <string name="mb">&#160;МБ</string>
     <string name="book_prev">Книга предыдущих лет</string>

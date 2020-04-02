@@ -17,6 +17,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class BaseWorker extends Worker {
     private Context context;
+    private long size = 0;
 
     public BaseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -31,7 +32,6 @@ public class BaseWorker extends Worker {
         try {
             String[] request = getInputData().getStringArray(Const.MSG);
             File f;
-            long size = 0;
             String path = context.getFilesDir().getParent() + "/databases/";
             for (int i = 0; i < request.length; i++) {
                 if (request[i].equals(Const.START) || request[i].equals(Const.END)) { //book
@@ -60,6 +60,8 @@ public class BaseWorker extends Worker {
                         }
                         d.changeMonth(1);
                     }
+                } else if (request[i].equals(Const.FILE)) { //cache
+                    clearFolder(new File(context.getFilesDir().getParent() + "/cache/"));
                 } else {//markers or materials
                     f = new File(path + request[i]);
                     if (f.exists()) {
@@ -83,4 +85,17 @@ public class BaseWorker extends Worker {
                 .build());
         return Result.failure();
     }
+
+    private void clearFolder(File folder) throws Exception {
+        for (File f : folder.listFiles()) {
+            if(f.isFile()) {
+                size += f.length();
+                f.delete();
+            } else {
+                clearFolder(f);
+                f.delete();
+            }
+        }
+    }
+
 }
