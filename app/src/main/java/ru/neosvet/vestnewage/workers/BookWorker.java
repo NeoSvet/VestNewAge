@@ -77,11 +77,13 @@ public class BookWorker extends Worker {
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
-                if (!kat && fromOtkr) {
-                    max = (d.getYear() - 2004) * 12 + d.getMonth() - 1;
-                    loadListUcoz(false, false); //если вкладка Послания и Откровения были загружены, то их тоже надо обновить
-                } else
+                if (!kat && fromOtkr) { //все Послания
+                    max = 146; //август 2004 - сентябрь 2016
+                    loadListUcoz(false, false); //обновление старых Посланий
+                } else if(kat) //Катрены
                     max = (d.getYear() - 2016) * 12 + d.getMonth() - 1;
+                else //только новые Послания
+                    max = 9; //январь-сентябрь 2016
                 cur = 0;
                 String s;
                 if (kat)
@@ -126,8 +128,8 @@ public class BookWorker extends Worker {
             if (bNew) {
                 d = DateHelper.initToday(context);
                 m = (d.getYear() - 2016) * 12;
-            } else
-                m = 137;
+            } else //старые Послания
+                m = 137; //август 2004 - декабрь 2015
             ProgressHelper.setMax(m);
         }
         final String path = lib.getDBFolder() + "/";
