@@ -31,6 +31,7 @@ public class BaseWorker extends Worker {
         try {
             String[] request = getInputData().getStringArray(Const.MSG);
             File f;
+            long size = 0;
             String path = context.getFilesDir().getParent() + "/databases/";
             for (int i = 0; i < request.length; i++) {
                 if (request[i].equals(Const.START) || request[i].equals(Const.END)) { //book
@@ -53,17 +54,23 @@ public class BaseWorker extends Worker {
                     }
                     while (d.getYear() < max_y || (d.getYear() == max_y && d.getMonth() <= max_m)) {
                         f = new File(path + d.getMY());
-                        if (f.exists())
+                        if (f.exists()) {
+                            size += f.length();
                             f.delete();
+                        }
                         d.changeMonth(1);
                     }
                 } else {//markers or materials
                     f = new File(path + request[i]);
-                    f.delete();
+                    if (f.exists()) {
+                        size += f.length();
+                        f.delete();
+                    }
                 }
             }
             ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
+                    .putLong(Const.PROG, size)
                     .build());
             return Result.success();
         } catch (Exception e) {
