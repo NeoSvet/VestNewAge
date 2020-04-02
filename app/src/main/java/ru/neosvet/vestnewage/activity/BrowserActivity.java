@@ -82,7 +82,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private int iPlace = -1;
     private PromHelper prom;
     private Animation anMin, anMax;
-    private MenuItem miThemeL, miThemeD, miNomenu, miRefresh;
+    private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
     private Tip tip;
     private static boolean boolMain;
 
@@ -279,6 +279,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
         miRefresh = navMenu.getMenu().getItem(0);
+        miShare = navMenu.getMenu().getItem(1);
         miNomenu = navMenu.getMenu().getItem(4);
         miThemeL = navMenu.getMenu().getItem(7);
         miThemeD = navMenu.getMenu().getItem(8);
@@ -703,6 +704,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
                 if (link.contains("print")) {// материалы с сайта Откровений
                     miRefresh.setVisible(false);
+                    miShare.setVisible(false);
                     bw.write("Copyright ");
                     bw.write(getResources().getString(R.string.copyright));
                     bw.write(" Leonid Maslov 2004-");
