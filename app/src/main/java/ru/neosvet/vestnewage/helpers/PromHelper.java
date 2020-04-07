@@ -24,7 +24,7 @@ import java.util.TimerTask;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class PromHelper {
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
@@ -242,7 +242,7 @@ public class PromHelper {
             return;
         boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
-        Intent intent = new Intent(context, SlashActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
         PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

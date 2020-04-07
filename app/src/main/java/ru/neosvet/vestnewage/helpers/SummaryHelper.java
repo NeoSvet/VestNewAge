@@ -23,7 +23,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.SlashActivity;
+import ru.neosvet.vestnewage.activity.MainActivity;
 
 /**
  * Created by NeoSvet on 11.06.2018.
@@ -42,7 +42,7 @@ public class SummaryHelper {
         this.context = context;
         notif_id = NotificationHelper.NOTIF_SUMMARY + 1;
         notifHelper = new NotificationHelper(context);
-        intent = new Intent(context, SlashActivity.class);
+        intent = new Intent(context, MainActivity.class);
         piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

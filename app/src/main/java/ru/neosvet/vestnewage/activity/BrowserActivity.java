@@ -84,11 +84,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
     private Tip tip;
-    private static boolean boolMain;
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
-        boolMain = !(context instanceof SlashActivity);
         Intent intent = new Intent(context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);
         if (place != null)
@@ -361,8 +359,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         } else if (history.size() > 0) {
             onBackBrowser();
         } else {
-            if (!boolMain)
-                startActivity(new Intent(this, MainActivity.class));
             super.onBackPressed();
         }
     }
@@ -462,8 +458,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!boolMain)
-                    startActivity(new Intent(BrowserActivity.this, MainActivity.class));
                 BrowserActivity.this.finish();
             }
         });

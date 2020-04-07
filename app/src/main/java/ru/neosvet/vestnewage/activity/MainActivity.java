@@ -2,10 +2,13 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,6 +21,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+
+import androidx.work.Data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +38,7 @@ import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.SlashUtils;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -52,8 +58,9 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.model.SlashModel;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
@@ -72,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private UnreadHelper unread;
     private int cur_id, prev_id = 0, tab = 0, statusBack, k_new = 0;
     public View fab;
+    private SlashUtils slash;
+    private SlashModel model;
     public Animation anMin, anMax;
 
     @Override
@@ -87,6 +96,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isMenuMode = true;
         } else
             setContentView(R.layout.main_activity);
+
+        initStar();
+        slash = new SlashUtils(MainActivity.this);
+        model = ViewModelProviders.of(this).get(SlashModel.class);
+        if (slash.openLink(getIntent())) {
+            tab = slash.getIntent().getIntExtra(Const.TAB, tab);
+            first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
+        } else if (!SlashModel.inProgress && slash.isNeedLoad()) {
+            slash.checkAdapterNewVersion();
+            model.startLoad();
+        }
+
         if (p == Const.SCREEN_SUMMARY)
             first_fragment = R.id.nav_rss;
         else if (p == Const.SCREEN_CALENDAR || !isMenuMode)
@@ -111,6 +132,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
         }
+    }
+
+    private void initStar() {
+        Animation anStar = AnimationUtils.loadAnimation(this, R.anim.flash);
+        anStar.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                findViewById(R.id.ivStar).setVisibility(View.GONE);
+                if (first_fragment != 0)
+                    setFragment(first_fragment, false);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        findViewById(R.id.ivStar).startAnimation(anStar);
     }
 
     private void initAnim() {
@@ -139,19 +181,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void restoreState(Bundle state) {
         if (state == null) {
             Intent intent = getIntent();
-            tab = intent.getIntExtra(Const.TAB, 0);
+            tab = intent.getIntExtra(Const.TAB, tab);
             if (pref.getBoolean(Const.FIRST, true)) {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean(Const.FIRST, false);
                 editor.apply();
                 tab = -1;
-                setFragment(R.id.nav_help, false);
+                first_fragment = R.id.nav_help;
                 isFirst = true;
             } else {
                 if (pref.getBoolean(Const.START_NEW, false) && k_new > 0)
-                    setFragment(R.id.nav_new, false);
+                    first_fragment = R.id.nav_new;
                 else
-                    setFragment(intent.getIntExtra(Const.CUR_ID, first_fragment), false);
+                    first_fragment = intent.getIntExtra(Const.CUR_ID, first_fragment);
             }
         } else {
             cur_id = state.getInt(Const.CUR_ID);
@@ -166,7 +208,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onPause() {
         super.onPause();
-        prom.stop();
+        if (prom != null)
+            prom.stop();
+        if (SlashModel.inProgress)
+            ProgressHelper.removeObservers(this);
     }
 
     @Override
@@ -174,6 +219,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         if (prom != null)
             prom.resume();
+        if (SlashModel.inProgress)
+            ProgressHelper.addObserver(this, this);
     }
 
     @Override
@@ -181,6 +228,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onMultiWindowModeChanged(isInMultiWindowMode);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
+    }
+
+    @Override
+    public void onChanged(@Nullable Data data) {
+        if (!SlashModel.inProgress)
+            return;
+        if (data.getBoolean(Const.TIME, false))
+            slash.reInitProm();
+        if (data.getBoolean(Const.FINISH, false)) {
+            SlashModel.inProgress = false;
+            ProgressHelper.removeObservers(this);
+        }
     }
 
     public void setProm(View textView) {
@@ -353,12 +412,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_rss:
                 curFragment = new SummaryFragment();
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
+                id = 0;
                 if (getIntent().hasExtra(DataBase.ID)) {
-                    int n = getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY);
-                    NotificationHelper notifHelper = new NotificationHelper(MainActivity.this);
-                    for (int i = NotificationHelper.NOTIF_SUMMARY; i <= n; i++)
-                        notifHelper.cancel(i);
+                    id = getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY);
                     getIntent().removeExtra(DataBase.ID);
+                } else if (slash.getIntent().hasExtra(DataBase.ID)) {
+                    id = slash.getIntent().getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY);
+                    slash.getIntent().removeExtra(DataBase.ID);
+                }
+                if (id != 0) {
+                    NotificationHelper notifHelper = new NotificationHelper(MainActivity.this);
+                    for (int i = NotificationHelper.NOTIF_SUMMARY; i <= id; i++)
+                        notifHelper.cancel(i);
                 }
                 break;
             case R.id.nav_site:
@@ -377,12 +442,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
-                String s = getIntent().getStringExtra(Const.LINK);
-                if (s != null) {
-                    search.setString(s);
+                if (getIntent().hasExtra(Const.LINK)) {
+                    search.setString(getIntent().getStringExtra(Const.LINK));
                     search.setPage(getIntent().getIntExtra(Const.SEARCH, 1));
-                    search.setMode(tab);
+                } else if (slash.getIntent().hasExtra(Const.LINK)) {
+                    search.setString(slash.getIntent().getStringExtra(Const.LINK));
+                    search.setPage(slash.getIntent().getIntExtra(Const.SEARCH, 1));
                 }
+                search.setMode(tab);
                 curFragment = search;
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
