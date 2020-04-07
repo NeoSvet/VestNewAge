@@ -94,6 +94,8 @@ public class SummaryWorker extends Worker {
             line = withOutTag(m[i].substring(0, a));
             if (line.contains(Const.SITE.substring(8)))
                 line = line.substring(line.indexOf("info/") + 5);
+            if (line.contains("#0"))
+                line = line.replace("#0", "#2");
             b = m[i].indexOf("</title");
             bw.write(withOutTag(m[i].substring(a + 10, b))); //title
             bw.write(Const.N);
