@@ -304,7 +304,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setFragment(R.id.nav_new, true);
+                if (!ProgressHelper.isBusy())
+                    setFragment(R.id.nav_new, true);
             }
         });
 
