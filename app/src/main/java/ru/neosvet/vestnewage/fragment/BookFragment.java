@@ -545,7 +545,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         openList(true);
     }
 
-    private void startLoad() {
+    @Override
+    public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
         initLoad();

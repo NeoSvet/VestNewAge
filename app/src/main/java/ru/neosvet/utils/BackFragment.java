@@ -12,4 +12,6 @@ public class BackFragment extends Fragment {
         }
         return true;
     }
+    public void startLoad() {
+    }
 }

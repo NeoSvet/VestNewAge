@@ -192,7 +192,8 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         }
     }
 
-    private void startLoad() {
+    @Override
+    public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
         initLoad();

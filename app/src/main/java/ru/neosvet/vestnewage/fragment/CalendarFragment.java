@@ -382,7 +382,8 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         }
     }
 
-    private void startLoad() {
+    @Override
+    public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);

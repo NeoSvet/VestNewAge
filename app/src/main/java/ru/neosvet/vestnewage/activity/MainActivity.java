@@ -239,6 +239,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (data.getBoolean(Const.FINISH, false)) {
             SlashModel.inProgress = false;
             ProgressHelper.removeObservers(this);
+            if (curFragment != null)
+                curFragment.startLoad();
         }
     }
 
