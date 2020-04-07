@@ -7,8 +7,8 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 37
-        versionName "3.4"
+        versionCode 38
+        versionName "3.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
