@@ -144,6 +144,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onAnimationEnd(Animation animation) {
                 findViewById(R.id.ivStar).setVisibility(View.GONE);
+                if (isFirst) {
+                    setFragment(R.id.nav_help, false);
+                    isFirst = true;
+                    return;
+                }
                 if (first_fragment != 0)
                     setFragment(first_fragment, false);
             }
@@ -188,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.putBoolean(Const.FIRST, false);
                 editor.apply();
                 tab = -1;
-                first_fragment = R.id.nav_help;
                 isFirst = true;
             } else {
                 if (pref.getBoolean(Const.START_NEW, false) && k_new > 0)
@@ -381,8 +385,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setFragment(int id, boolean savePrev) {
         statusBack = STATUS_PAGE;
-        if (cur_id != id)
-            isFirst = false;
+        isFirst = false;
         menuDownload.hide();
         if (savePrev)
             prev_id = cur_id;
