@@ -160,7 +160,11 @@ public class NewFragment extends Fragment {
                     if (s.contains(Const.POEMS))
                         t = getResources().getString(R.string.katren) + " " +
                                 getResources().getString(R.string.from) + " " + t;
-                    adNew.addItem(new ListItem(t, s + Const.HTML));
+                    if (s.contains("#")) {
+                        t = t.replace("#", " (") + ")";
+                        adNew.addItem(new ListItem(t, s.replace("#", Const.HTML + "#")));
+                    } else
+                        adNew.addItem(new ListItem(t, s + Const.HTML));
                 }
                 links.clear();
             }
