@@ -13,6 +13,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 
@@ -38,6 +39,18 @@ public class SlashUtils {
     public void checkAdapterNewVersion() {
         int ver = getPreviosVer();
         notifHelper = new NotificationHelper(context);
+        if (ver == 0) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        Thread.sleep(10000);
+                        showNotifDownloadAll();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
         if (ver < 21) {
             SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(Const.TIME, Const.TURN_OFF);
@@ -56,6 +69,21 @@ public class SlashUtils {
             showSummaryNotif();
             return;
         }
+    }
+
+    private void showNotifDownloadAll() {
+        Intent intent = new Intent(context, LoaderHelper.class);
+        intent.putExtra(Const.MODE, LoaderHelper.DOWNLOAD_ALL);
+        intent.putExtra(Const.TASK, "");
+        PendingIntent piStart = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
+                context.getResources().getString(R.string.downloads_all_title),
+                context.getResources().getString(R.string.downloads_all_msg),
+                NotificationHelper.CHANNEL_TIPS);
+        notifBuilder.setContentIntent(piStart);
+        notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
+        notifBuilder.setSound(null);
+        notifHelper.notify(800, notifBuilder);
     }
 
     public boolean isNeedLoad() {

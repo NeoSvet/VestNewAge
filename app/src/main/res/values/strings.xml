@@ -15,7 +15,9 @@
     <string name="no">Нет</string>
     <string name="new_name">Новое название</string>
     <string name="open_link">Открыть ссылку</string>
-    <!--New option-->
+    <!--SlashUtils-->
+    <string name="downloads_all_title">Скачайте все Катрены!</string>
+    <string name="downloads_all_msg">Нажмите, чтобы скачать все материалы.</string>
     <string name="are_you_know">А вы знали?</string>
     <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
     <!--Lib-->
