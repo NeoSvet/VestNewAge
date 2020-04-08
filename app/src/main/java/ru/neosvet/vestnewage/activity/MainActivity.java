@@ -96,6 +96,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isMenuMode = true;
         } else
             setContentView(R.layout.main_activity);
+        if (p == Const.SCREEN_SUMMARY)
+            first_fragment = R.id.nav_rss;
+        else if (p == Const.SCREEN_CALENDAR || !isMenuMode)
+            first_fragment = R.id.nav_calendar;
 
         initStar();
         slash = new SlashUtils(MainActivity.this);
@@ -107,11 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             slash.checkAdapterNewVersion();
             model.startLoad();
         }
-
-        if (p == Const.SCREEN_SUMMARY)
-            first_fragment = R.id.nav_rss;
-        else if (p == Const.SCREEN_CALENDAR || !isMenuMode)
-            first_fragment = R.id.nav_calendar;
 
         myFragmentManager = getFragmentManager();
         status = new StatusButton(this, findViewById(R.id.pStatus));
