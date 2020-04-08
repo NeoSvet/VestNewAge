@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import static android.content.Context.MODE_PRIVATE;
 
 public class SlashUtils {
+    private final String SETTINGS = "main";
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private NotificationHelper notifHelper;
@@ -58,7 +59,7 @@ public class SlashUtils {
     }
 
     public boolean isNeedLoad() {
-        SharedPreferences pref = context.getSharedPreferences("main", MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
         long time = pref.getLong(Const.TIME, 0);
         if (System.currentTimeMillis() - time > DateHelper.HOUR_IN_MILLS) {
             SharedPreferences.Editor editor = pref.edit();
@@ -70,7 +71,7 @@ public class SlashUtils {
     }
 
     private int getPreviosVer() {
-        SharedPreferences pref = context.getSharedPreferences("main", MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
         int prev = pref.getInt("ver", 0);
         try {
             int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
