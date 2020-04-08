@@ -529,6 +529,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (prev_id == R.id.nav_site)
                 tab = 1;
             setFragment(prev_id, false);
+        } else if (first_fragment == R.id.nav_new) {
+            switch (pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)) {
+                case Const.SCREEN_MENU:
+                    first_fragment = R.id.menu_fragment;
+                    break;
+                case Const.SCREEN_SUMMARY:
+                    first_fragment = R.id.nav_rss;
+                    break;
+                default:
+                    first_fragment = R.id.nav_calendar;
+                    break;
+            }
+            setFragment(first_fragment, false);
         } else if (curFragment != null) {
             if (curFragment.onBackPressed())
                 exit();
