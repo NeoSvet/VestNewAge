@@ -50,11 +50,11 @@
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
     <string name="list_is_empty">Список за этот месяц пуст!</string>
-    <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для загрузки: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
+    <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
-    <string name="alert_rnd">Загрузите все материалы, прежде чем пользоваться этой функцией!</string>
+    <string name="alert_rnd">Скачайте все материалы, прежде чем пользоваться этой функцией!</string>
     <string name="open">Открыть</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
@@ -202,7 +202,7 @@
     <!--SearchFragment-->
     <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>
-    <string name="alert_search">Результатов нет. Вы загрузили все материалы прежде, чем приступать к поиску?</string>
+    <string name="alert_search">Результатов нет. Вы скачали все материалы прежде, чем приступать к поиску?</string>
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапазон для поиска:</string>
     <string name="change_range">Поменять местами</string>
