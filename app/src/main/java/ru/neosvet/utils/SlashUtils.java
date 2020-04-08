@@ -4,8 +4,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
@@ -17,6 +15,8 @@ import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class SlashUtils {
     private final int START_ID = 900;
@@ -38,13 +38,13 @@ public class SlashUtils {
         int ver = getPreviosVer();
         notifHelper = new NotificationHelper(context);
         if (ver < 21) {
-            SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
+            SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(Const.TIME, Const.TURN_OFF);
             if (p == Const.TURN_OFF)
                 showNotifTip(context.getResources().getString(R.string.are_you_know),
                         context.getResources().getString(R.string.new_option_notif), getSettingsIntent());
             else {
-                pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+                pref = context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
                 p = pref.getInt(Const.TIME, Const.TURN_OFF);
                 if (p == Const.TURN_OFF)
                     showNotifTip(context.getResources().getString(R.string.are_you_know),
@@ -58,21 +58,19 @@ public class SlashUtils {
     }
 
     public boolean isNeedLoad() {
-        DateHelper date = DateHelper.initToday(context);
-        DataBase dataBase = new DataBase(context, date.getMY());
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
-        long time = 0;
-        if (cursor.moveToFirst())
-            time = cursor.getLong(cursor.getColumnIndex(Const.TIME));
-        cursor.close();
-        db.close();
-        dataBase.close();
-        return System.currentTimeMillis() - time > DateHelper.HOUR_IN_MILLS;
+        SharedPreferences pref = context.getSharedPreferences("main", MODE_PRIVATE);
+        long time = pref.getLong(Const.TIME, 0);
+        if (System.currentTimeMillis() - time > DateHelper.HOUR_IN_MILLS) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putLong(Const.TIME, System.currentTimeMillis());
+            editor.apply();
+            return true;
+        }
+        return false;
     }
 
     private int getPreviosVer() {
-        SharedPreferences pref = context.getSharedPreferences("main", Context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences("main", MODE_PRIVATE);
         int prev = pref.getInt("ver", 0);
         try {
             int cur = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
@@ -119,7 +117,7 @@ public class SlashUtils {
     }
 
     public void reInitProm() {
-        SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
         PromHelper prom = new PromHelper(context, null);
         prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF));
     }
