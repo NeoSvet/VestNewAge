@@ -137,6 +137,8 @@ public class CheckWorker extends Worker {
         s = withOutTag(s);
         if (s.contains(Const.SITE))
             s = s.substring(Const.SITE.length());
+        if (s.contains("#0"))
+            s = s.replace("#0", "#2");
         return s;
     }
 
