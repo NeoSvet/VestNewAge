@@ -40,21 +40,21 @@
         <RadioButton
             android:id="@+id/rbMenu"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/menu" />
 
         <RadioButton
             android:id="@+id/rbCalendar"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/calendar" />
 
         <RadioButton
             android:id="@+id/rbSummary"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/rss" />
 

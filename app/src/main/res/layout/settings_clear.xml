@@ -39,7 +39,7 @@
         <CheckBox
             android:id="@+id/cbBookPrev"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:text="@string/book_prev" />
@@ -47,7 +47,7 @@
         <CheckBox
             android:id="@+id/cbBookCur"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/cbBookPrev"
             android:text="@string/book_cur" />
@@ -55,7 +55,7 @@
         <CheckBox
             android:id="@+id/cbMaterials"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/cbBookCur"
             android:text="@string/materials" />
@@ -63,7 +63,7 @@
         <CheckBox
             android:id="@+id/cbMarkers"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/cbMaterials"
             android:text="@string/markers" />
@@ -71,7 +71,7 @@
         <CheckBox
             android:id="@+id/cbCache"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/cbMarkers"
             android:text="@string/cache" />

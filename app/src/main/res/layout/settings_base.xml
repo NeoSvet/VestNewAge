@@ -39,14 +39,14 @@
         <CheckBox
             android:id="@+id/cbCountFloat"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/count_float" />
 
         <CheckBox
             android:id="@+id/cbNew"
             style="@style/CheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/start_with_new" />
 
