@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
         } else if (!SlashModel.inProgress && slash.isNeedLoad()) {
             slash.checkAdapterNewVersion();
+            ProgressHelper.addObserver(this, this);
             model.startLoad();
         }
 
@@ -148,8 +149,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     isFirst = true;
                     return;
                 }
-                if (first_fragment != 0)
+                if (first_fragment != 0) {
                     setFragment(first_fragment, false);
+                    if (SlashModel.inProgress) {
+                        curFragment.startLoad();
+                        SlashModel.inProgress = false;
+                    }
+                }
             }
 
             @Override
@@ -240,10 +246,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (data.getBoolean(Const.TIME, false))
             slash.reInitProm();
         if (data.getBoolean(Const.FINISH, false)) {
-            SlashModel.inProgress = false;
             ProgressHelper.removeObservers(this);
-            if (curFragment != null)
+            if (curFragment != null) {
+                SlashModel.inProgress = false;
                 curFragment.startLoad();
+            }
         }
     }
 

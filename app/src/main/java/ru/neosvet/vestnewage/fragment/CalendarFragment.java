@@ -71,6 +71,9 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         initCalendar();
         model = ViewModelProviders.of(act).get(CalendarModel.class);
         restoreState(savedInstanceState);
+        created = true;
+        if (needLoad)
+            startLoad();
         return this.container;
     }
 
@@ -384,6 +387,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     @Override
     public void startLoad() {
+        if (!created) {
+            needLoad = true;
+            return;
+        }
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);
