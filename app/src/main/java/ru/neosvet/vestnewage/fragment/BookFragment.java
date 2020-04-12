@@ -53,7 +53,6 @@ import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
-    private final int DEF_YEAR = 100;
     private final String DIALOG_DATE = "date";
     private MainActivity act;
     private View container;
@@ -165,12 +164,14 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     private void restoreState(Bundle state) {
         DateHelper d = DateHelper.initToday(act);
-        d.setYear(DEF_YEAR);
+        d.setDay(1);
         int kat, pos;
         try {
             kat = pref.getInt(Const.KATRENY, d.getTimeInDays());
+            d.setMonth(9);
+            d.setYear(2016);
             pos = pref.getInt(Const.POSLANIYA, d.getTimeInDays());
-        } catch (Exception e) {
+        } catch (Exception e) { //if old version
             kat = (int) (pref.getLong(Const.KATRENY, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
             pos = (int) (pref.getLong(Const.POSLANIYA, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
         }
@@ -342,12 +343,11 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private boolean existsList(DateHelper d, boolean katren) {
-        if (d.getYear() == DEF_YEAR) return false;
         DataBase dataBase = new DataBase(act, d.getMY());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
-        String s;
+        String s = "";
         if (cursor.moveToFirst()) {
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
@@ -574,7 +574,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         if (result == null)
             return;
 
-        if (d.getYear() == DEF_YEAR || !existsList(d, tab == 0)) {
+        if (!existsList(d, tab == 0)) {
             d = DateHelper.putYearMonth(act,
                     2000 + Integer.parseInt(result.substring(3, 5)),
                     Integer.parseInt(result.substring(0, 2)));
