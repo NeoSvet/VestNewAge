@@ -95,13 +95,16 @@ public class LoaderWorker extends Worker {
             if (!isCancelled())
                 switch (getInputData().getInt(Const.MODE, 0)) {
                     case LoaderHelper.DOWNLOAD_ALL:
+                        downloadStyle(false);
                         download(LoaderHelper.ALL);
                         break;
                     case LoaderHelper.DOWNLOAD_ID:
+                        downloadStyle(false);
                         int p = getInputData().getInt(Const.SELECT, 0);
                         download(p);
                         break;
                     case LoaderHelper.DOWNLOAD_YEAR:
+                        downloadStyle(false);
                         downloadYear(getInputData().getInt(Const.YEAR, 0));
                         break;
                     case LoaderHelper.DOWNLOAD_PAGE:
