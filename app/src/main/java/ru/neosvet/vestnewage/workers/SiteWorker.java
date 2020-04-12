@@ -214,8 +214,12 @@ public class SiteWorker extends Worker {
         int k = 0;
         while ((s = br.readLine()) != null) {
             if (s.contains(Const.HTML)) {
-                bw.write(s);
+                if (s.contains("@"))
+                    bw.write(s.substring(9));
+                else
+                    bw.write(s);
                 bw.newLine();
+                bw.flush();
                 k++;
             }
         }
