@@ -146,12 +146,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 findViewById(R.id.ivStar).setVisibility(View.GONE);
                 if (isFirst) {
                     setFragment(R.id.nav_help, false);
+                    SlashModel.inProgress = false;
                     isFirst = true;
                     return;
                 }
                 if (first_fragment != 0) {
                     setFragment(first_fragment, false);
                     if (SlashModel.inProgress) {
+                        ProgressHelper.removeObservers(MainActivity.this);
                         curFragment.startLoad();
                         SlashModel.inProgress = false;
                     }
