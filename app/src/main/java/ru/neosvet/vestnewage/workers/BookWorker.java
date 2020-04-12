@@ -80,7 +80,7 @@ public class BookWorker extends Worker {
                 if (!kat && fromOtkr) { //все Послания
                     max = 146; //август 2004 - сентябрь 2016
                     loadListUcoz(false, false); //обновление старых Посланий
-                } else if(kat) //Катрены
+                } else if (kat) //Катрены
                     max = (d.getYear() - 2016) * 12 + d.getMonth() - 1;
                 else //только новые Послания
                     max = 9; //январь-сентябрь 2016
@@ -257,6 +257,8 @@ public class BookWorker extends Worker {
                     s = line.substring(n, line.indexOf("'", n));
                     i = s.indexOf(".") + 1;
                     date2 = s.substring(i, i + 5);
+                    if (date1.equals(""))
+                        date1 = date2;
                     if (!date2.equals(date1)) {
                         saveData(date1);
                         if (max > 0) {
@@ -275,10 +277,10 @@ public class BookWorker extends Worker {
                     title.add(Decoding(t));
                     links.add(s);
                 }
-                saveData(date1);
             }
             line = br.readLine();
         }
+        saveData(date1);
         br.close();
         in.close();
         return date1;
