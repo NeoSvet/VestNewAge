@@ -219,10 +219,11 @@ public class LoaderWorker extends Worker {
     private int workWithBook(boolean count) throws Exception {
         int end_year, end_month, k = 0;
         DateHelper d = DateHelper.initToday(context);
+        d.setDay(1);
         end_month = d.getMonth();
         end_year = d.getYear();
-        d = DateHelper.initToday(context);
-        d = DateHelper.putYearMonth(context, d.getYear() - 1, 1);
+        d.setMonth(1);
+        d.setYear(end_year - 1);
         while (!isCancelled()) {
             if (count)
                 k += countBookList(d.getMY());
