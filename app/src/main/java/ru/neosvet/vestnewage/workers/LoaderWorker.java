@@ -206,8 +206,12 @@ public class LoaderWorker extends Worker {
             k += workWithBook(true);
         ProgressHelper.setMax(k);
         // загрузка страниц:
-        if (id == LoaderHelper.ALL || id == R.id.nav_site)
+        if (id == LoaderHelper.ALL || id == R.id.nav_site) {
+            SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
             downloadList();
+            SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.NEWS).toString());
+            downloadList();
+        }
         if (isCancelled())
             return;
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
