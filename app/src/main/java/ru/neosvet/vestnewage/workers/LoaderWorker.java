@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -219,14 +217,6 @@ public class LoaderWorker extends Worker {
     }
 
     private int workWithBook(boolean count) throws Exception {
-        List<String> list = new ArrayList<String>();
-        File dir = lib.getDBFolder();
-        File[] f = dir.listFiles();
-        int i;
-        for (i = 0; i < f.length && !isCancelled(); i++) {
-            if (f[i].getName().length() == 5)
-                list.add(f[i].getName());
-        }
         int end_year, end_month, k = 0;
         DateHelper d = DateHelper.initToday(context);
         end_month = d.getMonth();
@@ -234,15 +224,10 @@ public class LoaderWorker extends Worker {
         d = DateHelper.initToday(context);
         d = DateHelper.putYearMonth(context, d.getYear() - 1, 1);
         while (!isCancelled()) {
-            for (i = 0; i < list.size(); i++) {
-                if (list.contains(d.getMY())) {
-                    if (count)
-                        k += countBookList(d.getMY());
-                    else
-                        downloadBookList(d.getMY());
-                    break;
-                }
-            }
+            if (count)
+                k += countBookList(d.getMY());
+            else
+                downloadBookList(d.getMY());
             if (d.getYear() == end_year && d.getMonth() == end_month)
                 break;
             d.changeMonth(1);
