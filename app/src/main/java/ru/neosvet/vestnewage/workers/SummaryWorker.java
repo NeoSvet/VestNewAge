@@ -27,6 +27,7 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
     private Context context;
+    private boolean SUMMARY;
 
     public SummaryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -36,7 +37,7 @@ public class SummaryWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        boolean SUMMARY = getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName());
+        SUMMARY = getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName());
         String error;
         try {
             if (SUMMARY) {
@@ -101,7 +102,8 @@ public class SummaryWorker extends Worker {
             bw.write(Const.N);
             bw.write(withOutTag(line)); //link
             bw.write(Const.N);
-            unread.addLink(line, now);
+            if (SUMMARY)
+                unread.addLink(line, now);
             a = m[i].indexOf("</des");
             bw.write(withOutTag(m[i].substring(b + 10, a))); //des
             bw.write(Const.N);
