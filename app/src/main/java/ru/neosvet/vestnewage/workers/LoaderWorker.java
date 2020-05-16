@@ -278,7 +278,7 @@ public class LoaderWorker extends Worker {
         }
         if (!singlePage)
             checkRequests();
-        String line, s = link;
+        String line, pline = null, s = link;
         final String parS = "<p", parE = "</p>";
         if (link.contains("#")) {
             s = s.substring(0, s.indexOf("#"));
@@ -296,6 +296,10 @@ public class LoaderWorker extends Worker {
                 if (line.contains("<!--/row-->") || line.contains("<h1>")) {
                     break;
                 } else if (line.contains("<")) {
+                    if (pline != null) {
+                        line = pline + line;
+                        pline = null;
+                    }
                     if (line.contains("<a")) {
                         while (!line.contains("</a"))
                             line += br.readLine();
@@ -307,8 +311,15 @@ public class LoaderWorker extends Worker {
                         line = line.replace(" class=\"noind\"", "")
                                 .replace(" class='poem'", "")
                                 .replace(" class=\"poem\"", "");
+                        if (!line.substring(line.length() - 1).equals(">"))
+                            line += " ";
                         while (!line.contains(parE)) {
                             line += br.readLine();
+                        }
+                        if (line.contains("</p><p")) {
+                            i = line.lastIndexOf("<p");
+                            pline = line.substring(i) + " ";
+                            line = line.substring(0, i);
                         }
                         while (line.indexOf(parS) < line.lastIndexOf(parS)) {
                             cv = new ContentValues();
