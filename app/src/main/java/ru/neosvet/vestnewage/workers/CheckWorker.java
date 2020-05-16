@@ -61,20 +61,16 @@ public class CheckWorker extends Worker {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        String s, title, link, des;
-        s = br.readLine();
-        while (!s.contains("item"))
-            s = br.readLine();
-        title = withOutTag(br.readLine());
-        link = parseLink(br.readLine());
-        des = withOutTag(br.readLine());
-        s = withOutTag(br.readLine()); //time
+        String s = br.readLine();
+        br.close();
+        in.close();
+        int a = s.indexOf("lastBuildDate") + 14;
+        long secList = DateHelper.parse(context, s.substring(a, s.indexOf("<", a))).getTimeInSeconds();
 
         File file = new File(context.getFilesDir() + Const.RSS);
         long secFile = 0;
         if (file.exists())
             secFile = DateHelper.putMills(context, file.lastModified()).getTimeInSeconds();
-        long secList = DateHelper.parse(context, s).getTimeInSeconds();
         if (secFile > secList) { //список в загрузке не нуждается
             br.close();
             return false;
@@ -84,39 +80,38 @@ public class CheckWorker extends Worker {
         BufferedWriter bwList = new BufferedWriter(new FileWriter(file));
         UnreadHelper unread = new UnreadHelper(context);
         DateHelper d;
-        do {
+        String title, link;
+        int b;
+        String m[] = s.split("<item>");
+        for (int i = 1; i < m.length; i++) {
+            a = m[i].indexOf("</link");
+            link = withOutTag(m[i].substring(0, a));
+            if (link.contains(Const.SITE.substring(8)))
+                link = link.substring(link.indexOf("info/") + 5);
+            if (link.contains("#0"))
+                link = link.replace("#0", "#2");
+            b = m[i].indexOf("</title");
+            title = withOutTag(m[i].substring(a + 10, b));
+            bwRSS.write(title); //title
+            bwRSS.write(Const.N);
+            bwRSS.write(link); //link
+            bwRSS.write(Const.N);
+            a = m[i].indexOf("</des");
+            bwRSS.write(withOutTag(m[i].substring(b + 10, a))); //des
+            bwRSS.write(Const.N);
+            b = m[i].indexOf("</a10");
+            s = withOutTag(m[i].substring(a + 15, b));
             d = DateHelper.parse(context, s);
+            bwRSS.write(d.getTimeInMills() + Const.N); //time
+            bwRSS.flush();
             if (unread.addLink(link, d)) {
                 bwList.write(link);
                 bwList.newLine();
                 bwList.flush();
                 postItem(title, link);
             }
-            bwRSS.write(title);
-            bwRSS.write(Const.N);
-            bwRSS.write(link);
-            bwRSS.write(Const.N);
-            bwRSS.write(des);
-            bwRSS.write(Const.N);
-            bwRSS.write(d.getTimeInMills() + Const.N); //time
-            bwRSS.flush();
-            s = br.readLine(); //</item><item> or </channel>
-            if (s.contains("</channel>")) break;
-            title = withOutTag(br.readLine());
-            link = parseLink(br.readLine());
-            des = withOutTag(br.readLine());
-            s = withOutTag(br.readLine()); //time
-        } while (s != null);
-        bwRSS.close();
-        br.close();
-        in.close();
-        if (unread.addLink(link, d)) {
-            bwList.write(link);
-            bwList.newLine();
-            bwList.flush();
-            postItem(title, link);
         }
-        bwList.close();
+        bwRSS.close();
         unread.setBadge();
         unread.close();
         return true;
@@ -128,18 +123,7 @@ public class CheckWorker extends Worker {
     }
 
     private String withOutTag(String s) {
-        int i = s.indexOf(">") + 1;
-        s = s.substring(i, s.indexOf("<", i));
-        return s;
-    }
-
-    private String parseLink(String s) {
-        s = withOutTag(s);
-        if (s.contains(Const.SITE))
-            s = s.substring(Const.SITE.length());
-        if (s.contains("#0"))
-            s = s.replace("#0", "#2");
-        return s;
+        return s.substring(s.indexOf(">") + 1);
     }
 
     private void makeNotification() {
