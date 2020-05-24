@@ -2,6 +2,8 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import androidx.work.Data;
@@ -20,6 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -40,6 +43,7 @@ public class SlashWorker extends Worker {
         try {
             synchronTime();
             loadAds();
+            loadNew();
             //return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,6 +53,43 @@ public class SlashWorker extends Worker {
                 .build());
         return Result.success();
         //return Result.failure();
+    }
+
+    private void loadNew() throws Exception {
+        String s = "http://neosvet.ucoz.ru/vna/new.txt";
+        Lib lib = new Lib(context);
+        BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        long t;
+        DataBase dbPage;
+        s = br.readLine();
+        while (!s.equals(Const.END)) {
+            t = Long.parseLong(s);
+            s = br.readLine(); //link
+            dbPage = new DataBase(context, s);
+            SQLiteDatabase db = dbPage.getWritableDatabase();
+            Cursor cursor = db.query(Const.TITLE, null,
+                    Const.LINK + DataBase.Q, new String[]{s},
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                if (t > cursor.getLong(cursor.getColumnIndex(Const.TIME))) {
+                    pushNew(s, dbPage.getPageTitle(cursor.getString(
+                            cursor.getColumnIndex(Const.TITLE)), s));
+                }
+            }
+            s = br.readLine();
+        }
+        br.close();
+        in.close();
+        Thread.sleep(100);
+    }
+
+    private void pushNew(String link, String title) {
+        ProgressHelper.postProgress(new Data.Builder()
+                .putBoolean(Const.DIALOG, true)
+                .putString(Const.LINK, link)
+                .putString(Const.TITLE, title)
+                .build());
     }
 
     private void loadAds() throws Exception {

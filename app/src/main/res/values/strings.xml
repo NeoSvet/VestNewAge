@@ -9,6 +9,8 @@
     <string name="download_it_main">Скачать все статьи</string>
     <string name="download_it_book">Скачать книгу с 2016 года</string>
     <string name="download_it_calendar">Скачать текущий год</string>
+    <string name="new_page_title">Страница была изменена</string>
+    <string name="new_page_des">Рекомендуется обновить страницу «%s»</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>

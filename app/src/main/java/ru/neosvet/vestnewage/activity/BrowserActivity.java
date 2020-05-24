@@ -157,9 +157,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void restoreState(Bundle state) {
         if (state == null) {
-            openLink(getIntent().getStringExtra(Const.LINK));
-            if (getIntent().hasExtra(Const.PLACE))
-                iPlace = 0;
+            if (getIntent().getBooleanExtra(Const.START, false)) {
+                link = getIntent().getStringExtra(Const.LINK);
+                downloadPage(false);
+            } else {
+                openLink(getIntent().getStringExtra(Const.LINK));
+                if (getIntent().hasExtra(Const.PLACE))
+                    iPlace = 0;
+            }
         } else {
             link = state.getString(Const.LINK);
             dbPage = new DataBase(this, link);

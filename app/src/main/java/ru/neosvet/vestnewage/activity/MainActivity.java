@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -33,6 +34,7 @@ import java.util.TimerTask;
 import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
+import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
-        } else if (!SlashModel.inProgress && slash.isNeedLoad()) {
+        } else if (!SlashModel.inProgress ) {//&& slash.isNeedLoad() tut
             slash.checkAdapterNewVersion();
             ProgressHelper.addObserver(this, this);
             model.startLoad();
@@ -247,6 +249,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         if (data.getBoolean(Const.TIME, false))
             slash.reInitProm();
+        if (data.getBoolean(Const.DIALOG, false)) {
+            showDialog(data.getString(Const.LINK),
+                    data.getString(Const.TITLE));
+        }
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.removeObservers(this);
             if (curFragment != null) {
@@ -254,6 +260,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 curFragment.startLoad();
             }
         }
+    }
+
+    private void showDialog(final String link, String title) {
+        final CustomDialog alert = new CustomDialog(this);
+        alert.setTitle(getResources().getString(R.string.new_page_title));
+        alert.setMessage(String.format(getResources().getString(R.string.new_page_des), title));
+        alert.setRightButton(getResources().getString(R.string.refresh), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, BrowserActivity.class);
+                intent.putExtra(Const.LINK, link);
+                intent.putExtra(Const.START, true);
+                startActivity(intent);
+                alert.dismiss();
+            }
+        });
+        alert.show(null);
     }
 
     public void setProm(View textView) {
