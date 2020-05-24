@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
-        } else if (!SlashModel.inProgress ) {//&& slash.isNeedLoad() tut
+        } else if (!SlashModel.inProgress && slash.isNeedLoad()) {
             slash.checkAdapterNewVersion();
             ProgressHelper.addObserver(this, this);
             model.startLoad();
