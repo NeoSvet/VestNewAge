@@ -208,25 +208,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     } else {
                         openPage(link);
                     }
-                } else {
-                    PopupMenu pMenu = new PopupMenu(act, view);
-                    for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
-                        pMenu.getMenu().add(adMain.getItem(pos).getHead(i));
-                    }
-                    pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            String title = item.getTitle().toString();
-                            for (int i = 0; i < adMain.getItem(pos).getCount(); i++) {
-                                if (adMain.getItem(pos).getHead(i).equals(title)) {
-                                    openPage(adMain.getItem(pos).getLink(i));
-                                    break;
-                                }
-                            }
-                            return true;
-                        }
-                    });
-                    pMenu.show();
                 }
             }
         });
