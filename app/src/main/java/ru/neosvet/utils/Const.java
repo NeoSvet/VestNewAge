@@ -9,7 +9,7 @@ public interface Const {
     byte TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
     String SITE = "http://blagayavest.info/", COMMA = ",", N = "\n", NN = "\n\n", AND = "&";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”", CHECK = "Check";
-    String HTML = ".html", PRINT = "?styletpl=print", PROG = "prog", MAX = "max", FROM_OTKR = "from_otkr", FINISH = "finish";
+    String HTML = ".html", PRINT = "print/", PROG = "prog", MAX = "max", FROM_OTKR = "from_otkr", FINISH = "finish";
     String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie", SEARCH = "search";
     String TASK = "task", HREF = "href", DIALOG = "dialog", POEMS = "poems", FIRST = "first", RSS = "/rss", STYLE = "style";
     String COUNT_IN_MENU = "count_in_menu", START_NEW = "start_new", START_SCEEN = "start_screen", CUR_ID = "cur_id";
