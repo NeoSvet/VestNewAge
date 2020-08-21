@@ -28,23 +28,12 @@ public class CalendarItem {
         bold = true;
     }
 
-    public void clear(boolean onlyTitle) {
+    public void clear() {
         if (titles.size() > 0) {
-            if (!bold) {
-                titles.clear();
-                if (!onlyTitle)
-                    links.clear();
-            } else {
-                while (titles.size() > 1) {
-                    titles.remove(1);
-                    if (!onlyTitle)
-                        links.remove(1);
-                }
-            }
-            if (!onlyTitle) {
-                katren = false;
-                poslanie = false;
-            }
+            titles.clear();
+            links.clear();
+            katren = false;
+            poslanie = false;
         }
     }
 

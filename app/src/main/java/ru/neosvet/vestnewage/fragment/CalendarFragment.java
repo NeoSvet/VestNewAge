@@ -305,7 +305,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private void openCalendar(boolean loadIfNeed) {
         try {
             for (int i = 0; i < adCalendar.getItemCount(); i++)
-                adCalendar.getItem(i).clear(false);
+                adCalendar.getItem(i).clear();
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
             SQLiteDatabase db = dataBase.getWritableDatabase();
             Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
