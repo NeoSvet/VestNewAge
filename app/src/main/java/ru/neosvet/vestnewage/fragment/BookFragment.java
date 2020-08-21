@@ -269,10 +269,30 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             }
             ivNext.setEnabled(existsList(d, katren));
             d.changeMonth(-1);
-            DataBase dataBase = new DataBase(act, d.getMY());
-            SQLiteDatabase db = dataBase.getWritableDatabase();
+            DataBase dataBase;
+            SQLiteDatabase db;
             String t, s;
-            Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+            Cursor cursor;
+
+            if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
+                //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
+                dataBase = new DataBase(act, "12.04");
+                db = dataBase.getWritableDatabase();
+                cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+                if (cursor.moveToFirst() && cursor.moveToNext()) {
+                    t = cursor.getString(cursor.getColumnIndex(Const.TITLE));
+                    s = cursor.getString(cursor.getColumnIndex(Const.LINK));
+                    adBook.addItem(new ListItem(t, s));
+                }
+                cursor.close();
+                db.close();
+                dataBase.close();
+            }
+
+            dataBase = new DataBase(act, d.getMY());
+            db = dataBase.getWritableDatabase();
+            cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+
             DateHelper dModList;
             if (cursor.moveToFirst()) {
                 dModList = DateHelper.putMills(act,
