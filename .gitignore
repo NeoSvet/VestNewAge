@@ -6,4 +6,4 @@
 /build
 /captures
 .externalNativeBuild
-/app/release/output.json
+*.json
