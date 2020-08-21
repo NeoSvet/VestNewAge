@@ -114,7 +114,7 @@
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
     <string name="cabinet_tip">Если открылось сообщение «Для просмотра этой страницы необходимо зарегистрироваться&#8230;», то нажмите «Назад» и откройте страницу повторно.</string>
     <!--Страница-->
-    <string name="video_on_vimeo">Видео на Vimeo</string>
+    <string name="video_on_site">Ссылка на видео с другого сайта</string>
     <string name="page">Страница:</string>
     <string name="copyright">©</string>
     <string name="downloaded">Загружено:</string>

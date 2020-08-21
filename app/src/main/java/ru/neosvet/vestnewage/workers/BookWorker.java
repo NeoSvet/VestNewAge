@@ -21,6 +21,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.PageParser;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -231,65 +232,44 @@ public class BookWorker extends Worker {
     }
 
     private String loadListBook(String url) throws Exception {
-        url = Const.SITE + url + Const.PRINT;
-        InputStream in = new BufferedInputStream(lib.getStream(url));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        boolean begin = false;
-        int i, n;
-        String line, t, s, date1 = "", date2;
-        line = br.readLine();
-        while (!line.contains("container--")) {
-            if (isCancelled()) {
-                br.close();
-                in.close();
-                return date1;
-            }
-            if (!begin)
-                begin = line.contains("h2");//razdel
-            else if (line.contains("clear"))
-                break;
-            else if (line.contains(Const.HREF)) {
-                if (line.contains("years"))
-                    line = line.substring(0, line.indexOf("years"));
-                n = 0;
-                while (line.indexOf(Const.HREF, n) > -1) {
-                    n = line.indexOf(Const.HREF, n) + 7;
-                    s = line.substring(n, line.indexOf("'", n));
-                    i = s.indexOf(".") + 1;
-                    date2 = s.substring(i, i + 5);
-                    if (date1.equals(""))
-                        date1 = date2;
-                    if (!date2.equals(date1)) {
-                        saveData(date1);
-                        if (max > 0) {
-                            ProgressHelper.postProgress(new Data.Builder()
-                                    .putBoolean(Const.DIALOG, true)
-                                    .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
-                                    .build());
-                            cur++;
-                        } else
-                            ProgressHelper.upProg();
-                        date1 = date2;
-                    }
-                    t = line.substring(line.indexOf(">", n) + 1, line.indexOf("<", n));
-                    if (t.contains("(")) //poems
-                        t = t.substring(0, t.indexOf(" ("));
-                    title.add(Decoding(t));
-                    links.add(s);
-                }
-            }
-            line = br.readLine();
-        }
-        saveData(date1);
-        br.close();
-        in.close();
-        return date1;
-    }
+        url = Const.SITE + Const.PRINT + url + Const.HTML;
+        PageParser page = new PageParser(context);
+        page.load(url, "page-title");
 
-    private String Decoding(String s) {
-        if (!s.contains("&#x"))
-            return s;
-        return android.text.Html.fromHtml(s).toString();
+        String a, s, date1 = "", date2;
+        page.getFirstElem();
+        do {
+            a = page.getLink();
+            while (a == null && page.getNextItem() != null) {
+                a = page.getLink();
+            }
+            if (a == null)
+                break;
+            if (a.length() < 19) continue;
+            date2 = DataBase.getDatePage(a);
+            if (date1.equals(""))
+                date1 = date2;
+            else if (!date2.equals(date1)) {
+                saveData(date1);
+                if (max > 0) {
+                    ProgressHelper.postProgress(new Data.Builder()
+                            .putBoolean(Const.DIALOG, true)
+                            .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
+                            .build());
+                    cur++;
+                } else
+                    ProgressHelper.upProg();
+                date1 = date2;
+            }
+            s = page.getText();
+            if (s.contains("(")) //poems
+                s = s.substring(0, s.indexOf(" ("));
+            title.add(s);
+            links.add(a.substring(1));
+        } while (page.getNextItem() != null);
+        page.clear();
+        saveData(date1);
+        return date1;
     }
 
     private void saveData(String date) throws Exception {

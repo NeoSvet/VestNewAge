@@ -23,6 +23,7 @@ import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.PageParser;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
@@ -278,162 +279,74 @@ public class LoaderWorker extends Worker {
         }
         if (!singlePage)
             checkRequests();
-        String line, pline = null, s = link;
-        final String parS = "<p", parE = "</p>";
+        String s = link;
+        int k = 1;
         if (link.contains("#")) {
+            k = Integer.parseInt(s.substring(s.indexOf("#") + 1));
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
-        builderRequest.url(Const.SITE + s + Const.PRINT);
-        Response response = client.newCall(builderRequest.build()).execute();
-        BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
+
+        boolean boolArticle = dataBase.getName().equals("00.00");
+        PageParser page = new PageParser(context);
+        page.load(Const.SITE + Const.PRINT + s, "<!-- Шаблон");
+
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
-        boolean begin = false;
-        int id = 0, i;
-        while ((line = br.readLine()) != null) {
-            if (begin) {
-                if (line.contains("<!--/row-->") || line.contains("<h1>")) {
-                    break;
-                } else if (line.contains("<")) {
-                    if (pline != null) {
-                        line = pline + line;
-                        pline = null;
-                    }
-                    if (line.contains("<a")) {
-                        while (!line.contains("</a"))
-                            line += br.readLine();
-                    }
-                    line = line.trim();
-                    if (line.length() < 7) continue;
-                    line = line.replace("<br />", Const.BR).replace("color", "cvet");
-                    if (line.contains(parS)) {
-                        line = line.replace(" class=\"noind\"", "")
-                                .replace(" class='poem'", "")
-                                .replace(" class=\"poem\"", "");
-                        if (!line.substring(line.length() - 1).equals(">"))
-                            line += " ";
-                        while (!line.contains(parE)) {
-                            line += br.readLine();
-                        }
-                        if (line.contains("</p><p")) {
-                            i = line.lastIndexOf("<p");
-                            pline = line.substring(i) + " ";
-                            line = line.substring(0, i);
-                        }
-                        while (line.indexOf(parS) < line.lastIndexOf(parS)) {
-                            cv = new ContentValues();
-                            cv.put(DataBase.ID, id);
-                            i = line.indexOf(parE) + parE.length();
-                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line.substring(0, i)));
-                            db.insert(DataBase.PARAGRAPH, null, cv);
-                            line = line.substring(i).trim();
-                        }
-                    }
-                    if (line.contains("iframe")) {
-                        if (!line.contains("</iframe"))
-                            line += br.readLine();
-                        if (line.contains("?"))
-                            s = line.substring(line.indexOf("video/") + 6,
-                                    line.indexOf("?"));
-                        else
-                            s = line.substring(line.indexOf("video/") + 6,
-                                    line.indexOf("\"", 65));
-                        s = "<a href=\"https://vimeo.com/" + s + "\">" +
-                                context.getResources().getString
-                                        (R.string.video_on_vimeo) + "</a>";
-                        if (line.contains("center"))
-                            line = "<center>" + s + "</center>";
-                        else line = s;
-                    } else if (line.contains("noind")) { // объединяем подпись в один абзац
-                        s = br.readLine();
-                        while (s.contains("noind")) {
-                            line += s;
-                            s = br.readLine();
-                        }
-                        while (line.indexOf(parE) < line.lastIndexOf(parE)) {
-                            line = line.substring(0, line.indexOf(parE)) + Const.BR +
-                                    line.substring(line.indexOf("\">", line.indexOf(parE)) + 2);
-                        }
-                    } else if (line.contains(".jpg")) {
-                        line = line.replace("=\"/", "=\"http://blagayavest.info/");
-                    } else {
-                        while (line.indexOf(parE) < line.lastIndexOf(parE)) {
-                            // своей Звезды!</p>(<a href="/2016/29.02.16.html">Послание от 29.02.16</a>)
-                            s = line.substring(0, line.indexOf(parE) + parE.length());
-                            cv = new ContentValues();
-                            cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(s));
-                            db.insert(DataBase.PARAGRAPH, null, cv);
-                            line = line.substring(s.length());
-                        }
-                    }
-                    cv = new ContentValues();
-                    cv.put(DataBase.ID, id);
-                    cv.put(DataBase.PARAGRAPH, ConvertHTMLcode(line));
-                    db.insert(DataBase.PARAGRAPH, null, cv);
-                }
-            } else if (line.contains("<h1")) {
-                if (link.contains("#")) {// ссылка на последующий текст на странице
-                    // узнаем его номер:
-                    id = Integer.parseInt(link.substring(link.indexOf("#") + 1));
-                    // мотаем до него:
-                    while (id > 1) {
-                        line = br.readLine();
-                        if (line.contains("<h1"))
-                            id--;
-                    }
-                }
-                Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
-                        Const.LINK + DataBase.Q, new String[]{link}
-                        , null, null, null);
-                if (cursor.moveToFirst()) {
-                    id = cursor.getInt(0);
-                    s = cursor.getString(1);
-                } else s = "";
-                cursor.close();
-                cv = new ContentValues();
-                cv.put(Const.TIME, System.currentTimeMillis());
-                if (!line.contains("</h1")) //в случае нескольких катренов за день
-                    line += " " + br.readLine() + br.readLine();
-                if (id == 0) { // id не найден, материала нет - добавляем
-                    cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
-                    cv.put(Const.LINK, link);
-                    id = (int) db.insert(Const.TITLE, null, cv);
-                    //обновляем дату изменения списка:
+        int id = 0;
+
+        s = page.getFirstElem();
+        do {
+            if (page.isHead()) {
+                k--;
+                if (k == 0) {
+                    s = Lib.withOutTags(s);
+                    Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
+                            Const.LINK + DataBase.Q, new String[]{link}
+                            , null, null, null);
+                    if (cursor.moveToFirst())
+                        id = cursor.getInt(0);
+                    else id = 0;
+                    cursor.close();
                     cv = new ContentValues();
                     cv.put(Const.TIME, System.currentTimeMillis());
-                    db.update(Const.TITLE, cv, DataBase.ID +
-                            DataBase.Q, new String[]{"1"});
-                } else { // id найден, значит материал есть
-                    if (s.contains("/")) // в заголовке ссылка, необходимо заменить
-                        cv.put(Const.TITLE, getTitle(line, dataBase.getName()));
-                    //обновляем дату загрузки материала
-                    db.update(Const.TITLE, cv, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(id)});
-                    //удаляем содержимое материала
-                    db.delete(DataBase.PARAGRAPH, DataBase.ID +
-                            DataBase.Q, new String[]{String.valueOf(id)});
+
+                    if (id == 0) { // id не найден, материала нет - добавляем
+                        cv.put(Const.TITLE, getTitle(s, dataBase.getName()));
+                        cv.put(Const.LINK, link);
+                        id = (int) db.insert(Const.TITLE, null, cv);
+                        //обновляем дату изменения списка:
+                        cv = new ContentValues();
+                        cv.put(Const.TIME, System.currentTimeMillis());
+                        db.update(Const.TITLE, cv, DataBase.ID +
+                                DataBase.Q, new String[]{"1"});
+                    } else { // id найден, значит материал есть
+                        //обновляем заголовок
+                        cv.put(Const.TITLE, getTitle(s, dataBase.getName()));
+                        //обновляем дату загрузки материала
+                        db.update(Const.TITLE, cv, DataBase.ID +
+                                DataBase.Q, new String[]{String.valueOf(id)});
+                        //удаляем содержимое материала
+                        db.delete(DataBase.PARAGRAPH, DataBase.ID +
+                                DataBase.Q, new String[]{String.valueOf(id)});
+                    }
+                    s = page.getNextElem();
                 }
-                begin = true;
-            } else if (line.contains("counter") && singlePage) { // счетчики
-                sendCounter(line);
             }
-        }
-        br.close();
-        response.close();
+            if (k == 0 || boolArticle) {
+                cv = new ContentValues();
+                cv.put(DataBase.ID, id);
+                //Lib.LOG("par: " + s);
+                cv.put(DataBase.PARAGRAPH, s);
+                db.insert(DataBase.PARAGRAPH, null, cv);
+            }
+            s = page.getNextElem();
+        } while (s != null);
+
         db.close();
         dataBase.close();
+        page.clear();
         return true;
-    }
-
-    private String ConvertHTMLcode(String s) {
-        int a, b;
-        while ((a = s.indexOf("&")) > -1) {
-            b = s.indexOf(";", a) + 1;
-            s = s.substring(0, a) + android.text.Html.fromHtml(s.substring(a, b)) + s.substring(b);
-        }
-        return s;
     }
 
     private String initMessage(String s) {
@@ -477,24 +390,6 @@ public class LoaderWorker extends Worker {
         return line;
     }
 
-    private void sendCounter(String line) {
-        int i = 0;
-        while ((i = line.indexOf("img src", i)) > -1) {
-            i += 9;
-            final String link_counter = line.substring(i, line.indexOf("\"", i));
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        builderRequest.url(link_counter);
-                        Response response = client.newCall(builderRequest.build()).execute();
-                        response.close();
-                    } catch (Exception ex) {
-                    }
-                }
-            }).start();
-        }
-    }
-
     private void downloadStyle(boolean replaceStyle) throws Exception {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
@@ -522,8 +417,8 @@ public class LoaderWorker extends Worker {
                     s = s.replace("15px", "5px");
                 else if (s.contains("print2"))
                     s = s.replace("8pt/9pt", "12pt");
-                s = s.replace("#333", "#ccc");
                 bwLight.write(s);
+                s = s.replace("#333", "#ccc");
                 if (s.contains("#000"))
                     s = s.replace("#000", "#fff");
                 else
