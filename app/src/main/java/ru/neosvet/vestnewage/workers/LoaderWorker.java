@@ -286,7 +286,7 @@ public class LoaderWorker extends Worker {
             s = s.substring(0, s.indexOf("#"));
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
-
+        int n = k;
         boolean boolArticle = dataBase.getName().equals("00.00");
         PageParser page = new PageParser(context);
         page.load(Const.SITE + Const.PRINT + s, "<!-- Шаблон");
@@ -299,6 +299,13 @@ public class LoaderWorker extends Worker {
         do {
             if (page.isHead()) {
                 k--;
+                if (k == -1 && !boolArticle) {
+                    n++;
+                    if (link.contains("#"))
+                        link = link.substring(0, link.indexOf("#"));
+                    link += "#" + n;
+                    k = 0;
+                }
                 if (k == 0) {
                     s = Lib.withOutTags(s);
                     Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
