@@ -343,7 +343,6 @@ public class LoaderWorker extends Worker {
             if (k == 0 || boolArticle) {
                 cv = new ContentValues();
                 cv.put(DataBase.ID, id);
-                //Lib.LOG("par: " + s);
                 cv.put(DataBase.PARAGRAPH, s);
                 db.insert(DataBase.PARAGRAPH, null, cv);
             }
