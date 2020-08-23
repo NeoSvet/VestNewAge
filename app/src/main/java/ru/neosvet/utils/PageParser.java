@@ -98,11 +98,10 @@ public class PageParser {
             return;
 
         t = t.replace("&nbsp;", " ")
+                .replace("<br> ", "<br>")
                 .replace("<span> </span>", " ")
-                .replace("</b> <b>", " ")
-                .replace(" class=\"c0\"", "")
-                .replace("</strong> <strong>", " ")
                 .replace("b>", "strong>")
+                .replace("</strong> <strong>", " ")
                 .replace("</span>", "")
                 .replace("</div>", "");
 
