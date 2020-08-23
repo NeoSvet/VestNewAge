@@ -163,6 +163,7 @@ public class PageParser {
                     continue;
                 }
                 n = s.indexOf("href") + 6;
+                if (n == 5) continue;
                 if (s.contains("\""))
                     elem.par = s.substring(n, s.indexOf("\"", n));
                 else
