@@ -30,7 +30,7 @@ public class PageParser {
 
         public HTMLElem(String tag) {
             this.tag = tag;
-            start = true;
+            start = !tag.equals(PAR);
             end = true;
         }
 
@@ -108,7 +108,7 @@ public class PageParser {
         String[] m = t.split("<");
         int n;
         HTMLElem elem;
-        boolean wasNoind = false;
+        boolean wasNoind = false, startPar = false;
 
         for (int i = 0; i < m.length; i++) {
             s = m[i].trim();
@@ -136,6 +136,8 @@ public class PageParser {
                 n = s.length();
             if (s.indexOf("/") == 0) { //end tag
                 elem.tag = s.substring(1, n);
+                if (elem.tag.equals(PAR))
+                    startPar = false;
                 if (content.size() > 0) {
                     n = content.size() - 1;
                     if (content.get(n).tag.equals(elem.tag)) {
@@ -157,6 +159,12 @@ public class PageParser {
             elem.end = false;
             elem.tag = s.substring(0, n);
             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
+            if (elem.tag.equals(PAR)) {
+                if (startPar)
+                    content.add(new HTMLElem(PAR));
+                else
+                    startPar = true;
+            }
             if (elem.tag.equals(LINK)) {
                 if (s.contains("data-ajax-url")) {
                     i++;
