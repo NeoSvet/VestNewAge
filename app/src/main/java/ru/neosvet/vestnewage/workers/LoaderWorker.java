@@ -293,7 +293,7 @@ public class LoaderWorker extends Worker {
 
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
-        int id = 0;
+        int id = 0, bid = 0;
 
         s = page.getFirstElem();
         do {
@@ -307,7 +307,6 @@ public class LoaderWorker extends Worker {
                     k = 0;
                 }
                 if (k == 0) {
-                    s = Lib.withOutTags(s);
                     Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
                             Const.LINK + DataBase.Q, new String[]{link}
                             , null, null, null);
@@ -319,17 +318,25 @@ public class LoaderWorker extends Worker {
                     cv.put(Const.TIME, System.currentTimeMillis());
 
                     if (id == 0) { // id не найден, материала нет - добавляем
-                        cv.put(Const.TITLE, getTitle(s, dataBase.getName()));
-                        cv.put(Const.LINK, link);
-                        id = (int) db.insert(Const.TITLE, null, cv);
-                        //обновляем дату изменения списка:
-                        cv = new ContentValues();
-                        cv.put(Const.TIME, System.currentTimeMillis());
-                        db.update(Const.TITLE, cv, DataBase.ID +
-                                DataBase.Q, new String[]{"1"});
+                        if (link.contains("#")) {
+                            id = bid;
+                            cv = new ContentValues();
+                            cv.put(DataBase.ID, id);
+                            cv.put(DataBase.PARAGRAPH, s);
+                            db.insert(DataBase.PARAGRAPH, null, cv);
+                        } else {
+                            cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getName()));
+                            cv.put(Const.LINK, link);
+                            id = (int) db.insert(Const.TITLE, null, cv);
+                            //обновляем дату изменения списка:
+                            cv = new ContentValues();
+                            cv.put(Const.TIME, System.currentTimeMillis());
+                            db.update(Const.TITLE, cv, DataBase.ID +
+                                    DataBase.Q, new String[]{"1"});
+                        }
                     } else { // id найден, значит материал есть
                         //обновляем заголовок
-                        cv.put(Const.TITLE, getTitle(s, dataBase.getName()));
+                        cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getName()));
                         //обновляем дату загрузки материала
                         db.update(Const.TITLE, cv, DataBase.ID +
                                 DataBase.Q, new String[]{String.valueOf(id)});
@@ -337,6 +344,7 @@ public class LoaderWorker extends Worker {
                         db.delete(DataBase.PARAGRAPH, DataBase.ID +
                                 DataBase.Q, new String[]{String.valueOf(id)});
                     }
+                    bid = id;
                     s = page.getNextElem();
                 }
             }
