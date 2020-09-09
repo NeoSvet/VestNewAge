@@ -348,7 +348,7 @@ public class LoaderWorker extends Worker {
                     s = page.getNextElem();
                 }
             }
-            if ((k == 0 || boolArticle) && page.getText().length() > 0) {
+            if ((k == 0 || boolArticle) && !page.isEmpty()) {
                 cv = new ContentValues();
                 cv.put(DataBase.ID, id);
                 cv.put(DataBase.PARAGRAPH, s);

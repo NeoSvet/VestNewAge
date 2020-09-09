@@ -291,6 +291,12 @@ public class PageParser {
         return Lib.withOutTags(content.get(cur).html);
     }
 
+    public boolean isEmpty() {
+        if (content.get(cur).end)
+            return getText().length() == 0;
+        return false;
+    }
+
     public boolean isHead() {
         return content.get(cur).tag.indexOf(HEAD) == 0;
     }
