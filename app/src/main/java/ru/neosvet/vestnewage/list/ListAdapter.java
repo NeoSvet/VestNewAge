@@ -42,7 +42,7 @@ public class ListAdapter extends BaseAdapter {
 
     @Override
     public ListItem getItem(int i) {
-        return data.get(i); //data == null ? null :
+        return (data == null || i >= data.size()) ? null : data.get(i);
     }
 
     public void clear() {
