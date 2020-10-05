@@ -753,7 +753,11 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 n = -1;
             //выводим на экран:
             String link = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
-            String msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
+            String msg;
+            if (link == null)
+                msg = getResources().getString(R.string.try_again);
+            else
+                msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
             if (title == null) {
                 title = msg;
                 msg = s;
