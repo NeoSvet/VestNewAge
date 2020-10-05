@@ -160,7 +160,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setFragment(first_fragment, false);
                     if (SlashModel.inProgress) {
                         ProgressHelper.removeObservers(MainActivity.this);
-                        curFragment.startLoad();
+                        if (curFragment != null)
+                            curFragment.startLoad();
                         SlashModel.inProgress = false;
                     }
                 }
