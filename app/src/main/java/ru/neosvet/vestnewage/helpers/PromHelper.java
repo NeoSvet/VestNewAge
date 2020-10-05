@@ -23,6 +23,7 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
@@ -187,8 +188,15 @@ public class PromHelper {
             t = t.substring(context.getResources().getString(R.string.to_prom).length() + 1);
             if (t.contains(","))
                 t = t.substring(0, t.indexOf(","));
-            else
-                t = t.substring(0, t.indexOf(" "));
+            else if (t.contains("."))
+                t = t.substring(0, t.indexOf("."));
+            else if (t.contains(" "))
+                t = t.substring(0, t.indexOf(" "));
+            else {
+                tvPromTime.setVisibility(View.GONE);
+                return;
+            }
+
             if (Integer.parseInt(t) > 2) {
                 tvPromTime.setVisibility(View.GONE);
                 return;
