@@ -168,6 +168,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             }
         } else {
             link = state.getString(Const.LINK);
+            if (link == null) return;
             dbPage = new DataBase(this, link);
             if (!LoaderModel.inProgress) {
                 openPage(false);
