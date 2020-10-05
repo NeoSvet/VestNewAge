@@ -186,18 +186,19 @@ public class PromHelper {
         if (tvPromTime.getId() == R.id.tvPromTime &&
                 t.contains(context.getResources().getStringArray(R.array.time)[6])) {
             t = t.substring(context.getResources().getString(R.string.to_prom).length() + 1);
+            int h = 0;
             if (t.contains(","))
                 t = t.substring(0, t.indexOf(","));
             else if (t.contains("."))
                 t = t.substring(0, t.indexOf("."));
             else if (t.contains(" "))
                 t = t.substring(0, t.indexOf(" "));
-            else {
-                tvPromTime.setVisibility(View.GONE);
-                return;
-            }
+            else
+                h = 1;
+            if (h == 0)
+                h = Integer.parseInt(t);
 
-            if (Integer.parseInt(t) > 2) {
+            if (h > 2) {
                 tvPromTime.setVisibility(View.GONE);
                 return;
             }
