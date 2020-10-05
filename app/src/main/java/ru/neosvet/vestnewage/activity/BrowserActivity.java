@@ -521,7 +521,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 shareIntent.setType("text/plain");
                 String s = wvBrowser.getTitle();
-                s = s.substring(9) + " (" + getResources().getString(R.string.from) + " " + s.substring(0, 8) + ")";
+                if (s.length() > 9)
+                    s = s.substring(9) + " (" + getResources().getString(R.string.from) + " " + s.substring(0, 8) + ")";
                 shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, s + Const.N + Const.SITE + link);
                 startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share)));
                 break;
