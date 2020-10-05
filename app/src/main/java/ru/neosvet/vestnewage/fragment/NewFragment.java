@@ -56,6 +56,7 @@ public class NewFragment extends Fragment {
     private void restoreState(Bundle state) {
         if (state != null) {
             index_ads = state.getInt(Const.ADS);
+            if (index_ads == -1) return;
             showAd(adNew.getItem(index_ads).getLink(), adNew.getItem(index_ads).getHead(0));
         }
     }
