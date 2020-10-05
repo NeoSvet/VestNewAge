@@ -625,6 +625,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     public void openPage(boolean newPage) {
         status.setLoad(false);
+        if (link == null) return;
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
