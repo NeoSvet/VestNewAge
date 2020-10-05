@@ -603,6 +603,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     public void openLink(String url) {
+        if (url == null) return;
         if (!url.contains(Const.HTML) && !url.contains("http:")) {
             lib.openInApps(url, null);
             return;
