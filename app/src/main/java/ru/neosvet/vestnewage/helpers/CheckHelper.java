@@ -52,7 +52,7 @@ public class CheckHelper extends LifecycleService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (!intent.getBooleanExtra(Const.START, false)) {
+        if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
             stopForeground(true);
             return Service.START_NOT_STICKY;
         }
