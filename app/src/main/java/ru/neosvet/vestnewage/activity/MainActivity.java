@@ -103,7 +103,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else if (p == Const.SCREEN_CALENDAR || !isMenuMode)
             first_fragment = R.id.nav_calendar;
 
-        initStar();
+        if (savedInstanceState == null)
+            initStar();
+        else
+            findViewById(R.id.ivStar).setVisibility(View.GONE);
+
         slash = new SlashUtils(MainActivity.this);
         model = ViewModelProviders.of(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
