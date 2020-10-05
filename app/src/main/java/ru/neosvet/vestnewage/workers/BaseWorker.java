@@ -2,8 +2,8 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
@@ -88,7 +88,7 @@ public class BaseWorker extends Worker {
 
     private void clearFolder(File folder) throws Exception {
         for (File f : folder.listFiles()) {
-            if(f.isFile()) {
+            if (f.isFile()) {
                 size += f.length();
                 f.delete();
             } else {

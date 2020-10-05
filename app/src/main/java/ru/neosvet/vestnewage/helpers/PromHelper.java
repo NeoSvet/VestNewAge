@@ -11,19 +11,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 

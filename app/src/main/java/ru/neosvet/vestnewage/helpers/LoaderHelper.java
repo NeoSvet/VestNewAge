@@ -3,14 +3,14 @@ package ru.neosvet.vestnewage.helpers;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.arch.lifecycle.LifecycleService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 
+import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LifecycleService;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;

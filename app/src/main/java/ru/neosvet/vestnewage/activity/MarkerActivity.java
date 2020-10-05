@@ -9,9 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
@@ -25,6 +22,10 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
@@ -78,7 +79,7 @@ public class MarkerActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             }
             cursor.close();
-			db.close();
+            db.close();
             dataBase.close();
             if (s.length() > 0) {
                 s.delete(s.length() - 2, s.length());

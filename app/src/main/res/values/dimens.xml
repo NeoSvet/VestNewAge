@@ -16,4 +16,5 @@
     <dimen name="menu_width">260dp</dimen>
     <dimen name="calendar_margin_top">8dp</dimen>
     <dimen name="menu_fragment_top">0dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
 </resources>

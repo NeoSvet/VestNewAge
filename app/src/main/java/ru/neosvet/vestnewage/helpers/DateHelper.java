@@ -1,7 +1,8 @@
 package ru.neosvet.vestnewage.helpers;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 

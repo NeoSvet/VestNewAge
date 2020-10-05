@@ -2,8 +2,8 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 

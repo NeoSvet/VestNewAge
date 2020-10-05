@@ -8,12 +8,13 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;

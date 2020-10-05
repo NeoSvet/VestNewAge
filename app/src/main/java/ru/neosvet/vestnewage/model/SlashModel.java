@@ -1,9 +1,9 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;

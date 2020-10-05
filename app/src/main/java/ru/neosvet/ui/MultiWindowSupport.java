@@ -1,8 +1,9 @@
 package ru.neosvet.ui;
 
-import android.support.annotation.RequiresApi;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import ru.neosvet.vestnewage.R;
 

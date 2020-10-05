@@ -2,20 +2,10 @@ package ru.neosvet.vestnewage.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +13,17 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.work.Data;
+
+import com.google.android.material.navigation.NavigationView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
         if (p == 0 && getResources().getInteger(R.integer.screen_mode)
                 < getResources().getInteger(R.integer.screen_tablet_port)) {
-            setContentView(R.layout.main_activity_nomenu);
+            setContentView(R.layout.main_content);
             first_fragment = R.id.menu_fragment;
             isMenuMode = true;
         } else
@@ -530,6 +530,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (curFragment == null || resultCode != RESULT_OK)
             return;
         if (curFragment instanceof CollectionsFragment) {
