@@ -86,17 +86,18 @@ public class PageParser {
             in.close();
             return;
         }
-        String t = "";
+        StringBuilder sb = new StringBuilder(br.readLine());
         while ((s = br.readLine()) != null && !ProgressHelper.isCancelled()) {
             if (s.contains("<!--/row-->"))
                 break;
-            t += s;
+            sb.append(" ").append(s);
         }
         br.close();
         in.close();
         if (ProgressHelper.isCancelled())
             return;
 
+        String t = sb.toString();
         t = t.replace("&nbsp;", " ")
                 .replace("<br> ", "<br>")
                 .replace("<span> </span>", " ")
