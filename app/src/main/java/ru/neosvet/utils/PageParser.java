@@ -18,9 +18,9 @@ public class PageParser {
             IMAGE = "img", FRAME = "iframe", DIV = "div", SPAN = "span", TEXT = "text";
     Context context;
     int cur, index;
-    List<HTMLElem> content = new ArrayList<HTMLElem>();
+    List<HTMLElem> content = new ArrayList<>();
 
-    private class HTMLElem {
+    private static class HTMLElem {
         public String tag, par = "";
         private String html = "";
         public boolean start = false, end = false;
@@ -267,7 +267,7 @@ public class PageParser {
         }
         index--;
         while (end > 1) {
-            s.append("</" + elem.tag + ">");
+            s.append("</").append(elem.tag).append(">");
             end--;
         }
         return s.toString();

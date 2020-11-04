@@ -279,7 +279,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.GONE);
         InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
-        mainLayout = (LinearLayout) findViewById(R.id.content_browser);
+        mainLayout = findViewById(R.id.content_browser);
         softKeyboard = new SoftKeyboard(mainLayout, im);
         NavigationView navMenu = (NavigationView) findViewById(R.id.nav_view);
         navMenu.setNavigationItemSelectedListener(this);
@@ -292,7 +292,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         tip = new Tip(this, findViewById(R.id.tvFinish));
         pSearch = findViewById(R.id.pSearch);
-        etSearch = (EditText) findViewById(R.id.etSearch);
+        etSearch = findViewById(R.id.etSearch);
         tvPlace = (TextView) findViewById(R.id.tvPlace);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);

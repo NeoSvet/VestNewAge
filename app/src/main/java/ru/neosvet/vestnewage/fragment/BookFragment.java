@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -121,6 +122,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     @Override
     public void onChanged(@Nullable Data data) {
+        if (data == null) return;
         if (data.getBoolean(Const.OTKR, false)) {
             fromOtkr = true;
             if (tab == 1 && dPoslanie.getYear() == 2016 && dPoslanie.getMonth() == 1)
@@ -367,7 +369,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(Const.TITLE, new String[]{Const.LINK},
                 null, null, null, null, null);
-        String s = "";
+        String s;
         if (cursor.moveToFirst()) {
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
@@ -388,7 +390,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
         fabRefresh = container.findViewById(R.id.fabRefresh);
         fabRndMenu = container.findViewById(R.id.fabRndMenu);
-        tvDate = (TextView) container.findViewById(R.id.tvDate);
+        tvDate = container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
@@ -412,6 +414,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -419,7 +422,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 startLoad();
             }
         });
-        lvBook = (ListView) container.findViewById(R.id.lvBook);
+        lvBook = container.findViewById(R.id.lvBook);
         adBook = new ListAdapter(act);
         lvBook.setAdapter(adBook);
         lvBook.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -722,60 +725,63 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             g = new Random();
             n = g.nextInt(curTitle.getCount() - 2) + 2; //0 - отсуствует, 1 - дата изменения списка
         }
-        if (curTitle.moveToPosition(n)) { //если случайный текст найден
-            String s = "";
-            if (view.getId() == R.id.bRndStih) { //случайных стих
-                s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
-                Cursor curPar = db.query(DataBase.PARAGRAPH,
-                        new String[]{DataBase.PARAGRAPH},
-                        DataBase.ID + DataBase.Q,
-                        new String[]{s}, null, null, null);
-                if (curPar.getCount() > 1) { //если текст скачен
-                    g = new Random();
-                    n = curPar.getCount(); //номер случайного стиха
-                    if (y > 13 || (y == 13 && m > 7))
-                        n--; //исключаем подпись
-                    n = g.nextInt(n);
-                    if (curPar.moveToPosition(n)) { //если случайный стих найден
-                        s = Lib.withOutTags(curPar.getString(0));
-                    } else {
-                        s = "";
-                        n = -1;
-                    }
-                } else
-                    s = "";
-                curPar.close();
-                if (s.equals("")) {//случайный стих не найден
-                    Lib.showToast(act, getResources().getString(R.string.alert_rnd));
-                    title = getResources().getString(R.string.rnd_stih);
-                }
-            } else // случайный катрен или послание
-                n = -1;
-            //выводим на экран:
-            String link = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
-            String msg;
-            if (link == null)
-                msg = getResources().getString(R.string.try_again);
-            else
-                msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
-            if (title == null) {
-                title = msg;
-                msg = s;
-            }
-            dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
-            showRndAlert(title, link, msg, s, n);
-            //добавляем в журнал:
-            ContentValues cv = new ContentValues();
-            cv.put(Const.TIME, System.currentTimeMillis());
-            String id = dataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n;
-            DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
-            db = dbJournal.getWritableDatabase();
-            cv.put(DataBase.ID, id);
-            db.insert(DataBase.JOURNAL, null, cv);
-            dbJournal.close();
-        } else
+        if (!curTitle.moveToPosition(n)) {
+            curTitle.close();
             Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+            return;
+        }
+        //если случайный текст найден
+        String s = "";
+        if (view.getId() == R.id.bRndStih) { //случайных стих
+            s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
+            Cursor curPar = db.query(DataBase.PARAGRAPH,
+                    new String[]{DataBase.PARAGRAPH},
+                    DataBase.ID + DataBase.Q,
+                    new String[]{s}, null, null, null);
+            if (curPar.getCount() > 1) { //если текст скачен
+                g = new Random();
+                n = curPar.getCount(); //номер случайного стиха
+                if (y > 13 || (y == 13 && m > 7))
+                    n--; //исключаем подпись
+                n = g.nextInt(n);
+                if (curPar.moveToPosition(n)) { //если случайный стих найден
+                    s = Lib.withOutTags(curPar.getString(0));
+                } else {
+                    s = "";
+                    n = -1;
+                }
+            } else
+                s = "";
+            curPar.close();
+            if (s.equals("")) {//случайный стих не найден
+                Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+                title = getResources().getString(R.string.rnd_stih);
+            }
+        } else // случайный катрен или послание
+            n = -1;
+        //выводим на экран:
+        String link = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
+        String msg;
+        if (link == null)
+            msg = getResources().getString(R.string.try_again);
+        else
+            msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
         curTitle.close();
+        if (title == null) {
+            title = msg;
+            msg = s;
+        }
+        dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
+        showRndAlert(title, link, msg, s, n);
+        if (link == null) return;
+        //добавляем в журнал:
+        ContentValues cv = new ContentValues();
+        cv.put(Const.TIME, System.currentTimeMillis());
+        DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
+        db = dbJournal.getWritableDatabase();
+        cv.put(DataBase.ID, DataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n);
+        db.insert(DataBase.JOURNAL, null, cv);
+        dbJournal.close();
     }
 
     private void showRndAlert(String title, final String link, String msg, final String place, final int par) {

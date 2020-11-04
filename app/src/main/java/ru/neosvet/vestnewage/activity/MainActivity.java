@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int cur_id, prev_id = 0, tab = 0, statusBack, k_new = 0;
     public View fab;
     private SlashUtils slash;
-    private SlashModel model;
     public Animation anMin, anMax;
 
     @Override
@@ -109,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
         slash = new SlashUtils(MainActivity.this);
-        model = ViewModelProviders.of(this).get(SlashModel.class);
+        SlashModel model = ViewModelProviders.of(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
@@ -250,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!SlashModel.inProgress)
+        if (!SlashModel.inProgress || data == null)
             return;
         if (data.getBoolean(Const.TIME, false))
             slash.reInitProm();
@@ -645,7 +644,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             link = link.substring(link.length() - 5, link.length() - 1);
             year = Integer.parseInt(link);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         ((BookFragment) curFragment).setYear(year);
     }

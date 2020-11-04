@@ -28,10 +28,10 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookWorker extends Worker {
-    private Context context;
-    private List<String> title = new ArrayList<String>();
-    private List<String> links = new ArrayList<String>();
-    private Lib lib;
+    private final Context context;
+    private final List<String> title = new ArrayList<>();
+    private final List<String> links = new ArrayList<>();
+    private final Lib lib;
     private int cur, max;
     private boolean BOOK;
 

@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -36,6 +37,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CheckAdapter;
 
+@SuppressLint("DefaultLocale")
 public class MarkerActivity extends AppCompatActivity {
     private float density;
     private String pageCon;
@@ -274,7 +276,7 @@ public class MarkerActivity extends AppCompatActivity {
                 setPageList(s);
             }
             sel = getResources().getString(R.string.sel_pos) +
-                    String.format("%.1f", getIntent().getFloatExtra(Const.PLACE, 0f)) + "%";
+                    String.format("%.1f%%", getIntent().getFloatExtra(Const.PLACE, 0f));
         } else { //edit mode
             setResult(0);
             DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
@@ -305,9 +307,9 @@ public class MarkerActivity extends AppCompatActivity {
 
             String[] mId = DataBase.getList(s);
             StringBuilder b = new StringBuilder(getResources().getString(R.string.sel_col));
-            for (int i = 0; i < mId.length; i++) {
+            for (String id : mId) {
                 cursor = db.query(DataBase.COLLECTIONS, null,
-                        DataBase.ID + DataBase.Q, new String[]{mId[i]}
+                        DataBase.ID + DataBase.Q, new String[]{id}
                         , null, null, Const.PLACE);
                 if (cursor.moveToFirst()) {
                     b.append(cursor.getString(cursor.getColumnIndex(Const.TITLE)));
@@ -342,27 +344,27 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         adPage = new CheckAdapter(this);
         loadPage();
         adCol = new CheckAdapter(this);
         loadCol();
-        tvSel = (TextView) findViewById(R.id.tvSel);
-        rPar = (RadioButton) findViewById(R.id.rPar);
-        rPos = (RadioButton) findViewById(R.id.rPos);
+        tvSel = findViewById(R.id.tvSel);
+        rPar = findViewById(R.id.rPar);
+        rPos = findViewById(R.id.rPos);
         pPos = findViewById(R.id.pPos);
-        lvList = (ListView) findViewById(R.id.lvList);
+        lvList = findViewById(R.id.lvList);
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         heightDialog = displaymetrics.heightPixels -
                 (int) (getResources().getInteger(R.integer.top_minus) * density);
-        mainLayout = (LinearLayout) findViewById(R.id.content_marker);
-        sbPos = (SeekBar) findViewById(R.id.sbPos);
-        tvPos = (TextView) findViewById(R.id.tvPos);
-        tvCol = (TextView) findViewById(R.id.tvCol);
-        etDes = (EditText) findViewById(R.id.etDes);
-        etCol = (EditText) findViewById(R.id.etCol);
+        mainLayout = findViewById(R.id.content_marker);
+        sbPos = findViewById(R.id.sbPos);
+        tvPos = findViewById(R.id.tvPos);
+        tvCol = findViewById(R.id.tvCol);
+        etDes = findViewById(R.id.etDes);
+        etCol = findViewById(R.id.etCol);
         fabOk = findViewById(R.id.fabOk);
     }
 
@@ -443,7 +445,7 @@ public class MarkerActivity extends AppCompatActivity {
                 if (posVisible) {
                     float pos = sbPos.getProgress() / 10f;
                     tvSel.setText(getResources().getString(R.string.sel_pos) +
-                            String.format("%.1f", pos) + "%");
+                            String.format("%.1f%%", pos));
                 } else if (modeList == 1) { //page
                     String s = getPageList();
                     if (s == null) {
@@ -656,8 +658,8 @@ public class MarkerActivity extends AppCompatActivity {
                 adPage.getItem(i).setCheck(false);
             s = s.substring(s.indexOf(":") + 2).replace(", ", Const.COMMA);
             String[] m = s.split(Const.COMMA);
-            for (int i = 0; i < m.length; i++)
-                adPage.getItem(Integer.parseInt(m[i])).setCheck(true);
+            for (String item : m)
+                adPage.getItem(Integer.parseInt(item)).setCheck(true);
         } else {
             for (int i = 0; i < adPage.getCount(); i++)
                 adPage.getItem(i).setCheck(true);

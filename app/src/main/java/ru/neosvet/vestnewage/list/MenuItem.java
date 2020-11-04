@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.list;
 
 public class MenuItem {
-    private String title;
+    private final String title;
     private int image;
     private boolean select = false;
 

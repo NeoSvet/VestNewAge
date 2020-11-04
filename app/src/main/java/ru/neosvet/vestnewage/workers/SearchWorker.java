@@ -22,8 +22,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.SearchModel;
 
 public class SearchWorker extends Worker {
-    private Context context;
-    private DataBase dbSearch;
+    private final Context context;
     private SQLiteDatabase dbS;
     private String str;
     private int mode, count1 = 0, count2 = 0;
@@ -40,7 +39,7 @@ public class SearchWorker extends Worker {
         String error;
         try {
             Lib lib = new Lib(context);
-            List<String> list = new ArrayList<String>();
+            List<String> list = new ArrayList<>();
             for (File f : lib.getDBFolder().listFiles()) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
@@ -49,7 +48,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new DataBase(context, Const.SEARCH);
+            DataBase dbSearch = new DataBase(context, Const.SEARCH);
             dbS = dbSearch.getWritableDatabase();
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
@@ -118,9 +117,9 @@ public class SearchWorker extends Worker {
     }
 
     private void searchInResults(String find, boolean reverseOrder) throws Exception {
-        List<String> title = new ArrayList<String>();
-        List<String> link = new ArrayList<String>();
-        List<String> id = new ArrayList<String>();
+        List<String> title = new ArrayList<>();
+        List<String> link = new ArrayList<>();
+        List<String> id = new ArrayList<>();
         Cursor curSearch = dbS.query(Const.SEARCH,
                 null, null, null, null, null,
                 DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
@@ -245,7 +244,6 @@ public class SearchWorker extends Worker {
                                     des = null;
                                 }
                                 dbS.insert(Const.SEARCH, null, cv);
-                                cv = null;
                             }
                             cv = new ContentValues();
                             cv.put(Const.TITLE, t);

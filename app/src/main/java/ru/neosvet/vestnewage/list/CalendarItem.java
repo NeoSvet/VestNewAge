@@ -9,10 +9,11 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class CalendarItem {
-    private Context context;
-    private int num, color;
-    private List<String> titles = new ArrayList<String>();
-    private List<String> links = new ArrayList<String>();
+    private final Context context;
+    private final int num;
+    private int color;
+    private final List<String> titles = new ArrayList<>();
+    private final List<String> links = new ArrayList<>();
     private boolean bold = false, katren = false, poslanie = false;
 
     public CalendarItem(Context context, int num, int id_color) {

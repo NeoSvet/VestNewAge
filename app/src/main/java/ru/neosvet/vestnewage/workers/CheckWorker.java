@@ -26,9 +26,9 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class CheckWorker extends Worker {
-    private Context context;
+    private final Context context;
     public static final String TAG_PERIODIC = "check periodic";
-    private List<String> list = new ArrayList<>();
+    private final List<String> list = new ArrayList<>();
 
     public CheckWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -82,7 +82,7 @@ public class CheckWorker extends Worker {
         DateHelper d;
         String title, link;
         int b;
-        String m[] = s.split("<item>");
+        String[] m = s.split("<item>");
         for (int i = 1; i < m.length; i++) {
             a = m[i].indexOf("</link");
             link = withOutTag(m[i].substring(0, a));

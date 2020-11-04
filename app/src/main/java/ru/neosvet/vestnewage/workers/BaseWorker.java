@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class BaseWorker extends Worker {
-    private Context context;
+    private final Context context;
     private long size = 0;
 
     public BaseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -33,11 +33,11 @@ public class BaseWorker extends Worker {
             String[] request = getInputData().getStringArray(Const.MSG);
             File f;
             String path = context.getFilesDir().getParent() + "/databases/";
-            for (int i = 0; i < request.length; i++) {
-                if (request[i].equals(Const.START) || request[i].equals(Const.END)) { //book
+            for (String r : request) {
+                if (r.equals(Const.START) || r.equals(Const.END)) { //book
                     DateHelper d;
                     int max_y, max_m;
-                    if (request[i].equals(Const.START)) { //book prev years
+                    if (r.equals(Const.START)) { //book prev years
                         d = DateHelper.initToday(context);
                         max_y = d.getYear() - 1;
                         max_m = 12;
@@ -60,10 +60,10 @@ public class BaseWorker extends Worker {
                         }
                         d.changeMonth(1);
                     }
-                } else if (request[i].equals(Const.FILE)) { //cache
+                } else if (r.equals(Const.FILE)) { //cache
                     clearFolder(new File(context.getFilesDir().getParent() + "/cache/"));
                 } else {//markers or materials
-                    f = new File(path + request[i]);
+                    f = new File(path + r);
                     if (f.exists()) {
                         size += f.length();
                         f.delete();

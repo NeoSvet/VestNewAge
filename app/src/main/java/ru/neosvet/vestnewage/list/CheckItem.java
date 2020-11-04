@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.list;
 
 public class CheckItem {
-    private String title;
+    private final String title;
     private int id = 0;
     private boolean check = false;
 

@@ -15,8 +15,8 @@ import ru.neosvet.vestnewage.R;
 
 public class HelpAdapter extends BaseAdapter {
     private final String BUTTON = "b";
-    private Context context;
-    private List<ListItem> data = new ArrayList<ListItem>();
+    private final Context context;
+    private final List<ListItem> data = new ArrayList<>();
 
     public HelpAdapter(Context context) {
         this.context = context;

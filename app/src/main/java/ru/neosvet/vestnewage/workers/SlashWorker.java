@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
 
 public class SlashWorker extends Worker {
-    private Context context;
+    private final Context context;
 
     public SlashWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);

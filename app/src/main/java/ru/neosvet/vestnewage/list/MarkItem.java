@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.list;
 
 public class MarkItem {
     private String title, data, des, place;
-    private int id;
+    private final int id;
     private boolean select = false;
 
     public MarkItem(String title, int id, String data) {

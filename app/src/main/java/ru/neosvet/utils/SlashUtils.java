@@ -24,8 +24,8 @@ public class SlashUtils {
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private NotificationHelper notifHelper;
-    private Intent main;
-    private Context context;
+    private final Intent main;
+    private final Context context;
 
     public SlashUtils(Context context) {
         this.context = context;
@@ -65,10 +65,8 @@ public class SlashUtils {
                             context.getResources().getString(R.string.new_option_notif), getSettingsIntent());
             }
         }
-        if (ver == 0) {
+        if (ver == 0)
             showSummaryNotif();
-            return;
-        }
     }
 
     private void showNotifDownloadAll() {

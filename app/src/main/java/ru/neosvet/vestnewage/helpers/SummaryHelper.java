@@ -31,10 +31,10 @@ import ru.neosvet.vestnewage.activity.MainActivity;
  */
 public class SummaryHelper {
     private static final int TEN_MIN_IN_MILLS = 600000;
-    private Context context;
-    private NotificationHelper notifHelper;
-    private Intent intent;
-    private PendingIntent piEmpty;
+    private final Context context;
+    private final NotificationHelper notifHelper;
+    private final Intent intent;
+    private final PendingIntent piEmpty;
     private int notif_id;
     private NotificationCompat.Builder notifBuilder;
 

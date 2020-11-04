@@ -51,7 +51,7 @@ public class MenuFragment extends Fragment {
             i = 1;
         }
 
-        ListView lvMenu = (ListView) this.container.findViewById(R.id.lvMenu);
+        ListView lvMenu = this.container.findViewById(R.id.lvMenu);
         adMenu = new MenuAdapter(act);
         lvMenu.setAdapter(adMenu);
         int[] mImage = new int[]{R.drawable.download, R.drawable.new0, R.drawable.rss, R.drawable.main,

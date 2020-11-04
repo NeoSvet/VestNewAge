@@ -26,7 +26,7 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
-    private Context context;
+    private final Context context;
     private boolean SUMMARY;
 
     public SummaryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -85,7 +85,7 @@ public class SummaryWorker extends Worker {
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
         DateHelper now = DateHelper.initNow(context);
         UnreadHelper unread = new UnreadHelper(context);
-        String m[] = br.readLine().split("<item>");
+        String[] m = br.readLine().split("<item>");
         br.close();
         in.close();
         String line;

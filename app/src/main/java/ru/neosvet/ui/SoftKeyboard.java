@@ -98,7 +98,7 @@ public class SoftKeyboard implements View.OnFocusChangeListener {
             }
 
             if (v instanceof EditText) {
-                EditText editText = (EditText) v;
+                EditText editText = (EditText)v;
                 editText.setOnFocusChangeListener(this);
                 editText.setCursorVisible(true);
                 editTextList.add(editText);

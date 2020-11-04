@@ -191,7 +191,7 @@ public class JournalFragment extends Fragment {
             }
         });
         dbJournal = new DataBase(act, DataBase.JOURNAL);
-        lvJournal = (ListView) container.findViewById(R.id.lvJournal);
+        lvJournal = container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
         lvJournal.setOnItemClickListener(new AdapterView.OnItemClickListener() {

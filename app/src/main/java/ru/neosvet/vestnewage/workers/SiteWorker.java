@@ -27,8 +27,8 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
-    private Context context;
-    List<ListItem> list = new ArrayList<ListItem>();
+    private final Context context;
+    private final List<ListItem> list = new ArrayList<>();
 
     public SiteWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -126,14 +126,15 @@ public class SiteWorker extends Worker {
 
         String s = page.getFirstElem();
         if (s == null) return;
-        String a, d = "";
+        String a;
+        StringBuilder d = new StringBuilder();
         do {
             if (page.isHead()) {
                 if (boolSite)
                     list.add(new ListItem(page.getText(), true));
                 else {
-                    setDes(d);
-                    d = "";
+                    setDes(d.toString());
+                    d = new StringBuilder();
                     list.add(new ListItem(page.getText()));
                     addLink("", "@");
                 }
@@ -151,12 +152,12 @@ public class SiteWorker extends Worker {
                 } else {
                     if (a != null)
                         addLink(page.getText(), a);
-                    d += s;
+                    d.append(s);
                 }
             }
             s = page.getNextItem();
         } while (s != null);
-        setDes(d);
+        setDes(d.toString());
         page.clear();
     }
 

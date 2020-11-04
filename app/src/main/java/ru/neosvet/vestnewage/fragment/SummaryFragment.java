@@ -115,7 +115,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     private void initViews() {
         fabRefresh = container.findViewById(R.id.fabRefresh);
-        lvSummary = (ListView) container.findViewById(R.id.lvList);
+        lvSummary = container.findViewById(R.id.lvList);
         adSummary = new ListAdapter(act);
         lvSummary.setAdapter(adSummary);
         act.fab = fabRefresh;

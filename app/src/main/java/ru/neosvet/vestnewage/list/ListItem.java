@@ -6,8 +6,8 @@ import java.util.List;
 
 public class ListItem implements Serializable {
     private String title, des = null;
-    private List<String> heads = new ArrayList<String>();
-    private List<String> links = new ArrayList<String>();
+    private final List<String> heads = new ArrayList<>();
+    private final List<String> links = new ArrayList<>();
     private boolean select = false;
 
     public ListItem(String title, String link) {

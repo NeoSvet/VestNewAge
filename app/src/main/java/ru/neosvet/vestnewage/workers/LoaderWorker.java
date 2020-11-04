@@ -36,8 +36,8 @@ import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class LoaderWorker extends Worker {
-    private Context context;
-    private Lib lib;
+    private final Context context;
+    private final Lib lib;
     private Request.Builder builderRequest;
     private OkHttpClient client;
     private int cur, max, k_requests = 0;
@@ -372,7 +372,7 @@ public class LoaderWorker extends Worker {
                 s = s.substring(0, s.length() - 2);
             DateHelper d = DateHelper.parse(context, s);
             return d.getMonthString() + " " + d.getYear();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return s;
     }
@@ -417,7 +417,7 @@ public class LoaderWorker extends Worker {
             br.close();
             response.close();
             int u;
-            String m[] = s.split("#");
+            String[] m = s.split("#");
             for (int i = 1; i < m.length; i++) {
                 if (i == 1)
                     s = m[i].substring(m[i].indexOf("body"));

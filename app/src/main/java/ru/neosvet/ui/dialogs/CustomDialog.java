@@ -67,7 +67,7 @@ public class CustomDialog {
     }
 
     public void setInputText(String text, TextWatcher watcher) {
-        input = (EditText) dialogView.findViewById(R.id.input);
+        input = dialogView.findViewById(R.id.input);
         input.setVisibility(View.VISIBLE);
         input.setText(text);
         input.setSelection(text.length());

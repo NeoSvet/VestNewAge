@@ -11,9 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import ru.neosvet.vestnewage.R;
 
 public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
-    private Context context;
-    private int max, select;
-    private View.OnTouchListener click;
+    private final Context context;
+    private final int max;
+    private int select;
+    private final View.OnTouchListener click;
 
     public PageAdapter(Context context, int max, int select, View.OnTouchListener click) {
         this.context = context;
@@ -50,7 +51,7 @@ public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
         return max;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         View bg;
         TextView num;
 

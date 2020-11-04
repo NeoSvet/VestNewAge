@@ -14,8 +14,8 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHolder> {
-    private List<CalendarItem> data = new ArrayList<CalendarItem>();
-    private View.OnTouchListener click;
+    private final List<CalendarItem> data = new ArrayList<>();
+    private final View.OnTouchListener click;
 
     public CalendarAdapter(View.OnTouchListener click) {
         this.click = click;
@@ -73,14 +73,14 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
         return -1;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         View bg;
         TextView num;
 
         ViewHolder(View itemView) {
             super(itemView);
             bg = itemView.findViewById(R.id.cell_bg);
-            num = (TextView) itemView.findViewById(R.id.cell_num);
+            num = itemView.findViewById(R.id.cell_num);
         }
     }
 }

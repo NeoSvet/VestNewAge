@@ -27,7 +27,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class MarkersWorker extends Worker {
-    private Context context;
+    private final Context context;
 
     public MarkersWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -236,18 +236,18 @@ public class MarkersWorker extends Worker {
         StringBuilder b;
         if (ids == null) {
             b = new StringBuilder();
-            for (int i = 0; i < m.length; i++) {
+            for (String s : m) {
                 b.append(Const.COMMA);
-                b.append(m[i]);
+                b.append(s);
             }
             b.delete(0, 1);
         } else {
             b = new StringBuilder(ids);
             ids = DataBase.closeList(ids);
-            for (int i = 0; i < m.length; i++) {
-                if (!ids.contains(DataBase.closeList(m[i]))) {
+            for (String s : m) {
+                if (!ids.contains(DataBase.closeList(s))) {
                     b.append(Const.COMMA);
-                    b.append(m[i]);
+                    b.append(s);
                 }
             }
         }
@@ -256,8 +256,8 @@ public class MarkersWorker extends Worker {
 
     private String getNewId(HashMap<Integer, Integer> h, String[] m) throws Exception {
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < m.length; i++) {
-            b.append(h.get(Integer.parseInt(m[i])));
+        for (String s : m) {
+            b.append(h.get(Integer.parseInt(s)));
             b.append(Const.COMMA);
         }
         b.delete(b.length() - 1, b.length());

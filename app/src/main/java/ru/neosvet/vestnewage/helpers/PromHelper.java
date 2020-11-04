@@ -29,11 +29,11 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class PromHelper {
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
-    private Context context;
+    private final Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
     private Timer timer = null;
-    private SharedPreferences pref;
+    private final SharedPreferences pref;
 
     public PromHelper(Context context, @Nullable View textView) {
         this.context = context;
@@ -304,12 +304,6 @@ public class PromHelper {
             d.changeMinutes(-p);
         }
         NotificationHelper.setAlarm(context, piProm, d.getTimeInMills());
-    }
-
-    public void clearTimeDiff() {
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(Const.TIMEDIFF, 0);
-        editor.apply();
     }
 
     public static class Rec extends BroadcastReceiver {

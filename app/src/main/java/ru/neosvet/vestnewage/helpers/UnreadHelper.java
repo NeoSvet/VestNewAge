@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.R;
 
 public class UnreadHelper {
     public static final String NAME = "noread";
-    private Context context;
+    private final Context context;
     private DataBase dbUnread, dbPages;
     private SQLiteDatabase db;
     private long time = 0;
@@ -66,7 +66,7 @@ public class UnreadHelper {
     }
 
     public List<String> getList() {
-        List<String> links = new ArrayList<String>();
+        List<String> links = new ArrayList<>();
         Cursor cursor = db.query(NAME, null, null,
                 null, null, null, Const.TIME);
         if (cursor.moveToFirst()) {

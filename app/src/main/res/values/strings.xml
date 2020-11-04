@@ -209,9 +209,9 @@
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапазон для поиска:</string>
     <string name="change_range">Поменять местами</string>
-    <string name="you_search">Вы искали w1 “w2”.</string>
+    <string name="you_search">Вы искали %s “%s”.</string>
     <string name="search_for">Поиск по</string>
-    <string name="found_in">Найдено n1 соответствий в n2 материалах.</string>
+    <string name="found_in">Найдено %d соответствий в %d материалах.</string>
     <string name="search_in_results">Искать в результатах</string>
     <string name="results_last_search">Показать результаты предыдущего поиска</string>
     <string name="clear_results_search">Удалить эти результаты</string>

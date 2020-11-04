@@ -70,8 +70,7 @@ public class NotificationHelper extends ContextWrapper {
     public PendingIntent getCancelPromNotif() {
         Intent intent = new Intent(this, NotificationHelper.Result.class);
         intent.putExtra(MODE, ID_ACCEPT);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        return pendingIntent;
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     public PendingIntent getPostponeSummaryNotif(int id, String des, String link) {
@@ -80,8 +79,7 @@ public class NotificationHelper extends ContextWrapper {
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
         intent.putExtra(DataBase.ID, id);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        return pendingIntent;
+        return PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     /**

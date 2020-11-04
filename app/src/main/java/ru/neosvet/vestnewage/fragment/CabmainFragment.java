@@ -108,7 +108,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data result) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || result == null)
             return;
         if (result.getBoolean(Const.START, false)) {
             act.status.loadText();
@@ -217,14 +217,14 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
-        etEmail = (EditText) container.findViewById(R.id.etEmail);
-        etPassword = (EditText) container.findViewById(R.id.etPassword);
-        cbRemEmail = (CheckBox) container.findViewById(R.id.cbRemEmail);
-        cbRemPassword = (CheckBox) container.findViewById(R.id.cbRemPassword);
+        etEmail = container.findViewById(R.id.etEmail);
+        etPassword = container.findViewById(R.id.etPassword);
+        cbRemEmail = container.findViewById(R.id.cbRemEmail);
+        cbRemPassword = container.findViewById(R.id.cbRemPassword);
         InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
-        LinearLayout mainLayout = (LinearLayout) container.findViewById(R.id.content_cabmain);
+        LinearLayout mainLayout = container.findViewById(R.id.content_cabmain);
         softKeyboard = new SoftKeyboard(mainLayout, im);
-        ListView lvList = (ListView) container.findViewById(R.id.lvList);
+        ListView lvList = container.findViewById(R.id.lvList);
         adMain = new ListAdapter(act);
         lvList.setAdapter(adMain);
         lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -368,27 +368,27 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             if (!cbRemEmail.isChecked()) {
                 editor.putString(Const.EMAIL, "");
             }
-            editor.commit();
+            editor.apply();
         }
     }
 
     private String criptPassword(String password) {
         char[] c = password.toCharArray();
-        password = "";
+        StringBuilder s = new StringBuilder();
         for (int a = 0; a < c.length; a++) {
-            password += Character.toString((char) ((Character.codePointAt(c, a) - a - 1)));
+            s.append((char) (Character.codePointAt(c, a) - a - 1));
         }
-        return password;
+        return s.toString();
     }
 
     private String uncriptPassword(String password) {
         try {
             char[] c = password.toCharArray();
-            password = "";
+            StringBuilder s = new StringBuilder();
             for (int a = 0; a < c.length; a++) {
-                password += Character.toString((char) ((Character.codePointAt(c, a) + a + 1)));
+                s.append((char) (Character.codePointAt(c, a) + a + 1));
             }
-            return password;
+            return s.toString();
         } catch (Exception e) {
             return "";
         }
@@ -409,19 +409,20 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             if (cbRemPassword.isChecked()) {
                 editor.putString(Const.PASSWORD, criptPassword(etPassword.getText().toString()));
             }
-            editor.commit();
+            editor.apply();
         }
         initLoad();
         act.status.startText();
         model.login(etEmail.getText().toString(), etPassword.getText().toString());
     }
 
-    private void initWordList(String[] words) {
+    private void initWordList(@Nullable String[] words) {
         mode_list = CabModel.WORDS;
         adMain.clear();
-        for (int i = 0; i < words.length; i++) {
-            adMain.addItem(new ListItem(words[i]));
-        }
+        if (words != null)
+            for (String word : words) {
+                adMain.addItem(new ListItem(word));
+            }
         adMain.notifyDataSetChanged();
     }
 

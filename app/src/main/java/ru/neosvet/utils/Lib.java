@@ -22,7 +22,7 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    private Context context;
+    private final Context context;
 
     public Lib(Context context) {
         this.context = context;
@@ -59,8 +59,7 @@ public class Lib {
 
     public File getDBFolder() {
         String s = context.getFilesDir().toString();
-        File f = new File(s.substring(0, s.length() - 5) + "databases");
-        return f;
+        return new File(s.substring(0, s.length() - 5) + "databases");
     }
 
     public File getFile(String link) {
@@ -106,7 +105,7 @@ public class Lib {
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions((Activity) context,
                     new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            //Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE
                     }, code);
             return true;

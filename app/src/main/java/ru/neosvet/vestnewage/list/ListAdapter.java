@@ -13,9 +13,9 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class ListAdapter extends BaseAdapter {
-    private Context context;
-    private LayoutInflater inflater;
-    private List<ListItem> data = new ArrayList<ListItem>();
+    private final Context context;
+    private final LayoutInflater inflater;
+    private final List<ListItem> data = new ArrayList<>();
 
     public ListAdapter(Context context) {
         this.context = context;

@@ -13,9 +13,9 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class MarkAdapter extends BaseAdapter {
-    private Context context;
-    private LayoutInflater inflater;
-    private List<MarkItem> data = new ArrayList<MarkItem>();
+    private final Context context;
+    private final LayoutInflater inflater;
+    private final List<MarkItem> data = new ArrayList<>();
 
     public MarkAdapter(Context context) {
         this.context = context;

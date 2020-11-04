@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabWorker extends Worker {
-    private Context context;
+    private final Context context;
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
     private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
 
@@ -95,10 +95,9 @@ public class CabWorker extends Worker {
         if (s.length() == 2) { // ok
             return getListWord(true);
         } else { //INCORRECT_PASSWORD
-            Data.Builder result = new Data.Builder()
+            return new Data.Builder()
                     .putInt(Const.MODE, ERROR)
                     .putString(Const.DESCTRIPTION, s);
-            return result;
         }
     }
 
@@ -113,7 +112,7 @@ public class CabWorker extends Worker {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(
                 response.body().byteStream(), Const.ENCODING), 1000);
-        String list[];
+        String[] list;
         String s = br.readLine();
         while (!s.contains("lt_box") && !s.contains("name=\"keyw")) { //!s.contains("fd_box") &&
             s = br.readLine();

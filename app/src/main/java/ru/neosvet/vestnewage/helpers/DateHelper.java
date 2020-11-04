@@ -22,7 +22,7 @@ public class DateHelper {
     public static final byte MONDAY = 1, SUNDAY = 0;
     public static final int MONTH_IN_SEC = 2592000, DAY_IN_SEC = 86400,
             HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000;
-    private Context context;
+    private final Context context;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
     private LocalTime time = null;

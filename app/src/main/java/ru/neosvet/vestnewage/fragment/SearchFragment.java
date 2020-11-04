@@ -137,7 +137,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.setBusy(false);
@@ -282,7 +282,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     private void initViews() {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         editor = pref.edit();
-        mainLayout = (LinearLayout) container.findViewById(R.id.content_search);
+        mainLayout = container.findViewById(R.id.content_search);
         pSettings = container.findViewById(R.id.pSettings);
         pAdditionSet = container.findViewById(R.id.pAdditionSet);
         fabSettings = container.findViewById(R.id.fabSettings);
@@ -294,7 +294,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         pPages = container.findViewById(R.id.pPages);
         bShow = container.findViewById(R.id.bShow);
         tvStatus = (TextView) container.findViewById(R.id.tvStatus);
-        cbSearchInResults = (CheckBox) container.findViewById(R.id.cbSearchInResults);
+        cbSearchInResults = container.findViewById(R.id.cbSearchInResults);
         tvLabel = (TextView) container.findViewById(R.id.tvLabel);
         etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
         sMode = (Spinner) container.findViewById(R.id.sMode);
@@ -302,7 +302,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 getResources().getStringArray(R.array.search_mode));
         adBook.setDropDownViewResource(R.layout.spinner_item);
         sMode.setAdapter(adBook);
-        lvResult = (ListView) container.findViewById(R.id.lvResult);
+        lvResult = container.findViewById(R.id.lvResult);
         adResults = new ListAdapter(act);
         lvResult.setAdapter(adResults);
         InputMethodManager im = (InputMethodManager) act.getSystemService(Service.INPUT_METHOD_SERVICE);
@@ -395,7 +395,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                model.cancel = true;
+                SearchModel.cancel = true;
             }
         });
 
@@ -565,12 +565,11 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             else
                 s = getResources().getStringArray(R.array.search_mode)[mode];
             tvLabel.setText(
-                    getResources().getString(R.string.you_search)
-                            .replace("w1", s.substring(s.indexOf(" ") + 1))
-                            .replace("w2", str)
-                            + Const.N + getResources().getString(R.string.found_in)
-                            .replace("n1", String.valueOf(count1))
-                            .replace("n2", String.valueOf(count2)));
+                    String.format(getResources().getString(R.string.you_search),
+                            s.substring(s.indexOf(" ") + 1), str)
+                            + Const.N +
+                            String.format(getResources().getString(R.string.found_in),
+                                    count1, count2));
             editor.putString(LABEL, tvLabel.getText().toString());
             editor.apply();
         }

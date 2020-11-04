@@ -102,7 +102,7 @@ public class NewFragment extends Fragment {
     }
 
     private void initList() {
-        ListView lvNew = (ListView) container.findViewById(R.id.lvList);
+        ListView lvNew = container.findViewById(R.id.lvList);
         adNew = new ListAdapter(act);
         lvNew.setAdapter(adNew);
         lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -147,6 +147,7 @@ public class NewFragment extends Fragment {
             int n;
             UnreadHelper unread = new UnreadHelper(act);
             unread.setBadge();
+            StringBuilder sb;
             long time = unread.lastModified();
             if (time > 0) {
                 List<String> links = unread.getList();

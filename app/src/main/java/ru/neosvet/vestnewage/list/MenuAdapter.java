@@ -14,8 +14,8 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class MenuAdapter extends BaseAdapter {
-    private Context context;
-    private List<MenuItem> data = new ArrayList<MenuItem>();
+    private final Context context;
+    private final List<MenuItem> data = new ArrayList<>();
 
     public MenuAdapter(Context context) {
         this.context = context;

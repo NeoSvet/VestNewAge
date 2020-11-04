@@ -9,7 +9,7 @@ public class ProgressHelper {
     private static boolean busy, cancel;
     private static String msg;
     private static int prog, max;
-    private static MutableLiveData<Data> live = new MutableLiveData<Data>();
+    private static final MutableLiveData<Data> live = new MutableLiveData<>();
 
     public static boolean isBusy() {
         return busy;

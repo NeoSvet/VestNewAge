@@ -35,11 +35,11 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 
 public class CalendarWorker extends Worker {
-    private Context context;
+    private final Context context;
     private DataBase dataBase;
     private SQLiteDatabase db;
-    private Lib lib;
-    private List<ListItem> list = new ArrayList<ListItem>();
+    private final Lib lib;
+    private final List<ListItem> list = new ArrayList<>();
 
     public CalendarWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);

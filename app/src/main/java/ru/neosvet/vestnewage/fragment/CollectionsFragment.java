@@ -437,7 +437,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         bExport = container.findViewById(R.id.bExport);
         menu = new Tip(act, container.findViewById(R.id.pMenu));
         tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
-        lvMarker = (ListView) container.findViewById(R.id.lvMarker);
+        lvMarker = container.findViewById(R.id.lvMarker);
         adMarker = new MarkAdapter(act);
         lvMarker.setAdapter(adMarker);
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);

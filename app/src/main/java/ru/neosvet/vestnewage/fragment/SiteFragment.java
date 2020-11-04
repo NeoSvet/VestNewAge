@@ -179,7 +179,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 startLoad(tabHost.getCurrentTabTag());
             }
         });
-        lvMain = (ListView) container.findViewById(R.id.lvMain);
+        lvMain = container.findViewById(R.id.lvMain);
         adMain = new ListAdapter(act);
         lvMain.setAdapter(adMain);
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {

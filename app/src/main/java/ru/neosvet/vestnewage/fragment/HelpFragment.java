@@ -66,7 +66,7 @@ public class HelpFragment extends Fragment {
 
     private void initList() {
         adHelp = new HelpAdapter(act);
-        ListView lvHelp = (ListView) container.findViewById(R.id.lvHelp);
+        ListView lvHelp = container.findViewById(R.id.lvHelp);
         lvHelp.setAdapter(adHelp);
         lvHelp.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

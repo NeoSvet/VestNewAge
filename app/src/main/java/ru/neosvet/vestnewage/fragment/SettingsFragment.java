@@ -552,20 +552,22 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         t.append(getResources().getString(R.string.in));
         t.append(" ");
         p++;
-        if (p > 4 && p < 21)
-            t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
-        else {
-            if (p == 1)
+        if (p == 1) {
+            t.append(getResources().getStringArray(R.array.time)[3]);
+        } else if (p > 4 && p < 21) {
+            t.append(p);
+            t.append(" ");
+            t.append(getResources().getStringArray(R.array.time)[4]);
+        } else {
+            t.append(p);
+            t.append(" ");
+            int n = p % 10;
+            if (n == 1)
                 t.append(getResources().getStringArray(R.array.time)[3]);
-            else {
-                int n = p % 10;
-                if (n == 1)
-                    t.append(p + " " + getResources().getStringArray(R.array.time)[3]);
-                else if (n > 1 && n < 5)
-                    t.append(p + " " + getResources().getStringArray(R.array.time)[5]);
-                else
-                    t.append(p + " " + getResources().getStringArray(R.array.time)[4]);
-            }
+            else if (n > 1 && n < 5)
+                t.append(getResources().getStringArray(R.array.time)[5]);
+            else
+                t.append(getResources().getStringArray(R.array.time)[4]);
         }
         tvPromNotif.setText(t);
     }

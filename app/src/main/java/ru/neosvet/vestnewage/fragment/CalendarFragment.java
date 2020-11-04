@@ -188,10 +188,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void initCalendar() {
-        tvDate = (TextView) container.findViewById(R.id.tvDate);
+        tvDate = container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
-        rvCalendar = (RecyclerView) container.findViewById(R.id.rvCalendar);
+        rvCalendar = container.findViewById(R.id.rvCalendar);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
         adCalendar = new CalendarAdapter(this);
         rvCalendar.setLayoutManager(layoutManager);
