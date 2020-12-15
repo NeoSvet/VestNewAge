@@ -20,6 +20,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -53,6 +54,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -63,6 +65,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     public static final String THEME = "theme", NOMENU = "nomenu",
             SCALE = "scale", FILE = "file://",
             STYLE = "/style/style.css", PAGE = "/page.html";
+    private final String script = "<a href='javascript:NeoInterface.";
     private List<String> history = new ArrayList<String>();
     private boolean nomenu, lightTheme, twoPointers = false, back = false;
     private SharedPreferences pref;
@@ -70,7 +73,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private SoftKeyboard softKeyboard;
     private LoaderModel model;
     private WebView wvBrowser;
-    private DataBase dbPage, dbJournal;
+    private DataBase dbPage;
     private TextView tvPlace;
     private EditText etSearch;
     private StatusButton status;
@@ -85,6 +88,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
     private Tip tip;
+    private Runnable mainRunnable = null;
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
@@ -299,7 +303,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bBack = navMenu.getHeaderView(0).findViewById(R.id.bBack);
         status = new StatusButton(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
-        dbJournal = new DataBase(this, DataBase.JOURNAL);
 
         SharedPreferences prMain = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         if (prMain.getBoolean(Const.COUNT_IN_MENU, true))
@@ -330,6 +333,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         mainLayout.requestLayout();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
+        wvBrowser.getSettings().setJavaScriptEnabled(true);
+        wvBrowser.addJavascriptInterface(this, "NeoInterface");
         int z = pref.getInt(SCALE, 0);
         if (z > 0)
             wvBrowser.setInitialScale(z);
@@ -694,6 +699,13 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         cursor.close();
         dbPage.close();
         bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
+        if (dbPage.isBook()) {
+            bw.write(script);
+            bw.write("PrevPage();'>На предыдущую</a> | ");
+            bw.write(script);
+            bw.write("NextPage();'>На следующую</a>");
+            bw.write(Const.BR);
+        }
         if (link.contains("print")) {// материалы с сайта Откровений
             miRefresh.setVisible(false);
             miShare.setVisible(false);
@@ -753,6 +765,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 ContentValues cv = new ContentValues();
                 cv.put(Const.TIME, System.currentTimeMillis());
                 String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
+                DataBase dbJournal = new DataBase(BrowserActivity.this, DataBase.JOURNAL);
                 SQLiteDatabase db = dbJournal.getWritableDatabase();
                 try {
                     int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
@@ -770,14 +783,17 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         i--;
                     }
                     cursor.close();
+                    dbJournal.close();
                 } catch (Exception e) {
-                    db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
+                    dbJournal.close();
+                    File file = new File(getFilesDir().getParent() + "/databases/" + DataBase.JOURNAL);
+                    file.delete();
+                    /*db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
                     //создаем таблицу нового образца:
                     db.execSQL("create table " + DataBase.JOURNAL + " ("
                             + DataBase.ID + " text primary key,"
-                            + Const.TIME + " integer);");
+                            + Const.TIME + " integer);");*/
                 }
-                dbJournal.close();
             }
         }).start();
     }
@@ -789,5 +805,101 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private float getPositionOnPage() {
         return (((float) wvBrowser.getScrollY()) / wvBrowser.getScale())
                 / ((float) wvBrowser.getContentHeight());
+    }
+
+    @JavascriptInterface
+    public void NextPage() { // NeoInterface
+        if (mainRunnable != null)
+            wvBrowser.removeCallbacks(mainRunnable);
+        mainRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String s = dbPage.getNextPage(link);
+                    if (s != null) {
+                        openLink(s);
+                        return;
+                    }
+                    final String today = DateHelper.initToday(BrowserActivity.this).getMY();
+                    DateHelper d = getDateFromLink();
+                    if (d.getMY().equals(today)) {
+                        tipEndList();
+                        return;
+                    }
+                    d.changeMonth(1);
+                    dbPage.close();
+                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    if (cursor.moveToFirst()) {
+                        openLink(cursor.getString(0));
+                        return;
+                    }
+                } catch (Exception e) {
+                }
+                tipEndList();
+            }
+        };
+        wvBrowser.post(mainRunnable);
+    }
+
+    private DateHelper getDateFromLink() throws Exception {
+        return DateHelper.parse(this,
+                link.substring(link.lastIndexOf("/") + 1,
+                        link.lastIndexOf(".")));
+    }
+
+    @JavascriptInterface
+    public void PrevPage() { // NeoInterface
+        if (mainRunnable != null)
+            wvBrowser.removeCallbacks(mainRunnable);
+        mainRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String s = dbPage.getPrevPage(link);
+                    if (s != null) {
+                        openLink(s);
+                        return;
+                    }
+                    final String min = getMinMY();
+                    DateHelper d = getDateFromLink();
+                    if (d.getMY().equals(min)) {
+                        tipEndList();
+                        return;
+                    }
+                    d.changeMonth(-1);
+                    dbPage.close();
+                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    if (cursor.moveToLast()) {
+                        openLink(cursor.getString(0));
+                        return;
+                    }
+                } catch (Exception e) {
+                    tipEndList();
+                    return;
+                }
+                tipEndList();
+            }
+        };
+        wvBrowser.post(mainRunnable);
+    }
+
+    private void tipEndList() {
+        Lib.showToast(this, getResources().getString(R.string.tip_end_list));
+    }
+
+    private String getMinMY() {
+        DateHelper d;
+        if (link.contains(Const.POEMS)) {
+            d = DateHelper.putYearMonth(this, 2016, 2);
+            return d.getMY();
+        }
+        SharedPreferences pref = getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
+        if (pref.getBoolean(Const.OTKR, false))
+            d = DateHelper.putYearMonth(this, 2004, 8);
+        else
+            d = DateHelper.putYearMonth(this, 2016, 1);
+        return d.getMY();
     }
 }

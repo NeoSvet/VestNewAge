@@ -246,4 +246,58 @@ public class DataBase extends SQLiteOpenHelper {
     public boolean isBook() {
         return !isArticle() && patternBook.matcher(getDatabaseName()).matches();
     }
+
+    public Cursor getCursor(boolean poems) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if(poems) {
+            return db.query(Const.TITLE, new String[]{Const.LINK},
+                    Const.LINK + LIKE,
+                    new String[]{"%" + Const.POEMS + "%"}
+                    , null, null, Const.LINK);
+        }
+        return db.query(Const.TITLE, new String[]{Const.LINK},
+                Const.LINK + " NOT" + LIKE,
+                new String[]{"%" + Const.POEMS + "%"}
+                , null, null, Const.LINK);
+    }
+
+    public String getNextPage(String link) {
+        Cursor cursor = getCursor(link.contains(Const.POEMS));
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        String s;
+        do {
+            s = cursor.getString(0);
+            if (s.equals(link))
+                break;
+        } while (cursor.moveToNext());
+        if (cursor.moveToNext()) {
+            s = cursor.getString(0);
+            cursor.close();
+            return s;
+        }
+        cursor.close();
+        return null;
+    }
+
+    public String getPrevPage(String link) {
+        Cursor cursor = getCursor(link.contains(Const.POEMS));
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        String s, p = null;
+        do {
+            s = cursor.getString(0);
+            if (s.equals(link)) {
+                cursor.close();
+                return p;
+            }
+            p = s;
+        } while (cursor.moveToNext());
+        cursor.close();
+        return null;
+    }
 }
