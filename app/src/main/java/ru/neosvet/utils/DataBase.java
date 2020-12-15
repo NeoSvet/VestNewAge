@@ -207,8 +207,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public int getPageId(String link) {
-        DataBase dataBase = new DataBase(context, getDatabaseName());
-        SQLiteDatabase db = dataBase.getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.query(Const.TITLE,
                 new String[]{DataBase.ID},
                 Const.LINK + DataBase.Q, new String[]{link},
@@ -218,7 +217,6 @@ public class DataBase extends SQLiteOpenHelper {
             r = cursor.getInt(0);
         cursor.close();
         db.close();
-        dataBase.close();
         return r;
     }
 
