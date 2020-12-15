@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.regex.Pattern;
+
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
@@ -15,6 +17,7 @@ public class DataBase extends SQLiteOpenHelper {
             COLLECTIONS = "collections", ID = "id", DESC = " DESC",
             ARTICLES = "00.00";
     private final Context context;
+    private final Pattern patternBook = Pattern.compile("\\d{2}.\\d{2}");
 
     public DataBase(Context context, String name) {
         super(context, configName(name), null, 1);
@@ -238,5 +241,9 @@ public class DataBase extends SQLiteOpenHelper {
 
     public boolean isArticle() {
         return getDatabaseName().equals(ARTICLES);
+    }
+
+    public boolean isBook() {
+        return !isArticle() && patternBook.matcher(getDatabaseName()).matches();
     }
 }
