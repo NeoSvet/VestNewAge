@@ -628,12 +628,98 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     public void openPage(boolean newPage) {
         status.setLoad(false);
         if (link == null) return;
+        if (!readyStyle())
+            return;
+        try {
+            File file = new File(getFilesDir() + PAGE);
+            if (newPage || !file.exists())
+                generatePage(file);
+            String s = file.toString();
+            if (link.contains("#"))
+                s += link.substring(link.indexOf("#"));
+            wvBrowser.loadUrl(FILE + s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void generatePage(File file) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        dbPage = new DataBase(this, link);
+        SQLiteDatabase db = dbPage.getWritableDatabase();
+        Cursor cursor = db.query(Const.TITLE, null,
+                Const.LINK + DataBase.Q, new String[]{link},
+                null, null, null);
+        int id;
+        DateHelper d;
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
+            String s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
+            d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
+            if (dbPage.getName().equals("00.00")) //раз в неделю предлагать обновить статьи
+                status.checkTime(d.getTimeInSeconds());
+            bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
+            bw.write("<title>");
+            bw.write(s);
+            bw.write("</title>\n");
+            bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+            bw.flush();
+            bw.write(STYLE.substring(1));
+            bw.write("\">\n</head><body>\n<h1 class=\"page-title\">");
+            bw.write(s);
+            bw.write("</h1>\n");
+            bw.flush();
+        } else {
+            //заголовка нет - значит нет и страницы
+            //сюда никогдане попадет, т.к. выше есть проверка existsPage
+            cursor.close();
+            return;
+        }
+        cursor.close();
+        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
+                null, null, null);
+        boolean poems = link.contains("poems/");
+        if (cursor.moveToFirst()) {
+            do {
+                if (poems) {
+                    bw.write("<p class='poem'");
+                    bw.write(cursor.getString(0).substring(2));
+                } else
+                    bw.write(cursor.getString(0));
+                bw.write(Const.N);
+                bw.flush();
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        dbPage.close();
+        bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
+        if (link.contains("print")) {// материалы с сайта Откровений
+            miRefresh.setVisible(false);
+            miShare.setVisible(false);
+            bw.write("Copyright ");
+            bw.write(getResources().getString(R.string.copyright));
+            bw.write(" Leonid Maslov 2004-");
+            bw.write(d.getYear() + Const.BR);
+        } else {
+            bw.write(getResources().getString(R.string.page) + " " + Const.SITE + link);
+            bw.write("<br>Copyright ");
+            bw.write(getResources().getString(R.string.copyright));
+            bw.write(" Leonid Maslov 2004-");
+            bw.write(d.getYear() + Const.BR);
+            bw.write(getResources().getString(R.string.downloaded) + " " + d.toString());
+        }
+        bw.write("\n</div></body></html>");
+        bw.close();
+    }
+
+    private boolean readyStyle() {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
             status.setLoad(true);
             model.startLoad(true, null);
-            return;
+            return false;
         }
         final File fStyle = lib.getFile(STYLE);
         boolean replace = true;
@@ -652,85 +738,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             else
                 fDark.renameTo(fStyle);
         }
-        try {
-            File file = new File(getFilesDir() + PAGE);
-            String s;
-            if (newPage) {
-                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                dbPage = new DataBase(this, link);
-                SQLiteDatabase db = dbPage.getWritableDatabase();
-                Cursor cursor = db.query(Const.TITLE, null,
-                        Const.LINK + DataBase.Q, new String[]{link},
-                        null, null, null);
-                int id;
-                DateHelper d;
-                if (cursor.moveToFirst()) {
-                    id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-                    s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
-                    d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
-                    if (dbPage.getName().equals("00.00")) //раз в неделю предлагать обновить статьи
-                        status.checkTime(d.getTimeInSeconds());
-                    bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
-                    bw.write("<title>");
-                    bw.write(s);
-                    bw.write("</title>\n");
-                    bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-                    bw.flush();
-                    bw.write(STYLE.substring(1));
-                    bw.write("\">\n</head><body>\n<h1 class=\"page-title\">");
-                    bw.write(s);
-                    bw.write("</h1>\n");
-                    bw.flush();
-                } else {
-                    //заголовка нет - значит нет и страницы
-                    //сюда никогдане попадет, т.к. выше есть проверка existsPage
-                    cursor.close();
-                    return;
-                }
-                cursor.close();
-                cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                        null, null, null);
-                boolean poems = link.contains("poems/");
-                if (cursor.moveToFirst()) {
-                    do {
-                        if (poems) {
-                            bw.write("<p class='poem'");
-                            bw.write(cursor.getString(0).substring(2));
-                        } else
-                            bw.write(cursor.getString(0));
-                        bw.write(Const.N);
-                        bw.flush();
-                    } while (cursor.moveToNext());
-                }
-                cursor.close();
-                dbPage.close();
-                bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
-                if (link.contains("print")) {// материалы с сайта Откровений
-                    miRefresh.setVisible(false);
-                    miShare.setVisible(false);
-                    bw.write("Copyright ");
-                    bw.write(getResources().getString(R.string.copyright));
-                    bw.write(" Leonid Maslov 2004-");
-                    bw.write(d.getYear() + Const.BR);
-                } else {
-                    bw.write(getResources().getString(R.string.page) + " " + Const.SITE + link);
-                    bw.write("<br>Copyright ");
-                    bw.write(getResources().getString(R.string.copyright));
-                    bw.write(" Leonid Maslov 2004-");
-                    bw.write(d.getYear() + Const.BR);
-                    bw.write(getResources().getString(R.string.downloaded) + " " + d.toString());
-                }
-                bw.write("\n</div></body></html>");
-                bw.close();
-            }
-            s = file.toString();
-            if (link.contains("#"))
-                s += link.substring(link.indexOf("#"));
-            wvBrowser.loadUrl(FILE + s);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return true;
     }
 
     public void checkUnread() {
