@@ -60,7 +60,7 @@ public class SummaryHelper {
             br.readLine(); //des
             br.readLine(); //time
             name = DataBase.getDatePage(link);
-            if (dataBase == null || !dataBase.getName().equals(name)) {
+            if (dataBase == null || !dataBase.getDatabaseName().equals(name)) {
                 if (dataBase != null) {
                     db.close();
                     dataBase.close();

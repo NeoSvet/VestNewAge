@@ -287,7 +287,7 @@ public class LoaderWorker extends Worker {
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
         int n = k;
-        boolean boolArticle = dataBase.getName().equals("00.00");
+        boolean boolArticle = dataBase.getDatabaseName().equals("00.00");
         PageParser page = new PageParser(context);
         page.load(Const.SITE + Const.PRINT + s, "<!-- Шаблон");
 
@@ -325,7 +325,7 @@ public class LoaderWorker extends Worker {
                             cv.put(DataBase.PARAGRAPH, s);
                             db.insert(DataBase.PARAGRAPH, null, cv);
                         } else {
-                            cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getName()));
+                            cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
                             cv.put(Const.LINK, link);
                             id = (int) db.insert(Const.TITLE, null, cv);
                             //обновляем дату изменения списка:
@@ -336,7 +336,7 @@ public class LoaderWorker extends Worker {
                         }
                     } else { // id найден, значит материал есть
                         //обновляем заголовок
-                        cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getName()));
+                        cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
                         //обновляем дату загрузки материала
                         db.update(Const.TITLE, cv, DataBase.ID +
                                 DataBase.Q, new String[]{String.valueOf(id)});

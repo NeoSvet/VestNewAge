@@ -14,12 +14,10 @@ public class DataBase extends SQLiteOpenHelper {
             MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
             COLLECTIONS = "collections", ID = "id", DESC = " DESC";
     private final Context context;
-    private final String name;
 
     public DataBase(Context context, String name) {
         super(context, configName(name), null, 1);
         this.context = context;
-        this.name = configName(name);
     }
 
     private static String configName(String name) {
@@ -28,13 +26,9 @@ public class DataBase extends SQLiteOpenHelper {
         return name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
-        if (name.contains(".")) { // базы данных с материалами
+        if (getDatabaseName().contains(".")) { // базы данных с материалами
             db.execSQL("create table " + Const.TITLE + " ("
                     + ID + " integer primary key autoincrement," //id Const.TITLE
                     + Const.LINK + " text,"
@@ -47,36 +41,43 @@ public class DataBase extends SQLiteOpenHelper {
             db.execSQL("create table " + PARAGRAPH + " ("
                     + ID + " integer," //id Const.TITLE
                     + PARAGRAPH + " text);");
-        } else if (name.equals(UnreadHelper.NAME)) {
-            db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
-                    + Const.LINK + " text primary key,"
-                    + Const.TIME + " integer);");
-        } else if (name.equals(Const.SEARCH)) {
-            db.execSQL("create table if not exists " + Const.SEARCH + " ("
-                    + Const.LINK + " text primary key,"
-                    + Const.TITLE + " text,"
-                    + ID + " integer," //number for sorting
-                    + Const.DESCTRIPTION + " text);");
-        } else if (name.equals(JOURNAL)) {
-            db.execSQL("create table if not exists " + JOURNAL + " ("
-                    + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
-                    + Const.TIME + " integer);");
-        } else if (name.equals(MARKERS)) {
-            db.execSQL("create table " + MARKERS + " ("
-                    + ID + " integer primary key autoincrement," //id закладки
-                    + Const.LINK + " text," //ссылка на материал
-                    + COLLECTIONS + " text," //список id подборок, в которые включен материал
-                    + Const.DESCTRIPTION + " text,"  //описание
-                    + Const.PLACE + " text);"); //место в материале
-            db.execSQL("create table " + COLLECTIONS + " ("
-                    + ID + " integer primary key autoincrement," //id подборок
-                    + MARKERS + " text," //список id закладок
-                    + Const.PLACE + " integer," //место подборки в списке подоборок
-                    + Const.TITLE + " text);"); //название Подборки
-            // добавляем подборку по умолчанию - "вне подборок":
-            ContentValues cv = new ContentValues();
-            cv.put(Const.TITLE, context.getResources().getString(R.string.no_collections));
-            db.insert(COLLECTIONS, null, cv);
+            return;
+        }
+        switch (getDatabaseName()) {
+            case UnreadHelper.NAME:
+                db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
+                        + Const.LINK + " text primary key,"
+                        + Const.TIME + " integer);");
+                break;
+            case Const.SEARCH:
+                db.execSQL("create table if not exists " + Const.SEARCH + " ("
+                        + Const.LINK + " text primary key,"
+                        + Const.TITLE + " text,"
+                        + ID + " integer," //number for sorting
+                        + Const.DESCTRIPTION + " text);");
+                break;
+            case JOURNAL:
+                db.execSQL("create table if not exists " + JOURNAL + " ("
+                        + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
+                        + Const.TIME + " integer);");
+                break;
+            case MARKERS:
+                db.execSQL("create table " + MARKERS + " ("
+                        + ID + " integer primary key autoincrement," //id закладки
+                        + Const.LINK + " text," //ссылка на материал
+                        + COLLECTIONS + " text," //список id подборок, в которые включен материал
+                        + Const.DESCTRIPTION + " text,"  //описание
+                        + Const.PLACE + " text);"); //место в материале
+                db.execSQL("create table " + COLLECTIONS + " ("
+                        + ID + " integer primary key autoincrement," //id подборок
+                        + MARKERS + " text," //список id закладок
+                        + Const.PLACE + " integer," //место подборки в списке подоборок
+                        + Const.TITLE + " text);"); //название Подборки
+                // добавляем подборку по умолчанию - "вне подборок":
+                ContentValues cv = new ContentValues();
+                cv.put(Const.TITLE, context.getResources().getString(R.string.no_collections));
+                db.insert(COLLECTIONS, null, cv);
+                break;
         }
     }
 
@@ -186,7 +187,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public String getPageTitle(String title, String link) {
-        if (name.equals("00.00") || link.contains("2004") || link.contains("pred")) {
+        if (getDatabaseName().equals("00.00") || link.contains("2004") || link.contains("pred")) {
             return title;
         } else {
             String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
@@ -202,7 +203,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public int getPageId(String link) {
-        DataBase dataBase = new DataBase(context, name);
+        DataBase dataBase = new DataBase(context, getDatabaseName());
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor cursor = db.query(Const.TITLE,
                 new String[]{DataBase.ID},

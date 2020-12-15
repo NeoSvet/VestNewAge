@@ -36,7 +36,7 @@ public class UnreadHelper {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
             dbPages = new DataBase(context, link);
-        } else if (!dbPages.getName().equals(DataBase.getDatePage(link))) {
+        } else if (!dbPages.getDatabaseName().equals(DataBase.getDatePage(link))) {
             dbPages.close();
             dbPages = new DataBase(context, link);
         }
