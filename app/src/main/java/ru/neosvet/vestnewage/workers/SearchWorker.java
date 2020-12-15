@@ -149,7 +149,7 @@ public class SearchWorker extends Worker {
                     dataBase.close();
                 }
                 dataBase = new DataBase(context, name1);
-                db = dataBase.getWritableDatabase();
+                db = dataBase.getReadableDatabase();
             }
             cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                     DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
@@ -195,7 +195,7 @@ public class SearchWorker extends Worker {
         DataBase dataBase = new DataBase(context, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
-        SQLiteDatabase db = dataBase.getWritableDatabase();
+        SQLiteDatabase db = dataBase.getReadableDatabase();
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
             curSearch = db.query(Const.TITLE, null,

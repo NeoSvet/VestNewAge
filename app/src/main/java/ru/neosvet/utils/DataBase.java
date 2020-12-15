@@ -116,7 +116,7 @@ public class DataBase extends SQLiteOpenHelper {
     // для материалов в базах данных:
     public static String getContentPage(Context ctxt, String link, boolean onlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
+        SQLiteDatabase db = dataBase.getReadableDatabase();
         Cursor cursor = db.query(Const.TITLE, null,
                 Const.LINK + DataBase.Q, new String[]{link},
                 null, null, null);
@@ -207,7 +207,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public int getPageId(String link) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(Const.TITLE,
                 new String[]{DataBase.ID},
                 Const.LINK + DataBase.Q, new String[]{link},
@@ -221,7 +221,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public boolean existsPage(String link) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor curTitle = db.query(Const.TITLE, new String[]{DataBase.ID},
                 Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean exists = false;
@@ -246,7 +246,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public Cursor getCursor(boolean poems) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         if(poems) {
             return db.query(Const.TITLE, new String[]{Const.LINK},
                     Const.LINK + LIKE,

@@ -651,7 +651,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void generatePage(File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         dbPage = new DataBase(this, link);
-        SQLiteDatabase db = dbPage.getWritableDatabase();
+        SQLiteDatabase db = dbPage.getReadableDatabase();
         Cursor cursor = db.query(Const.TITLE, null,
                 Const.LINK + DataBase.Q, new String[]{link},
                 null, null, null);

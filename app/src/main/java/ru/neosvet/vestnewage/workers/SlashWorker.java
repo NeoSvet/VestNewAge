@@ -67,7 +67,7 @@ public class SlashWorker extends Worker {
             t = Long.parseLong(s);
             s = br.readLine(); //link
             dbPage = new DataBase(context, s);
-            SQLiteDatabase db = dbPage.getWritableDatabase();
+            SQLiteDatabase db = dbPage.getReadableDatabase();
             Cursor cursor = db.query(Const.TITLE, null,
                     Const.LINK + DataBase.Q, new String[]{s},
                     null, null, null);

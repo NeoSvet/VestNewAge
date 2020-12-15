@@ -84,7 +84,7 @@ public class JournalFragment extends Fragment {
             do {
                 id = curJ.getString(iID).split(Const.AND);
                 dataBase = new DataBase(act, id[0]);
-                db = dataBase.getWritableDatabase();
+                db = dataBase.getReadableDatabase();
                 cursor = db.query(Const.TITLE, null, DataBase.ID + DataBase.Q,
                         new String[]{id[1]}, null, null, null);
                 if (cursor.moveToFirst()) {
