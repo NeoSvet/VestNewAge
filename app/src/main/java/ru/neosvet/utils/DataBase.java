@@ -12,7 +12,8 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", JOURNAL = "journal",
             MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
-            COLLECTIONS = "collections", ID = "id", DESC = " DESC";
+            COLLECTIONS = "collections", ID = "id", DESC = " DESC",
+            ARTICLES = "00.00";
     private final Context context;
 
     public DataBase(Context context, String name) {
@@ -161,7 +162,7 @@ public class DataBase extends SQLiteOpenHelper {
 
     public static String getDatePage(String link) {
         if (!link.contains("/") || link.contains("press"))
-            return "00.00";
+            return ARTICLES;
         else if (link.contains("pred")) {
             if (link.contains("2004"))
                 return "12.04";
@@ -187,7 +188,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public String getPageTitle(String title, String link) {
-        if (getDatabaseName().equals("00.00") || link.contains("2004") || link.contains("pred")) {
+        if (isArticle() || link.contains("2004") || link.contains("pred")) {
             return title;
         } else {
             String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
@@ -233,5 +234,9 @@ public class DataBase extends SQLiteOpenHelper {
         }
         curTitle.close();
         return exists;
+    }
+
+    public boolean isArticle() {
+        return getDatabaseName().equals(ARTICLES);
     }
 }

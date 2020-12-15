@@ -357,7 +357,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private String getTitleByLink(String s) {
-        DataBase dataBase = new DataBase(act, "00.00");
+        DataBase dataBase = new DataBase(act, DataBase.ARTICLES);
         SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle = db.query(Const.TITLE, new String[]{Const.TITLE},
                 Const.LINK + DataBase.Q, new String[]{s}, null, null, null);

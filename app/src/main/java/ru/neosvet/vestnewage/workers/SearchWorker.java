@@ -70,9 +70,9 @@ public class SearchWorker extends Worker {
             }
             dbS.delete(Const.SEARCH, null, null);
             DateHelper d;
-            if (mode == 3 && list.contains("00.00")) { //режим "по всем материалам"
+            if (mode == 3 && list.contains(DataBase.ARTICLES)) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
-                searchList("00.00", str, mode);
+                searchList(DataBase.ARTICLES, str, mode);
             }
             d = DateHelper.putYearMonth(context, start_year, start_month);
             while (!SearchModel.cancel) {

@@ -339,7 +339,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                 if (cbsClear[1].isChecked()) //book cur year
                     list.add(Const.END);
                 if (cbsClear[2].isChecked()) //materials
-                    list.add("00.00");
+                    list.add(DataBase.ARTICLES);
                 if (cbsClear[3].isChecked()) //markers
                     list.add(DataBase.MARKERS);
                 if (cbsClear[4].isChecked()) //cache

@@ -287,7 +287,7 @@ public class LoaderWorker extends Worker {
             if (link.contains("?")) s += link.substring(link.indexOf("?"));
         }
         int n = k;
-        boolean boolArticle = dataBase.getDatabaseName().equals("00.00");
+        boolean boolArticle = dataBase.isArticle();
         PageParser page = new PageParser(context);
         page.load(Const.SITE + Const.PRINT + s, "<!-- Шаблон");
 
