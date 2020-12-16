@@ -86,7 +86,7 @@ public class PageParser {
             in.close();
             return;
         }
-        StringBuilder sb = new StringBuilder(br.readLine());
+        StringBuilder sb = new StringBuilder(s);
         while ((s = br.readLine()) != null && !ProgressHelper.isCancelled()) {
             if (s.contains("<!--/row-->"))
                 break;
