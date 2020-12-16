@@ -17,7 +17,7 @@ public class DataBase extends SQLiteOpenHelper {
             COLLECTIONS = "collections", ID = "id", DESC = " DESC",
             ARTICLES = "00.00";
     private final Context context;
-    private final Pattern patternBook = Pattern.compile("\\d{2}.\\d{2}");
+    private final Pattern patternBook = Pattern.compile("\\d{2}\\.\\d{2}");
 
     public DataBase(Context context, String name) {
         super(context, configName(name), null, 1);
