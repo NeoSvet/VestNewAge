@@ -289,7 +289,7 @@ public class LoaderWorker extends Worker {
         int n = k;
         boolean boolArticle = dataBase.isArticle();
         PageParser page = new PageParser(context);
-        page.load(Const.SITE + Const.PRINT + s, "<!-- Шаблон");
+        page.load(Const.SITE + Const.PRINT + s, "page-title");
 
         SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
