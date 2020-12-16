@@ -23,6 +23,7 @@ import java.io.FileReader;
 
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -191,13 +192,11 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 1) { // site
-                        if (link.contains(".html")) {
-                            BrowserActivity.openReader(act, link, null);
-                        } else if (link.contains(Const.RSS)) {
+                        if (link.contains("rss")) {
                             act.setFragment(R.id.nav_rss, true);
-                        } else if (link.contains("/poems")) {
+                        } else if (link.contains("poems")) {
                             act.openBook(link, true);
-                        } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
+                        } else if (link.contains("tolkovaniya") || link.contains("2016")) {
                             act.openBook(link, false);
                         } else if (link.contains("files") && !link.contains("http")) {
                             openPage(Const.SITE + link);

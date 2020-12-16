@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
@@ -29,6 +30,7 @@ import ru.neosvet.vestnewage.model.SiteModel;
 public class SiteWorker extends Worker {
     private final Context context;
     private final List<ListItem> list = new ArrayList<>();
+    private static final Pattern patternList = Pattern.compile("\\d{4}\\.html");
 
     public SiteWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -189,7 +191,7 @@ public class SiteWorker extends Worker {
         String s;
         int k = 0;
         while ((s = br.readLine()) != null) {
-            if (s.contains(Const.HTML)) {
+            if (isNeedLoad(s)) {
                 if (s.contains("@"))
                     bw.write(s.substring(9));
                 else
@@ -202,5 +204,15 @@ public class SiteWorker extends Worker {
         bw.close();
         br.close();
         return k;
+    }
+
+    private static boolean isNeedLoad(String link) {
+        if (!link.contains(Const.HTML))
+            return false;
+        if (link.contains("tolkovaniya") || (link.contains("/") && link.length() < 18))
+            return false;
+        if (patternList.matcher(link).matches())
+            return false;
+        return true;
     }
 }

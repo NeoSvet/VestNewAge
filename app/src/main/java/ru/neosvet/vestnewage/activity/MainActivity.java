@@ -642,7 +642,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setFragment(R.id.nav_book, true);
         int year = 2016;
         try {
-            link = link.substring(link.length() - 5, link.length() - 1);
+            link = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
             year = Integer.parseInt(link);
         } catch (Exception ignored) {
         }
