@@ -127,6 +127,9 @@ public class LoaderWorker extends Worker {
             LoaderModel.inProgress = false;
             return Result.success();
         } catch (Exception e) {
+            File file = LoaderHelper.getFileList(context);
+            if (file.exists())
+                file.delete();
             e.printStackTrace();
             error = e.getMessage();
         }
