@@ -47,7 +47,7 @@ public class LoaderHelper extends LifecycleService {
     private NotificationCompat.Builder notif;
     private NotificationManager manager;
     public static boolean start;
-    public static final int STOP = -2, ALL = -1, DOWNLOAD_ALL = 0, DOWNLOAD_ID = 1,
+    public static final int STOP = -3, STOP_WITH_NOTIF = -2, ALL = -1, DOWNLOAD_ALL = 0, DOWNLOAD_ID = 1,
             DOWNLOAD_YEAR = 2, DOWNLOAD_PAGE = 3, DOWNLOAD_OTKR = 4;
     private Data.Builder data;
     private Constraints constraints;
@@ -63,7 +63,7 @@ public class LoaderHelper extends LifecycleService {
         Intent intent = new Intent(context, LoaderHelper.class);
         intent.putExtra(Const.DIALOG, context instanceof Activity);
         intent.putExtra(Const.MODE, mode);
-        if (mode == STOP) {
+        if (mode == STOP_WITH_NOTIF || mode == STOP) {
             intent.putExtra(Const.FINISH, true);
             intent.putExtra(Const.ERROR, request);
         } else {
@@ -79,12 +79,13 @@ public class LoaderHelper extends LifecycleService {
     public int onStartCommand(Intent intent, final int flags, int startId) {
         if (intent == null)
             return Service.START_NOT_STICKY;
+        int mode = intent.getIntExtra(Const.MODE, STOP_WITH_NOTIF);
         if (intent.getBooleanExtra(Const.FINISH, false)) {
             if (!start)
                 return Service.START_NOT_STICKY;
             start = false;
-            if (intent.getIntExtra(Const.MODE, 0) != STOP) {
-                String msg = intent.getStringExtra(Const.ERROR);
+            String msg = intent.getStringExtra(Const.ERROR);
+            if (mode == STOP_WITH_NOTIF || msg != null) {
                 String title;
                 if (msg == null) {
                     title = getResources().getString(R.string.load_suc_finish);
@@ -103,7 +104,6 @@ public class LoaderHelper extends LifecycleService {
             }
             return Service.START_NOT_STICKY;
         }
-        int mode = intent.getIntExtra(Const.MODE, STOP);
         if (mode == STOP)
             return Service.START_NOT_STICKY;
         ProgressHelper.setMax(0);

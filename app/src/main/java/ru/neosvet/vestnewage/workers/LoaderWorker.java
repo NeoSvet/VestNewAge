@@ -125,7 +125,7 @@ public class LoaderWorker extends Worker {
                         LoaderModel.inProgress = false;
                         return Result.success();
                 }
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
+            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
             LoaderModel.inProgress = false;
             return Result.success();
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class LoaderWorker extends Worker {
             return Result.failure();
         }
         if (name.equals(LoaderHelper.TAG)) {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, error);
             return Result.failure();
         }
         ProgressHelper.postProgress(new Data.Builder()

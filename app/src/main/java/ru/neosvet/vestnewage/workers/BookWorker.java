@@ -70,7 +70,7 @@ public class BookWorker extends Worker {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean(Const.OTKR, true);
                 editor.apply();
-                LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
+                LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
                 return Result.success();
             }
             if (BOOK) { // book section
@@ -115,7 +115,7 @@ public class BookWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, error);
             return Result.failure();
         }
         return Result.failure();
