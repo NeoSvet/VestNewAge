@@ -38,7 +38,7 @@ public class CheckHelper extends LifecycleService {
                 context.getResources().getString(R.string.check_new),
                 NotificationHelper.CHANNEL_MUTE)
                 .setProgress(0, 0, true);
-        startForeground(NotificationHelper.NOTIF_SUMMARY, notifBuilder.build());
+        startForeground(NotificationHelper.NOTIF_CHECK, notifBuilder.build());
     }
 
     public static void postCommand(Context context, boolean start) {

@@ -30,6 +30,7 @@ public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
     public static final int NOTIF_SUMMARY = 111, ID_SUMMARY = 2, ID_SUMMARY_POSTPONE = 3;
     public static final int NOTIF_PROM = 222, ID_ACCEPT = 1;
+    public static final int NOTIF_CHECK = 333, NOTIF_SLASH = 444;
     public static final String CHANNEL_SUMMARY = "summary", CHANNEL_MUTE = "mute",
             CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
