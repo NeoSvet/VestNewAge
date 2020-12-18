@@ -36,24 +36,21 @@ public class WebClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        //Lib.LOG("shouldOverrideUrlLoading1=" + url);
         view.setVisibility(View.GONE);
         if (url.contains(files)) {
-            act.openLink(getUrl(url));
+            act.openLink(getUrl(url), true);
             return true;
         }
-//        Lib.LOG("shouldOverrideUrlLoading2=" + url);
         if (url.contains("http") || url.contains("mailto")) {
             act.openPage(false);
             act.openInApps(url);
         } else
-            act.openLink(url);
+            act.openLink(url, true);
 //        super.shouldOverrideUrlLoading(view, url);
         return true;
     }
 
     public void onPageFinished(WebView view, String url) {
-//        Lib.LOG("onPageFinished=" + url);
         view.setVisibility(View.VISIBLE);
         if (url.contains(files)) {
             act.checkUnread();

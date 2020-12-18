@@ -162,7 +162,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void restoreState(Bundle state) {
         if (state == null) {
-            openLink(getIntent().getStringExtra(Const.LINK));
+            openLink(getIntent().getStringExtra(Const.LINK), true);
             if (getIntent().hasExtra(Const.PLACE))
                 iPlace = 0;
         } else {
@@ -372,7 +372,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void onBackBrowser() {
         back = true;
-        openLink(history.get(0));
+        openLink(history.get(0), false);
         history.remove(0);
     }
 
@@ -603,7 +603,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         }
     }
 
-    public void openLink(String url) {
+    public void openLink(String url, boolean add_history) {
         if (url == null) return;
         if (!url.contains(Const.HTML) && !url.contains("http:")) {
             lib.openInApps(url, null);
@@ -613,7 +613,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             if (!url.contains(PAGE)) {
                 if (back)
                     back = false;
-                else if (!link.equals(Const.LINK)) //first value
+                else if (!link.equals(Const.LINK) && add_history) //first value
                     history.add(0, link);
                 link = url;
                 dbPage = new DataBase(this, link);
@@ -777,7 +777,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     try {
                         String s = dbPage.getNextPage(link);
                         if (s != null) {
-                            openLink(s);
+                            openLink(s, false);
                             return;
                         }
                         final String today = DateHelper.initToday(BrowserActivity.this).getMY();
@@ -791,7 +791,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         dbPage = new DataBase(BrowserActivity.this, d.getMY());
                         Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
                         if (cursor.moveToFirst()) {
-                            openLink(cursor.getString(0));
+                            openLink(cursor.getString(0), false);
                             return;
                         }
                     } catch (Exception e) {
@@ -820,7 +820,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     try {
                         String s = dbPage.getPrevPage(link);
                         if (s != null) {
-                            openLink(s);
+                            openLink(s, false);
                             return;
                         }
                         final String min = getMinMY();
@@ -834,7 +834,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         dbPage = new DataBase(BrowserActivity.this, d.getMY());
                         Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
                         if (cursor.moveToLast()) {
-                            openLink(cursor.getString(0));
+                            openLink(cursor.getString(0), false);
                             return;
                         }
                     } catch (Exception e) {
