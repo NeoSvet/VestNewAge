@@ -88,7 +88,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
     private Tip tip;
-    private Runnable mainRunnable = null;
+    private Runnable runBrowser = null, runNextPage = null, runPrevPage = null;
 
 
     public static void openReader(Context context, String link, @Nullable String place) {
@@ -754,43 +754,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     public void addJournal() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ContentValues cv = new ContentValues();
-                cv.put(Const.TIME, System.currentTimeMillis());
-                String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
-                DataBase dbJournal = new DataBase(BrowserActivity.this, DataBase.JOURNAL);
-                SQLiteDatabase db = dbJournal.getWritableDatabase();
-                try {
-                    int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
-                    if (i == 0) {// no update
-                        cv.put(DataBase.ID, id);
-                        db.insert(DataBase.JOURNAL, null, cv);
-                    }
-                    Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
-                    i = cursor.getCount();
-                    cursor.moveToFirst();
-                    while (i > 100) {
-                        db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
-                                new String[]{cursor.getString(0)});
-                        cursor.moveToNext();
-                        i--;
-                    }
-                    cursor.close();
-                    dbJournal.close();
-                } catch (Exception e) {
-                    dbJournal.close();
-                    File file = new File(getFilesDir().getParent() + "/databases/" + DataBase.JOURNAL);
-                    file.delete();
-                    /*db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
-                    //создаем таблицу нового образца:
-                    db.execSQL("create table " + DataBase.JOURNAL + " ("
-                            + DataBase.ID + " text primary key,"
-                            + Const.TIME + " integer);");*/
-                }
-            }
-        }).start();
+        new Thread(this::runJournal).start();
     }
 
     public void openInApps(String url) {
@@ -804,37 +768,39 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @JavascriptInterface
     public void NextPage() { // NeoInterface
-        if (mainRunnable != null)
-            wvBrowser.removeCallbacks(mainRunnable);
-        mainRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String s = dbPage.getNextPage(link);
-                    if (s != null) {
-                        openLink(s);
-                        return;
+        if (runBrowser != null)
+            wvBrowser.removeCallbacks(runBrowser);
+        if (runNextPage == null)
+            runNextPage = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String s = dbPage.getNextPage(link);
+                        if (s != null) {
+                            openLink(s);
+                            return;
+                        }
+                        final String today = DateHelper.initToday(BrowserActivity.this).getMY();
+                        DateHelper d = getDateFromLink();
+                        if (d.getMY().equals(today)) {
+                            tipEndList();
+                            return;
+                        }
+                        d.changeMonth(1);
+                        dbPage.close();
+                        dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                        Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                        if (cursor.moveToFirst()) {
+                            openLink(cursor.getString(0));
+                            return;
+                        }
+                    } catch (Exception e) {
                     }
-                    final String today = DateHelper.initToday(BrowserActivity.this).getMY();
-                    DateHelper d = getDateFromLink();
-                    if (d.getMY().equals(today)) {
-                        tipEndList();
-                        return;
-                    }
-                    d.changeMonth(1);
-                    dbPage.close();
-                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
-                    if (cursor.moveToFirst()) {
-                        openLink(cursor.getString(0));
-                        return;
-                    }
-                } catch (Exception e) {
+                    tipEndList();
                 }
-                tipEndList();
-            }
-        };
-        wvBrowser.post(mainRunnable);
+            };
+        runBrowser = runNextPage;
+        wvBrowser.post(runBrowser);
     }
 
     private DateHelper getDateFromLink() throws Exception {
@@ -845,39 +811,41 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @JavascriptInterface
     public void PrevPage() { // NeoInterface
-        if (mainRunnable != null)
-            wvBrowser.removeCallbacks(mainRunnable);
-        mainRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String s = dbPage.getPrevPage(link);
-                    if (s != null) {
-                        openLink(s);
-                        return;
-                    }
-                    final String min = getMinMY();
-                    DateHelper d = getDateFromLink();
-                    if (d.getMY().equals(min)) {
+        if (runBrowser != null)
+            wvBrowser.removeCallbacks(runBrowser);
+        if (runPrevPage == null)
+            runPrevPage = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String s = dbPage.getPrevPage(link);
+                        if (s != null) {
+                            openLink(s);
+                            return;
+                        }
+                        final String min = getMinMY();
+                        DateHelper d = getDateFromLink();
+                        if (d.getMY().equals(min)) {
+                            tipEndList();
+                            return;
+                        }
+                        d.changeMonth(-1);
+                        dbPage.close();
+                        dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                        Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                        if (cursor.moveToLast()) {
+                            openLink(cursor.getString(0));
+                            return;
+                        }
+                    } catch (Exception e) {
                         tipEndList();
                         return;
                     }
-                    d.changeMonth(-1);
-                    dbPage.close();
-                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
-                    if (cursor.moveToLast()) {
-                        openLink(cursor.getString(0));
-                        return;
-                    }
-                } catch (Exception e) {
                     tipEndList();
-                    return;
                 }
-                tipEndList();
-            }
-        };
-        wvBrowser.post(mainRunnable);
+            };
+        runBrowser = runPrevPage;
+        wvBrowser.post(runBrowser);
     }
 
     private void tipEndList() {
@@ -896,5 +864,41 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         else
             d = DateHelper.putYearMonth(this, 2016, 1);
         return d.getMY();
+    }
+
+
+    public void runJournal() {
+        ContentValues cv = new ContentValues();
+        cv.put(Const.TIME, System.currentTimeMillis());
+        String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
+        DataBase dbJournal = new DataBase(BrowserActivity.this, DataBase.JOURNAL);
+        SQLiteDatabase db = dbJournal.getWritableDatabase();
+        try {
+            int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
+            if (i == 0) {// no update
+                cv.put(DataBase.ID, id);
+                db.insert(DataBase.JOURNAL, null, cv);
+            }
+            Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
+            i = cursor.getCount();
+            cursor.moveToFirst();
+            while (i > 100) {
+                db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
+                        new String[]{cursor.getString(0)});
+                cursor.moveToNext();
+                i--;
+            }
+            cursor.close();
+            dbJournal.close();
+        } catch (Exception e) {
+            dbJournal.close();
+            File file = new File(getFilesDir().getParent() + "/databases/" + DataBase.JOURNAL);
+            file.delete();
+                    /*db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
+                    //создаем таблицу нового образца:
+                    db.execSQL("create table " + DataBase.JOURNAL + " ("
+                            + DataBase.ID + " text primary key,"
+                            + Const.TIME + " integer);");*/
+        }
     }
 }
