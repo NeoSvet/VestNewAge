@@ -13,15 +13,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.work.Data;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -59,10 +55,10 @@ import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.helpers.SlashHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
-import ru.neosvet.vestnewage.model.SlashModel;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
     public boolean isMenuMode = false;
@@ -108,14 +104,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
         slash = new SlashUtils(MainActivity.this);
-        SlashModel model = ViewModelProviders.of(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
-        } else if (!SlashModel.inProgress && slash.isNeedLoad()) {
+        } else if (slash.isNeedLoad()) {
             slash.checkAdapterNewVersion();
-            ProgressHelper.addObserver(this, this);
-            model.startLoad();
+            SlashHelper.postCommand(this, true);
         }
 
         myFragmentManager = getFragmentManager();
@@ -151,18 +145,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 findViewById(R.id.ivStar).setVisibility(View.GONE);
                 if (isFirst) {
                     setFragment(R.id.nav_help, false);
-                    SlashModel.inProgress = false;
                     isFirst = true;
                     return;
                 }
                 if (first_fragment != 0) {
                     setFragment(first_fragment, false);
-                    if (SlashModel.inProgress) {
-                        ProgressHelper.removeObservers(MainActivity.this);
-                        if (curFragment != null)
-                            curFragment.startLoad();
-                        SlashModel.inProgress = false;
-                    }
+                    if (curFragment != null)
+                        curFragment.startLoad();
                 }
             }
 
@@ -227,8 +216,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onPause();
         if (prom != null)
             prom.stop();
-        if (SlashModel.inProgress)
-            ProgressHelper.removeObservers(this);
     }
 
     @Override
@@ -236,8 +223,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         if (prom != null)
             prom.resume();
-        if (SlashModel.inProgress)
-            ProgressHelper.addObserver(this, this);
     }
 
     @Override
@@ -245,42 +230,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onMultiWindowModeChanged(isInMultiWindowMode);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             MultiWindowSupport.resizeFloatTextView(tvNew, isInMultiWindowMode);
-    }
-
-    @Override
-    public void onChanged(@Nullable Data data) {
-        if (!SlashModel.inProgress || data == null)
-            return;
-        if (data.getBoolean(Const.TIME, false))
-            slash.reInitProm();
-        if (data.getBoolean(Const.DIALOG, false)) {
-            showDialog(data.getString(Const.LINK),
-                    data.getString(Const.TITLE));
-        }
-        if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.removeObservers(this);
-            if (curFragment != null) {
-                SlashModel.inProgress = false;
-                curFragment.startLoad();
-            }
-        }
-    }
-
-    private void showDialog(final String link, String title) {
-        final CustomDialog alert = new CustomDialog(this);
-        alert.setTitle(getResources().getString(R.string.new_page_title));
-        alert.setMessage(String.format(getResources().getString(R.string.new_page_des), title));
-        alert.setRightButton(getResources().getString(R.string.refresh), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, BrowserActivity.class);
-                intent.putExtra(Const.LINK, link);
-                intent.putExtra(Const.START, true);
-                startActivity(intent);
-                alert.dismiss();
-            }
-        });
-        alert.show(null);
     }
 
     public void setProm(View textView) {

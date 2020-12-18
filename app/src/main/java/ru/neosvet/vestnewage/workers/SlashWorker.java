@@ -1,12 +1,10 @@
 package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
-import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -24,9 +22,10 @@ import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.SlashUtils;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
-import ru.neosvet.vestnewage.model.SlashModel;
+import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.helpers.SlashHelper;
 
 public class SlashWorker extends Worker {
     private final Context context;
@@ -39,7 +38,6 @@ public class SlashWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        SlashModel.inProgress = true;
         try {
             synchronTime();
             loadAds();
@@ -48,9 +46,7 @@ public class SlashWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.FINISH, true)
-                .build());
+        SlashHelper.postCommand(context, false);
         return Result.success();
         //return Result.failure();
     }
@@ -68,28 +64,18 @@ public class SlashWorker extends Worker {
             s = br.readLine(); //link
             dbPage = new DataBase(context, s);
             SQLiteDatabase db = dbPage.getReadableDatabase();
-            Cursor cursor = db.query(Const.TITLE, null,
+            Cursor cursor = db.query(Const.TITLE, new String[]{Const.TIME},
                     Const.LINK + DataBase.Q, new String[]{s},
                     null, null, null);
             if (cursor.moveToFirst()) {
-                if (t > cursor.getLong(cursor.getColumnIndex(Const.TIME))) {
-                    pushNew(s, dbPage.getPageTitle(cursor.getString(
-                            cursor.getColumnIndex(Const.TITLE)), s));
-                }
+                //if (t > cursor.getLong(0))
+                    LoaderHelper.postCommand(context, LoaderHelper.DOWNLOAD_PAGE, s);
             }
             s = br.readLine();
         }
         br.close();
         in.close();
         Thread.sleep(100);
-    }
-
-    private void pushNew(String link, String title) {
-        ProgressHelper.postProgress(new Data.Builder()
-                .putBoolean(Const.DIALOG, true)
-                .putString(Const.LINK, link)
-                .putString(Const.TITLE, title)
-                .build());
     }
 
     private void loadAds() throws Exception {
@@ -139,14 +125,7 @@ public class SlashWorker extends Worker {
         response.close();
         long timeDevice = DateHelper.initNow(context).getTimeInSeconds();
         int timeDiff = (int) (timeDevice - timeServer);
-        SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
-        if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt(Const.TIMEDIFF, timeDiff);
-            editor.apply();
-            ProgressHelper.postProgress(new Data.Builder()
-                    .putBoolean(Const.TIME, true)
-                    .build());
-        }
+        SlashUtils slash = new SlashUtils(context);
+        slash.reInitProm(timeDiff);
     }
 }

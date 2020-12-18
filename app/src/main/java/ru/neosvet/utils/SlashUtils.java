@@ -143,10 +143,22 @@ public class SlashUtils {
         notifHelper.notify(START_ID, notifBuilder);
     }
 
-    public void reInitProm() {
+    private void reInitProm() {
         SharedPreferences pref = context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
         PromHelper prom = new PromHelper(context, null);
         prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF));
+    }
+
+    public void reInitProm(int timeDiff) {
+        SharedPreferences pref = context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
+        if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt(Const.TIMEDIFF, timeDiff);
+            editor.apply();
+
+            PromHelper prom = new PromHelper(context, null);
+            prom.initNotif(timeDiff);
+        }
     }
 
     private Intent getSettingsIntent() {
