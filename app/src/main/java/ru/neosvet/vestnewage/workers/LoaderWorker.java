@@ -121,7 +121,7 @@ public class LoaderWorker extends Worker {
                                 .putString(Const.LINK, link) // use only in CollectionsFragment
                                 .build());
                         if (name.equals(LoaderHelper.TAG))
-                            break;
+                            LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
                         LoaderModel.inProgress = false;
                         return Result.success();
                 }
