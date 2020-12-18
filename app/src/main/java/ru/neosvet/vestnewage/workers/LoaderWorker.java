@@ -120,6 +120,8 @@ public class LoaderWorker extends Worker {
                                 .putBoolean(Const.FINISH, true)
                                 .putString(Const.LINK, link) // use only in CollectionsFragment
                                 .build());
+                        if (name.equals(LoaderHelper.TAG))
+                            break;
                         LoaderModel.inProgress = false;
                         return Result.success();
                 }

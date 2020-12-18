@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -27,6 +28,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.workers.BookWorker;
@@ -59,11 +61,12 @@ public class LoaderHelper extends LifecycleService {
 
     public static void postCommand(Context context, int mode, String request) {
         Intent intent = new Intent(context, LoaderHelper.class);
+        intent.putExtra(Const.DIALOG, context instanceof Activity);
+        intent.putExtra(Const.MODE, mode);
         if (mode == STOP) {
             intent.putExtra(Const.FINISH, true);
             intent.putExtra(Const.ERROR, request);
         } else {
-            intent.putExtra(Const.MODE, mode);
             intent.putExtra(Const.TASK, request);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -107,7 +110,8 @@ public class LoaderHelper extends LifecycleService {
         ProgressHelper.setMessage(getResources().getString(R.string.start));
         initNotif();
         start = true;
-        Lib.showToast(getApplicationContext(), getResources().getString(R.string.load_background));
+        if (intent.getBooleanExtra(Const.DIALOG, false))
+            Lib.showToast(getApplicationContext(), getResources().getString(R.string.load_background));
         startLoad(mode, intent.getStringExtra(Const.TASK));
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(new Handler.Callback() {
@@ -199,6 +203,18 @@ public class LoaderHelper extends LifecycleService {
                         .setInputData(data.build())
                         .setConstraints(constraints)
                         .addTag(CalendarModel.TAG)
+                        .build();
+                job = work.beginUniqueWork(TAG,
+                        ExistingWorkPolicy.REPLACE, task);
+                break;
+            case DOWNLOAD_PAGE:
+                data.putBoolean(Const.STYLE, false)
+                        .putString(Const.LINK, request);
+                task = new OneTimeWorkRequest
+                        .Builder(LoaderWorker.class)
+                        .setInputData(data.build())
+                        .setConstraints(constraints)
+                        .addTag(LoaderModel.TAG)
                         .build();
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
