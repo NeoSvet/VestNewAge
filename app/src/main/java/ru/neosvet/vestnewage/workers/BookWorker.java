@@ -245,7 +245,8 @@ public class BookWorker extends Worker {
 
     private String loadPoems() throws Exception {
         String s = null;
-        for (int i = 2016; i <= DateHelper.initToday(context).getYear() && !isCancelled(); i++) {
+        int y = DateHelper.initToday(context).getYear();
+        for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
             s = loadListBook(Const.POEMS + "/" + i);
         }
         return s;

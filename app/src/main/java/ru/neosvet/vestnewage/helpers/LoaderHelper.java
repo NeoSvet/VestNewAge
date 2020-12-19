@@ -240,7 +240,8 @@ public class LoaderHelper extends LifecycleService {
         DateHelper d = null;
         if (id == ALL || id == R.id.nav_book) {
             d = DateHelper.initToday(getApplication().getBaseContext());
-            k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
+            //k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
+            k = d.getMonth() - 1; //for ucoz don't need count
             k += 9; // poslaniya (01.16-09.16)
         }
         if (id == ALL) {
