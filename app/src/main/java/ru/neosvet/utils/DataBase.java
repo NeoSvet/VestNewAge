@@ -124,10 +124,7 @@ public class DataBase extends SQLiteOpenHelper {
     // для материалов в базах данных:
     public static String getContentPage(Context ctxt, String link, boolean onlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
-        SQLiteDatabase db = dataBase.getReadableDatabase();
-        Cursor cursor = db.query(Const.TITLE, null,
-                Const.LINK + DataBase.Q, new String[]{link},
-                null, null, null);
+        Cursor cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
         int id;
 
         StringBuilder pageCon = new StringBuilder();
@@ -135,7 +132,6 @@ public class DataBase extends SQLiteOpenHelper {
             pageCon.append(dataBase.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link));
             if (onlyTitle) {
                 cursor.close();
-                db.close();
                 dataBase.close();
                 return pageCon.toString();
             }
@@ -144,14 +140,11 @@ public class DataBase extends SQLiteOpenHelper {
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
         } else { // страница не загружена...
             cursor.close();
-            db.close();
             dataBase.close();
             return null;
         }
         cursor.close();
-        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                null, null, null);
+        cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id);
         if (cursor.moveToFirst()) {
             do {
                 pageCon.append(Lib.withOutTags(cursor.getString(0)));
@@ -160,12 +153,10 @@ public class DataBase extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         } else { // страница не загружена...
             cursor.close();
-            db.close();
             dataBase.close();
             return null;
         }
         cursor.close();
-        db.close();
         dataBase.close();
         pageCon.delete(pageCon.length() - 2, pageCon.length());
         return pageCon.toString();
