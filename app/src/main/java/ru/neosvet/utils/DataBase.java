@@ -342,6 +342,10 @@ public class DataBase extends SQLiteOpenHelper {
         return db.delete(table, whereClause, new String[]{whereArg});
     }
 
+    public int delete(String table, String whereClause, int whereArg) {
+        return db.delete(table, whereClause, new String[]{String.valueOf(whereArg)});
+    }
+
     public int delete(String table, String whereClause, String[] whereArgs) {
         return db.delete(table, whereClause, whereArgs);
     }

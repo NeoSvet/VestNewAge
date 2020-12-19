@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -307,8 +306,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             for (int i = 0; i < adCalendar.getItemCount(); i++)
                 adCalendar.getItem(i).clear();
             DataBase dataBase = new DataBase(act, dCurrent.getMY());
-            SQLiteDatabase db = dataBase.getWritableDatabase();
-            Cursor cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+            Cursor cursor = dataBase.query(Const.TITLE, null);
             boolean empty = true;
             if (cursor.moveToFirst()) {
                 if (loadIfNeed) {
@@ -343,7 +341,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                 }
             }
             cursor.close();
-            db.close();
             dataBase.close();
             adCalendar.notifyDataSetChanged();
 
@@ -358,13 +355,10 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     private String getTitleByLink(String s) {
         DataBase dataBase = new DataBase(act, DataBase.ARTICLES);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.TITLE},
-                Const.LINK + DataBase.Q, new String[]{s}, null, null, null);
+        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.TITLE}, Const.LINK + DataBase.Q, s);
         if (curTitle.moveToFirst())
             s = curTitle.getString(0);
         curTitle.close();
-        db.close();
         dataBase.close();
         return s;
     }

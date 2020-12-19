@@ -60,10 +60,7 @@ public class MarkerActivity extends AppCompatActivity {
         if (par != null) {
             par = Lib.withOutTags(par);
             DataBase dataBase = new DataBase(context, DataBase.getDatePage(link));
-            Cursor cursor = dataBase.query(DataBase.PARAGRAPH,
-                    new String[]{DataBase.PARAGRAPH},
-                    DataBase.ID + DataBase.Q,
-                    String.valueOf(dataBase.getPageId(link)));
+            Cursor cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, dataBase.getPageId(link));
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;

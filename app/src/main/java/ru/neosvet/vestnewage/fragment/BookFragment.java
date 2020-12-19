@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -272,28 +271,24 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             ivNext.setEnabled(existsList(d, katren));
             d.changeMonth(-1);
             DataBase dataBase;
-            SQLiteDatabase db;
             String t, s;
             Cursor cursor;
 
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
                 dataBase = new DataBase(act, "12.04");
-                db = dataBase.getWritableDatabase();
-                cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+                cursor = dataBase.query(Const.TITLE, null);
                 if (cursor.moveToFirst() && cursor.moveToNext()) {
                     t = cursor.getString(cursor.getColumnIndex(Const.TITLE));
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK));
                     adBook.addItem(new ListItem(t, s));
                 }
                 cursor.close();
-                db.close();
                 dataBase.close();
             }
 
             dataBase = new DataBase(act, d.getMY());
-            db = dataBase.getWritableDatabase();
-            cursor = db.query(Const.TITLE, null, null, null, null, null, null);
+            cursor = dataBase.query(Const.TITLE, null);
 
             DateHelper dModList;
             if (cursor.moveToFirst()) {
@@ -302,12 +297,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 if (d.getYear() > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
                     if (katren) { // катрены
-                        cursor = db.query(Const.TITLE, null,
+                        cursor = dataBase.query(Const.TITLE, null,
                                 Const.LINK + DataBase.LIKE,
                                 new String[]{"%" + Const.POEMS + "%"}
                                 , null, null, Const.LINK);
                     } else { // послания
-                        cursor = db.query(Const.TITLE, null,
+                        cursor = dataBase.query(Const.TITLE, null,
                                 Const.LINK + " NOT" + DataBase.LIKE,
                                 new String[]{"%" + Const.POEMS + "%"}
                                 , null, null, Const.LINK);
@@ -334,7 +329,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             } else
                 dModList = d;
             cursor.close();
-            db.close();
             dataBase.close();
             DateHelper today = DateHelper.initToday(act);
             if (d.getMonth() == today.getMonth() && d.getYear() == today.getYear()) {
@@ -366,9 +360,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     private boolean existsList(DateHelper d, boolean katren) {
         DataBase dataBase = new DataBase(act, d.getMY());
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(Const.TITLE, new String[]{Const.LINK},
-                null, null, null, null, null);
+        Cursor cursor = dataBase.query(Const.TITLE, new String[]{Const.LINK});
         String s;
         if (cursor.moveToFirst()) {
             // первую запись пропускаем, т.к. там дата изменения списка
@@ -377,11 +369,13 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 if ((s.contains(Const.POEMS) && katren) ||
                         (!s.contains(Const.POEMS) && !katren)) {
                     cursor.close();
+                    dataBase.close();
                     return true;
                 }
             }
         }
         cursor.close();
+        dataBase.close();
         return false;
     }
 
@@ -699,24 +693,17 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         //открываем базу по случайной дате:
         String name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
         DataBase dataBase = new DataBase(act, name);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
         Cursor curTitle;
         String title = null;
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         if (view.getId() == R.id.bRndKat) { //случайный катрен
             title = getResources().getString(R.string.rnd_kat);
-            curTitle = db.query(Const.TITLE, null,
-                    Const.LINK + DataBase.LIKE,
-                    new String[]{"%" + Const.POEMS + "%"}
-                    , null, null, null);
+            curTitle = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.LIKE, "%" + Const.POEMS + "%");
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
             title = getResources().getString(R.string.rnd_pos);
-            curTitle = db.query(Const.TITLE, null,
-                    Const.LINK + " NOT" + DataBase.LIKE,
-                    new String[]{"%" + Const.POEMS + "%"}
-                    , null, null, null);
+            curTitle = dataBase.query(Const.TITLE, null, Const.LINK + " NOT" + DataBase.LIKE, "%" + Const.POEMS + "%");
         } else { //случайных стих
-            curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
+            curTitle = dataBase.query(Const.TITLE, null);
         }
         //определяем случайных текст:
         if (curTitle.getCount() < 2)
@@ -727,6 +714,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         }
         if (!curTitle.moveToPosition(n)) {
             curTitle.close();
+            dataBase.close();
             Lib.showToast(act, getResources().getString(R.string.alert_rnd));
             return;
         }
@@ -734,10 +722,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         String s = "";
         if (view.getId() == R.id.bRndStih) { //случайных стих
             s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
-            Cursor curPar = db.query(DataBase.PARAGRAPH,
-                    new String[]{DataBase.PARAGRAPH},
-                    DataBase.ID + DataBase.Q,
-                    new String[]{s}, null, null, null);
+            Cursor curPar = dataBase.query(DataBase.PARAGRAPH,
+                    new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, s);
             if (curPar.getCount() > 1) { //если текст скачен
                 g = new Random();
                 n = curPar.getCount(); //номер случайного стиха
@@ -767,6 +753,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         else
             msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
         curTitle.close();
+        dataBase.close();
         if (title == null) {
             title = msg;
             msg = s;
@@ -778,9 +765,8 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         ContentValues cv = new ContentValues();
         cv.put(Const.TIME, System.currentTimeMillis());
         DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
-        db = dbJournal.getWritableDatabase();
         cv.put(DataBase.ID, DataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n);
-        db.insert(DataBase.JOURNAL, null, cv);
+        dbJournal.insert(DataBase.JOURNAL,  cv);
         dbJournal.close();
     }
 

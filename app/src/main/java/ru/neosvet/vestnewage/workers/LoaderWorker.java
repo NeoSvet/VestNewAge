@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.workers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -247,20 +246,16 @@ public class LoaderWorker extends Worker {
 
     private int countBookList(String name) throws Exception {
         DataBase dataBase = new DataBase(context, name);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(Const.TITLE, null, null, null, null, null, null);
+        Cursor curTitle = dataBase.query(Const.TITLE, null);
         int k = curTitle.getCount() - 1;
         curTitle.close();
-        db.close();
         dataBase.close();
         return k;
     }
 
     private void downloadBookList(String name) throws Exception {
         DataBase dataBase = new DataBase(context, name);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.LINK},
-                null, null, null, null, null);
+        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.LINK});
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
@@ -269,7 +264,6 @@ public class LoaderWorker extends Worker {
             }
         }
         curTitle.close();
-        db.close();
         dataBase.close();
     }
 
@@ -296,7 +290,6 @@ public class LoaderWorker extends Worker {
         PageParser page = new PageParser(context);
         page.load(Const.SITE + Const.PRINT + s, "page-title");
 
-        SQLiteDatabase db = dataBase.getWritableDatabase();
         ContentValues cv;
         int id = 0, bid = 0;
 
@@ -312,9 +305,7 @@ public class LoaderWorker extends Worker {
                     k = 0;
                 }
                 if (k == 0) {
-                    Cursor cursor = db.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE},
-                            Const.LINK + DataBase.Q, new String[]{link}
-                            , null, null, null);
+                    Cursor cursor = dataBase.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE}, Const.LINK + DataBase.Q, link);
                     if (cursor.moveToFirst())
                         id = cursor.getInt(0);
                     else id = 0;
@@ -328,26 +319,23 @@ public class LoaderWorker extends Worker {
                             cv = new ContentValues();
                             cv.put(DataBase.ID, id);
                             cv.put(DataBase.PARAGRAPH, s);
-                            db.insert(DataBase.PARAGRAPH, null, cv);
+                            dataBase.insert(DataBase.PARAGRAPH, cv);
                         } else {
                             cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
                             cv.put(Const.LINK, link);
-                            id = (int) db.insert(Const.TITLE, null, cv);
+                            id = (int) dataBase.insert(Const.TITLE, cv);
                             //обновляем дату изменения списка:
                             cv = new ContentValues();
                             cv.put(Const.TIME, System.currentTimeMillis());
-                            db.update(Const.TITLE, cv, DataBase.ID +
-                                    DataBase.Q, new String[]{"1"});
+                            dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1");
                         }
                     } else { // id найден, значит материал есть
                         //обновляем заголовок
                         cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
                         //обновляем дату загрузки материала
-                        db.update(Const.TITLE, cv, DataBase.ID +
-                                DataBase.Q, new String[]{String.valueOf(id)});
+                        dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, id);
                         //удаляем содержимое материала
-                        db.delete(DataBase.PARAGRAPH, DataBase.ID +
-                                DataBase.Q, new String[]{String.valueOf(id)});
+                        dataBase.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, id);
                     }
                     bid = id;
                     s = page.getNextElem();
@@ -357,12 +345,11 @@ public class LoaderWorker extends Worker {
                 cv = new ContentValues();
                 cv.put(DataBase.ID, id);
                 cv.put(DataBase.PARAGRAPH, s);
-                db.insert(DataBase.PARAGRAPH, null, cv);
+                dataBase.insert(DataBase.PARAGRAPH, cv);
             }
             s = page.getNextElem();
         } while (s != null);
 
-        db.close();
         dataBase.close();
         page.clear();
         return true;

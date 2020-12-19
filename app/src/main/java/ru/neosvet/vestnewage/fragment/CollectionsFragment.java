@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -241,7 +240,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         int iID, iPlace, iLink, iDes;
         String[] mId;
         String link = sCol.substring(sCol.indexOf(Const.N) + 1);
@@ -253,9 +251,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         String place;
         int k = 0;
         for (int i = 0; i < mId.length; i++) {
-            cursor = db.query(DataBase.MARKERS, null,
-                    DataBase.ID + DataBase.Q, new String[]{mId[i]},
-                    null, null, null);
+            cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, mId[i]);
             if (cursor.moveToFirst()) {
                 iID = cursor.getColumnIndex(DataBase.ID);
                 iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -327,24 +323,18 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 p = DataBase.closeList(p);
 
                 DataBase dataBase = new DataBase(act, link);
-                SQLiteDatabase db = dataBase.getWritableDatabase();
-                Cursor cursor = db.query(Const.TITLE, null,
-                        Const.LINK + DataBase.Q, new String[]{link},
-                        null, null, null);
+                Cursor cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
                 int id;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                 } else { // страница не загружена...
                     cursor.close();
-                    db.close();
                     dataBase.close();
                     b.append(getResources().getString(R.string.not_load_page));
                     return b.toString();
                 }
                 cursor.close();
-                cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                        null, null, null);
+                cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id);
                 int i = 1;
                 if (cursor.moveToFirst()) {
                     do {
@@ -357,12 +347,10 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     } while (cursor.moveToNext());
                 } else { // страница не загружена...
                     cursor.close();
-                    db.close();
                     dataBase.close();
                     throw new Exception();
                 }
                 cursor.close();
-                db.close();
                 dataBase.close();
                 b.delete(b.length() - 2, b.length());
             }
@@ -397,8 +385,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         adMarker.clear();
         act.setTitle(getResources().getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, Const.PLACE);
+        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, null, null, null, null, null, Const.PLACE);
         String s;
         boolean isNull = false;
         if (cursor.moveToFirst()) {
@@ -739,10 +726,9 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             return;
         }
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(Const.TITLE, name);
-        int r = db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+        int r = dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                 adMarker.getItem(iSel).getStrId());
         dbMarker.close();
         if (r == 1) {
@@ -765,21 +751,20 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private void saveChange() {
         if (change) {
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-            SQLiteDatabase db = dbMarker.getWritableDatabase();
             ContentValues cv;
             if (sCol == null) {
                 for (int i = 1; i < adMarker.getCount(); i++) {
                     cv = new ContentValues();
                     cv.put(Const.PLACE, i);
-                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
+                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
                             adMarker.getItem(i).getStrId());
                 }
             } else {
                 cv = new ContentValues();
                 final String t = getListId();
                 cv.put(DataBase.MARKERS, t);
-                db.update(DataBase.COLLECTIONS, cv, Const.TITLE + DataBase.Q,
-                        new String[]{sCol.substring(0, sCol.indexOf(Const.N))});
+                dbMarker.update(DataBase.COLLECTIONS, cv, Const.TITLE + DataBase.Q,
+                        sCol.substring(0, sCol.indexOf(Const.N)));
                 sCol = sCol.substring(0, sCol.indexOf(Const.N) + 1) + t;
             }
             dbMarker.close();
@@ -789,7 +774,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
 
     private void deleteElement() {
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         int n;
         String s, id = String.valueOf(adMarker.getItem(iSel).getId());
         ContentValues cv;
@@ -801,16 +785,13 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             //получаем список закладок у удаляемой подборки:
             s = adMarker.getItem(iSel).getData();
             mId = DataBase.getList(s);
-            cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
-                    Const.TITLE + DataBase.Q, new String[]{getResources().getString(R.string.no_collections)},
-                    null, null, null);
+            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
+                    Const.TITLE + DataBase.Q, getResources().getString(R.string.no_collections));
             cursor.moveToFirst();
             int nc_id = cursor.getInt(0); //id подборки "Вне подборок"
             cursor.close();
             for (int i = 0; i < mId.length; i++) { //перебираем список закладок.
-                cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
-                        DataBase.ID + DataBase.Q, new String[]{mId[i]},
-                        null, null, null);
+                cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, mId[i]);
                 if (!cursor.moveToFirst()) continue;
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 cursor.close();
@@ -825,16 +806,14 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 //обновляем закладку:
                 cv = new ContentValues();
                 cv.put(DataBase.COLLECTIONS, s);
-                db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, new String[]{mId[i]});
+                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, mId[i]);
             }
             //удаляем подборку:
-            db.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, new String[]{id});
+            dbMarker.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, id);
             //дополняем список "Вне подоборок"
             if (b.length() > 0) { //список на добавление не пуст
                 //получаем список закладок в "Вне подоборок":
-                cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(nc_id)},
-                        null, null, null);
+                cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, nc_id);
                 if (cursor.moveToFirst())
                     s = cursor.getString(0);
                 else
@@ -843,22 +822,18 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 //дополняем список:
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, b.toString() + s);
-                db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{String.valueOf(nc_id)});
+                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, nc_id);
                 loadColList(); //обновляем список подборок
             } else //иначе просто удаляем подборку из списка
                 adMarker.removeAt(iSel);
         } else { //удаляем закладку
             n = 0;
-            cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
-                    DataBase.ID + DataBase.Q, new String[]{id},
-                    null, null, null);
+            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, id);
             if (cursor.moveToFirst()) {
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 mId = DataBase.getList(s);
                 for (int i = 0; i < mId.length; i++) { //перебираем список подборок
-                    cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                            DataBase.ID + DataBase.Q, new String[]{mId[i]},
-                            null, null, null);
+                    cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, mId[i]);
                     if (!cursor.moveToFirst()) continue;
                     s = DataBase.closeList(cursor.getString(0)); //список закладок у подборки
                     s = s.replace(DataBase.closeList(String.valueOf(id)), Const.COMMA); //убираем удаляемую закладку
@@ -866,12 +841,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                     //обновляем подборку:
                     cv = new ContentValues();
                     cv.put(DataBase.MARKERS, s);
-                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{mId[i]});
+                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, mId[i]);
                 }
             }
             cursor.close();
             //удаляем закладку:
-            db.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, new String[]{id});
+            dbMarker.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, id);
             adMarker.removeAt(iSel);
         }
         dbMarker.close();
@@ -905,10 +880,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         if (resultCode == 1) {
             sCol = sCol.substring(0, sCol.indexOf(Const.N));
             DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-            SQLiteDatabase db = dbMarker.getWritableDatabase();
-            Cursor cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                    Const.TITLE + DataBase.Q, new String[]{String.valueOf(sCol)},
-                    null, null, null);
+            Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, Const.TITLE + DataBase.Q, sCol);
             if (cursor.moveToFirst())
                 sCol += Const.N + cursor.getString(0); //список закладок в подборке
             else
