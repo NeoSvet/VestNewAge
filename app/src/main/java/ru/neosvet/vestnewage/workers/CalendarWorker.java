@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.workers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -37,7 +36,6 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 public class CalendarWorker extends Worker {
     private final Context context;
     private DataBase dataBase;
-    private SQLiteDatabase db;
     private final Lib lib;
     private final List<ListItem> list = new ArrayList<>();
 
@@ -114,9 +112,7 @@ public class CalendarWorker extends Worker {
     public static int getListLink(Context context, int year, int month) throws Exception {
         DateHelper d = DateHelper.putYearMonth(context, year, month);
         DataBase dataBase = new DataBase(context, d.getMY());
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor curTitle = db.query(Const.TITLE, new String[]{Const.LINK},
-                null, null, null, null, null);
+        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.LINK});
         int k = 0;
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
@@ -133,7 +129,6 @@ public class CalendarWorker extends Worker {
             bw.close();
         }
         curTitle.close();
-        db.close();
         dataBase.close();
         return k;
     }
@@ -182,7 +177,6 @@ public class CalendarWorker extends Worker {
             }
         }
         if (dataBase != null) {
-            db.close();
             dataBase.close();
             dataBase = null;
         }
@@ -207,17 +201,13 @@ public class CalendarWorker extends Worker {
 
 
     private void initDatebase(String name) throws Exception {
-        if (dataBase != null) {
-            db.close();
+        if (dataBase != null)
             dataBase.close();
-        }
         dataBase = new DataBase(context, name);
-        db = dataBase.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(Const.TIME, System.currentTimeMillis());
-        if (db.update(Const.TITLE, cv,
-                DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
-            db.insert(Const.TITLE, null, cv);
+        if (dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1") == 0) {
+            dataBase.insert(Const.TITLE, cv);
         }
     }
 
@@ -232,15 +222,13 @@ public class CalendarWorker extends Worker {
         ContentValues cv = new ContentValues();
         cv.put(Const.LINK, link);
         // пытаемся обновить запись:
-        if (db.update(Const.TITLE, cv,
-                Const.LINK + DataBase.Q,
-                new String[]{link}) == 0) {
+        if (dataBase.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) == 0) {
             // обновить не получилось, добавляем:
             if (link.contains("@"))
                 cv.put(Const.TITLE, link.substring(9));
             else
                 cv.put(Const.TITLE, link);
-            db.insert(Const.TITLE, null, cv);
+            dataBase.insert(Const.TITLE, cv);
         }
     }
 }

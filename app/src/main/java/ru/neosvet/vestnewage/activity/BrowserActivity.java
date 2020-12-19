@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -125,6 +124,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         super.onResume();
         prom.resume();
         ProgressHelper.addObserver(this, this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbPage.close();
     }
 
     private void initModel() {
@@ -646,10 +651,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void generatePage(File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         dbPage = new DataBase(this, link);
-        SQLiteDatabase db = dbPage.getReadableDatabase();
-        Cursor cursor = db.query(Const.TITLE, null,
-                Const.LINK + DataBase.Q, new String[]{link},
-                null, null, null);
+        Cursor cursor = dbPage.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
         int id;
         DateHelper d;
         if (cursor.moveToFirst()) {
@@ -676,9 +678,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             return;
         }
         cursor.close();
-        cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)},
-                null, null, null);
+        cursor = dbPage.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id);
         boolean poems = link.contains("poems/");
         if (cursor.moveToFirst()) {
             do {
@@ -692,7 +692,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             } while (cursor.moveToNext());
         }
         cursor.close();
-        dbPage.close();
         bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
         if (dbPage.isBook()) {
             bw.write(script);
@@ -873,19 +872,17 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         cv.put(Const.TIME, System.currentTimeMillis());
         String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
         DataBase dbJournal = new DataBase(BrowserActivity.this, DataBase.JOURNAL);
-        SQLiteDatabase db = dbJournal.getWritableDatabase();
         try {
-            int i = db.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, new String[]{id});
+            int i = dbJournal.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, id);
             if (i == 0) {// no update
                 cv.put(DataBase.ID, id);
-                db.insert(DataBase.JOURNAL, null, cv);
+                dbJournal.insert(DataBase.JOURNAL, cv);
             }
-            Cursor cursor = db.query(DataBase.JOURNAL, new String[]{DataBase.ID}, null, null, null, null, null);
+            Cursor cursor = dbJournal.query(DataBase.JOURNAL, new String[]{DataBase.ID});
             i = cursor.getCount();
             cursor.moveToFirst();
             while (i > 100) {
-                db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q,
-                        new String[]{cursor.getString(0)});
+                dbJournal.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, cursor.getString(0));
                 cursor.moveToNext();
                 i--;
             }

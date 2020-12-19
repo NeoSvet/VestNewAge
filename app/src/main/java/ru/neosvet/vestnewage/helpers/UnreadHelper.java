@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +21,12 @@ public class UnreadHelper {
     public static final String NAME = "noread";
     private final Context context;
     private DataBase dbUnread, dbPages;
-    private SQLiteDatabase db;
     private long time = 0;
     private int[] ids_new;
 
     public UnreadHelper(Context context) {
         this.context = context;
         dbUnread = new DataBase(context, NAME);
-        db = dbUnread.getWritableDatabase();
     }
 
     public boolean addLink(String link, DateHelper date) {
@@ -42,23 +39,21 @@ public class UnreadHelper {
         }
         if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
-        Cursor cursor = db.query(NAME, new String[]{Const.LINK},
-                Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
+        Cursor cursor = dbUnread.query(NAME, new String[]{Const.LINK}, Const.LINK + DataBase.Q, link);
         boolean exists = cursor.moveToFirst();
         cursor.close();
         if (exists) return true; // уже есть в списке непрочитанного
         ContentValues cv = new ContentValues();
         cv.put(Const.TIME, date.getTimeInMills());
         cv.put(Const.LINK, link);
-        db.insert(NAME, null, cv);
+        dbUnread.insert(NAME, cv);
         time = System.currentTimeMillis();
         return true;
     }
 
     public void deleteLink(String link) {
         link = link.replace(Const.HTML, "");
-        if (db.delete(NAME, Const.LINK
-                + DataBase.Q, new String[]{link}) > 0) {
+        if (dbUnread.delete(NAME, Const.LINK + DataBase.Q, link) > 0) {
             time = System.currentTimeMillis();
             setBadge();
         }
@@ -67,7 +62,7 @@ public class UnreadHelper {
 
     public List<String> getList() {
         List<String> links = new ArrayList<>();
-        Cursor cursor = db.query(NAME, null, null,
+        Cursor cursor = dbUnread.query(NAME, null, null,
                 null, null, null, Const.TIME);
         if (cursor.moveToFirst()) {
             int iLink = cursor.getColumnIndex(Const.LINK);
@@ -82,7 +77,7 @@ public class UnreadHelper {
     }
 
     public int getCount() {
-        Cursor cursor = db.query(NAME, null, null,
+        Cursor cursor = dbUnread.query(NAME, null, null,
                 null, null, null, Const.TIME);
         int k = 0;
         if (cursor.moveToFirst())
@@ -108,19 +103,17 @@ public class UnreadHelper {
     }
 
     public void clearList() {
-        db.delete(NAME, null, null);
+        dbUnread.delete(NAME);
         time = System.currentTimeMillis();
     }
 
     public void open() {
         dbUnread = new DataBase(context, NAME);
-        db = dbUnread.getWritableDatabase();
     }
 
     public void close() {
         if (dbPages != null)
             dbPages.close();
-        db.close();
         dbUnread.close();
         if (time > 0) {
             SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
@@ -131,8 +124,7 @@ public class UnreadHelper {
     }
 
     public void setBadge() {
-        Cursor cursor = db.query(NAME, null, Const.TIME + " > ?",
-                new String[]{"0"}, null, null, null);
+        Cursor cursor = dbUnread.query(NAME, null, Const.TIME + " > ?", "0");
         if (cursor.getCount() == 0)
             ShortcutBadger.removeCount(context);
         else

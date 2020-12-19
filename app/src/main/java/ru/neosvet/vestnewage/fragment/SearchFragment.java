@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -580,8 +579,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         adResults.clear();
         adResults.notifyDataSetChanged();
         DataBase dataBase = new DataBase(act, Const.SEARCH);
-        SQLiteDatabase db = dataBase.getWritableDatabase();
-        Cursor cursor = db.query(Const.SEARCH, null, null, null, null, null,
+        Cursor cursor = dataBase.query(Const.SEARCH, null, null, null, null, null,
                 DataBase.ID + (dStart.getTimeInMills() > dEnd.getTimeInMills() ? DataBase.DESC : ""));
         if (cursor.getCount() == 0) {
             bShow.setVisibility(View.GONE);
@@ -629,6 +627,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 }
             }
         }
+        dataBase.close();
     }
 
     @Override

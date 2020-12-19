@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -58,20 +57,21 @@ public class SlashWorker extends Worker {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         long t;
         DataBase dbPage;
+        Cursor cursor;
         s = br.readLine();
         while (!s.equals(Const.END)) {
             t = Long.parseLong(s);
             s = br.readLine(); //link
             dbPage = new DataBase(context, s);
-            SQLiteDatabase db = dbPage.getReadableDatabase();
-            Cursor cursor = db.query(Const.TITLE, new String[]{Const.TIME},
+            cursor = dbPage.query(Const.TITLE, new String[]{Const.TIME},
                     Const.LINK + DataBase.Q, new String[]{s},
                     null, null, null);
             if (cursor.moveToFirst()) {
-                //if (t > cursor.getLong(0))
+                if (t > cursor.getLong(0))
                     LoaderHelper.postCommand(context, LoaderHelper.DOWNLOAD_PAGE, s);
             }
             s = br.readLine();
+            dbPage.close();
         }
         br.close();
         in.close();

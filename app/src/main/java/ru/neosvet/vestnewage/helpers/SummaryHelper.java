@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -52,7 +51,6 @@ public class SummaryHelper {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String title, link, name;
         DataBase dataBase = null;
-        SQLiteDatabase db = null;
         ContentValues cv;
         Cursor cursor;
         while ((title = br.readLine()) != null) {
@@ -61,29 +59,22 @@ public class SummaryHelper {
             br.readLine(); //time
             name = DataBase.getDatePage(link);
             if (dataBase == null || !dataBase.getDatabaseName().equals(name)) {
-                if (dataBase != null) {
-                    db.close();
+                if (dataBase != null)
                     dataBase.close();
-                }
                 dataBase = new DataBase(context, name);
-                db = dataBase.getWritableDatabase();
             }
-            cursor = db.query(Const.TITLE, null,
-                    Const.LINK + DataBase.Q, new String[]{link},
-                    null, null, null);
+            cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
             if (!cursor.moveToFirst()) {
                 cv = new ContentValues();
                 cv.put(Const.TITLE, title);
                 cv.put(Const.LINK, link);
-                db.insert(Const.TITLE, null, cv);
+                dataBase.insert(Const.TITLE, cv);
             }
             cursor.close();
         }
         br.close();
-        if (dataBase != null) {
-            db.close();
+        if (dataBase != null)
             dataBase.close();
-        }
     }
 
     public void createNotification(String text, String link) {

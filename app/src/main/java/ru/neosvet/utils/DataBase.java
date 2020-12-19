@@ -318,4 +318,40 @@ public class DataBase extends SQLiteOpenHelper {
     public int update(String table, ContentValues row, String whereClause, String whereArg) {
         return db.update(table, row, whereClause, new String[]{whereArg});
     }
+
+    public int update(String table, ContentValues row, String whereClause, int whereArg) {
+        return db.update(table, row, whereClause, new String[]{String.valueOf(whereArg)});
+    }
+
+    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs) {
+        return db.query(table, columns, selection, selectionArgs, null, null, null);
+    }
+
+    public Cursor query(String table, String[] columns, String selection, String selectionArg) {
+        return db.query(table, columns, selection, new String[]{selectionArg}, null, null, null);
+    }
+
+    public Cursor query(String table, String[] columns, String selection, int selectionArg) {
+        return db.query(table, columns, selection, new String[]{String.valueOf(selectionArg)}, null, null, null);
+    }
+
+    public Cursor query(String table, String[] columns) {
+        return db.query(table, columns, null, null, null, null, null);
+    }
+
+    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+        return db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+    }
+
+    public int delete(String table) {
+        return db.delete(table, null, null);
+    }
+
+    public int delete(String table, String whereClause, String whereArg) {
+        return db.delete(table, whereClause, new String[]{whereArg});
+    }
+
+    public int delete(String table, String whereClause, String[] whereArgs) {
+        return db.delete(table, whereClause, whereArgs);
+    }
 }

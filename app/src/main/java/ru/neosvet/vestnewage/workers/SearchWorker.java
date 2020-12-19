@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.workers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -23,7 +22,7 @@ import ru.neosvet.vestnewage.model.SearchModel;
 
 public class SearchWorker extends Worker {
     private final Context context;
-    private SQLiteDatabase dbS;
+    private DataBase dbSearch;
     private String str;
     private int mode, count1 = 0, count2 = 0;
 
@@ -48,8 +47,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            DataBase dbSearch = new DataBase(context, Const.SEARCH);
-            dbS = dbSearch.getWritableDatabase();
+            dbSearch = new DataBase(context, Const.SEARCH);
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
             str = getInputData().getString(Const.START); // начальная дата
@@ -68,7 +66,7 @@ public class SearchWorker extends Worker {
                 dbSearch.close();
                 return getResult();
             }
-            dbS.delete(Const.SEARCH, null, null);
+            dbSearch.delete(Const.SEARCH);
             DateHelper d;
             if (mode == 3 && list.contains(DataBase.ARTICLES)) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
@@ -84,7 +82,6 @@ public class SearchWorker extends Worker {
                     break;
                 d.changeMonth(step);
             }
-            dbS.close();
             dbSearch.close();
             return getResult();
         } catch (Exception e) {
@@ -120,7 +117,7 @@ public class SearchWorker extends Worker {
         List<String> title = new ArrayList<>();
         List<String> link = new ArrayList<>();
         List<String> id = new ArrayList<>();
-        Cursor curSearch = dbS.query(Const.SEARCH,
+        Cursor curSearch = dbSearch.query(Const.SEARCH,
                 null, null, null, null, null,
                 DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
         if (curSearch.moveToFirst()) {
@@ -135,7 +132,6 @@ public class SearchWorker extends Worker {
         }
         curSearch.close();
         DataBase dataBase = null;
-        SQLiteDatabase db = null;
         Cursor cursor;
         String name1, name2 = "";
         ContentValues cv;
@@ -144,17 +140,13 @@ public class SearchWorker extends Worker {
         for (int i = 0; i < title.size(); i++) {
             name1 = DataBase.getDatePage(link.get(i));
             if (!name1.equals(name2)) {
-                if (dataBase != null) {
-                    db.close();
+                if (dataBase != null)
                     dataBase.close();
-                }
                 dataBase = new DataBase(context, name1);
-                db = dataBase.getReadableDatabase();
             }
-            cursor = db.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
+            cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                     DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
-                    new String[]{String.valueOf(dataBase.getPageId(link.get(i))), "%" + find + "%"},
-                    null, null, null);
+                    new String[]{String.valueOf(dataBase.getPageId(link.get(i))), "%" + find + "%"});
             if (cursor.moveToFirst()) {
                 cv = new ContentValues();
                 cv.put(Const.TITLE, title.get(i));
@@ -166,11 +158,9 @@ public class SearchWorker extends Worker {
                     des.append(getDes(cursor.getString(0), find));
                 }
                 cv.put(Const.DESCTRIPTION, des.toString());
-                dbS.update(Const.SEARCH, cv, DataBase.ID +
-                        DataBase.Q, new String[]{id.get(i)});
+                dbSearch.update(Const.SEARCH, cv, DataBase.ID + DataBase.Q, id.get(i));
             } else {
-                dbS.delete(Const.SEARCH, DataBase.ID +
-                        DataBase.Q, new String[]{id.get(i)});
+                dbSearch.delete(Const.SEARCH, DataBase.ID + DataBase.Q, id.get(i));
             }
             cursor.close();
             p2 = ProgressHelper.getProcent(i, title.size());
@@ -182,10 +172,8 @@ public class SearchWorker extends Worker {
                         .build());
             }
         }
-        if (dataBase != null) {
-            db.close();
+        if (dataBase != null)
             dataBase.close();
-        }
         title.clear();
         link.clear();
         id.clear();
@@ -195,21 +183,14 @@ public class SearchWorker extends Worker {
         DataBase dataBase = new DataBase(context, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
-        SQLiteDatabase db = dataBase.getReadableDatabase();
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
-            curSearch = db.query(Const.TITLE, null,
-                    Const.TITLE + DataBase.LIKE, new String[]{"%" + find + "%"}
-                    , null, null, null);
+            curSearch = dataBase.query(Const.TITLE, null, Const.TITLE + DataBase.LIKE, "%" + find + "%");
         } else if (mode == 4) { //Искать по дате - ищем по ссылкам
-            curSearch = db.query(Const.TITLE, null,
-                    Const.LINK + DataBase.LIKE, new String[]{"%" + find + "%"}
-                    , null, null, null);
+            curSearch = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.LIKE, "%" + find + "%");
         } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
             //фильтрация по 0 и 1 будет позже
-            curSearch = db.query(DataBase.PARAGRAPH, null,
-                    DataBase.PARAGRAPH + DataBase.LIKE, new String[]{"%" + find + "%"}
-                    , null, null, null);
+            curSearch = dataBase.query(DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + DataBase.LIKE, "%" + find + "%");
         }
         if (curSearch.moveToFirst()) {
             int iPar = curSearch.getColumnIndex(DataBase.PARAGRAPH);
@@ -226,10 +207,7 @@ public class SearchWorker extends Worker {
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
-                    curTitle = db.query(Const.TITLE, null,
-                            DataBase.ID + DataBase.Q,
-                            new String[]{String.valueOf(id)},
-                            null, null, null);
+                    curTitle = dataBase.query(Const.TITLE, null, DataBase.ID + DataBase.Q, id);
                     if (curTitle.moveToFirst()) {
                         s = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
                         if (mode == 0) //Искать в Посланиях
@@ -243,7 +221,7 @@ public class SearchWorker extends Worker {
                                     cv.put(Const.DESCTRIPTION, des.toString());
                                     des = null;
                                 }
-                                dbS.insert(Const.SEARCH, null, cv);
+                                dbSearch.insert(Const.SEARCH, cv);
                             }
                             cv = new ContentValues();
                             cv.put(Const.TITLE, t);
@@ -261,11 +239,10 @@ public class SearchWorker extends Worker {
             if (cv != null) {
                 if (des != null)
                     cv.put(Const.DESCTRIPTION, des.toString());
-                dbS.insert(Const.SEARCH, null, cv);
+                dbSearch.insert(Const.SEARCH, cv);
             }
         }
         curSearch.close();
-        db.close();
         dataBase.close();
     }
 

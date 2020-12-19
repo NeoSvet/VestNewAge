@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.workers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -66,9 +65,8 @@ public class MarkersWorker extends Worker {
 
     private void doExport(Uri file) throws Exception {
         DataBase dbMarker = new DataBase(context, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         int i1, i2, i3;
-        Cursor cursor = db.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.ID);
+        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.ID);
         //DocumentFile file = folder.createFile(DataBase.MARKERS, DataBase.MARKERS);
         OutputStream outStream = context.getContentResolver().openOutputStream(file);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outStream, Const.ENCODING));
@@ -85,7 +83,7 @@ public class MarkersWorker extends Worker {
         }
         cursor.close();
         bw.write(Const.AND + Const.N);
-        cursor = db.query(DataBase.MARKERS, null, null, null, null, null, DataBase.ID);
+        cursor = dbMarker.query(DataBase.MARKERS, null, null, null, null, null, DataBase.ID);
         int i4, i5;
         if (cursor.moveToFirst()) {
             i1 = cursor.getColumnIndex(DataBase.ID);
@@ -106,13 +104,11 @@ public class MarkersWorker extends Worker {
         bw.close();
         outStream.close();
         cursor.close();
-        db.close();
         dbMarker.close();
     }
 
     private void doImport(Uri file) throws Exception {
         DataBase dbMarker = new DataBase(context, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         InputStream inputStream = context.getContentResolver().openInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, Const.ENCODING), 1000);
         String s;
@@ -127,14 +123,14 @@ public class MarkersWorker extends Worker {
                 break;
             id = Integer.parseInt(s);
             s = br.readLine();//title
-            cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
-                    Const.TITLE + DataBase.Q, new String[]{s}, null, null, null);
+            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
+                    Const.TITLE + DataBase.Q, s);
             if (cursor.moveToFirst()) {
                 nid = cursor.getInt(0);
             } else {
                 cv = new ContentValues();
                 cv.put(Const.TITLE, s);
-                nid = (int) db.insert(DataBase.COLLECTIONS, null, cv);
+                nid = (int) dbMarker.insert(DataBase.COLLECTIONS,  cv);
             }
             hC.put(id, nid);
             cursor.close();
@@ -149,10 +145,10 @@ public class MarkersWorker extends Worker {
             s = br.readLine();
             d = br.readLine();
             br.readLine(); //col
-            cursor = db.query(DataBase.MARKERS, new String[]{DataBase.ID},
+            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.ID},
                     Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
                             DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
-                    new String[]{p, s, d}, null, null, null);
+                    new String[]{p, s, d});
             if (cursor.moveToFirst()) {
                 nid = cursor.getInt(0);
             } else {
@@ -160,7 +156,7 @@ public class MarkersWorker extends Worker {
                 cv.put(Const.PLACE, p);
                 cv.put(Const.LINK, s);
                 cv.put(Const.DESCTRIPTION, d);
-                nid = (int) db.insert(DataBase.MARKERS, null, cv);
+                nid = (int) dbMarker.insert(DataBase.MARKERS, cv);
             }
             hM.put(id, nid);
             cursor.close();
@@ -204,32 +200,30 @@ public class MarkersWorker extends Worker {
         while ((s = br.readLine()) != null) {
             if (s.equals(Const.AND))
                 break;
-            cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                    DataBase.ID + DataBase.Q, new String[]{s},
-                    null, null, null);
+            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, s);
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
                 cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), DataBase.getList(p)));
-                db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, new String[]{s});
+                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, s);
             }
             cursor.close();
         }
         //совмещение закладок
         while ((s = br.readLine()) != null) {
-            cursor = db.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS},
-                    DataBase.ID + DataBase.Q, new String[]{s},
-                    null, null, null);
+            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, s);
             if (cursor.moveToFirst()) {
                 p = br.readLine();
                 cv = new ContentValues();
                 cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), DataBase.getList(p)));
-                db.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, new String[]{s});
+                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, s);
             }
             cursor.close();
         }
         br.close();
         f.delete();
+
+        dbMarker.close();
     }
 
     private String combineIds(String ids, String[] m) {

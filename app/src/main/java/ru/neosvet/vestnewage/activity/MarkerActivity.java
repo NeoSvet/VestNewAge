@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -61,12 +60,10 @@ public class MarkerActivity extends AppCompatActivity {
         if (par != null) {
             par = Lib.withOutTags(par);
             DataBase dataBase = new DataBase(context, DataBase.getDatePage(link));
-            SQLiteDatabase db = dataBase.getWritableDatabase();
-            Cursor cursor = db.query(DataBase.PARAGRAPH,
+            Cursor cursor = dataBase.query(DataBase.PARAGRAPH,
                     new String[]{DataBase.PARAGRAPH},
                     DataBase.ID + DataBase.Q,
-                    new String[]{String.valueOf(dataBase.getPageId(link))},
-                    null, null, null);
+                    String.valueOf(dataBase.getPageId(link)));
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;
@@ -81,7 +78,6 @@ public class MarkerActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             }
             cursor.close();
-            db.close();
             dataBase.close();
             if (s.length() > 0) {
                 s.delete(s.length() - 2, s.length());
@@ -195,8 +191,7 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void loadCol() {
         DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
-        Cursor cursor = db.query(DataBase.COLLECTIONS,
+        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
                 new String[]{DataBase.ID, Const.TITLE},
                 null, null, null, null, Const.PLACE);
         if (cursor.moveToFirst()) {
@@ -280,10 +275,7 @@ public class MarkerActivity extends AppCompatActivity {
         } else { //edit mode
             setResult(0);
             DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-            SQLiteDatabase db = dbMarker.getWritableDatabase();
-            Cursor cursor = db.query(DataBase.MARKERS, null,
-                    DataBase.ID + DataBase.Q, new String[]{String.valueOf(id)}
-                    , null, null, null);
+            Cursor cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, id);
             cursor.moveToFirst();
             etDes.setText(cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION)));
             String s = cursor.getString(cursor.getColumnIndex(Const.PLACE));
@@ -308,7 +300,7 @@ public class MarkerActivity extends AppCompatActivity {
             String[] mId = DataBase.getList(s);
             StringBuilder b = new StringBuilder(getResources().getString(R.string.sel_col));
             for (String id : mId) {
-                cursor = db.query(DataBase.COLLECTIONS, null,
+                cursor = dbMarker.query(DataBase.COLLECTIONS, null,
                         DataBase.ID + DataBase.Q, new String[]{id}
                         , null, null, Const.PLACE);
                 if (cursor.moveToFirst()) {
@@ -511,12 +503,10 @@ public class MarkerActivity extends AppCompatActivity {
                         }
                         etCol.setText("");
                         DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-                        SQLiteDatabase db = dbMarker.getWritableDatabase();
                         ContentValues cv;
                         //освобождаем первую позицию (PLACE) путем смещения всех вперед..
-                        Cursor cursor = db.query(DataBase.COLLECTIONS,
-                                new String[]{DataBase.ID, Const.PLACE},
-                                null, null, null, null, null);
+                        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
+                                new String[]{DataBase.ID, Const.PLACE});
                         if (cursor.moveToFirst()) {
                             int iID = cursor.getColumnIndex(DataBase.ID);
                             int iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -527,8 +517,7 @@ public class MarkerActivity extends AppCompatActivity {
                                     id = cursor.getInt(iID);
                                     cv = new ContentValues();
                                     cv.put(Const.PLACE, i + 1);
-                                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                                            new String[]{String.valueOf(id)});
+                                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, id);
                                 }
                             } while (cursor.moveToNext());
                         }
@@ -537,9 +526,9 @@ public class MarkerActivity extends AppCompatActivity {
                         cv = new ContentValues();
                         cv.put(Const.PLACE, 1);
                         cv.put(Const.TITLE, s);
-                        db.insert(DataBase.COLLECTIONS, null, cv);
-                        cursor = db.query(DataBase.COLLECTIONS, null,
-                                Const.PLACE + DataBase.Q, new String[]{"1"}, null, null, null);
+                        dbMarker.insert(DataBase.COLLECTIONS, cv);
+                        cursor = dbMarker.query(DataBase.COLLECTIONS, null,
+                                Const.PLACE + DataBase.Q, "1");
                         if (cursor.moveToFirst()) {
                             adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
                                     cursor.getString(cursor.getColumnIndex(Const.TITLE)));
@@ -559,15 +548,12 @@ public class MarkerActivity extends AppCompatActivity {
     private void updateMarker() {
         //формуируем закладку
         DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = getMarkerValues();
         //обновляем закладку в базе
         String sid = String.valueOf(id);
-        db.update(DataBase.MARKERS, cv,
-                DataBase.ID + DataBase.Q, new String[]{sid});
-        dbMarker.close();
+        dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, sid);
+
         //обновляем подборки
-        db = dbMarker.getWritableDatabase();
         Cursor cursor;
         int col_id;
         String s;
@@ -575,9 +561,7 @@ public class MarkerActivity extends AppCompatActivity {
         for (int i = 0; i < adCol.getCount(); i++) {
             col_id = adCol.getItem(i).getId();
             //получаем список закладок в подборке
-            cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                    DataBase.ID + DataBase.Q, new String[]{String.valueOf(col_id)}
-                    , null, null, null);
+            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, col_id);
             if (cursor.moveToFirst()) {
                 s = cursor.getString(0); //список закладок в подборке
                 if (adCol.getItem(i).isCheck()) { //в этой подоборке должна быть
@@ -589,8 +573,7 @@ public class MarkerActivity extends AppCompatActivity {
                         //добавляем новую закладку в самое начало
                         cv = new ContentValues();
                         cv.put(DataBase.MARKERS, id + s);
-                        db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                                new String[]{String.valueOf(col_id)});
+                        dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
                     }
                 } else { //в этой подоборке не должна быть
                     if (DataBase.closeList(s).contains(sid)) {//присутствует - удаляем
@@ -600,8 +583,7 @@ public class MarkerActivity extends AppCompatActivity {
                         //обновляем подборку
                         cv = new ContentValues();
                         cv.put(DataBase.MARKERS, s);
-                        db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                                new String[]{String.valueOf(col_id)});
+                        dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
                     }
                 }
             }
@@ -618,12 +600,10 @@ public class MarkerActivity extends AppCompatActivity {
     private void addMarker() {
         //формулируем закладку
         DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        SQLiteDatabase db = dbMarker.getWritableDatabase();
         ContentValues cv = getMarkerValues();
         //добавляем в базу и получаем id
-        long mar_id = db.insert(DataBase.MARKERS, null, cv);
+        long mar_id = dbMarker.insert(DataBase.MARKERS, null, cv);
         //обновляем подборки, в которые добавлена закладка
-        db = dbMarker.getWritableDatabase();
         Cursor cursor;
         int col_id;
         String s;
@@ -631,9 +611,8 @@ public class MarkerActivity extends AppCompatActivity {
             if (adCol.getItem(i).isCheck()) {
                 col_id = adCol.getItem(i).getId();
                 //получаем список закладок в подборке
-                cursor = db.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                        DataBase.ID + DataBase.Q, new String[]{String.valueOf(col_id)}
-                        , null, null, null);
+                cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
+                        DataBase.ID + DataBase.Q, col_id);
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(0); //список закладок в подборке
                     if (s != null)
@@ -643,8 +622,7 @@ public class MarkerActivity extends AppCompatActivity {
                     //добавляем новую закладку в самое начало
                     cv = new ContentValues();
                     cv.put(DataBase.MARKERS, mar_id + s);
-                    db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                            new String[]{String.valueOf(col_id)});
+                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
                 }
                 cursor.close();
             }
