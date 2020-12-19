@@ -360,15 +360,17 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                     bShow.setVisibility(View.VISIBLE);
                     page = 0;
                     showResult();
-                    tvLabel.setText(pref.getString(LABEL, ""));
+                    String s = pref.getString(LABEL, "");
+                    tvLabel.setText(s);
+                    if (s.contains("“"))
+                        string = s.substring(s.indexOf("“") + 1, s.indexOf(Const.N) - 2);
                 } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
                     deleteBase();
                     adResults.clear();
                     adResults.notifyDataSetChanged();
                 } else {
                     Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
-                    BrowserActivity.openReader(act, adResults.getItem(pos).getLink(),
-                            Lib.withOutTags(adResults.getItem(pos).getDes()));
+                    BrowserActivity.openReader(act, adResults.getItem(pos).getLink(), string);
                 }
             }
         });
@@ -524,7 +526,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         page = -1;
         pStatus.setVisibility(View.VISIBLE);
         fabSettings.setVisibility(View.GONE);
-        final String s = etSearch.getText().toString();
+        string = etSearch.getText().toString();
         int mode;
         if (cbSearchInResults.isChecked()) {
             mode = 6;
@@ -532,21 +534,21 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         } else
             mode = sMode.getSelectedItemPosition();
         ProgressHelper.addObserver(act, this);
-        model.search(s, mode, dStart.getMY(), dEnd.getMY());
+        model.search(string, mode, dStart.getMY(), dEnd.getMY());
         boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {
-            if (adSearch.getItem(i).equals(s)) {
+            if (adSearch.getItem(i).equals(string)) {
                 needAdd = false;
                 break;
             }
         }
         if (needAdd) {
-            adSearch.add(s);
+            adSearch.add(string);
             adSearch.notifyDataSetChanged();
             File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
-                bw.write(s + Const.N);
+                bw.write(string + Const.N);
                 bw.close();
             } catch (Exception e) {
                 e.printStackTrace();

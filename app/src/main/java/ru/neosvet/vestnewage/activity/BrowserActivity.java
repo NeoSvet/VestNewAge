@@ -73,7 +73,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private LoaderModel model;
     private WebView wvBrowser;
     private DataBase dbPage;
-    private TextView tvPlace;
     private EditText etSearch;
     private StatusButton status;
     private LinearLayout mainLayout;
@@ -81,8 +80,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = Const.LINK, string = null;
-    private String[] place;
-    private int iPlace = -1;
     private PromHelper prom;
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
@@ -90,11 +87,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Runnable runBrowser = null, runNextPage = null, runPrevPage = null;
 
 
-    public static void openReader(Context context, String link, @Nullable String place) {
+    public static void openReader(Context context, String link, @Nullable String search) {
         Intent intent = new Intent(context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);
-        if (place != null)
-            intent.putExtra(Const.PLACE, place);
+        if (search != null)
+            intent.putExtra(Const.SEARCH, search);
         context.startActivity(intent);
     }
 
@@ -109,7 +106,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         setViews();
         initModel();
         restoreState(savedInstanceState);
-        initPlace();
     }
 
     @Override
@@ -159,7 +155,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(Const.LINK, link);
-        outState.putInt(Const.PLACE, iPlace);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
         outState.putString(Const.SEARCH, string);
         super.onSaveInstanceState(outState);
@@ -168,8 +163,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void restoreState(Bundle state) {
         if (state == null) {
             openLink(getIntent().getStringExtra(Const.LINK), true);
-            if (getIntent().hasExtra(Const.PLACE))
-                iPlace = 0;
+            string = getIntent().getStringExtra(Const.SEARCH);
         } else {
             link = state.getString(Const.LINK);
             if (link == null) return;
@@ -194,59 +188,25 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     }
                 }).start();
             }
-            iPlace = state.getInt(Const.PLACE);
             string = state.getString(Const.SEARCH);
-            if (string != null) {
-                etSearch.setText(string);
-                findText(string);
-                pSearch.setVisibility(View.VISIBLE);
-                fabMenu.setVisibility(View.GONE);
-            }
         }
-    }
-
-    private void initPlace() {
-        if (iPlace == -1) return;
-        String p = getIntent().getStringExtra(Const.PLACE);
-        fabMenu.setVisibility(View.GONE);
-        tvPlace.setVisibility(View.VISIBLE);
-        etSearch.setVisibility(View.GONE);
-        if (p.contains(Const.NN)) {
-            place = p.split(Const.NN);
-        } else {
-            place = new String[]{p};
-            bPrev.setVisibility(View.GONE);
-            bNext.setVisibility(View.GONE);
+        if (string != null) {
+            etSearch.setText(string);
+            // findText(string);
+            pSearch.setVisibility(View.VISIBLE);
+            fabMenu.setVisibility(View.GONE);
         }
-        pSearch.setVisibility(View.VISIBLE);
     }
 
     private void closeSearch() {
         tip.hide();
-        if (tvPlace != null) {
-            bPrev.setVisibility(View.VISIBLE);
-            bNext.setVisibility(View.VISIBLE);
-            tvPlace.setVisibility(View.GONE);
-            tvPlace.setText("");
-            tvPlace = null;
-            etSearch.setVisibility(View.VISIBLE);
-            iPlace = -1;
-            place = null;
-        } else
-            string = null;
+        string = null;
         pSearch.setVisibility(View.GONE);
         if (!nomenu) {
             fabMenu.setVisibility(View.VISIBLE);
             fabMenu.startAnimation(anMax);
         }
         wvBrowser.clearMatches();
-    }
-
-    public void setPlace() {
-        if (iPlace == -1) return;
-        String s = place[iPlace];
-        tvPlace.setText(s.replace(Const.N, " "));
-        findText(s);
     }
 
     private void findText(String s) {
@@ -297,7 +257,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         tip = new Tip(this, findViewById(R.id.tvFinish));
         pSearch = findViewById(R.id.pSearch);
         etSearch = findViewById(R.id.etSearch);
-        tvPlace = (TextView) findViewById(R.id.tvPlace);
         bPrev = findViewById(R.id.bPrev);
         bNext = findViewById(R.id.bNext);
         bBack = navMenu.getHeaderView(0).findViewById(R.id.bBack);
@@ -323,12 +282,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
         if (lightTheme) {
-            tvPlace.setTextColor(getResources().getColor(android.R.color.black));
             etSearch.setTextColor(getResources().getColor(android.R.color.black));
             etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
         } else
             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
-        tvPlace.requestLayout();
         etSearch.requestLayout();
         mainLayout.requestLayout();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
@@ -437,27 +394,15 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (place == null) {
-                    softKeyboard.closeSoftKeyboard();
-                    wvBrowser.findNext(false);
-                } else if (iPlace > 0) {
-                    iPlace--;
-                    setPlace();
-                } else
-                    tip.show();
+                softKeyboard.closeSoftKeyboard();
+                wvBrowser.findNext(false);
             }
         });
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (place == null) {
-                    softKeyboard.closeSoftKeyboard();
-                    wvBrowser.findNext(true);
-                } else if (iPlace < place.length - 1) {
-                    iPlace++;
-                    setPlace();
-                } else
-                    tip.show();
+                softKeyboard.closeSoftKeyboard();
+                wvBrowser.findNext(true);
             }
         });
         findViewById(R.id.bClose).setOnClickListener(new View.OnClickListener() {
@@ -492,13 +437,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void initTheme() {
         if (lightTheme) {
-            tvPlace.setTextColor(getResources().getColor(android.R.color.black));
             etSearch.setTextColor(getResources().getColor(android.R.color.black));
             etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white));
             setCheckItem(miThemeL, true);
         } else {
-            tvPlace.setTextColor(getResources().getColor(android.R.color.white));
             etSearch.setTextColor(getResources().getColor(android.R.color.white));
             etSearch.setHintTextColor(getResources().getColor(R.color.light_gray));
             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
@@ -554,14 +497,13 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 softKeyboard.openSoftKeyboard();
                 break;
             case R.id.nav_marker:
-                if (iPlace > -1)
-                    MarkerActivity.addMarker(this, link, place[iPlace], null);
-                else {
-                    Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
-                    marker.putExtra(Const.LINK, link);
-                    marker.putExtra(Const.PLACE, getPositionOnPage() * 100f);
-                    startActivity(marker);
-                }
+                Intent marker = new Intent(getApplicationContext(), MarkerActivity.class);
+                marker.putExtra(Const.LINK, link);
+                marker.putExtra(Const.PLACE, getPositionOnPage() * 100f);
+                if (string != null)
+                    marker.putExtra(Const.DESCTRIPTION, getResources().getString(R.string.search_for)
+                            + " “" + string + "”");
+                startActivity(marker);
                 break;
             case R.id.nav_opt_scale:
             case R.id.nav_src_scale:
@@ -898,5 +840,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                             + DataBase.ID + " text primary key,"
                             + Const.TIME + " integer);");*/
         }
+    }
+
+    public void initSearch() {
+        if (string != null)
+            findText(string);
     }
 }

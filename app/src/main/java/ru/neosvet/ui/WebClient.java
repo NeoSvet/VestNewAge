@@ -14,10 +14,10 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 public class WebClient extends WebViewClient {
     private final String files = "file";
     private BrowserActivity act;
-    private Handler hPlace = new Handler(new Handler.Callback() {
+    private Handler hSearch = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            act.setPlace();
+            act.initSearch();
             return false;
         }
     });
@@ -59,7 +59,7 @@ public class WebClient extends WebViewClient {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                hPlace.sendEmptyMessage(0);
+                hSearch.sendEmptyMessage(0);
             }
         }, 500);
     }
