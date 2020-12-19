@@ -151,9 +151,11 @@ public class BookWorker extends Worker {
             f = new File(path + s.substring(0, s.indexOf(" ")));
             if (f.exists()) {
                 l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
-                if (s.contains("delete"))
+                if (s.contains("delete")) {
                     if (f.lastModified() < l) f.delete();
-                    else if (f.length() != l) f.delete();
+                } else if (f.length() != l) {
+                    f.delete();
+                }
             }
         }
         br.close();
