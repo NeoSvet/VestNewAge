@@ -804,9 +804,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private DateHelper getDateFromLink() throws Exception {
-        return DateHelper.parse(this,
-                link.substring(link.lastIndexOf("/") + 1,
-                        link.lastIndexOf(".")));
+        String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
+        if (s.contains("_"))
+            s = s.substring(0, s.indexOf("_"));
+        return DateHelper.parse(this, s);
     }
 
     @JavascriptInterface
