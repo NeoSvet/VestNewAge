@@ -18,10 +18,12 @@ public class DataBase extends SQLiteOpenHelper {
             ARTICLES = "00.00";
     private final Context context;
     private final Pattern patternBook = Pattern.compile("\\d{2}\\.\\d{2}");
+    private SQLiteDatabase db;
 
     public DataBase(Context context, String name) {
         super(context, configName(name), null, 1);
         this.context = context;
+        db = this.getWritableDatabase();
     }
 
     private static String configName(String name) {
@@ -87,6 +89,12 @@ public class DataBase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
+    @Override
+    public synchronized void close() {
+        db.close();
+        super.close();
     }
 
     // для закладок и подборок:
@@ -207,7 +215,6 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public int getPageId(String link) {
-        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(Const.TITLE,
                 new String[]{DataBase.ID},
                 Const.LINK + DataBase.Q, new String[]{link},
@@ -216,12 +223,10 @@ public class DataBase extends SQLiteOpenHelper {
         if (cursor.moveToFirst())
             r = cursor.getInt(0);
         cursor.close();
-        db.close();
         return r;
     }
 
     public boolean existsPage(String link) {
-        SQLiteDatabase db = this.getReadableDatabase();
         Cursor curTitle = db.query(Const.TITLE, new String[]{DataBase.ID},
                 Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean exists = false;
@@ -246,8 +251,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public Cursor getCursor(boolean poems) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        if(poems) {
+        if (poems) {
             return db.query(Const.TITLE, new String[]{Const.LINK},
                     Const.LINK + LIKE,
                     new String[]{"%" + Const.POEMS + "%"}
@@ -297,5 +301,21 @@ public class DataBase extends SQLiteOpenHelper {
         } while (cursor.moveToNext());
         cursor.close();
         return null;
+    }
+
+    public long insert(String table, String nullColumnHack, ContentValues row) {
+        return db.insert(table, nullColumnHack, row);
+    }
+
+    public long insert(String table, ContentValues row) {
+        return db.insert(table, null, row);
+    }
+
+    public int update(String table, ContentValues row, String whereClause, String[] whereArgs) {
+        return db.update(table, row, whereClause, whereArgs);
+    }
+
+    public int update(String table, ContentValues row, String whereClause, String whereArg) {
+        return db.update(table, row, whereClause, new String[]{whereArg});
     }
 }
