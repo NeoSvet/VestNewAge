@@ -80,6 +80,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = Const.LINK, string = null;
+    private boolean didSearch = false;
     private PromHelper prom;
     private Animation anMin, anMax;
     private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
@@ -201,6 +202,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void closeSearch() {
         tip.hide();
         string = null;
+        didSearch = false;
         pSearch.setVisibility(View.GONE);
         if (!nomenu) {
             fabMenu.setVisibility(View.VISIBLE);
@@ -228,6 +230,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             } catch (Exception ignored) {
             }
         }
+        didSearch = true;
     }
 
     private void downloadPage(boolean replaceStyle) {
@@ -382,8 +385,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
                         || keyCode == EditorInfo.IME_ACTION_SEARCH) {
                     if (etSearch.length() > 0) {
-                        string = etSearch.getText().toString();
-                        softKeyboard.closeSoftKeyboard();
+                        searchOk();
                         findText(string);
                     }
                     return true;
@@ -394,14 +396,18 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                softKeyboard.closeSoftKeyboard();
+                searchOk();
+                if (!didSearch)
+                    initSearch();
                 wvBrowser.findNext(false);
             }
         });
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                softKeyboard.closeSoftKeyboard();
+                searchOk();
+                if (!didSearch)
+                    initSearch();
                 wvBrowser.findNext(true);
             }
         });
@@ -433,6 +439,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     status.onClick();
             }
         });
+    }
+
+    private void searchOk() {
+        string = etSearch.getText().toString();
+        softKeyboard.closeSoftKeyboard();
     }
 
     private void initTheme() {
