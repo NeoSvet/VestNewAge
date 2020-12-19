@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.workers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -15,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
@@ -153,8 +153,6 @@ public class BookWorker extends Worker {
                 l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
                 if (s.contains("delete")) {
                     if (f.lastModified() < l) f.delete();
-                } else if (f.length() != l) {
-                    f.delete();
                 }
             }
         }
@@ -170,10 +168,13 @@ public class BookWorker extends Worker {
             d = DateHelper.putYearMonth(context, 2004, 8);
         }
         DataBase dataBase;
-        SQLiteDatabase db;
-        ContentValues cv;
-        boolean isTitle;
+        boolean isTitle, isNotExists = true;
+        HashMap<String, Integer> ids = new HashMap<>();
+        int n, id;
+        String v;
         final long time = System.currentTimeMillis();
+        ContentValues cvTime = new ContentValues();
+        cvTime.put(Const.TIME, time);
         while (d.getYear() < m) {
             name = d.getMY();
             if (max > 0) {
@@ -184,35 +185,40 @@ public class BookWorker extends Worker {
                 cur++;
             } else
                 ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
-            f = new File(path + name);
-            if (!f.exists()) {
-                dataBase = new DataBase(context, name);
-                db = dataBase.getWritableDatabase();
-                isTitle = true;
-                in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
-                br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
-                while ((s = br.readLine()) != null) {
-                    if (s.equals(Const.AND)) {
-                        isTitle = false;
-                        s = br.readLine();
-                    }
-                    cv = new ContentValues();
-                    if (isTitle) {
-                        cv.put(Const.LINK, s);
-                        cv.put(Const.TITLE, br.readLine());
-                        cv.put(Const.TIME, time);
-                        db.insert(Const.TITLE, null, cv);
-                    } else {
-                        cv.put(DataBase.ID, Integer.parseInt(s));
-                        cv.put(DataBase.PARAGRAPH, br.readLine());
-                        db.insert(DataBase.PARAGRAPH, null, cv);
-                    }
+
+            dataBase = new DataBase(context, name);
+            isTitle = true;
+            in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
+            br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
+            n = 2;
+            while ((s = br.readLine()) != null) {
+                if (s.equals(Const.AND)) {
+                    isTitle = false;
+                    s = br.readLine();
                 }
-                br.close();
-                in.close();
-                db.close();
-                dataBase.close();
+                v = br.readLine();
+
+                if (isTitle) {
+                    if (!dataBase.existsPage(s)) {
+                        isNotExists = true;
+                        id = dataBase.getPageId(s);
+                        if (id == -1)
+                            id = (int) dataBase.insert(Const.TITLE, getRow(s, v, time));
+                        else
+                            dataBase.update(Const.TITLE, cvTime, Const.LINK + DataBase.Q, s);
+
+                        ids.put(String.valueOf(n), id);
+                    } else
+                        isNotExists = false;
+                    n++;
+                } else if (isNotExists) {
+                    dataBase.insert(DataBase.PARAGRAPH, getRow(ids.get(s), v));
+                }
             }
+            br.close();
+            in.close();
+            dataBase.close();
+
             d.changeMonth(1);
             if (withDialog)
                 ProgressHelper.upProg();
@@ -220,6 +226,21 @@ public class BookWorker extends Worker {
                 return name;
         }
         return name;
+    }
+
+    private ContentValues getRow(String link, String title, long time) {
+        ContentValues cv = new ContentValues();
+        cv.put(Const.LINK, link);
+        cv.put(Const.TITLE, title);
+        cv.put(Const.TIME, time);
+        return cv;
+    }
+
+    private ContentValues getRow(int id, String par) {
+        ContentValues cv = new ContentValues();
+        cv.put(DataBase.ID, id);
+        cv.put(DataBase.PARAGRAPH, par);
+        return cv;
     }
 
     private String loadPoems() throws Exception {
@@ -274,26 +295,21 @@ public class BookWorker extends Worker {
     private void saveData(String date) throws Exception {
         if (title.size() > 0) {
             DataBase dataBase = new DataBase(context, date);
-            SQLiteDatabase db = dataBase.getWritableDatabase();
             ContentValues cv = new ContentValues();
             cv.put(Const.TIME, System.currentTimeMillis());
-            if (db.update(Const.TITLE, cv,
-                    DataBase.ID + DataBase.Q, new String[]{"1"}) == 0) {
-                db.insert(Const.TITLE, null, cv);
+            if (dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1") == 0) {
+                dataBase.insert(Const.TITLE, cv);
             }
             for (int i = 0; i < title.size(); i++) {
                 cv = new ContentValues();
                 cv.put(Const.TITLE, title.get(i));
                 // пытаемся обновить запись:
-                if (db.update(Const.TITLE, cv,
-                        Const.LINK + DataBase.Q,
-                        new String[]{links.get(i)}) == 0) {
+                if (dataBase.update(Const.TITLE, cv, Const.LINK + DataBase.Q, links.get(i)) == 0) {
                     // обновить не получилось, добавляем:
                     cv.put(Const.LINK, links.get(i));
-                    db.insert(Const.TITLE, null, cv);
+                    dataBase.insert(Const.TITLE, cv);
                 }
             }
-            db.close();
             dataBase.close();
             title.clear();
             links.clear();
