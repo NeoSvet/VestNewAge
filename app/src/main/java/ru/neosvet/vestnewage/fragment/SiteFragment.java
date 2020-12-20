@@ -21,9 +21,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+import ru.neosvet.utils.AdsUtils;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -41,6 +41,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private SiteModel model;
     private TabHost tabHost;
     private ListView lvMain;
+    private AdsUtils ads;
     private int x, y, tab = 0;
     private boolean notClick = false, scrollToFirst = false;
 
@@ -49,6 +50,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                              Bundle savedInstanceState) {
         this.container = inflater.inflate(R.layout.site_fragment, container, false);
         act = (MainActivity) getActivity();
+        ads = new AdsUtils(act);
         initViews();
         setViews();
         model = ViewModelProviders.of(act).get(SiteModel.class);
@@ -108,20 +110,30 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(Const.TAB, tabHost.getCurrentTab());
+        outState.putInt(Const.TAB, tab);
+        outState.putInt(Const.ADS, ads.getIndex());
         super.onSaveInstanceState(outState);
     }
 
     private void restoreState(Bundle state) {
+        int index_ads = -1;
         if (state != null) {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
+            index_ads = state.getInt(Const.ADS);
         }
         if (tab == 1) {
             tabHost.setCurrentTab(0);
             tabHost.setCurrentTab(1);
         } else
-            tabHost.setCurrentTab(tab);
+            tabHost.setCurrentTab(0);
+        if (tab == 2) {
+            showAdsDev();
+            if (index_ads > -1) {
+                ads.setIndex(index_ads);
+                ads.showAd(adMain.getItem(ads.getIndex()).getLink(), adMain.getItem(ads.getIndex()).getHead(0));
+            }
+        }
     }
 
     private void initTabs() {
@@ -188,7 +200,10 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
                 if (notClick) return;
                 if (act.checkBusy()) return;
+                if (isAds(pos))
+                    return;
                 if (adMain.getItem(pos).getCount() == 1) {
+
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 1) { // site
@@ -275,6 +290,48 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         });
     }
 
+    private boolean isAds(int pos) {
+        if (tab == 2) {
+            if (pos < 2) { //back
+                if (pos == 1) //clear
+                    ads.clear();
+                tabHost.setCurrentTab(1);
+                tabHost.setCurrentTab(0);
+                return true;
+            }
+            ads.setIndex(pos);
+            ads.showAd(adMain.getItem(pos).getLink(), adMain.getItem(pos).getHead(0));
+            return true;
+        }
+        if (tabHost.getCurrentTab() == 0 && pos == 0) {
+            tab = 2;
+            showAdsDev();
+            return true;
+        }
+        return false;
+    }
+
+    private void showAdsDev() {
+        try {
+            adMain.clear();
+            ads.loadList(adMain, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ListItem item = new ListItem(getResources().getString(R.string.back_title));
+        if (adMain.getCount() == 0) {
+            item.setDes(getResources().getString(R.string.list_is_empty));
+            adMain.addItem(item);
+        } else {
+            item.setDes(getResources().getString(R.string.back_des));
+            adMain.insertItem(0, item);
+            item = new ListItem(getResources().getString(R.string.clear));
+            item.setDes(getResources().getString(R.string.this_list));
+            adMain.insertItem(1, item);
+        }
+        adMain.notifyDataSetChanged();
+    }
+
     private void openList(File f, boolean loadIfNeed) {
         try {
             adMain.clear();
@@ -285,7 +342,13 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
+            if (tabHost.getCurrentTab() == 0) { //news
+                tab = 0;
+                adMain.addItem(new ListItem(getResources().getString(R.string.news_dev)), "");
+                adMain.getItem(i++).addLink("");
+            }
             if (tabHost.getCurrentTab() == 1) { //main
+                tab = 1;
                 adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
                 adMain.getItem(i++).addLink(FORUM);
             }
