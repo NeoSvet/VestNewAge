@@ -605,7 +605,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         } else {
             DateHelper t = DateHelper.initToday(act);
             if (t.getMonth() == d.getMonth() && t.getYear() == d.getYear())
-                Lib.showToast(act, getResources().getString(R.string.list_is_empty));
+                Lib.showToast(act, getResources().getString(R.string.month_is_empty));
             else
                 startLoad();
         }
