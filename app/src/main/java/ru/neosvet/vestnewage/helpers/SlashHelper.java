@@ -60,7 +60,7 @@ public class SlashHelper extends LifecycleService {
                     .build();
             WorkManager.initialize(getApplicationContext(), configuration);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

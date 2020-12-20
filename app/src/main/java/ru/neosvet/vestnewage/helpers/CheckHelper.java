@@ -62,7 +62,7 @@ public class CheckHelper extends LifecycleService {
                     .build();
             WorkManager.initialize(getApplicationContext(), configuration);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         Data data = new Data.Builder()
                 .putString(Const.TASK, TAG).build();
