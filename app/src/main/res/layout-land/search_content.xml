@@ -4,15 +4,20 @@
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg"
     android:orientation="vertical"
-    android:paddingBottom="20dp">
+    android:paddingBottom="15dp">
 
     <LinearLayout
-        style="@style/ItemBG"
+        style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/card_bg"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="3dp"
         android:orientation="horizontal"
-        android:padding="5dp">
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp">
 
         <ImageButton
             android:id="@+id/bShow"
@@ -55,12 +60,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="45dp"
+        android:layout_marginBottom="42dp"
         android:orientation="horizontal">
 
         <RelativeLayout
             android:id="@+id/pAdditionSet"
-            style="@style/ItemBG"
+            style="@style/Label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
