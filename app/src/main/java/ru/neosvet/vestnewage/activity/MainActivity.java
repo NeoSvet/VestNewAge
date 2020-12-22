@@ -433,13 +433,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_search:
                 SearchFragment search = new SearchFragment();
                 if (getIntent().hasExtra(Const.LINK)) {
+                    search.setMode(tab);
                     search.setString(getIntent().getStringExtra(Const.LINK));
                     search.setPage(getIntent().getIntExtra(Const.SEARCH, 1));
                 } else if (slash.getIntent().hasExtra(Const.LINK)) {
+                    search.setMode(tab);
                     search.setString(slash.getIntent().getStringExtra(Const.LINK));
                     search.setPage(slash.getIntent().getIntExtra(Const.SEARCH, 1));
                 }
-                search.setMode(tab);
                 curFragment = search;
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;

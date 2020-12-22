@@ -78,12 +78,12 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     private DateHelper dStart, dEnd;
     private ListAdapter adResults;
     private ResizeAnim anim;
-    private int min_m = 1, min_y = 2016, dialog = -1, mode = 5, page = -1;
+    private int min_m = 1, min_y = 2016, dialog = -1, mode = -1, page = -1;
     private DateDialog dateDialog;
     private SoftKeyboard softKeyboard;
     private String string;
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
     private boolean scrollToFirst = false;
 
     public void setString(String s) {
@@ -170,8 +170,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         outState.putInt(Const.DIALOG, dialog);
         if (dialog > -1)
             dateDialog.dismiss();
-        outState.putInt(Const.START, dStart.getTimeInDays());
-        outState.putInt(Const.END, dEnd.getTimeInDays());
         outState.putInt(Const.SEARCH, page);
         if (page > -1) {
             outState.putBoolean(ADDITION, pAdditionSet.getVisibility() == View.VISIBLE);
@@ -188,21 +186,17 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             min_m = 8; //aug
             min_y = 2004; //2004
         }
+
+        initMode();
+        initDates();
+
         if (state == null) {
-            dEnd = DateHelper.initToday(act);
-            if (mode < 5)// открываем ссылку с сайта Благая Весть
-                dStart = DateHelper.putYearMonth(act, 2016, 1);
-            else
-                dStart = DateHelper.putYearMonth(act, min_y, min_m);
-            sMode.setSelection(mode);
             if (string != null) {
                 etSearch.setText(string);
                 startSearch();
             }
         } else {
             act.setCurFragment(this);
-            dStart = DateHelper.putDays(act, state.getInt(Const.START));
-            dEnd = DateHelper.putDays(act, state.getInt(Const.END));
             page = state.getInt(Const.SEARCH, -1);
             if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
@@ -221,8 +215,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
             }
             softKeyboard.closeSoftKeyboard();
         }
-        bStart.setText(formatDate(dStart));
-        bEnd.setText(formatDate(dEnd));
+
         if (adResults.getCount() == 0 && !ProgressHelper.isBusy()) {
             f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
             if (f.exists()) {
@@ -235,6 +228,28 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 adResults.notifyDataSetChanged();
             }
         }
+    }
+
+    private void initMode() {
+        if (mode == -1)
+            mode = pref.getInt(Const.MODE, 5);
+        sMode.setSelection(mode);
+    }
+
+    private void initDates() {
+        int d = pref.getInt(Const.START, 0);
+        if (d == 0) {
+            dEnd = DateHelper.initToday(act);
+            //if (mode < 5)// открываем ссылку с сайта Благая Весть
+            //    dStart = DateHelper.putYearMonth(act, 2016, 1);
+            dStart = DateHelper.putYearMonth(act, min_y, min_m);
+        } else {
+            dStart = DateHelper.putDays(act, d);
+            dEnd = DateHelper.putDays(act, pref.getInt(Const.END, 0));
+        }
+
+        bStart.setText(formatDate(dStart));
+        bEnd.setText(formatDate(dEnd));
     }
 
     private void visSettings() {
@@ -362,8 +377,10 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                     showResult();
                     String s = pref.getString(LABEL, "");
                     tvLabel.setText(s);
-                    if (s.contains("“"))
+                    if (s.contains("“")) {
                         string = s.substring(s.indexOf("“") + 1, s.indexOf(Const.N) - 2);
+                        etSearch.setText(string);
+                    }
                 } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
                     deleteBase();
                     adResults.clear();
@@ -410,6 +427,10 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                 fabOk.setVisibility(View.GONE);
                 mainLayout.setVisibility(View.VISIBLE);
                 pSettings.setVisibility(View.GONE);
+                editor.putInt(Const.MODE, sMode.getSelectedItemPosition());
+                editor.putInt(Const.START, dStart.getTimeInDays());
+                editor.putInt(Const.END, dEnd.getTimeInDays());
+                editor.apply();
             }
         });
         container.findViewById(R.id.bClearSearch).setOnClickListener(new View.OnClickListener() {
