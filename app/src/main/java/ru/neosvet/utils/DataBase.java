@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.regex.Pattern;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class DataBase extends SQLiteOpenHelper {
@@ -54,6 +55,14 @@ public class DataBase extends SQLiteOpenHelper {
                 db.execSQL("create table if not exists " + UnreadHelper.NAME + " ("
                         + Const.LINK + " text primary key,"
                         + Const.TIME + " integer);");
+                break;
+            case DevadsHelper.NAME:
+                db.execSQL("create table if not exists " + DevadsHelper.NAME + " ("
+                        + Const.MODE + " integer,"
+                        + Const.UNREAD + " integer default 1,"
+                        + Const.TITLE + " text,"
+                        + Const.LINK + " text,"
+                        + Const.DESCTRIPTION + " text);");
                 break;
             case Const.SEARCH:
                 db.execSQL("create table if not exists " + Const.SEARCH + " ("

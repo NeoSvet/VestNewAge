@@ -21,13 +21,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.utils.AdsUtils;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -41,7 +41,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private SiteModel model;
     private TabHost tabHost;
     private ListView lvMain;
-    private AdsUtils ads;
+    private DevadsHelper ads;
     private int x, y, tab = 0;
     private boolean notClick = false, scrollToFirst = false;
 
@@ -50,7 +50,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                              Bundle savedInstanceState) {
         this.container = inflater.inflate(R.layout.site_fragment, container, false);
         act = (MainActivity) getActivity();
-        ads = new AdsUtils(act);
+        ads = new DevadsHelper(act);
         initViews();
         setViews();
         model = ViewModelProviders.of(act).get(SiteModel.class);
@@ -131,7 +131,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             showAdsDev();
             if (index_ads > -1) {
                 ads.setIndex(index_ads);
-                ads.showAd(adMain.getItem(ads.getIndex()).getLink(), adMain.getItem(ads.getIndex()).getHead(0));
+                ads.showAd(adMain.getItem(ads.getIndex()).getTitle(),
+                        adMain.getItem(ads.getIndex()).getLink(),
+                        adMain.getItem(ads.getIndex()).getHead(0));
             }
         }
     }
@@ -300,7 +302,11 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 return true;
             }
             ads.setIndex(pos);
-            ads.showAd(adMain.getItem(pos).getLink(), adMain.getItem(pos).getHead(0));
+            ads.showAd(adMain.getItem(pos).getTitle(),
+                    adMain.getItem(pos).getLink(),
+                    adMain.getItem(pos).getHead(0));
+            adMain.getItem(pos).setDes("");
+            adMain.notifyDataSetChanged();
             return true;
         }
         if (tabHost.getCurrentTab() == 0 && pos == 0) {

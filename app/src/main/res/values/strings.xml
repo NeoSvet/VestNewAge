@@ -54,6 +54,7 @@
     <string name="ad">Объявление</string>
     <string name="katren">Катрен</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
+    <string name="current_version">Про текущую версию приложения</string>
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>

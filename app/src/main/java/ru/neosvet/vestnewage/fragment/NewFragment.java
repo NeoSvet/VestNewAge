@@ -12,11 +12,11 @@ import android.widget.ListView;
 import java.io.File;
 import java.util.List;
 
-import ru.neosvet.utils.AdsUtils;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
@@ -26,14 +26,14 @@ public class NewFragment extends Fragment {
     private ListAdapter adNew;
     private MainActivity act;
     private View container, fabClear, tvEmptyNew;
-    private AdsUtils ads;
+    private DevadsHelper ads;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         this.container = inflater.inflate(R.layout.new_fragment, container, false);
         act = (MainActivity) getActivity();
-        ads = new AdsUtils(act);
+        ads = new DevadsHelper(act);
         act.setTitle(getResources().getString(R.string.new_section));
         tvEmptyNew = this.container.findViewById(R.id.tvEmptyNew);
         initClear();
@@ -97,7 +97,11 @@ public class NewFragment extends Fragment {
                 if (act.checkBusy()) return;
                 if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
                     ads.setIndex(pos);
-                    ads.showAd(adNew.getItem(pos).getLink(), adNew.getItem(pos).getHead(0));
+                    ads.showAd(adNew.getItem(pos).getTitle(),
+                            adNew.getItem(pos).getLink(),
+                            adNew.getItem(pos).getHead(0));
+                    adNew.getItem(pos).setDes("");
+                    adNew.notifyDataSetChanged();
                 } else if (!adNew.getItem(pos).getLink().equals("")) {
                     BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
                 }
@@ -151,7 +155,9 @@ public class NewFragment extends Fragment {
             if (time < ads.getTime()) {
                 ads.loadList(adNew, true);
                 if (ads.getIndex() > -1)
-                    ads.showAd(adNew.getItem(ads.getIndex()).getLink(), adNew.getItem(ads.getIndex()).getHead(0));
+                    ads.showAd(adNew.getItem(ads.getIndex()).getTitle(),
+                            adNew.getItem(ads.getIndex()).getLink(),
+                            adNew.getItem(ads.getIndex()).getHead(0));
             }
         } catch (Exception e) {
             e.printStackTrace();

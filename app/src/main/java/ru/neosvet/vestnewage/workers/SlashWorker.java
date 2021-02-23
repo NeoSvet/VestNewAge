@@ -9,10 +9,6 @@ import androidx.work.WorkerParameters;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 
 import okhttp3.OkHttpClient;
@@ -23,6 +19,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.SlashUtils;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.SlashHelper;
 
@@ -79,37 +76,15 @@ public class SlashWorker extends Worker {
     }
 
     private void loadAds() throws Exception {
-        String t = "0";
-        BufferedReader br;
-        File file = new File(context.getFilesDir() + File.separator + Const.ADS);
-        if (file.exists()) {
-            br = new BufferedReader(new FileReader(file));
-            t = br.readLine();
-            br.close();
-        }
+        DevadsHelper ads = new DevadsHelper(context);
+       long t = ads.getTime();
         String s = "http://neosvet.ucoz.ru/ads_vna.txt";
         Lib lib = new Lib(context);
         BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
-        br = new BufferedReader(new InputStreamReader(in));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();
-        if (Long.parseLong(s) > Long.parseLong(t)) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write(System.currentTimeMillis() + Const.N);
-            while ((s = br.readLine()) != null) {
-                if (s.contains("<u>")) {
-                    int a = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-                    int b = Integer.parseInt(s.substring(3));
-                    if (b <= a) {
-                        br.readLine(); //<d>
-                        br.readLine(); //<e>
-                        continue;
-                    }
-                }
-                bw.write(s + Const.N);
-                bw.flush();
-            }
-            bw.close();
-        }
+        if (Long.parseLong(s) > t)
+            ads.update(br);
         br.close();
         in.close();
     }
