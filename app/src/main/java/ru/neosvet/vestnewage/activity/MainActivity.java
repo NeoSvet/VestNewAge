@@ -418,7 +418,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_site:
                 curFragment = new SiteFragment();
-                ((SiteFragment) curFragment).setTab(tab);
+                Bundle args = new Bundle();
+                args.putInt(Const.TAB, tab);
+                curFragment.setArguments(args);
                 fragmentTransaction.replace(R.id.my_fragment, curFragment);
                 break;
             case R.id.nav_calendar:

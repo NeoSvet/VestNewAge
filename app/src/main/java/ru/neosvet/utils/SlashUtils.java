@@ -168,6 +168,12 @@ public class SlashUtils {
     }
 
     public boolean openLink(Intent intent) {
+        if(intent.getBooleanExtra(Const.ADS, false)) {
+            main.putExtra(Const.CUR_ID, R.id.nav_site);
+            main.putExtra(Const.TAB, 2);
+            return true;
+        }
+
         Uri data = intent.getData();
         if (data == null)
             return false;
@@ -185,7 +191,6 @@ public class SlashUtils {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 0);
         } else if (link.equals(SiteFragment.NOVOSTI)) {
-
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 1);
         } else if (link.contains(Const.HTML)) {

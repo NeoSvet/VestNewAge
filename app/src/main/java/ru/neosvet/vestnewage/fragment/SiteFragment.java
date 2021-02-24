@@ -67,10 +67,17 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        ads.close();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (ProgressHelper.isBusy())
             initLoad();
+        ads.reopen();
     }
 
     private void initLoad() {
@@ -121,20 +128,27 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
             index_ads = state.getInt(Const.ADS);
-        }
-        if (tab == 1) {
-            tabHost.setCurrentTab(0);
-            tabHost.setCurrentTab(1);
         } else
-            tabHost.setCurrentTab(0);
-        if (tab == 2) {
-            showAdsDev();
-            if (index_ads > -1) {
-                ads.setIndex(index_ads);
-                ads.showAd(adMain.getItem(ads.getIndex()).getTitle(),
-                        adMain.getItem(ads.getIndex()).getLink(),
-                        adMain.getItem(ads.getIndex()).getHead(0));
-            }
+            tab = getArguments().getInt(Const.TAB);
+        switch (tab) {
+            case 0:
+                tabHost.setCurrentTab(0);
+                break;
+            case 1:
+                tabHost.setCurrentTab(0);
+                tabHost.setCurrentTab(1);
+                break;
+            case 2:
+                tabHost.setCurrentTab(0);
+                tab = 2;
+                showDevads();
+                if (index_ads > -1) {
+                    ads.setIndex(index_ads);
+                    ads.showAd(adMain.getItem(ads.getIndex()).getTitle(),
+                            adMain.getItem(ads.getIndex()).getLink(),
+                            adMain.getItem(ads.getIndex()).getHead(0));
+                }
+                break;
         }
     }
 
@@ -178,7 +192,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                     startLoad(name);
             }
         });
-        tabHost.setCurrentTab(0);
     }
 
     private void initViews() {
@@ -311,13 +324,13 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         }
         if (tabHost.getCurrentTab() == 0 && pos == 0) {
             tab = 2;
-            showAdsDev();
+            showDevads();
             return true;
         }
         return false;
     }
 
-    private void showAdsDev() {
+    private void showDevads() {
         try {
             adMain.clear();
             ads.loadList(adMain, false);
@@ -352,8 +365,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 tab = 0;
                 adMain.addItem(new ListItem(getResources().getString(R.string.news_dev)), "");
                 adMain.getItem(i++).addLink("");
-            }
-            if (tabHost.getCurrentTab() == 1) { //main
+            } else if (tabHost.getCurrentTab() == 1) { //main
                 tab = 1;
                 adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
                 adMain.getItem(i++).addLink(FORUM);
@@ -426,9 +438,5 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
 
     private File getFile(String name) {
         return new File(act.getFilesDir() + name);
-    }
-
-    public void setTab(int tab) {
-        this.tab = tab;
     }
 }

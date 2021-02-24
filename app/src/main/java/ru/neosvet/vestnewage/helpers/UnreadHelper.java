@@ -83,6 +83,9 @@ public class UnreadHelper {
         if (cursor.moveToFirst())
             k = cursor.getCount();
         cursor.close();
+        DevadsHelper ads = new DevadsHelper(context);
+        k += ads.getUnreadCount();
+        ads.close();
         return k;
     }
 
@@ -124,11 +127,18 @@ public class UnreadHelper {
     }
 
     public void setBadge() {
+        DevadsHelper ads = new DevadsHelper(context);
+        setBadge(ads.getUnreadCount());
+        ads.close();
+    }
+
+    public void setBadge(int count_ads) {
         Cursor cursor = dbUnread.query(NAME, null, Const.TIME + " > ?", "0");
-        if (cursor.getCount() == 0)
+        count_ads += cursor.getCount();
+        if (count_ads == 0)
             ShortcutBadger.removeCount(context);
         else
-            ShortcutBadger.applyCount(context, cursor.getCount());
+            ShortcutBadger.applyCount(context, count_ads);
         cursor.close();
     }
 }

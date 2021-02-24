@@ -1,11 +1,16 @@
 package ru.neosvet.vestnewage.helpers;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.view.View;
+
+import androidx.core.app.NotificationCompat;
 
 import java.io.BufferedReader;
 
@@ -14,6 +19,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 
@@ -22,13 +28,15 @@ public class DevadsHelper {
     private final byte MODE_T = 0, MODE_U = 1, MODE_TLD = 2, MODE_TD = 3, MODE_TL = 4;
     private DataBase db;
     private CustomDialog alert;
-    private Context context;
+    private final Context context;
     private long time = -1;
     private int index_ads = -1;
+    private boolean isClosed;
 
     public DevadsHelper(Context context) {
         this.context = context;
         db = new DataBase(context, NAME);
+        isClosed = false;
     }
 
     public int getIndex() {
@@ -46,12 +54,21 @@ public class DevadsHelper {
                 time = Long.parseLong(cursor.getString(0));
             else
                 time = 0;
+            cursor.close();
         }
         return time;
     }
 
-    public void loadList(ListAdapter list, boolean withAd) throws Exception {
-        Cursor cursor = db.query(NAME, null);
+    public void loadList(ListAdapter list, boolean onlyUnread) throws Exception {
+        Cursor cursor;
+        String ad;
+        if (onlyUnread) {
+            cursor = db.query(NAME, null, Const.UNREAD + DataBase.Q, 1);
+            ad = context.getResources().getString(R.string.ad) + ": ";
+        } else {
+            cursor = db.query(NAME, null);
+            ad = "";
+        }
         if (!cursor.moveToFirst())
             return;
         int iMode = cursor.getColumnIndex(Const.MODE);
@@ -61,12 +78,7 @@ public class DevadsHelper {
         int iUnread = cursor.getColumnIndex(Const.UNREAD);
         int m;
         String t, d, l;
-        String ad;
         boolean unread;
-        if (withAd)
-            ad = context.getResources().getString(R.string.ad) + ": ";
-        else
-            ad = "";
 
         do {
             t = cursor.getString(iTitle);
@@ -74,6 +86,8 @@ public class DevadsHelper {
             l = cursor.getString(iLink);
             m = cursor.getInt(iMode);
             unread = cursor.getInt(iUnread) == 1;
+            if (onlyUnread && !unread)
+                continue;
             switch (m) {
                 case MODE_T:
                     continue;
@@ -95,11 +109,11 @@ public class DevadsHelper {
                         list.getItem(0).addHead(d);
                     break;
             }
-            if (unread)
+            if (!onlyUnread && unread)
                 list.getItem(0).setDes(context.getResources().getString(R.string.new_section));
 
         } while (cursor.moveToNext());
-
+        cursor.close();
         list.notifyDataSetChanged();
     }
 
@@ -158,6 +172,7 @@ public class DevadsHelper {
         String[] m = new String[]{"", "", ""};
         byte mode, n = 0;
         Cursor cursor;
+        boolean isNew = false;
         while ((s = br.readLine()) != null) {
             if (s.contains("<e>")) {
                 if (m[0].contains("<u>"))
@@ -169,8 +184,11 @@ public class DevadsHelper {
                 else
                     mode = MODE_TL;
                 cursor = db.query(NAME, new String[]{Const.TITLE}, Const.TITLE + DataBase.Q, m[0]);
-                if (!cursor.moveToFirst())
+                if (!cursor.moveToFirst()) {
+                    isNew = true;
                     addRow(mode, m);
+                }
+                cursor.close();
                 n = 0;
                 m[2] = "";
             } else if (s.indexOf("<") != 0) {
@@ -182,9 +200,33 @@ public class DevadsHelper {
         }
         ContentValues cv = new ContentValues();
         cv.put(Const.MODE, MODE_T);
+        cv.put(Const.UNREAD, 0);
         time = System.currentTimeMillis();
         cv.put(Const.TITLE, time);
         db.insert(NAME, cv);
+        if (isNew) {
+            UnreadHelper unread = new UnreadHelper(context);
+            unread.setBadge(getUnreadCount());
+            unread.close();
+            showNotif();
+        }
+    }
+
+    private void showNotif() {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(Const.ADS, true);
+        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationHelper notifHelper = new NotificationHelper(context);
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
+                context.getResources().getString(R.string.app_name),
+                context.getResources().getString(R.string.new_dev_ads),
+                NotificationHelper.CHANNEL_SUMMARY);
+        notifBuilder.setContentIntent(piStart);
+        notifBuilder.setGroup(NotificationHelper.GROUP_SUMMARY);
+        notifBuilder.setSound(null);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            notifBuilder.setFullScreenIntent(piStart, true);
+        notifHelper.notify(555, notifBuilder);
     }
 
     private void addRow(byte mode, String[] m) {
@@ -192,13 +234,32 @@ public class DevadsHelper {
         cv.put(Const.MODE, mode);
         cv.put(Const.TITLE, m[0].substring(3));
         if (mode == MODE_U || mode == MODE_TD) {
-            cv.put(Const.DESCTRIPTION, m[1].substring(3));
+            cv.put(Const.DESCTRIPTION, m[1].substring(3).replace(Const.BR, Const.N));
         } else {
             cv.put(Const.LINK, m[1].substring(3));
             if (mode == MODE_TLD)
-                cv.put(Const.DESCTRIPTION, m[2].substring(3));
+                cv.put(Const.DESCTRIPTION, m[2].substring(3).replace(Const.BR, Const.N));
         }
         db.insert(NAME, cv);
+    }
+
+    public void close() {
+        db.close();
+        isClosed = true;
+    }
+
+    public void reopen() {
+        if (isClosed) {
+            db = new DataBase(context, NAME);
+            isClosed = false;
+        }
+    }
+
+    public int getUnreadCount() {
+        Cursor cursor = db.query(NAME, new String[]{Const.TITLE}, Const.UNREAD + DataBase.Q, 1);
+        int k = cursor.getCount();
+        cursor.close();
+        return k;
     }
 }
 

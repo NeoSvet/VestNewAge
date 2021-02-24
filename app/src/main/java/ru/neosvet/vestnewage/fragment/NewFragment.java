@@ -57,9 +57,16 @@ public class NewFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        ads.close();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         adNew.clear();
+        ads.reopen();
         loadList();
         act.updateNew();
     }
@@ -73,7 +80,7 @@ public class NewFragment extends Fragment {
                 try {
                     UnreadHelper unread = new UnreadHelper(act);
                     unread.clearList();
-                    unread.setBadge();
+                    unread.setBadge(ads.getUnreadCount());
                     unread.close();
                     adNew.clear();
                     adNew.notifyDataSetChanged();
@@ -97,11 +104,7 @@ public class NewFragment extends Fragment {
                 if (act.checkBusy()) return;
                 if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
                     ads.setIndex(pos);
-                    ads.showAd(adNew.getItem(pos).getTitle(),
-                            adNew.getItem(pos).getLink(),
-                            adNew.getItem(pos).getHead(0));
-                    adNew.getItem(pos).setDes("");
-                    adNew.notifyDataSetChanged();
+                    showAd(pos);
                 } else if (!adNew.getItem(pos).getLink().equals("")) {
                     BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
                 }
@@ -127,12 +130,12 @@ public class NewFragment extends Fragment {
         NotificationHelper notifHelper = new NotificationHelper(act);
         notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         try {
+            ads.loadList(adNew, true);
             String t, s;
             int n;
             UnreadHelper unread = new UnreadHelper(act);
-            unread.setBadge();
-            long time = unread.lastModified();
-            if (time > 0) {
+            unread.setBadge(ads.getUnreadCount());
+            if (unread.lastModified() > 0) {
                 List<String> links = unread.getList();
                 unread.close();
                 for (int i = links.size() - 1; i > -1; i--) {
@@ -152,13 +155,9 @@ public class NewFragment extends Fragment {
                 }
                 links.clear();
             }
-            if (time < ads.getTime()) {
-                ads.loadList(adNew, true);
-                if (ads.getIndex() > -1)
-                    ads.showAd(adNew.getItem(ads.getIndex()).getTitle(),
-                            adNew.getItem(ads.getIndex()).getLink(),
-                            adNew.getItem(ads.getIndex()).getHead(0));
-            }
+            unread.close();
+            if (ads.getIndex() > -1)
+                showAd(ads.getIndex());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -166,5 +165,13 @@ public class NewFragment extends Fragment {
             tvEmptyNew.setVisibility(View.VISIBLE);
             fabClear.setVisibility(View.GONE);
         }
+    }
+
+    private void showAd(int index) {
+        String t = adNew.getItem(index).getTitle();
+        ads.showAd(t.substring(t.indexOf(" ") + 1),
+                adNew.getItem(index).getLink(),
+                adNew.getItem(index).getHead(0));
+        act.updateNew();
     }
 }
