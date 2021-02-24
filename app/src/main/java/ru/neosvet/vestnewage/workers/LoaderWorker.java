@@ -215,8 +215,8 @@ public class LoaderWorker extends Worker {
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
             SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
             downloadList();
-            SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.NEWS).toString());
-            downloadList();
+            //SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.NEWS).toString());
+            //downloadList();
         }
         if (isCancelled())
             return;

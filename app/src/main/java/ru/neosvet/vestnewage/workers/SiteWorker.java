@@ -185,6 +185,8 @@ public class SiteWorker extends Worker {
     }
 
     public static int getListLink(Context context, String file) throws Exception {
+        if(file.contains(SiteFragment.NEWS))
+            return 0;
         BufferedReader br = new BufferedReader(new FileReader(file));
         File f = LoaderHelper.getFileList(context);
         BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
