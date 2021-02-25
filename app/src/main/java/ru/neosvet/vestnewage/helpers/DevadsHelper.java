@@ -1,16 +1,11 @@
 package ru.neosvet.vestnewage.helpers;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
-import android.os.Build;
 import android.view.View;
-
-import androidx.core.app.NotificationCompat;
 
 import java.io.BufferedReader;
 
@@ -19,7 +14,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 
@@ -167,7 +161,7 @@ public class DevadsHelper {
         });
     }
 
-    public void update(BufferedReader br) throws Exception {
+    public boolean update(BufferedReader br) throws Exception {
         String s;
         String[] m = new String[]{"", "", ""};
         byte mode, n = 0;
@@ -204,29 +198,7 @@ public class DevadsHelper {
         time = System.currentTimeMillis();
         cv.put(Const.TITLE, time);
         db.insert(NAME, cv);
-        if (isNew) {
-            UnreadHelper unread = new UnreadHelper(context);
-            unread.setBadge(getUnreadCount());
-            unread.close();
-            showNotif();
-        }
-    }
-
-    private void showNotif() {
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(Const.ADS, true);
-        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        NotificationHelper notifHelper = new NotificationHelper(context);
-        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.app_name),
-                context.getResources().getString(R.string.new_dev_ads),
-                NotificationHelper.CHANNEL_SUMMARY);
-        notifBuilder.setContentIntent(piStart);
-        notifBuilder.setGroup(NotificationHelper.GROUP_SUMMARY);
-        notifBuilder.setSound(null);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-            notifBuilder.setFullScreenIntent(piStart, true);
-        notifHelper.notify(555, notifBuilder);
+        return isNew;
     }
 
     private void addRow(byte mode, String[] m) {

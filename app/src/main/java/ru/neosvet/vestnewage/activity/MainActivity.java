@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.activity;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -18,6 +16,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -30,7 +32,6 @@ import java.util.TimerTask;
 import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
-import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
@@ -50,22 +51,24 @@ import ru.neosvet.vestnewage.fragment.SearchFragment;
 import ru.neosvet.vestnewage.fragment.SettingsFragment;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
+import ru.neosvet.vestnewage.fragment.WelcomeFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
-import ru.neosvet.vestnewage.helpers.SlashHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
+import ru.neosvet.vestnewage.model.SlashModel;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Bundle>, WelcomeFragment.ItemClicker {
     private final byte STATUS_MENU = 0, STATUS_PAGE = 1, STATUS_EXIT = 2;
     public static boolean isFirst = false, isCountInMenu = false;
-    public boolean isMenuMode = false;
+    public boolean isMenuMode = false, isBlinked = false;
     private int first_fragment;
     private MenuFragment frMenu;
     private BackFragment curFragment;
     private FragmentManager myFragmentManager;
+    private WelcomeFragment frWelcome = null;
     public Lib lib = new Lib(this);
     private Tip menuDownload;
     private NavigationView navigationView;
@@ -78,11 +81,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int cur_id, prev_id = 0, tab = 0, statusBack, k_new = 0;
     public View fab;
     private SlashUtils slash;
+    private SlashModel model;
     public Animation anMin, anMax;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myFragmentManager = getSupportFragmentManager();
 
         pref = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         int p = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR);
@@ -104,15 +109,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
         slash = new SlashUtils(MainActivity.this);
+        model = ViewModelProviders.of(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
         } else if (slash.isNeedLoad()) {
             slash.checkAdapterNewVersion();
-            SlashHelper.postCommand(this, true);
+            SlashModel.addObserver(this, this);
+            model.startLoad();
         }
 
-        myFragmentManager = getFragmentManager();
         status = new StatusButton(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
         unread = new UnreadHelper(this);
@@ -153,6 +159,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (curFragment != null)
                         curFragment.startLoad();
                 }
+                if (frWelcome != null && !frWelcome.isAdded())
+                    frWelcome.show(myFragmentManager, null);
+                isBlinked = true;
             }
 
             @Override
@@ -216,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onPause();
         if (prom != null)
             prom.stop();
+        SlashModel.removeObservers(this);
     }
 
     @Override
@@ -223,6 +233,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         if (prom != null)
             prom.resume();
+        if (SlashModel.inProgress)
+            SlashModel.addObserver(this, this);
     }
 
     @Override
@@ -622,5 +634,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onChanged(Bundle data) {
+        SlashModel.inProgress = false;
+        SlashModel.removeObservers(this);
+
+        if (data.getBoolean(Const.TIME, false)) {
+            slash.reInitProm(data.getInt(Const.TIMEDIFF, 0));
+        }
+
+        frWelcome = new WelcomeFragment();
+        frWelcome.setArguments(data);
+        if (isBlinked)
+            frWelcome.show(myFragmentManager, null);
+    }
+
+    @Override
+    public void onItemClick(String link) {
+        if (link.length() == 0)
+            return;
+        if (link.equals(Const.ADS)) {
+            tab = 2;
+            setFragment(R.id.nav_site, true);
+        } else
+            BrowserActivity.openReader(this, link, null);
     }
 }
