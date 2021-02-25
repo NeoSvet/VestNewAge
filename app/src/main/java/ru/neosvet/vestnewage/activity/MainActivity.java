@@ -195,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void restoreState(Bundle state) {
-        updateNew();
         if (state == null) {
             Intent intent = getIntent();
             tab = intent.getIntExtra(Const.TAB, tab);
@@ -216,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (navigationView == null && !isMenuMode)
                 setMenuFragment();
         }
-        if (state != null)
-            tvNew.clearAnimation();
+        updateNew();
+        tvNew.clearAnimation();
     }
 
     @Override
