@@ -1,6 +1,6 @@
 package ru.neosvet.utils;
 
-import android.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 

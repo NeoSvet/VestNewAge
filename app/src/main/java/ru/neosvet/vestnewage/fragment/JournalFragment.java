@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment;
 
-import android.app.Fragment;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +11,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import androidx.fragment.app.Fragment;
 
 import ru.neosvet.ui.Tip;
 import ru.neosvet.utils.Const;
