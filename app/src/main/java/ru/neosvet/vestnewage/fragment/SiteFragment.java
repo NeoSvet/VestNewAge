@@ -99,7 +99,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             return;
         }
         if (data.getBoolean(Const.LIST, false)) {
-            openList(getFile(data.getString(Const.FILE)), false);
+            String f = data.getString(Const.FILE);
+            if (tabHost.getCurrentTabTag().equals(f))
+                openList(getFile(f), false);
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
