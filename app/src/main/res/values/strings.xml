@@ -57,6 +57,11 @@
     <string name="new_dev_ads">Новые объявления от разработчика</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="current_version">Про текущую версию приложения</string>
+    <string name="sync_time">Время сверено с сайтом</string>
+    <string name="matches">Совпадает</string>
+    <string name="time_deviation">Отклонение на %d сек.</string>
+    <string name="updated_page">Страница обновлена</string>
+    <string name="welcome_back">С возвращением!</string>
     <!--BookFragment-->
     <string name="poslaniya">Послания</string>
     <string name="katreny">Катрены</string>
