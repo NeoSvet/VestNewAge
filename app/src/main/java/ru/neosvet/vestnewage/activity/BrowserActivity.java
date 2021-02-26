@@ -171,7 +171,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (state == null) {
             openLink(getIntent().getStringExtra(Const.LINK), true);
             string = getIntent().getStringExtra(Const.SEARCH);
-            if (string.contains(Const.NN)) {
+            if (string != null && string.contains(Const.NN)) {
                 place = string.split(Const.NN);
                 iPlace = 0;
                 string = place[iPlace];
