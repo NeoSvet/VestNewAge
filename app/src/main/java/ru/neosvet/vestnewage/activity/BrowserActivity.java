@@ -80,6 +80,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = Const.LINK, string = null;
+    private String[] place;
+    private int iPlace = -1;
     private boolean didSearch = false;
     private PromHelper prom;
     private Animation anMin, anMax;
@@ -158,6 +160,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         outState.putString(Const.LINK, link);
         outState.putFloat(DataBase.PARAGRAPH, getPositionOnPage());
         outState.putString(Const.SEARCH, string);
+        if (iPlace > -1) {
+            outState.putInt(Const.PLACE, iPlace);
+            outState.putStringArray(Const.STRING, place);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -165,6 +171,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (state == null) {
             openLink(getIntent().getStringExtra(Const.LINK), true);
             string = getIntent().getStringExtra(Const.SEARCH);
+            if (string.contains(Const.NN)) {
+                place = string.split(Const.NN);
+                iPlace = 0;
+                string = place[iPlace];
+            }
         } else {
             link = state.getString(Const.LINK);
             if (link == null) return;
@@ -189,10 +200,17 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     }
                 }).start();
             }
-            string = state.getString(Const.SEARCH);
+            iPlace = state.getInt(Const.PLACE, -1);
+            if (iPlace > -1) {
+                place = state.getStringArray(Const.STRING);
+                string = place[iPlace];
+            } else
+                string = state.getString(Const.SEARCH);
         }
         if (string != null) {
             etSearch.setText(string);
+            if (iPlace > -1)
+                etSearch.setEnabled(false);
             // findText(string);
             pSearch.setVisibility(View.VISIBLE);
             fabMenu.setVisibility(View.GONE);
@@ -202,6 +220,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void closeSearch() {
         tip.hide();
         string = null;
+        if (iPlace > -1) {
+            iPlace = -1;
+            place = null;
+            etSearch.setText("");
+            etSearch.setEnabled(true);
+        }
         didSearch = false;
         pSearch.setVisibility(View.GONE);
         if (!nomenu) {
@@ -396,6 +420,13 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (iPlace > -1) {
+                    if (--iPlace == -1)
+                        iPlace = place.length - 1;
+                    etSearch.setText(place[iPlace]);
+                    findText(place[iPlace]);
+                    return;
+                }
                 searchOk();
                 if (!didSearch)
                     initSearch();
@@ -405,6 +436,13 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (iPlace > -1) {
+                    if (++iPlace == place.length)
+                        iPlace = 0;
+                    etSearch.setText(place[iPlace]);
+                    findText(place[iPlace]);
+                    return;
+                }
                 searchOk();
                 if (!didSearch)
                     initSearch();
