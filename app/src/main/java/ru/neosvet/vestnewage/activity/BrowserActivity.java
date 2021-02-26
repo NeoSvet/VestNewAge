@@ -62,11 +62,11 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 
 public class BrowserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     public static final String THEME = "theme", NOMENU = "nomenu",
-            SCALE = "scale", FILE = "file://",
+            NAVBUTTONS = "navb", SCALE = "scale", FILE = "file://",
             STYLE = "/style/style.css", PAGE = "/page.html";
     private final String script = "<a href='javascript:NeoInterface.";
     private List<String> history = new ArrayList<String>();
-    private boolean nomenu, lightTheme, twoPointers = false, back = false;
+    private boolean nomenu, navbuttons, lightTheme, twoPointers = false, back = false;
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private SoftKeyboard softKeyboard;
@@ -76,7 +76,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private EditText etSearch;
     private StatusButton status;
     private LinearLayout mainLayout;
-    private View fabMenu, tvPromTime, pSearch, bPrev, bNext, bBack;
+    private View fabMenu, fabTop, fabBottom, tvPromTime, pSearch, bPrev, bNext, bBack;
     private DrawerLayout drawerMenu;
     private Lib lib;
     private String link = Const.LINK, string = null;
@@ -85,7 +85,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private boolean didSearch = false;
     private PromHelper prom;
     private Animation anMin, anMax;
-    private MenuItem miThemeL, miThemeD, miNomenu, miRefresh, miShare;
+    private MenuItem miThemeL, miThemeD, miNomenu, miButtons, miRefresh, miShare;
     private Tip tip;
     private Runnable runBrowser = null, runNextPage = null, runPrevPage = null;
 
@@ -276,9 +276,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         navMenu.setNavigationItemSelectedListener(this);
         miRefresh = navMenu.getMenu().getItem(0);
         miShare = navMenu.getMenu().getItem(1);
-        miNomenu = navMenu.getMenu().getItem(4);
-        miThemeL = navMenu.getMenu().getItem(7);
-        miThemeD = navMenu.getMenu().getItem(8);
+        miNomenu = navMenu.getMenu().getItem(6);
+        miButtons = navMenu.getMenu().getItem(7);
+        miThemeL = navMenu.getMenu().getItem(8);
+        miThemeD = navMenu.getMenu().getItem(9);
 
         wvBrowser = (WebView) findViewById(R.id.wvBrowser);
         tip = new Tip(this, findViewById(R.id.tvFinish));
@@ -289,6 +290,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         bBack = navMenu.getHeaderView(0).findViewById(R.id.bBack);
         status = new StatusButton(this, findViewById(R.id.pStatus));
         fabMenu = findViewById(R.id.fabMenu);
+        fabTop = findViewById(R.id.fabTop);
+        fabBottom = findViewById(R.id.fabBottom);
 
         SharedPreferences prMain = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         if (prMain.getBoolean(Const.COUNT_IN_MENU, true))
@@ -367,6 +370,20 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void setViews() {
         wvBrowser.setWebViewClient(new WebClient(this));
+        wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if(!navbuttons)
+                    return;
+                if (scrollY > 300) {
+                    fabTop.setVisibility(View.VISIBLE);
+                    fabBottom.setVisibility(View.GONE);
+                } else {
+                    fabTop.setVisibility(View.GONE);
+                    fabBottom.setVisibility(View.VISIBLE);
+                }
+            }
+        });
         wvBrowser.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -401,6 +418,19 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             @Override
             public void onClick(View view) {
                 drawerMenu.openDrawer(Gravity.LEFT);
+            }
+        });
+        fabTop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wvBrowser.scrollTo(0, 0);
+            }
+        });
+        fabBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wvBrowser.scrollTo(0, (int) (wvBrowser.getContentHeight()
+                        * wvBrowser.getScale()));
             }
         });
         etSearch.setOnKeyListener(new View.OnKeyListener() {
@@ -468,6 +498,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             setCheckItem(miNomenu, nomenu);
             fabMenu.setVisibility(View.GONE);
         }
+        if (pref.getBoolean(NAVBUTTONS, true)) {
+            navbuttons = true;
+            setCheckItem(miButtons, navbuttons);
+        } else
+            fabBottom.setVisibility(View.GONE);
         status.setClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -531,6 +566,17 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     fabMenu.setVisibility(View.GONE);
                 else
                     fabMenu.setVisibility(View.VISIBLE);
+                break;
+            case R.id.nav_buttons:
+                navbuttons = !navbuttons;
+                setCheckItem(item, navbuttons);
+                editor.putBoolean(NAVBUTTONS, navbuttons);
+                if (navbuttons) {
+                    fabTop.setVisibility(View.VISIBLE);
+                } else {
+                    fabTop.setVisibility(View.GONE);
+                    fabBottom.setVisibility(View.GONE);
+                }
                 break;
             case R.id.nav_search:
                 if (pSearch.getVisibility() == View.VISIBLE)

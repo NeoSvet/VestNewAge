@@ -81,6 +81,7 @@
     <string name="opt_scale">Оптимальный масштаб</string>
     <string name="src_scale">Исходный масштаб</string>
     <string name="hide_menu">Скрыть кнопку меню</string>
+    <string name="nav_buttons">Кнопки вверх/вниз</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <string name="load_unavailable_t">Загрузка недоступна</string>

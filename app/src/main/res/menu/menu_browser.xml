@@ -17,10 +17,6 @@
         android:icon="@drawable/search"
         android:title="@string/search" />
     <item
-        android:id="@+id/nav_nomenu"
-        android:icon="@drawable/none"
-        android:title="@string/hide_menu" />
-    <item
         android:id="@+id/nav_opt_scale"
         android:icon="@drawable/opt_scale"
         android:title="@string/opt_scale" />
@@ -28,7 +24,14 @@
         android:id="@+id/nav_src_scale"
         android:icon="@drawable/src_scale"
         android:title="@string/src_scale" />
-
+    <item
+        android:id="@+id/nav_nomenu"
+        android:icon="@drawable/none"
+        android:title="@string/hide_menu" />
+    <item
+        android:id="@+id/nav_buttons"
+        android:icon="@drawable/none"
+        android:title="@string/nav_buttons" />
     <item
         android:id="@+id/nav_light"
         android:icon="@drawable/none"
@@ -37,5 +40,4 @@
         android:id="@+id/nav_dark"
         android:icon="@drawable/none"
         android:title="@string/dark_theme" />
-
 </menu>

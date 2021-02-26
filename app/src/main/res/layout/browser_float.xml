@@ -27,8 +27,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginRight="5dp"
         android:layout_marginTop="55dp"
+        android:layout_marginRight="5dp"
         android:background="@drawable/field"
         android:padding="10dp"
         android:text="@string/finish_list"
@@ -42,6 +42,27 @@
         android:layout_marginLeft="5dp"
         android:layout_marginTop="5dp"
         app:srcCompat="@drawable/menu" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="5dp"
+        android:alpha="0.5"
+        android:visibility="gone"
+        app:srcCompat="@drawable/top" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="5dp"
+        android:alpha="0.5"
+        app:srcCompat="@drawable/bottom" />
 
     <TextView
         android:id="@+id/tvPromTime"
