@@ -321,7 +321,7 @@ public class LoaderWorker extends Worker {
                             cv.put(DataBase.PARAGRAPH, s);
                             dataBase.insert(DataBase.PARAGRAPH, cv);
                         } else {
-                            cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
+                            cv.put(Const.TITLE, getTitle(s, dataBase.getDatabaseName()));
                             cv.put(Const.LINK, link);
                             id = (int) dataBase.insert(Const.TITLE, cv);
                             //обновляем дату изменения списка:
@@ -331,7 +331,7 @@ public class LoaderWorker extends Worker {
                         }
                     } else { // id найден, значит материал есть
                         //обновляем заголовок
-                        cv.put(Const.TITLE, getTitle(Lib.withOutTags(s), dataBase.getDatabaseName()));
+                        cv.put(Const.TITLE, getTitle(s, dataBase.getDatabaseName()));
                         //обновляем дату загрузки материала
                         dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, id);
                         //удаляем содержимое материала
@@ -386,8 +386,7 @@ public class LoaderWorker extends Worker {
     }
 
     private String getTitle(String line, String name) {
-        line = line.replace("&ldquo;", "“").replace("&rdquo;", "”");
-        line = Lib.withOutTags(line);
+        line = Lib.withOutTags(line).replace(".20", ".");
         if (line.contains(name)) {
             line = line.substring(9);
             if (line.contains(Const.KV_OPEN))
