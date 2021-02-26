@@ -6,11 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import ru.neosvet.utils.Const;
@@ -35,6 +38,13 @@ public class WelcomeFragment extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getDialog().setOnShowListener(dialog -> {
+            BottomSheetDialog d = (BottomSheetDialog)dialog;
+            FrameLayout bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            BottomSheetBehavior.from(bottomSheet).setPeekHeight(
+                    (int)(175 * getResources().getDisplayMetrics().density));
+        });
+
         ListView lvBottom = view.findViewById(R.id.lvBottom);
         adapter = new ListAdapter(requireContext());
         lvBottom.setAdapter(adapter);
