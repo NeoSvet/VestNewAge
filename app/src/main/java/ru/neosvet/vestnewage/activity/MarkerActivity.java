@@ -203,6 +203,7 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void restoreState(Bundle state) {
+        setResult(RESULT_CANCELED);
         if (state != null) {
             tvCol.setText(state.getString(DataBase.COLLECTIONS));
             String s = state.getString(Const.LIST);
@@ -270,7 +271,6 @@ public class MarkerActivity extends AppCompatActivity {
             sel = getResources().getString(R.string.sel_pos) +
                     String.format("%.1f%%", getIntent().getFloatExtra(Const.PLACE, 0f));
         } else { //edit mode
-            setResult(0);
             DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
             Cursor cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, id);
             cursor.moveToFirst();

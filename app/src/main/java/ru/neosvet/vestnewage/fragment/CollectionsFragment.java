@@ -42,6 +42,8 @@ import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
+import static android.app.Activity.RESULT_OK;
+
 public class CollectionsFragment extends BackFragment implements Observer<Data> {
     public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
@@ -877,27 +879,30 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     }
 
     public void putResult(int resultCode) {
-        if (resultCode == 1) {
-            sCol = sCol.substring(0, sCol.indexOf(Const.N));
-            DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-            Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, Const.TITLE + DataBase.Q, sCol);
-            if (cursor.moveToFirst())
-                sCol += Const.N + cursor.getString(0); //список закладок в подборке
-            else
-                sCol += Const.N;
-            cursor.close();
-            dbMarker.close();
+        if (resultCode != RESULT_OK)
+            return;
 
-            loadMarList();
-            if (iSel == adMarker.getCount())
-                iSel--;
-            if (iSel == -1) {
-                unSelect();
-            } else {
-                adMarker.getItem(iSel).setSelect(true);
-                adMarker.notifyDataSetChanged();
-            }
+        sCol = sCol.substring(0, sCol.indexOf(Const.N));
+        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
+        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, Const.TITLE + DataBase.Q, sCol);
+        if (cursor.moveToFirst())
+            sCol += Const.N + cursor.getString(0); //список закладок в подборке
+        else
+            sCol += Const.N;
+        cursor.close();
+        dbMarker.close();
+
+        loadMarList();
+        if (iSel == adMarker.getCount())
+            iSel--;
+        if (iSel == -1) {
+            unSelect();
+        } else {
+            adMarker.getItem(iSel).setSelect(true);
+            adMarker.notifyDataSetChanged();
         }
+
+        goToEdit();
     }
 
     public String getListId() {
