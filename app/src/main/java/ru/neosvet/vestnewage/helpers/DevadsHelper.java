@@ -116,6 +116,12 @@ public class DevadsHelper {
     }
 
     public void showAd(String title, final String link, String des) {
+        ContentValues cv = new ContentValues();
+        cv.put(Const.UNREAD, 0);
+        if (db.update(NAME, cv, Const.TITLE + DataBase.Q, title) == 0) {
+            db.update(NAME, cv, Const.DESCTRIPTION + DataBase.Q, des);
+        }
+
         if (des.equals("")) {// only link
             Lib lib = new Lib(context);
             lib.openInApps(link, null);
@@ -130,10 +136,6 @@ public class DevadsHelper {
         alert = new CustomDialog(act);
         alert.setTitle(context.getResources().getString(R.string.ad));
         alert.setMessage(des);
-
-        ContentValues cv = new ContentValues();
-        cv.put(Const.UNREAD, 0);
-        db.update(NAME, cv, Const.TITLE + DataBase.Q, title);
 
         if (link.equals("")) { // only des
             alert.setRightButton(context.getResources().getString(android.R.string.ok), new View.OnClickListener() {
