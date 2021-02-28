@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
 
 import ru.neosvet.vestnewage.R;
@@ -13,6 +14,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -64,6 +66,11 @@ public class SlashUtils {
                     showNotifTip(context.getResources().getString(R.string.are_you_know),
                             context.getResources().getString(R.string.new_option_notif), getSettingsIntent());
             }
+        }
+        if (ver > 44 && ver < 47) {
+            DataBase db = new DataBase(context, DevadsHelper.NAME);
+            db.delete(DevadsHelper.NAME);
+            db.close();
         }
         if (ver == 0)
             showSummaryNotif();
@@ -168,7 +175,7 @@ public class SlashUtils {
     }
 
     public boolean openLink(Intent intent) {
-        if(intent.getBooleanExtra(Const.ADS, false)) {
+        if (intent.getBooleanExtra(Const.ADS, false)) {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 2);
             return true;

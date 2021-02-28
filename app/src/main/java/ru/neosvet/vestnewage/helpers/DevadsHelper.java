@@ -179,6 +179,7 @@ public class DevadsHelper {
                     mode = MODE_TD;
                 else
                     mode = MODE_TL;
+                m[0] = m[0].substring(3);
                 cursor = db.query(NAME, new String[]{Const.TITLE}, Const.TITLE + DataBase.Q, m[0]);
                 if (!cursor.moveToFirst()) {
                     isNew = true;
@@ -199,20 +200,21 @@ public class DevadsHelper {
         cv.put(Const.UNREAD, 0);
         time = System.currentTimeMillis();
         cv.put(Const.TITLE, time);
-        db.insert(NAME, cv);
+        if (db.update(NAME, cv, Const.MODE + DataBase.Q, MODE_T) == 0)
+            db.insert(NAME, cv);
         return isNew;
     }
 
     private void addRow(byte mode, String[] m) {
         ContentValues cv = new ContentValues();
         cv.put(Const.MODE, mode);
-        cv.put(Const.TITLE, m[0].substring(3));
+        cv.put(Const.TITLE, m[0]);
         if (mode == MODE_U || mode == MODE_TD) {
-            cv.put(Const.DESCTRIPTION, m[1].substring(3).replace(Const.BR, Const.N));
+            cv.put(Const.DESCTRIPTION, m[1].substring(3));
         } else {
             cv.put(Const.LINK, m[1].substring(3));
             if (mode == MODE_TLD)
-                cv.put(Const.DESCTRIPTION, m[2].substring(3).replace(Const.BR, Const.N));
+                cv.put(Const.DESCTRIPTION, m[2].substring(3));
         }
         db.insert(NAME, cv);
     }
