@@ -220,7 +220,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 if (isAds(pos))
                     return;
                 if (adMain.getItem(pos).getCount() == 1) {
-
                     String link = adMain.getItem(pos).getLink();
                     if (link.equals("#") || link.equals("@")) return;
                     if (tabHost.getCurrentTab() == 1) { // site
@@ -309,9 +308,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
 
     private boolean isAds(int pos) {
         if (tab == 2) {
-            if (pos < 2) { //back
-                if (pos == 1) //clear
-                    ads.clear();
+            if (pos == 0) { //back
                 tabHost.setCurrentTab(1);
                 tabHost.setCurrentTab(0);
                 return true;
@@ -340,16 +337,8 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             e.printStackTrace();
         }
         ListItem item = new ListItem(getResources().getString(R.string.back_title));
-        if (adMain.getCount() == 0) {
-            item.setDes(getResources().getString(R.string.list_is_empty));
-            adMain.addItem(item);
-        } else {
-            item.setDes(getResources().getString(R.string.back_des));
-            adMain.insertItem(0, item);
-            item = new ListItem(getResources().getString(R.string.clear));
-            item.setDes(getResources().getString(R.string.this_list));
-            adMain.insertItem(1, item);
-        }
+        item.setDes(getResources().getString(R.string.back_des));
+        adMain.insertItem(0, item);
         adMain.notifyDataSetChanged();
     }
 

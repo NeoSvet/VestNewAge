@@ -17,10 +17,7 @@
     <string name="open_link">Открыть ссылку</string>
     <!--AdsUtils-->
     <string name="back_title">Назад</string>
-    <string name="list_is_empty">Список пуст</string>
     <string name="back_des">К объявлениям сайта</string>
-    <string name="clear">Очистить</string>
-    <string name="this_list">Этот список</string>
     <!--SlashUtils-->
     <string name="downloads_all_title">Скачайте все Катрены!</string>
     <string name="downloads_all_msg">Нажмите, чтобы скачать все материалы.</string>
