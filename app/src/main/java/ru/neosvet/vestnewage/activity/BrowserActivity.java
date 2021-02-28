@@ -370,20 +370,21 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void setViews() {
         wvBrowser.setWebViewClient(new WebClient(this));
-        wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if(!navbuttons)
-                    return;
-                if (scrollY > 300) {
-                    fabTop.setVisibility(View.VISIBLE);
-                    fabBottom.setVisibility(View.GONE);
-                } else {
-                    fabTop.setVisibility(View.GONE);
-                    fabBottom.setVisibility(View.VISIBLE);
+        if (android.os.Build.VERSION.SDK_INT > 22)
+            wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    if (!navbuttons)
+                        return;
+                    if (scrollY > 300) {
+                        fabTop.setVisibility(View.VISIBLE);
+                        fabBottom.setVisibility(View.GONE);
+                    } else {
+                        fabTop.setVisibility(View.GONE);
+                        fabBottom.setVisibility(View.VISIBLE);
+                    }
                 }
-            }
-        });
+            });
         wvBrowser.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -501,6 +502,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (pref.getBoolean(NAVBUTTONS, true)) {
             navbuttons = true;
             setCheckItem(miButtons, navbuttons);
+            if (android.os.Build.VERSION.SDK_INT < 23) {
+                fabTop.setVisibility(View.VISIBLE);
+                fabBottom.setVisibility(View.GONE);
+            }
         } else
             fabBottom.setVisibility(View.GONE);
         status.setClick(new View.OnClickListener() {
