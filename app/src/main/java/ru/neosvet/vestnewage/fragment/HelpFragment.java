@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.HelpAdapter;
 
 public class HelpFragment extends Fragment {
-    private final int COUNT = 7, FEEDBACK = 1, FEEDBACK_COUNT = 5,
+    private final int COUNT = 7, FEEDBACK = 1, FEEDBACK_COUNT = 4,
             WRITE_TO_DEV = 1, LINK_ON_APP = 2, LINK_ON_SITE = 3, CHANGELOG = 4;
     private boolean feedback = false;
     private MainActivity act;
