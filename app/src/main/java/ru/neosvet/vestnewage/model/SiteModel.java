@@ -37,8 +37,8 @@ public class SiteModel extends AndroidViewModel {
                 .setInputData(data.build())
                 .setConstraints(constraints)
                 .build();
-        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
-                ExistingWorkPolicy.REPLACE, task);
+        WorkContinuation job = WorkManager.getInstance(getApplication())
+                .beginUniqueWork(TAG, ExistingWorkPolicy.REPLACE, task);
         task = new OneTimeWorkRequest
                 .Builder(LoaderWorker.class)
                 .setInputData(data.build())

@@ -466,7 +466,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         } else p = Const.TURN_OFF;
         editor.putInt(Const.TIME, p);
         editor.apply();
-        WorkManager work = WorkManager.getInstance();
+        WorkManager work = WorkManager.getInstance(act.getApplicationContext());
         work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
         if (p == Const.TURN_OFF)
             return;

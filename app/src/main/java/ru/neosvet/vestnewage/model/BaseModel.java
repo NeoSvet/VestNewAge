@@ -35,8 +35,8 @@ public class BaseModel extends AndroidViewModel {
                 .setConstraints(constraints)
                 .setInputData(data)
                 .build();
-        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
-                ExistingWorkPolicy.REPLACE, task);
+        WorkContinuation job = WorkManager.getInstance(getApplication())
+                .beginUniqueWork(TAG, ExistingWorkPolicy.REPLACE, task);
         job.enqueue();
     }
 }

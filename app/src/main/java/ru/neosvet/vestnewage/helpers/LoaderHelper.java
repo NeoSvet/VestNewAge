@@ -56,7 +56,7 @@ public class LoaderHelper extends LifecycleService {
     @Override
     public void onCreate() {
         super.onCreate();
-        work = WorkManager.getInstance();
+        work = WorkManager.getInstance(getApplication());
     }
 
     public static void postCommand(Context context, int mode, String request) {

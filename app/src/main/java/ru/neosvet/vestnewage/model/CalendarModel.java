@@ -40,8 +40,8 @@ public class CalendarModel extends AndroidViewModel {
                 .setConstraints(constraints)
                 .addTag(TAG)
                 .build();
-        WorkContinuation job = WorkManager.getInstance().beginUniqueWork(TAG,
-                ExistingWorkPolicy.REPLACE, task);
+        WorkContinuation job = WorkManager.getInstance(getApplication())
+                .beginUniqueWork(TAG, ExistingWorkPolicy.REPLACE, task);
         if (!LoaderModel.inProgress) {
             task = new OneTimeWorkRequest
                     .Builder(LoaderWorker.class)
