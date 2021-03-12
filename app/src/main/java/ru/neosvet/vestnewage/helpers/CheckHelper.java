@@ -31,14 +31,6 @@ public class CheckHelper extends LifecycleService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Context context = getApplicationContext();
-        NotificationHelper notifHelper = new NotificationHelper(context);
-        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.site_name),
-                context.getResources().getString(R.string.check_new),
-                NotificationHelper.CHANNEL_MUTE)
-                .setProgress(0, 0, true);
-        startForeground(NotificationHelper.NOTIF_CHECK, notifBuilder.build());
     }
 
     public static void postCommand(Context context, boolean start) {
@@ -56,6 +48,16 @@ public class CheckHelper extends LifecycleService {
             stopForeground(true);
             return Service.START_NOT_STICKY;
         }
+
+        Context context = getApplicationContext();
+        NotificationHelper notifHelper = new NotificationHelper(context);
+        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
+                context.getResources().getString(R.string.site_name),
+                context.getResources().getString(R.string.check_new),
+                NotificationHelper.CHANNEL_MUTE)
+                .setProgress(0, 0, true);
+        startForeground(NotificationHelper.NOTIF_CHECK, notifBuilder.build());
+
         try {
             Configuration configuration = new Configuration.Builder()
                     .setMinimumLoggingLevel(android.util.Log.INFO)
@@ -64,9 +66,10 @@ public class CheckHelper extends LifecycleService {
         } catch (Exception e) {
             //e.printStackTrace();
         }
+
         Data data = new Data.Builder()
                 .putString(Const.TASK, TAG).build();
-        WorkManager work = WorkManager.getInstance();
+        WorkManager work = WorkManager.getInstance(context);
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
