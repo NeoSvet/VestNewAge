@@ -57,6 +57,11 @@ public class BaseWorker extends Worker {
                         if (f.exists()) {
                             size += f.length();
                             f.delete();
+                            f = new File(path + d.getMY() + "-journal");
+                            if (f.exists()) {
+                                size += f.length();
+                                f.delete();
+                            }
                         }
                         d.changeMonth(1);
                     }
