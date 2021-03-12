@@ -23,7 +23,6 @@
     <string name="downloads_all_msg">Нажмите, чтобы скачать все материалы.</string>
     <string name="are_you_know">А вы знали?</string>
     <string name="new_option_notif">О наличии автоматической проверки нового и уведомлений о Посылах?</string>
-    <string name="check_slash">Проверка нового</string>
     <!--Lib-->
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
