@@ -753,19 +753,22 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         else
             msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
         curTitle.close();
-        dataBase.close();
         if (title == null) {
             title = msg;
             msg = s;
         }
         dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
         showRndAlert(title, link, msg, s, n);
-        if (link == null) return;
+        if (link == null) {
+            dataBase.close();
+            return;
+        }
         //добавляем в журнал:
         ContentValues cv = new ContentValues();
         cv.put(Const.TIME, System.currentTimeMillis());
         DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
         cv.put(DataBase.ID, DataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n);
+        dataBase.close();
         dbJournal.insert(DataBase.JOURNAL,  cv);
         dbJournal.close();
     }
