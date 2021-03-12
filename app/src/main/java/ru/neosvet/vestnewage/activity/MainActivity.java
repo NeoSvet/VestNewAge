@@ -19,7 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
         slash = new SlashUtils(MainActivity.this);
-        model = ViewModelProviders.of(this).get(SlashModel.class);
+        model = new ViewModelProvider(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);

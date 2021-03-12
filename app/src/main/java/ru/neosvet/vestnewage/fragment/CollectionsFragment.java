@@ -22,7 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import ru.neosvet.ui.Tip;
@@ -133,7 +133,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     }
 
     private void initModel() {
-        model = ViewModelProviders.of(act).get(MarkersModel.class);
+        model = new ViewModelProvider(this).get(MarkersModel.class);
         if (ProgressHelper.isBusy())
             initRotate();
     }
@@ -474,7 +474,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                             return;
                         initLoad();
                         act.status.startText();
-                        LoaderModel load = ViewModelProviders.of(act).get(LoaderModel.class);
+                        LoaderModel load = new ViewModelProvider(CollectionsFragment.this).get(LoaderModel.class);
                         load.startLoad(false, adMarker.getItem(pos).getData());
                         return;
                     }

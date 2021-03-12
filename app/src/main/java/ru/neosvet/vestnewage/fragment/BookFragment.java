@@ -25,7 +25,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import java.io.File;
@@ -87,7 +87,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         initViews();
         setViews();
         initTabs();
-        model = ViewModelProviders.of(act).get(BookModel.class);
+        model = new ViewModelProvider(this).get(BookModel.class);
         restoreState(savedInstanceState);
         if (year > 0) {
             DateHelper d = DateHelper.initToday(act);
@@ -769,7 +769,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
         cv.put(DataBase.ID, DataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n);
         dataBase.close();
-        dbJournal.insert(DataBase.JOURNAL,  cv);
+        dbJournal.insert(DataBase.JOURNAL, cv);
         dbJournal.close();
     }
 

@@ -28,7 +28,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
@@ -126,7 +126,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     private void initModel() {
-        model = ViewModelProviders.of(act).get(SearchModel.class);
+        model = new ViewModelProvider(this).get(SearchModel.class);
         if (ProgressHelper.isBusy()) {
             pStatus.setVisibility(View.VISIBLE);
             fabSettings.setVisibility(View.GONE);

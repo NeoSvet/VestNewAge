@@ -26,7 +26,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
@@ -78,7 +78,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         initSections();
         initViews();
         setViews();
-        model = ViewModelProviders.of(act).get(BaseModel.class);
+        model = new ViewModelProvider(this).get(BaseModel.class);
         restoreState(savedInstanceState);
         return this.container;
     }

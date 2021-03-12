@@ -23,7 +23,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -32,7 +31,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import com.google.android.material.navigation.NavigationView;
@@ -132,7 +131,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void initModel() {
-        model = ViewModelProviders.of(this).get(LoaderModel.class);
+        model = new ViewModelProvider(this).get(LoaderModel.class);
         if (LoaderModel.inProgress)
             status.setLoad(true);
     }

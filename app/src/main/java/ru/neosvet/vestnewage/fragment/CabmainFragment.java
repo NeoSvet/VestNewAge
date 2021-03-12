@@ -21,7 +21,7 @@ import android.widget.ListView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import ru.neosvet.ui.SoftKeyboard;
@@ -101,7 +101,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     }
 
     private void initModel() {
-        model = ViewModelProviders.of(act).get(CabModel.class);
+        model = new ViewModelProvider(this).get(CabModel.class);
         if (ProgressHelper.isBusy())
             initLoad();
     }

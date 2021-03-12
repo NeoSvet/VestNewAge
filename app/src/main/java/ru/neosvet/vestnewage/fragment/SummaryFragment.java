@@ -10,7 +10,7 @@ import android.widget.ListView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import java.io.BufferedReader;
@@ -45,7 +45,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         act.setTitle(getResources().getString(R.string.rss));
         initViews();
         setViews();
-        model = ViewModelProviders.of(act).get(SummaryModel.class);
+        model = new ViewModelProvider(this).get(SummaryModel.class);
         restoreState(savedInstanceState);
         created = true;
         if (needLoad)

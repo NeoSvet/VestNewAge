@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
@@ -68,7 +68,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         act.setTitle(getResources().getString(R.string.calendar));
         initViews();
         initCalendar();
-        model = ViewModelProviders.of(act).get(CalendarModel.class);
+        model = new ViewModelProvider(this).get(CalendarModel.class);
         restoreState(savedInstanceState);
         created = true;
         if (needLoad)

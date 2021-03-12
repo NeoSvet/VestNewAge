@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
 import java.io.BufferedReader;
@@ -53,7 +53,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         ads = new DevadsHelper(act);
         initViews();
         setViews();
-        model = ViewModelProviders.of(act).get(SiteModel.class);
+        model = new ViewModelProvider(this).get(SiteModel.class);
         initTabs();
         restoreState(savedInstanceState);
         return this.container;
