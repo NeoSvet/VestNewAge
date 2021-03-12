@@ -229,7 +229,11 @@ public class LoaderHelper extends LifecycleService {
                     .setConstraints(constraints)
                     .addTag(TAG)
                     .build();
-            job = job.then(task);
+            if (job == null) {
+                job = work.beginUniqueWork(TAG,
+                        ExistingWorkPolicy.REPLACE, task);
+            } else
+                job = job.then(task);
         }
         job.enqueue();
     }
@@ -253,7 +257,8 @@ public class LoaderHelper extends LifecycleService {
         ProgressHelper.setMax(k);
         OneTimeWorkRequest task;
         WorkContinuation job = null;
-        if (id == ALL) { //Summary
+        ListsHelper listsHelper = new ListsHelper(getApplication().getBaseContext());
+        if (id == ALL && listsHelper.summaryIsOld()) { //Summary
             task = new OneTimeWorkRequest
                     .Builder(SummaryWorker.class)
                     .setInputData(data.build())
@@ -263,20 +268,20 @@ public class LoaderHelper extends LifecycleService {
             job = work.beginUniqueWork(TAG,
                     ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL || id == R.id.nav_site) { //Site
+        if ((id == ALL || id == R.id.nav_site) && listsHelper.siteIsOld()) { //Site
             task = new OneTimeWorkRequest
                     .Builder(SiteWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
                     .addTag(SiteModel.TAG)
                     .build();
-            if (id == ALL)
+            if (job != null)
                 job = job.then(task);
             else
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL) { //Calendar
+        if (id == ALL && listsHelper.bookIsOld()) { //Calendar
             data = data.putInt(Const.YEAR, ALL);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWorker.class)
@@ -284,16 +289,20 @@ public class LoaderHelper extends LifecycleService {
                     .setConstraints(constraints)
                     .addTag(CalendarModel.TAG)
                     .build();
-            job = job.then(task);
+            if (job != null)
+                job = job.then(task);
+            else
+                job = work.beginUniqueWork(TAG,
+                        ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL || id == R.id.nav_book) { //Book
+        if ((id == ALL || id == R.id.nav_book) && listsHelper.bookIsOld()) { //Book
             task = new OneTimeWorkRequest
                     .Builder(BookWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
                     .addTag(BookModel.TAG)
                     .build();
-            if (id == ALL)
+            if (job != null)
                 job = job.then(task);
             else
                 job = work.beginUniqueWork(TAG,
