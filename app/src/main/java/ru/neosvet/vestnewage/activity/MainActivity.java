@@ -156,8 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 if (first_fragment != 0) {
                     setFragment(first_fragment, false);
-                    if (curFragment != null)
-                        curFragment.startLoad();
                 }
                 if (frWelcome != null && !frWelcome.isAdded())
                     frWelcome.show(myFragmentManager, null);

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.Observer;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -70,9 +72,14 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         initCalendar();
         model = new ViewModelProvider(this).get(CalendarModel.class);
         restoreState(savedInstanceState);
-        created = true;
-        if (needLoad)
-            startLoad();
+        if (savedInstanceState == null) {
+            String path = act.getFilesDir().getParent() + "/databases/";
+            DateHelper d = DateHelper.initNow(act);
+            File f = new File(path + d.getMY());
+            if (!f.exists() || System.currentTimeMillis()
+                    - f.lastModified() > DateHelper.HOUR_IN_MILLS)
+                startLoad();
+        }
         return this.container;
     }
 
@@ -381,10 +388,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
 
     @Override
     public void startLoad() {
-        if (!created) {
-            needLoad = true;
-            return;
-        }
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);

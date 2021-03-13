@@ -47,9 +47,12 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
         setViews();
         model = new ViewModelProvider(this).get(SummaryModel.class);
         restoreState(savedInstanceState);
-        created = true;
-        if (needLoad)
-            startLoad();
+        if (savedInstanceState == null) {
+            File f = new File(act.getFilesDir() + Const.RSS);
+            if (!f.exists() || System.currentTimeMillis()
+                    - f.lastModified() > DateHelper.HOUR_IN_MILLS)
+                startLoad();
+        }
         return this.container;
     }
 
@@ -197,10 +200,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     @Override
     public void startLoad() {
-        if (!created) {
-            needLoad = true;
-            return;
-        }
         if (ProgressHelper.isBusy())
             return;
         initLoad();
