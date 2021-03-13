@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,17 +34,20 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     private ListView lvSummary;
     private ListAdapter adSummary;
     private MainActivity act;
-    private View container;
     private View fabRefresh;
     private SummaryModel model;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.summary_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.summary_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.rss));
-        initViews();
+        initViews(view);
         setViews();
         model = new ViewModelProvider(this).get(SummaryModel.class);
         restoreState(savedInstanceState);
@@ -53,7 +57,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
         }
-        return this.container;
     }
 
     @Override
@@ -116,7 +119,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             startLoad();
     }
 
-    private void initViews() {
+    private void initViews(View container) {
         fabRefresh = container.findViewById(R.id.fabRefresh);
         lvSummary = container.findViewById(R.id.lvList);
         adSummary = new ListAdapter(act);

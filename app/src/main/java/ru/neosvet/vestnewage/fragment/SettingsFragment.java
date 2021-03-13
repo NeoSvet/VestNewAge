@@ -23,6 +23,7 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.lifecycle.Observer;
@@ -56,7 +57,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View[] pSections;
-    private View container, bClearDo, ivClear;
+    private View bClearDo, ivClear;
     private View tvCheckOn, tvCheckOff, bCheckSet;
     private View tvPromOn, tvPromOff, bPromSet;
     private ImageView[] imgSections;
@@ -70,17 +71,20 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     private boolean stopRotate;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.settings_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.settings_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.settings));
-        initSections();
-        initViews();
+        initViews(view);
+        initSections(view);
         setViews();
         model = new ViewModelProvider(this).get(BaseModel.class);
         restoreState(savedInstanceState);
-        return this.container;
     }
 
     @Override
@@ -150,7 +154,6 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     private void initRotate() {
         stopRotate = false;
         if (anRotate == null) {
-            ivClear = container.findViewById(R.id.ivClear);
             anRotate = AnimationUtils.loadAnimation(act, R.anim.rotate);
             anRotate.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -176,7 +179,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
         ivClear.startAnimation(anRotate);
     }
 
-    private void initSections() {
+    private void initSections(View container) {
         imgSections = new ImageView[]{container.findViewById(R.id.imgBase),
                 container.findViewById(R.id.imgScreen), container.findViewById(R.id.imgClear),
                 container.findViewById(R.id.imgCheck), container.findViewById(R.id.imgProm)};
@@ -222,7 +225,8 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             bSections[i].setOnClickListener(SectionsClick);
     }
 
-    private void initViews() {
+    private void initViews(View container) {
+        ivClear = container.findViewById(R.id.ivClear);
         cbCountFloat = container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
         if (act.isMenuMode)
@@ -275,6 +279,11 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
             p = sbPromTime.getMax();
         sbPromTime.setProgress(p);
         setPromTime();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            initButtonsSet();
+        else
+            initButtonsSetNew(container);
     }
 
     private void setViews() {
@@ -383,10 +392,6 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                 saveProm();
             }
         });
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            initButtonsSet();
-        else
-            initButtonsSetNew();
     }
 
     private void initButtonsSet() {
@@ -407,7 +412,7 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     }
 
     @RequiresApi(26)
-    private void initButtonsSetNew() {
+    private void initButtonsSetNew(View container) {
         bCheckSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

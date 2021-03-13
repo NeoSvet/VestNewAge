@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ru.neosvet.utils.Const;
@@ -21,19 +23,21 @@ public class HelpFragment extends Fragment {
             WRITE_TO_DEV = 1, LINK_ON_APP = 2, LINK_ON_SITE = 3, CHANGELOG = 4;
     private boolean feedback = false;
     private MainActivity act;
-    private View container;
     private HelpAdapter adHelp;
     private boolean[] mHelp = null;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.help_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.help_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.help));
-        initList();
+        initList(view);
         restoreState(savedInstanceState);
-        return this.container;
     }
 
     public void setOpenHelp(int i) {
@@ -65,7 +69,7 @@ public class HelpFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    private void initList() {
+    private void initList(View container) {
         adHelp = new HelpAdapter(act);
         ListView lvHelp = container.findViewById(R.id.lvHelp);
         lvHelp.setAdapter(adHelp);

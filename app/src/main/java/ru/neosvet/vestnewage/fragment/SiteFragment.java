@@ -12,6 +12,7 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,7 +38,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
     private MainActivity act;
     private ListAdapter adMain;
-    private View container, fabRefresh, tvEmptySite;
+    private View fabRefresh, tvEmptySite;
     private SiteModel model;
     private TabHost tabHost;
     private ListView lvMain;
@@ -46,17 +47,20 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     private boolean notClick = false, scrollToFirst = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.site_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.site_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         ads = new DevadsHelper(act);
-        initViews();
+        initViews(view);
         setViews();
         model = new ViewModelProvider(this).get(SiteModel.class);
         initTabs();
         restoreState(savedInstanceState);
-        return this.container;
     }
 
     @Override
@@ -155,7 +159,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void initTabs() {
-        tabHost = (TabHost) container.findViewById(R.id.thMain);
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
@@ -196,10 +199,12 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
         });
     }
 
-    private void initViews() {
+    private void initViews(View container) {
+        tabHost = (TabHost) container.findViewById(R.id.thMain);
         tvEmptySite = container.findViewById(R.id.tvEmptySite);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         act.fab = fabRefresh;
+        lvMain = container.findViewById(R.id.lvMain);
     }
 
     private void setViews() {
@@ -209,7 +214,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                 startLoad(tabHost.getCurrentTabTag());
             }
         });
-        lvMain = container.findViewById(R.id.lvMain);
         adMain = new ListAdapter(act);
         lvMain.setAdapter(adMain);
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {

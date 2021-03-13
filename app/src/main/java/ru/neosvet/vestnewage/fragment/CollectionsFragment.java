@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
@@ -59,39 +60,19 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     private MarkersModel model;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.container = inflater.inflate(R.layout.collections_fragment, container, false);
-        act = (MainActivity) getActivity();
+        return this.container;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        act = (MainActivity) getActivity();
         initViews();
         setViews();
-        if (savedInstanceState != null) {
-            act.setCurFragment(this);
-            sCol = savedInstanceState.getString(DataBase.COLLECTIONS);
-            iSel = savedInstanceState.getInt(Const.SELECT, -1);
-            sName = savedInstanceState.getString(Const.RENAME, null);
-            delete = savedInstanceState.getBoolean(Const.DIALOG, false);
-            if (savedInstanceState.getBoolean(Const.PAGE, false)
-                    && LoaderModel.inProgress)
-                initLoad();
-        }
-
-        if (sCol == null)
-            loadColList();
-        else
-            loadMarList();
-
-        if (iSel > -1) {
-            goToEdit();
-            if (sName != null)
-                renameDialog(sName);
-            else if (delete)
-                deleteDialog();
-        }
-
         initModel();
-        return this.container;
+        restoreState(savedInstanceState);
     }
 
     @Override
@@ -130,6 +111,32 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         outState.putBoolean(Const.DIALOG, delete);
         outState.putBoolean(Const.PAGE, load);
         super.onSaveInstanceState(outState);
+    }
+
+    private void restoreState(Bundle state) {
+        if (state != null) {
+            act.setCurFragment(this);
+            sCol = state.getString(DataBase.COLLECTIONS);
+            iSel = state.getInt(Const.SELECT, -1);
+            sName = state.getString(Const.RENAME, null);
+            delete = state.getBoolean(Const.DIALOG, false);
+            if (state.getBoolean(Const.PAGE, false)
+                    && LoaderModel.inProgress)
+                initLoad();
+        }
+
+        if (sCol == null)
+            loadColList();
+        else
+            loadMarList();
+
+        if (iSel > -1) {
+            goToEdit();
+            if (sName != null)
+                renameDialog(sName);
+            else if (delete)
+                deleteDialog();
+        }
     }
 
     private void initModel() {

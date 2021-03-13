@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ru.neosvet.utils.Const;
@@ -20,21 +22,31 @@ public class MenuFragment extends Fragment {
             R.id.nav_book, R.id.nav_search, R.id.nav_marker, R.id.nav_journal,
             R.id.nav_cabinet, R.id.nav_settings, R.id.nav_help};
     private MainActivity act;
-    private View container;
+    private ListView lvMenu;
     private MenuAdapter adMenu;
     private int iSelect = 3;
     private boolean isFullScreen = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.menu_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.menu_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
 
-        int i;
+        initView(view);
+        restoreState(savedInstanceState);
+    }
+
+    private void initView(View container) {
+        lvMenu = container.findViewById(R.id.lvMenu);
+
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
-            this.container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
+            container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
@@ -43,16 +55,29 @@ public class MenuFragment extends Fragment {
                 }
             });
             if (MainActivity.isCountInMenu)
-                act.setProm(this.container.findViewById(R.id.tvPromTimeInMenu));
-            i = 0;
+                act.setProm(container.findViewById(R.id.tvPromTimeInMenu));
+            initList(0);
         } else {
             act.setTitle(getResources().getString(R.string.app_name));
-            this.container.findViewById(R.id.ivHeadMenu).setVisibility(View.GONE);
+            container.findViewById(R.id.ivHeadMenu).setVisibility(View.GONE);
             isFullScreen = true;
-            i = 1;
+            initList(1);
         }
+    }
 
-        ListView lvMenu = this.container.findViewById(R.id.lvMenu);
+
+    private void restoreState(Bundle state) {
+        if (!isFullScreen) {
+            if (state != null) {
+                act.setFrMenu(this);
+                iSelect = state.getInt(Const.SELECT);
+            }
+            adMenu.getItem(getPos(iSelect)).setSelect(true);
+        }
+        adMenu.notifyDataSetChanged();
+    }
+
+    private void initList(int i) {
         adMenu = new MenuAdapter(act);
         lvMenu.setAdapter(adMenu);
         int[] mImage = new int[]{R.drawable.download, R.drawable.new0, R.drawable.rss, R.drawable.main,
@@ -84,17 +109,6 @@ public class MenuFragment extends Fragment {
                 adMenu.notifyDataSetChanged();
             }
         });
-        if (!isFullScreen) {
-            if (savedInstanceState != null) {
-                act.setFrMenu(this);
-                iSelect = savedInstanceState.getInt(Const.SELECT);
-            }
-            adMenu.getItem(getPos(iSelect)).setSelect(true);
-        }
-        act.updateNew();
-        adMenu.notifyDataSetChanged();
-
-        return this.container;
     }
 
     @Override

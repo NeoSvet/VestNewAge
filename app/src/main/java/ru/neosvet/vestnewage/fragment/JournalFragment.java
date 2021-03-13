@@ -12,6 +12,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ru.neosvet.ui.Tip;
@@ -31,19 +33,23 @@ public class JournalFragment extends Fragment {
     private ListAdapter adJournal;
     private MainActivity act;
     private Tip tip;
-    private View container, fabClear, fabPrev, fabNext;
+    private View tvEmptyJournal, fabClear, fabPrev, fabNext;
     private int offset = 0;
     private Animation anMin, anMax;
     private ListView lvJournal;
     private boolean finish = true, scrollToFirst = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.journal_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.journal_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.journal));
-        initViews();
+        initViews(view);
         if (savedInstanceState != null) {
             offset = savedInstanceState.getInt(Const.START, 0);
             finish = savedInstanceState.getBoolean(Const.END, true);
@@ -52,7 +58,6 @@ public class JournalFragment extends Fragment {
                 fabNext.setVisibility(View.VISIBLE);
             }
         }
-        return this.container;
     }
 
     @Override
@@ -136,16 +141,17 @@ public class JournalFragment extends Fragment {
         }
         if (adJournal.getCount() == 0) {
             fabClear.setVisibility(View.GONE);
-            container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
+            tvEmptyJournal.setVisibility(View.VISIBLE);
         } else
             fabClear.setVisibility(View.VISIBLE);
     }
 
-    private void initViews() {
+    private void initViews(View container) {
         tip = new Tip(act, container.findViewById(R.id.tvFinish));
         fabPrev = container.findViewById(R.id.fabPrev);
         fabNext = container.findViewById(R.id.fabNext);
         fabClear = container.findViewById(R.id.fabClear);
+        tvEmptyJournal = container.findViewById(R.id.tvEmptyJournal);
         fabPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

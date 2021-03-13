@@ -46,7 +46,7 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private RecyclerView rvCalendar;
     private DateHelper dCurrent;
     private TextView tvDate;
-    private View container, ivPrev, ivNext, fabRefresh;
+    private View ivPrev, ivNext, fabRefresh;
     private CalendarModel model;
     private MainActivity act;
     private DateDialog dateDialog;
@@ -63,12 +63,16 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     });
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.calendar_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.calendar_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.calendar));
-        initViews();
+        initViews(view);
         initCalendar();
         model = new ViewModelProvider(this).get(CalendarModel.class);
         restoreState(savedInstanceState);
@@ -80,7 +84,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
         }
-        return this.container;
     }
 
     @Override
@@ -157,7 +160,11 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         createCalendar(0);
     }
 
-    private void initViews() {
+    private void initViews(View container) {
+        tvDate = container.findViewById(R.id.tvDate);
+        ivPrev = container.findViewById(R.id.ivPrev);
+        ivNext = container.findViewById(R.id.ivNext);
+        rvCalendar = container.findViewById(R.id.rvCalendar);
         DateHelper d = DateHelper.initToday(act);
         today_m = d.getMonth();
         today_y = d.getYear();
@@ -194,10 +201,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     }
 
     private void initCalendar() {
-        tvDate = container.findViewById(R.id.tvDate);
-        ivPrev = container.findViewById(R.id.ivPrev);
-        ivNext = container.findViewById(R.id.ivNext);
-        rvCalendar = container.findViewById(R.id.rvCalendar);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
         adCalendar = new CalendarAdapter(this);
         rvCalendar.setLayoutManager(layoutManager);

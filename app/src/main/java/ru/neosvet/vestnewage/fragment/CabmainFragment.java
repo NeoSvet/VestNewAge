@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -44,20 +45,23 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
     private EditText etEmail, etPassword;
-    private View container, fabEnter, fabExit, pMain;
+    private View fabEnter, fabExit, pMain;
     private byte mode_list = 0;
     private CabModel model;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.cabmain_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.cabmain_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
-        initViews();
+        initViews(view);
         setViews();
         restoreState(savedInstanceState);
         initModel();
-        return this.container;
     }
 
     @Override
@@ -212,7 +216,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         super.onSaveInstanceState(outState);
     }
 
-    private void initViews() {
+    private void initViews(View container) {
         act.setTitle(getResources().getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);

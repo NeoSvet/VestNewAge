@@ -22,6 +22,7 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
@@ -55,7 +56,6 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final String DIALOG_DATE = "date";
     private MainActivity act;
-    private View container;
     private Animation anMin, anMax;
     private ListAdapter adBook;
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
@@ -80,11 +80,15 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     });
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.book_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.book_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
-        initViews();
+        initViews(view);
         setViews();
         initTabs();
         model = new ViewModelProvider(this).get(BookModel.class);
@@ -96,7 +100,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             dialog = DIALOG_DATE + d.toString();
             showDatePicker(d);
         }
-        return this.container;
     }
 
     @Override
@@ -202,7 +205,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     }
 
     private void initTabs() {
-        tabHost = (TabHost) container.findViewById(R.id.thBook);
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
@@ -379,14 +381,19 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         return false;
     }
 
-    private void initViews() {
+    private void initViews(View container) {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
+        lvBook = container.findViewById(R.id.lvBook);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         fabRndMenu = container.findViewById(R.id.fabRndMenu);
         tvDate = container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
+        tabHost = (TabHost) container.findViewById(R.id.thBook);
+        container.findViewById(R.id.bRndStih).setOnClickListener(this);
+        container.findViewById(R.id.bRndPos).setOnClickListener(this);
+        container.findViewById(R.id.bRndKat).setOnClickListener(this);
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize);
         anMin.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -416,7 +423,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 startLoad();
             }
         });
-        lvBook = container.findViewById(R.id.lvBook);
         adBook = new ListAdapter(act);
         lvBook.setAdapter(adBook);
         lvBook.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -514,9 +520,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                     menuRnd.show();
             }
         });
-        container.findViewById(R.id.bRndStih).setOnClickListener(this);
-        container.findViewById(R.id.bRndPos).setOnClickListener(this);
-        container.findViewById(R.id.bRndKat).setOnClickListener(this);
     }
 
     private void openMonth(boolean plus) {

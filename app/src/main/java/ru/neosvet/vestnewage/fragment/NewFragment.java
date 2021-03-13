@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
@@ -26,21 +28,25 @@ import ru.neosvet.vestnewage.list.ListItem;
 public class NewFragment extends Fragment {
     private ListAdapter adNew;
     private MainActivity act;
-    private View container, fabClear, tvEmptyNew;
+    private View fabClear, tvEmptyNew;
     private DevadsHelper ads;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.new_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.new_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         ads = new DevadsHelper(act);
         act.setTitle(getResources().getString(R.string.new_section));
-        tvEmptyNew = this.container.findViewById(R.id.tvEmptyNew);
+        tvEmptyNew = view.findViewById(R.id.tvEmptyNew);
+        fabClear = view.findViewById(R.id.fabClear);
         initClear();
-        initList();
+        initList(view.findViewById(R.id.lvList));
         restoreState(savedInstanceState);
-        return this.container;
     }
 
     @Override
@@ -73,7 +79,6 @@ public class NewFragment extends Fragment {
     }
 
     private void initClear() {
-        fabClear = container.findViewById(R.id.fabClear);
         act.fab = fabClear;
         fabClear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,8 +100,7 @@ public class NewFragment extends Fragment {
         });
     }
 
-    private void initList() {
-        ListView lvNew = container.findViewById(R.id.lvList);
+    private void initList(ListView lvNew) {
         adNew = new ListAdapter(act);
         lvNew.setAdapter(adNew);
         lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {

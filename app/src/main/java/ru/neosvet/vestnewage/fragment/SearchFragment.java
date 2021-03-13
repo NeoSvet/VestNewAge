@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
@@ -63,7 +64,7 @@ import ru.neosvet.vestnewage.model.SearchModel;
 public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
     private MainActivity act;
-    private View container, fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
+    private View fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
     private PageAdapter adPages;
     private RecyclerView rvPages;
@@ -99,16 +100,19 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.container = inflater.inflate(R.layout.search_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.search_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.search));
-        initViews();
-        setViews();
+        initViews(view);
+        setViews(view);
         initModel();
         restoreState(savedInstanceState);
-        return this.container;
     }
 
     @Override
@@ -293,7 +297,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         return getResources().getStringArray(R.array.months_short)[d.getMonth() - 1] + " " + d.getYear();
     }
 
-    private void initViews() {
+    private void initViews(View container) {
         pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         editor = pref.edit();
         mainLayout = container.findViewById(R.id.content_search);
@@ -323,7 +327,7 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         softKeyboard = new SoftKeyboard(mainLayout, im);
     }
 
-    private void setViews() {
+    private void setViews(View container) {
         File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
         List<String> liSearch = new ArrayList<String>();
         if (f.exists()) {
