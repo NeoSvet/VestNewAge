@@ -638,14 +638,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SlashModel.inProgress = false;
         SlashModel.removeObservers(this);
 
+        int timediff = 0;
         if (data.getBoolean(Const.TIME, false)) {
-            slash.reInitProm(data.getInt(Const.TIMEDIFF, 0));
+            timediff = data.getInt(Const.TIMEDIFF, 0);
+            slash.reInitProm(timediff);
+            if (timediff < 0) timediff *= -1;
         }
 
-        frWelcome = new WelcomeFragment();
-        frWelcome.setArguments(data);
-        if (isBlinked)
-            frWelcome.show(myFragmentManager, null);
+        if (data.getBoolean(Const.ADS, false) || timediff > 4 || data.getBoolean(Const.PAGE, false)) {
+            frWelcome = new WelcomeFragment();
+            frWelcome.setArguments(data);
+            if (isBlinked)
+                frWelcome.show(myFragmentManager, null);
+        }
     }
 
     @Override
