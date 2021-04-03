@@ -94,7 +94,7 @@ public class SlashUtils {
     public boolean isNeedLoad() {
         SharedPreferences pref = context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
         long time = pref.getLong(Const.TIME, 0);
-        if (System.currentTimeMillis() - time > (DateHelper.HOUR_IN_MILLS * 7)) {
+        if (System.currentTimeMillis() - time > (DateHelper.HOUR_IN_MILLS * 3)) {
             SharedPreferences.Editor editor = pref.edit();
             editor.putLong(Const.TIME, System.currentTimeMillis());
             editor.apply();
