@@ -113,11 +113,16 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             ProgressHelper.removeObservers(act);
             if (error != null) {
                 act.status.setError(error);
+                if (adMain.getCount() == 0) {
+                    tab = 2;
+                    showDevads();
+                }
                 return;
             }
             fabRefresh.setVisibility(View.VISIBLE);
             act.status.setLoad(false);
             ProgressHelper.setBusy(false);
+
         }
     }
 

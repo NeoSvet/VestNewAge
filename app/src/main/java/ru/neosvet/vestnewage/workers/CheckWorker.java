@@ -58,8 +58,10 @@ public class CheckWorker extends Worker {
 
     private boolean checkSummary() throws Exception {
         Lib lib = new Lib(context);
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
+        String site = lib.getWorkSite();
+        InputStream in = new BufferedInputStream(lib.getStream(site
                 + "rss/?" + System.currentTimeMillis()));
+        site = site.substring(site.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
         br.close();
@@ -86,7 +88,7 @@ public class CheckWorker extends Worker {
         for (int i = 1; i < m.length; i++) {
             a = m[i].indexOf("</link");
             link = withOutTag(m[i].substring(0, a));
-            if (link.contains(Const.SITE.substring(8)))
+            if (link.contains(site))
                 link = link.substring(link.indexOf("info/") + 5);
             if (link.contains("#0"))
                 link = link.replace("#0", "#2");

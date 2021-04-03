@@ -34,6 +34,7 @@ public class BookWorker extends Worker {
     private final Lib lib;
     private int cur, max;
     private boolean BOOK;
+    private String SITE;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -74,6 +75,7 @@ public class BookWorker extends Worker {
                 return Result.success();
             }
             if (BOOK) { // book section
+                SITE = lib.getWorkSite();
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
@@ -89,7 +91,7 @@ public class BookWorker extends Worker {
                 if (kat)
                     s = loadPoems();
                 else
-                    s = loadListBook("tolkovaniya");
+                    s = loadTolkovaniya();
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
                         .putString(Const.TITLE, s)
@@ -99,7 +101,7 @@ public class BookWorker extends Worker {
             //LoaderHelper
             if (!LoaderHelper.start)
                 return Result.success();
-            loadListBook("tolkovaniya");
+            loadTolkovaniya();
             loadPoems();
             if (!LoaderHelper.start)
                 return Result.success();
@@ -119,6 +121,12 @@ public class BookWorker extends Worker {
             return Result.failure();
         }
         return Result.failure();
+    }
+
+    private String loadTolkovaniya() throws Exception {
+        if (SITE.equals(Const.SITE))
+            return loadListBook(SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
+        throw new Exception("Сайт на реконструкции");
     }
 
     private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
@@ -247,15 +255,20 @@ public class BookWorker extends Worker {
         String s = null;
         int y = DateHelper.initToday(context).getYear();
         for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
-            s = loadListBook(Const.POEMS + "/" + i);
+            if (SITE.equals(Const.SITE))
+                s = loadListBook(SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML);
+            else
+                s = loadListBook(SITE + Const.PRINT + i + Const.HTML);
         }
         return s;
     }
 
     private String loadListBook(String url) throws Exception {
-        url = Const.SITE + Const.PRINT + url + Const.HTML;
         PageParser page = new PageParser(context);
-        page.load(url, "page-title");
+        if (url.contains(Const.SITE))
+            page.load(url, "page-title");
+        else
+            page.load(url, "<h2>");
 
         String a, s, date1 = "", date2;
         page.getFirstElem();

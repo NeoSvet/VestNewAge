@@ -80,7 +80,9 @@ public class SummaryWorker extends Worker {
 
     private void loadList() throws Exception {
         Lib lib = new Lib(context);
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE + "rss/?" + System.currentTimeMillis()));
+        String site = lib.getWorkSite();
+        InputStream in = new BufferedInputStream(lib.getStream(site + "rss/?" + System.currentTimeMillis()));
+        site = site.substring(site.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
         DateHelper now = DateHelper.initNow(context);
@@ -93,7 +95,7 @@ public class SummaryWorker extends Worker {
         for (int i = 1; i < m.length; i++) {
             a = m[i].indexOf("</link");
             line = withOutTag(m[i].substring(0, a));
-            if (line.contains(Const.SITE.substring(8)))
+            if (line.contains(site))
                 line = line.substring(line.indexOf("info/") + 5);
             if (line.contains("#0"))
                 line = line.replace("#0", "#2");

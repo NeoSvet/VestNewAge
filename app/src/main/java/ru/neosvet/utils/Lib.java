@@ -7,15 +7,17 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
-import android.os.Build;
-import android.widget.Toast;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
@@ -139,5 +141,24 @@ public class Lib {
 
     public static String withOutTags(String s) {
         return android.text.Html.fromHtml(s).toString().trim();
+    }
+
+    public String getWorkSite() throws Exception {
+        InputStream in = new BufferedInputStream(getStream(Const.SITE));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        String s;
+        boolean first = false;
+        while ((s = br.readLine()) != null) {
+            if (s.contains("title")) {
+                first = s.contains("Благая Весть");
+                break;
+            }
+        }
+        br.close();
+        in.close();
+        if (first)
+            return Const.SITE;
+        else
+            return Const.SITE2;
     }
 }

@@ -134,7 +134,7 @@ public class CalendarWorker extends Worker {
     }
 
     private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
+        InputStream in = new BufferedInputStream(lib.getStream(lib.getWorkSite()
                 + "AjaxData/Calendar?year=" + year + "&month=" + month));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
