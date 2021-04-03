@@ -111,7 +111,7 @@ public class DevadsHelper {
         list.notifyDataSetChanged();
     }
 
-    public void clear() {
+    private void clear() {
         db.delete(NAME, Const.MODE + " != ?", MODE_T);
     }
 
@@ -180,12 +180,17 @@ public class DevadsHelper {
                 else
                     mode = MODE_TL;
                 m[0] = m[0].substring(3);
-                cursor = db.query(NAME, new String[]{Const.TITLE}, Const.TITLE + DataBase.Q, m[0]);
-                if (!cursor.moveToFirst()) {
-                    isNew = true;
+                if (isNew)
                     addRow(mode, m);
+                else {
+                    cursor = db.query(NAME, new String[]{Const.TITLE}, Const.TITLE + DataBase.Q, m[0]);
+                    if (!cursor.moveToFirst()) {
+                        clear();
+                        isNew = true;
+                        addRow(mode, m);
+                    }
+                    cursor.close();
                 }
-                cursor.close();
                 n = 0;
                 m[2] = "";
             } else if (s.indexOf("<") != 0) {
