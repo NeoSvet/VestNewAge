@@ -133,6 +133,7 @@ public class LoaderWorker extends Worker {
             if (file.exists())
                 file.delete();
             e.printStackTrace();
+            Lib.setError(e);
             error = e.getMessage();
         }
         LoaderModel.inProgress = false;

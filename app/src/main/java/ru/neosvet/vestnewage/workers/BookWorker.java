@@ -20,6 +20,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.MyException;
 import ru.neosvet.utils.PageParser;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
@@ -108,6 +109,7 @@ public class BookWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
+            Lib.setError(e);
             error = e.getMessage();
         }
         if (BOOK) {
@@ -125,7 +127,7 @@ public class BookWorker extends Worker {
     private String loadTolkovaniya() throws Exception {
         if (lib.isMainSite())
             return loadListBook(Const.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
-        throw new Exception(context.getString(R.string.site_not_available));
+        throw new MyException(context.getString(R.string.site_not_available));
     }
 
     private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {

@@ -2,6 +2,7 @@ package ru.neosvet.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -105,7 +107,7 @@ public class StatusButton {
             visible = true;
             iv.startAnimation(anRotate);
         } else {
-            if(prog) {
+            if (prog) {
                 prog = false;
                 progBar.setProgress(0);
                 progBar.setVisibility(View.GONE);
@@ -183,12 +185,18 @@ public class StatusButton {
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.NeoDialog)
                     .setTitle(context.getResources().getString(R.string.error))
                     .setMessage(error)
-                    .setPositiveButton(context.getResources().getString(android.R.string.ok),
+                    .setPositiveButton(context.getResources().getString(R.string.send),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-
+                                    sendError();
                                 }
-                            });
+                            })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            Lib.setError(null);
+                        }
+                    });
             builder.create().show();
             ProgressHelper.setBusy(false);
             setLoad(false);
@@ -196,6 +204,29 @@ public class StatusButton {
             return true;
         }
         return false;
+    }
+
+    private void sendError() {
+        StringBuilder des = new StringBuilder();
+        try {
+            des.append(context.getResources().getString(R.string.app_version));
+            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
+            des.append(" (");
+            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode);
+            des.append(")\n");
+            des.append(context.getResources().getString(R.string.system_version));
+            des.append(Build.VERSION.RELEASE);
+            des.append(" (");
+            des.append(Build.VERSION.SDK_INT);
+            des.append(")");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Lib lib = new Lib(context);
+        lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
+                + lib.getErrorDes() + "\n"
+                + context.getResources().getString(R.string.srv_info)
+                + des.toString(), null);
     }
 
     public boolean isTime() {

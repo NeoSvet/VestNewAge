@@ -88,6 +88,7 @@ public class CalendarWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
+            Lib.setError(e);
             error = e.getMessage();
         }
         if (CALENDAR) {
