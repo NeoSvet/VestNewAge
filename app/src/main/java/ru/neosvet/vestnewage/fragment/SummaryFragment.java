@@ -212,12 +212,12 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     private void finishLoad(String error) {
         ProgressHelper.removeObservers(act);
-        act.updateNew();
-        act.status.setLoad(false);
         if (error != null) {
             act.status.setError(error);
             return;
         }
+        act.updateNew();
+        act.status.setLoad(false);
         fabRefresh.setVisibility(View.VISIBLE);
     }
 }
