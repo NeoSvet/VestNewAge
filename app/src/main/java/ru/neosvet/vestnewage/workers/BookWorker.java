@@ -21,6 +21,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.PageParser;
+import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -34,7 +35,6 @@ public class BookWorker extends Worker {
     private final Lib lib;
     private int cur, max;
     private boolean BOOK;
-    private String SITE;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -75,7 +75,6 @@ public class BookWorker extends Worker {
                 return Result.success();
             }
             if (BOOK) { // book section
-                SITE = lib.getWorkSite();
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
                 DateHelper d = DateHelper.initToday(context);
@@ -124,9 +123,9 @@ public class BookWorker extends Worker {
     }
 
     private String loadTolkovaniya() throws Exception {
-        if (SITE.equals(Const.SITE))
-            return loadListBook(SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
-        throw new Exception("Сайт на реконструкции");
+        if (lib.isMainSite())
+            return loadListBook(Const.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
+        throw new Exception(context.getString(R.string.site_not_available));
     }
 
     private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
@@ -255,17 +254,18 @@ public class BookWorker extends Worker {
         String s = null;
         int y = DateHelper.initToday(context).getYear();
         for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
-            if (SITE.equals(Const.SITE))
-                s = loadListBook(SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML);
+            if (lib.isMainSite())
+                s = loadListBook(Const.SITE + Const.PRINT + Const.POEMS
+                        + "/" + i + Const.HTML);
             else
-                s = loadListBook(SITE + Const.PRINT + i + Const.HTML);
+                s = loadListBook(Const.SITE2 + Const.PRINT + i + Const.HTML);
         }
         return s;
     }
 
     private String loadListBook(String url) throws Exception {
         PageParser page = new PageParser(context);
-        if (url.contains(Const.SITE))
+        if (lib.isMainSite())
             page.load(url, "page-title");
         else
             page.load(url, "<h2>");

@@ -43,16 +43,11 @@ public class SiteWorker extends Worker {
         boolean SITE = getInputData().getString(Const.TASK).equals(SiteModel.class.getSimpleName());
         String error;
         try {
-            Lib lib = new Lib(context);
             if (SITE) {
                 ProgressHelper.setBusy(true);
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.START, true)
                         .build());
-                String site = lib.getWorkSite();
-                if(!site.equals(Const.SITE))
-                    throw new Exception("Сайт на реконструкции");
-
                 loadList(getInputData().getString(Const.LINK));
                 String s = getInputData().getString(Const.FILE);
                 saveList(s);
@@ -69,6 +64,7 @@ public class SiteWorker extends Worker {
                     Const.SITE,
                     Const.SITE + "novosti.html",
             };
+            Lib lib = new Lib(context);
             String[] file = new String[]{
                     lib.getFileByName(SiteFragment.MAIN).toString(),
                     lib.getFileByName(SiteFragment.NEWS).toString()
@@ -189,7 +185,7 @@ public class SiteWorker extends Worker {
     }
 
     public static int getListLink(Context context, String file) throws Exception {
-        if(file.contains(SiteFragment.NEWS))
+        if (file.contains(SiteFragment.NEWS))
             return 0;
         BufferedReader br = new BufferedReader(new FileReader(file));
         File f = LoaderHelper.getFileList(context);

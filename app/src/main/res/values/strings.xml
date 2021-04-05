@@ -195,6 +195,9 @@
     <string name="load_fail">При загрузке произошёл сбой - отсутствует доступ к интернету?</string>
     <string name="error_load">Ошибка при загрузке</string>
     <string name="error">Ошибка</string>
+    <string name="error_code">Ошибка на сайте:&#160;</string>
+    <string name="error_site">Сайт не ответил на запрос</string>
+    <string name="site_not_available">Сайт недоступен</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
     <string name="done">Готово</string>

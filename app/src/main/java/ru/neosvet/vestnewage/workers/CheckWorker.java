@@ -58,10 +58,13 @@ public class CheckWorker extends Worker {
 
     private boolean checkSummary() throws Exception {
         Lib lib = new Lib(context);
-        String site = lib.getWorkSite();
-        InputStream in = new BufferedInputStream(lib.getStream(site
+        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
-        site = site.substring(site.indexOf("/") + 2);
+        String site;
+        if (lib.isMainSite())
+            site = Const.SITE.substring(Const.SITE.indexOf("/") + 2);
+        else
+            site = Const.SITE2.substring(Const.SITE2.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
         br.close();

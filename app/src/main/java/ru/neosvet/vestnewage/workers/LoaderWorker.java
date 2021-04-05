@@ -42,7 +42,7 @@ public class LoaderWorker extends Worker {
     private OkHttpClient client;
     private int cur, max, k_requests = 0;
     private long time_requests = 0;
-    private String name, SITE;
+    private String name;
 
     public LoaderWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -65,12 +65,10 @@ public class LoaderWorker extends Worker {
         String error;
         name = getInputData().getString(Const.TASK);
         try {
-            SITE = lib.getWorkSite();
-
             time_requests = System.currentTimeMillis();
             builderRequest = new Request.Builder();
             builderRequest.header(Const.USER_AGENT, context.getPackageName());
-            builderRequest.header("Referer", SITE);
+            builderRequest.header("Referer", Const.SITE);
             client = Lib.createHttpClient();
             if (name.equals(CheckHelper.class.getSimpleName())) {
                 downloadList();
@@ -292,10 +290,10 @@ public class LoaderWorker extends Worker {
         int n = k;
         boolean boolArticle = dataBase.isArticle();
         PageParser page = new PageParser(context);
-        if (SITE.equals(Const.SITE))
-            page.load(SITE + Const.PRINT + s, "page-title");
+        if (lib.isMainSite())
+            page.load(Const.SITE + Const.PRINT + s, "page-title");
         else
-            page.load(SITE + Const.PRINT + s, "<h2>");
+            page.load(Const.SITE2 + Const.PRINT + s, "<h2>");
 
         ContentValues cv;
         int id = 0, bid = 0;
@@ -406,7 +404,7 @@ public class LoaderWorker extends Worker {
         final File fLight = lib.getFile(Const.LIGHT);
         final File fDark = lib.getFile(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
-            if (SITE.equals(Const.SITE))
+            if (lib.isMainSite())
                 downloadStyleFromSite(fLight, fDark);
             else
                 downloadFromUcoz(fLight, fDark);
@@ -437,7 +435,7 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadStyleFromSite(File fLight, File fDark) throws Exception {
-        builderRequest.url(SITE + "_content/BV/style-print.min.css");
+        builderRequest.url(Const.SITE + "_content/BV/style-print.min.css");
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
