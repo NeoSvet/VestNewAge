@@ -224,9 +224,7 @@ public class StatusButton {
         }
         Lib lib = new Lib(context);
         lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
-                + lib.getErrorDes() + "\n"
-                + context.getResources().getString(R.string.srv_info)
-                + des.toString(), null);
+                + lib.getErrorDes() + des.toString(), null);
     }
 
     public boolean isTime() {
