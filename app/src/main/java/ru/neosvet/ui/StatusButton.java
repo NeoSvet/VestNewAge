@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -208,8 +209,7 @@ public class StatusButton {
 
     private void sendError() {
         Lib lib = new Lib(context);
-        lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
-                + ErrorUtils.getInformation(context), null);
+        lib.openInApps(Const.mailto + ErrorUtils.getInformation(context), null);
     }
 
     public boolean isTime() {

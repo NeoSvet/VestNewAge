@@ -101,8 +101,7 @@ public class HelpFragment extends Fragment {
     private void onClickButton(int index) {
         switch (index) {
             case WRITE_TO_DEV:
-                act.lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
-                        + getResources().getString(R.string.srv_info)
+                act.lib.openInApps(Const.mailto + getResources().getString(R.string.srv_info)
                         + adHelp.getItem(FEEDBACK + CHANGELOG).getDes(), null);
                 break;
             case LINK_ON_APP:
