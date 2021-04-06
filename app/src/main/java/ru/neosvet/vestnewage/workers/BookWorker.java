@@ -19,6 +19,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MyException;
 import ru.neosvet.utils.PageParser;
@@ -52,8 +53,9 @@ public class BookWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String error;
         BOOK = getInputData().getString(Const.TASK).equals(BookModel.class.getSimpleName());
+        String error;
+        ErrorUtils.setData(getInputData());
         if (BOOK) {
             ProgressHelper.setBusy(true);
             ProgressHelper.postProgress(new Data.Builder()
@@ -109,7 +111,7 @@ public class BookWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         if (BOOK) {

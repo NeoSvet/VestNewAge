@@ -16,6 +16,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -39,6 +40,7 @@ public class CabWorker extends Worker {
                 .putBoolean(Const.START, true)
                 .build());
         String error;
+        ErrorUtils.setData(getInputData());
         try {
             String task = getInputData().getString(Const.TASK);
             Data.Builder result;
@@ -54,7 +56,7 @@ public class CabWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         ProgressHelper.postProgress(new Data.Builder()

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.PageParser;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
@@ -42,6 +43,7 @@ public class SiteWorker extends Worker {
     public Result doWork() {
         boolean SITE = getInputData().getString(Const.TASK).equals(SiteModel.class.getSimpleName());
         String error;
+        ErrorUtils.setData(getInputData());
         try {
             if (SITE) {
                 ProgressHelper.setBusy(true);
@@ -77,7 +79,7 @@ public class SiteWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         if (SITE) {

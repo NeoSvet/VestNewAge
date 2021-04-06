@@ -2,7 +2,6 @@ package ru.neosvet.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -194,7 +194,7 @@ public class StatusButton {
                     .setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
-                            Lib.setError(null);
+                            ErrorUtils.clear();
                         }
                     });
             builder.create().show();
@@ -207,24 +207,9 @@ public class StatusButton {
     }
 
     private void sendError() {
-        StringBuilder des = new StringBuilder();
-        try {
-            des.append(context.getResources().getString(R.string.app_version));
-            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
-            des.append(" (");
-            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode);
-            des.append(")\n");
-            des.append(context.getResources().getString(R.string.system_version));
-            des.append(Build.VERSION.RELEASE);
-            des.append(" (");
-            des.append(Build.VERSION.SDK_INT);
-            des.append(")");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         Lib lib = new Lib(context);
         lib.openInApps("mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body="
-                + lib.getErrorDes() + des.toString(), null);
+                + ErrorUtils.getInformation(context), null);
     }
 
     public boolean isTime() {

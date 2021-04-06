@@ -24,6 +24,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -50,6 +51,7 @@ public class CalendarWorker extends Worker {
     public Result doWork() {
         boolean CALENDAR = getInputData().getString(Const.TASK).equals(CalendarModel.class.getSimpleName());
         String error;
+        ErrorUtils.setData(getInputData());
         try {
             if (CALENDAR) {
                 ProgressHelper.setBusy(true);
@@ -88,7 +90,7 @@ public class CalendarWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         if (CALENDAR) {

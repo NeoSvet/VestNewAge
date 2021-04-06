@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -39,6 +40,7 @@ public class SummaryWorker extends Worker {
     public Result doWork() {
         SUMMARY = getInputData().getString(Const.TASK).equals(SummaryModel.class.getSimpleName());
         String error;
+        ErrorUtils.setData(getInputData());
         try {
             if (SUMMARY) {
                 ProgressHelper.setBusy(true);
@@ -60,7 +62,7 @@ public class SummaryWorker extends Worker {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         if (SUMMARY) {

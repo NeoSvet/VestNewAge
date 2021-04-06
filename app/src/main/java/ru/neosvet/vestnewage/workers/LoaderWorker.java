@@ -22,6 +22,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.PageParser;
 import ru.neosvet.vestnewage.R;
@@ -63,6 +64,7 @@ public class LoaderWorker extends Worker {
     public Result doWork() {
         LoaderModel.inProgress = true;
         String error;
+        ErrorUtils.setData(getInputData());
         name = getInputData().getString(Const.TASK);
         try {
             time_requests = System.currentTimeMillis();
@@ -133,7 +135,7 @@ public class LoaderWorker extends Worker {
             if (file.exists())
                 file.delete();
             e.printStackTrace();
-            Lib.setError(e);
+            ErrorUtils.setError(e);
             error = e.getMessage();
         }
         LoaderModel.inProgress = false;

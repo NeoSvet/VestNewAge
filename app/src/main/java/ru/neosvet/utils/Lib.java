@@ -31,17 +31,11 @@ import okhttp3.TlsVersion;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    private static Exception error;
     private final Context context;
     private boolean first = true;
 
     public boolean isMainSite() {
         return first;
-    }
-
-    public static void setError(Exception error) {
-        if (error == null || !(error instanceof MyException))
-            Lib.error = error;
     }
 
     public Lib(Context context) {
@@ -92,7 +86,7 @@ public class Lib {
             OkHttpClient client = createHttpClient();
             response = client.newCall(builderRequest.build()).execute();
         } catch (Exception e) {
-            error = e;
+            ErrorUtils.setError(e);
             e.printStackTrace();
             if (url.contains(Const.SITE)) {
                 first = false;
@@ -173,22 +167,5 @@ public class Lib {
 
     public static String withOutTags(String s) {
         return android.text.Html.fromHtml(s).toString().trim();
-    }
-
-    public String getErrorDes() {
-        if (Lib.error == null)
-            return "";
-        StringBuilder des = new StringBuilder(context.getResources().getString(R.string.error_des));
-        des.append("\n");
-        des.append(Lib.error.getMessage());
-        des.append("\n");
-        for (StackTraceElement e : Lib.error.getStackTrace()) {
-            String s = e.toString();
-            if (s.contains("ru.neosvet")) {
-                des.append(s);
-                des.append("\n");
-            }
-        }
-        return des.toString();
     }
 }

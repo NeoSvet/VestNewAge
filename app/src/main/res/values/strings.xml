@@ -17,6 +17,7 @@
     <string name="open_link">Открыть ссылку</string>
     <string name="send">Отправить</string>
     <string name="error_des">Описание ошибки:</string>
+    <string name="input_data">Входные данные:</string>
     <!--AdsUtils-->
     <string name="back_title">Назад</string>
     <string name="back_des">К объявлениям сайта</string>
