@@ -23,6 +23,7 @@ import androidx.work.WorkManager;
 import java.io.File;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
@@ -86,14 +87,19 @@ public class LoaderHelper extends LifecycleService {
             start = false;
             String msg = intent.getStringExtra(Const.ERROR);
             if (mode == STOP_WITH_NOTIF || msg != null) {
+                NotificationHelper notifHelper = new NotificationHelper(this);
                 String title;
+                Intent main;
                 if (msg == null) {
                     title = getResources().getString(R.string.load_suc_finish);
                     msg = "";
-                } else
+                    main = new Intent(this, MainActivity.class);
+                } else {
                     title = getResources().getString(R.string.error_load);
-                NotificationHelper notifHelper = new NotificationHelper(this);
-                Intent main = new Intent(this, MainActivity.class);
+                    msg += "\n" + getResources().getString(R.string.touch_to_send);
+                    main = new Intent(Intent.ACTION_VIEW);
+                    main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
+                }
                 PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
                 PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
                 notif = notifHelper.getNotification(title, msg,
