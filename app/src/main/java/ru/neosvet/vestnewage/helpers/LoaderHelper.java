@@ -99,6 +99,7 @@ public class LoaderHelper extends LifecycleService {
                     msg += "\n" + getResources().getString(R.string.touch_to_send);
                     main = new Intent(Intent.ACTION_VIEW);
                     main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
+                    ErrorUtils.clear();
                 }
                 PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
                 PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
