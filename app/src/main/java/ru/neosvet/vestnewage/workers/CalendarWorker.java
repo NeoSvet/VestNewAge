@@ -143,6 +143,8 @@ public class CalendarWorker extends Worker {
         String s = br.readLine();
         br.close();
         in.close();
+        if (s.length() < 10)
+            return;
         JSONObject json, jsonI;
         JSONArray jsonA;
         String link;
