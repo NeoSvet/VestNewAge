@@ -25,7 +25,7 @@ import ru.neosvet.vestnewage.model.CabModel;
 public class CabWorker extends Worker {
     private final Context context;
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
-    private final String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru/";
+    private final String HOST = "https://www.otkroveniya.eu/";
 
     public CabWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
