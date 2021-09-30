@@ -227,18 +227,21 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     public boolean existsPage(String link) {
-        Cursor curTitle = db.query(Const.TITLE, new String[]{DataBase.ID},
-                Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
         boolean exists = false;
-        if (curTitle.moveToFirst()) {
-            Cursor curPar = db.query(DataBase.PARAGRAPH, null,
-                    DataBase.ID + DataBase.Q,
-                    new String[]{String.valueOf(curTitle.getInt(0))}
-                    , null, null, null);
-            exists = curPar.moveToFirst();
-            curPar.close();
+        try {
+            Cursor curTitle = db.query(Const.TITLE, new String[]{DataBase.ID},
+                    Const.LINK + DataBase.Q, new String[]{link}, null, null, null);
+            if (curTitle.moveToFirst()) {
+                Cursor curPar = db.query(DataBase.PARAGRAPH, null,
+                        DataBase.ID + DataBase.Q,
+                        new String[]{String.valueOf(curTitle.getInt(0))}
+                        , null, null, null);
+                exists = curPar.moveToFirst();
+                curPar.close();
+            }
+            curTitle.close();
+        } catch (Exception e) {
         }
-        curTitle.close();
         return exists;
     }
 
