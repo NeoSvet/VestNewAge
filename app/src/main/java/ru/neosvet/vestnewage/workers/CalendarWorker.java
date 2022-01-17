@@ -138,7 +138,7 @@ public class CalendarWorker extends Worker {
 
     private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
-                + "AjaxData/Calendar?year=" + year + "&month=" + month));
+                + "AjaxData/Calendar/" + year + "-" + month + ".json"));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
         br.close();
@@ -150,6 +150,7 @@ public class CalendarWorker extends Worker {
         String link;
         initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
         json = new JSONObject(s);
+        json = json.getJSONObject("calendarData");
         DateHelper d;
         int n;
         for (int i = 0; i < json.names().length() && !ProgressHelper.isCancelled(); i++) {
