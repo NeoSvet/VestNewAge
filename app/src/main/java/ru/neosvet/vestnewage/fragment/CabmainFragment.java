@@ -238,19 +238,24 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                 if (mode_list == CabModel.LOGIN) {
                     String s;
                     switch (pos) {
-                        case 0: //восстановить доступ
+                        case 0: //не открывает
+                            s = "http://neosvet.ucoz.ru/vna/vpn.html";
+                            Lib lib = new Lib(act);
+                            lib.openInApps(s, null);
+                            return;
+                        case 1: //восстановить доступ
                             s = "sendpass.html";
                             break;
-                        case 1: //зарегистрироваться
+                        case 2: //зарегистрироваться
                             s = "register.html";
                             break;
-                        case 2: //о регистрации
+                        case 3: //о регистрации
                             s = "reginfo.html";
                             break;
-                        case 3: //стастистика регистраций
+                        case 4: //стастистика регистраций
                             s = "regstat.html";
                             break;
-                        default: //(4) стастистика слов
+                        default: //(5) стастистика слов
                             s = "trans.html";
                             break;
                     }
