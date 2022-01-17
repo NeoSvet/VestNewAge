@@ -15,7 +15,7 @@
         <item>&#160;дня</item>
     </string-array>
     <string-array name="cabinet_main">
-        <item>Не открывает?</item>
+        <item>Не открывается?</item>
         <item>Возможно необходимо воспользоваться VPN</item>
         <item>Восстановить доступ</item>
         <item>к личному кабинету</item>
