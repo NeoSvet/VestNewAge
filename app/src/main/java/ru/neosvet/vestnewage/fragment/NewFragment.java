@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -80,22 +79,19 @@ public class NewFragment extends Fragment {
 
     private void initClear() {
         act.fab = fabClear;
-        fabClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    UnreadHelper unread = new UnreadHelper(act);
-                    unread.clearList();
-                    unread.setBadge(ads.getUnreadCount());
-                    unread.close();
-                    adNew.clear();
-                    adNew.notifyDataSetChanged();
-                    tvEmptyNew.setVisibility(View.VISIBLE);
-                    fabClear.setVisibility(View.GONE);
-                    act.updateNew();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        fabClear.setOnClickListener(view -> {
+            try {
+                UnreadHelper unread = new UnreadHelper(act);
+                unread.clearList();
+                unread.setBadge(ads.getUnreadCount());
+                unread.close();
+                adNew.clear();
+                adNew.notifyDataSetChanged();
+                tvEmptyNew.setVisibility(View.VISIBLE);
+                fabClear.setVisibility(View.GONE);
+                act.updateNew();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -103,31 +99,25 @@ public class NewFragment extends Fragment {
     private void initList(ListView lvNew) {
         adNew = new ListAdapter(act);
         lvNew.setAdapter(adNew);
-        lvNew.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
-                    ads.setIndex(pos);
-                    showAd(pos);
-                } else if (!adNew.getItem(pos).getLink().equals("")) {
-                    BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
-                }
+        lvNew.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
+                ads.setIndex(pos);
+                showAd(pos);
+            } else if (!adNew.getItem(pos).getLink().equals("")) {
+                BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
             }
         });
-        lvNew.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (!act.status.startMin())
-                        act.startAnimMin();
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
-                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                    if (!act.status.startMax())
-                        act.startAnimMax();
-                }
-                return false;
+        lvNew.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!act.status.startMin())
+                    act.startAnimMin();
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                    || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                if (!act.status.startMax())
+                    act.startAnimMax();
             }
+            return false;
         });
     }
 

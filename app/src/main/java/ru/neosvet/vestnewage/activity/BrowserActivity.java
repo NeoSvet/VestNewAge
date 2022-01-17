@@ -40,7 +40,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -188,14 +187,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                                 * (float) wvBrowser.getContentHeight()));
                     }
                 };
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            Thread.sleep(500);
-                            h.sendEmptyMessage(0);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(500);
+                        h.sendEmptyMessage(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }).start();
             }
@@ -354,126 +351,96 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void setViews() {
         wvBrowser.setWebViewClient(new WebClient(this));
-        wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (!navbuttons)
-                    return;
-                if (scrollY > 300) {
-                    fabTop.setVisibility(View.VISIBLE);
-                    fabBottom.setVisibility(View.GONE);
-                } else {
-                    fabTop.setVisibility(View.GONE);
-                    fabBottom.setVisibility(View.VISIBLE);
+        wvBrowser.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (!navbuttons)
+                return;
+            if (scrollY > 300) {
+                fabTop.setVisibility(View.VISIBLE);
+                fabBottom.setVisibility(View.GONE);
+            } else {
+                fabTop.setVisibility(View.GONE);
+                fabBottom.setVisibility(View.VISIBLE);
+            }
+        });
+        wvBrowser.setOnTouchListener((view, event) -> {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                if (!nomenu && pSearch.getVisibility() == View.GONE)
+                    fabMenu.startAnimation(anMin);
+                if (prom.isProm() && tvPromTime != null)
+                    tvPromTime.startAnimation(anMin);
+            } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
+                    event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                if (!nomenu && pSearch.getVisibility() == View.GONE) {
+                    fabMenu.setVisibility(View.VISIBLE);
+                    fabMenu.startAnimation(anMax);
+                }
+                if (prom.isProm() && tvPromTime != null) {
+                    tvPromTime.setVisibility(View.VISIBLE);
+                    tvPromTime.startAnimation(anMax);
                 }
             }
-        });
-        wvBrowser.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (!nomenu && pSearch.getVisibility() == View.GONE)
-                        fabMenu.startAnimation(anMin);
-                    if (prom.isProm() && tvPromTime != null)
-                        tvPromTime.startAnimation(anMin);
-                } else if (event.getActionMasked() == MotionEvent.ACTION_UP ||
-                        event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                    if (!nomenu && pSearch.getVisibility() == View.GONE) {
-                        fabMenu.setVisibility(View.VISIBLE);
-                        fabMenu.startAnimation(anMax);
-                    }
-                    if (prom.isProm() && tvPromTime != null) {
-                        tvPromTime.setVisibility(View.VISIBLE);
-                        tvPromTime.startAnimation(anMax);
-                    }
-                }
-                if (event.getPointerCount() == 2) {
-                    twoPointers = true;
-                } else if (twoPointers) {
-                    twoPointers = false;
-                    wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
-                }
-                return false;
+            if (event.getPointerCount() == 2) {
+                twoPointers = true;
+            } else if (twoPointers) {
+                twoPointers = false;
+                wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
             }
+            return false;
         });
-        fabMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawerMenu.openDrawer(Gravity.LEFT);
-            }
-        });
-        fabTop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                wvBrowser.scrollTo(0, 0);
-            }
-        });
-        fabBottom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fabMenu.setOnClickListener(view ->
+                drawerMenu.openDrawer(Gravity.LEFT)
+        );
+        fabTop.setOnClickListener(view ->
+                wvBrowser.scrollTo(0, 0)
+        );
+        fabBottom.setOnClickListener(view ->
                 wvBrowser.scrollTo(0, (int) (wvBrowser.getContentHeight()
-                        * wvBrowser.getScale()));
-            }
-        });
-        etSearch.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-                        || keyCode == EditorInfo.IME_ACTION_SEARCH) {
-                    if (etSearch.length() > 0) {
-                        searchOk();
-                        findText(string);
-                    }
-                    return true;
+                        * wvBrowser.getScale()))
+        );
+        etSearch.setOnKeyListener((view, keyCode, keyEvent) -> {
+            if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                    || keyCode == EditorInfo.IME_ACTION_SEARCH) {
+                if (etSearch.length() > 0) {
+                    searchOk();
+                    findText(string);
                 }
-                return false;
+                return true;
             }
+            return false;
         });
-        bPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (iPlace > -1) {
-                    if (--iPlace == -1)
-                        iPlace = place.length - 1;
-                    etSearch.setText(place[iPlace]);
-                    findText(place[iPlace]);
-                    return;
-                }
-                searchOk();
-                if (!didSearch)
-                    initSearch();
-                wvBrowser.findNext(false);
+        bPrev.setOnClickListener(view -> {
+            if (iPlace > -1) {
+                if (--iPlace == -1)
+                    iPlace = place.length - 1;
+                etSearch.setText(place[iPlace]);
+                findText(place[iPlace]);
+                return;
             }
+            searchOk();
+            if (!didSearch)
+                initSearch();
+            wvBrowser.findNext(false);
         });
-        bNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (iPlace > -1) {
-                    if (++iPlace == place.length)
-                        iPlace = 0;
-                    etSearch.setText(place[iPlace]);
-                    findText(place[iPlace]);
-                    return;
-                }
-                searchOk();
-                if (!didSearch)
-                    initSearch();
-                wvBrowser.findNext(true);
+        bNext.setOnClickListener(view -> {
+            if (iPlace > -1) {
+                if (++iPlace == place.length)
+                    iPlace = 0;
+                etSearch.setText(place[iPlace]);
+                findText(place[iPlace]);
+                return;
             }
+            searchOk();
+            if (!didSearch)
+                initSearch();
+            wvBrowser.findNext(true);
         });
-        findViewById(R.id.bClose).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                softKeyboard.closeSoftKeyboard();
-                closeSearch();
-            }
+        findViewById(R.id.bClose).setOnClickListener(view -> {
+            softKeyboard.closeSoftKeyboard();
+            closeSearch();
         });
-        bBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                BrowserActivity.this.finish();
-            }
-        });
+        bBack.setOnClickListener(view ->
+                BrowserActivity.this.finish()
+        );
         initTheme();
         if (pref.getBoolean(NOMENU, false)) {
             nomenu = true;
@@ -485,14 +452,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             setCheckItem(miButtons, navbuttons);
         } else
             fabBottom.setVisibility(View.GONE);
-        status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (status.isTime())
-                    downloadPage(true);
-                else
-                    status.onClick();
-            }
+        status.setClick(view -> {
+            if (status.isTime())
+                downloadPage(true);
+            else
+                status.onClick();
         });
     }
 
@@ -565,12 +529,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     closeSearch();
                 fabMenu.setVisibility(View.GONE);
                 pSearch.setVisibility(View.VISIBLE);
-                etSearch.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        etSearch.requestFocus();
-                    }
-                });
+                etSearch.post(() -> etSearch.requestFocus());
                 softKeyboard.openSoftKeyboard();
                 break;
             case R.id.nav_marker:
@@ -789,33 +748,30 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (runBrowser != null)
             wvBrowser.removeCallbacks(runBrowser);
         if (runNextPage == null)
-            runNextPage = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String s = dbPage.getNextPage(link);
-                        if (s != null) {
-                            openLink(s, false);
-                            return;
-                        }
-                        final String today = DateHelper.initToday(BrowserActivity.this).getMY();
-                        DateHelper d = getDateFromLink();
-                        if (d.getMY().equals(today)) {
-                            tipEndList();
-                            return;
-                        }
-                        d.changeMonth(1);
-                        dbPage.close();
-                        dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                        Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
-                        if (cursor.moveToFirst()) {
-                            openLink(cursor.getString(0), false);
-                            return;
-                        }
-                    } catch (Exception e) {
+            runNextPage = () -> {
+                try {
+                    String s = dbPage.getNextPage(link);
+                    if (s != null) {
+                        openLink(s, false);
+                        return;
                     }
-                    tipEndList();
+                    final String today = DateHelper.initToday(BrowserActivity.this).getMY();
+                    DateHelper d = getDateFromLink();
+                    if (d.getMY().equals(today)) {
+                        tipEndList();
+                        return;
+                    }
+                    d.changeMonth(1);
+                    dbPage.close();
+                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    if (cursor.moveToFirst()) {
+                        openLink(cursor.getString(0), false);
+                        return;
+                    }
+                } catch (Exception e) {
                 }
+                tipEndList();
             };
         runBrowser = runNextPage;
         wvBrowser.post(runBrowser);
@@ -833,35 +789,32 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (runBrowser != null)
             wvBrowser.removeCallbacks(runBrowser);
         if (runPrevPage == null)
-            runPrevPage = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String s = dbPage.getPrevPage(link);
-                        if (s != null) {
-                            openLink(s, false);
-                            return;
-                        }
-                        final String min = getMinMY();
-                        DateHelper d = getDateFromLink();
-                        if (d.getMY().equals(min)) {
-                            tipEndList();
-                            return;
-                        }
-                        d.changeMonth(-1);
-                        dbPage.close();
-                        dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                        Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
-                        if (cursor.moveToLast()) {
-                            openLink(cursor.getString(0), false);
-                            return;
-                        }
-                    } catch (Exception e) {
+            runPrevPage = () -> {
+                try {
+                    String s = dbPage.getPrevPage(link);
+                    if (s != null) {
+                        openLink(s, false);
+                        return;
+                    }
+                    final String min = getMinMY();
+                    DateHelper d = getDateFromLink();
+                    if (d.getMY().equals(min)) {
                         tipEndList();
                         return;
                     }
+                    d.changeMonth(-1);
+                    dbPage.close();
+                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
+                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    if (cursor.moveToLast()) {
+                        openLink(cursor.getString(0), false);
+                        return;
+                    }
+                } catch (Exception e) {
                     tipEndList();
+                    return;
                 }
+                tipEndList();
             };
         runBrowser = runPrevPage;
         wvBrowser.post(runBrowser);

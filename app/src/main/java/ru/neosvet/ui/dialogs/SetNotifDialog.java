@@ -11,7 +11,6 @@ import android.os.Environment;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -60,52 +59,40 @@ public class SetNotifDialog extends Dialog {
         }
         cbVibr.setChecked(pref.getBoolean(VIBR, true));
 
-        cbSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean user) {
-                if (cbSound.isChecked()) {
-                    tvSound.setVisibility(View.VISIBLE);
-                    tvLabel.setVisibility(View.VISIBLE);
-                    pButtons.setVisibility(View.VISIBLE);
-                } else {
-                    tvSound.setVisibility(View.GONE);
-                    tvLabel.setVisibility(View.GONE);
-                    pButtons.setVisibility(View.GONE);
-                }
+        cbSound.setOnCheckedChangeListener((compoundButton, user) -> {
+            if (cbSound.isChecked()) {
+                tvSound.setVisibility(View.VISIBLE);
+                tvLabel.setVisibility(View.VISIBLE);
+                pButtons.setVisibility(View.VISIBLE);
+            } else {
+                tvSound.setVisibility(View.GONE);
+                tvLabel.setVisibility(View.GONE);
+                pButtons.setVisibility(View.GONE);
             }
         });
-        findViewById(R.id.bStandard).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
-                act.startActivityForResult(intent, RINGTONE);
-            }
+        findViewById(R.id.bStandard).setOnClickListener(view -> {
+            Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+            act.startActivityForResult(intent, RINGTONE);
         });
-        findViewById(R.id.bCustom).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Lib lib = new Lib(act);
-                if (lib.verifyStoragePermissions(RINGTONE)) return;
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                String data = uri;
-                if (data == null)
-                    data = Environment.getExternalStorageDirectory().getAbsolutePath();
-                intent.setDataAndType(android.net.Uri.parse(data), "audio/*");
-                act.startActivityForResult(intent, CUSTOM);
-            }
+        findViewById(R.id.bCustom).setOnClickListener(view -> {
+            Lib lib = new Lib(act);
+            if (lib.verifyStoragePermissions(RINGTONE)) return;
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            String data = uri;
+            if (data == null)
+                data = Environment.getExternalStorageDirectory().getAbsolutePath();
+            intent.setDataAndType(android.net.Uri.parse(data), "audio/*");
+            act.startActivityForResult(intent, CUSTOM);
         });
-        findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean(SOUND, cbSound.isChecked());
-                editor.putString(NAME, name);
-                editor.putString(URI, uri);
-                editor.putBoolean(VIBR, cbVibr.isChecked());
-                editor.apply();
-                SetNotifDialog.this.dismiss();
-            }
+        findViewById(R.id.bOk).setOnClickListener(view -> {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean(SOUND, cbSound.isChecked());
+            editor.putString(NAME, name);
+            editor.putString(URI, uri);
+            editor.putBoolean(VIBR, cbVibr.isChecked());
+            editor.apply();
+            SetNotifDialog.this.dismiss();
         });
     }
 

@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -128,48 +127,34 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     }
 
     private void setViews() {
-        fabRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fabRefresh.setOnClickListener(view -> startLoad());
+        act.status.setClick(view -> {
+            if (!act.status.isStop()) {
+                act.status.setLoad(false);
+                ProgressHelper.cancelled();
+                fabRefresh.setVisibility(View.VISIBLE);
+                ProgressHelper.setBusy(false);
+                return;
+            }
+            if (act.status.onClick())
+                fabRefresh.setVisibility(View.VISIBLE);
+            else if (act.status.isTime())
                 startLoad();
-            }
         });
-        act.status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!act.status.isStop()) {
-                    act.status.setLoad(false);
-                    ProgressHelper.cancelled();
-                    fabRefresh.setVisibility(View.VISIBLE);
-                    ProgressHelper.setBusy(false);
-                    return;
-                }
-                if (act.status.onClick())
-                    fabRefresh.setVisibility(View.VISIBLE);
-                else if (act.status.isTime())
-                    startLoad();
-            }
+        lvSummary.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
         });
-        lvSummary.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
+        lvSummary.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!act.status.startMin())
+                    act.startAnimMin();
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                    || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                if (!act.status.startMax())
+                    act.startAnimMax();
             }
-        });
-        lvSummary.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (!act.status.startMin())
-                        act.startAnimMin();
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
-                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                    if (!act.status.startMax())
-                        act.startAnimMax();
-                }
-                return false;
-            }
+            return false;
         });
     }
 

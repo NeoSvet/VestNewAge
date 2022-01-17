@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Message;
 
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LifecycleService;
@@ -101,8 +100,8 @@ public class LoaderHelper extends LifecycleService {
                     main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
                     ErrorUtils.clear();
                 }
-                PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
-                PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
                 notif = notifHelper.getNotification(title, msg,
                         NotificationHelper.CHANNEL_TIPS)
                         .setContentIntent(piMain)
@@ -121,27 +120,22 @@ public class LoaderHelper extends LifecycleService {
             Lib.showToast(getApplicationContext(), getResources().getString(R.string.load_background));
         startLoad(mode, intent.getStringExtra(Const.TASK));
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        final Handler handler = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                notif.setContentText(ProgressHelper.getMessage());
-                notif.setProgress(ProgressHelper.getMax(), ProgressHelper.getProg(), false);
-                manager.notify(notif_id, notif.build());
-                return false;
-            }
+        final Handler handler = new Handler(message -> {
+            notif.setContentText(ProgressHelper.getMessage());
+            notif.setProgress(ProgressHelper.getMax(), ProgressHelper.getProg(), false);
+            manager.notify(notif_id, notif.build());
+            return false;
         });
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (start) {
-                        Thread.sleep(DateHelper.SEC_IN_MILLS);
-                        if (start)
-                            handler.sendEmptyMessage(0);
-                    }
-                    stopForeground(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        new Thread(() -> {
+            try {
+                while (start) {
+                    Thread.sleep(DateHelper.SEC_IN_MILLS);
+                    if (start)
+                        handler.sendEmptyMessage(0);
                 }
+                stopForeground(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }).start();
         return super.onStartCommand(intent, flags, startId);
@@ -156,11 +150,11 @@ public class LoaderHelper extends LifecycleService {
     private void initNotif() {
         NotificationHelper notifHelper = new NotificationHelper(this);
         Intent main = new Intent(this, MainActivity.class);
-        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         Intent iStop = new Intent(this, LoaderHelper.class);
         iStop.putExtra(Const.FINISH, true);
         iStop.putExtra(Const.MODE, STOP);
-        PendingIntent piStop = PendingIntent.getService(this, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent piStop = PendingIntent.getService(this, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
         notif = notifHelper.getNotification(
                 getResources().getString(R.string.load),
                 getResources().getString(R.string.start),

@@ -71,12 +71,9 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     private boolean notClick = false, fromOtkr;
     private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
-    final Handler hTimer = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
-            return false;
-        }
+    final Handler hTimer = new Handler(message -> {
+        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+        return false;
     });
 
     @Override
@@ -230,16 +227,14 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             }
         }
         tabHost.setCurrentTab(1);
-        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-            public void onTabChanged(String name) {
-                if (ProgressHelper.isBusy()) return;
-                if (name.equals(Const.KATRENY))
-                    act.setTitle(getResources().getString(R.string.katreny));
-                else
-                    act.setTitle(getResources().getString(R.string.poslaniya));
-                tab = tabHost.getCurrentTab();
-                openList(true);
-            }
+        tabHost.setOnTabChangedListener(name -> {
+            if (ProgressHelper.isBusy()) return;
+            if (name.equals(Const.KATRENY))
+                act.setTitle(getResources().getString(R.string.katreny));
+            else
+                act.setTitle(getResources().getString(R.string.poslaniya));
+            tab = tabHost.getCurrentTab();
+            openList(true);
         });
     }
 
@@ -417,108 +412,78 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
 
     @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
-        fabRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startLoad();
-            }
-        });
+        fabRefresh.setOnClickListener(view -> startLoad());
         adBook = new ListAdapter(act);
         lvBook.setAdapter(adBook);
-        lvBook.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
-                if (notClick) return;
-                if (act.checkBusy()) return;
-                BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), null);
-            }
+        lvBook.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (notClick) return;
+            if (act.checkBusy()) return;
+            BrowserActivity.openReader(act, adBook.getItem(pos).getLink(), null);
         });
-        lvBook.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (!act.status.startMin()) {
-                            fabRefresh.startAnimation(anMin);
-                            fabRndMenu.startAnimation(anMin);
-                            menuRnd.hide();
-                        }
-                        x = (int) event.getX(0);
-                        y = (int) event.getY(0);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
-                        notClick = false;
-                        if (r > (int) (30 * getResources().getDisplayMetrics().density))
-                            if (r > Math.abs(y - (int) event.getY(0))) {
-                                if (x > x2) { // next
-                                    if (ivNext.isEnabled())
-                                        openMonth(true);
-                                    notClick = true;
-                                } else if (x < x2) { // prev
-                                    if (ivPrev.isEnabled())
-                                        openMonth(false);
-                                    notClick = true;
-                                }
+        lvBook.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (!act.status.startMin()) {
+                        fabRefresh.startAnimation(anMin);
+                        fabRndMenu.startAnimation(anMin);
+                        menuRnd.hide();
+                    }
+                    x = (int) event.getX(0);
+                    y = (int) event.getY(0);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
+                    notClick = false;
+                    if (r > (int) (30 * getResources().getDisplayMetrics().density))
+                        if (r > Math.abs(y - (int) event.getY(0))) {
+                            if (x > x2) { // next
+                                if (ivNext.isEnabled())
+                                    openMonth(true);
+                                notClick = true;
+                            } else if (x < x2) { // prev
+                                if (ivPrev.isEnabled())
+                                    openMonth(false);
+                                notClick = true;
                             }
-                    case MotionEvent.ACTION_CANCEL:
-                        if (!act.status.startMax()) {
-                            fabRefresh.setVisibility(View.VISIBLE);
-                            fabRefresh.startAnimation(anMax);
-                            fabRndMenu.setVisibility(View.VISIBLE);
-                            fabRndMenu.startAnimation(anMax);
                         }
-                        break;
-                }
-                return false;
+                case MotionEvent.ACTION_CANCEL:
+                    if (!act.status.startMax()) {
+                        fabRefresh.setVisibility(View.VISIBLE);
+                        fabRefresh.startAnimation(anMax);
+                        fabRndMenu.setVisibility(View.VISIBLE);
+                        fabRndMenu.startAnimation(anMax);
+                    }
+                    break;
             }
+            return false;
         });
-        ivPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMonth(false);
+        ivPrev.setOnClickListener(view -> openMonth(false));
+        ivNext.setOnClickListener(view -> openMonth(true));
+        act.status.setClick(view -> {
+            if (!act.status.isStop()) {
+                act.status.setLoad(false);
+                ProgressHelper.cancelled();
+                fabRefresh.setVisibility(View.VISIBLE);
+                fabRndMenu.setVisibility(View.VISIBLE);
+                ProgressHelper.setBusy(false);
+                return;
             }
+            if (act.status.onClick()) {
+                fabRefresh.setVisibility(View.VISIBLE);
+                fabRndMenu.setVisibility(View.VISIBLE);
+            } else if (act.status.isTime())
+                startLoad();
         });
-        ivNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMonth(true);
-            }
+        tvDate.setOnClickListener(view -> {
+            if (act.checkBusy()) return;
+            dialog = DIALOG_DATE;
+            showDatePicker(null);
         });
-        act.status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!act.status.isStop()) {
-                    act.status.setLoad(false);
-                    ProgressHelper.cancelled();
-                    fabRefresh.setVisibility(View.VISIBLE);
-                    fabRndMenu.setVisibility(View.VISIBLE);
-                    ProgressHelper.setBusy(false);
-                    return;
-                }
-                if (act.status.onClick()) {
-                    fabRefresh.setVisibility(View.VISIBLE);
-                    fabRndMenu.setVisibility(View.VISIBLE);
-                } else if (act.status.isTime())
-                    startLoad();
-            }
-        });
-        tvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (act.checkBusy()) return;
-                dialog = DIALOG_DATE;
-                showDatePicker(null);
-            }
-        });
-        fabRndMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (menuRnd.isShow())
-                    menuRnd.hide();
-                else
-                    menuRnd.show();
-            }
+        fabRndMenu.setOnClickListener(view -> {
+            if (menuRnd.isShow())
+                menuRnd.hide();
+            else
+                menuRnd.show();
         });
     }
 
@@ -529,18 +494,12 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                 builder.setMessage(getResources().getString(R.string.alert_download_otkr));
                 builder.setNegativeButton(getResources().getString(R.string.no),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            }
-                        });
+                        (dialog, id) -> dialog.dismiss());
                 builder.setPositiveButton(getResources().getString(R.string.yes),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                ProgressHelper.addObserver(act, BookFragment.this);
-                                ivPrev.setEnabled(false);
-                                LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
-                            }
+                        (dialog, id) -> {
+                            ProgressHelper.addObserver(act, BookFragment.this);
+                            ivPrev.setEnabled(false);
+                            LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
                         });
                 builder.create().show();
                 return;
@@ -780,28 +739,17 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         alertRnd = new CustomDialog(act);
         alertRnd.setTitle(title);
         alertRnd.setMessage(msg);
-        alertRnd.setLeftButton(getResources().getString(R.string.in_markers), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent marker = new Intent(act, MarkerActivity.class);
-                marker.putExtra(Const.LINK, link);
-                marker.putExtra(DataBase.PARAGRAPH, par);
-                startActivity(marker);
-                alertRnd.dismiss();
-            }
+        alertRnd.setLeftButton(getResources().getString(R.string.in_markers), view -> {
+            Intent marker = new Intent(act, MarkerActivity.class);
+            marker.putExtra(Const.LINK, link);
+            marker.putExtra(DataBase.PARAGRAPH, par);
+            startActivity(marker);
+            alertRnd.dismiss();
         });
-        alertRnd.setRightButton(getResources().getString(R.string.open), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                BrowserActivity.openReader(act, link, place);
-                alertRnd.dismiss();
-            }
+        alertRnd.setRightButton(getResources().getString(R.string.open), view -> {
+            BrowserActivity.openReader(act, link, place);
+            alertRnd.dismiss();
         });
-        alertRnd.show(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                dialog = "";
-            }
-        });
+        alertRnd.show(dialogInterface -> dialog = "");
     }
 }

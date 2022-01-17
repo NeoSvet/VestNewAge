@@ -2,7 +2,6 @@ package ru.neosvet.ui;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -18,13 +17,10 @@ public class Tip {
     private Animation anShow, anHide;
     private Timer timer;
 
-    final Handler hHide = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            if (show)
-                object.startAnimation(anHide);
-            return false;
-        }
+    final Handler hHide = new Handler(message -> {
+        if (show)
+            object.startAnimation(anHide);
+        return false;
     });
 
     public Tip(Context context, final View object) {

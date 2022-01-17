@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -152,82 +151,67 @@ public class JournalFragment extends Fragment {
         fabNext = container.findViewById(R.id.fabNext);
         fabClear = container.findViewById(R.id.fabClear);
         tvEmptyJournal = container.findViewById(R.id.tvEmptyJournal);
-        fabPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (offset == 0) {
-                    tip.show();
-                } else {
-                    offset -= Const.MAX_ON_PAGE;
-                    adJournal.clear();
-                    openList();
-                }
-            }
-        });
-        fabNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (finish) {
-                    tip.show();
-                } else {
-                    offset += Const.MAX_ON_PAGE;
-                    adJournal.clear();
-                    openList();
-                }
-            }
-        });
-        fabClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                fabClear.setVisibility(View.GONE);
-                container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
-                dbJournal.delete(DataBase.JOURNAL);
-                dbJournal.close();
+        fabPrev.setOnClickListener(view -> {
+            if (offset == 0) {
+                tip.show();
+            } else {
+                offset -= Const.MAX_ON_PAGE;
                 adJournal.clear();
-                adJournal.notifyDataSetChanged();
-                fabPrev.setVisibility(View.GONE);
-                fabNext.setVisibility(View.GONE);
-                finish = true;
-                offset = 0;
+                openList();
             }
+        });
+        fabNext.setOnClickListener(view -> {
+            if (finish) {
+                tip.show();
+            } else {
+                offset += Const.MAX_ON_PAGE;
+                adJournal.clear();
+                openList();
+            }
+        });
+        fabClear.setOnClickListener(view -> {
+            fabClear.setVisibility(View.GONE);
+            container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
+            dbJournal.delete(DataBase.JOURNAL);
+            dbJournal.close();
+            adJournal.clear();
+            adJournal.notifyDataSetChanged();
+            fabPrev.setVisibility(View.GONE);
+            fabNext.setVisibility(View.GONE);
+            finish = true;
+            offset = 0;
         });
         dbJournal = new DataBase(act, DataBase.JOURNAL);
         lvJournal = container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
-        lvJournal.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                String link = adJournal.getItem(pos).getLink();
-                String s = adJournal.getItem(pos).getDes();
-                if (s.contains(getResources().getString(R.string.rnd_stih))) {
-                    s = s.substring(s.indexOf(Const.N, s.indexOf(
-                            getResources().getString(R.string.rnd_stih))) + 1);
-                    Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
-                } else
-                    s = null;
-                BrowserActivity.openReader(act, link, s);
-                adJournal.clear();
-            }
+        lvJournal.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            String link = adJournal.getItem(pos).getLink();
+            String s = adJournal.getItem(pos).getDes();
+            if (s.contains(getResources().getString(R.string.rnd_stih))) {
+                s = s.substring(s.indexOf(Const.N, s.indexOf(
+                        getResources().getString(R.string.rnd_stih))) + 1);
+                Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
+            } else
+                s = null;
+            BrowserActivity.openReader(act, link, s);
+            adJournal.clear();
         });
-        lvJournal.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                String des = adJournal.getItem(pos).getDes();
-                String par = null;
-                int i = des.indexOf(getResources().getString(R.string.rnd_stih));
-                if (i > -1 && i < des.lastIndexOf(Const.N)) {
-                    par = des.substring(des.indexOf(Const.N, i) + 1);
-                    i = des.indexOf("«");
-                    des = des.substring(i, des.indexOf(Const.N, i) - 1);
-                } else if (des.contains("«")) {
-                    des = des.substring(des.indexOf("«"));
-                } else
-                    des = des.substring(des.indexOf("(") + 1, des.indexOf(")"));
-                MarkerActivity.addMarker(act, adJournal.getItem(pos).getLink(), par, des);
-                return true;
-            }
+        lvJournal.setOnItemLongClickListener((adapterView, view, pos, l) -> {
+            String des = adJournal.getItem(pos).getDes();
+            String par = null;
+            int i = des.indexOf(getResources().getString(R.string.rnd_stih));
+            if (i > -1 && i < des.lastIndexOf(Const.N)) {
+                par = des.substring(des.indexOf(Const.N, i) + 1);
+                i = des.indexOf("«");
+                des = des.substring(i, des.indexOf(Const.N, i) - 1);
+            } else if (des.contains("«")) {
+                des = des.substring(des.indexOf("«"));
+            } else
+                des = des.substring(des.indexOf("(") + 1, des.indexOf(")"));
+            MarkerActivity.addMarker(act, adJournal.getItem(pos).getLink(), par, des);
+            return true;
         });
         lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -265,30 +249,27 @@ public class JournalFragment extends Fragment {
             }
         });
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
-        lvJournal.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (adJournal.getCount() == 0)
-                    return false;
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    fabClear.startAnimation(anMin);
-                    if (fabNext.getVisibility() == View.VISIBLE) {
-                        fabPrev.startAnimation(anMin);
-                        fabNext.startAnimation(anMin);
-                    }
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
-                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                    fabClear.setVisibility(View.VISIBLE);
-                    fabClear.startAnimation(anMax);
-                    if (offset > 0 || !finish) {
-                        fabPrev.setVisibility(View.VISIBLE);
-                        fabNext.setVisibility(View.VISIBLE);
-                        fabPrev.startAnimation(anMax);
-                        fabNext.startAnimation(anMax);
-                    }
-                }
+        lvJournal.setOnTouchListener((view, motionEvent) -> {
+            if (adJournal.getCount() == 0)
                 return false;
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                fabClear.startAnimation(anMin);
+                if (fabNext.getVisibility() == View.VISIBLE) {
+                    fabPrev.startAnimation(anMin);
+                    fabNext.startAnimation(anMin);
+                }
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                    || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                fabClear.setVisibility(View.VISIBLE);
+                fabClear.startAnimation(anMax);
+                if (offset > 0 || !finish) {
+                    fabPrev.setVisibility(View.VISIBLE);
+                    fabNext.setVisibility(View.VISIBLE);
+                    fabPrev.startAnimation(anMax);
+                    fabNext.startAnimation(anMax);
+                }
             }
+            return false;
         });
     }
 

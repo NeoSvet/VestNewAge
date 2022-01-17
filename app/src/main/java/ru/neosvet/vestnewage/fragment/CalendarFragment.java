@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -51,15 +52,12 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private MainActivity act;
     private DateDialog dateDialog;
     private boolean dialog = false;
-    final Handler hTimer = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            if (message.what == 0)
-                tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
-            else
-                act.startAnimMax();
-            return false;
-        }
+    final Handler hTimer = new Handler(message -> {
+        if (message.what == 0)
+            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+        else
+            act.startAnimMax();
+        return false;
     });
 
     @Override
@@ -169,33 +167,20 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         today_m = d.getMonth();
         today_y = d.getYear();
         fabRefresh = container.findViewById(R.id.fabRefresh);
-        container.findViewById(R.id.bProm).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openLink("Posyl-na-Edinenie.html");
+        container.findViewById(R.id.bProm).setOnClickListener(v -> openLink("Posyl-na-Edinenie.html"));
+        fabRefresh.setOnClickListener(view -> startLoad());
+        act.status.setClick(view -> {
+            if (!act.status.isStop()) {
+                act.status.setLoad(false);
+                ProgressHelper.cancelled();
+                fabRefresh.setVisibility(View.VISIBLE);
+                ProgressHelper.setBusy(false);
+                return;
             }
-        });
-        fabRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            if (act.status.onClick()) {
+                fabRefresh.setVisibility(View.VISIBLE);
+            } else if (act.status.isTime())
                 startLoad();
-            }
-        });
-        act.status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!act.status.isStop()) {
-                    act.status.setLoad(false);
-                    ProgressHelper.cancelled();
-                    fabRefresh.setVisibility(View.VISIBLE);
-                    ProgressHelper.setBusy(false);
-                    return;
-                }
-                if (act.status.onClick()) {
-                    fabRefresh.setVisibility(View.VISIBLE);
-                } else if (act.status.isTime())
-                    startLoad();
-            }
         });
         act.fab = fabRefresh;
     }
@@ -206,43 +191,27 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         rvCalendar.setLayoutManager(layoutManager);
         rvCalendar.setAdapter(adCalendar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            rvCalendar.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (!act.isInMultiWindowMode())
-                        return false;
-                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                        act.startAnimMin();
-                    }
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                hTimer.sendEmptyMessage(1);
-                            }
-                        }, 1000);
-                    }
+            rvCalendar.setOnTouchListener((v, event) -> {
+                if (!act.isInMultiWindowMode())
                     return false;
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    act.startAnimMin();
                 }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            hTimer.sendEmptyMessage(1);
+                        }
+                    }, 1000);
+                }
+                return false;
             });
-        ivPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMonth(-1);
-            }
-        });
-        ivNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMonth(1);
-            }
-        });
-        tvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (act.checkBusy()) return;
-                showDatePicker();
-            }
+        ivPrev.setOnClickListener(view -> openMonth(-1));
+        ivNext.setOnClickListener(view -> openMonth(1));
+        tvDate.setOnClickListener(view -> {
+            if (act.checkBusy()) return;
+            showDatePicker();
         });
     }
 

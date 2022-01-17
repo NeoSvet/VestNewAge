@@ -3,9 +3,7 @@ package ru.neosvet.vestnewage.helpers;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
-import android.view.View;
 
 import java.io.BufferedReader;
 
@@ -138,29 +136,17 @@ public class DevadsHelper {
         alert.setMessage(des);
 
         if (link.equals("")) { // only des
-            alert.setRightButton(context.getResources().getString(android.R.string.ok), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    alert.dismiss();
-                }
-            });
+            alert.setRightButton(context.getResources().getString(android.R.string.ok),
+                    view -> alert.dismiss());
         } else {
-            alert.setRightButton(context.getResources().getString(R.string.open_link), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Lib lib = new Lib(context);
-                    lib.openInApps(link, null);
-                    alert.dismiss();
-                }
+            alert.setRightButton(context.getResources().getString(R.string.open_link), view -> {
+                Lib lib = new Lib(context);
+                lib.openInApps(link, null);
+                alert.dismiss();
             });
         }
 
-        alert.show(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                index_ads = -1;
-            }
-        });
+        alert.show(dialogInterface -> index_ads = -1);
     }
 
     public boolean update(BufferedReader br) throws Exception {

@@ -1,7 +1,6 @@
 package ru.neosvet.ui;
 
 import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -14,12 +13,9 @@ import ru.neosvet.vestnewage.activity.BrowserActivity;
 public class WebClient extends WebViewClient {
     private final String files = "file";
     private BrowserActivity act;
-    private Handler hSearch = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message message) {
-            act.initSearch();
-            return false;
-        }
+    private Handler hSearch = new Handler(message -> {
+        act.initSearch();
+        return false;
     });
 
     public WebClient(BrowserActivity act) {

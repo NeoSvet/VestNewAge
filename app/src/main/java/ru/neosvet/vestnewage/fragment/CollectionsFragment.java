@@ -168,10 +168,7 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                             .setTitle(getResources().getString(R.string.error))
                             .setMessage(error)
                             .setPositiveButton(getResources().getString(android.R.string.ok),
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-
-                                        }
+                                    (dialog, id) -> {
                                     });
                     builder.create().show();
                     return;
@@ -189,19 +186,14 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
                         .setMessage(getResources().getString(R.string.send_file))
                         .setPositiveButton(getResources().getString(R.string.yes),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                                        sendIntent.setType("text/plain");
-                                        sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
-                                        startActivity(sendIntent);
-                                    }
+                                (dialog, id) -> {
+                                    Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                    sendIntent.setType("text/plain");
+                                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
+                                    startActivity(sendIntent);
                                 })
                         .setNegativeButton(getResources().getString(R.string.no),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-
-                                    }
+                                (dialog, id) -> {
                                 });
                 builder.create().show();
             } else { //import
@@ -458,185 +450,139 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     }
 
     private void setViews() {
-        lvMarker.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                if (iSel > -1) {
-                    if (sCol == null && pos == 0)
-                        return;
-                    adMarker.getItem(iSel).setSelect(false);
-                    iSel = pos;
-                    adMarker.getItem(iSel).setSelect(true);
-                    adMarker.notifyDataSetChanged();
-                } else if (sCol == null) {
-                    sCol = adMarker.getItem(pos).getTitle()
-                            + Const.N + adMarker.getItem(pos).getData();
-                    loadMarList();
-                } else {
-                    if (adMarker.getItem(pos).getTitle().contains("/")) {
-                        if (ProgressHelper.isBusy() || load)
-                            return;
-                        initLoad();
-                        act.status.startText();
-                        LoaderModel load = new ViewModelProvider(CollectionsFragment.this).get(LoaderModel.class);
-                        load.startLoad(false, adMarker.getItem(pos).getData());
-                        return;
-                    }
-                    String p;
-                    if (adMarker.getItem(pos).getPlace().equals("0"))
-                        p = null;
-                    else {
-                        p = adMarker.getItem(pos).getDes();
-                        p = p.substring(p.indexOf(Const.N, p.indexOf(Const.N) + 1) + 1);
-                    }
-                    BrowserActivity.openReader(act, adMarker.getItem(pos).getData(), p);
-                }
-            }
-        });
-        lvMarker.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (iSel > -1 || adMarker.getCount() == 0)
-                    return false;
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    fabEdit.startAnimation(anMin);
-                    if (sCol != null)
-                        fabBack.startAnimation(anMin);
-                    else if (fabMenu != null)
-                        fabMenu.startAnimation(anMin);
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
-                        || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                    fabEdit.setVisibility(View.VISIBLE);
-                    fabEdit.startAnimation(anMax);
-                    if (sCol != null) {
-                        fabBack.setVisibility(View.VISIBLE);
-                        fabBack.startAnimation(anMax);
-                    } else if (fabMenu != null) {
-                        fabMenu.setVisibility(View.VISIBLE);
-                        fabMenu.startAnimation(anMax);
-                    }
-                }
-                return false;
-            }
-        });
-        fabEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (sCol == null) {
-                    if (adMarker.getCount() == 1) {
-                        Lib.showToast(act, getResources().getString(R.string.nothing_edit));
-                        return;
-                    }
-                    iSel = 1;
-                } else
-                    iSel = 0;
-                goToEdit();
-            }
-        });
-        fabBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sCol = null;
-                loadColList();
-            }
-        });
-        container.findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveChange();
+        lvMarker.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            if (iSel > -1) {
+                if (sCol == null && pos == 0)
+                    return;
                 adMarker.getItem(iSel).setSelect(false);
+                iSel = pos;
+                adMarker.getItem(iSel).setSelect(true);
                 adMarker.notifyDataSetChanged();
-                unSelect();
+            } else if (sCol == null) {
+                sCol = adMarker.getItem(pos).getTitle()
+                        + Const.N + adMarker.getItem(pos).getData();
+                loadMarList();
+            } else {
+                if (adMarker.getItem(pos).getTitle().contains("/")) {
+                    if (ProgressHelper.isBusy() || load)
+                        return;
+                    initLoad();
+                    act.status.startText();
+                    LoaderModel load = new ViewModelProvider(CollectionsFragment.this).get(LoaderModel.class);
+                    load.startLoad(false, adMarker.getItem(pos).getData());
+                    return;
+                }
+                String p;
+                if (adMarker.getItem(pos).getPlace().equals("0"))
+                    p = null;
+                else {
+                    p = adMarker.getItem(pos).getDes();
+                    p = p.substring(p.indexOf(Const.N, p.indexOf(Const.N) + 1) + 1);
+                }
+                BrowserActivity.openReader(act, adMarker.getItem(pos).getData(), p);
             }
         });
-        container.findViewById(R.id.bTop).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int n = 0;
-                if (sCol == null)
-                    n = 1;
-                if (iSel > n) {
-                    change = true;
-                    n = iSel - 1;
-                    MarkItem item = adMarker.getItem(n);
-                    adMarker.removeAt(n);
-                    adMarker.insertItem(iSel, item);
-                    iSel = n;
-                    adMarker.notifyDataSetChanged();
-                    lvMarker.smoothScrollToPosition(iSel);
+        lvMarker.setOnTouchListener((view, motionEvent) -> {
+            if (iSel > -1 || adMarker.getCount() == 0)
+                return false;
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                fabEdit.startAnimation(anMin);
+                if (sCol != null)
+                    fabBack.startAnimation(anMin);
+                else if (fabMenu != null)
+                    fabMenu.startAnimation(anMin);
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                    || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                fabEdit.setVisibility(View.VISIBLE);
+                fabEdit.startAnimation(anMax);
+                if (sCol != null) {
+                    fabBack.setVisibility(View.VISIBLE);
+                    fabBack.startAnimation(anMax);
+                } else if (fabMenu != null) {
+                    fabMenu.setVisibility(View.VISIBLE);
+                    fabMenu.startAnimation(anMax);
                 }
             }
+            return false;
         });
-        container.findViewById(R.id.bBottom).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (iSel < adMarker.getCount() - 1) {
-                    change = true;
-                    int n = iSel + 1;
-                    MarkItem item = adMarker.getItem(n);
-                    adMarker.removeAt(n);
-                    adMarker.insertItem(iSel, item);
-                    iSel = n;
-                    adMarker.notifyDataSetChanged();
-                    lvMarker.smoothScrollToPosition(iSel);
+        fabEdit.setOnClickListener(view -> {
+            if (sCol == null) {
+                if (adMarker.getCount() == 1) {
+                    Lib.showToast(act, getResources().getString(R.string.nothing_edit));
+                    return;
                 }
+                iSel = 1;
+            } else
+                iSel = 0;
+            goToEdit();
+        });
+        fabBack.setOnClickListener(view -> {
+            sCol = null;
+            loadColList();
+        });
+        container.findViewById(R.id.bOk).setOnClickListener(view -> {
+            saveChange();
+            adMarker.getItem(iSel).setSelect(false);
+            adMarker.notifyDataSetChanged();
+            unSelect();
+        });
+        container.findViewById(R.id.bTop).setOnClickListener(view -> {
+            int n = 0;
+            if (sCol == null)
+                n = 1;
+            if (iSel > n) {
+                change = true;
+                n = iSel - 1;
+                MarkItem item = adMarker.getItem(n);
+                adMarker.removeAt(n);
+                adMarker.insertItem(iSel, item);
+                iSel = n;
+                adMarker.notifyDataSetChanged();
+                lvMarker.smoothScrollToPosition(iSel);
             }
         });
-        container.findViewById(R.id.bEdit).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (sCol == null) {
-                    renameDialog(adMarker.getItem(iSel).getTitle());
-                } else {
-                    saveChange();
-                    Intent marker = new Intent(act, MarkerActivity.class);
-                    marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
-                    marker.putExtra(Const.LINK, adMarker.getItem(iSel).getData());
-                    act.startActivityForResult(marker, MARKER_REQUEST);
-                }
+        container.findViewById(R.id.bBottom).setOnClickListener(view -> {
+            if (iSel < adMarker.getCount() - 1) {
+                change = true;
+                int n = iSel + 1;
+                MarkItem item = adMarker.getItem(n);
+                adMarker.removeAt(n);
+                adMarker.insertItem(iSel, item);
+                iSel = n;
+                adMarker.notifyDataSetChanged();
+                lvMarker.smoothScrollToPosition(iSel);
             }
         });
-        container.findViewById(R.id.bDelete).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                delete = true;
-                deleteDialog();
+        container.findViewById(R.id.bEdit).setOnClickListener(view -> {
+            if (sCol == null) {
+                renameDialog(adMarker.getItem(iSel).getTitle());
+            } else {
+                saveChange();
+                Intent marker = new Intent(act, MarkerActivity.class);
+                marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
+                marker.putExtra(Const.LINK, adMarker.getItem(iSel).getData());
+                act.startActivityForResult(marker, MARKER_REQUEST);
             }
         });
-        if (android.os.Build.VERSION.SDK_INT > 18) {
-            fabMenu.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (ProgressHelper.isBusy()) return;
-                    if (menu.isShow())
-                        menu.hide();
-                    else {
-                        if (adMarker.getCount() == 0)
-                            bExport.setVisibility(View.GONE);
-                        else
-                            bExport.setVisibility(View.VISIBLE);
-                        menu.show();
-                    }
-                }
-            });
-            bExport.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    selectFile(true);
-
-                }
-            });
-            container.findViewById(R.id.bImport).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    selectFile(false);
-                }
-            });
-        } else {
-            fabMenu.setVisibility(View.GONE);
-            fabMenu = null;
-        }
+        container.findViewById(R.id.bDelete).setOnClickListener(view -> {
+            delete = true;
+            deleteDialog();
+        });
+        fabMenu.setOnClickListener(view -> {
+            if (ProgressHelper.isBusy()) return;
+            if (menu.isShow())
+                menu.hide();
+            else {
+                if (adMarker.getCount() == 0)
+                    bExport.setVisibility(View.GONE);
+                else
+                    bExport.setVisibility(View.VISIBLE);
+                menu.show();
+            }
+        });
+        bExport.setOnClickListener(view -> selectFile(true));
+        container.findViewById(R.id.bImport).setOnClickListener(view -> selectFile(false));
     }
 
     private void initLoad() {
@@ -650,25 +596,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
         final CustomDialog dialog = new CustomDialog(act);
         dialog.setTitle(getResources().getString(R.string.delete) + "?");
         dialog.setMessage(adMarker.getItem(iSel).getTitle());
-        dialog.setLeftButton(getResources().getString(R.string.no), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
+        dialog.setLeftButton(getResources().getString(R.string.no), view -> dialog.dismiss());
+        dialog.setRightButton(getResources().getString(R.string.yes), view -> {
+            deleteElement();
+            dialog.dismiss();
         });
-        dialog.setRightButton(getResources().getString(R.string.yes), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteElement();
-                dialog.dismiss();
-            }
-        });
-        dialog.show(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                delete = false;
-            }
-        });
+        dialog.show(dialogInterface -> delete = false);
     }
 
     private void renameDialog(String old_name) {
@@ -693,25 +626,12 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
             }
         });
 
-        dialog.setLeftButton(getResources().getString(android.R.string.no), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
+        dialog.setLeftButton(getResources().getString(android.R.string.no), view -> dialog.dismiss());
+        dialog.setRightButton(getResources().getString(android.R.string.yes), view -> {
+            renameCol(dialog.getInputText());
+            dialog.dismiss();
         });
-        dialog.setRightButton(getResources().getString(android.R.string.yes), new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                renameCol(dialog.getInputText());
-                dialog.dismiss();
-            }
-        });
-        dialog.show(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                sName = null;
-            }
-        });
+        dialog.show(dialogInterface -> sName = null);
     }
 
     private void renameCol(String name) {

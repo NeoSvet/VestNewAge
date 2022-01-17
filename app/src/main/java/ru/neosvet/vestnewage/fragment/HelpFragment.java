@@ -73,28 +73,25 @@ public class HelpFragment extends Fragment {
         adHelp = new HelpAdapter(act);
         ListView lvHelp = container.findViewById(R.id.lvHelp);
         lvHelp.setAdapter(adHelp);
-        lvHelp.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                int i = pos;
-                if (feedback && pos > FEEDBACK) {
-                    if (pos <= FEEDBACK + FEEDBACK_COUNT) {
-                        onClickButton(pos - FEEDBACK);
-                        return;
-                    } else
-                        i -= FEEDBACK_COUNT;
-                }
-                if (pos == FEEDBACK)
-                    turnFeedback();
-                else if (adHelp.getItem(pos).getCount() == 0) {
-                    mHelp[i] = true;
-                    adHelp.getItem(pos).addLink("");
-                } else {
-                    mHelp[i] = false;
-                    adHelp.getItem(pos).clear();
-                }
-                adHelp.notifyDataSetChanged();
+        lvHelp.setOnItemClickListener((adapterView, view, pos, l) -> {
+            int i = pos;
+            if (feedback && pos > FEEDBACK) {
+                if (pos <= FEEDBACK + FEEDBACK_COUNT) {
+                    onClickButton(pos - FEEDBACK);
+                    return;
+                } else
+                    i -= FEEDBACK_COUNT;
             }
+            if (pos == FEEDBACK)
+                turnFeedback();
+            else if (adHelp.getItem(pos).getCount() == 0) {
+                mHelp[i] = true;
+                adHelp.getItem(pos).addLink("");
+            } else {
+                mHelp[i] = false;
+                adHelp.getItem(pos).clear();
+            }
+            adHelp.notifyDataSetChanged();
         });
     }
 

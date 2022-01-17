@@ -61,41 +61,29 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         setContentView(R.layout.dialog_date);
 
         tvYear = (TextView) findViewById(R.id.tvYear);
-        findViewById(R.id.bMinus).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (date.getYear() > min_year) {
-                    date.changeYear(-1);
-                    date.setMonth(12);
-                    setCalendar();
-                }
-            }
-        });
-        findViewById(R.id.bPlus).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (date.getYear() < max_year) {
-                    date.changeYear(1);
-                    date.setMonth(1);
-                    setCalendar();
-                }
-            }
-        });
-        findViewById(R.id.bStart).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                date.setYear(min_year);
-                date.setMonth(min_month);
+        findViewById(R.id.bMinus).setOnClickListener(view -> {
+            if (date.getYear() > min_year) {
+                date.changeYear(-1);
+                date.setMonth(12);
                 setCalendar();
             }
         });
-        findViewById(R.id.bEnd).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                date.setYear(max_year);
-                date.setMonth(max_month);
+        findViewById(R.id.bPlus).setOnClickListener(view -> {
+            if (date.getYear() < max_year) {
+                date.changeYear(1);
+                date.setMonth(1);
                 setCalendar();
             }
+        });
+        findViewById(R.id.bStart).setOnClickListener(view -> {
+            date.setYear(min_year);
+            date.setMonth(min_month);
+            setCalendar();
+        });
+        findViewById(R.id.bEnd).setOnClickListener(view -> {
+            date.setYear(max_year);
+            date.setMonth(max_month);
+            setCalendar();
         });
 
         RecyclerView rvMonth = (RecyclerView) findViewById(R.id.rvMonth);
@@ -113,13 +101,10 @@ public class DateDialog extends Dialog implements View.OnClickListener {
             max_month = d.getMonth();
         setCalendar();
 
-        findViewById(R.id.bOk).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                result.putDate(date);
-                cancel = false;
-                DateDialog.this.dismiss();
-            }
+        findViewById(R.id.bOk).setOnClickListener(view -> {
+            result.putDate(date);
+            cancel = false;
+            DateDialog.this.dismiss();
         });
     }
 

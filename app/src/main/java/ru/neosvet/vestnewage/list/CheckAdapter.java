@@ -64,29 +64,23 @@ public class CheckAdapter extends BaseAdapter {
         cb.setChecked(data.get(position).isCheck());
         cb.setTag(position);
         if (act.getModeList() == 1) { //page
-            cb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int pos = (int) view.getTag();
-                    boolean check = !data.get(pos).isCheck();
-                    if (pos == 0) {
-                        for (int i = 0; i < data.size(); i++)
-                            data.get(i).setCheck(check);
-                    } else {
-                        if (!check)
-                            data.get(0).setCheck(check);
-                        data.get(pos).setCheck(check);
-                    }
-                    act.update();
+            cb.setOnClickListener(view -> {
+                int pos = (int) view.getTag();
+                boolean check = !data.get(pos).isCheck();
+                if (pos == 0) {
+                    for (int i = 0; i < data.size(); i++)
+                        data.get(i).setCheck(check);
+                } else {
+                    if (!check)
+                        data.get(0).setCheck(check);
+                    data.get(pos).setCheck(check);
                 }
+                act.update();
             });
         } else { //col
-            cb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int pos = (int) view.getTag();
-                    data.get(pos).setCheck(!data.get(pos).isCheck());
-                }
+            cb.setOnClickListener(view -> {
+                int pos = (int) view.getTag();
+                data.get(pos).setCheck(!data.get(pos).isCheck());
             });
         }
         return convertView;

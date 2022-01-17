@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
@@ -39,21 +38,18 @@ public class WelcomeFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getDialog().setOnShowListener(dialog -> {
-            BottomSheetDialog d = (BottomSheetDialog)dialog;
+            BottomSheetDialog d = (BottomSheetDialog) dialog;
             FrameLayout bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
             BottomSheetBehavior.from(bottomSheet).setPeekHeight(
-                    (int)(175 * getResources().getDisplayMetrics().density));
+                    (int) (175 * getResources().getDisplayMetrics().density));
         });
 
         ListView lvBottom = view.findViewById(R.id.lvBottom);
         adapter = new ListAdapter(requireContext());
         lvBottom.setAdapter(adapter);
-        lvBottom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
-                if (clicker != null)
-                    clicker.onItemClick(adapter.getItem(pos).getLink());
-            }
+        lvBottom.setOnItemClickListener((adapterView, view1, pos, l) -> {
+            if (clicker != null)
+                clicker.onItemClick(adapter.getItem(pos).getLink());
         });
         fillInList();
     }

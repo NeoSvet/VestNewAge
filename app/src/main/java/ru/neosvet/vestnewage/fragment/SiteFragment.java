@@ -6,7 +6,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -189,18 +188,16 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             }
         }
         tabHost.setCurrentTab(1);
-        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-            public void onTabChanged(String name) {
-                if (name.equals(MAIN))
-                    act.setTitle(getResources().getString(R.string.site));
-                else
-                    act.setTitle(getResources().getString(R.string.news));
-                File f = getFile(name);
-                if (f.exists())
-                    openList(f, true);
-                else
-                    startLoad(name);
-            }
+        tabHost.setOnTabChangedListener(name -> {
+            if (name.equals(MAIN))
+                act.setTitle(getResources().getString(R.string.site));
+            else
+                act.setTitle(getResources().getString(R.string.news));
+            File f = getFile(name);
+            if (f.exists())
+                openList(f, true);
+            else
+                startLoad(name);
         });
     }
 
@@ -213,89 +210,75 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     }
 
     private void setViews() {
-        fabRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startLoad(tabHost.getCurrentTabTag());
-            }
-        });
+        fabRefresh.setOnClickListener(view -> startLoad(tabHost.getCurrentTabTag()));
         adMain = new ListAdapter(act);
         lvMain.setAdapter(adMain);
-        lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int pos, long l) {
-                if (notClick) return;
-                if (act.checkBusy()) return;
-                if (isAds(pos))
-                    return;
-                if (adMain.getItem(pos).getCount() == 1) {
-                    String link = adMain.getItem(pos).getLink();
-                    if (link.equals("#") || link.equals("@")) return;
-                    if (tabHost.getCurrentTab() == 1) { // site
-                        if (link.contains("rss")) {
-                            act.setFragment(R.id.nav_rss, true);
-                        } else if (link.contains("poems")) {
-                            act.openBook(link, true);
-                        } else if (link.contains("tolkovaniya") || link.contains("2016")) {
-                            act.openBook(link, false);
-                        } else if (link.contains("files") && !link.contains("http")) {
-                            openPage(Const.SITE + link);
-                        } else
-                            openPage(link);
-                    } else {
+        lvMain.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (notClick) return;
+            if (act.checkBusy()) return;
+            if (isAds(pos))
+                return;
+            if (adMain.getItem(pos).getCount() == 1) {
+                String link = adMain.getItem(pos).getLink();
+                if (link.equals("#") || link.equals("@")) return;
+                if (tabHost.getCurrentTab() == 1) { // site
+                    if (link.contains("rss")) {
+                        act.setFragment(R.id.nav_rss, true);
+                    } else if (link.contains("poems")) {
+                        act.openBook(link, true);
+                    } else if (link.contains("tolkovaniya") || link.contains("2016")) {
+                        act.openBook(link, false);
+                    } else if (link.contains("files") && !link.contains("http")) {
+                        openPage(Const.SITE + link);
+                    } else
                         openPage(link);
-                    }
+                } else {
+                    openPage(link);
                 }
             }
         });
-        lvMain.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (!act.status.startMin())
-                            act.startAnimMin();
-                        x = (int) event.getX(0);
-                        y = (int) event.getY(0);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
-                        notClick = false;
-                        if (r > (int) (30 * getResources().getDisplayMetrics().density))
-                            if (r > Math.abs(y - (int) event.getY(0))) {
-                                int t = tabHost.getCurrentTab();
-                                if (x > x2) { // next
-                                    if (t < 2)
-                                        tabHost.setCurrentTab(t + 1);
-                                    notClick = true;
-                                } else if (x < x2) { // prev
-                                    if (t > 0)
-                                        tabHost.setCurrentTab(t - 1);
-                                    notClick = true;
-                                }
+        lvMain.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (!act.status.startMin())
+                        act.startAnimMin();
+                    x = (int) event.getX(0);
+                    y = (int) event.getY(0);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    final int x2 = (int) event.getX(0), r = Math.abs(x - x2);
+                    notClick = false;
+                    if (r > (int) (30 * getResources().getDisplayMetrics().density))
+                        if (r > Math.abs(y - (int) event.getY(0))) {
+                            int t = tabHost.getCurrentTab();
+                            if (x > x2) { // next
+                                if (t < 2)
+                                    tabHost.setCurrentTab(t + 1);
+                                notClick = true;
+                            } else if (x < x2) { // prev
+                                if (t > 0)
+                                    tabHost.setCurrentTab(t - 1);
+                                notClick = true;
                             }
-                    case MotionEvent.ACTION_CANCEL:
-                        if (!act.status.startMax())
-                            act.startAnimMax();
-                        break;
-                }
-                return false;
+                        }
+                case MotionEvent.ACTION_CANCEL:
+                    if (!act.status.startMax())
+                        act.startAnimMax();
+                    break;
             }
+            return false;
         });
-        act.status.setClick(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!act.status.isStop()) {
-                    act.status.setLoad(false);
-                    ProgressHelper.cancelled();
-                    ProgressHelper.setBusy(false);
-                    return;
-                }
-                if (act.status.onClick())
-                    fabRefresh.setVisibility(View.VISIBLE);
-                else if (act.status.isTime())
-                    startLoad(tabHost.getCurrentTabTag());
+        act.status.setClick(view -> {
+            if (!act.status.isStop()) {
+                act.status.setLoad(false);
+                ProgressHelper.cancelled();
+                ProgressHelper.setBusy(false);
+                return;
             }
+            if (act.status.onClick())
+                fabRefresh.setVisibility(View.VISIBLE);
+            else if (act.status.isTime())
+                startLoad(tabHost.getCurrentTabTag());
         });
         lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override

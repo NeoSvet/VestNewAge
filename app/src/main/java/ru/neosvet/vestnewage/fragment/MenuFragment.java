@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -46,13 +45,10 @@ public class MenuFragment extends Fragment {
 
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
-            container.findViewById(R.id.ivHeadMenu).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+            container.findViewById(R.id.ivHeadMenu).setOnClickListener(view -> {
+                act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                startActivity(Intent.createChooser(act.lib.openInApps(Const.SITE),
 //                        getResources().getString(R.string.open)));
-                }
             });
             if (MainActivity.isCountInMenu)
                 act.setProm(container.findViewById(R.id.tvPromTimeInMenu));
@@ -90,24 +86,21 @@ public class MenuFragment extends Fragment {
             adMenu.addItem(mImage[i], act.getResources().getString(mTitle[i]));
         }
 
-        lvMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (pos == 0 && !isFullScreen) {
-                    act.showDownloadMenu();
-                    return;
-                }
-                if (adMenu.getItem(pos).isSelect()) return;
-                if (act.checkBusy()) return;
-                iSelect = pos - (isFullScreen ? 0 : 1);
-                act.setFragment(mMenu[iSelect], false);
-                if (isFullScreen) return;
-                for (int i = getPos(0); i < adMenu.getCount(); i++) {
-                    adMenu.getItem(i).setSelect(false);
-                }
-                adMenu.getItem(pos).setSelect(true);
-                adMenu.notifyDataSetChanged();
+        lvMenu.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (pos == 0 && !isFullScreen) {
+                act.showDownloadMenu();
+                return;
             }
+            if (adMenu.getItem(pos).isSelect()) return;
+            if (act.checkBusy()) return;
+            iSelect = pos - (isFullScreen ? 0 : 1);
+            act.setFragment(mMenu[iSelect], false);
+            if (isFullScreen) return;
+            for (int i1 = getPos(0); i1 < adMenu.getCount(); i1++) {
+                adMenu.getItem(i1).setSelect(false);
+            }
+            adMenu.getItem(pos).setSelect(true);
+            adMenu.notifyDataSetChanged();
         });
     }
 

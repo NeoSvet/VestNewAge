@@ -10,7 +10,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -89,38 +88,29 @@ public class PromHelper {
                 }
             });
             final Animation anMax = AnimationUtils.loadAnimation(context, R.anim.maximize);
-            tvPromTime.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    tvPromTime.startAnimation(anMin);
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            hTime.sendEmptyMessage(START_ANIM);
-                        }
-                    }, 2 * DateHelper.SEC_IN_MILLS);
-                }
-            });
-            hTime = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message message) {
-                    if (message.what == SET_PROM_TEXT) {
-                        setPromTime();
-                    } else { //START_ANIM
-                        tvPromTime.setVisibility(View.VISIBLE);
-                        tvPromTime.startAnimation(anMax);
+            tvPromTime.setOnClickListener(view -> {
+                tvPromTime.startAnimation(anMin);
+                timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        hTime.sendEmptyMessage(START_ANIM);
                     }
-                    return false;
+                }, 2 * DateHelper.SEC_IN_MILLS);
+            });
+            hTime = new Handler(message -> {
+                if (message.what == SET_PROM_TEXT) {
+                    setPromTime();
+                } else { //START_ANIM
+                    tvPromTime.setVisibility(View.VISIBLE);
+                    tvPromTime.startAnimation(anMax);
                 }
+                return false;
             });
         } else { //R.id.tvPromTimeInMenu
-            hTime = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message message) {
-                    setPromTime();
-                    return false;
-                }
+            hTime = new Handler(message -> {
+                setPromTime();
+                return false;
             });
         }
     }

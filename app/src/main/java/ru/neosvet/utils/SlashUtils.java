@@ -42,14 +42,12 @@ public class SlashUtils {
         int ver = getPreviosVer();
         notifHelper = new NotificationHelper(context);
         if (ver == 0) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        Thread.sleep(10000);
-                        showNotifDownloadAll();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            new Thread(() -> {
+                try {
+                    Thread.sleep(10000);
+                    showNotifDownloadAll();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }).start();
         }
@@ -80,7 +78,7 @@ public class SlashUtils {
         Intent intent = new Intent(context, LoaderHelper.class);
         intent.putExtra(Const.MODE, LoaderHelper.DOWNLOAD_ALL);
         intent.putExtra(Const.TASK, "");
-        PendingIntent piStart = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piStart = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.downloads_all_title),
                 context.getResources().getString(R.string.downloads_all_msg),
@@ -121,13 +119,13 @@ public class SlashUtils {
     }
 
     private void showNotifTip(String title, String msg, Intent intent) {
-        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 title, msg, NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { // on N with setFullScreenIntent don't work summary group
-            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
         notifBuilder.setSound(null);

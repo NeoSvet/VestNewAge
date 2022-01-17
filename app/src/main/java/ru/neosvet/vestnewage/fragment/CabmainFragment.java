@@ -12,9 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -153,12 +151,7 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
                 final CustomDialog alert = new CustomDialog(act);
                 alert.setTitle(getResources().getString(R.string.error));
                 alert.setMessage(result.getString(Const.DESCTRIPTION));
-                alert.setRightButton(getResources().getString(android.R.string.ok), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        alert.dismiss();
-                    }
-                });
+                alert.setRightButton(getResources().getString(android.R.string.ok), view -> alert.dismiss());
                 alert.show(null);
                 return;
         }
@@ -231,60 +224,57 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         ListView lvList = container.findViewById(R.id.lvList);
         adMain = new ListAdapter(act);
         lvList.setAdapter(adMain);
-        lvList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                if (mode_list == CabModel.LOGIN) {
-                    String s;
-                    switch (pos) {
-                        case 0: //не открывает
-                            s = "http://neosvet.ucoz.ru/vna/vpn.html";
-                            Lib lib = new Lib(act);
-                            lib.openInApps(s, null);
-                            return;
-                        case 1: //восстановить доступ
-                            s = "sendpass.html";
-                            break;
-                        case 2: //зарегистрироваться
-                            s = "register.html";
-                            break;
-                        case 3: //о регистрации
-                            s = "reginfo.html";
-                            break;
-                        case 4: //стастистика регистраций
-                            s = "regstat.html";
-                            break;
-                        default: //(5) стастистика слов
-                            s = "trans.html";
-                            break;
-                    }
-                    CabpageActivity.openPage(act, s);
-                } else if (mode_list == CabModel.CABINET) {
-                    switch (pos) {
-                        case 0: //передача ощущений
-                            if (adMain.getItem(pos).getDes().equals(
-                                    getResources().getString(R.string.select_status))) {
-                                initLoad();
-                                act.status.startText();
-                                model.getListWord();
-                            } else
-                                Lib.showToast(act, getResources().getString(R.string.send_unlivable));
-                            break;
-                        case 1: //анкета
-                            CabpageActivity.openPage(act, "edinenie/anketa.html");
-                            break;
-                        case 2: //единомышленники
-                            CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html");
-                            break;
-                        default:
-                            break;
-                    }
-                } else if (mode_list == CabModel.WORDS) {
-                    initLoad();
-                    act.status.startText();
-                    model.selectWord(pos);
+        lvList.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            if (mode_list == CabModel.LOGIN) {
+                String s;
+                switch (pos) {
+                    case 0: //не открывает
+                        s = "http://neosvet.ucoz.ru/vna/vpn.html";
+                        Lib lib = new Lib(act);
+                        lib.openInApps(s, null);
+                        return;
+                    case 1: //восстановить доступ
+                        s = "sendpass.html";
+                        break;
+                    case 2: //зарегистрироваться
+                        s = "register.html";
+                        break;
+                    case 3: //о регистрации
+                        s = "reginfo.html";
+                        break;
+                    case 4: //стастистика регистраций
+                        s = "regstat.html";
+                        break;
+                    default: //(5) стастистика слов
+                        s = "trans.html";
+                        break;
                 }
+                CabpageActivity.openPage(act, s);
+            } else if (mode_list == CabModel.CABINET) {
+                switch (pos) {
+                    case 0: //передача ощущений
+                        if (adMain.getItem(pos).getDes().equals(
+                                getResources().getString(R.string.select_status))) {
+                            initLoad();
+                            act.status.startText();
+                            model.getListWord();
+                        } else
+                            Lib.showToast(act, getResources().getString(R.string.send_unlivable));
+                        break;
+                    case 1: //анкета
+                        CabpageActivity.openPage(act, "edinenie/anketa.html");
+                        break;
+                    case 2: //единомышленники
+                        CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html");
+                        break;
+                    default:
+                        break;
+                }
+            } else if (mode_list == CabModel.WORDS) {
+                initLoad();
+                act.status.startText();
+                model.selectWord(pos);
             }
         });
     }
@@ -326,44 +316,30 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         etEmail.addTextChangedListener(textWatcher);
         etPassword.addTextChangedListener(textWatcher);
 
-        etPassword.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-                        || keyCode == EditorInfo.IME_ACTION_GO) {
-                    if (fabEnter.getVisibility() == View.VISIBLE)
-                        subLogin();
-                    return true;
-                }
-                return false;
+        etPassword.setOnKeyListener((view, keyCode, keyEvent) -> {
+            if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                    || keyCode == EditorInfo.IME_ACTION_GO) {
+                if (fabEnter.getVisibility() == View.VISIBLE)
+                    subLogin();
+                return true;
             }
+            return false;
         });
-        cbRemEmail.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                cbRemPassword.setEnabled(check);
-                if (!check)
-                    cbRemPassword.setChecked(false);
-            }
+        cbRemEmail.setOnCheckedChangeListener((compoundButton, check) -> {
+            cbRemPassword.setEnabled(check);
+            if (!check)
+                cbRemPassword.setChecked(false);
         });
-        fabEnter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                subLogin();
-            }
-        });
-        fabExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mode_list = CabModel.LOGIN;
-                CabModel.cookie = null;
-                CabModel.email = "";
-                adMain.clear();
-                loginList();
-                fabEnter.setVisibility(View.VISIBLE);
-                fabExit.setVisibility(View.GONE);
-                pMain.setVisibility(View.VISIBLE);
-            }
+        fabEnter.setOnClickListener(view -> subLogin());
+        fabExit.setOnClickListener(view -> {
+            mode_list = CabModel.LOGIN;
+            CabModel.cookie = null;
+            CabModel.email = "";
+            adMain.clear();
+            loginList();
+            fabEnter.setVisibility(View.VISIBLE);
+            fabExit.setVisibility(View.GONE);
+            pMain.setVisibility(View.VISIBLE);
         });
     }
 

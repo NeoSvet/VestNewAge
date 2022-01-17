@@ -6,7 +6,6 @@ package ru.neosvet.ui;
  */
 
 import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -98,7 +97,7 @@ public class SoftKeyboard implements View.OnFocusChangeListener {
             }
 
             if (v instanceof EditText) {
-                EditText editText = (EditText)v;
+                EditText editText = (EditText) v;
                 editText.setOnFocusChangeListener(this);
                 editText.setCursorVisible(true);
                 editTextList.add(editText);
@@ -123,19 +122,15 @@ public class SoftKeyboard implements View.OnFocusChangeListener {
     }
 
     // This handler will clear focus of selected EditText
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message m) {
-            switch (m.what) {
-                case CLEAR_FOCUS:
-                    if (tempView != null) {
-                        tempView.clearFocus();
-                        tempView = null;
-                    }
-                    break;
+    private final Handler mHandler = new Handler(message -> {
+        if (message.what == CLEAR_FOCUS) {
+            if (tempView != null) {
+                tempView.clearFocus();
+                tempView = null;
             }
         }
-    };
+        return false;
+    });
 
     private class SoftKeyboardChangesThread extends Thread {
         private AtomicBoolean started;

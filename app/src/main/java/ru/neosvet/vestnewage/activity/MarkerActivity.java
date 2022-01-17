@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
@@ -155,15 +154,12 @@ public class MarkerActivity extends AppCompatActivity {
     private void initKeyboard() {
         InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
         softKeyboard = new SoftKeyboard(mainLayout, im);
-        final Handler hFab = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                if (message.what == 0)
-                    fabOk.setVisibility(View.VISIBLE);
-                else
-                    fabOk.setVisibility(View.GONE);
-                return false;
-            }
+        final Handler hFab = new Handler(message -> {
+            if (message.what == 0)
+                fabOk.setVisibility(View.VISIBLE);
+            else
+                fabOk.setVisibility(View.GONE);
+            return false;
         });
         softKeyboard.setSoftKeyboardCallback(new SoftKeyboard.SoftKeyboardChanged() {
             @Override
@@ -362,41 +358,35 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void setViews() {
-        CompoundButton.OnCheckedChangeListener typeSel = new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                if (check) {
-                    String s = sel;
-                    sel = tvSel.getText().toString();
-                    tvSel.setText(s);
-                }
+        CompoundButton.OnCheckedChangeListener typeSel = (compoundButton, check) -> {
+            if (check) {
+                String s = sel;
+                sel = tvSel.getText().toString();
+                tvSel.setText(s);
             }
         };
         rPar.setOnCheckedChangeListener(typeSel);
         rPos.setOnCheckedChangeListener(typeSel);
-        tvSel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainLayout.setVisibility(View.GONE);
-                if (rPar.isChecked()) {
-                    modeList = 1;
-                    setPageList(tvSel.getText().toString());
-                    lvList.setAdapter(adPage);
-                    showList();
-                } else {
-                    softKeyboard.closeSoftKeyboard();
-                    String s = tvSel.getText().toString();
-                    s = s.substring(s.indexOf(":") + 2, s.indexOf("%"));
-                    float pos = Float.parseFloat(s.replace(Const.COMMA, "."));
-                    sbPos.setProgress((int) (pos * 10));
-                    setPosText(pos);
-                    posVisible = true;
-                    pPos.setVisibility(View.VISIBLE);
-                    ResizeAnim anim = new ResizeAnim(pPos, false, heightDialog);
-                    anim.setDuration(800);
-                    pPos.clearAnimation();
-                    pPos.startAnimation(anim);
-                }
+        tvSel.setOnClickListener(view -> {
+            mainLayout.setVisibility(View.GONE);
+            if (rPar.isChecked()) {
+                modeList = 1;
+                setPageList(tvSel.getText().toString());
+                lvList.setAdapter(adPage);
+                showList();
+            } else {
+                softKeyboard.closeSoftKeyboard();
+                String s = tvSel.getText().toString();
+                s = s.substring(s.indexOf(":") + 2, s.indexOf("%"));
+                float pos = Float.parseFloat(s.replace(Const.COMMA, "."));
+                sbPos.setProgress((int) (pos * 10));
+                setPosText(pos);
+                posVisible = true;
+                pPos.setVisibility(View.VISIBLE);
+                ResizeAnim anim = new ResizeAnim(pPos, false, heightDialog);
+                anim.setDuration(800);
+                pPos.clearAnimation();
+                pPos.startAnimation(anim);
             }
         });
         sbPos.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -418,127 +408,112 @@ public class MarkerActivity extends AppCompatActivity {
                 newProgPos();
             }
         });
-        tvCol.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainLayout.setVisibility(View.GONE);
-                modeList = 2;
-                setColList(tvCol.getText().toString());
-                lvList.setAdapter(adCol);
-                showList();
+        tvCol.setOnClickListener(view -> {
+            mainLayout.setVisibility(View.GONE);
+            modeList = 2;
+            setColList(tvCol.getText().toString());
+            lvList.setAdapter(adCol);
+            showList();
+        });
+        fabOk.setOnClickListener(view -> {
+            if (posVisible) {
+                float pos = sbPos.getProgress() / 10f;
+                tvSel.setText(getResources().getString(R.string.sel_pos) +
+                        String.format("%.1f%%", pos));
+            } else if (modeList == 1) { //page
+                String s = getPageList();
+                if (s == null) {
+                    Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
+                    return;
+                }
+                tvSel.setText(s);
+            } else if (modeList == 2) { //col
+                String s = getColList();
+                if (s == null) {
+                    Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
+                    return;
+                }
+                tvCol.setText(s);
+            } else if (id > -1) { //edit marker
+                setResult(RESULT_OK);
+                updateMarker();
+            } else {
+                addMarker();
+            }
+            onBackPressed();
+        });
+        findViewById(R.id.bMinus).setOnClickListener(view -> {
+            String s = tvPos.getText().toString();
+            while (sbPos.getProgress() > 4 && s.equals(tvPos.getText().toString())) {
+                sbPos.setProgress(sbPos.getProgress() - 5);
+                newProgPos();
             }
         });
-        fabOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (posVisible) {
-                    float pos = sbPos.getProgress() / 10f;
-                    tvSel.setText(getResources().getString(R.string.sel_pos) +
-                            String.format("%.1f%%", pos));
-                } else if (modeList == 1) { //page
-                    String s = getPageList();
-                    if (s == null) {
-                        Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
-                        return;
+        findViewById(R.id.bPlus).setOnClickListener(view -> {
+            String s = tvPos.getText().toString();
+            while (sbPos.getProgress() < 996 && s.equals(tvPos.getText().toString())) {
+                sbPos.setProgress(sbPos.getProgress() + 5);
+                newProgPos();
+            }
+        });
+        etCol.setOnKeyListener((view, keyCode, keyEvent) -> {
+            if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                    || keyCode == EditorInfo.IME_ACTION_GO) {
+                softKeyboard.closeSoftKeyboard();
+                if (view.equals(etCol)) { //add col
+                    String s = etCol.getText().toString();
+                    if (s.contains(Const.COMMA)) {
+                        Lib.showToast(MarkerActivity.this,
+                                getResources().getString(R.string.unuse_dot));
+                        return true;
                     }
-                    tvSel.setText(s);
-                } else if (modeList == 2) { //col
-                    String s = getColList();
-                    if (s == null) {
-                        Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
-                        return;
-                    }
-                    tvCol.setText(s);
-                } else if (id > -1) { //edit marker
-                    setResult(RESULT_OK);
-                    updateMarker();
-                } else {
-                    addMarker();
-                }
-                onBackPressed();
-            }
-        });
-        findViewById(R.id.bMinus).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String s = tvPos.getText().toString();
-                while (sbPos.getProgress() > 4 && s.equals(tvPos.getText().toString())) {
-                    sbPos.setProgress(sbPos.getProgress() - 5);
-                    newProgPos();
-                }
-            }
-        });
-        findViewById(R.id.bPlus).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String s = tvPos.getText().toString();
-                while (sbPos.getProgress() < 996 && s.equals(tvPos.getText().toString())) {
-                    sbPos.setProgress(sbPos.getProgress() + 5);
-                    newProgPos();
-                }
-            }
-        });
-        etCol.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-                        || keyCode == EditorInfo.IME_ACTION_GO) {
-                    softKeyboard.closeSoftKeyboard();
-                    if (view.equals(etCol)) { //add col
-                        String s = etCol.getText().toString();
-                        if (s.contains(Const.COMMA)) {
+                    for (int i = 0; i < adCol.getCount(); i++) {
+                        if (adCol.getItem(i).equals(s)) {
                             Lib.showToast(MarkerActivity.this,
-                                    getResources().getString(R.string.unuse_dot));
+                                    getResources().getString(R.string.title_already_used));
                             return true;
                         }
-                        for (int i = 0; i < adCol.getCount(); i++) {
-                            if (adCol.getItem(i).equals(s)) {
-                                Lib.showToast(MarkerActivity.this,
-                                        getResources().getString(R.string.title_already_used));
-                                return true;
-                            }
-                        }
-                        etCol.setText("");
-                        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-                        ContentValues cv;
-                        //освобождаем первую позицию (PLACE) путем смещения всех вперед..
-                        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
-                                new String[]{DataBase.ID, Const.PLACE});
-                        if (cursor.moveToFirst()) {
-                            int iID = cursor.getColumnIndex(DataBase.ID);
-                            int iPlace = cursor.getColumnIndex(Const.PLACE);
-                            int id, i;
-                            do {
-                                i = cursor.getInt(iPlace);
-                                if (i > 0) { // нулевую позицию не трогаем ("Вне подборок")
-                                    id = cursor.getInt(iID);
-                                    cv = new ContentValues();
-                                    cv.put(Const.PLACE, i + 1);
-                                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, id);
-                                }
-                            } while (cursor.moveToNext());
-                        }
-                        cursor.close();
-                        //добавляем новую подборку на первую позицию
-                        cv = new ContentValues();
-                        cv.put(Const.PLACE, 1);
-                        cv.put(Const.TITLE, s);
-                        dbMarker.insert(DataBase.COLLECTIONS, cv);
-                        cursor = dbMarker.query(DataBase.COLLECTIONS, null,
-                                Const.PLACE + DataBase.Q, "1");
-                        if (cursor.moveToFirst()) {
-                            adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
-                                    cursor.getString(cursor.getColumnIndex(Const.TITLE)));
-                        }
-                        cursor.close();
-                        dbMarker.close();
-                        //добавляем подборку в поле
-                        tvCol.setText(tvCol.getText() + ", " + s);
                     }
-                    return true;
+                    etCol.setText("");
+                    DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
+                    ContentValues cv;
+                    //освобождаем первую позицию (PLACE) путем смещения всех вперед..
+                    Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
+                            new String[]{DataBase.ID, Const.PLACE});
+                    if (cursor.moveToFirst()) {
+                        int iID = cursor.getColumnIndex(DataBase.ID);
+                        int iPlace = cursor.getColumnIndex(Const.PLACE);
+                        int id, i;
+                        do {
+                            i = cursor.getInt(iPlace);
+                            if (i > 0) { // нулевую позицию не трогаем ("Вне подборок")
+                                id = cursor.getInt(iID);
+                                cv = new ContentValues();
+                                cv.put(Const.PLACE, i + 1);
+                                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, id);
+                            }
+                        } while (cursor.moveToNext());
+                    }
+                    cursor.close();
+                    //добавляем новую подборку на первую позицию
+                    cv = new ContentValues();
+                    cv.put(Const.PLACE, 1);
+                    cv.put(Const.TITLE, s);
+                    dbMarker.insert(DataBase.COLLECTIONS, cv);
+                    cursor = dbMarker.query(DataBase.COLLECTIONS, null,
+                            Const.PLACE + DataBase.Q, "1");
+                    if (cursor.moveToFirst()) {
+                        adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
+                                cursor.getString(cursor.getColumnIndex(Const.TITLE)));
+                    }
+                    cursor.close();
+                    dbMarker.close();
+                    //добавляем подборку в поле
+                    tvCol.setText(tvCol.getText() + ", " + s);
                 }
-                return false;
+                return true;
             }
+            return false;
         });
     }
 

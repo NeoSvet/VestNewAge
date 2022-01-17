@@ -345,128 +345,84 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
         adSearch = new ArrayAdapter<String>(act, R.layout.spinner_item, liSearch);
         etSearch.setThreshold(1);
         etSearch.setAdapter(adSearch);
-        etSearch.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-                        || keyCode == EditorInfo.IME_ACTION_SEARCH) {
-                    enterSearch();
-                    return true;
-                }
-                return false;
-            }
-        });
-        etSearch.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-                    etSearch.showDropDown();
-                return false;
-            }
-        });
-        container.findViewById(R.id.bSearch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        etSearch.setOnKeyListener((view, keyCode, keyEvent) -> {
+            if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                    || keyCode == EditorInfo.IME_ACTION_SEARCH) {
                 enterSearch();
-            }
-        });
-        lvResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (act.checkBusy()) return;
-                if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
-                    fabSettings.setVisibility(View.GONE);
-                    bShow.setVisibility(View.VISIBLE);
-                    page = 0;
-                    showResult();
-                    String s = pref.getString(LABEL, "");
-                    tvLabel.setText(s);
-                    if (s.contains("“")) {
-                        string = s.substring(s.indexOf("“") + 1, s.indexOf(Const.N) - 2);
-                        etSearch.setText(string);
-                    }
-                } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
-                    deleteBase();
-                    adResults.clear();
-                    adResults.notifyDataSetChanged();
-                } else {
-                    Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
-                    BrowserActivity.openReader(act, adResults.getItem(pos).getLink(), string);
-                }
-            }
-        });
-        lvResult.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                String des = tvLabel.getText().toString();
-                des = getResources().getString(R.string.search_for) +
-                        des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1);
-                MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
                 return true;
             }
+            return false;
         });
-        View.OnClickListener click = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                softKeyboard.closeSoftKeyboard();
-                visSettings();
+        etSearch.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+                etSearch.showDropDown();
+            return false;
+        });
+        container.findViewById(R.id.bSearch).setOnClickListener(view -> enterSearch());
+        lvResult.setOnItemClickListener((adapterView, view, pos, l) -> {
+            if (act.checkBusy()) return;
+            if (adResults.getItem(pos).getLink().equals(LAST_RESULTS)) {
+                fabSettings.setVisibility(View.GONE);
+                bShow.setVisibility(View.VISIBLE);
+                page = 0;
+                showResult();
+                String s = pref.getString(LABEL, "");
+                tvLabel.setText(s);
+                if (s.contains("“")) {
+                    string = s.substring(s.indexOf("“") + 1, s.indexOf(Const.N) - 2);
+                    etSearch.setText(string);
+                }
+            } else if (adResults.getItem(pos).getLink().equals(CLEAR_RESULTS)) {
+                deleteBase();
+                adResults.clear();
+                adResults.notifyDataSetChanged();
+            } else {
+                Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
+                BrowserActivity.openReader(act, adResults.getItem(pos).getLink(), string);
             }
+        });
+        lvResult.setOnItemLongClickListener((adapterView, view, pos, l) -> {
+            String des = tvLabel.getText().toString();
+            des = getResources().getString(R.string.search_for) +
+                    des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1);
+            MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
+            return true;
+        });
+        View.OnClickListener click = view -> {
+            softKeyboard.closeSoftKeyboard();
+            visSettings();
         };
         fabSettings.setOnClickListener(click);
         container.findViewById(R.id.bSettings).setOnClickListener(click);
-        container.findViewById(R.id.bStop).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SearchModel.cancel = true;
-            }
-        });
+        container.findViewById(R.id.bStop).setOnClickListener(view -> SearchModel.cancel = true);
 
-        fabOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (page == -1)
-                    fabSettings.setVisibility(View.VISIBLE);
-                else
-                    pPages.setVisibility(View.VISIBLE);
-                fabOk.setVisibility(View.GONE);
-                mainLayout.setVisibility(View.VISIBLE);
-                pSettings.setVisibility(View.GONE);
-                editor.putInt(Const.MODE, sMode.getSelectedItemPosition());
-                editor.putInt(Const.START, dStart.getTimeInDays());
-                editor.putInt(Const.END, dEnd.getTimeInDays());
-                editor.apply();
-            }
+        fabOk.setOnClickListener(view -> {
+            if (page == -1)
+                fabSettings.setVisibility(View.VISIBLE);
+            else
+                pPages.setVisibility(View.VISIBLE);
+            fabOk.setVisibility(View.GONE);
+            mainLayout.setVisibility(View.VISIBLE);
+            pSettings.setVisibility(View.GONE);
+            editor.putInt(Const.MODE, sMode.getSelectedItemPosition());
+            editor.putInt(Const.START, dStart.getTimeInDays());
+            editor.putInt(Const.END, dEnd.getTimeInDays());
+            editor.apply();
         });
-        container.findViewById(R.id.bClearSearch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                adSearch.clear();
-                adSearch.notifyDataSetChanged();
-                File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
-                if (f.exists()) f.delete();
-            }
+        container.findViewById(R.id.bClearSearch).setOnClickListener(view -> {
+            adSearch.clear();
+            adSearch.notifyDataSetChanged();
+            File f1 = new File(act.getFilesDir() + File.separator + Const.SEARCH);
+            if (f1.exists()) f1.delete();
         });
-        bStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePicker(0);
-            }
-        });
-        bEnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePicker(1);
-            }
-        });
-        container.findViewById(R.id.bChangeRange).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DateHelper d = dEnd;
-                dEnd = dStart;
-                dStart = d;
-                bStart.setText(formatDate(dStart));
-                bEnd.setText(formatDate(dEnd));
-            }
+        bStart.setOnClickListener(view -> showDatePicker(0));
+        bEnd.setOnClickListener(view -> showDatePicker(1));
+        container.findViewById(R.id.bChangeRange).setOnClickListener(view -> {
+            DateHelper d = dEnd;
+            dEnd = dStart;
+            dStart = d;
+            bStart.setText(formatDate(dStart));
+            bEnd.setText(formatDate(dEnd));
         });
         lvResult.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -484,19 +440,13 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
                                  int visibleItemCount, int totalItemCount) {
             }
         });
-        bShow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bShow.setVisibility(View.GONE);
-                pAdditionSet.setVisibility(View.VISIBLE);
-            }
+        bShow.setOnClickListener(view -> {
+            bShow.setVisibility(View.GONE);
+            pAdditionSet.setVisibility(View.VISIBLE);
         });
-        container.findViewById(R.id.bHide).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bShow.setVisibility(View.VISIBLE);
-                pAdditionSet.setVisibility(View.GONE);
-            }
+        container.findViewById(R.id.bHide).setOnClickListener(view -> {
+            bShow.setVisibility(View.VISIBLE);
+            pAdditionSet.setVisibility(View.GONE);
         });
     }
 

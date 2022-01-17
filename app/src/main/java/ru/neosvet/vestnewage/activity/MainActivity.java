@@ -273,37 +273,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initInterface() {
-        findViewById(R.id.bDownloadAll).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                menuDownload.hide();
-                LoaderHelper.postCommand(MainActivity.this,
-                        LoaderHelper.DOWNLOAD_ALL, "");
-            }
+        findViewById(R.id.bDownloadAll).setOnClickListener(view -> {
+            menuDownload.hide();
+            LoaderHelper.postCommand(MainActivity.this,
+                    LoaderHelper.DOWNLOAD_ALL, "");
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
-        bDownloadIt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                menuDownload.hide();
-                if (cur_id == R.id.nav_calendar) {
-                    LoaderHelper.postCommand(MainActivity.this,
-                            LoaderHelper.DOWNLOAD_YEAR,
-                            String.valueOf(((CalendarFragment) curFragment).getCurrentYear()));
-                } else {
-                    LoaderHelper.postCommand(MainActivity.this,
-                            LoaderHelper.DOWNLOAD_ID,
-                            String.valueOf(cur_id));
-                }
+        bDownloadIt.setOnClickListener(view -> {
+            menuDownload.hide();
+            if (cur_id == R.id.nav_calendar) {
+                LoaderHelper.postCommand(MainActivity.this,
+                        LoaderHelper.DOWNLOAD_YEAR,
+                        String.valueOf(((CalendarFragment) curFragment).getCurrentYear()));
+            } else {
+                LoaderHelper.postCommand(MainActivity.this,
+                        LoaderHelper.DOWNLOAD_ID,
+                        String.valueOf(cur_id));
             }
         });
         tvNew = (TextView) findViewById(R.id.tvNew);
-        tvNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!ProgressHelper.isBusy())
-                    setFragment(R.id.nav_new, true);
-            }
+        tvNew.setOnClickListener(view -> {
+            if (!ProgressHelper.isBusy())
+                setFragment(R.id.nav_new, true);
         });
 
         if (getResources().getInteger(R.integer.screen_mode) !=
@@ -320,13 +311,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setNavigationItemSelectedListener(this);
             navigationView.setCheckedItem(cur_id);
 
-            navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+            navigationView.getHeaderView(0).setOnClickListener(view -> {
+                lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                    startActivity(Intent.createChooser(lib.openInApps(Const.SITE),
 //                            getResources().getString(R.string.open)));
-                }
             });
         }
     }

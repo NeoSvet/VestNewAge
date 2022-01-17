@@ -190,36 +190,33 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
                 container.findViewById(R.id.bScreen), container.findViewById(R.id.bClear),
                 container.findViewById(R.id.bCheck), container.findViewById(R.id.bProm)};
 
-        View.OnClickListener SectionsClick = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int section;
-                switch (view.getId()) {
-                    case R.id.bBase:
-                        section = PANEL_BASE;
-                        break;
-                    case R.id.bScreen:
-                        section = PANEL_SCREEN;
-                        break;
-                    case R.id.bClear:
-                        section = PANEL_CLEAR;
-                        break;
-                    case R.id.bCheck:
-                        section = PANEL_CHECK;
-                        break;
-                    default:
-                        section = PANEL_PROM;
-                        break;
-                }
-                if (bPanels[section]) { //if open
-                    pSections[section].setVisibility(View.GONE);
-                    imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.plus));
-                } else { //if close
-                    pSections[section].setVisibility(View.VISIBLE);
-                    imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.minus));
-                }
-                bPanels[section] = !bPanels[section];
+        View.OnClickListener SectionsClick = view -> {
+            int section;
+            switch (view.getId()) {
+                case R.id.bBase:
+                    section = PANEL_BASE;
+                    break;
+                case R.id.bScreen:
+                    section = PANEL_SCREEN;
+                    break;
+                case R.id.bClear:
+                    section = PANEL_CLEAR;
+                    break;
+                case R.id.bCheck:
+                    section = PANEL_CHECK;
+                    break;
+                default:
+                    section = PANEL_PROM;
+                    break;
             }
+            if (bPanels[section]) { //if open
+                pSections[section].setVisibility(View.GONE);
+                imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.plus));
+            } else { //if close
+                pSections[section].setVisibility(View.VISIBLE);
+                imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.minus));
+            }
+            bPanels[section] = !bPanels[section];
         };
         for (int i = 0; i < bSections.length; i++)
             bSections[i].setOnClickListener(SectionsClick);
@@ -287,77 +284,60 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     }
 
     private void setViews() {
-        cbCountFloat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setMainCheckBox(Const.COUNT_IN_MENU, !check, -1);
-                MainActivity.isCountInMenu = !check;
-            }
+        cbCountFloat.setOnCheckedChangeListener((compoundButton, check) -> {
+            setMainCheckBox(Const.COUNT_IN_MENU, !check, -1);
+            MainActivity.isCountInMenu = !check;
         });
-        cbNew.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
-                setMainCheckBox(Const.START_NEW, check, -1);
-            }
-        });
+        cbNew.setOnCheckedChangeListener((compoundButton, check) -> setMainCheckBox(Const.START_NEW, check, -1));
 
-        CheckBox.OnCheckedChangeListener ScreenChecked = new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                if (checked) {
-                    byte sel;
-                    switch (compoundButton.getId()) {
-                        case R.id.rbMenu:
-                            sel = Const.SCREEN_MENU;
-                            break;
-                        case R.id.rbCalendar:
-                            sel = Const.SCREEN_CALENDAR;
-                            break;
-                        default:
-                            sel = Const.SCREEN_SUMMARY;
-                            break;
-                    }
-                    setMainCheckBox(Const.START_SCEEN, false, sel);
+        CheckBox.OnCheckedChangeListener ScreenChecked = (compoundButton, checked) -> {
+            if (checked) {
+                byte sel;
+                switch (compoundButton.getId()) {
+                    case R.id.rbMenu:
+                        sel = Const.SCREEN_MENU;
+                        break;
+                    case R.id.rbCalendar:
+                        sel = Const.SCREEN_CALENDAR;
+                        break;
+                    default:
+                        sel = Const.SCREEN_SUMMARY;
+                        break;
                 }
+                setMainCheckBox(Const.START_SCEEN, false, sel);
             }
         };
         for (int i = 0; i < rbsScreen.length; i++)
             rbsScreen[i].setOnCheckedChangeListener(ScreenChecked);
 
-        CheckBox.OnCheckedChangeListener ClearChecked = new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                int k = 0;
-                for (int i = 0; i < cbsClear.length; i++) {
-                    if (cbsClear[i].isChecked())
-                        k++;
-                }
-                bClearDo.setEnabled(k > 0);
+        CheckBox.OnCheckedChangeListener ClearChecked = (compoundButton, checked) -> {
+            int k = 0;
+            for (int i = 0; i < cbsClear.length; i++) {
+                if (cbsClear[i].isChecked())
+                    k++;
             }
+            bClearDo.setEnabled(k > 0);
         };
         for (int i = 0; i < cbsClear.length; i++)
             cbsClear[i].setOnCheckedChangeListener(ClearChecked);
-        bClearDo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initRotate();
-                bClearDo.setEnabled(false);
-                List<String> list = new ArrayList<String>();
-                if (cbsClear[0].isChecked()) //book prev years
-                    list.add(Const.START);
-                if (cbsClear[1].isChecked()) //book cur year
-                    list.add(Const.END);
-                if (cbsClear[2].isChecked()) //materials
-                    list.add(DataBase.ARTICLES);
-                if (cbsClear[3].isChecked()) //markers
-                    list.add(DataBase.MARKERS);
-                if (cbsClear[4].isChecked()) //cache
-                    list.add(Const.FILE);
-                initProgress();
-                model.startClear(list.toArray(new String[]{}));
-                for (int i = 0; i < cbsClear.length; i++)
-                    cbsClear[i].setChecked(false);
-            }
+        bClearDo.setOnClickListener(view -> {
+            initRotate();
+            bClearDo.setEnabled(false);
+            List<String> list = new ArrayList<String>();
+            if (cbsClear[0].isChecked()) //book prev years
+                list.add(Const.START);
+            if (cbsClear[1].isChecked()) //book cur year
+                list.add(Const.END);
+            if (cbsClear[2].isChecked()) //materials
+                list.add(DataBase.ARTICLES);
+            if (cbsClear[3].isChecked()) //markers
+                list.add(DataBase.MARKERS);
+            if (cbsClear[4].isChecked()) //cache
+                list.add(Const.FILE);
+            initProgress();
+            model.startClear(list.toArray(new String[]{}));
+            for (int i = 0; i < cbsClear.length; i++)
+                cbsClear[i].setChecked(false);
         });
 
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -395,49 +375,34 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     }
 
     private void initButtonsSet() {
-        bCheckSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog = new SetNotifDialog(act, Const.SUMMARY);
-                dialog.show();
-            }
+        bCheckSet.setOnClickListener(view -> {
+            dialog = new SetNotifDialog(act, Const.SUMMARY);
+            dialog.show();
         });
-        bPromSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog = new SetNotifDialog(act, Const.PROM);
-                dialog.show();
-            }
+        bPromSet.setOnClickListener(view -> {
+            dialog = new SetNotifDialog(act, Const.PROM);
+            dialog.show();
         });
     }
 
     @RequiresApi(26)
     private void initButtonsSetNew(View container) {
-        bCheckSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
-                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_SUMMARY);
-                startActivity(intent);
-            }
+        bCheckSet.setOnClickListener(view -> {
+            Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_SUMMARY);
+            startActivity(intent);
         });
-        bPromSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
-                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_PROM);
-                startActivity(intent);
-            }
+        bPromSet.setOnClickListener(view -> {
+            Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName())
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationHelper.CHANNEL_PROM);
+            startActivity(intent);
         });
         container.findViewById(R.id.pBattery).setVisibility(View.VISIBLE);
-        container.findViewById(R.id.bSetBattery).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                startActivity(intent);
-            }
+        container.findViewById(R.id.bSetBattery).setOnClickListener(view -> {
+            Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+            startActivity(intent);
         });
     }
 

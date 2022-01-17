@@ -74,12 +74,7 @@ public class CabpageActivity extends AppCompatActivity {
         });
         status = new StatusButton(this, findViewById(R.id.pStatus));
         fabClose = findViewById(R.id.fabClose);
-        fabClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        fabClose.setOnClickListener(view -> onBackPressed());
     }
 
     private class wvClient extends WebViewClient {

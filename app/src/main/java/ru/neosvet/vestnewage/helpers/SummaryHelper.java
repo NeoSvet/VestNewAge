@@ -43,7 +43,7 @@ public class SummaryHelper {
         notif_id = NotificationHelper.NOTIF_SUMMARY + 1;
         notifHelper = new NotificationHelper(context);
         intent = new Intent(context, MainActivity.class);
-        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
     }
 
     public void updateBook() throws Exception {
@@ -81,7 +81,7 @@ public class SummaryHelper {
         if (!link.contains("://"))
             link = Const.SITE + link;
         intent.setData(Uri.parse(link));
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(notif_id, text, link);
         notifBuilder = notifHelper.getNotification(
                 context.getResources().getString(R.string.site_name), text,
@@ -112,7 +112,7 @@ public class SummaryHelper {
                 NotificationHelper.CHANNEL_SUMMARY);
         intent.setData(Uri.parse(Const.SITE + Const.RSS));
         intent.putExtra(DataBase.ID, notif_id);
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         notifBuilder.setContentIntent(piSummary)
                 .setGroup(NotificationHelper.GROUP_SUMMARY);
         notifBuilder.setFullScreenIntent(piEmpty, true);
@@ -147,7 +147,7 @@ public class SummaryHelper {
         Intent intent = new Intent(context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
-        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
         NotificationHelper.setAlarm(context, piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
     }
 
