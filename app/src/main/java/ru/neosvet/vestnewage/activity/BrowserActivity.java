@@ -302,6 +302,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
         wvBrowser.getSettings().setJavaScriptEnabled(true);
+        wvBrowser.getSettings().setAllowContentAccess(true);
+        wvBrowser.getSettings().setAllowFileAccess(true);
         wvBrowser.addJavascriptInterface(this, "NeoInterface");
         int z = pref.getInt(SCALE, 0);
         if (z > 0)
