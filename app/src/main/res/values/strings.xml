@@ -160,7 +160,7 @@
     <string name="off">выкл</string>
     <string name="on">вкл</string>
     <string name="check_summary">Проверка сводки</string>
-    <string name="each_one">каждый час        </string>
+    <string name="each_one">каждый час</string>
     <string name="each_more">каждые</string>
     <string name="prom_notif">Напомнить о Посыле</string>
     <string name="prom_notif_off">Не напоминать о Посыле</string>
@@ -215,7 +215,7 @@
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="page_app">Страница приложения</string>
-    <string name="url_on_app">Приложение «Благая Весть» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
+    <string name="url_on_app">Приложение «Весть Нового Века» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений</string>
     <string name="app_version">Версия приложения:&#160;</string>
     <string name="system_version">Версия системы:&#160;</string>
