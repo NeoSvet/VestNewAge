@@ -7,7 +7,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -15,19 +14,11 @@ import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.SSLContext;
-
-import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.TlsVersion;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
@@ -50,21 +41,8 @@ public class Lib {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
-    public static OkHttpClient createHttpClient() throws NoSuchAlgorithmException, KeyManagementException {
+    public static OkHttpClient createHttpClient() {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-
-        if (Build.VERSION.SDK_INT < 22) {
-            SSLContext sc = SSLContext.getInstance("TLSv1.2");
-            sc.init(null, null, null);
-            client.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
-            List<ConnectionSpec> specs = new LinkedList<>();
-            specs.add(new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2).build());
-            specs.add(ConnectionSpec.COMPATIBLE_TLS);
-            specs.add(ConnectionSpec.CLEARTEXT);
-            client.connectionSpecs(specs);
-        }
-
         client.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
         client.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
         client.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);

@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -65,20 +63,15 @@ public class CabpageActivity extends AppCompatActivity {
         wvBrowser.clearHistory();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
-        if (android.os.Build.VERSION.SDK_INT > 18) {
-            wvBrowser.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent event) {
-                    if (event.getPointerCount() == 2) {
-                        twoPointers = true;
-                    } else if (twoPointers) {
-                        twoPointers = false;
-                        wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
-                    }
-                    return false;
-                }
-            });
-        }
+        wvBrowser.setOnTouchListener((view, event) -> {
+            if (event.getPointerCount() == 2) {
+                twoPointers = true;
+            } else if (twoPointers) {
+                twoPointers = false;
+                wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
+            }
+            return false;
+        });
         status = new StatusButton(this, findViewById(R.id.pStatus));
         fabClose = findViewById(R.id.fabClose);
         fabClose.setOnClickListener(new View.OnClickListener() {
@@ -104,18 +97,8 @@ public class CabpageActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             if (url.contains("#")) return;
             String SCRIPT = "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
-            if (android.os.Build.VERSION.SDK_INT > 18) {
-                wvBrowser.evaluateJavascript(SCRIPT,
-                        new ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String s) {
-                                wvBrowser.setVisibility(View.VISIBLE);
-                            }
-                        });
-            } else {
-                wvBrowser.loadUrl("javascript: " + SCRIPT + " return false;");
-                wvBrowser.setVisibility(View.VISIBLE);
-            }
+            wvBrowser.evaluateJavascript(SCRIPT,
+                    s -> wvBrowser.setVisibility(View.VISIBLE));
             status.setLoad(false);
             String s = wvBrowser.getTitle();
             if (!s.contains(":")) {

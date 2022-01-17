@@ -237,22 +237,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private void findText(String s) {
         if (s.contains(Const.N))
             s = s.substring(0, s.indexOf(Const.N));
-        if (android.os.Build.VERSION.SDK_INT > 15)
-            wvBrowser.findAllAsync(s);
-        else {
-            wvBrowser.findAll(s);
-            try {
-                //Can't use getMethod() as it's a private method
-                for (Method m : WebView.class.getDeclaredMethods()) {
-                    if (m.getName().equals("setFindIsUp")) {
-                        m.setAccessible(true);
-                        m.invoke(wvBrowser, true);
-                        break;
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-        }
+        wvBrowser.findAllAsync(s);
         didSearch = true;
     }
 
@@ -369,21 +354,20 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void setViews() {
         wvBrowser.setWebViewClient(new WebClient(this));
-        if (android.os.Build.VERSION.SDK_INT > 22)
-            wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    if (!navbuttons)
-                        return;
-                    if (scrollY > 300) {
-                        fabTop.setVisibility(View.VISIBLE);
-                        fabBottom.setVisibility(View.GONE);
-                    } else {
-                        fabTop.setVisibility(View.GONE);
-                        fabBottom.setVisibility(View.VISIBLE);
-                    }
+        wvBrowser.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (!navbuttons)
+                    return;
+                if (scrollY > 300) {
+                    fabTop.setVisibility(View.VISIBLE);
+                    fabBottom.setVisibility(View.GONE);
+                } else {
+                    fabTop.setVisibility(View.GONE);
+                    fabBottom.setVisibility(View.VISIBLE);
                 }
-            });
+            }
+        });
         wvBrowser.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -403,13 +387,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         tvPromTime.startAnimation(anMax);
                     }
                 }
-                if (android.os.Build.VERSION.SDK_INT > 18) {
-                    if (event.getPointerCount() == 2) {
-                        twoPointers = true;
-                    } else if (twoPointers) {
-                        twoPointers = false;
-                        wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
-                    }
+                if (event.getPointerCount() == 2) {
+                    twoPointers = true;
+                } else if (twoPointers) {
+                    twoPointers = false;
+                    wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
                 }
                 return false;
             }
@@ -501,10 +483,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (pref.getBoolean(NAVBUTTONS, true)) {
             navbuttons = true;
             setCheckItem(miButtons, navbuttons);
-            if (android.os.Build.VERSION.SDK_INT < 23) {
-                fabTop.setVisibility(View.VISIBLE);
-                fabBottom.setVisibility(View.GONE);
-            }
         } else
             fabBottom.setVisibility(View.GONE);
         status.setClick(new View.OnClickListener() {

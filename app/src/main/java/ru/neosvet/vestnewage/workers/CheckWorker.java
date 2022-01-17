@@ -136,7 +136,6 @@ public class CheckWorker extends Worker {
             return;
         SummaryHelper summaryHelper = new SummaryHelper(getApplicationContext());
         boolean several = list.size() > 2;
-        boolean notNotify = several && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
         int start, end, step;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             start = 0;
@@ -148,15 +147,13 @@ public class CheckWorker extends Worker {
             step = -2;
         }
         for (int i = start; i != end; i += step) {
-            if (summaryHelper.isNotification() && !notNotify)
+            if (summaryHelper.isNotification() && !several)
                 summaryHelper.showNotification();
             summaryHelper.createNotification(list.get(i), list.get(i + 1));
             if (several)
                 summaryHelper.muteNotification();
         }
         if (several) {
-            if (!notNotify)
-                summaryHelper.showNotification();
             summaryHelper.groupNotification();
         } else
             summaryHelper.singleNotification(list.get(0));
