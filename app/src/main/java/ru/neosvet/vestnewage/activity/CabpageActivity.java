@@ -23,6 +23,7 @@ import okhttp3.Response;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.fragment.CabmainFragment;
 import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabpageActivity extends AppCompatActivity {
@@ -79,12 +80,14 @@ public class CabpageActivity extends AppCompatActivity {
         @Nullable
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            OkHttpClient client = new OkHttpClient();
-            Request req = new Request.Builder()
-                    .url(request.getUrl().toString())
-                    .addHeader("cookie", CabModel.cookie)
-                    .build();
+            if (CabModel.cookie == null || CabModel.cookie.isEmpty())
+                return super.shouldInterceptRequest(view, request);
             try {
+                OkHttpClient client = new OkHttpClient();
+                Request req = new Request.Builder()
+                        .url(request.getUrl().toString())
+                        .addHeader("cookie", CabModel.cookie)
+                        .build();
                 Response response = client.newCall(req).execute();
                 InputStream responseInputStream = response.body().byteStream();
                 return new WebResourceResponse(null, null, responseInputStream);
@@ -112,8 +115,8 @@ public class CabpageActivity extends AppCompatActivity {
             status.setLoad(false);
             String s = wvBrowser.getTitle();
             if (!s.contains(":")) {
-                status.setError(getResources().getString(R.string.load_fail));
-                finish();
+                CabmainFragment.error = getResources().getString(R.string.cab_fail);
+                onBackPressed();
                 return;
             }
             CabpageActivity.this.setTitle(s.substring(s.indexOf(":") + 3));

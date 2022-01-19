@@ -38,6 +38,7 @@ import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
 public class CabmainFragment extends BackFragment implements Observer<Data> {
+    public static String error = null;
     private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -74,6 +75,13 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         super.onResume();
         if (ProgressHelper.isBusy())
             ProgressHelper.addObserver(act, this);
+        if (error != null) {
+            act.status.setError(error);
+            act.status.setClick(view -> {
+                error = null;
+                act.status.onClick();
+            });
+        }
     }
 
     @Override
@@ -120,12 +128,14 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             return;
         ProgressHelper.setBusy(false);
         ProgressHelper.removeObservers(act);
-        act.status.setLoad(false);
         String error = result.getString(Const.ERROR);
         if (error != null) {
+            if (error.equals("Connection reset") || error.equals("Read timed out"))
+                error = getResources().getString(R.string.cab_fail);
             act.status.setError(error);
             return;
         }
+        act.status.setLoad(false);
         switch (result.getInt(Const.MODE, 0)) {
             case CabWorker.SELECTED_WORD:
                 int select = result.getInt(Const.SELECT, -1);
