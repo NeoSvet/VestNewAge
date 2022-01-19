@@ -25,7 +25,6 @@ import ru.neosvet.vestnewage.model.CabModel;
 public class CabWorker extends Worker {
     private final Context context;
     public static final int SELECTED_WORD = 1, NO_SELECTED = 2, WORD_LIST = 3, TIMEOUT = 4, ERROR = 5;
-    private final String HOST = "https://www.otkroveniya.eu/";
 
     public CabWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -68,7 +67,7 @@ public class CabWorker extends Worker {
 
     private Data.Builder subLogin(String email, String pass) throws Exception {
         Request request = new Request.Builder()
-                .url(HOST)
+                .url(Const.CAB_SITE)
                 .addHeader(Const.USER_AGENT, context.getPackageName())
                 .build();
         OkHttpClient client = Lib.createHttpClient();
@@ -85,7 +84,7 @@ public class CabWorker extends Worker {
                 .build();
         request = new Request.Builder()
                 .post(requestBody)
-                .url(HOST + "auth.php")
+                .url(Const.CAB_SITE + "auth.php")
                 .addHeader(Const.USER_AGENT, context.getPackageName())
                 .addHeader(Const.COOKIE, cookie)
                 .build();
@@ -106,7 +105,7 @@ public class CabWorker extends Worker {
 
     private Data.Builder getListWord(boolean returnSelectWord) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(HOST + "edinenie/anketa.html");
+        builderRequest.url(Const.CAB_SITE + "edinenie/anketa.html");
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
 
@@ -169,7 +168,7 @@ public class CabWorker extends Worker {
 
     private Data.Builder sendWord(int index) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(HOST + "savedata.php");
+        builderRequest.url(Const.CAB_SITE + "savedata.php");
         builderRequest.header(Const.USER_AGENT, context.getPackageName());
         builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
         RequestBody requestBody = new FormBody.Builder()

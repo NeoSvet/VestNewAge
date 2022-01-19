@@ -6,14 +6,20 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.InputStream;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
@@ -38,17 +44,7 @@ public class CabpageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cabpage_activity);
         initView();
-        String HOST = "http://0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru";
-        if (CabModel.cookie != null) {
-            CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(wvBrowser.getContext());
-            CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.setAcceptCookie(true);
-            cookieManager.removeSessionCookie();
-            cookieManager.setCookie(HOST, CabModel.cookie + "; domain=" + HOST.substring(7));
-            cookieSyncManager.getInstance().sync();
-//            cookieManager.getCookie(HOST);
-        }
-        wvBrowser.loadUrl(HOST + "/" + getIntent().getStringExtra(Const.LINK));
+        wvBrowser.loadUrl(Const.CAB_SITE + getIntent().getStringExtra(Const.LINK));
     }
 
     private void initView() {
@@ -63,6 +59,8 @@ public class CabpageActivity extends AppCompatActivity {
         wvBrowser.clearHistory();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
         wvBrowser.getSettings().setDisplayZoomControls(false);
+        wvBrowser.getSettings().setAllowContentAccess(true);
+        wvBrowser.getSettings().setAllowFileAccess(true);
         wvBrowser.setOnTouchListener((view, event) -> {
             if (event.getPointerCount() == 2) {
                 twoPointers = true;
@@ -78,6 +76,23 @@ public class CabpageActivity extends AppCompatActivity {
     }
 
     private class wvClient extends WebViewClient {
+        @Nullable
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            OkHttpClient client = new OkHttpClient();
+            Request req = new Request.Builder()
+                    .url(request.getUrl().toString())
+                    .addHeader("cookie", CabModel.cookie)
+                    .build();
+            try {
+                Response response = client.newCall(req).execute();
+                InputStream responseInputStream = response.body().byteStream();
+                return new WebResourceResponse(null, null, responseInputStream);
+            } catch (Exception e) {
+                return super.shouldInterceptRequest(view, request);
+            }
+        }
+
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             if (url.contains("#")) return;

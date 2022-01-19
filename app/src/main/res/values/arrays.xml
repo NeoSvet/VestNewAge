@@ -31,7 +31,6 @@
     <string-array name="cabinet_enter">
         <item>Моя анкета</item>
         <item>Мои Единомышленники</item>
-        <item>Подсказка</item>
     </string-array>
     <string-array name="search_mode">
         <item>Искать в Посланиях</item>

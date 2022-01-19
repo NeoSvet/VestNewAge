@@ -419,7 +419,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
         for (int i = 0; i < getResources().getStringArray(R.array.cabinet_enter).length; i++) {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
         }
-        adMain.getItem(adMain.getCount() - 1).setDes(getResources().getString(R.string.cabinet_tip));
         adMain.notifyDataSetChanged();
     }
 }
