@@ -46,7 +46,7 @@ public class StatusButton {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (!stop) //panel.getVisibility() == View.VISIBLE
+                if (!stop && visible)
                     iv.startAnimation(anRotate);
             }
 
@@ -129,6 +129,8 @@ public class StatusButton {
             panel.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_red));
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
+            visible = true;
+            panel.setVisibility(View.VISIBLE);
         } else {
             panel.setVisibility(View.GONE);
             visible = false;
@@ -187,17 +189,8 @@ public class StatusButton {
                     .setTitle(context.getResources().getString(R.string.error))
                     .setMessage(error)
                     .setPositiveButton(context.getResources().getString(R.string.send),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    sendError();
-                                }
-                            })
-                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            ErrorUtils.clear();
-                        }
-                    });
+                            (dialog, id) -> sendError())
+                    .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();
             ProgressHelper.setBusy(false);
             setLoad(false);
