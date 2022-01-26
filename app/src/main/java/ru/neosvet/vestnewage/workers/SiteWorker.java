@@ -147,7 +147,9 @@ public class SiteWorker extends Worker {
                 a = page.getLink();
                 t = page.getText();
                 if (isSite) {
-                    if (!t.isEmpty()) {
+                    if (!t.isEmpty() && !s.contains("\"#\"")) {
+                        if(s.contains("&times;") || s.contains("<button>"))
+                            break;
                         if (!s.contains("<"))
                             list.get(list.size() - 1).setDes(s);
                         else
