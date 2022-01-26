@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
@@ -219,22 +220,9 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             if (isAds(pos))
                 return;
             if (adMain.getItem(pos).getCount() == 1) {
-                String link = adMain.getItem(pos).getLink();
-                if (link.equals("#") || link.equals("@")) return;
-                if (tabHost.getCurrentTab() == 1) { // site
-                    if (link.contains("rss")) {
-                        act.setFragment(R.id.nav_rss, true);
-                    } else if (link.contains("poems")) {
-                        act.openBook(link, true);
-                    } else if (link.contains("tolkovaniya") || link.contains("2016")) {
-                        act.openBook(link, false);
-                    } else if (link.contains("files") && !link.contains("http")) {
-                        openPage(Const.SITE + link);
-                    } else
-                        openPage(link);
-                } else {
-                    openPage(link);
-                }
+                openSingleLink(adMain.getItem(pos).getLink());
+            } else {
+                openMultiLink(adMain.getItem(pos), view);
             }
         });
         lvMain.setOnTouchListener((v, event) -> {
@@ -296,6 +284,41 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                                  int visibleItemCount, int totalItemCount) {
             }
         });
+    }
+
+    private void openMultiLink(ListItem links, View parent) {
+        PopupMenu pMenu = new PopupMenu(act, parent);
+        for (int i = 1; i < links.getCount(); i++)
+            pMenu.getMenu().add(links.getHead(i));
+        pMenu.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            for (int i = 0; i < links.getCount(); i++) {
+                if (links.getHead(i).equals(title)) {
+                    openPage(links.getLink(i));
+                    break;
+                }
+            }
+            return true;
+        });
+        pMenu.show();
+    }
+
+    private void openSingleLink(String link) {
+        if (link.equals("#") || link.equals("@")) return;
+        if (tabHost.getCurrentTab() == 1) { // site
+            if (link.contains("rss")) {
+                act.setFragment(R.id.nav_rss, true);
+            } else if (link.contains("poems")) {
+                act.openBook(link, true);
+            } else if (link.contains("tolkovaniya") || link.contains("2016")) {
+                act.openBook(link, false);
+            } else if (link.contains("files") && !link.contains("http")) {
+                openPage(Const.SITE + link);
+            } else
+                openPage(link);
+        } else {
+            openPage(link);
+        }
     }
 
     private boolean isAds(int pos) {
