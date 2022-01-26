@@ -22,7 +22,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MyException;
-import ru.neosvet.utils.PageParser;
+import ru.neosvet.html.PageParser;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;

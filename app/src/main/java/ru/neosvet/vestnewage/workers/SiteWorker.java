@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.PageParser;
+import ru.neosvet.html.PageParser;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;

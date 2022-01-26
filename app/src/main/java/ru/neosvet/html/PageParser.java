@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.html;
 
 import android.content.Context;
 
@@ -9,64 +9,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class PageParser {
-    static String HEAD = "h", LINK = "a", PAR = "p", STYLE = "style", CLASS = "class",
-            TEXTCOLOR = "text-color", COLOR = "color", LINE = "br",
-            IMAGE = "img", FRAME = "iframe", DIV = "div", SPAN = "span", TEXT = "text";
-    Context context;
-    int cur, index;
-    List<HTMLElem> content = new ArrayList<>();
-
-    private static class HTMLElem {
-        public String tag, par = "";
-        private String html = "";
-        public boolean start = false, end = false;
-
-        public HTMLElem() {
-        }
-
-        public HTMLElem(String tag) {
-            this.tag = tag;
-            start = !tag.equals(PAR);
-            end = true;
-        }
-
-        public String getHtml() {
-            return html;
-        }
-
-        public void setHtml(String html) {
-            if (html.contains("& ")) //"&#x"
-                this.html = android.text.Html.fromHtml(html).toString();
-            else
-                this.html = html;
-        }
-
-        public String getCode() {
-            if (tag.equals(LINE))
-                return "<" + tag + ">" + html;
-            if (!start && end)
-                return "</" + tag + ">";
-            if (tag.equals(TEXT))
-                return html;
-            if (tag.equals(IMAGE))
-                return "<" + tag + " " + par;
-            String s;
-            if (par.length() == 0)
-                s = "<" + tag + ">" + html;
-            else if (tag.equals(LINK))
-                s = "<" + tag + " href=\"" + par + "\">" + html;
-            else
-                s = "<" + tag + " " + par + ">" + html;
-            if (end)
-                return s + "</" + tag + ">";
-            else
-                return s;
-        }
-    }
+    private Context context;
+    private int cur, index;
+    private List<HTMLElem> content = new ArrayList<>();
+    private final String SITE = ru.neosvet.utils.Const.SITE;
 
     public PageParser(Context context) {
         this.context = context;
@@ -119,10 +70,10 @@ public class PageParser {
                 s = s.substring(0, n) + s.substring(s.indexOf(">", n) + 1);
             }
             if (s.length() == 0) continue;
-            if (s.indexOf(DIV) == 0 || s.indexOf(SPAN) == 0) {
+            if (s.indexOf(Const.DIV) == 0 || s.indexOf(Const.SPAN) == 0) {
                 s = s.substring(s.indexOf(">") + 1);
                 if (s.length() > 0) {
-                    elem = new HTMLElem(TEXT);
+                    elem = new HTMLElem(Const.TEXT);
                     elem.setHtml(s);
                     content.add(elem);
                 }
@@ -137,13 +88,13 @@ public class PageParser {
                 n = s.length();
             if (s.indexOf("/") == 0) { //end tag
                 elem.tag = s.substring(1, n);
-                if (elem.tag.equals(PAR))
+                if (elem.tag.equals(Const.PAR))
                     startPar = false;
                 if (content.size() > 0) {
                     n = content.size() - 1;
                     if (content.get(n).tag.equals(elem.tag)) {
                         if (s.indexOf(">") < s.length() - 1) {
-                            elem = new HTMLElem(TEXT);
+                            elem = new HTMLElem(Const.TEXT);
                             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
                             content.add(elem);
                         }
@@ -160,13 +111,13 @@ public class PageParser {
             elem.end = false;
             elem.tag = s.substring(0, n);
             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
-            if (elem.tag.equals(PAR)) {
+            if (elem.tag.equals(Const.PAR)) {
                 if (startPar)
-                    content.add(new HTMLElem(PAR));
+                    content.add(new HTMLElem(Const.PAR));
                 else
                     startPar = true;
             }
-            if (elem.tag.equals(LINK)) {
+            if (elem.tag.equals(Const.LINK)) {
                 if (s.contains("data-ajax-url")) {
                     i++;
                     continue;
@@ -179,28 +130,28 @@ public class PageParser {
                     elem.par = s.substring(n, s.indexOf("'", n));
                 elem.par = elem.par.replace("..", "");
                 if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
-                    elem.par = Const.SITE + elem.par.substring(1);
+                    elem.par = SITE + elem.par.substring(1);
             }
-            if (elem.tag.equals(IMAGE)) {
+            if (elem.tag.equals(Const.IMAGE)) {
                 elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/");
             }
-            if (elem.tag.equals(FRAME)) {
-                elem.tag = LINK;
+            if (elem.tag.equals(Const.FRAME)) {
+                elem.tag = Const.LINK;
                 n = s.indexOf("src") + 5;
                 elem.par = s.substring(n, s.indexOf("\"", n));
                 elem.setHtml(context.getResources().getString(R.string.video_on_site));
             }
-            if (elem.tag.equals(PAR) || elem.tag.indexOf(HEAD) == 0) {
+            if (elem.tag.equals(Const.PAR) || elem.tag.indexOf(Const.HEAD) == 0) {
                 s = s.substring(0, s.indexOf(">")).replace("\"", "'");
-                if (s.contains(CLASS)) {
-                    n = s.indexOf(CLASS);
-                    elem.par = s.substring(n, s.indexOf("'", n + CLASS.length() + 2) + 1);
+                if (s.contains(Const.CLASS)) {
+                    n = s.indexOf(Const.CLASS);
+                    elem.par = s.substring(n, s.indexOf("'", n + Const.CLASS.length() + 2) + 1);
                     if (elem.par.contains("poem") && url.contains("poem"))
                         elem.par = "";
                     else if (elem.par.contains("noind")) {
                         if (wasNoind) {
                             n = content.size() - 1;
-                            content.get(n).tag = LINE;
+                            content.get(n).tag = Const.LINE;
                             content.get(n).html = elem.html;
                             wasNoind = false;
                             continue;
@@ -208,16 +159,16 @@ public class PageParser {
                             wasNoind = true;
                     }
                 }
-                if (s.contains(STYLE)) {
-                    n = s.indexOf(STYLE);
-                    s = s.substring(n, s.indexOf("'", n + STYLE.length() + 2)) + ";'";
+                if (s.contains(Const.STYLE)) {
+                    n = s.indexOf(Const.STYLE);
+                    s = s.substring(n, s.indexOf("'", n + Const.STYLE.length() + 2)) + ";'";
                     s = s.replace(";;", ";");
-                    if (s.contains(TEXTCOLOR)) {
-                        n = s.indexOf(TEXTCOLOR);
+                    if (s.contains(Const.TEXTCOLOR)) {
+                        n = s.indexOf(Const.TEXTCOLOR);
                         s = s.substring(0, n) + s.substring(s.indexOf(";", n) + 1);
                     }
-                    if (s.contains(COLOR)) {
-                        n = s.indexOf(COLOR);
+                    if (s.contains(Const.COLOR)) {
+                        n = s.indexOf(Const.COLOR);
                         s = s.substring(0, n) + s.substring(s.indexOf(";", n) + 1);
                     }
                     if (s.length() > 3) {
@@ -273,6 +224,10 @@ public class PageParser {
         return s.toString();
     }
 
+    public HTMLElem curItem() {
+        return content.get(cur);
+    }
+
     public String getNextItem() {
         index++;
         if (index >= content.size())
@@ -282,7 +237,7 @@ public class PageParser {
     }
 
     public String getLink() {
-        if (content.get(cur).tag.equals(LINK))
+        if (content.get(cur).tag.equals(Const.LINK))
             return content.get(cur).par;
         else
             return null;
@@ -299,7 +254,7 @@ public class PageParser {
     }
 
     public boolean isHead() {
-        return content.get(cur).tag.indexOf(HEAD) == 0;
+        return content.get(cur).tag.indexOf(Const.HEAD) == 0;
     }
 
 }

@@ -9,7 +9,6 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,7 +23,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.PageParser;
+import ru.neosvet.html.PageParser;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
