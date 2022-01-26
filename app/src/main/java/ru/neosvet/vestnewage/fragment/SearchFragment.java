@@ -15,7 +15,6 @@ import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -45,13 +44,12 @@ import java.util.List;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -61,9 +59,8 @@ import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
 
 
-public class SearchFragment extends BackFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
+public class SearchFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
-    private MainActivity act;
     private View fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
     private PageAdapter adPages;
@@ -107,7 +104,6 @@ public class SearchFragment extends BackFragment implements DateDialog.Result, V
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.search));
         initViews(view);
         setViews(view);

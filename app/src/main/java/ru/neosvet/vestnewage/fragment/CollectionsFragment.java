@@ -26,13 +26,12 @@ import androidx.work.Data;
 
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -43,12 +42,11 @@ import ru.neosvet.vestnewage.model.MarkersModel;
 
 import static android.app.Activity.RESULT_OK;
 
-public class CollectionsFragment extends BackFragment implements Observer<Data> {
+public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
     private View container, fabEdit, fabMenu, fabBack, pEdit, bExport;
     private TextView tvEmpty;
-    private MainActivity act;
     private MarkAdapter adMarker;
     private Tip menu;
     private int iSel = -1;
@@ -66,7 +64,6 @@ public class CollectionsFragment extends BackFragment implements Observer<Data> 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         initViews();
         setViews();
         initModel();

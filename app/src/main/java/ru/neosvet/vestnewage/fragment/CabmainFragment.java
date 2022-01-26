@@ -25,21 +25,19 @@ import androidx.work.Data;
 
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.CabpageActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
-public class CabmainFragment extends BackFragment implements Observer<Data> {
+public class CabmainFragment extends NeoFragment implements Observer<Data> {
     public static String error = null;
-    private MainActivity act;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
     private CheckBox cbRemEmail, cbRemPassword;
@@ -56,7 +54,6 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         initViews(view);
         setViews();
         restoreState(savedInstanceState);
@@ -77,11 +74,18 @@ public class CabmainFragment extends BackFragment implements Observer<Data> {
             ProgressHelper.addObserver(act, this);
         if (error != null) {
             act.status.setError(error);
-            act.status.setClick(view -> {
-                error = null;
-                act.status.onClick();
-            });
+            act.status.setClick(view -> onStatusClick(false));
         }
+    }
+
+    @Override
+    public void onStatusClick(boolean reset) {
+        error = null;
+        if (reset) {
+            act.status.setError(null);
+            return;
+        }
+        act.status.onClick();
     }
 
     @Override

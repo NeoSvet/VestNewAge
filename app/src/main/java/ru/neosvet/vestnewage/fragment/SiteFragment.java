@@ -22,11 +22,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.utils.BackFragment;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -34,9 +33,8 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
-public class SiteFragment extends BackFragment implements Observer<Data> {
+public class SiteFragment extends NeoFragment implements Observer<Data> {
     public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
-    private MainActivity act;
     private ListAdapter adMain;
     private View fabRefresh, tvEmptySite;
     private SiteModel model;
@@ -54,7 +52,6 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         ads = new DevadsHelper(act);
         initViews(view);
         setViews();
@@ -256,18 +253,7 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
             }
             return false;
         });
-        act.status.setClick(view -> {
-            if (!act.status.isStop()) {
-                act.status.setLoad(false);
-                ProgressHelper.cancelled();
-                ProgressHelper.setBusy(false);
-                return;
-            }
-            if (act.status.onClick())
-                fabRefresh.setVisibility(View.VISIBLE);
-            else if (act.status.isTime())
-                startLoad(tabHost.getCurrentTabTag());
-        });
+        act.status.setClick(view -> onStatusClick(false));
         lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
@@ -284,6 +270,25 @@ public class SiteFragment extends BackFragment implements Observer<Data> {
                                  int visibleItemCount, int totalItemCount) {
             }
         });
+    }
+
+    @Override
+    public void onStatusClick(boolean reset) {
+        if (reset) {
+            act.status.setError(null);
+            fabRefresh.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (!act.status.isStop()) {
+            act.status.setLoad(false);
+            ProgressHelper.cancelled();
+            ProgressHelper.setBusy(false);
+            return;
+        }
+        if (act.status.onClick())
+            fabRefresh.setVisibility(View.VISIBLE);
+        else if (act.status.isTime())
+            startLoad(tabHost.getCurrentTabTag());
     }
 
     private void openMultiLink(ListItem links, View parent) {

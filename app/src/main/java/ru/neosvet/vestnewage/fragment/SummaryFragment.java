@@ -17,11 +17,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
@@ -29,10 +28,9 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
-public class SummaryFragment extends BackFragment implements Observer<Data> {
+public class SummaryFragment extends NeoFragment implements Observer<Data> {
     private ListView lvSummary;
     private ListAdapter adSummary;
-    private MainActivity act;
     private View fabRefresh;
     private SummaryModel model;
 
@@ -44,7 +42,6 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.rss));
         initViews(view);
         setViews();
@@ -128,19 +125,7 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
 
     private void setViews() {
         fabRefresh.setOnClickListener(view -> startLoad());
-        act.status.setClick(view -> {
-            if (!act.status.isStop()) {
-                act.status.setLoad(false);
-                ProgressHelper.cancelled();
-                fabRefresh.setVisibility(View.VISIBLE);
-                ProgressHelper.setBusy(false);
-                return;
-            }
-            if (act.status.onClick())
-                fabRefresh.setVisibility(View.VISIBLE);
-            else if (act.status.isTime())
-                startLoad();
-        });
+        act.status.setClick(view -> onStatusClick(false));
         lvSummary.setOnItemClickListener((adapterView, view, pos, l) -> {
             if (act.checkBusy()) return;
             BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
@@ -156,6 +141,26 @@ public class SummaryFragment extends BackFragment implements Observer<Data> {
             }
             return false;
         });
+    }
+
+    @Override
+    public void onStatusClick(boolean reset) {
+        if (reset) {
+            act.status.setError(null);
+            fabRefresh.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (!act.status.isStop()) {
+            act.status.setLoad(false);
+            ProgressHelper.cancelled();
+            fabRefresh.setVisibility(View.VISIBLE);
+            ProgressHelper.setBusy(false);
+            return;
+        }
+        if (act.status.onClick())
+            fabRefresh.setVisibility(View.VISIBLE);
+        else if (act.status.isTime())
+            startLoad();
     }
 
     private void openList(boolean loadIfNeed) {

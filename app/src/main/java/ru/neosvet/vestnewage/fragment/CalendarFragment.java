@@ -4,14 +4,11 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.widget.TabHost;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,12 +25,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
@@ -41,7 +37,7 @@ import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class CalendarFragment extends BackFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
+public class CalendarFragment extends NeoFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -49,7 +45,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     private TextView tvDate;
     private View ivPrev, ivNext, fabRefresh;
     private CalendarModel model;
-    private MainActivity act;
     private DateDialog dateDialog;
     private boolean dialog = false;
     final Handler hTimer = new Handler(message -> {
@@ -68,7 +63,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.calendar));
         initViews(view);
         initCalendar();
@@ -169,20 +163,28 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
         fabRefresh = container.findViewById(R.id.fabRefresh);
         container.findViewById(R.id.bProm).setOnClickListener(v -> openLink("Posyl-na-Edinenie.html"));
         fabRefresh.setOnClickListener(view -> startLoad());
-        act.status.setClick(view -> {
-            if (!act.status.isStop()) {
-                act.status.setLoad(false);
-                ProgressHelper.cancelled();
-                fabRefresh.setVisibility(View.VISIBLE);
-                ProgressHelper.setBusy(false);
-                return;
-            }
-            if (act.status.onClick()) {
-                fabRefresh.setVisibility(View.VISIBLE);
-            } else if (act.status.isTime())
-                startLoad();
-        });
+        act.status.setClick(view -> onStatusClick(false));
         act.fab = fabRefresh;
+    }
+
+    @Override
+    public void onStatusClick(boolean reset) {
+        if (reset) {
+            act.status.setError(null);
+            fabRefresh.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (!act.status.isStop()) {
+            act.status.setLoad(false);
+            ProgressHelper.cancelled();
+            fabRefresh.setVisibility(View.VISIBLE);
+            ProgressHelper.setBusy(false);
+            return;
+        }
+        if (act.status.onClick()) {
+            fabRefresh.setVisibility(View.VISIBLE);
+        } else if (act.status.isTime())
+            startLoad();
     }
 
     private void initCalendar() {
@@ -392,24 +394,6 @@ public class CalendarFragment extends BackFragment implements DateDialog.Result,
             return;
         dCurrent = date;
         createCalendar(0);
-    }
-
-    private void blinkDay(int d) {
-        boolean begin = false;
-        for (int i = 6; i < adCalendar.getItemCount(); i++) {
-            if (adCalendar.getItem(i).getNum() == 1)
-                begin = true;
-            if (begin) {
-                if (adCalendar.getItem(i).getNum() == d) {
-                    View v = rvCalendar.getLayoutManager().findViewByPosition(i);
-                    if (v != null) {
-                        v.clearAnimation();
-                        v.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink));
-                    }
-                    break;
-                }
-            }
-        }
     }
 
     public int getCurrentYear() {

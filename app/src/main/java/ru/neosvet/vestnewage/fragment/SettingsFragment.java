@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -39,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -51,9 +50,8 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 
-public class SettingsFragment extends BackFragment implements Observer<Data> {
+public class SettingsFragment extends NeoFragment implements Observer<Data> {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
-    private MainActivity act;
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
     private View[] pSections;
@@ -78,7 +76,6 @@ public class SettingsFragment extends BackFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         act.setTitle(getResources().getString(R.string.settings));
         initViews(view);
         initSections(view);

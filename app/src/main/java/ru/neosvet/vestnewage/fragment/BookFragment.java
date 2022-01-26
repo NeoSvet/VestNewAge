@@ -3,20 +3,17 @@ package ru.neosvet.vestnewage.fragment;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -37,13 +34,12 @@ import java.util.TimerTask;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
-import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -53,9 +49,8 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 
-public class BookFragment extends BackFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
+public class BookFragment extends NeoFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final String DIALOG_DATE = "date";
-    private MainActivity act;
     private Animation anMin, anMax;
     private ListAdapter adBook;
     private View fabRefresh, fabRndMenu, ivPrev, ivNext;
@@ -84,7 +79,6 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         initViews(view);
         setViews();
         initTabs();
@@ -459,21 +453,7 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
         });
         ivPrev.setOnClickListener(view -> openMonth(false));
         ivNext.setOnClickListener(view -> openMonth(true));
-        act.status.setClick(view -> {
-            if (!act.status.isStop()) {
-                act.status.setLoad(false);
-                ProgressHelper.cancelled();
-                fabRefresh.setVisibility(View.VISIBLE);
-                fabRndMenu.setVisibility(View.VISIBLE);
-                ProgressHelper.setBusy(false);
-                return;
-            }
-            if (act.status.onClick()) {
-                fabRefresh.setVisibility(View.VISIBLE);
-                fabRndMenu.setVisibility(View.VISIBLE);
-            } else if (act.status.isTime())
-                startLoad();
-        });
+        act.status.setClick(view -> onStatusClick(false));
         tvDate.setOnClickListener(view -> {
             if (act.checkBusy()) return;
             dialog = DIALOG_DATE;
@@ -485,6 +465,27 @@ public class BookFragment extends BackFragment implements DateDialog.Result, Vie
             else
                 menuRnd.show();
         });
+    }
+
+    @Override
+    public void onStatusClick(boolean reset) {
+        if (reset) {
+            act.status.setError(null);
+            return;
+        }
+        if (!act.status.isStop()) {
+            act.status.setLoad(false);
+            ProgressHelper.cancelled();
+            fabRefresh.setVisibility(View.VISIBLE);
+            fabRndMenu.setVisibility(View.VISIBLE);
+            ProgressHelper.setBusy(false);
+            return;
+        }
+        if (act.status.onClick()) {
+            fabRefresh.setVisibility(View.VISIBLE);
+            fabRndMenu.setVisibility(View.VISIBLE);
+        } else if (act.status.isTime())
+            startLoad();
     }
 
     private void openMonth(boolean plus) {

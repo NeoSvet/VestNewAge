@@ -1,7 +1,6 @@
 package ru.neosvet.ui;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -167,7 +166,7 @@ public class StatusButton {
         panel.startAnimation(resizeMax);
     }
 
-    private boolean isCrash() {
+    public boolean isCrash() {
         return error != null;
     }
 

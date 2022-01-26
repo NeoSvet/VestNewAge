@@ -33,7 +33,7 @@ import ru.neosvet.ui.MultiWindowSupport;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
-import ru.neosvet.utils.BackFragment;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean isMenuMode = false, isBlinked = false;
     private int first_fragment;
     private MenuFragment frMenu;
-    private BackFragment curFragment;
+    private NeoFragment curFragment;
     private FragmentManager myFragmentManager;
     private WelcomeFragment frWelcome = null;
     public Lib lib = new Lib(this);
@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void setCurFragment(BackFragment fragment) {
+    public void setCurFragment(NeoFragment fragment) {
         curFragment = fragment;
     }
 
