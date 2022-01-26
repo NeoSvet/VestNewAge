@@ -7,8 +7,8 @@ package ru.neosvet.utils;
 public interface Const {
     int MAX_ON_PAGE = 15, TIMEOUT = 20;
     byte TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
-    String SITE2 = "http://chenneling.info/", mailto = "mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body=";
-    String SITE = "http://blagayavest.info/", CAB_SITE = "https://www.otkroveniya.eu/", COMMA = ",", N = "\n", NN = "\n\n", AND = "&";
+    String SITE2 = "https://chenneling.info/", mailto = "mailto:neosvet333@gmail.com?subject=Приложение «Весть Нового Века»&body=";
+    String SITE = "https://blagayavest.info/", CAB_SITE = "https://www.otkroveniya.eu/", COMMA = ",", N = "\n", NN = "\n\n", AND = "&";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”", CHECK = "Check";
     String HTML = ".html", PRINT = "print/", PROG = "prog", MAX = "max", FROM_OTKR = "from_otkr", FINISH = "finish";
     String ENCODING = "cp1251", USER_AGENT = "User-Agent", COOKIE = "Cookie", SET_COOKIE = "Set-Cookie", SEARCH = "search";
