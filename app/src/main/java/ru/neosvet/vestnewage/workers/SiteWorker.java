@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.html.PageParser;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -120,22 +120,22 @@ public class SiteWorker extends Worker {
 
     private void loadList(String url) throws Exception {
         PageParser page = new PageParser(context);
-        boolean boolSite = url.equals(Const.SITE);
-        if (boolSite) {
+        boolean isSite = url.equals(Const.SITE);
+        int i;
+        if (isSite) {
             page.load(url, "page-title");
         } else {
-            int i = url.lastIndexOf("/") + 1;
+            i = url.lastIndexOf("/") + 1;
             url = url.substring(0, i) + Const.PRINT + url.substring(i);
             page.load(url, "razdel");
         }
-
         String s = page.getFirstElem();
         if (s == null) return;
-        String a;
+        String t, a;
         StringBuilder d = new StringBuilder();
         do {
             if (page.isHead()) {
-                if (boolSite)
+                if (isSite)
                     list.add(new ListItem(page.getText(), true));
                 else {
                     setDes(d.toString());
@@ -145,22 +145,36 @@ public class SiteWorker extends Worker {
                 }
             } else {
                 a = page.getLink();
-                if (boolSite) {
-                    if (page.getText().length() > 0) {
+                t = page.getText();
+                if (isSite) {
+                    if (!t.isEmpty()) {
                         if (!s.contains("<"))
                             list.get(list.size() - 1).setDes(s);
                         else
-                            list.add(new ListItem(page.getText()));
+                            list.add(new ListItem(t));
                         if (a != null)
-                            addLink(page.getText(), a);
+                            addLink(t, a);
                     }
                 } else {
+                    if (t.isEmpty()) {
+                        s = page.getNextItem();
+                        if (s.contains("title=")) {
+                            i = s.indexOf("title=") + 7;
+                            t = s.substring(i, s.indexOf("\"", i));
+                        } else if (s.contains("alt=")) {
+                            i = s.indexOf("alt=") + 5;
+                            t = s.substring(i, s.indexOf("\"", i));
+                        }
+                        s = "<a href='" + a + "'>" + t + "</a><br>";
+                    }
                     if (a != null)
-                        addLink(page.getText(), a);
+                        addLink(t, a);
                     d.append(s);
                 }
             }
             s = page.getNextItem();
+            while (!page.curItem().start && s != null)
+                s = page.getNextItem();
         } while (s != null);
         setDes(d.toString());
         page.clear();

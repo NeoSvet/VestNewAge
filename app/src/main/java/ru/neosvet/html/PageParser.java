@@ -128,7 +128,7 @@ public class PageParser {
                     elem.par = s.substring(n, s.indexOf("\"", n));
                 else
                     elem.par = s.substring(n, s.indexOf("'", n));
-                elem.par = elem.par.replace("..", "");
+                elem.par = elem.par.replace("..", "").replace("&#x2B;", "+");
                 if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
                     elem.par = SITE + elem.par.substring(1);
             }
