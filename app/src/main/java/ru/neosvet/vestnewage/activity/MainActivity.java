@@ -264,12 +264,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
         if (navigationView != null)
-            navigationView.getMenu().getItem(0).setIcon(unread.getNewId(k_new));
+            navigationView.getMenu().getItem(0).setIcon(getNewId());
         else if (frMenu != null)
-            frMenu.setNew(unread.getNewId(k_new));
+            frMenu.setNew(getNewId());
         tvNew.setText(String.valueOf(k_new));
         if (setNew())
             tvNew.startAnimation(AnimationUtils.loadAnimation(this, R.anim.blink));
+    }
+
+    public int getNewId() {
+        return unread.getNewId(k_new);
     }
 
     private void initInterface() {
@@ -327,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fragmentTransaction.replace(R.id.menu_fragment, frMenu).commit();
         } else
             frMenu.setSelect(cur_id);
-        frMenu.setNew(unread.getNewId(k_new));
+        frMenu.setNew(getNewId());
     }
 
     @Override
@@ -361,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setFrMenu(MenuFragment frMenu) {
         this.frMenu = frMenu;
-        frMenu.setNew(unread.getNewId(k_new));
+        frMenu.setNew(getNewId());
     }
 
     public void setFragment(int id, boolean savePrev) {

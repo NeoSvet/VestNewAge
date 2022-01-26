@@ -40,6 +40,12 @@ public class MenuFragment extends Fragment {
         restoreState(savedInstanceState);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        setNew(act.getNewId());
+    }
+
     private void initView(View container) {
         lvMenu = container.findViewById(R.id.lvMenu);
 
