@@ -1,6 +1,6 @@
 <resources>
     <!--MainActivity-->
-    <string name="app_name">Весть Нового Века</string>
+    <string name="app_name">Весть Века</string>
     <string name="navigation_drawer_open">Открытие панели</string>
     <string name="navigation_drawer_close">Закрытие панели</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
@@ -214,7 +214,7 @@
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="page_app">Страница приложения</string>
-    <string name="url_on_app">Приложение «Весть Нового Века» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
+    <string name="url_on_app">Приложение «Весть Века» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений</string>
     <string name="app_version">Версия приложения:&#160;</string>
     <string name="system_version">Версия системы:&#160;</string>
