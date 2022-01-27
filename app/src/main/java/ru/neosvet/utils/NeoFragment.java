@@ -19,12 +19,12 @@ public class NeoFragment extends Fragment {
 
     @Override
     public void onDetach() {
-        act = null;
+        //act = null;
         super.onDetach();
     }
 
     public boolean onBackPressed() {
-        if (act.status.isCrash()) {
+        if (act.status.isCrash() || !act.status.isStop()) {
             onStatusClick(true);
             return false;
         }
@@ -40,7 +40,10 @@ public class NeoFragment extends Fragment {
 
     public void onStatusClick(boolean reset) {
         if (reset) {
-            act.status.setError(null);
+            if (!act.status.isStop())
+                act.status.setLoad(false);
+            else
+                act.status.setError(null);
             return;
         }
         act.status.onClick();

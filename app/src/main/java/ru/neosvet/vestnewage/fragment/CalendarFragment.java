@@ -169,16 +169,16 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @Override
     public void onStatusClick(boolean reset) {
-        if (reset) {
-            act.status.setError(null);
-            fabRefresh.setVisibility(View.VISIBLE);
-            return;
-        }
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             ProgressHelper.cancelled();
             fabRefresh.setVisibility(View.VISIBLE);
             ProgressHelper.setBusy(false);
+            return;
+        }
+        if (reset) {
+            act.status.setError(null);
+            fabRefresh.setVisibility(View.VISIBLE);
             return;
         }
         if (act.status.onClick()) {

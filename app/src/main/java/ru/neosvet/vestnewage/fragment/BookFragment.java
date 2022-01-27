@@ -469,16 +469,16 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
 
     @Override
     public void onStatusClick(boolean reset) {
-        if (reset) {
-            act.status.setError(null);
-            return;
-        }
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             ProgressHelper.cancelled();
             fabRefresh.setVisibility(View.VISIBLE);
             fabRndMenu.setVisibility(View.VISIBLE);
             ProgressHelper.setBusy(false);
+            return;
+        }
+        if (reset) {
+            act.status.setError(null);
             return;
         }
         if (act.status.onClick()) {
