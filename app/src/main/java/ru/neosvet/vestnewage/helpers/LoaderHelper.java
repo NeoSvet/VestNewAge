@@ -282,7 +282,8 @@ public class LoaderHelper extends LifecycleService {
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
         }
-        if (id == ALL && listsHelper.bookIsOld()) { //Calendar
+        boolean isOld = listsHelper.bookIsOld();
+        if (id == ALL && isOld) { //Calendar
             data = data.putInt(Const.YEAR, ALL);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWorker.class)
@@ -296,7 +297,7 @@ public class LoaderHelper extends LifecycleService {
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
         }
-        if ((id == ALL || id == R.id.nav_book) && listsHelper.bookIsOld()) { //Book
+        if (id == ALL || id == R.id.nav_book) { //Book
             task = new OneTimeWorkRequest
                     .Builder(BookWorker.class)
                     .setInputData(data.build())

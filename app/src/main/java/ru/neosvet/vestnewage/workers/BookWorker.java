@@ -17,12 +17,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MyException;
-import ru.neosvet.html.PageParser;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -31,6 +31,7 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 
 public class BookWorker extends Worker {
+    private final long SIZE_EMPTY_BASE = 24576L;
     private final Context context;
     private final List<String> title = new ArrayList<>();
     private final List<String> links = new ArrayList<>();
@@ -64,7 +65,8 @@ public class BookWorker extends Worker {
         }
         try {
             if (getInputData().getBoolean(Const.OTKR, false)) { //загрузка Посланий за 2004-2015
-                String s = loadListUcoz(true, false);
+                ProgressHelper.setMax(137); //август 2004 - декабрь 2015
+                String s = loadListUcoz(true, UcozType.OLD);
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
                         .putBoolean(Const.OTKR, true)
@@ -83,7 +85,7 @@ public class BookWorker extends Worker {
                 DateHelper d = DateHelper.initToday(context);
                 if (!kat && fromOtkr) { //все Послания
                     max = 146; //август 2004 - сентябрь 2016
-                    loadListUcoz(false, false); //обновление старых Посланий
+                    loadListUcoz(false, UcozType.OLD); //обновление старых Посланий
                 } else if (kat) //Катрены
                     max = (d.getYear() - 2016) * 12 + d.getMonth() - 1;
                 else //только новые Послания
@@ -107,7 +109,10 @@ public class BookWorker extends Worker {
             loadPoems();
             if (!LoaderHelper.start)
                 return Result.success();
-            loadListUcoz(true, true);
+            DateHelper d = DateHelper.initToday(context);
+            ProgressHelper.setMax((d.getYear() - 2016) * 12);
+            loadListUcoz(true, UcozType.PART1);
+            loadListUcoz(true, UcozType.PART2);
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,52 +137,62 @@ public class BookWorker extends Worker {
         throw new MyException(context.getString(R.string.site_not_available));
     }
 
-    private String loadListUcoz(boolean withDialog, boolean bNew) throws Exception {
-        int m;
-        DateHelper d = null;
-        if (withDialog) {
-            if (bNew) {
-                d = DateHelper.initToday(context);
-                m = (d.getYear() - 2016) * 12;
-            } else //старые Послания
-                m = 137; //август 2004 - декабрь 2015
-            ProgressHelper.setMax(m);
+    private enum UcozType {
+        OLD,  //август 2004 - декабрь 2015
+        PART1, //январь 2016 - декабрь 2020
+        PART2 //январь 2021 - ...
+    }
+
+    private String loadListUcoz(boolean withDialog, UcozType type) throws Exception {
+        String name = "", s, url = "http://neosvet.ucoz.ru/databases_vna";
+        switch (type) {
+            case OLD:
+                url += "/list.txt";
+                break;
+            case PART1:
+                url += "/list_new.txt";
+                break;
+            case PART2:
+                url += "2/list.txt";
+                break;
         }
+        BufferedInputStream in = new BufferedInputStream(lib.getStream(url));
         final String path = lib.getDBFolder() + "/";
         File f;
-        String s, name = "";
         long l;
-        BufferedInputStream in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/list" +
-                (bNew ? "_new" : "") + ".txt"));
         //list format:
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        List<String> list = new ArrayList<>();
         while ((s = br.readLine()) != null) {
             if (isCancelled()) {
                 br.close();
                 in.close();
                 return name;
             }
-            f = new File(path + s.substring(0, s.indexOf(" ")));
+            name = s.substring(0, s.indexOf(" "));
+            f = new File(path + name);
             if (f.exists()) {
                 l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
                 if (s.contains("delete")) {
-                    if (f.lastModified() < l) f.delete();
+                    if (f.lastModified() < l) {
+                        list.add(name);
+                        f.delete();
+                    }
+                } else if (l != f.length()) {
+                    list.add(name);
+                    if (f.length() != SIZE_EMPTY_BASE)
+                        f.delete();
                 }
+            } else {
+                list.add(name);
             }
         }
         br.close();
         in.close();
-        if (bNew) {
-            if (d == null)
-                d = DateHelper.initToday(context);
-            m = d.getYear();
-            d = DateHelper.putYearMonth(context, 2016, 1);
-        } else {
-            m = 2016;
-            d = DateHelper.putYearMonth(context, 2004, 8);
-        }
+
+        url = url.substring(0, url.lastIndexOf("/") + 1);
         DataBase dataBase;
         boolean isTitle, isNotExists = true;
         HashMap<String, Integer> ids = new HashMap<>();
@@ -186,20 +201,23 @@ public class BookWorker extends Worker {
         final long time = System.currentTimeMillis();
         ContentValues cvTime = new ContentValues();
         cvTime.put(Const.TIME, time);
-        while (d.getYear() < m) {
-            name = d.getMY();
+        DateHelper d;
+
+        for (String item : list) {
             if (max > 0) {
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.DIALOG, true)
                         .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
                         .build());
                 cur++;
-            } else
+            } else {
+                d = DateHelper.parse(context, item);
                 ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
+            }
 
-            dataBase = new DataBase(context, name);
+            dataBase = new DataBase(context, item);
             isTitle = true;
-            in = new BufferedInputStream(lib.getStream("http://neosvet.ucoz.ru/databases_vna/" + name));
+            in = new BufferedInputStream(lib.getStream(url + name));
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
             n = 2;
             while ((s = br.readLine()) != null) {
@@ -229,8 +247,7 @@ public class BookWorker extends Worker {
             br.close();
             in.close();
             dataBase.close();
-
-            d.changeMonth(1);
+            name = item;
             if (withDialog)
                 ProgressHelper.upProg();
             if (isCancelled())
