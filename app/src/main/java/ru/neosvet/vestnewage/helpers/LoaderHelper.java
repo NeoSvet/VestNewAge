@@ -64,8 +64,12 @@ public class LoaderHelper extends LifecycleService {
         intent.putExtra(Const.DIALOG, context instanceof Activity);
         intent.putExtra(Const.MODE, mode);
         if (mode == STOP_WITH_NOTIF || mode == STOP) {
-            intent.putExtra(Const.FINISH, true);
-            intent.putExtra(Const.ERROR, request);
+            context.stopService(intent);
+            return;
+// on Build.VERSION_CODES.O this call error:
+// android.app.RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()
+//            intent.putExtra(Const.FINISH, true);
+//            intent.putExtra(Const.ERROR, request);
         } else {
             intent.putExtra(Const.TASK, request);
         }
