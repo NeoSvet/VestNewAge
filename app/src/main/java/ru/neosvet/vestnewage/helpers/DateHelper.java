@@ -69,6 +69,8 @@ public class DateHelper {
     public static DateHelper parse(Context context, String s) {
         DateTimeFormatter fDate = null;
         switch (s.length()) {
+            case 5:
+                s = "01." + s;
             case 8:
                 fDate = DateTimeFormatter
                         .ofPattern("dd.MM.yy")
