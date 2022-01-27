@@ -194,13 +194,11 @@ public class BookWorker extends Worker {
 
         url = url.substring(0, url.lastIndexOf("/") + 1);
         DataBase dataBase;
-        boolean isTitle, isNotExists = true;
+        boolean isTitle;
         HashMap<String, Integer> ids = new HashMap<>();
         int n, id;
         String v;
         final long time = System.currentTimeMillis();
-        ContentValues cvTime = new ContentValues();
-        cvTime.put(Const.TIME, time);
         DateHelper d;
 
         for (String item : list) {
@@ -217,7 +215,7 @@ public class BookWorker extends Worker {
 
             dataBase = new DataBase(context, item);
             isTitle = true;
-            in = new BufferedInputStream(lib.getStream(url + name));
+            in = new BufferedInputStream(lib.getStream(url + item));
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
             n = 2;
             while ((s = br.readLine()) != null) {
@@ -228,19 +226,14 @@ public class BookWorker extends Worker {
                 v = br.readLine();
 
                 if (isTitle) {
-                    if (!dataBase.existsPage(s)) {
-                        isNotExists = true;
-                        id = dataBase.getPageId(s);
-                        if (id == -1)
-                            id = (int) dataBase.insert(Const.TITLE, getRow(s, v, time));
-                        else
-                            dataBase.update(Const.TITLE, cvTime, Const.LINK + DataBase.Q, s);
-
-                        ids.put(String.valueOf(n), id);
-                    } else
-                        isNotExists = false;
+                    id = dataBase.getPageId(s);
+                    if (id == -1)
+                        id = (int) dataBase.insert(Const.TITLE, getRow(s, v, time));
+                    else
+                        dataBase.update(Const.TITLE, getRow(s, v, time), Const.LINK + DataBase.Q, s);
+                    ids.put(String.valueOf(n), id);
                     n++;
-                } else if (isNotExists) {
+                } else {
                     dataBase.insert(DataBase.PARAGRAPH, getRow(ids.get(s), v));
                 }
             }
