@@ -3,6 +3,8 @@ package ru.neosvet.vestnewage.list;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,7 @@ public class CalendarItem {
         this.context = context;
         this.num = num;
 
-        color = context.getResources().getColor(id_color);
+        color = ContextCompat.getColor(context, id_color);
         if (num < 1)
             bold = true;
     }
@@ -72,7 +74,7 @@ public class CalendarItem {
             bg = R.drawable.cell_bg_p;
         else
             bg = R.drawable.cell_bg_n;
-        return context.getResources().getDrawable(bg);
+        return ContextCompat.getDrawable(context, bg);
     }
 
     public boolean isBold() {

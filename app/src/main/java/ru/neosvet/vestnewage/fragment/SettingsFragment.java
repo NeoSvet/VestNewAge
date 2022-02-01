@@ -122,7 +122,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         for (int i = 0; i < bPanels.length; i++) {
             if (bPanels[i]) {
                 pSections[i].setVisibility(View.VISIBLE);
-                imgSections[i].setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                imgSections[i].setImageResource(R.drawable.minus);
             }
         }
     }
@@ -208,10 +208,10 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
             }
             if (bPanels[section]) { //if open
                 pSections[section].setVisibility(View.GONE);
-                imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                imgSections[section].setImageResource(R.drawable.plus);
             } else { //if close
                 pSections[section].setVisibility(View.VISIBLE);
-                imgSections[section].setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                imgSections[section].setImageResource(R.drawable.minus);
             }
             bPanels[section] = !bPanels[section];
         };

@@ -178,17 +178,17 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         public void onBindViewHolder(MonthAdapter.ViewHolder holder, int pos) {
             holder.tv.setText(data.get(pos));
             if (pos > max_pos && pos < min_year) {
-                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
+                holder.bg.setBackgroundResource(R.drawable.cell_bg_n);
                 holder.bg.setEnabled(false);
             } else if (pos == max_pos || pos == min_pos) {
                 if (pos == select)
-                    holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_kp));
+                    holder.bg.setBackgroundResource(R.drawable.cell_bg_kp);
                 else
-                    holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_p));
+                    holder.bg.setBackgroundResource(R.drawable.cell_bg_p);
             } else if (pos == select)
-                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_k));
+                holder.bg.setBackgroundResource(R.drawable.cell_bg_k);
             else
-                holder.bg.setBackgroundDrawable(act.getResources().getDrawable(R.drawable.cell_bg_n));
+                holder.bg.setBackgroundResource(R.drawable.cell_bg_n);
             holder.tv.setTag(pos);
             holder.tv.setOnClickListener(click);
         }

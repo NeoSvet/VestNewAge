@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,18 +74,18 @@ public class ListAdapter extends BaseAdapter {
             else
                 tv.setText(data.get(position).getDes());
             if (data.get(position).getLink().equals("@"))
-                tv.setTextColor(context.getResources().getColor(R.color.light_gray));
+                tv.setTextColor(ContextCompat.getColor(context, R.color.light_gray));
         }
         //}
         tv = (TextView) convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
         if (data.get(position).getLink().equals("@") && isItemList)
-            tv.setTextColor(context.getResources().getColor(R.color.light_gray));
+            tv.setTextColor(ContextCompat.getColor(context, R.color.light_gray));
         View item_bg = convertView.findViewById(R.id.item_bg);
         if (data.get(position).isSelect())
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
+            item_bg.setBackgroundResource(R.drawable.select_item_bg);
         else
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+            item_bg.setBackgroundResource(R.drawable.item_bg);
         return convertView;
     }
 }

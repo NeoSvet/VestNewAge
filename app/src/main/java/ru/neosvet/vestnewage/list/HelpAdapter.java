@@ -15,12 +15,7 @@ import ru.neosvet.vestnewage.R;
 
 public class HelpAdapter extends BaseAdapter {
     private final String BUTTON = "b";
-    private final Context context;
     private final List<ListItem> data = new ArrayList<>();
-
-    public HelpAdapter(Context context) {
-        this.context = context;
-    }
 
     public void clear() {
         data.clear();
@@ -64,7 +59,7 @@ public class HelpAdapter extends BaseAdapter {
     @Override
     public View getView(int pos, View convertView, ViewGroup parent) {
         boolean button = data.get(pos).getDes().equals(BUTTON);
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (button)
             convertView = inflater.inflate(R.layout.item_menu, null);
         else
@@ -73,18 +68,18 @@ public class HelpAdapter extends BaseAdapter {
         tv.setText(data.get(pos).getTitle());
         View item_bg = convertView.findViewById(R.id.item_bg);
         if (button) {
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.card_bg));
+            item_bg.setBackgroundResource(R.drawable.card_bg);
             ImageView img = (ImageView) convertView.findViewById(R.id.image_item);
             int icon = Integer.parseInt(data.get(pos).getLink());
-            img.setImageDrawable(context.getResources().getDrawable(icon));
+            img.setImageResource(icon);
         } else {
             tv = (TextView) convertView.findViewById(R.id.des_item);
             tv.setText(data.get(pos).getDes());
             if (data.get(pos).getCount() == 0) {
-                item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.card_bg));
+                item_bg.setBackgroundResource(R.drawable.card_bg);
                 tv.setVisibility(View.GONE);
             } else {
-                item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+                item_bg.setBackgroundResource(R.drawable.item_bg);
                 tv.setVisibility(View.VISIBLE);
             }
         }

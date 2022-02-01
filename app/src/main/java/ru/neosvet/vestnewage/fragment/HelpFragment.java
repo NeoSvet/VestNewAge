@@ -70,7 +70,7 @@ public class HelpFragment extends Fragment {
     }
 
     private void initList(View container) {
-        adHelp = new HelpAdapter(act);
+        adHelp = new HelpAdapter();
         ListView lvHelp = container.findViewById(R.id.lvHelp);
         lvHelp.setAdapter(adHelp);
         lvHelp.setOnItemClickListener((adapterView, view, pos, l) -> {

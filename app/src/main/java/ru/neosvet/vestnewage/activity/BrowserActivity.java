@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
@@ -293,10 +294,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
         if (lightTheme) {
-            etSearch.setTextColor(getResources().getColor(android.R.color.black));
-            etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
+            etSearch.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            etSearch.setHintTextColor(ContextCompat.getColor(this, R.color.dark_gray));
         } else
-            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
+            mainLayout.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black));
         etSearch.requestLayout();
         mainLayout.requestLayout();
         wvBrowser.getSettings().setBuiltInZoomControls(true);
@@ -469,14 +470,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void initTheme() {
         if (lightTheme) {
-            etSearch.setTextColor(getResources().getColor(android.R.color.black));
-            etSearch.setHintTextColor(getResources().getColor(R.color.dark_gray));
-            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white));
+            etSearch.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            etSearch.setHintTextColor(ContextCompat.getColor(this, R.color.dark_gray));
+            mainLayout.setBackgroundColor(ContextCompat.getColor(this, android.R.color.white));
             setCheckItem(miThemeL, true);
         } else {
-            etSearch.setTextColor(getResources().getColor(android.R.color.white));
-            etSearch.setHintTextColor(getResources().getColor(R.color.light_gray));
-            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.black));
+            etSearch.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+            etSearch.setHintTextColor(ContextCompat.getColor(this, R.color.light_gray));
+            mainLayout.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black));
             setCheckItem(miThemeD, true);
         }
     }
@@ -556,7 +557,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 lightTheme = !lightTheme;
                 setCheckItem(miThemeL, lightTheme);
                 setCheckItem(miThemeD, !lightTheme);
-                mainLayout.setBackgroundColor(getResources().getColor(
+                mainLayout.setBackgroundColor(ContextCompat.getColor(this,
                         lightTheme ? android.R.color.white : android.R.color.black));
                 editor.putInt(THEME, (lightTheme ? 0 : 1));
                 wvBrowser.clearCache(true);

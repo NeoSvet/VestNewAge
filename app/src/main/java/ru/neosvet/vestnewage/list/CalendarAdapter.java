@@ -36,7 +36,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     public void onBindViewHolder(CalendarAdapter.ViewHolder holder, int pos) {
         holder.num.setText(data.get(pos).getDay());
         holder.num.setTextColor(data.get(pos).getColor());
-        holder.bg.setBackgroundDrawable(data.get(pos).getBG());
+        holder.bg.setBackground(data.get(pos).getBG());
         if (data.get(pos).isBold()) {
             holder.num.setTypeface(null, Typeface.BOLD);
         } else {

@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -33,9 +34,9 @@ public class Lib {
         this.context = context;
     }
 
-//    public static void LOG(String msg) {
-//        Log.d("neotag", msg);
-//    }
+    public static void LOG(String msg) {
+        Log.d("neotag", msg);
+    }
 
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();

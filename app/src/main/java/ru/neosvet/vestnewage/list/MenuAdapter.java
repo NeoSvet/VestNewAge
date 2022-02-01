@@ -14,12 +14,7 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 
 public class MenuAdapter extends BaseAdapter {
-    private final Context context;
     private final List<MenuItem> data = new ArrayList<>();
-
-    public MenuAdapter(Context context) {
-        this.context = context;
-    }
 
     @Override
     public int getCount() {
@@ -49,7 +44,7 @@ public class MenuAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_menu, null);
         }
         TextView tv = (TextView) convertView.findViewById(R.id.text_item);
@@ -58,9 +53,9 @@ public class MenuAdapter extends BaseAdapter {
         iv.setImageResource(data.get(position).getImage());
         View item_bg = convertView.findViewById(R.id.item_bg);
         if (data.get(position).isSelect())
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.selected));
+            item_bg.setBackgroundResource(R.drawable.selected);
         else
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+            item_bg.setBackgroundResource(R.drawable.item_bg);
 
         return convertView;
     }

@@ -80,7 +80,7 @@ public class MenuFragment extends Fragment {
     }
 
     private void initList(int i) {
-        adMenu = new MenuAdapter(act);
+        adMenu = new MenuAdapter();
         lvMenu.setAdapter(adMenu);
         int[] mImage = new int[]{R.drawable.download, R.drawable.new0, R.drawable.rss, R.drawable.main,
                 R.drawable.calendar, R.drawable.book, R.drawable.search, R.drawable.marker,

@@ -63,9 +63,9 @@ public class MarkAdapter extends BaseAdapter {
         tv.setText(data.get(position).getTitle());
         View item_bg = convertView.findViewById(R.id.item_bg);
         if (data.get(position).isSelect())
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_item_bg));
+            item_bg.setBackgroundResource(R.drawable.select_item_bg);
         else
-            item_bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+            item_bg.setBackgroundResource(R.drawable.item_bg);
         return convertView;
     }
 

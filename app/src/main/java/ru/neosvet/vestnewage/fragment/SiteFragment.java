@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
@@ -166,13 +167,13 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
 
         tabSpec = tabHost.newTabSpec(NEWS);
         tabSpec.setIndicator(getResources().getString(R.string.news),
-                getResources().getDrawable(R.drawable.none));
+                ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec(MAIN);
         tabSpec.setIndicator(getResources().getString(R.string.site),
-                getResources().getDrawable(R.drawable.none));
+                ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
 

@@ -25,10 +25,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -50,7 +50,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     private boolean dialog = false;
     final Handler hTimer = new Handler(message -> {
         if (message.what == 0)
-            tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+            tvDate.setBackgroundResource(R.drawable.card_bg);
         else
             act.startAnimMax();
         return false;
@@ -221,7 +221,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     private void openMonth(int offset) {
         if (act.checkBusy()) return;
-        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
+        tvDate.setBackgroundResource(R.drawable.selected);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -417,18 +417,15 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
             pMenu.getMenu().add(adCalendar.getItem(pos).getTitle(i));
         }
-        pMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                String title = item.getTitle().toString();
-                for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
-                    if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
-                        openLink(adCalendar.getItem(pos).getLink(i));
-                        break;
-                    }
+        pMenu.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
+                if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
+                    openLink(adCalendar.getItem(pos).getLink(i));
+                    break;
                 }
-                return true;
             }
+            return true;
         });
         pMenu.show();
         return false;

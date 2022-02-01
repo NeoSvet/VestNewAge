@@ -561,11 +561,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
             builder.setMessage(getResources().getString(R.string.alert_search));
             builder.setPositiveButton(getResources().getString(android.R.string.ok),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
+                    (dialog, id) -> dialog.dismiss());
             builder.create().show();
             deleteBase();
         } else {
@@ -575,7 +571,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             if (adPages != null && adPages.getItemCount() == max)
                 adPages.setSelect(page);
             else {
-                adPages = new PageAdapter(act, max, page, this);
+                adPages = new PageAdapter(max, page, this);
                 LinearLayoutManager layoutManager = new LinearLayoutManager(act, LinearLayoutManager.HORIZONTAL, false);
                 rvPages.setLayoutManager(layoutManager);
                 rvPages.setAdapter(adPages);

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
@@ -67,7 +68,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     private DateHelper dKatren, dPoslanie;
     private SharedPreferences pref;
     final Handler hTimer = new Handler(message -> {
-        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_bg));
+        tvDate.setBackgroundResource(R.drawable.card_bg);
         return false;
     });
 
@@ -201,13 +202,13 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
 
         tabSpec = tabHost.newTabSpec(Const.KATRENY);
         tabSpec.setIndicator(getResources().getString(R.string.katreny),
-                getResources().getDrawable(R.drawable.none));
+                ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.pBook);
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec(Const.POSLANIYA);
         tabSpec.setIndicator(getResources().getString(R.string.poslaniya),
-                getResources().getDrawable(R.drawable.none));
+                ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.pBook);
         tabHost.addTab(tabSpec);
 
@@ -512,7 +513,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             d.changeMonth(1);
         else
             d.changeMonth(-1);
-        tvDate.setBackgroundDrawable(getResources().getDrawable(R.drawable.selected));
+        tvDate.setBackgroundResource(R.drawable.selected);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {

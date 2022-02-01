@@ -11,13 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import ru.neosvet.vestnewage.R;
 
 public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
-    private final Context context;
     private final int max;
     private int select;
     private final View.OnTouchListener click;
 
-    public PageAdapter(Context context, int max, int select, View.OnTouchListener click) {
-        this.context = context;
+    public PageAdapter(int max, int select, View.OnTouchListener click) {
         this.max = max;
         this.select = select;
         this.click = click;
@@ -34,9 +32,9 @@ public class PageAdapter extends RecyclerView.Adapter<PageAdapter.ViewHolder> {
     public void onBindViewHolder(PageAdapter.ViewHolder holder, int pos) {
         holder.num.setText(String.valueOf(pos + 1));
         if (pos == select)
-            holder.bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.select_bg));
+            holder.bg.setBackgroundResource(R.drawable.select_bg);
         else
-            holder.bg.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.item_bg));
+            holder.bg.setBackgroundResource(R.drawable.item_bg);
         holder.bg.setTag(pos);
         holder.bg.setOnTouchListener(click);
     }
