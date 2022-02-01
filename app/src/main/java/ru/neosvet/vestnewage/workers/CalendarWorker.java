@@ -143,14 +143,17 @@ public class CalendarWorker extends Worker {
         String s = br.readLine();
         br.close();
         in.close();
-        if (s.length() < 10)
+        if (s.length() < 20)
             return;
-        JSONObject json, jsonI;
+
+        JSONObject json = new JSONObject(s);
+        json = json.getJSONObject("calendarData");
+        if (json == null || json.names() == null)
+            return;
+        initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
+        JSONObject jsonI;
         JSONArray jsonA;
         String link;
-        initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
-        json = new JSONObject(s);
-        json = json.getJSONObject("calendarData");
         DateHelper d;
         int n;
         for (int i = 0; i < json.names().length() && !ProgressHelper.isCancelled(); i++) {
