@@ -145,21 +145,18 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onStatusClick(boolean reset) {
+        ProgressHelper.cancelled();
+        fabRefresh.setVisibility(View.VISIBLE);
+        ProgressHelper.setBusy(false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
-            ProgressHelper.cancelled();
-            fabRefresh.setVisibility(View.VISIBLE);
-            ProgressHelper.setBusy(false);
             return;
         }
         if (reset) {
             act.status.setError(null);
-            fabRefresh.setVisibility(View.VISIBLE);
             return;
         }
-        if (act.status.onClick())
-            fabRefresh.setVisibility(View.VISIBLE);
-        else if (act.status.isTime())
+        if (!act.status.onClick() && act.status.isTime())
             startLoad();
     }
 

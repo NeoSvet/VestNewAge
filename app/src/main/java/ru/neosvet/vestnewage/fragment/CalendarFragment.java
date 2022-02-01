@@ -25,6 +25,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.DateDialog;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -169,21 +170,18 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @Override
     public void onStatusClick(boolean reset) {
+        ProgressHelper.cancelled();
+        ProgressHelper.setBusy(false);
+        fabRefresh.setVisibility(View.VISIBLE);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
-            ProgressHelper.cancelled();
-            fabRefresh.setVisibility(View.VISIBLE);
-            ProgressHelper.setBusy(false);
             return;
         }
         if (reset) {
             act.status.setError(null);
-            fabRefresh.setVisibility(View.VISIBLE);
             return;
         }
-        if (act.status.onClick()) {
-            fabRefresh.setVisibility(View.VISIBLE);
-        } else if (act.status.isTime())
+        if (!act.status.onClick() && act.status.isTime())
             startLoad();
     }
 
@@ -362,6 +360,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @Override
     public void startLoad() {
+        Lib.LOG("busy: " + ProgressHelper.isBusy());
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);

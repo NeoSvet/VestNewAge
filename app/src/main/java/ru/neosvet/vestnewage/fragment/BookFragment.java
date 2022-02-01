@@ -34,10 +34,10 @@ import java.util.TimerTask;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
@@ -469,22 +469,19 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
 
     @Override
     public void onStatusClick(boolean reset) {
+        ProgressHelper.cancelled();
+        fabRefresh.setVisibility(View.VISIBLE);
+        fabRndMenu.setVisibility(View.VISIBLE);
+        ProgressHelper.setBusy(false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
-            ProgressHelper.cancelled();
-            fabRefresh.setVisibility(View.VISIBLE);
-            fabRndMenu.setVisibility(View.VISIBLE);
-            ProgressHelper.setBusy(false);
             return;
         }
         if (reset) {
             act.status.setError(null);
             return;
         }
-        if (act.status.onClick()) {
-            fabRefresh.setVisibility(View.VISIBLE);
-            fabRndMenu.setVisibility(View.VISIBLE);
-        } else if (act.status.isTime())
+        if (!act.status.onClick() && act.status.isTime())
             startLoad();
     }
 

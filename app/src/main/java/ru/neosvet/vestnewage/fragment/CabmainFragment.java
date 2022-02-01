@@ -92,6 +92,7 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
     public boolean onBackPressed() {
         if (ProgressHelper.isBusy()) {
             ProgressHelper.cancelled();
+            ProgressHelper.setBusy(false);
             return false;
         }
         if (mode_list == CabModel.LOGIN)
