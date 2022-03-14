@@ -52,6 +52,10 @@ public class LoaderHelper extends LifecycleService {
     private Data.Builder data;
     private Constraints constraints;
     private WorkManager work;
+    private final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
+            PendingIntent.FLAG_UPDATE_CURRENT :
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+
 
     @Override
     public void onCreate() {
@@ -104,8 +108,8 @@ public class LoaderHelper extends LifecycleService {
                     main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
                     ErrorUtils.clear();
                 }
-                PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-                PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                PendingIntent piMain = PendingIntent.getActivity(this, 0, main, FLAGS);
+                PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), FLAGS);
                 notif = notifHelper.getNotification(title, msg,
                         NotificationHelper.CHANNEL_TIPS)
                         .setContentIntent(piMain)
@@ -154,11 +158,11 @@ public class LoaderHelper extends LifecycleService {
     private void initNotif() {
         NotificationHelper notifHelper = new NotificationHelper(this);
         Intent main = new Intent(this, MainActivity.class);
-        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piMain = PendingIntent.getActivity(this, 0, main, FLAGS);
         Intent iStop = new Intent(this, LoaderHelper.class);
         iStop.putExtra(Const.FINISH, true);
         iStop.putExtra(Const.MODE, STOP);
-        PendingIntent piStop = PendingIntent.getService(this, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piStop = PendingIntent.getService(this, 0, iStop, FLAGS);
         notif = notifHelper.getNotification(
                 getString(R.string.load),
                 getString(R.string.start),

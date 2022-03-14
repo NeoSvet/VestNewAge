@@ -36,6 +36,9 @@ public class NotificationHelper extends ContextWrapper {
             CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
     private List<String> notifList;
+    private final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
+            PendingIntent.FLAG_CANCEL_CURRENT :
+            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE;
 
     public static void setAlarm(Context context, PendingIntent pi, long time) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -64,7 +67,7 @@ public class NotificationHelper extends ContextWrapper {
     public PendingIntent getCancelPromNotif() {
         Intent intent = new Intent(this, NotificationHelper.Result.class);
         intent.putExtra(MODE, ID_ACCEPT);
-        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+        return PendingIntent.getBroadcast(this, 0, intent, FLAGS);
     }
 
     public PendingIntent getPostponeSummaryNotif(int id, String des, String link) {
@@ -73,7 +76,7 @@ public class NotificationHelper extends ContextWrapper {
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
         intent.putExtra(DataBase.ID, id);
-        return PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+        return PendingIntent.getBroadcast(this, id, intent, FLAGS);
     }
 
     /**

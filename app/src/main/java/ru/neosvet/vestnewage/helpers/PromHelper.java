@@ -33,6 +33,9 @@ public class PromHelper {
     private Handler hTime = null;
     private Timer timer = null;
     private final SharedPreferences pref;
+    private final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
+            PendingIntent.FLAG_UPDATE_CURRENT :
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
 
     public PromHelper(Context context, @Nullable View textView) {
         this.context = context;
@@ -243,8 +246,8 @@ public class PromHelper {
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
         Intent intent = new Intent(context, MainActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
-        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
+        PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, FLAGS);
         NotificationHelper notifHelper = new NotificationHelper(context);
         String msg = getPromText();
         if (msg == null) //msg.contains("-")
@@ -280,7 +283,7 @@ public class PromHelper {
 
     public void initNotif(int p) {
         Intent intent = new Intent(context, Rec.class);
-        PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, FLAGS);
         if (p == Const.TURN_OFF) {
             NotificationHelper.setAlarm(context, piProm, p);
             return;
