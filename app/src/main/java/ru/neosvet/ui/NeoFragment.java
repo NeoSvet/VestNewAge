@@ -1,4 +1,4 @@
-package ru.neosvet.utils;
+package ru.neosvet.ui;
 
 import android.content.Context;
 
@@ -18,9 +18,9 @@ public class NeoFragment extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        //act = null;
-        super.onDetach();
+    public void onDestroyView() {
+        act = null;
+        super.onDestroyView();
     }
 
     public boolean onBackPressed() {
