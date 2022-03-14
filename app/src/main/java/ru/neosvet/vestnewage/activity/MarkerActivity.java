@@ -265,7 +265,7 @@ public class MarkerActivity extends AppCompatActivity {
                 tvSel.setText(s);
                 setPageList(s);
             }
-            sel = getResources().getString(R.string.sel_pos) +
+            sel = getString(R.string.sel_pos) +
                     String.format("%.1f%%", getIntent().getFloatExtra(Const.PLACE, 0f));
         } else { //edit mode
             DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
@@ -395,9 +395,7 @@ public class MarkerActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float f = progress / 10f;
-                tvPos.setText(String.format("%.1f", f) + "% \n" +
-                        getResources().getString(R.string.stop_for_text));
-
+                tvPos.setText(String.format(getString(R.string.format_scroll_position), f));
             }
 
             @Override
@@ -420,7 +418,7 @@ public class MarkerActivity extends AppCompatActivity {
         fabOk.setOnClickListener(view -> {
             if (posVisible) {
                 float pos = sbPos.getProgress() / 10f;
-                tvSel.setText(getResources().getString(R.string.sel_pos) +
+                tvSel.setText(getString(R.string.sel_pos) +
                         String.format("%.1f%%", pos));
             } else if (modeList == 1) { //page
                 String s = getPageList();

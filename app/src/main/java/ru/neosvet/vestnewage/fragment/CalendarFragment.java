@@ -238,7 +238,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             d.changeMonth(offsetMonth);
             dCurrent.changeMonth(offsetMonth);
         }
-        tvDate.setText(d.getMonthString() + Const.N + d.getYear());
+        tvDate.setText(d.getCalendarString());
         adCalendar.clear();
         for (int i = -1; i > -7; i--) //add label monday-saturday
             adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));

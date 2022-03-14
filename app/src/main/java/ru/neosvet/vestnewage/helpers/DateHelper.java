@@ -128,6 +128,10 @@ public class DateHelper {
         return context.getResources().getStringArray(R.array.months)[getMonth() - 1];
     }
 
+    public String getCalendarString() {
+        return getMonthString() + Const.N + date.getYear();
+    }
+
     public String getMY() {
         if (formatter == null)
             formatter = DateTimeFormatter.ofPattern("MM.yy").withZone(ZoneId.systemDefault());

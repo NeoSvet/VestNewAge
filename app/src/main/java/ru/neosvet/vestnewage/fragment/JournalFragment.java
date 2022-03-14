@@ -113,9 +113,8 @@ public class JournalFragment extends Fragment {
                             cursor.getColumnIndex(Const.TITLE)), s), s);
                     t = curJ.getLong(iTime);
                     d = DateHelper.putMills(act, t);
-                    item.setDes(now.getDiffDate(t) +
-                            getResources().getString(R.string.back)
-                            + "\n(" + d.toString() + ")");
+                    item.setDes(String.format(getString(R.string.format_time_back),
+                            now.getDiffDate(t), d));
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
                             if (s.contains(Const.POEMS))

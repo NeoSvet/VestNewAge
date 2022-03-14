@@ -135,17 +135,12 @@ public class HelpFragment extends Fragment {
             adHelp.insertItem(FEEDBACK + LINK_ON_SITE, getString(R.string.page_app), R.drawable.www);
             adHelp.insertItem(FEEDBACK + CHANGELOG, getString(R.string.changelog), 0);
             try {
-                StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));
-                des.append(act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName);
-                des.append(" (");
-                des.append(act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode);
-                des.append(")\n");
-                des.append(getResources().getString(R.string.system_version));
-                des.append(Build.VERSION.RELEASE);
-                des.append(" (");
-                des.append(Build.VERSION.SDK_INT);
-                des.append(")");
-                adHelp.getItem(FEEDBACK + CHANGELOG).setDes(des.toString());
+                String des = String.format(getString(R.string.format_info),
+                        act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName,
+                        act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionCode,
+                        Build.VERSION.RELEASE,
+                        Build.VERSION.SDK_INT);
+                adHelp.getItem(FEEDBACK + CHANGELOG).setDes(des);
                 adHelp.getItem(FEEDBACK + CHANGELOG).addLink("");
             } catch (Exception e) {
                 e.printStackTrace();

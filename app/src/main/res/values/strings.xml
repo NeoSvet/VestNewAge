@@ -47,6 +47,14 @@
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
     <string name="app_is_busy">Приложение занято. Дождитесь завершения задачи или прервите её.</string>
+    <!--Formats-->
+    <string name="format_search_date">Поиск: %s %d</string>
+    <string name="format_search_proc">Поиск %d%%</string>
+    <string name="format_found">Вы искали %s “%s”.\nНайдено %d соответствий в %d материалах.</string>
+    <string name="format_info">Версия приложения: %s (%d)\nВерсия системы: %s (%d)</string>
+    <string name="format_time_back">%s назад\n(%s)</string>
+    <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
+    <string name="format_freed_size">Освобождено: "%.2f" МБ</string>
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>
     <!--CalendarFragment-->
@@ -105,7 +113,6 @@
     <string name="position">Позиция</string>
     <string name="sel_pos">Выбрана позиция:&#160;</string>
     <string name="pos_n">Приблизительно на&#160;</string>
-    <string name="stop_for_text">(остановитесь и увидите текст)</string>
     <string name="page_entirely">Страница целиком</string>
     <string name="desctription">Описание</string>
     <string name="add_col">Добавить подборку</string>
@@ -144,8 +151,6 @@
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>
     <string name="cache">Кэш (временные файлы)</string>
-    <string name="freed">Освобождено:&#160;</string>
-    <string name="mb">&#160;МБ</string>
     <string name="book_prev">Книга предыдущих лет</string>
     <string name="book_cur">Книга текущего года</string>
     <string name="materials">Материалы</string>
@@ -216,8 +221,6 @@
     <string name="page_app">Страница приложения</string>
     <string name="url_on_app">Приложение «Весть Века» https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений</string>
-    <string name="app_version">Версия приложения:&#160;</string>
-    <string name="system_version">Версия системы:&#160;</string>
     <string name="write_to_dev">Написать разработчику</string>
     <string name="srv_info">\nСлужебная информация:\n</string>
     <!--SearchFragment-->
@@ -227,9 +230,7 @@
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапазон для поиска:</string>
     <string name="change_range">Поменять местами</string>
-    <string name="you_search">Вы искали %s “%s”.</string>
     <string name="search_for">Поиск по</string>
-    <string name="found_in">Найдено %d соответствий в %d материалах.</string>
     <string name="search_in_results">Искать в результатах</string>
     <string name="results_last_search">Показать результаты предыдущего поиска</string>
     <string name="clear_results_search">Удалить эти результаты</string>

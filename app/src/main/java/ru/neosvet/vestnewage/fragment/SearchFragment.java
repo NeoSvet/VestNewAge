@@ -157,11 +157,11 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         }
         if (Objects.equals(data.getString(Const.MODE), Const.TIME)) {
             DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
-            tvStatus.setText(getString(R.string.search) + ": "
-                    + d.getMonthString() + " " + (d.getYear() + 2000));
+            tvStatus.setText(String.format(getString(R.string.format_search_date),
+                    d.getMonthString(), d.getYear() + 2000));
         } else { //Const.PROG
-            tvStatus.setText(getString(R.string.search) + " "
-                    + data.getInt(Const.PROG, 0) + "%");
+            tvStatus.setText(String.format(getString(R.string.format_search_proc),
+                    data.getInt(Const.PROG, 0)));
         }
     }
 
@@ -538,11 +538,8 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             else
                 s = getResources().getStringArray(R.array.search_mode)[mode];
             tvLabel.setText(
-                    String.format(getString(R.string.you_search),
-                            s.substring(s.indexOf(" ") + 1), str)
-                            + Const.N +
-                            String.format(getString(R.string.found_in),
-                                    count1, count2));
+                    String.format(getString(R.string.format_found),
+                            s.substring(s.indexOf(" ") + 1), str, count1, count2));
             editor.putString(LABEL, tvLabel.getText().toString());
             editor.apply();
         }

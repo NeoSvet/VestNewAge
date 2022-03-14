@@ -251,7 +251,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                 return;
             }
             adBook.clear();
-            tvDate.setText(d.getMonthString() + Const.N + d.getYear());
+            tvDate.setText(d.getCalendarString());
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(!LoaderHelper.start);

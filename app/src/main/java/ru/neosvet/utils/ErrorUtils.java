@@ -55,17 +55,12 @@ public class ErrorUtils {
             }
         }
         try {
-            des.append(context.getResources().getString(R.string.srv_info));
-            des.append(context.getResources().getString(R.string.app_version));
-            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
-            des.append(" (");
-            des.append(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode);
-            des.append(")\n");
-            des.append(context.getResources().getString(R.string.system_version));
-            des.append(Build.VERSION.RELEASE);
-            des.append(" (");
-            des.append(Build.VERSION.SDK_INT);
-            des.append(")");
+            des.append(context.getString(R.string.srv_info));
+            des.append(String.format(context.getString(R.string.format_info),
+                    context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName,
+                    context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode,
+                    Build.VERSION.RELEASE,
+                    Build.VERSION.SDK_INT));
         } catch (Exception e) {
             e.printStackTrace();
         }
