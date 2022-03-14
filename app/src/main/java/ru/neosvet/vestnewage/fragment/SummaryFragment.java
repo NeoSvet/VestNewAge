@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,7 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ru.neosvet.utils.NeoFragment;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
@@ -42,7 +43,7 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act.setTitle(getResources().getString(R.string.rss));
+        act.setTitle(getString(R.string.rss));
         initViews(view);
         setViews();
         model = new ViewModelProvider(this).get(SummaryModel.class);
@@ -77,7 +78,7 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
@@ -123,6 +124,7 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
         act.fab = fabRefresh;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
         fabRefresh.setOnClickListener(view -> startLoad());
         act.status.setClick(view -> onStatusClick(false));
@@ -174,7 +176,7 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
                 adSummary.addItem(new ListItem(title, link));
                 adSummary.getItem(i).setDes(
                         dateNow.getDiffDate(Long.parseLong(time))
-                                + getResources().getString(R.string.back)
+                                + getString(R.string.back)
                                 + Const.N + des);
                 i++;
             }

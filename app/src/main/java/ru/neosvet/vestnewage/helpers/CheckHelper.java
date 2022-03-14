@@ -52,8 +52,8 @@ public class CheckHelper extends LifecycleService {
         Context context = getApplicationContext();
         NotificationHelper notifHelper = new NotificationHelper(context);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.site_name),
-                context.getResources().getString(R.string.check_new),
+                context.getString(R.string.site_name),
+                context.getString(R.string.check_new),
                 NotificationHelper.CHANNEL_MUTE)
                 .setProgress(0, 0, true);
         startForeground(NotificationHelper.NOTIF_CHECK, notifBuilder.build());

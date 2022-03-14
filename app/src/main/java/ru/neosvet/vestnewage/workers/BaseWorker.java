@@ -93,13 +93,11 @@ public class BaseWorker extends Worker {
 
     private void clearFolder(File folder) throws Exception {
         for (File f : folder.listFiles()) {
-            if (f.isFile()) {
+            if (f.isFile())
                 size += f.length();
-                f.delete();
-            } else {
+            else
                 clearFolder(f);
-                f.delete();
-            }
+            f.delete();
         }
     }
 

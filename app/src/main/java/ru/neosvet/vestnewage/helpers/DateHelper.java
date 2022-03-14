@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.helpers;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
@@ -16,21 +17,22 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import java.util.Locale;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.R;
 
 public class DateHelper {
     public static final byte MONDAY = 1, SUNDAY = 0;
-    public static final int MONTH_IN_SEC = 2592000, DAY_IN_SEC = 86400,
+    public static final int DAY_IN_SEC = 86400, //MONTH_IN_SEC = 2592000,
             HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000;
     private final Context context;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
-    private LocalTime time = null;
+    private LocalTime time;
 
-    private DateHelper(Context context) {
-        AndroidThreeTen.init(context);
-        this.context = context;
-    }
+//    private DateHelper(Context context) {
+//        AndroidThreeTen.init(context);
+//        this.context = context;
+//    }
 
     private DateHelper(Context context, LocalDate date, @Nullable LocalTime time) {
         AndroidThreeTen.init(context);
@@ -133,7 +135,7 @@ public class DateHelper {
     }
 
     public String getDiffDate(long mills) {
-        float time = getTimeInSeconds() - mills / SEC_IN_MILLS;
+        float time = getTimeInSeconds() - mills / (float) SEC_IN_MILLS;
         int k;
         if (time < 59.95f) {
             if (time == 0)
@@ -181,6 +183,7 @@ public class DateHelper {
         return s;
     }
 
+    @NonNull
     @Override
     public String toString() {
         ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());

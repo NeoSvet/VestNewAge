@@ -66,7 +66,7 @@ public class LoaderHelper extends LifecycleService {
         if (mode == STOP_WITH_NOTIF || mode == STOP) {
             context.stopService(intent);
             return;
-// on Build.VERSION_CODES.O this call error:
+//TODO on Build.VERSION_CODES.O this call error:
 // android.app.RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()
 //            intent.putExtra(Const.FINISH, true);
 //            intent.putExtra(Const.ERROR, request);
@@ -94,12 +94,12 @@ public class LoaderHelper extends LifecycleService {
                 String title;
                 Intent main;
                 if (msg == null) {
-                    title = getResources().getString(R.string.load_suc_finish);
+                    title = getString(R.string.load_suc_finish);
                     msg = "";
                     main = new Intent(this, MainActivity.class);
                 } else {
-                    title = getResources().getString(R.string.error_load);
-                    msg += "\n" + getResources().getString(R.string.touch_to_send);
+                    title = getString(R.string.error_load);
+                    msg += Const.N + getString(R.string.touch_to_send);
                     main = new Intent(Intent.ACTION_VIEW);
                     main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
                     ErrorUtils.clear();
@@ -117,11 +117,11 @@ public class LoaderHelper extends LifecycleService {
         if (mode == STOP)
             return Service.START_NOT_STICKY;
         ProgressHelper.setMax(0);
-        ProgressHelper.setMessage(getResources().getString(R.string.start));
+        ProgressHelper.setMessage(getString(R.string.start));
         initNotif();
         start = true;
         if (intent.getBooleanExtra(Const.DIALOG, false))
-            Lib.showToast(getApplicationContext(), getResources().getString(R.string.load_background));
+            Lib.showToast(getApplicationContext(), getString(R.string.load_background));
         startLoad(mode, intent.getStringExtra(Const.TASK));
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(message -> {
@@ -160,13 +160,13 @@ public class LoaderHelper extends LifecycleService {
         iStop.putExtra(Const.MODE, STOP);
         PendingIntent piStop = PendingIntent.getService(this, 0, iStop, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
         notif = notifHelper.getNotification(
-                getResources().getString(R.string.load),
-                getResources().getString(R.string.start),
+                getString(R.string.load),
+                getString(R.string.start),
                 NotificationHelper.CHANNEL_MUTE)
                 .setSmallIcon(R.drawable.star_anim)
                 .setContentIntent(piMain)
                 .setAutoCancel(false)
-                .addAction(0, getResources().getString(R.string.stop), piStop)
+                .addAction(0, getString(R.string.stop), piStop)
                 .setProgress(0, 0, true);
         startForeground(notif_id, notif.build());
     }
@@ -258,7 +258,7 @@ public class LoaderHelper extends LifecycleService {
             k += 4; //main, news, media and rss
         } else if (id == R.id.nav_site) //main, news
             k = 2;
-        ProgressHelper.setMessage(getApplication().getBaseContext().getResources().getString(R.string.download_list));
+        ProgressHelper.setMessage(getApplication().getBaseContext().getString(R.string.download_list));
         ProgressHelper.setMax(k);
         OneTimeWorkRequest task;
         WorkContinuation job = null;
@@ -288,7 +288,7 @@ public class LoaderHelper extends LifecycleService {
         }
         boolean isOld = listsHelper.bookIsOld();
         if (id == ALL && isOld) { //Calendar
-            data = data.putInt(Const.YEAR, ALL);
+            data.putInt(Const.YEAR, ALL);
             task = new OneTimeWorkRequest
                     .Builder(CalendarWorker.class)
                     .setInputData(data.build())

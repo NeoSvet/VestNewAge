@@ -123,9 +123,9 @@ public class Lib {
 
     public void copyAddress(String txt) {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(context.getResources().getText(R.string.app_name), txt);
+        ClipData clip = ClipData.newPlainText(context.getString(R.string.app_name), txt);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, context.getResources().getText(R.string.address_copied), Toast.LENGTH_LONG).show();
+        Toast.makeText(context, context.getString(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
 
     public boolean verifyStoragePermissions(int code) {

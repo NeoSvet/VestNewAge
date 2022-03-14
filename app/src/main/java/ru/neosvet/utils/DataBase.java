@@ -1,5 +1,6 @@
 package ru.neosvet.utils;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -19,7 +20,7 @@ public class DataBase extends SQLiteOpenHelper {
             ARTICLES = "00.00";
     private final Context context;
     private final Pattern patternBook = Pattern.compile("\\d{2}\\.\\d{2}");
-    private SQLiteDatabase db;
+    private final SQLiteDatabase db;
 
     public DataBase(Context context, String name) {
         super(context, configName(name), null, 1);
@@ -90,7 +91,7 @@ public class DataBase extends SQLiteOpenHelper {
                         + Const.TITLE + " text);"); //название Подборки
                 // добавляем подборку по умолчанию - "вне подборок":
                 ContentValues cv = new ContentValues();
-                cv.put(Const.TITLE, context.getResources().getString(R.string.no_collections));
+                cv.put(Const.TITLE, context.getString(R.string.no_collections));
                 db.insert(COLLECTIONS, null, cv);
                 break;
         }
@@ -131,6 +132,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     // для материалов в базах данных:
+    @SuppressLint("Range")
     public static String getContentPage(Context ctxt, String link, boolean onlyTitle) {
         DataBase dataBase = new DataBase(ctxt, link);
         Cursor cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
@@ -206,7 +208,7 @@ public class DataBase extends SQLiteOpenHelper {
             if (s.contains("_")) s = s.substring(0, s.indexOf("_"));
             if (s.contains("#")) s = s.substring(0, s.indexOf("#"));
             if (link.contains(Const.POEMS)) {
-                s += " " + context.getResources().getString(R.string.katren)
+                s += " " + context.getString(R.string.katren)
                         + " " + Const.KV_OPEN + title + Const.KV_CLOSE;
             } else
                 s += " " + title;

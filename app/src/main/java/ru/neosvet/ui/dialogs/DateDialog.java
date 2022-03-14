@@ -10,6 +10,7 @@ import android.view.Window;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,7 +23,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 public class DateDialog extends Dialog implements View.OnClickListener {
     private Activity act;
     private TextView tvYear;
-    private DateHelper date;
+    private final DateHelper date;
     private Result result;
     private MonthAdapter adMonth;
     private int min_year = 2016, min_month = 1, max_year = 0, max_month = 0;
@@ -32,6 +33,12 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         super(act);
         this.act = act;
         this.date = DateHelper.putDays(act, date.getTimeInDays());
+    }
+
+    @Override
+    public void setOnDismissListener(@Nullable OnDismissListener listener) {
+        act = null;
+        super.setOnDismissListener(listener);
     }
 
     public void setResult(Result result) {
@@ -143,16 +150,17 @@ public class DateDialog extends Dialog implements View.OnClickListener {
 
     class MonthAdapter extends RecyclerView.Adapter<MonthAdapter.ViewHolder> {
         public static final int NONE_MIN = -1, NONE_MAX = 12;
-        private List<String> data = new ArrayList<String>();
+        private final List<String> data = new ArrayList<>();
         private int select, min_pos = 0, max_pos = 11;
-        private View.OnClickListener click;
+        private final View.OnClickListener click;
 
         public MonthAdapter(View.OnClickListener click) {
             this.click = click;
         }
 
+        @NonNull
         @Override
-        public MonthAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public MonthAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(act).inflate(R.layout.item_date, parent, false);
             return new MonthAdapter.ViewHolder(view);
         }

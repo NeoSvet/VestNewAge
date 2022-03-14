@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -16,17 +18,18 @@ import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -40,10 +43,7 @@ import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.MarkersModel;
 
-import static android.app.Activity.RESULT_OK;
-
 public class CollectionsFragment extends NeoFragment implements Observer<Data> {
-    public static final int MARKER_REQUEST = 11, EXPORT_REQUEST = 12, IMPORT_REQUEST = 13;
     private ListView lvMarker;
     private View container, fabEdit, fabMenu, fabBack, pEdit, bExport;
     private TextView tvEmpty;
@@ -54,6 +54,27 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     private String sCol = null, sName = null;
     private Animation anMin, anMax, anRotate;
     private MarkersModel model;
+
+    private final ActivityResultLauncher<Intent> markerResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK)
+                    updateMarkersList();
+            });
+
+    private final ActivityResultLauncher<Intent> importResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null)
+                    parseFileResult(result.getData(), false);
+            });
+
+    private final ActivityResultLauncher<Intent> exportResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null)
+                    parseFileResult(result.getData(), true);
+            });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -142,7 +163,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy() && !load)
+        if ((!ProgressHelper.isBusy() && !load) || data == null)
             return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
@@ -162,9 +183,9 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 ProgressHelper.setBusy(false);
                 if (error != null) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
-                            .setTitle(getResources().getString(R.string.error))
+                            .setTitle(getString(R.string.error))
                             .setMessage(error)
-                            .setPositiveButton(getResources().getString(android.R.string.ok),
+                            .setPositiveButton(getString(android.R.string.ok),
                                     (dialog, id) -> {
                                     });
                     builder.create().show();
@@ -181,22 +202,22 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             if (data.getBoolean(Const.MODE, false)) { //export
                 final String file = data.getString(Const.FILE);
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
-                        .setMessage(getResources().getString(R.string.send_file))
-                        .setPositiveButton(getResources().getString(R.string.yes),
+                        .setMessage(getString(R.string.send_file))
+                        .setPositiveButton(getString(R.string.yes),
                                 (dialog, id) -> {
                                     Intent sendIntent = new Intent(Intent.ACTION_SEND);
                                     sendIntent.setType("text/plain");
                                     sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
                                     startActivity(sendIntent);
                                 })
-                        .setNegativeButton(getResources().getString(R.string.no),
+                        .setNegativeButton(getString(R.string.no),
                                 (dialog, id) -> {
                                 });
                 builder.create().show();
             } else { //import
                 sCol = null;
                 loadColList();
-                Lib.showToast(act, getResources().getString(R.string.completed));
+                Lib.showToast(act, getString(R.string.completed));
             }
         }
     }
@@ -246,8 +267,8 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         Cursor cursor;
         String place;
         int k = 0;
-        for (int i = 0; i < mId.length; i++) {
-            cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, mId[i]);
+        for (String s : mId) {
+            cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, s);
             if (cursor.moveToFirst()) {
                 iID = cursor.getColumnIndex(DataBase.ID);
                 iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -266,14 +287,15 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         dbMarker.close();
         adMarker.notifyDataSetChanged();
         if (adMarker.getCount() == 0) {
-            tvEmpty.setText(getResources().getString(R.string.collection_is_empty));
+            tvEmpty.setText(getString(R.string.collection_is_empty));
             tvEmpty.setVisibility(View.VISIBLE);
         }
     }
 
+    @SuppressLint("Range")
     private String getPlace(String link, String p) {
         if (p.equals("0"))
-            return getResources().getString(R.string.page_entirely);
+            return getString(R.string.page_entirely);
         try {
             StringBuilder b = new StringBuilder();
             if (p.contains("%")) { //позиция
@@ -308,11 +330,11 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                     b.delete(i - 1, b.length());
                 }
                 if (b.toString().equals("null"))
-                    b = new StringBuilder(getResources().getString(R.string.not_load_page));
-                b.insert(0, getResources().getString(R.string.pos_n) +
+                    b = new StringBuilder(getString(R.string.not_load_page));
+                b.insert(0, getString(R.string.pos_n) +
                         p.replace(".", Const.COMMA) + ":" + Const.N);
             } else { //абзацы
-                b.append(getResources().getString(R.string.par_n));
+                b.append(getString(R.string.par_n));
                 b.append(p.replace(Const.COMMA, ", "));
                 b.append(":");
                 b.append(Const.N);
@@ -326,7 +348,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 } else { // страница не загружена...
                     cursor.close();
                     dataBase.close();
-                    b.append(getResources().getString(R.string.not_load_page));
+                    b.append(getString(R.string.not_load_page));
                     return b.toString();
                 }
                 cursor.close();
@@ -357,9 +379,9 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         }
         // java.lang.IllegalStateException: Fragment CollectionsFragment{138a01e4} not attached to Activity ?
         if (p.contains("%"))
-            p = act.getResources().getString(R.string.sel_pos) + p;
+            p = act.getString(R.string.sel_pos) + p;
         else
-            p = act.getResources().getString(R.string.sel_par) + DataBase.openList(p).replace(Const.COMMA, ", ");
+            p = act.getString(R.string.sel_par) + DataBase.openList(p).replace(Const.COMMA, ", ");
         return p;
     }
 
@@ -379,7 +401,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         }
         fabBack.setVisibility(View.GONE);
         adMarker.clear();
-        act.setTitle(getResources().getString(R.string.collections));
+        act.setTitle(getString(R.string.collections));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, null, null, null, null, null, Const.PLACE);
         String s;
@@ -401,7 +423,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         dbMarker.close();
         if (isNull && adMarker.getCount() == 1) {
             adMarker.clear();
-            tvEmpty.setText(getResources().getString(R.string.empty_collections));
+            tvEmpty.setText(getString(R.string.empty_collections));
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
             fabEdit.setVisibility(View.VISIBLE);
@@ -419,7 +441,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         pEdit = container.findViewById(R.id.pEdit);
         bExport = container.findViewById(R.id.bExport);
         menu = new Tip(act, container.findViewById(R.id.pMenu));
-        tvEmpty = (TextView) container.findViewById(R.id.tvEmptyCollections);
+        tvEmpty = container.findViewById(R.id.tvEmptyCollections);
         lvMarker = container.findViewById(R.id.lvMarker);
         adMarker = new MarkAdapter(act);
         lvMarker.setAdapter(adMarker);
@@ -446,6 +468,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
         lvMarker.setOnItemClickListener((adapterView, view, pos, l) -> {
             if (act.checkBusy()) return;
@@ -506,7 +529,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         fabEdit.setOnClickListener(view -> {
             if (sCol == null) {
                 if (adMarker.getCount() == 1) {
-                    Lib.showToast(act, getResources().getString(R.string.nothing_edit));
+                    Lib.showToast(act, getString(R.string.nothing_edit));
                     return;
                 }
                 iSel = 1;
@@ -559,7 +582,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 Intent marker = new Intent(act, MarkerActivity.class);
                 marker.putExtra(DataBase.ID, adMarker.getItem(iSel).getId());
                 marker.putExtra(Const.LINK, adMarker.getItem(iSel).getData());
-                act.startActivityForResult(marker, MARKER_REQUEST);
+                markerResult.launch(marker);
             }
         });
         container.findViewById(R.id.bDelete).setOnClickListener(view -> {
@@ -591,10 +614,10 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     private void deleteDialog() {
         lvMarker.smoothScrollToPosition(iSel);
         final CustomDialog dialog = new CustomDialog(act);
-        dialog.setTitle(getResources().getString(R.string.delete) + "?");
+        dialog.setTitle(getString(R.string.delete) + "?");
         dialog.setMessage(adMarker.getItem(iSel).getTitle());
-        dialog.setLeftButton(getResources().getString(R.string.no), view -> dialog.dismiss());
-        dialog.setRightButton(getResources().getString(R.string.yes), view -> {
+        dialog.setLeftButton(getString(R.string.no), view -> dialog.dismiss());
+        dialog.setRightButton(getString(R.string.yes), view -> {
             deleteElement();
             dialog.dismiss();
         });
@@ -604,7 +627,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     private void renameDialog(String old_name) {
         sName = old_name;
         final CustomDialog dialog = new CustomDialog(act);
-        dialog.setTitle(getResources().getString(R.string.new_name));
+        dialog.setTitle(getString(R.string.new_name));
         dialog.setMessage(null);
         dialog.setInputText(sName, new TextWatcher() {
             @Override
@@ -623,19 +646,19 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             }
         });
 
-        dialog.setLeftButton(getResources().getString(android.R.string.no), view -> dialog.dismiss());
-        dialog.setRightButton(getResources().getString(android.R.string.yes), view -> {
-            renameCol(dialog.getInputText());
+        dialog.setLeftButton(getString(android.R.string.no), view -> dialog.dismiss());
+        dialog.setRightButton(getString(android.R.string.yes), view -> {
+            renameColumn(dialog.getInputText());
             dialog.dismiss();
         });
         dialog.show(dialogInterface -> sName = null);
     }
 
-    private void renameCol(String name) {
+    private void renameColumn(String name) {
         boolean bCancel = (name.length() == 0);
         if (!bCancel) {
             if (name.contains(Const.COMMA)) {
-                Lib.showToast(act, getResources().getString(R.string.unuse_dot));
+                Lib.showToast(act, getString(R.string.unuse_dot));
                 return;
             }
             for (int i = 0; i < adMarker.getCount(); i++) {
@@ -646,7 +669,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             }
         }
         if (bCancel) {
-            Lib.showToast(act, getResources().getString(R.string.cancel_rename));
+            Lib.showToast(act, getString(R.string.cancel_rename));
             return;
         }
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
@@ -659,7 +682,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             adMarker.getItem(iSel).setTitle(name);
             adMarker.notifyDataSetChanged();
         } else
-            Lib.showToast(act, getResources().getString(R.string.cancel_rename));
+            Lib.showToast(act, getString(R.string.cancel_rename));
     }
 
     private void goToEdit() {
@@ -710,12 +733,12 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             s = adMarker.getItem(iSel).getData();
             mId = DataBase.getList(s);
             cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
-                    Const.TITLE + DataBase.Q, getResources().getString(R.string.no_collections));
+                    Const.TITLE + DataBase.Q, getString(R.string.no_collections));
             cursor.moveToFirst();
             int nc_id = cursor.getInt(0); //id подборки "Вне подборок"
             cursor.close();
-            for (int i = 0; i < mId.length; i++) { //перебираем список закладок.
-                cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, mId[i]);
+            for (String item : mId) { //перебираем список закладок.
+                cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, item);
                 if (!cursor.moveToFirst()) continue;
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 cursor.close();
@@ -723,14 +746,14 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 if (s.length() == 1) { //в списке не осталось подборок
                     s = String.valueOf(nc_id); //указываем "Вне подборок"
                     // добавляем в список на добавление в "Вне подборок":
-                    b.append(mId[i]);
+                    b.append(item);
                     b.append(Const.COMMA);
                 } else
                     s = DataBase.openList(s);
                 //обновляем закладку:
                 cv = new ContentValues();
                 cv.put(DataBase.COLLECTIONS, s);
-                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, mId[i]);
+                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, item);
             }
             //удаляем подборку:
             dbMarker.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, id);
@@ -745,7 +768,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 cursor.close();
                 //дополняем список:
                 cv = new ContentValues();
-                cv.put(DataBase.MARKERS, b.toString() + s);
+                cv.put(DataBase.MARKERS, b + s);
                 dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, nc_id);
                 loadColList(); //обновляем список подборок
             } else //иначе просто удаляем подборку из списка
@@ -756,16 +779,16 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             if (cursor.moveToFirst()) {
                 s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
                 mId = DataBase.getList(s);
-                for (int i = 0; i < mId.length; i++) { //перебираем список подборок
-                    cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, mId[i]);
+                for (String item : mId) { //перебираем список подборок
+                    cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, item);
                     if (!cursor.moveToFirst()) continue;
                     s = DataBase.closeList(cursor.getString(0)); //список закладок у подборки
-                    s = s.replace(DataBase.closeList(String.valueOf(id)), Const.COMMA); //убираем удаляемую закладку
+                    s = s.replace(DataBase.closeList(id), Const.COMMA); //убираем удаляемую закладку
                     s = DataBase.openList(s);
                     //обновляем подборку:
                     cv = new ContentValues();
                     cv.put(DataBase.MARKERS, s);
-                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, mId[i]);
+                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, item);
                 }
             }
             cursor.close();
@@ -776,7 +799,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         dbMarker.close();
         if (adMarker.getCount() == n) { //не осталось элементов для редактирования
             if (n == 0) { //список закладок пуст
-                tvEmpty.setText(getResources().getString(R.string.collection_is_empty));
+                tvEmpty.setText(getString(R.string.collection_is_empty));
                 tvEmpty.setVisibility(View.VISIBLE);
             }
             unSelect(); //снимаем выделение
@@ -800,13 +823,34 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         iSel = -1;
     }
 
-    public void putResult(int resultCode) {
-        if (resultCode != RESULT_OK)
-            return;
+    public String getListId() {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < adMarker.getCount(); i++) {
+            s.append(adMarker.getItem(i).getId());
+            s.append(Const.COMMA);
+        }
+        s.delete(s.length() - 1, s.length());
+        return s.toString();
+    }
 
+    private void selectFile(boolean isExport) {
+        menu.hide();
+        Intent intent = new Intent(isExport ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        if (isExport) {
+            DateHelper date = DateHelper.initToday(act);
+            intent.putExtra(Intent.EXTRA_TITLE, DataBase.MARKERS + " "
+                    + date.toString().replace(".", "-"));
+            exportResult.launch(intent);
+        } else
+            importResult.launch(intent);
+    }
+
+    private void updateMarkersList() {
         sCol = sCol.substring(0, sCol.indexOf(Const.N));
         DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, Const.TITLE + DataBase.Q, sCol);
+        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
+                Const.TITLE + DataBase.Q, sCol);
         if (cursor.moveToFirst())
             sCol += Const.N + cursor.getString(0); //список закладок в подборке
         else
@@ -827,31 +871,8 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         goToEdit();
     }
 
-    public String getListId() {
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < adMarker.getCount(); i++) {
-            s.append(adMarker.getItem(i).getId());
-            s.append(Const.COMMA);
-        }
-        s.delete(s.length() - 1, s.length());
-        return s.toString();
-    }
-
-    @RequiresApi(19)
-    private void selectFile(boolean export) {
-        menu.hide();
-        Intent intent = new Intent(export ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
-        if (export) {
-            DateHelper date = DateHelper.initToday(act);
-            intent.putExtra(Intent.EXTRA_TITLE, DataBase.MARKERS + " "
-                    + date.toString().replace(".", "-"));
-        }
-        intent.setType("*/*");
-        act.startActivityForResult(intent, export ? EXPORT_REQUEST : IMPORT_REQUEST);
-    }
-
-    public void startModel(int code, Uri data) {
+    private void parseFileResult(Intent data, boolean isExport) {
         initRotate();
-        model.start(code == EXPORT_REQUEST, data.toString());
+        model.start(isExport, data.getDataString());
     }
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class MarkersWorker extends Worker {
@@ -39,16 +40,16 @@ public class MarkersWorker extends Worker {
         ProgressHelper.setBusy(true);
         String error;
         try {
-            boolean export = getInputData().getBoolean(Const.MODE, false);
+            boolean isExport = getInputData().getBoolean(Const.MODE, false);
             String file = getInputData().getString(Const.FILE);
-            if (export)
+            if (isExport)
                 doExport(Uri.parse(file));
             else
                 doImport(Uri.parse(file));
 
             ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
-                    .putBoolean(Const.MODE, export)
+                    .putBoolean(Const.MODE, isExport)
                     .putString(Const.FILE, file)
                     .build());
             return Result.success();

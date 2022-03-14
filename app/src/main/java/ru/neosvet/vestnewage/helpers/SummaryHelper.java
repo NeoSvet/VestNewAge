@@ -30,6 +30,9 @@ import ru.neosvet.vestnewage.activity.MainActivity;
  */
 public class SummaryHelper {
     private static final int TEN_MIN_IN_MILLS = 600000;
+    private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
+            PendingIntent.FLAG_UPDATE_CURRENT :
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
     private final Context context;
     private final NotificationHelper notifHelper;
     private final Intent intent;
@@ -43,7 +46,7 @@ public class SummaryHelper {
         notif_id = NotificationHelper.NOTIF_SUMMARY + 1;
         notifHelper = new NotificationHelper(context);
         intent = new Intent(context, MainActivity.class);
-        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
     }
 
     public void updateBook() throws Exception {
@@ -81,14 +84,14 @@ public class SummaryHelper {
         if (!link.contains("://"))
             link = Const.SITE + link;
         intent.setData(Uri.parse(link));
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, FLAGS);
         PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(notif_id, text, link);
         notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.site_name), text,
+                context.getString(R.string.site_name), text,
                 NotificationHelper.CHANNEL_SUMMARY);
         notifBuilder.setContentIntent(piSummary)
                 .setGroup(NotificationHelper.GROUP_SUMMARY)
-                .addAction(0, context.getResources().getString(R.string.postpone), piPostpone);
+                .addAction(0, context.getString(R.string.postpone), piPostpone);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }
@@ -108,18 +111,18 @@ public class SummaryHelper {
 
     public void groupNotification() {
         notifBuilder = notifHelper.getSummaryNotif(
-                context.getResources().getString(R.string.appeared_new_some),
+                context.getString(R.string.appeared_new_some),
                 NotificationHelper.CHANNEL_SUMMARY);
         intent.setData(Uri.parse(Const.SITE + Const.RSS));
         intent.putExtra(DataBase.ID, notif_id);
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, FLAGS);
         notifBuilder.setContentIntent(piSummary)
                 .setGroup(NotificationHelper.GROUP_SUMMARY);
         notifBuilder.setFullScreenIntent(piEmpty, true);
     }
 
     public void singleNotification(String text) {
-        notifBuilder.setContentText(context.getResources().getString(R.string.appeared_new) + text);
+        notifBuilder.setContentText(context.getString(R.string.appeared_new) + text);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }
@@ -143,11 +146,11 @@ public class SummaryHelper {
     }
 
     public static void postpone(Context context, String des, String link) {
-        Lib.showToast(context, context.getResources().getString(R.string.postpone_alert));
+        Lib.showToast(context, context.getString(R.string.postpone_alert));
         Intent intent = new Intent(context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
-        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, FLAGS);
         NotificationHelper.setAlarm(context, piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
     }
 

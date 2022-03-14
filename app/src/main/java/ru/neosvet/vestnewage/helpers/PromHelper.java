@@ -149,7 +149,7 @@ public class PromHelper {
     private void setPromTime() {
         String t = getPromText();
         if (t == null) { //t.contains("-")
-            tvPromTime.setText(context.getResources().getString(R.string.prom));
+            tvPromTime.setText(context.getString(R.string.prom));
             Animation an = AnimationUtils.loadAnimation(context, R.anim.hide);
             an.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -175,7 +175,7 @@ public class PromHelper {
         tvPromTime.setText(t);
         if (tvPromTime.getId() == R.id.tvPromTime &&
                 t.contains(context.getResources().getStringArray(R.array.time)[6])) {
-            t = t.substring(context.getResources().getString(R.string.to_prom).length() + 1);
+            t = t.substring(context.getString(R.string.to_prom).length() + 1);
             int h = 0;
             if (t.contains(","))
                 t = t.substring(0, t.indexOf(","));
@@ -194,7 +194,7 @@ public class PromHelper {
             }
             tvPromTime.setVisibility(View.VISIBLE);
         }
-        if (t.equals(context.getResources().getString(R.string.prom))) {
+        if (t.equals(context.getString(R.string.prom))) {
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -212,13 +212,13 @@ public class PromHelper {
         if (t.contains("-") || // prom was been
                 t.equals(context.getResources().getStringArray(R.array.time)[0])) //second
             return null;
-        t = context.getResources().getString(R.string.to_prom) + " " + t;
+        t = context.getString(R.string.to_prom) + " " + t;
         int delay;
-        if (t.contains(context.getResources().getString(R.string.sec)))
+        if (t.contains(context.getString(R.string.sec)))
             delay = DateHelper.SEC_IN_MILLS; // 1 sec
-        else if (t.contains(context.getResources().getString(R.string.min))) {
+        else if (t.contains(context.getString(R.string.min))) {
             t = t.replace(context.getResources().getStringArray(R.array.time)[3],
-                    context.getResources().getString(R.string.minute));
+                    context.getString(R.string.minute));
             delay = 6 * DateHelper.SEC_IN_MILLS; // 1/10 of min in sec
         } else
             delay = 360 * DateHelper.SEC_IN_MILLS; // 1/10 of hour in sec
@@ -248,21 +248,21 @@ public class PromHelper {
         NotificationHelper notifHelper = new NotificationHelper(context);
         String msg = getPromText();
         if (msg == null) //msg.contains("-")
-            msg = context.getResources().getString(R.string.prom);
+            msg = context.getString(R.string.prom);
         PendingIntent piCancel = notifHelper.getCancelPromNotif();
 
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.prom_for_soul_unite),
+                context.getString(R.string.prom_for_soul_unite),
                 msg, NotificationHelper.CHANNEL_PROM);
         notifBuilder.setContentIntent(piProm)
                 .setFullScreenIntent(piEmpty, true)
-                .addAction(0, context.getResources().getString(R.string.accept), piCancel)
+                .addAction(0, context.getString(R.string.accept), piCancel)
                 .setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (p == 0)
                 notifBuilder.setTimeoutAfter(30 * DateHelper.SEC_IN_MILLS);
             else
-                notifBuilder.setTimeoutAfter(p * 60 * DateHelper.SEC_IN_MILLS);
+                notifBuilder.setTimeoutAfter((long) p * 60 * DateHelper.SEC_IN_MILLS);
         } else {
             if (sound) {
                 String uri = pref.getString(SetNotifDialog.URI, null);

@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -48,8 +49,9 @@ public class CabpageActivity extends AppCompatActivity {
         wvBrowser.loadUrl(Const.CAB_SITE + getIntent().getStringExtra(Const.LINK));
     }
 
+    @SuppressLint({"ClickableViewAccessibility", "SetJavaScriptEnabled"})
     private void initView() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.VISIBLE);
         this.setTitle("");
@@ -115,7 +117,7 @@ public class CabpageActivity extends AppCompatActivity {
             status.setLoad(false);
             String s = wvBrowser.getTitle();
             if (!s.contains(":")) {
-                CabmainFragment.error = getResources().getString(R.string.cab_fail);
+                CabmainFragment.error = getString(R.string.cab_fail);
                 onBackPressed();
                 return;
             }

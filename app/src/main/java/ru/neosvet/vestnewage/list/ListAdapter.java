@@ -44,7 +44,7 @@ public class ListAdapter extends BaseAdapter {
 
     @Override
     public ListItem getItem(int i) {
-        return (data == null || i >= data.size()) ? null : data.get(i);
+        return (i >= data.size()) ? null : data.get(i);
     }
 
     public void clear() {
@@ -68,7 +68,7 @@ public class ListAdapter extends BaseAdapter {
             isItemList = true;
         } else {
             convertView = inflater.inflate(R.layout.item_detail, null);
-            tv = (TextView) convertView.findViewById(R.id.des_item);
+            tv = convertView.findViewById(R.id.des_item);
             if (data.get(position).getDes().contains("<"))
                 tv.setText(android.text.Html.fromHtml(data.get(position).getDes()));
             else
@@ -77,7 +77,7 @@ public class ListAdapter extends BaseAdapter {
                 tv.setTextColor(ContextCompat.getColor(context, R.color.light_gray));
         }
         //}
-        tv = (TextView) convertView.findViewById(R.id.text_item);
+        tv = convertView.findViewById(R.id.text_item);
         tv.setText(data.get(position).getTitle());
         if (data.get(position).getLink().equals("@") && isItemList)
             tv.setTextColor(ContextCompat.getColor(context, R.color.light_gray));

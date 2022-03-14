@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,8 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -76,7 +77,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act.setTitle(getResources().getString(R.string.settings));
+        act.setTitle(getString(R.string.settings));
         initViews(view);
         initSections(view);
         setViews();
@@ -129,7 +130,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.removeObservers(act);
@@ -138,13 +139,11 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
             bClearDo.setEnabled(false);
             String error = data.getString(Const.ERROR);
             if (error != null) {
-                Lib.showToast(act, getResources().getString(R.string.error)
-                        + ": " + error);
+                Lib.showToast(act, getString(R.string.error) + ": " + error);
                 return;
             }
-            float size = data.getLong(Const.PROG, 0) / 1024 / 1024f;
-            Lib.showToast(act, getResources().getString(R.string.freed)
-                    + String.format("%.2f", size) + getResources().getString(R.string.mb));
+            float size = data.getLong(Const.PROG, 0) / 1024f / 1024f; //to MegaByte
+            Lib.showToast(act, String.format(getString(R.string.format_freed_size), size));
         }
     }
 
@@ -187,6 +186,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
                 container.findViewById(R.id.bScreen), container.findViewById(R.id.bClear),
                 container.findViewById(R.id.bCheck), container.findViewById(R.id.bProm)};
 
+        @SuppressLint("NonConstantResourceId")
         View.OnClickListener SectionsClick = view -> {
             int section;
             switch (view.getId()) {
@@ -215,8 +215,8 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
             }
             bPanels[section] = !bPanels[section];
         };
-        for (int i = 0; i < bSections.length; i++)
-            bSections[i].setOnClickListener(SectionsClick);
+        for (View bSection : bSections)
+            bSection.setOnClickListener(SectionsClick);
     }
 
     private void initViews(View container) {
@@ -224,7 +224,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         cbCountFloat = container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
         if (act.isMenuMode)
-            cbCountFloat.setText(getResources().getString(R.string.count_everywhere));
+            cbCountFloat.setText(getString(R.string.count_everywhere));
         cbNew = container.findViewById(R.id.cbNew);
         SharedPreferences pref = act.getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
         cbNew.setChecked(pref.getBoolean(Const.START_NEW, false));
@@ -287,6 +287,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         });
         cbNew.setOnCheckedChangeListener((compoundButton, check) -> setMainCheckBox(Const.START_NEW, check, -1));
 
+        @SuppressLint("NonConstantResourceId")
         CheckBox.OnCheckedChangeListener ScreenChecked = (compoundButton, checked) -> {
             if (checked) {
                 byte sel;
@@ -304,23 +305,23 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
                 setMainCheckBox(Const.START_SCEEN, false, sel);
             }
         };
-        for (int i = 0; i < rbsScreen.length; i++)
-            rbsScreen[i].setOnCheckedChangeListener(ScreenChecked);
+        for (RadioButton radioButton : rbsScreen)
+            radioButton.setOnCheckedChangeListener(ScreenChecked);
 
         CheckBox.OnCheckedChangeListener ClearChecked = (compoundButton, checked) -> {
             int k = 0;
-            for (int i = 0; i < cbsClear.length; i++) {
-                if (cbsClear[i].isChecked())
+            for (CheckBox checkBox : cbsClear) {
+                if (checkBox.isChecked())
                     k++;
             }
             bClearDo.setEnabled(k > 0);
         };
-        for (int i = 0; i < cbsClear.length; i++)
-            cbsClear[i].setOnCheckedChangeListener(ClearChecked);
+        for (CheckBox checkBox : cbsClear)
+            checkBox.setOnCheckedChangeListener(ClearChecked);
         bClearDo.setOnClickListener(view -> {
             initRotate();
             bClearDo.setEnabled(false);
-            List<String> list = new ArrayList<String>();
+            List<String> list = new ArrayList<>();
             if (cbsClear[0].isChecked()) //book prev years
                 list.add(Const.START);
             if (cbsClear[1].isChecked()) //book cur year
@@ -333,8 +334,8 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
                 list.add(Const.FILE);
             initProgress();
             model.startClear(list.toArray(new String[]{}));
-            for (int i = 0; i < cbsClear.length; i++)
-                cbsClear[i].setChecked(false);
+            for (CheckBox checkBox : cbsClear)
+                checkBox.setChecked(false);
         });
 
         sbCheckTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -467,12 +468,12 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void setCheckTime() {
-        StringBuilder t = new StringBuilder(getResources().getString(R.string.check_summary));
+        StringBuilder t = new StringBuilder(getString(R.string.check_summary));
         t.append(" ");
         if (sbCheckTime.getProgress() == sbCheckTime.getMax()) {
             tvCheckOn.setVisibility(View.VISIBLE);
             tvCheckOff.setVisibility(View.GONE);
-            t.append(getResources().getString(R.string.turn_off));
+            t.append(getString(R.string.turn_off));
             tvCheck.setText(t);
             bCheckSet.setEnabled(false);
             return;
@@ -488,16 +489,16 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         } else
             p *= 15;
         if (p == 1)
-            t.append(getResources().getString(R.string.each_one));
+            t.append(getString(R.string.each_one));
         else {
-            t.append(getResources().getString(R.string.each_more));
+            t.append(getString(R.string.each_more));
             t.append(" ");
             t.append(p);
             t.append(" ");
             if (bH)
-                t.append(getResources().getString(R.string.hours));
+                t.append(getString(R.string.hours));
             else
-                t.append(getResources().getString(R.string.minutes));
+                t.append(getString(R.string.minutes));
         }
         tvCheck.setText(t);
     }
@@ -507,16 +508,16 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         if (p == sbPromTime.getMax()) {
             tvPromOn.setVisibility(View.VISIBLE);
             tvPromOff.setVisibility(View.GONE);
-            tvPromNotif.setText(getResources().getString(R.string.prom_notif_off));
+            tvPromNotif.setText(getString(R.string.prom_notif_off));
             bPromSet.setEnabled(false);
             return;
         }
         bPromSet.setEnabled(true);
         tvPromOn.setVisibility(View.GONE);
         tvPromOff.setVisibility(View.VISIBLE);
-        StringBuilder t = new StringBuilder(getResources().getString(R.string.prom_notif));
+        StringBuilder t = new StringBuilder(getString(R.string.prom_notif));
         t.append(" ");
-        t.append(getResources().getString(R.string.in));
+        t.append(getString(R.string.in));
         t.append(" ");
         p++;
         if (p == 1) {

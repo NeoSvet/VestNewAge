@@ -248,7 +248,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void initViews() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setVisibility(View.GONE);
         InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
@@ -284,7 +284,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             prom = new PromHelper(this, tvPromTime);
         }
 
-        drawerMenu = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerMenu = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerMenu.addDrawerListener(toggle);
@@ -334,7 +334,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (pSearch.getVisibility() == View.VISIBLE) {
@@ -503,9 +503,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 shareIntent.setType("text/plain");
                 String s = wvBrowser.getTitle();
                 if (s.length() > 9)
-                    s = s.substring(9) + " (" + getResources().getString(R.string.from) + " " + s.substring(0, 8) + ")";
+                    s = s.substring(9) + " (" + getString(R.string.from) + " " + s.substring(0, 8) + ")";
                 shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, s + Const.N + Const.SITE + link);
-                startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share)));
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
                 break;
             case R.id.nav_nomenu:
                 nomenu = !nomenu;
@@ -540,7 +540,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 marker.putExtra(Const.LINK, link);
                 marker.putExtra(Const.PLACE, getPositionOnPage() * 100f);
                 if (string != null)
-                    marker.putExtra(Const.DESCTRIPTION, getResources().getString(R.string.search_for)
+                    marker.putExtra(Const.DESCTRIPTION, getString(R.string.search_for)
                             + " “" + string + "”");
                 startActivity(marker);
                 break;
@@ -565,7 +565,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 initTheme();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -685,16 +685,16 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             miRefresh.setVisible(false);
             miShare.setVisible(false);
             bw.write("Copyright ");
-            bw.write(getResources().getString(R.string.copyright));
+            bw.write(getString(R.string.copyright));
             bw.write(" Leonid Maslov 2004-");
             bw.write(d.getYear() + Const.BR);
         } else {
-            bw.write(getResources().getString(R.string.page) + " " + Const.SITE + link);
+            bw.write(getString(R.string.page) + " " + Const.SITE + link);
             bw.write("<br>Copyright ");
-            bw.write(getResources().getString(R.string.copyright));
+            bw.write(getString(R.string.copyright));
             bw.write(" Leonid Maslov 2004-");
             bw.write(d.getYear() + Const.BR);
-            bw.write(getResources().getString(R.string.downloaded) + " " + d.toString());
+            bw.write(getString(R.string.downloaded) + " " + d.toString());
         }
         bw.write("\n</div></body></html>");
         bw.close();
@@ -824,7 +824,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void tipEndList() {
-        Lib.showToast(this, getResources().getString(R.string.tip_end_list));
+        Lib.showToast(this, getString(R.string.tip_end_list));
     }
 
     private String getMinMY() {

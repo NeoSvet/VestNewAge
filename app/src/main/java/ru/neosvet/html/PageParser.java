@@ -14,10 +14,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class PageParser {
-    private Context context;
+    private final Context context;
     private int cur, index;
-    private List<HTMLElem> content = new ArrayList<>();
-    private final String SITE = ru.neosvet.utils.Const.SITE;
+    private final List<HTMLElem> content = new ArrayList<>();
 
     public PageParser(Context context) {
         this.context = context;
@@ -32,7 +31,7 @@ public class PageParser {
             if (s.contains(start))
                 break;
         }
-        if (ProgressHelper.isCancelled()) {
+        if (ProgressHelper.isCancelled() || s == null) {
             br.close();
             in.close();
             return;
@@ -129,6 +128,7 @@ public class PageParser {
                 else
                     elem.par = s.substring(n, s.indexOf("'", n));
                 elem.par = elem.par.replace("..", "").replace("&#x2B;", "+");
+                String SITE = ru.neosvet.utils.Const.SITE;
                 if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
                     elem.par = SITE + elem.par.substring(1);
             }
@@ -139,7 +139,7 @@ public class PageParser {
                 elem.tag = Const.LINK;
                 n = s.indexOf("src") + 5;
                 elem.par = s.substring(n, s.indexOf("\"", n));
-                elem.setHtml(context.getResources().getString(R.string.video_on_site));
+                elem.setHtml(context.getString(R.string.video_on_site));
             }
             if (elem.tag.equals(Const.PAR) || elem.tag.indexOf(Const.HEAD) == 0) {
                 s = s.substring(0, s.indexOf(">")).replace("\"", "'");

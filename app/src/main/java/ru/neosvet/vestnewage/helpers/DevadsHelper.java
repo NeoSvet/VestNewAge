@@ -56,7 +56,7 @@ public class DevadsHelper {
         String ad;
         if (onlyUnread) {
             cursor = db.query(NAME, null, Const.UNREAD + DataBase.Q, 1);
-            ad = context.getResources().getString(R.string.ad) + ": ";
+            ad = context.getString(R.string.ad) + ": ";
         } else {
             cursor = db.query(NAME, null);
             ad = "";
@@ -86,12 +86,12 @@ public class DevadsHelper {
                 case MODE_U:
                     m = Integer.parseInt(t);
                     if (m > context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode) {
-                        list.insertItem(0, new ListItem(ad + context.getResources().getString(R.string.access_new_version)));
+                        list.insertItem(0, new ListItem(ad + context.getString(R.string.access_new_version)));
                     } else {
-                        list.insertItem(0, new ListItem(ad + context.getResources().getString(R.string.current_version)));
+                        list.insertItem(0, new ListItem(ad + context.getString(R.string.current_version)));
                     }
                     list.getItem(0).addHead(d);
-                    list.getItem(0).addLink(context.getResources().getString(R.string.url_on_app));
+                    list.getItem(0).addLink(context.getString(R.string.url_on_app));
                     break;
                 default:
                     list.insertItem(0, new ListItem(ad + t));
@@ -102,7 +102,7 @@ public class DevadsHelper {
                     break;
             }
             if (!onlyUnread && unread)
-                list.getItem(0).setDes(context.getResources().getString(R.string.new_section));
+                list.getItem(0).setDes(context.getString(R.string.new_section));
 
         } while (cursor.moveToNext());
         cursor.close();
@@ -132,14 +132,14 @@ public class DevadsHelper {
 
         Activity act = (Activity) context;
         alert = new CustomDialog(act);
-        alert.setTitle(context.getResources().getString(R.string.ad));
+        alert.setTitle(context.getString(R.string.ad));
         alert.setMessage(des);
 
         if (link.equals("")) { // only des
-            alert.setRightButton(context.getResources().getString(android.R.string.ok),
+            alert.setRightButton(context.getString(android.R.string.ok),
                     view -> alert.dismiss());
         } else {
-            alert.setRightButton(context.getResources().getString(R.string.open_link), view -> {
+            alert.setRightButton(context.getString(R.string.open_link), view -> {
                 Lib lib = new Lib(context);
                 lib.openInApps(link, null);
                 alert.dismiss();

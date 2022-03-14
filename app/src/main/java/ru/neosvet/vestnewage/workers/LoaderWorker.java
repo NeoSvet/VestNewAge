@@ -162,7 +162,7 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadYear(int year) throws Exception {
-        ProgressHelper.setMessage(context.getResources().getString(R.string.start));
+        ProgressHelper.setMessage(context.getString(R.string.start));
         DateHelper d = DateHelper.initToday(context);
         int k;
         if (year == d.getYear())
@@ -206,7 +206,7 @@ public class LoaderWorker extends Worker {
     private void download(int id) throws Exception {
         if (isCancelled())
             return;
-        ProgressHelper.setMessage(context.getResources().getString(R.string.start));
+        ProgressHelper.setMessage(context.getString(R.string.start));
         // подсчёт количества страниц:
         int k = 0;
         if (id == LoaderHelper.ALL || id == R.id.nav_site)

@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -22,17 +23,23 @@ public class SetNotifDialog extends Dialog {
     public static final byte RINGTONE = 1, CUSTOM = 2;
     public static final String SOUND = "sound", NAME = "name", URI = "uri", VIBR = "vibr";
     private Activity act;
-    private String source, name, uri;
+    private final String source;
+    private String name, uri;
     private SharedPreferences pref;
     private TextView tvSound;
     private View tvLabel, pButtons;
     private CheckBox cbSound, cbVibr;
 
-
     public SetNotifDialog(@NonNull Activity act, String source) {
         super(act);
         this.act = act;
         this.source = source;
+    }
+
+    @Override
+    public void setOnDismissListener(@Nullable OnDismissListener listener) {
+        act = null;
+        super.setOnDismissListener(listener);
     }
 
     @Override
@@ -104,7 +111,7 @@ public class SetNotifDialog extends Dialog {
 
     private void setRingtone() {
         if (name == null)
-            tvSound.setText(act.getResources().getString(R.string.default_));
+            tvSound.setText(act.getString(R.string.default_));
         else
             tvSound.setText(name);
     }

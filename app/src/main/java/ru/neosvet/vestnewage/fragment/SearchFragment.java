@@ -1,8 +1,8 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -40,14 +40,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
@@ -57,7 +58,6 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
-
 
 public class SearchFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
@@ -104,7 +104,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act.setTitle(getResources().getString(R.string.search));
+        act.setTitle(getString(R.string.search));
         initViews(view);
         setViews(view);
         initModel();
@@ -155,12 +155,12 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                     data.getInt(Const.END, 0));
             return;
         }
-        if (data.getString(Const.MODE).equals(Const.TIME)) {
+        if (Objects.equals(data.getString(Const.MODE), Const.TIME)) {
             DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
-            tvStatus.setText(getResources().getString(R.string.search) + ": "
+            tvStatus.setText(getString(R.string.search) + ": "
                     + d.getMonthString() + " " + (d.getYear() + 2000));
         } else { //Const.PROG
-            tvStatus.setText(getResources().getString(R.string.search) + " "
+            tvStatus.setText(getString(R.string.search) + " "
                     + data.getInt(Const.PROG, 0) + "%");
         }
     }
@@ -220,10 +220,10 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(
-                        getResources().getString(R.string.results_last_search),
+                        getString(R.string.results_last_search),
                         LAST_RESULTS));
                 adResults.addItem(new ListItem(
-                        getResources().getString(R.string.clear_results_search),
+                        getString(R.string.clear_results_search),
                         CLEAR_RESULTS));
                 adResults.notifyDataSetChanged();
             }
@@ -301,18 +301,18 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         pAdditionSet = container.findViewById(R.id.pAdditionSet);
         fabSettings = container.findViewById(R.id.fabSettings);
         fabOk = container.findViewById(R.id.fabOk);
-        rvPages = (RecyclerView) container.findViewById(R.id.rvPages);
-        bStart = (Button) container.findViewById(R.id.bStartRange);
-        bEnd = (Button) container.findViewById(R.id.bEndRange);
+        rvPages = container.findViewById(R.id.rvPages);
+        bStart = container.findViewById(R.id.bStartRange);
+        bEnd = container.findViewById(R.id.bEndRange);
         pStatus = container.findViewById(R.id.pStatus);
         pPages = container.findViewById(R.id.pPages);
         bShow = container.findViewById(R.id.bShow);
-        tvStatus = (TextView) container.findViewById(R.id.tvStatus);
+        tvStatus = container.findViewById(R.id.tvStatus);
         cbSearchInResults = container.findViewById(R.id.cbSearchInResults);
-        tvLabel = (TextView) container.findViewById(R.id.tvLabel);
-        etSearch = (AutoCompleteTextView) container.findViewById(R.id.etSearch);
-        sMode = (Spinner) container.findViewById(R.id.sMode);
-        ArrayAdapter<String> adBook = new ArrayAdapter<String>(act, R.layout.spinner_button,
+        tvLabel = container.findViewById(R.id.tvLabel);
+        etSearch = container.findViewById(R.id.etSearch);
+        sMode = container.findViewById(R.id.sMode);
+        ArrayAdapter<String> adBook = new ArrayAdapter<>(act, R.layout.spinner_button,
                 getResources().getStringArray(R.array.search_mode));
         adBook.setDropDownViewResource(R.layout.spinner_item);
         sMode.setAdapter(adBook);
@@ -323,9 +323,10 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         softKeyboard = new SoftKeyboard(mainLayout, im);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setViews(View container) {
         File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
-        List<String> liSearch = new ArrayList<String>();
+        List<String> liSearch = new ArrayList<>();
         if (f.exists()) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(f));
@@ -338,7 +339,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                 e.printStackTrace();
             }
         }
-        adSearch = new ArrayAdapter<String>(act, R.layout.spinner_item, liSearch);
+        adSearch = new ArrayAdapter<>(act, R.layout.spinner_item, liSearch);
         etSearch.setThreshold(1);
         etSearch.setAdapter(adSearch);
         etSearch.setOnKeyListener((view, keyCode, keyEvent) -> {
@@ -373,13 +374,13 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                 adResults.clear();
                 adResults.notifyDataSetChanged();
             } else {
-                Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
+                Lib.showToast(act, getString(R.string.long_press_for_mark));
                 BrowserActivity.openReader(act, adResults.getItem(pos).getLink(), string);
             }
         });
         lvResult.setOnItemLongClickListener((adapterView, view, pos, l) -> {
             String des = tvLabel.getText().toString();
-            des = getResources().getString(R.string.search_for) +
+            des = getString(R.string.search_for) +
                     des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1);
             MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
             return true;
@@ -454,7 +455,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     private void enterSearch() {
         etSearch.dismissDropDown();
         if (etSearch.length() < 3)
-            Lib.showToast(act, getResources().getString(R.string.low_sym_for_search));
+            Lib.showToast(act, getString(R.string.low_sym_for_search));
         else {
             pPages.setVisibility(View.GONE);
             page = 0;
@@ -501,7 +502,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         int mode;
         if (cbSearchInResults.isChecked()) {
             mode = 6;
-            tvStatus.setText(getResources().getString(R.string.search));
+            tvStatus.setText(getString(R.string.search));
         } else
             mode = sMode.getSelectedItemPosition();
         ProgressHelper.addObserver(act, this);
@@ -533,14 +534,14 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             cbSearchInResults.setChecked(true);
             String s;
             if (mode == 6)
-                s = getResources().getString(R.string.search_in_results);
+                s = getString(R.string.search_in_results);
             else
                 s = getResources().getStringArray(R.array.search_mode)[mode];
             tvLabel.setText(
-                    String.format(getResources().getString(R.string.you_search),
+                    String.format(getString(R.string.you_search),
                             s.substring(s.indexOf(" ") + 1), str)
                             + Const.N +
-                            String.format(getResources().getString(R.string.found_in),
+                            String.format(getString(R.string.found_in),
                                     count1, count2));
             editor.putString(LABEL, tvLabel.getText().toString());
             editor.apply();
@@ -559,8 +560,8 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             pAdditionSet.setVisibility(View.GONE);
             fabSettings.setVisibility(View.VISIBLE);
             AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
-            builder.setMessage(getResources().getString(R.string.alert_search));
-            builder.setPositiveButton(getResources().getString(android.R.string.ok),
+            builder.setMessage(getString(R.string.alert_search));
+            builder.setPositiveButton(getString(android.R.string.ok),
                     (dialog, id) -> dialog.dismiss());
             builder.create().show();
             deleteBase();
@@ -599,6 +600,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         dataBase.close();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {//click page item
         if (event.getAction() != MotionEvent.ACTION_UP)

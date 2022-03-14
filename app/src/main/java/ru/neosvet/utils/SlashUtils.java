@@ -22,6 +22,9 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import static android.content.Context.MODE_PRIVATE;
 
 public class SlashUtils {
+    private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
+            PendingIntent.FLAG_UPDATE_CURRENT :
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
     private final String SETTINGS = "main";
     private final int START_ID = 900;
     private int notif_id = START_ID;
@@ -55,14 +58,14 @@ public class SlashUtils {
             SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
             int p = pref.getInt(Const.TIME, Const.TURN_OFF);
             if (p == Const.TURN_OFF)
-                showNotifTip(context.getResources().getString(R.string.are_you_know),
-                        context.getResources().getString(R.string.new_option_notif), getSettingsIntent());
+                showNotifTip(context.getString(R.string.are_you_know),
+                        context.getString(R.string.new_option_notif), getSettingsIntent());
             else {
                 pref = context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
                 p = pref.getInt(Const.TIME, Const.TURN_OFF);
                 if (p == Const.TURN_OFF)
-                    showNotifTip(context.getResources().getString(R.string.are_you_know),
-                            context.getResources().getString(R.string.new_option_notif), getSettingsIntent());
+                    showNotifTip(context.getString(R.string.are_you_know),
+                            context.getString(R.string.new_option_notif), getSettingsIntent());
             }
         }
         if (ver > 44 && ver < 47) {
@@ -78,10 +81,10 @@ public class SlashUtils {
         Intent intent = new Intent(context, LoaderHelper.class);
         intent.putExtra(Const.MODE, LoaderHelper.DOWNLOAD_ALL);
         intent.putExtra(Const.TASK, "");
-        PendingIntent piStart = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piStart = PendingIntent.getService(context, 0, intent, FLAGS);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getResources().getString(R.string.downloads_all_title),
-                context.getResources().getString(R.string.downloads_all_msg),
+                context.getString(R.string.downloads_all_title),
+                context.getString(R.string.downloads_all_msg),
                 NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
@@ -119,13 +122,13 @@ public class SlashUtils {
     }
 
     private void showNotifTip(String title, String msg, Intent intent) {
-        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent piStart = PendingIntent.getActivity(context, 0, intent, FLAGS);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 title, msg, NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setContentIntent(piStart);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { // on N with setFullScreenIntent don't work summary group
-            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
         notifBuilder.setSound(null);
@@ -135,14 +138,14 @@ public class SlashUtils {
     private void showSummaryNotif() {
         if (notif_id - START_ID < 2) return; //notifications < 2, summary is not need
         NotificationCompat.Builder notifBuilder = notifHelper.getSummaryNotif(
-                context.getResources().getString(R.string.tips),
+                context.getString(R.string.tips),
                 NotificationHelper.CHANNEL_TIPS);
         notifBuilder.setGroup(NotificationHelper.GROUP_TIPS);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             notifBuilder.setContentIntent(PendingIntent.getActivity(context, 0,
-                    getSettingsIntent(), PendingIntent.FLAG_UPDATE_CURRENT));
+                    getSettingsIntent(), FLAGS));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
             notifBuilder.setFullScreenIntent(piEmpty, false);
         }
         notifHelper.notify(START_ID, notifBuilder);
@@ -215,6 +218,8 @@ public class SlashUtils {
             main.putExtra(Const.TAB, 1);
         } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
             link = data.getQuery();
+            if (link == null)
+                return false;
             int page = 1;
             if (link.contains("start")) {
                 page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
@@ -239,5 +244,4 @@ public class SlashUtils {
             main.putExtra(Const.LINK, link.substring(link.indexOf("=") + 1));
         }
         return true;
-    }
-}
+    }}

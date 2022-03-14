@@ -14,9 +14,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
 
 public class CheckAdapter extends BaseAdapter {
-    private MarkerActivity act = null;
-    private LayoutInflater inflater;
-    private List<CheckItem> data = new ArrayList<CheckItem>();
+    private final MarkerActivity act;
+    private final LayoutInflater inflater;
+    private final List<CheckItem> data = new ArrayList<>();
 
     public CheckAdapter(MarkerActivity act) {
         this.act = act;

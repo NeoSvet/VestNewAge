@@ -25,7 +25,7 @@ import androidx.work.Data;
 
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.utils.NeoFragment;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -136,7 +136,7 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
         String error = result.getString(Const.ERROR);
         if (error != null) {
             if (error.equals("Connection reset") || error.equals("Read timed out"))
-                error = getResources().getString(R.string.cab_fail);
+                error = getString(R.string.cab_fail);
             act.status.setError(error);
             return;
         }
@@ -145,28 +145,28 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
             case CabWorker.SELECTED_WORD:
                 int select = result.getInt(Const.SELECT, -1);
                 if (select == -1)
-                    initCabinet(getResources().getString(R.string.selected_status),
+                    initCabinet(getString(R.string.selected_status),
                             result.getString(Const.DESCTRIPTION));
                 else
-                    initCabinet(getResources().getString(R.string.selected_status),
+                    initCabinet(getString(R.string.selected_status),
                             adMain.getItem(select).getTitle());
                 break;
             case CabWorker.NO_SELECTED:
-                initCabinet(getResources().getString(R.string.send_status),
-                        getResources().getString(R.string.select_status));
+                initCabinet(getString(R.string.send_status),
+                        getString(R.string.select_status));
                 break;
             case CabWorker.WORD_LIST:
                 initWordList(result.getStringArray(Const.DESCTRIPTION));
                 break;
             case CabWorker.TIMEOUT:
-                initCabinet(getResources().getString(R.string.send_status),
+                initCabinet(getString(R.string.send_status),
                         result.getString(Const.DESCTRIPTION));
                 break;
             case CabWorker.ERROR:
                 final CustomDialog alert = new CustomDialog(act);
-                alert.setTitle(getResources().getString(R.string.error));
+                alert.setTitle(getString(R.string.error));
                 alert.setMessage(result.getString(Const.DESCTRIPTION));
-                alert.setRightButton(getResources().getString(android.R.string.ok), view -> alert.dismiss());
+                alert.setRightButton(getString(android.R.string.ok), view -> alert.dismiss());
                 alert.show(null);
                 return;
         }
@@ -225,7 +225,7 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void initViews(View container) {
-        act.setTitle(getResources().getString(R.string.cabinet));
+        act.setTitle(getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
@@ -270,12 +270,12 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
                 switch (pos) {
                     case 0: //передача ощущений
                         if (adMain.getItem(pos).getDes().equals(
-                                getResources().getString(R.string.select_status))) {
+                                getString(R.string.select_status))) {
                             initLoad();
                             act.status.startText();
                             model.getListWord();
                         } else
-                            Lib.showToast(act, getResources().getString(R.string.send_unlivable));
+                            Lib.showToast(act, getString(R.string.send_unlivable));
                         break;
                     case 1: //анкета
                         CabpageActivity.openPage(act, "edinenie/anketa.html");

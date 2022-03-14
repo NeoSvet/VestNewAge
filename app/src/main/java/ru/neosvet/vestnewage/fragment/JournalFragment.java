@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -39,6 +41,18 @@ public class JournalFragment extends Fragment {
     private boolean finish = true, scrollToFirst = false;
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        act = (MainActivity) getActivity();
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDestroyView() {
+        act = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.journal_fragment, container, false);
     }
@@ -46,8 +60,7 @@ public class JournalFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
-        act.setTitle(getResources().getString(R.string.journal));
+        act.setTitle(getString(R.string.journal));
         initViews(view);
         if (savedInstanceState != null) {
             offset = savedInstanceState.getInt(Const.START, 0);
@@ -72,6 +85,7 @@ public class JournalFragment extends Fragment {
         dbJournal.close();
     }
 
+    @SuppressLint("Range")
     private void openList() {
         tip.hide();
         Cursor curJ = dbJournal.query(DataBase.JOURNAL, null, null, null, null, null, Const.TIME + DataBase.DESC);
@@ -105,13 +119,13 @@ public class JournalFragment extends Fragment {
                     if (id.length == 3) { //случайные
                         if (id[2].equals("-1")) { //случайный катрен или послание
                             if (s.contains(Const.POEMS))
-                                s = getResources().getString(R.string.rnd_kat);
+                                s = getString(R.string.rnd_kat);
                             else
-                                s = getResources().getString(R.string.rnd_pos);
+                                s = getString(R.string.rnd_pos);
                         } else { //случаный стих
                             cursor.close();
                             cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id[1]);
-                            s = getResources().getString(R.string.rnd_stih);
+                            s = getString(R.string.rnd_stih);
                             if (cursor.moveToPosition(Integer.parseInt(id[2])))
                                 s += ":" + Const.N + Lib.withOutTags(cursor.getString(0));
                         }
@@ -145,6 +159,7 @@ public class JournalFragment extends Fragment {
             fabClear.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initViews(View container) {
         tip = new Tip(act, container.findViewById(R.id.tvFinish));
         fabPrev = container.findViewById(R.id.fabPrev);
@@ -189,10 +204,10 @@ public class JournalFragment extends Fragment {
             if (act.checkBusy()) return;
             String link = adJournal.getItem(pos).getLink();
             String s = adJournal.getItem(pos).getDes();
-            if (s.contains(getResources().getString(R.string.rnd_stih))) {
+            if (s.contains(getString(R.string.rnd_stih))) {
                 s = s.substring(s.indexOf(Const.N, s.indexOf(
-                        getResources().getString(R.string.rnd_stih))) + 1);
-                Lib.showToast(act, getResources().getString(R.string.long_press_for_mark));
+                        getString(R.string.rnd_stih))) + 1);
+                Lib.showToast(act, getString(R.string.long_press_for_mark));
             } else
                 s = null;
             BrowserActivity.openReader(act, link, s);
@@ -201,7 +216,7 @@ public class JournalFragment extends Fragment {
         lvJournal.setOnItemLongClickListener((adapterView, view, pos, l) -> {
             String des = adJournal.getItem(pos).getDes();
             String par = null;
-            int i = des.indexOf(getResources().getString(R.string.rnd_stih));
+            int i = des.indexOf(getString(R.string.rnd_stih));
             if (i > -1 && i < des.lastIndexOf(Const.N)) {
                 par = des.substring(des.indexOf(Const.N, i) + 1);
                 i = des.indexOf("«");

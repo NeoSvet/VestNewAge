@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,8 +24,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -90,7 +91,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
@@ -137,8 +138,10 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
             index_ads = state.getInt(Const.ADS);
-        } else
+        } else if (getArguments() != null)
             tab = getArguments().getInt(Const.TAB);
+        else
+            tab = 0;
         switch (tab) {
             case 0:
                 tabHost.setCurrentTab(0);
@@ -166,13 +169,13 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         TabHost.TabSpec tabSpec;
 
         tabSpec = tabHost.newTabSpec(NEWS);
-        tabSpec.setIndicator(getResources().getString(R.string.news),
+        tabSpec.setIndicator(getString(R.string.news),
                 ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec(MAIN);
-        tabSpec.setIndicator(getResources().getString(R.string.site),
+        tabSpec.setIndicator(getString(R.string.site),
                 ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.lvMain);
         tabHost.addTab(tabSpec);
@@ -180,7 +183,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         TabWidget widget = tabHost.getTabWidget();
         for (int i = 0; i < widget.getChildCount(); i++) {
             View v = widget.getChildAt(i);
-            TextView tv = (TextView) v.findViewById(android.R.id.title);
+            TextView tv = v.findViewById(android.R.id.title);
             if (tv != null) {
                 tv.setMaxLines(1);
                 v.setBackgroundResource(R.drawable.table_selector);
@@ -189,9 +192,9 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         tabHost.setCurrentTab(1);
         tabHost.setOnTabChangedListener(name -> {
             if (name.equals(MAIN))
-                act.setTitle(getResources().getString(R.string.site));
+                act.setTitle(getString(R.string.site));
             else
-                act.setTitle(getResources().getString(R.string.news));
+                act.setTitle(getString(R.string.news));
             File f = getFile(name);
             if (f.exists())
                 openList(f, true);
@@ -201,13 +204,14 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void initViews(View container) {
-        tabHost = (TabHost) container.findViewById(R.id.thMain);
+        tabHost = container.findViewById(R.id.thMain);
         tvEmptySite = container.findViewById(R.id.tvEmptySite);
         fabRefresh = container.findViewById(R.id.fabRefresh);
         act.fab = fabRefresh;
         lvMain = container.findViewById(R.id.lvMain);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
         fabRefresh.setOnClickListener(view -> startLoad(tabHost.getCurrentTabTag()));
         adMain = new ListAdapter(act);
@@ -355,8 +359,8 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ListItem item = new ListItem(getResources().getString(R.string.back_title));
-        item.setDes(getResources().getString(R.string.back_des));
+        ListItem item = new ListItem(getString(R.string.back_title));
+        item.setDes(getString(R.string.back_des));
         adMain.insertItem(0, item);
         adMain.notifyDataSetChanged();
     }
@@ -373,11 +377,11 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             int i = 0;
             if (tabHost.getCurrentTab() == 0) { //news
                 tab = 0;
-                adMain.addItem(new ListItem(getResources().getString(R.string.news_dev)), "");
+                adMain.addItem(new ListItem(getString(R.string.news_dev)), "");
                 adMain.getItem(i++).addLink("");
             } else if (tabHost.getCurrentTab() == 1) { //main
                 tab = 1;
-                adMain.addItem(new ListItem(getResources().getString(R.string.novosti)), "");
+                adMain.addItem(new ListItem(getString(R.string.novosti)), "");
                 adMain.getItem(i++).addLink(FORUM);
             }
             while ((t = br.readLine()) != null) {
@@ -426,7 +430,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     private void openPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
             if (url.contains(Const.SITE)) {
-                act.lib.openInApps(url, getResources().getString(R.string.to_load));
+                act.lib.openInApps(url, getString(R.string.to_load));
             } else {
                 act.lib.openInApps(url, null);
             }

@@ -19,12 +19,15 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class StatusButton {
-    private Context context;
-    private Animation anRotate, anMin, anMax, anHide;
-    private View panel;
-    private TextView tv;
-    private ImageView iv;
-    private ProgressBar progBar;
+    private final Context context;
+    private final Animation anRotate;
+    private Animation anMin;
+    private Animation anMax;
+    private final Animation anHide;
+    private final View panel;
+    private final TextView tv;
+    private final ImageView iv;
+    private final ProgressBar progBar;
     private ResizeAnim resizeMax = null;
     private String error = null;
     private boolean stop = true, time = false, visible, prog = false;
@@ -114,7 +117,7 @@ public class StatusButton {
             }
             visible = false;
             iv.clearAnimation();
-            tv.setText(context.getResources().getString(R.string.done));
+            tv.setText(context.getString(R.string.done));
             panel.startAnimation(anHide);
         }
     }
@@ -124,7 +127,7 @@ public class StatusButton {
         stop = true;
         if (error != null) {
             time = false;
-            tv.setText(context.getResources().getString(R.string.crash));
+            tv.setText(context.getString(R.string.crash));
             panel.setBackgroundResource(R.drawable.shape_red);
             iv.setImageResource(R.drawable.close);
             iv.clearAnimation();
@@ -145,7 +148,7 @@ public class StatusButton {
             this.time = true;
             initResizeMax();
             visible = true;
-            tv.setText(context.getResources().getString(R.string.refresh) + "?");
+            tv.setText(context.getString(R.string.refresh) + "?");
             return true;
         } else {
             this.time = false;
@@ -171,11 +174,11 @@ public class StatusButton {
     }
 
     public void startText() {
-        tv.setText(context.getResources().getString(R.string.start));
+        tv.setText(context.getString(R.string.start));
     }
 
     public void loadText() {
-        tv.setText(context.getResources().getString(R.string.load));
+        tv.setText(context.getString(R.string.load));
     }
 
     public void setClick(View.OnClickListener event) {
@@ -185,9 +188,9 @@ public class StatusButton {
     public boolean onClick() {
         if (isCrash()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.NeoDialog)
-                    .setTitle(context.getResources().getString(R.string.error))
+                    .setTitle(context.getString(R.string.error))
                     .setMessage(error)
-                    .setPositiveButton(context.getResources().getString(R.string.send),
+                    .setPositiveButton(context.getString(R.string.send),
                             (dialog, id) -> sendError())
                     .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();

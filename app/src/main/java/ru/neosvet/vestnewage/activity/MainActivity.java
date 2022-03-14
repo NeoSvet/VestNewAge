@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -11,6 +12,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,10 +32,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.MultiWindowSupport;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.SetNotifDialog;
-import ru.neosvet.utils.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
@@ -81,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int cur_id, prev_id = 0, tab = 0, statusBack, k_new = 0;
     public View fab;
     private SlashUtils slash;
-    private SlashModel model;
     public Animation anMin, anMax;
 
     @Override
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
         slash = new SlashUtils(MainActivity.this);
-        model = new ViewModelProvider(this).get(SlashModel.class);
+        SlashModel model = new ViewModelProvider(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
             first_fragment = slash.getIntent().getIntExtra(Const.CUR_ID, first_fragment);
@@ -303,22 +304,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (getResources().getInteger(R.integer.screen_mode) !=
                 getResources().getInteger(R.integer.screen_tablet_land)) {
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             if (isMenuMode) return;
-            drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer = findViewById(R.id.drawer_layout);
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
             drawer.addDrawerListener(toggle);
             toggle.syncState();
-            navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView = findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
             navigationView.setCheckedItem(cur_id);
 
             navigationView.getHeaderView(0).setOnClickListener(view -> {
                 lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                    startActivity(Intent.createChooser(lib.openInApps(Const.SITE),
-//                            getResources().getString(R.string.open)));
+//                            getString(R.string.open)));
             });
         }
     }
@@ -343,14 +344,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.menu_table, menu);
-        MenuItem miDownloadAll = menu.add(getResources().getString(R.string.download_title));
+        MenuItem miDownloadAll = menu.add(getString(R.string.download_title));
         miDownloadAll.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         miDownloadAll.setIcon(R.drawable.download_button);
         return true;
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawer.closeDrawer(GravityCompat.START);
         if (checkBusy())
             return false;
@@ -368,6 +369,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         frMenu.setNew(getNewId());
     }
 
+    @SuppressLint("NonConstantResourceId")
     public void setFragment(int id, boolean savePrev) {
         statusBack = STATUS_PAGE;
         isFirst = false;
@@ -490,14 +492,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onActivityResult(requestCode, resultCode, data);
         if (curFragment == null || resultCode != RESULT_OK)
             return;
-        if (curFragment instanceof CollectionsFragment) {
-            CollectionsFragment fr = (CollectionsFragment) curFragment;
-            if (requestCode == CollectionsFragment.MARKER_REQUEST)
-                fr.putResult(resultCode);
-            else
-                fr.startModel(requestCode, data.getData());
-            return;
-        }
         if (curFragment instanceof SettingsFragment) {
             SettingsFragment fr = (SettingsFragment) curFragment;
             if (requestCode == SetNotifDialog.RINGTONE)
@@ -547,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setFragment(R.id.menu_fragment, false);
         } else { //  statusBack == STATUS_MENU;
             statusBack = STATUS_EXIT;
-            Lib.showToast(this, getResources().getString(R.string.click_for_exit));
+            Lib.showToast(this, getString(R.string.click_for_exit));
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -564,6 +558,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("NonConstantResourceId")
     public void showDownloadMenu() {
         if (menuDownload.isShow())
             menuDownload.hide();
@@ -573,15 +568,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             switch (cur_id) {
                 case R.id.nav_site:
                     bDownloadIt.setVisibility(View.VISIBLE);
-                    bDownloadIt.setText(getResources().getString(R.string.download_it_main));
+                    bDownloadIt.setText(getString(R.string.download_it_main));
                     break;
                 case R.id.nav_calendar:
                     bDownloadIt.setVisibility(View.VISIBLE);
-                    bDownloadIt.setText(getResources().getString(R.string.download_it_calendar));
+                    bDownloadIt.setText(getString(R.string.download_it_calendar));
                     break;
                 case R.id.nav_book:
                     bDownloadIt.setVisibility(View.VISIBLE);
-                    bDownloadIt.setText(getResources().getString(R.string.download_it_book));
+                    bDownloadIt.setText(getString(R.string.download_it_book));
                     break;
                 default:
                     bDownloadIt.setVisibility(View.GONE);
@@ -619,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public boolean checkBusy() {
         if (ProgressHelper.isBusy()) {
-            Lib.showToast(this, getResources().getString(R.string.app_is_busy));
+            Lib.showToast(this, getString(R.string.app_is_busy));
             return true;
         }
         return false;

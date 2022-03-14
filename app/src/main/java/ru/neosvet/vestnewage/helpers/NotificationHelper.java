@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.helpers;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -28,9 +29,9 @@ import ru.neosvet.vestnewage.R;
  */
 public class NotificationHelper extends ContextWrapper {
     private NotificationManager manager;
-    public static final int NOTIF_SUMMARY = 111, ID_SUMMARY = 2, ID_SUMMARY_POSTPONE = 3;
+    public static final int NOTIF_SUMMARY = 111, ID_SUMMARY_POSTPONE = 3; //ID_SUMMARY = 2,
     public static final int NOTIF_PROM = 222, ID_ACCEPT = 1;
-    public static final int NOTIF_CHECK = 333, NOTIF_SLASH = 444;
+    public static final int NOTIF_CHECK = 333; //, NOTIF_SLASH = 444;
     public static final String CHANNEL_SUMMARY = "summary", CHANNEL_MUTE = "mute",
             CHANNEL_PROM = "prom", CHANNEL_TIPS = "tips", MODE = "mode",
             GROUP_SUMMARY = "group_summary", GROUP_TIPS = "group_tips";
@@ -156,18 +157,20 @@ public class NotificationHelper extends ContextWrapper {
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle()
                 .setSummaryText(title);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            style.setBigContentTitle(getResources().getString(R.string.app_name));
+            style.setBigContentTitle(getString(R.string.app_name));
             if (notifList != null) {
                 for (int i = 0; i < notifList.size(); i++) {
                     style.addLine(notifList.get(i));
                 }
                 notifList.clear();
             }
-            PendingIntent piEmpty = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+            @SuppressLint("UnspecifiedImmutableFlag")
+            PendingIntent piEmpty = PendingIntent.getActivity(this,
+                    0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
             notifBuilder.setFullScreenIntent(piEmpty, false)
                     .setWhen(System.currentTimeMillis()).setShowWhen(true);
         }
-        notifBuilder.setContentTitle(getResources().getString(R.string.app_name))
+        notifBuilder.setContentTitle(getString(R.string.app_name))
                 .setSmallIcon(R.drawable.star)
                 .setContentText(title)
                 .setStyle(style)

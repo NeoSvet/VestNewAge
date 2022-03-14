@@ -30,28 +30,28 @@ public class ErrorUtils {
     public static String getInformation(Context context) {
         StringBuilder des = new StringBuilder();
         if (ErrorUtils.error != null) {
-            des.append(context.getResources().getString(R.string.error_des));
-            des.append("\n");
+            des.append(context.getString(R.string.error_des));
+            des.append(Const.N);
             des.append(ErrorUtils.error.getMessage());
-            des.append("\n");
+            des.append(Const.N);
             for (StackTraceElement e : ErrorUtils.error.getStackTrace()) {
                 String s = e.toString();
                 if (s.contains("ru.neosvet")) {
                     des.append(s);
-                    des.append("\n");
+                    des.append(Const.N);
                 }
             }
         }
         if (ErrorUtils.data != null) {
-            des.append("\n");
-            des.append(context.getResources().getString(R.string.input_data));
-            des.append("\n");
+            des.append(Const.N);
+            des.append(context.getString(R.string.input_data));
+            des.append(Const.N);
             Map<String, Object> map = ErrorUtils.data.getKeyValueMap();
             for (String key : map.keySet()) {
                 des.append(key);
                 des.append(": ");
-                des.append(map.get(key).toString());
-                des.append("\n");
+                des.append(map.get(key));
+                des.append(Const.N);
             }
         }
         try {

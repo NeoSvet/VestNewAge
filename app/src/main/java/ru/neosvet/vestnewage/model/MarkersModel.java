@@ -22,13 +22,13 @@ public class MarkersModel extends AndroidViewModel {
         super(application);
     }
 
-    public void start(boolean export, String file) {
+    public void start(boolean isExport, String file) {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .setRequiresBatteryNotLow(false)
                 .build();
         Data data = new Data.Builder()
-                .putBoolean(Const.MODE, export)
+                .putBoolean(Const.MODE, isExport)
                 .putString(Const.FILE, file)
                 .build();
         OneTimeWorkRequest task = new OneTimeWorkRequest

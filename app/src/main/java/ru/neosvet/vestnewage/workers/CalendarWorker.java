@@ -71,7 +71,7 @@ public class CalendarWorker extends Worker {
                 return Result.success();
             DateHelper d = DateHelper.initToday(context);
             if (getInputData().getInt(Const.MODE, 0) == LoaderHelper.DOWNLOAD_YEAR) {
-                ProgressHelper.setMessage(context.getResources().getString(R.string.download_list));
+                ProgressHelper.setMessage(context.getString(R.string.download_list));
                 int m, y = getInputData().getInt(Const.YEAR, 0);
                 if (d.getYear() != y)
                     m = 12;

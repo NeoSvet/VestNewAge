@@ -161,7 +161,7 @@ public class CabWorker extends Worker {
             return result;
         } else {
             result.putInt(Const.MODE, ERROR);
-            result.putString(Const.DESCTRIPTION, context.getResources().getString(R.string.anketa_failed));
+            result.putString(Const.DESCTRIPTION, context.getString(R.string.anketa_failed));
             return result;
         }
     }

@@ -63,7 +63,7 @@ public class MarkerActivity extends AppCompatActivity {
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;
-                if (des != null && des.equals(context.getResources().getString(R.string.search_for)))
+                if (des != null && des.equals(context.getString(R.string.search_for)))
                     n = 1;
                 do {
                     if (par.contains(Lib.withOutTags(cursor.getString(0)))) {
@@ -120,9 +120,9 @@ public class MarkerActivity extends AppCompatActivity {
     private String getPageList() {
         StringBuilder s = new StringBuilder();
         if (adPage.getItem(0).isCheck()) {
-            s.append(getResources().getString(R.string.page_entirely));
+            s.append(getString(R.string.page_entirely));
         } else {
-            s.append(getResources().getString(R.string.sel_par));
+            s.append(getString(R.string.sel_par));
             for (int i = 1; i < adPage.getCount(); i++) {
                 if (adPage.getItem(i).isCheck()) {
                     s.append(i);
@@ -138,7 +138,7 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     public String getColList() {
-        StringBuilder s = new StringBuilder(getResources().getString(R.string.sel_col));
+        StringBuilder s = new StringBuilder(getString(R.string.sel_col));
         for (int i = 0; i < adCol.getCount(); i++) {
             if (adCol.getItem(i).isCheck()) {
                 s.append(adCol.getItem(i).getTitle());
@@ -198,6 +198,7 @@ public class MarkerActivity extends AppCompatActivity {
         dbMarker.close();
     }
 
+    @SuppressLint("Range")
     private void restoreState(Bundle state) {
         setResult(RESULT_CANCELED);
         if (state != null) {
@@ -241,7 +242,7 @@ public class MarkerActivity extends AppCompatActivity {
                 posVisible = true;
             }
         } else if (id < 0) { //add marker mode
-            tvCol.setText(getResources().getString(R.string.sel_col) + getResources().getString(R.string.no_collections));
+            tvCol.setText(getString(R.string.sel_col) + getString(R.string.no_collections));
             adCol.getItem(0).setCheck(true);
             if (getIntent().hasExtra(Const.DESCTRIPTION))
                 etDes.setText(getIntent().getStringExtra(Const.DESCTRIPTION));
@@ -253,13 +254,13 @@ public class MarkerActivity extends AppCompatActivity {
             if (id == -1) {
                 int par = getIntent().getIntExtra(DataBase.PARAGRAPH, -1);
                 if (par == -1)
-                    tvSel.setText(getResources().getString(R.string.page_entirely));
+                    tvSel.setText(getString(R.string.page_entirely));
                 else { // случайный стих
                     adPage.getItem(par).setCheck(true);
-                    tvSel.setText(getResources().getString(R.string.sel_par) + (par + 1));
+                    tvSel.setText(getString(R.string.sel_par) + (par + 1));
                 }
             } else { // id==-2 если в PARAGRAPH список (см addMarker)
-                String s = getResources().getString(R.string.sel_par) +
+                String s = getString(R.string.sel_par) +
                         getIntent().getStringExtra(DataBase.PARAGRAPH);
                 tvSel.setText(s);
                 setPageList(s);
@@ -275,15 +276,15 @@ public class MarkerActivity extends AppCompatActivity {
             if (s.contains("%")) {
                 rPos.setChecked(true);
                 setPosText(Float.parseFloat(s.substring(0, s.length() - 1).replace(Const.COMMA, ".")));
-                s = getResources().getString(R.string.sel_pos) + s;
-                sel = getResources().getString(R.string.page_entirely);
+                s = getString(R.string.sel_pos) + s;
+                sel = getString(R.string.page_entirely);
             } else {
                 rPar.setChecked(true);
                 if (s.equals("0"))
-                    s = getResources().getString(R.string.page_entirely);
+                    s = getString(R.string.page_entirely);
                 else
-                    s = getResources().getString(R.string.sel_par) + s.replace(Const.COMMA, ", ");
-                sel = getResources().getString(R.string.sel_pos) + "0,0%";
+                    s = getString(R.string.sel_par) + s.replace(Const.COMMA, ", ");
+                sel = getString(R.string.sel_pos) + "0,0%";
             }
             setPageList(s);
             tvSel.setText(s);
@@ -291,7 +292,7 @@ public class MarkerActivity extends AppCompatActivity {
             cursor.close();
 
             String[] mId = DataBase.getList(s);
-            StringBuilder b = new StringBuilder(getResources().getString(R.string.sel_col));
+            StringBuilder b = new StringBuilder(getString(R.string.sel_col));
             for (String id : mId) {
                 cursor = dbMarker.query(DataBase.COLLECTIONS, null,
                         DataBase.ID + DataBase.Q, new String[]{id}
@@ -357,6 +358,7 @@ public class MarkerActivity extends AppCompatActivity {
         return modeList;
     }
 
+    @SuppressLint("Range")
     private void setViews() {
         CompoundButton.OnCheckedChangeListener typeSel = (compoundButton, check) -> {
             if (check) {
@@ -423,14 +425,14 @@ public class MarkerActivity extends AppCompatActivity {
             } else if (modeList == 1) { //page
                 String s = getPageList();
                 if (s == null) {
-                    Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
+                    Lib.showToast(MarkerActivity.this, getString(R.string.one_for_sel));
                     return;
                 }
                 tvSel.setText(s);
             } else if (modeList == 2) { //col
                 String s = getColList();
                 if (s == null) {
-                    Lib.showToast(MarkerActivity.this, getResources().getString(R.string.one_for_sel));
+                    Lib.showToast(MarkerActivity.this, getString(R.string.one_for_sel));
                     return;
                 }
                 tvCol.setText(s);
@@ -464,13 +466,13 @@ public class MarkerActivity extends AppCompatActivity {
                     String s = etCol.getText().toString();
                     if (s.contains(Const.COMMA)) {
                         Lib.showToast(MarkerActivity.this,
-                                getResources().getString(R.string.unuse_dot));
+                                getString(R.string.unuse_dot));
                         return true;
                     }
                     for (int i = 0; i < adCol.getCount(); i++) {
                         if (adCol.getItem(i).equals(s)) {
                             Lib.showToast(MarkerActivity.this,
-                                    getResources().getString(R.string.title_already_used));
+                                    getString(R.string.title_already_used));
                             return true;
                         }
                     }
@@ -617,7 +619,7 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void setColList(String s) {
-        s = DataBase.closeList(s.substring(getResources().getString(R.string.sel_col).length()).replace(", ", Const.COMMA));
+        s = DataBase.closeList(s.substring(getString(R.string.sel_col).length()).replace(", ", Const.COMMA));
         String t;
         for (int i = 0; i < adCol.getCount(); i++) {
             t = DataBase.closeList(adCol.getItem(i).getTitle());

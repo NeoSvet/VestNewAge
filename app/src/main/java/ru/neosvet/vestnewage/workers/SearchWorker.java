@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.workers;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import androidx.work.WorkerParameters;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
@@ -39,7 +41,7 @@ public class SearchWorker extends Worker {
         try {
             Lib lib = new Lib(context);
             List<String> list = new ArrayList<>();
-            for (File f : lib.getDBFolder().listFiles()) {
+            for (File f : Objects.requireNonNull(lib.getDBFolder().listFiles())) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
                 if (SearchModel.cancel)
@@ -113,7 +115,7 @@ public class SearchWorker extends Worker {
                 .build());
     }
 
-    private void searchInResults(String find, boolean reverseOrder) throws Exception {
+    private void searchInResults(String find, boolean reverseOrder) {
         List<String> title = new ArrayList<>();
         List<String> link = new ArrayList<>();
         List<String> id = new ArrayList<>();
@@ -139,10 +141,11 @@ public class SearchWorker extends Worker {
         int p1 = -1, p2;
         for (int i = 0; i < title.size(); i++) {
             name1 = DataBase.getDatePage(link.get(i));
-            if (!name1.equals(name2)) {
+            if (i == 0 || !name1.equals(name2)) {
                 if (dataBase != null)
                     dataBase.close();
                 dataBase = new DataBase(context, name1);
+                name2 = name1;
             }
             cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
                     DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
@@ -179,7 +182,8 @@ public class SearchWorker extends Worker {
         id.clear();
     }
 
-    private void searchList(String name, final String find, int mode) throws Exception {
+    @SuppressLint("Range")
+    private void searchList(String name, final String find, int mode) {
         DataBase dataBase = new DataBase(context, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;

@@ -38,7 +38,7 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NeoFragment;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
@@ -89,7 +89,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             DateHelper d = DateHelper.initToday(act);
             d.setYear(year);
             year = 0;
-            dialog = DIALOG_DATE + d.toString();
+            dialog = DIALOG_DATE + d;
             showDatePicker(d);
         }
     }
@@ -201,13 +201,13 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         TabHost.TabSpec tabSpec;
 
         tabSpec = tabHost.newTabSpec(Const.KATRENY);
-        tabSpec.setIndicator(getResources().getString(R.string.katreny),
+        tabSpec.setIndicator(getString(R.string.katreny),
                 ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.pBook);
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec(Const.POSLANIYA);
-        tabSpec.setIndicator(getResources().getString(R.string.poslaniya),
+        tabSpec.setIndicator(getString(R.string.poslaniya),
                 ContextCompat.getDrawable(act, R.drawable.none));
         tabSpec.setContent(R.id.pBook);
         tabHost.addTab(tabSpec);
@@ -215,7 +215,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         TabWidget widget = tabHost.getTabWidget();
         for (int i = 0; i < widget.getChildCount(); i++) {
             View v = widget.getChildAt(i);
-            TextView tv = (TextView) v.findViewById(android.R.id.title);
+            TextView tv = v.findViewById(android.R.id.title);
             if (tv != null) {
                 tv.setMaxLines(1);
                 v.setBackgroundResource(R.drawable.table_selector);
@@ -225,14 +225,15 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         tabHost.setOnTabChangedListener(name -> {
             if (ProgressHelper.isBusy()) return;
             if (name.equals(Const.KATRENY))
-                act.setTitle(getResources().getString(R.string.katreny));
+                act.setTitle(getString(R.string.katreny));
             else
-                act.setTitle(getResources().getString(R.string.poslaniya));
+                act.setTitle(getString(R.string.poslaniya));
             tab = tabHost.getCurrentTab();
             openList(true);
         });
     }
 
+    @SuppressLint("Range")
     private void openList(boolean loadIfNeed) {
         try {
             DateHelper d;
@@ -313,7 +314,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                         if (t.contains("_")) t = t.substring(0, t.indexOf("_"));
                         if (t.contains("#")) t = t.substring(0, t.indexOf("#"));
                         t = cursor.getString(iTitle) +
-                                " (" + getResources().getString(R.string.from)
+                                " (" + getString(R.string.from)
                                 + " " + t + ")";
                     }
                     adBook.addItem(new ListItem(t, s));
@@ -380,7 +381,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         tvDate = container.findViewById(R.id.tvDate);
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
-        tabHost = (TabHost) container.findViewById(R.id.thBook);
+        tabHost = container.findViewById(R.id.thBook);
         container.findViewById(R.id.bRndStih).setOnClickListener(this);
         container.findViewById(R.id.bRndPos).setOnClickListener(this);
         container.findViewById(R.id.bRndKat).setOnClickListener(this);
@@ -491,10 +492,10 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (!plus && tab == 1) {
             if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
-                builder.setMessage(getResources().getString(R.string.alert_download_otkr));
-                builder.setNegativeButton(getResources().getString(R.string.no),
+                builder.setMessage(getString(R.string.alert_download_otkr));
+                builder.setNegativeButton(getString(R.string.no),
                         (dialog, id) -> dialog.dismiss());
-                builder.setPositiveButton(getResources().getString(R.string.yes),
+                builder.setPositiveButton(getString(R.string.yes),
                         (dialog, id) -> {
                             ProgressHelper.addObserver(act, BookFragment.this);
                             ivPrev.setEnabled(false);
@@ -566,7 +567,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         } else {
             DateHelper t = DateHelper.initToday(act);
             if (t.getMonth() == d.getMonth() && t.getYear() == d.getYear())
-                Lib.showToast(act, getResources().getString(R.string.month_is_empty));
+                Lib.showToast(act, getString(R.string.month_is_empty));
             else
                 startLoad();
         }
@@ -613,6 +614,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         openList(true);
     }
 
+    @SuppressLint("Range")
     @Override
     public void onClick(View view) {
         menuRnd.hide();
@@ -658,10 +660,10 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         String title = null;
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         if (view.getId() == R.id.bRndKat) { //случайный катрен
-            title = getResources().getString(R.string.rnd_kat);
+            title = getString(R.string.rnd_kat);
             curTitle = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.LIKE, "%" + Const.POEMS + "%");
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
-            title = getResources().getString(R.string.rnd_pos);
+            title = getString(R.string.rnd_pos);
             curTitle = dataBase.query(Const.TITLE, null, Const.LINK + " NOT" + DataBase.LIKE, "%" + Const.POEMS + "%");
         } else { //случайных стих
             curTitle = dataBase.query(Const.TITLE, null);
@@ -676,7 +678,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (!curTitle.moveToPosition(n)) {
             curTitle.close();
             dataBase.close();
-            Lib.showToast(act, getResources().getString(R.string.alert_rnd));
+            Lib.showToast(act, getString(R.string.alert_rnd));
             return;
         }
         //если случайный текст найден
@@ -701,8 +703,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                 s = "";
             curPar.close();
             if (s.equals("")) {//случайный стих не найден
-                Lib.showToast(act, getResources().getString(R.string.alert_rnd));
-                title = getResources().getString(R.string.rnd_stih);
+                Lib.showToast(act, getString(R.string.alert_rnd));
+                title = getString(R.string.rnd_stih);
             }
         } else // случайный катрен или послание
             n = -1;
@@ -710,7 +712,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         String link = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
         String msg;
         if (link == null)
-            msg = getResources().getString(R.string.try_again);
+            msg = getString(R.string.try_again);
         else
             msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
         curTitle.close();
@@ -738,14 +740,14 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         alertRnd = new CustomDialog(act);
         alertRnd.setTitle(title);
         alertRnd.setMessage(msg);
-        alertRnd.setLeftButton(getResources().getString(R.string.in_markers), view -> {
+        alertRnd.setLeftButton(getString(R.string.in_markers), view -> {
             Intent marker = new Intent(act, MarkerActivity.class);
             marker.putExtra(Const.LINK, link);
             marker.putExtra(DataBase.PARAGRAPH, par);
             startActivity(marker);
             alertRnd.dismiss();
         });
-        alertRnd.setRightButton(getResources().getString(R.string.open), view -> {
+        alertRnd.setRightButton(getString(R.string.open), view -> {
             BrowserActivity.openReader(act, link, place);
             alertRnd.dismiss();
         });

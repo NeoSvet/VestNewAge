@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,18 @@ public class MenuFragment extends Fragment {
     private boolean isFullScreen = false;
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        act = (MainActivity) getActivity();
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDestroyView() {
+        act = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.menu_fragment, container, false);
     }
@@ -34,8 +47,6 @@ public class MenuFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
-
         initView(view);
         restoreState(savedInstanceState);
     }
@@ -54,13 +65,13 @@ public class MenuFragment extends Fragment {
             container.findViewById(R.id.ivHeadMenu).setOnClickListener(view -> {
                 act.lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                startActivity(Intent.createChooser(act.lib.openInApps(Const.SITE),
-//                        getResources().getString(R.string.open)));
+//                        getString(R.string.open)));
             });
             if (MainActivity.isCountInMenu)
                 act.setProm(container.findViewById(R.id.tvPromTimeInMenu));
             initList(0);
         } else {
-            act.setTitle(getResources().getString(R.string.app_name));
+            act.setTitle(getString(R.string.app_name));
             container.findViewById(R.id.ivHeadMenu).setVisibility(View.GONE);
             isFullScreen = true;
             initList(1);
@@ -89,7 +100,7 @@ public class MenuFragment extends Fragment {
                 R.string.news, R.string.calendar, R.string.book, R.string.search, R.string.markers,
                 R.string.journal, R.string.cabinet, R.string.settings, R.string.help};
         for (; i < mImage.length; i++) {
-            adMenu.addItem(mImage[i], act.getResources().getString(mTitle[i]));
+            adMenu.addItem(mImage[i], act.getString(mTitle[i]));
         }
 
         lvMenu.setOnItemClickListener((adapterView, view, pos, l) -> {

@@ -1,11 +1,11 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +28,7 @@ import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.utils.NeoFragment;
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -64,7 +64,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act.setTitle(getResources().getString(R.string.calendar));
+        act.setTitle(getString(R.string.calendar));
         initViews(view);
         initCalendar();
         model = new ViewModelProvider(this).get(CalendarModel.class);
@@ -97,7 +97,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy())
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
@@ -185,6 +185,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             startLoad();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initCalendar() {
         GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
         adCalendar = new CalendarAdapter(this);
@@ -280,6 +281,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         return dCurrent.getMonth() == today_m && dCurrent.getYear() == today_y;
     }
 
+    @SuppressLint({"Range", "NotifyDataSetChanged"})
     private void openCalendar(boolean loadIfNeed) {
         try {
             for (int i = 0; i < adCalendar.getItemCount(); i++)
@@ -399,6 +401,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         return dCurrent.getYear();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) { //click calendar item
         if (event.getAction() != MotionEvent.ACTION_UP)

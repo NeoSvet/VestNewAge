@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -31,6 +33,18 @@ public class NewFragment extends Fragment {
     private DevadsHelper ads;
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        act = (MainActivity) getActivity();
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDestroyView() {
+        act = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.new_fragment, container, false);
     }
@@ -38,9 +52,8 @@ public class NewFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
         ads = new DevadsHelper(act);
-        act.setTitle(getResources().getString(R.string.new_section));
+        act.setTitle(getString(R.string.new_section));
         tvEmptyNew = view.findViewById(R.id.tvEmptyNew);
         fabClear = view.findViewById(R.id.fabClear);
         initClear();
@@ -96,12 +109,13 @@ public class NewFragment extends Fragment {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initList(ListView lvNew) {
         adNew = new ListAdapter(act);
         lvNew.setAdapter(adNew);
         lvNew.setOnItemClickListener((adapterView, view, pos, l) -> {
             if (act.checkBusy()) return;
-            if (adNew.getItem(pos).getTitle().contains(getResources().getString(R.string.ad))) {
+            if (adNew.getItem(pos).getTitle().contains(getString(R.string.ad))) {
                 ads.setIndex(pos);
                 showAd(pos);
             } else if (!adNew.getItem(pos).getLink().equals("")) {
@@ -141,7 +155,7 @@ public class NewFragment extends Fragment {
                         t = t.substring(0, n) + " (" + t.substring(n + 1) + ")";
                     }
                     if (s.contains(Const.POEMS))
-                        t = getResources().getString(R.string.katren) + " " + getResources().getString(R.string.from) + " " + t;
+                        t = getString(R.string.katren) + " " + getString(R.string.from) + " " + t;
                     if (s.contains("#")) {
                         t = t.replace("#", " (") + ")";
                         adNew.addItem(new ListItem(t, s.replace("#", Const.HTML + "#")));

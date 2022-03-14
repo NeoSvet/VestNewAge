@@ -55,7 +55,7 @@ public class WelcomeFragment extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof ItemClicker)
             clicker = (ItemClicker) context;
@@ -63,9 +63,11 @@ public class WelcomeFragment extends BottomSheetDialogFragment {
 
     private void fillInList() {
         Bundle args = getArguments();
+        if (args == null)
+            return;
 
         if (args.getBoolean(Const.ADS)) {
-            adapter.addItem(new ListItem(getResources().getString(R.string.new_dev_ads), Const.ADS));
+            adapter.addItem(new ListItem(getString(R.string.new_dev_ads), Const.ADS));
         }
 
         if (args.getBoolean(Const.PAGE)) {
@@ -73,18 +75,18 @@ public class WelcomeFragment extends BottomSheetDialogFragment {
             String[] link = args.getStringArray(Const.LINK);
             for (int i = 0; i < title.length; i++) {
                 ListItem item = new ListItem(title[i], link[i]);
-                item.setDes(getResources().getString(R.string.updated_page));
+                item.setDes(getString(R.string.updated_page));
                 adapter.addItem(item);
             }
         }
 
         if (args.getBoolean(Const.TIME)) {
             int timeDiff = args.getInt(Const.TIMEDIFF);
-            ListItem item = new ListItem(getResources().getString(R.string.sync_time));
+            ListItem item = new ListItem(getString(R.string.sync_time));
             if (timeDiff == 0)
-                item.setDes(getResources().getString(R.string.matches));
+                item.setDes(getString(R.string.matches));
             else
-                item.setDes(String.format(getResources().getString(R.string.time_deviation),
+                item.setDes(String.format(getString(R.string.time_deviation),
                         timeDiff));
             adapter.addItem(item);
             adapter.notifyDataSetChanged();

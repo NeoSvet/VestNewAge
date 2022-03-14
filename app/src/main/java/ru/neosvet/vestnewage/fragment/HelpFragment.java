@@ -1,12 +1,12 @@
 package ru.neosvet.vestnewage.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -27,6 +27,18 @@ public class HelpFragment extends Fragment {
     private boolean[] mHelp = null;
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        act = (MainActivity) getActivity();
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDestroyView() {
+        act = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.help_fragment, container, false);
     }
@@ -34,8 +46,7 @@ public class HelpFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act = (MainActivity) getActivity();
-        act.setTitle(getResources().getString(R.string.help));
+        act.setTitle(getString(R.string.help));
         initList(view);
         restoreState(savedInstanceState);
     }
@@ -98,13 +109,14 @@ public class HelpFragment extends Fragment {
     private void onClickButton(int index) {
         switch (index) {
             case WRITE_TO_DEV:
-                act.lib.openInApps(Const.mailto + getResources().getString(R.string.srv_info)
-                        + adHelp.getItem(FEEDBACK + CHANGELOG).getDes(), null);
+                var msg = getString(R.string.srv_info)
+                        + adHelp.getItem(FEEDBACK + CHANGELOG).getDes();
+                act.lib.openInApps(Const.mailto + msg, null);
                 break;
             case LINK_ON_APP:
                 Intent sendIntent = new Intent(Intent.ACTION_SEND);
                 sendIntent.setType("text/plain");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.url_on_app));
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.url_on_app));
                 startActivity(sendIntent);
                 break;
             case LINK_ON_SITE:
@@ -118,10 +130,10 @@ public class HelpFragment extends Fragment {
     private void turnFeedback() {
         feedback = !feedback;
         if (feedback) {
-            adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getResources().getString(R.string.write_to_dev), R.drawable.gm);
-            adHelp.insertItem(FEEDBACK + LINK_ON_APP, getResources().getString(R.string.link_on_app), R.drawable.play_store);
-            adHelp.insertItem(FEEDBACK + LINK_ON_SITE, getResources().getString(R.string.page_app), R.drawable.www);
-            adHelp.insertItem(FEEDBACK + CHANGELOG, getResources().getString(R.string.changelog), 0);
+            adHelp.insertItem(FEEDBACK + WRITE_TO_DEV, getString(R.string.write_to_dev), R.drawable.gm);
+            adHelp.insertItem(FEEDBACK + LINK_ON_APP, getString(R.string.link_on_app), R.drawable.play_store);
+            adHelp.insertItem(FEEDBACK + LINK_ON_SITE, getString(R.string.page_app), R.drawable.www);
+            adHelp.insertItem(FEEDBACK + CHANGELOG, getString(R.string.changelog), 0);
             try {
                 StringBuilder des = new StringBuilder(getResources().getString(R.string.app_version));
                 des.append(act.getPackageManager().getPackageInfo(act.getPackageName(), 0).versionName);
