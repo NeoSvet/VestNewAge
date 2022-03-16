@@ -130,13 +130,12 @@ public class Lib {
     public boolean verifyStoragePermissions(int code) {
         //http://stackoverflow.com/questions/38989050/android-6-0-write-to-external-sd-card
         int permission = ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                Manifest.permission.READ_EXTERNAL_STORAGE);
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions((Activity) context,
                     new String[]{
-                            //Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            Manifest.permission.READ_EXTERNAL_STORAGE
                     }, code);
             return true;
         }

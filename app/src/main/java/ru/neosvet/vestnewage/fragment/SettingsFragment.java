@@ -553,7 +553,7 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         String name, uri;
         Cursor cursor = null;
         try {
-            uri = data.getData().toString().replace("%3A", "/");
+            uri = data.getData().toString();
             String id = uri.substring(uri.lastIndexOf("/") + 1);
             cursor = act.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media.DATA},

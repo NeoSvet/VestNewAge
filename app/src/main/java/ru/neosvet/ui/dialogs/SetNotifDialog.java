@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
@@ -22,6 +21,7 @@ import ru.neosvet.vestnewage.R;
 public class SetNotifDialog extends Dialog {
     public static final byte RINGTONE = 1, CUSTOM = 2;
     public static final String SOUND = "sound", NAME = "name", URI = "uri", VIBR = "vibr";
+    public static final String AUDIO_TYPE = "audio/*";
     private Activity act;
     private final String source;
     private String name, uri;
@@ -88,8 +88,9 @@ public class SetNotifDialog extends Dialog {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             String data = uri;
             if (data == null)
-                data = Environment.getExternalStorageDirectory().getAbsolutePath();
-            intent.setDataAndType(android.net.Uri.parse(data), "audio/*");
+                intent.setType(AUDIO_TYPE);
+            else
+                intent.setDataAndType(android.net.Uri.parse(data), AUDIO_TYPE);
             act.startActivityForResult(intent, CUSTOM);
         });
         findViewById(R.id.bOk).setOnClickListener(view -> {
