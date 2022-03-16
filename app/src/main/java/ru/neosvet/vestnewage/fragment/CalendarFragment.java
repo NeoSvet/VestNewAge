@@ -362,7 +362,6 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @Override
     public void startLoad() {
-        Lib.LOG("busy: " + ProgressHelper.isBusy());
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);
