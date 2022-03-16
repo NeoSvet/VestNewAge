@@ -873,6 +873,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     private void parseFileResult(Intent data, boolean isExport) {
         initRotate();
+        ProgressHelper.addObserver(act, this);
         model.start(isExport, data.getDataString());
     }
 }
