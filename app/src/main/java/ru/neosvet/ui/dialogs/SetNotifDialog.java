@@ -15,19 +15,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 
 public class SetNotifDialog extends Dialog {
-    public static final byte RINGTONE = 1, CUSTOM = 2;
+    public static final byte RINGTONE = 1;
     public static final String SOUND = "sound", NAME = "name", URI = "uri", VIBR = "vibr";
-    public static final String AUDIO_TYPE = "audio/*";
     private Activity act;
     private final String source;
     private String name, uri;
     private SharedPreferences pref;
     private TextView tvSound;
-    private View tvLabel, pButtons;
+    private View bRingtone;
     private CheckBox cbSound, cbVibr;
 
     public SetNotifDialog(@NonNull Activity act, String source) {
@@ -49,8 +47,7 @@ public class SetNotifDialog extends Dialog {
         setContentView(R.layout.dialog_setnotif);
 
         tvSound = findViewById(R.id.tvSound);
-        tvLabel = findViewById(R.id.tvLabel);
-        pButtons = findViewById(R.id.pButtons);
+        bRingtone = findViewById(R.id.bRingtone);
         cbSound = findViewById(R.id.cbSound);
         cbVibr = findViewById(R.id.cbVibr);
 
@@ -61,37 +58,23 @@ public class SetNotifDialog extends Dialog {
         cbSound.setChecked(pref.getBoolean(SOUND, false));
         if (!cbSound.isChecked()) {
             tvSound.setVisibility(View.GONE);
-            tvLabel.setVisibility(View.GONE);
-            pButtons.setVisibility(View.GONE);
+            bRingtone.setVisibility(View.GONE);
         }
         cbVibr.setChecked(pref.getBoolean(VIBR, true));
 
         cbSound.setOnCheckedChangeListener((compoundButton, user) -> {
             if (cbSound.isChecked()) {
                 tvSound.setVisibility(View.VISIBLE);
-                tvLabel.setVisibility(View.VISIBLE);
-                pButtons.setVisibility(View.VISIBLE);
+                bRingtone.setVisibility(View.VISIBLE);
             } else {
                 tvSound.setVisibility(View.GONE);
-                tvLabel.setVisibility(View.GONE);
-                pButtons.setVisibility(View.GONE);
+                bRingtone.setVisibility(View.GONE);
             }
         });
-        findViewById(R.id.bStandard).setOnClickListener(view -> {
+        bRingtone.setOnClickListener(view -> {
             Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
             act.startActivityForResult(intent, RINGTONE);
-        });
-        findViewById(R.id.bCustom).setOnClickListener(view -> {
-            Lib lib = new Lib(act);
-            if (lib.verifyStoragePermissions(RINGTONE)) return;
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            String data = uri;
-            if (data == null)
-                intent.setType(AUDIO_TYPE);
-            else
-                intent.setDataAndType(android.net.Uri.parse(data), AUDIO_TYPE);
-            act.startActivityForResult(intent, CUSTOM);
         });
         findViewById(R.id.bOk).setOnClickListener(view -> {
             SharedPreferences.Editor editor = pref.edit();

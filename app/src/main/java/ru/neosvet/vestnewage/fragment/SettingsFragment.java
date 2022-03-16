@@ -547,27 +547,4 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         Ringtone ringTone = RingtoneManager.getRingtone(act, uri);
         dialog.putRingtone(ringTone.getTitle(act), uri.toString());
     }
-
-    public void putCustom(Intent data) {
-        if (data == null) return;
-        String name, uri;
-        Cursor cursor = null;
-        try {
-            uri = data.getData().toString();
-            String id = uri.substring(uri.lastIndexOf("/") + 1);
-            cursor = act.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media.DATA},
-                    MediaStore.Audio.Media._ID + DataBase.Q,
-                    new String[]{id}, null);
-            cursor.moveToFirst();
-            uri = cursor.getString(0);
-            name = uri.substring(uri.lastIndexOf("/") + 1);
-        } catch (Exception e) {
-            return;
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        dialog.putRingtone(name, uri);
-    }
 }

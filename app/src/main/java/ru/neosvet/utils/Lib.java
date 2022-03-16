@@ -127,21 +127,6 @@ public class Lib {
         Toast.makeText(context, context.getString(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
 
-    public boolean verifyStoragePermissions(int code) {
-        //http://stackoverflow.com/questions/38989050/android-6-0-write-to-external-sd-card
-        int permission = ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.READ_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                    }, code);
-            return true;
-        }
-        return false;
-    }
-
     public static String withOutTags(String s) {
         return android.text.Html.fromHtml(s).toString().trim();
     }

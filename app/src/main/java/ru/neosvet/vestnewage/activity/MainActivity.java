@@ -496,8 +496,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SettingsFragment fr = (SettingsFragment) curFragment;
             if (requestCode == SetNotifDialog.RINGTONE)
                 fr.putRingtone(data);
-            else if (requestCode == SetNotifDialog.CUSTOM)
-                fr.putCustom(data);
         }
     }
 
