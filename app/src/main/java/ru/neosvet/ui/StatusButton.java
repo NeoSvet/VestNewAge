@@ -192,6 +192,8 @@ public class StatusButton {
                     .setMessage(error)
                     .setPositiveButton(context.getString(R.string.send),
                             (dialog, id) -> sendError())
+                    .setNegativeButton(context.getString(android.R.string.cancel),
+                            (dialog, id) -> dialog.dismiss())
                     .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();
             ProgressHelper.setBusy(false);
