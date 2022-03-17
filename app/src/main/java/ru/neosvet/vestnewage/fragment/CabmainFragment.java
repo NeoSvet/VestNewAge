@@ -359,17 +359,16 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
         if (!cbRemPassword.isChecked()) {
             SharedPreferences pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(Const.PASSWORD, "");
-            if (!cbRemEmail.isChecked()) {
+            if (!cbRemEmail.isChecked())
                 editor.putString(Const.EMAIL, "");
-            }
             editor.apply();
         }
+        super.onDestroyView();
     }
 
     private String criptPassword(String password) {
