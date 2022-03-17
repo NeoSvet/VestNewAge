@@ -23,8 +23,7 @@ import java.util.HashMap;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
+import ru.neosvet.vestnewage.model.CollectionsModel;
 
 public class MarkersWorker extends Worker {
     private final Context context;
@@ -37,7 +36,6 @@ public class MarkersWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        ProgressHelper.setBusy(true);
         String error;
         try {
             boolean isExport = getInputData().getBoolean(Const.MODE, false);
@@ -47,7 +45,7 @@ public class MarkersWorker extends Worker {
             else
                 doImport(Uri.parse(file));
 
-            ProgressHelper.postProgress(new Data.Builder()
+            CollectionsModel.state.postValue(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
                     .putBoolean(Const.MODE, isExport)
                     .putString(Const.FILE, file)
@@ -57,7 +55,7 @@ public class MarkersWorker extends Worker {
             e.printStackTrace();
             error = e.getMessage();
         }
-        ProgressHelper.postProgress(new Data.Builder()
+        CollectionsModel.state.postValue(new Data.Builder()
                 .putBoolean(Const.FINISH, true)
                 .putString(Const.ERROR, error)
                 .build());
@@ -131,7 +129,7 @@ public class MarkersWorker extends Worker {
             } else {
                 cv = new ContentValues();
                 cv.put(Const.TITLE, s);
-                nid = (int) dbMarker.insert(DataBase.COLLECTIONS,  cv);
+                nid = (int) dbMarker.insert(DataBase.COLLECTIONS, cv);
             }
             hC.put(id, nid);
             cursor.close();

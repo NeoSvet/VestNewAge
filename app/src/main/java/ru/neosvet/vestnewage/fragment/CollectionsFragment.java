@@ -40,8 +40,8 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
+import ru.neosvet.vestnewage.model.CollectionsModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.model.MarkersModel;
 
 public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     private ListView lvMarker;
@@ -50,10 +50,10 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     private MarkAdapter adMarker;
     private Tip menu;
     private int iSel = -1;
-    private boolean change = false, delete = false, stopRotate, load;
+    private boolean change = false, delete = false, stopRotate;
     private String sCol = null, sName = null;
     private Animation anMin, anMax, anRotate;
-    private MarkersModel model;
+    private CollectionsModel model;
 
     private final ActivityResultLauncher<Intent> markerResult = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -92,20 +92,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (ProgressHelper.isBusy() || load)
-            ProgressHelper.removeObservers(act);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy() || load)
-            ProgressHelper.addObserver(act, this);
-    }
-
-    @Override
     public boolean onBackPressed() {
         if (iSel > -1) {
             unSelect();
@@ -125,7 +111,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         outState.putInt(Const.SELECT, iSel);
         outState.putString(Const.RENAME, sName);
         outState.putBoolean(Const.DIALOG, delete);
-        outState.putBoolean(Const.PAGE, load);
         super.onSaveInstanceState(outState);
     }
 
@@ -156,69 +141,73 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void initModel() {
-        model = new ViewModelProvider(this).get(MarkersModel.class);
-        if (ProgressHelper.isBusy())
-            initRotate();
+        CollectionsModel.state.observe(act, this);
+        model = new ViewModelProvider(this).get(CollectionsModel.class);
+        switch (model.task) {
+            case 1:
+                initLoad();
+                break;
+            case 2:
+                initRotate();
+                break;
+        }
     }
 
     @Override
     public void onChanged(@Nullable Data data) {
-        if ((!ProgressHelper.isBusy() && !load) || data == null)
+        if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
             return;
         }
-        if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.removeObservers(act);
-            String error = data.getString(Const.ERROR);
-            if (load) {
-                load = false;
-                act.status.setLoad(false);
-                if (error != null)
-                    act.status.setError(error);
-                fabBack.setVisibility(View.VISIBLE);
-            } else {
-                stopRotate = true;
-                ProgressHelper.setBusy(false);
-                if (error != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
-                            .setTitle(getString(R.string.error))
-                            .setMessage(error)
-                            .setPositiveButton(getString(android.R.string.ok),
-                                    (dialog, id) -> {
-                                    });
-                    builder.create().show();
-                    return;
-                }
-            }
-            if (data.getString(Const.LINK) != null) { //finish download page
-                ProgressHelper.removeObservers(act);
-                loadMarList();
-                act.status.setLoad(false);
-                return;
-            }
-            ProgressHelper.setBusy(false);
-            if (data.getBoolean(Const.MODE, false)) { //export
-                final String file = data.getString(Const.FILE);
+        if (!data.getBoolean(Const.FINISH, false))
+            return;
+        ProgressHelper.setBusy(false);
+
+        String error = data.getString(Const.ERROR);
+        if (model.task == 2) { //finish download page
+            model.task = 0;
+            stopLoad();
+            if (error != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
-                        .setMessage(getString(R.string.send_file))
-                        .setPositiveButton(getString(R.string.yes),
-                                (dialog, id) -> {
-                                    Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                                    sendIntent.setType("text/plain");
-                                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
-                                    startActivity(sendIntent);
-                                })
-                        .setNegativeButton(getString(R.string.no),
+                        .setTitle(getString(R.string.error))
+                        .setMessage(error)
+                        .setPositiveButton(getString(android.R.string.ok),
                                 (dialog, id) -> {
                                 });
                 builder.create().show();
-            } else { //import
-                sCol = null;
-                loadColList();
-                Lib.showToast(act, getString(R.string.completed));
-            }
+            } else
+                loadMarList();
+            return;
+        }
+
+        model.task = 0;
+        stopRotate = true;
+        if (error != null) {
+            act.status.setError(error);
+            return;
+        }
+
+        if (data.getBoolean(Const.MODE, false)) { //export
+            final String file = data.getString(Const.FILE);
+            AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog)
+                    .setMessage(getString(R.string.send_file))
+                    .setPositiveButton(getString(R.string.yes),
+                            (dialog, id) -> {
+                                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                sendIntent.setType("text/plain");
+                                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file));
+                                startActivity(sendIntent);
+                            })
+                    .setNegativeButton(getString(R.string.no),
+                            (dialog, id) -> {
+                            });
+            builder.create().show();
+        } else { //import
+            sCol = null;
+            loadColList();
+            Lib.showToast(act, getString(R.string.completed));
         }
     }
 
@@ -435,6 +424,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void initViews() {
+        act.status.setClick(view -> stopLoad());
         fabEdit = container.findViewById(R.id.fabEdit);
         fabMenu = container.findViewById(R.id.fabMenu);
         fabBack = container.findViewById(R.id.fabBack);
@@ -468,6 +458,11 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize);
     }
 
+    private void stopLoad() {
+        fabBack.setVisibility(View.VISIBLE);
+        act.status.setLoad(false);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
         lvMarker.setOnItemClickListener((adapterView, view, pos, l) -> {
@@ -485,12 +480,12 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 loadMarList();
             } else {
                 if (adMarker.getItem(pos).getTitle().contains("/")) {
-                    if (ProgressHelper.isBusy() || load)
+                    if (ProgressHelper.isBusy())
                         return;
+                    ProgressHelper.setBusy(true);
                     initLoad();
                     act.status.startText();
-                    LoaderModel load = new ViewModelProvider(CollectionsFragment.this).get(LoaderModel.class);
-                    load.startLoad(false, adMarker.getItem(pos).getData());
+                    model.loadPage(adMarker.getItem(pos).getData());
                     return;
                 }
                 String p;
@@ -607,7 +602,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     private void initLoad() {
         fabBack.setVisibility(View.GONE);
-        load = true;
         act.status.setLoad(true);
     }
 
@@ -872,8 +866,8 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void parseFileResult(Intent data, boolean isExport) {
+        ProgressHelper.setBusy(true);
         initRotate();
-        ProgressHelper.addObserver(act, this);
         model.start(isExport, data.getDataString());
     }
 }
