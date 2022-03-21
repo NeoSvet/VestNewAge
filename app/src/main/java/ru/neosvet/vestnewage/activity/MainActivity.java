@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -55,6 +56,7 @@ import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.fragment.SummaryFragment;
 import ru.neosvet.vestnewage.fragment.WelcomeFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -155,12 +157,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     isFirst = true;
                     return;
                 }
-                if (first_fragment != 0) {
+                if (first_fragment != 0)
                     setFragment(first_fragment, false);
-                }
-                if (frWelcome != null && !frWelcome.isAdded())
-                    frWelcome.show(myFragmentManager, null);
-                isBlinked = true;
+                if (frWelcome != null && !frWelcome.isAdded() && isBlinked)
+                    showWelcome();
             }
 
             @Override
@@ -633,9 +633,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (data.getBoolean(Const.ADS, false) || timediff > 4 || data.getBoolean(Const.PAGE, false)) {
             frWelcome = new WelcomeFragment();
             frWelcome.setArguments(data);
-            if (isBlinked)
-                frWelcome.show(myFragmentManager, null);
+            int warn = data.getInt(Const.WARN, -1);
+            if (warn > -1)
+                showWarnAds(warn);
+            else
+                isBlinked = true;
         }
+    }
+
+    private void showWelcome() {
+        frWelcome.show(myFragmentManager, null);
+    }
+
+    private void showWarnAds(int warn) {
+        DevadsHelper ads = new DevadsHelper(this);
+        String[] item = ads.getItem(warn);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog)
+                .setTitle(getString(R.string.warning) + " " + item[0])
+                .setMessage(item[1])
+                .setNegativeButton(getString(android.R.string.ok),
+                        (dialog, id) -> dialog.dismiss())
+                .setOnDismissListener(dialog -> showWelcome());
+        if (item[2] != null) {
+            builder.setPositiveButton(getString(R.string.open_link),
+                    (dialog, id) -> {
+                        Lib lib = new Lib(this);
+                        lib.openInApps(item[2], null);
+                    });
+        }
+        builder.create().show();
     }
 
     @Override

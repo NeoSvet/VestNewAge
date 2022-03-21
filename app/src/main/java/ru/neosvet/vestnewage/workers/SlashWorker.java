@@ -53,7 +53,7 @@ public class SlashWorker extends Worker {
     }
 
     private void loadNew() throws Exception {
-        String t, s = "http://neosvet.ucoz.ru/vna/new.txt";
+        String s = "http://neosvet.ucoz.ru/vna/new.txt";
         Lib lib = new Lib(context);
         BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -71,10 +71,11 @@ public class SlashWorker extends Worker {
                     Const.LINK + DataBase.Q, new String[]{s},
                     null, null, null);
             if (cursor.moveToFirst()) {
-                if (time > cursor.getLong(cursor.getColumnIndex(Const.TIME))) {
+                int iTime = cursor.getColumnIndex(Const.TIME);
+                if (time > cursor.getLong(iTime)) {
                     LoaderHelper.postCommand(context, LoaderHelper.DOWNLOAD_PAGE, s);
-                    t = cursor.getString(cursor.getColumnIndex(Const.TITLE));
-                    titles.add(t);
+                    int iTitle = cursor.getColumnIndex(Const.TITLE);
+                    titles.add(cursor.getString(iTitle));
                     links.add(s);
                 }
             }
@@ -106,6 +107,7 @@ public class SlashWorker extends Worker {
                 unread.setBadge(ads.getUnreadCount());
                 unread.close();
                 result.putBoolean(Const.ADS, true);
+                result.putInt(Const.WARN, ads.getWarnIndex());
             }
         }
         br.close();

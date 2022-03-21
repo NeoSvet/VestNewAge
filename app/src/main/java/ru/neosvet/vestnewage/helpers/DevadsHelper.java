@@ -22,7 +22,7 @@ public class DevadsHelper {
     private CustomDialog alert;
     private final Context context;
     private long time = -1;
-    private int index_ads = -1;
+    private int index_ads = -1, index_warn = -1;
     private boolean isClosed;
 
     public DevadsHelper(Context context) {
@@ -39,6 +39,10 @@ public class DevadsHelper {
         index_ads = index;
     }
 
+    public int getWarnIndex() {
+        return index_warn;
+    }
+
     public long getTime() {
         if (time == -1) {
             Cursor cursor = db.query(NAME, new String[]{Const.TITLE}, Const.MODE + DataBase.Q, MODE_T);
@@ -49,6 +53,30 @@ public class DevadsHelper {
             cursor.close();
         }
         return time;
+    }
+
+    public String[] getItem(int index) {
+        Cursor cursor = db.query(NAME, null);
+        String[] m = new String[3];
+        if (!cursor.moveToFirst())
+            return m;
+
+        int iTitle = cursor.getColumnIndex(Const.TITLE);
+        int iDes = cursor.getColumnIndex(Const.DESCTRIPTION);
+        int iLink = cursor.getColumnIndex(Const.LINK);
+        int n = 0;
+
+        do {
+            if (index == n) {
+                m[0] = cursor.getString(iTitle);
+                m[1] = cursor.getString(iDes);
+                m[2] = cursor.getString(iLink);
+                break;
+            }
+            n++;
+        } while (cursor.moveToNext());
+        cursor.close();
+        return m;
     }
 
     public void loadList(ListAdapter list, boolean onlyUnread) throws Exception {
@@ -152,8 +180,9 @@ public class DevadsHelper {
     public boolean update(BufferedReader br) throws Exception {
         String s;
         String[] m = new String[]{"", "", ""};
-        byte mode, n = 0;
+        byte mode, n = 0, index = 0;
         Cursor cursor;
+        index_warn = -1;
         boolean isNew = false;
         while ((s = br.readLine()) != null) {
             if (s.contains("<e>")) {
@@ -165,6 +194,9 @@ public class DevadsHelper {
                     mode = MODE_TD;
                 else
                     mode = MODE_TL;
+                if (m[0].contains("<w>"))
+                    index_warn = index;
+                index++;
                 m[0] = m[0].substring(3);
                 if (isNew)
                     addRow(mode, m);

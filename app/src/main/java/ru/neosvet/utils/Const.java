@@ -18,6 +18,6 @@ public interface Const {
     String RENAME = "rename", START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email";
     String PASSWORD = "password", PANEL = "panel", LOGIN = "login", GET_WORDS = "get_words", SELECT_WORD = "select_word";
     String SELECT = "select", CURRENT_DATE = "current_date", TIME = "time", TIMEDIFF = "timediff", SUMMARY = "Summary";
-    String PROM = "Prom", POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads", FILE = "file", MSG = "msg";
-    String TITLE = "title", LINK = "link", PLACE = "place", DESCTRIPTION = "des";
+    String PROM = "Prom", POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads", WARN = "warn", FILE = "file";
+    String TITLE = "title", MSG = "msg", LINK = "link", PLACE = "place", DESCTRIPTION = "des";
 }
