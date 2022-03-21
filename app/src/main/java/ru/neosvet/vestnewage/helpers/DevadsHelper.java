@@ -5,7 +5,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
@@ -23,12 +25,16 @@ public class DevadsHelper {
     private final Context context;
     private long time = -1;
     private int index_ads = -1, index_warn = -1;
-    private boolean isClosed;
+    private boolean isClosed, isNew;
 
     public DevadsHelper(Context context) {
         this.context = context;
         db = new DataBase(context, NAME);
         isClosed = false;
+    }
+
+    public boolean hasNew() {
+        return isNew;
     }
 
     public int getIndex() {
@@ -137,7 +143,8 @@ public class DevadsHelper {
         list.notifyDataSetChanged();
     }
 
-    private void clear() {
+    public void clear() {
+        time = 0;
         db.delete(NAME, Const.MODE + " != ?", MODE_T);
     }
 
@@ -177,7 +184,7 @@ public class DevadsHelper {
         alert.show(dialogInterface -> index_ads = -1);
     }
 
-    public boolean update(BufferedReader br) throws Exception {
+    private boolean update(BufferedReader br) throws Exception {
         String s;
         String[] m = new String[]{"", "", ""};
         byte mode, n = 0, index = 0;
@@ -243,6 +250,8 @@ public class DevadsHelper {
     }
 
     public void close() {
+        if (isClosed)
+            return;
         db.close();
         isClosed = true;
     }
@@ -259,6 +268,26 @@ public class DevadsHelper {
         int k = cursor.getCount();
         cursor.close();
         return k;
+    }
+
+    public void loadAds() throws Exception {
+        isNew = false;
+        long t = getTime();
+        String s = "http://neosvet.ucoz.ru/ads_vna.txt";
+        Lib lib = new Lib(context);
+        BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        s = br.readLine();
+        if (Long.parseLong(s) > t) {
+            if (update(br)) {
+                isNew = true;
+                UnreadHelper unread = new UnreadHelper(context);
+                unread.setBadge(getUnreadCount());
+                unread.close();
+            }
+        }
+        br.close();
+        in.close();
     }
 }
 

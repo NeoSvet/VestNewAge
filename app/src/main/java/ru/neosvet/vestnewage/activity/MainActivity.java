@@ -648,6 +648,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showWarnAds(int warn) {
         DevadsHelper ads = new DevadsHelper(this);
         String[] item = ads.getItem(warn);
+        ads.close();
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NeoDialog)
                 .setTitle(getString(R.string.warning) + " " + item[0])
                 .setMessage(item[1])

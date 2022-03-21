@@ -23,7 +23,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
-import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
 
 public class SlashWorker extends Worker {
@@ -95,23 +94,10 @@ public class SlashWorker extends Worker {
 
     private void loadAds() throws Exception {
         DevadsHelper ads = new DevadsHelper(context);
-        long t = ads.getTime();
-        String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-        Lib lib = new Lib(context);
-        BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        s = br.readLine();
-        if (Long.parseLong(s) > t) {
-            if (ads.update(br)) {
-                UnreadHelper unread = new UnreadHelper(context);
-                unread.setBadge(ads.getUnreadCount());
-                unread.close();
-                result.putBoolean(Const.ADS, true);
-                result.putInt(Const.WARN, ads.getWarnIndex());
-            }
-        }
-        br.close();
-        in.close();
+        ads.loadAds();
+        ads.close();
+        result.putBoolean(Const.ADS, ads.hasNew());
+        result.putInt(Const.WARN, ads.getWarnIndex());
     }
 
     private void synchronTime() throws Exception {
