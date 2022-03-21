@@ -92,6 +92,12 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     @Override
+    public void onDestroyView() {
+        CollectionsModel.state.removeObserver(this);
+        super.onDestroyView();
+    }
+
+    @Override
     public boolean onBackPressed() {
         if (iSel > -1) {
             unSelect();
