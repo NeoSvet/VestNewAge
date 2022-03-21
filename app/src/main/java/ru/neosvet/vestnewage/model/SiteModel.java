@@ -48,4 +48,22 @@ public class SiteModel extends AndroidViewModel {
         job = job.then(task);
         job.enqueue();
     }
+
+    public void loadAds() {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(false)
+                .build();
+        Data.Builder data = new Data.Builder()
+                .putString(Const.TASK, this.getClass().getSimpleName())
+                .putBoolean(Const.ADS, true);
+        OneTimeWorkRequest task = new OneTimeWorkRequest
+                .Builder(SiteWorker.class)
+                .setInputData(data.build())
+                .setConstraints(constraints)
+                .build();
+        WorkContinuation job = WorkManager.getInstance(getApplication())
+                .beginUniqueWork(TAG, ExistingWorkPolicy.REPLACE, task);
+        job.enqueue();
+    }
 }

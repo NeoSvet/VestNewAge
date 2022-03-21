@@ -23,6 +23,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -50,13 +51,23 @@ public class SiteWorker extends Worker {
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.START, true)
                         .build());
-                loadList(getInputData().getString(Const.LINK));
-                String s = getInputData().getString(Const.FILE);
-                saveList(s);
-                ProgressHelper.postProgress(new Data.Builder()
-                        .putBoolean(Const.LIST, true)
-                        .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
-                        .build());
+                if (getInputData().getBoolean(Const.ADS, false)) {
+                    DevadsHelper ads = new DevadsHelper(context);
+                    ads.clear();
+                    ads.loadAds();
+                    ads.close();
+                    ProgressHelper.postProgress(new Data.Builder()
+                            .putBoolean(Const.ADS, true)
+                            .build());
+                } else {
+                    loadList(getInputData().getString(Const.LINK));
+                    String s = getInputData().getString(Const.FILE);
+                    saveList(s);
+                    ProgressHelper.postProgress(new Data.Builder()
+                            .putBoolean(Const.LIST, true)
+                            .putString(Const.FILE, s.substring(s.lastIndexOf("/")))
+                            .build());
+                }
                 return Result.success();
             }
             //LoaderHelper
@@ -148,7 +159,7 @@ public class SiteWorker extends Worker {
                 t = page.getText();
                 if (isSite) {
                     if (!t.isEmpty() && !s.contains("\"#\"")) {
-                        if(s.contains("&times;") || s.contains("<button>"))
+                        if (s.contains("&times;") || s.contains("<button>"))
                             break;
                         if (!s.contains("<"))
                             list.get(list.size() - 1).setDes(s);

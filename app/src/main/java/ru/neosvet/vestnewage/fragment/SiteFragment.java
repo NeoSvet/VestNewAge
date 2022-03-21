@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends NeoFragment implements Observer<Data> {
+    private final int TAB_NEWS = 0, TAB_MAIN = 1, TAB_DEV = 2;
     public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
     private ListAdapter adMain;
     private View fabRefresh, tvEmptySite;
@@ -43,7 +44,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     private TabHost tabHost;
     private ListView lvMain;
     private DevadsHelper ads;
-    private int x, y, tab = 0;
+    private int x, y, tab = TAB_NEWS;
     private boolean notClick = false, scrollToFirst = false;
 
     @Override
@@ -80,7 +81,6 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         super.onResume();
         if (ProgressHelper.isBusy())
             initLoad();
-        ads.reopen();
     }
 
     private void initLoad() {
@@ -101,10 +101,17 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             act.status.setProgress(data.getInt(Const.PROG, 0));
             return;
         }
+        fabRefresh.setVisibility(View.VISIBLE);
+        act.status.setLoad(false);
+        ProgressHelper.setBusy(false);
+        if (data.getBoolean(Const.ADS, false)) {
+            showDevads();
+            return;
+        }
         if (data.getBoolean(Const.LIST, false)) {
             String f = data.getString(Const.FILE);
-            if (tab != 2 && tabHost.getCurrentTabTag().equals(f))
-                openList(getFile(f), false);
+            if (tab != TAB_DEV && tabHost.getCurrentTabTag().equals(f))
+                openList(getFile(), false);
             return;
         }
         if (data.getBoolean(Const.FINISH, false)) {
@@ -113,14 +120,11 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             if (error != null) {
                 act.status.setError(error);
                 if (adMain.getCount() == 0) {
-                    tab = 2;
+                    tab = TAB_DEV;
                     showDevads();
                 }
                 return;
             }
-            fabRefresh.setVisibility(View.VISIBLE);
-            act.status.setLoad(false);
-            ProgressHelper.setBusy(false);
 
         }
     }
@@ -141,18 +145,18 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         } else if (getArguments() != null)
             tab = getArguments().getInt(Const.TAB);
         else
-            tab = 0;
+            tab = TAB_NEWS;
         switch (tab) {
-            case 0:
+            case TAB_NEWS:
                 tabHost.setCurrentTab(0);
                 break;
-            case 1:
+            case TAB_MAIN:
                 tabHost.setCurrentTab(0);
                 tabHost.setCurrentTab(1);
                 break;
-            case 2:
+            case TAB_DEV:
                 tabHost.setCurrentTab(0);
-                tab = 2;
+                tab = TAB_DEV;
                 showDevads();
                 if (index_ads > -1) {
                     ads.setIndex(index_ads);
@@ -191,15 +195,18 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         }
         tabHost.setCurrentTab(1);
         tabHost.setOnTabChangedListener(name -> {
-            if (name.equals(MAIN))
+            if (name.equals(MAIN)) {
                 act.setTitle(getString(R.string.site));
-            else
+                tab = TAB_MAIN;
+            } else {
                 act.setTitle(getString(R.string.news));
-            File f = getFile(name);
+                tab = TAB_NEWS;
+            }
+            File f = getFile();
             if (f.exists())
                 openList(f, true);
             else
-                startLoad(name);
+                startLoad();
         });
     }
 
@@ -213,7 +220,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
 
     @SuppressLint("ClickableViewAccessibility")
     private void setViews() {
-        fabRefresh.setOnClickListener(view -> startLoad(tabHost.getCurrentTabTag()));
+        fabRefresh.setOnClickListener(view -> startLoad());
         adMain = new ListAdapter(act);
         lvMain.setAdapter(adMain);
         lvMain.setOnItemClickListener((adapterView, view, pos, l) -> {
@@ -291,7 +298,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             return;
         }
         if (!act.status.onClick() && act.status.isTime())
-            startLoad(tabHost.getCurrentTabTag());
+            startLoad();
     }
 
     private void openMultiLink(ListItem links, View parent) {
@@ -355,6 +362,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     private void showDevads() {
         try {
             adMain.clear();
+            ads.reopen();
             ads.loadList(adMain, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -375,12 +383,10 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             BufferedReader br = new BufferedReader(new FileReader(f));
             String t, d, l, h;
             int i = 0;
-            if (tabHost.getCurrentTab() == 0) { //news
-                tab = 0;
+            if (tab == TAB_NEWS) {
                 adMain.addItem(new ListItem(getString(R.string.news_dev)), "");
                 adMain.getItem(i++).addLink("");
-            } else if (tabHost.getCurrentTab() == 1) { //main
-                tab = 1;
+            } else if (tab == TAB_MAIN) {
                 adMain.addItem(new ListItem(getString(R.string.novosti)), "");
                 adMain.getItem(i++).addLink(FORUM);
             }
@@ -418,7 +424,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         } catch (Exception e) {
             e.printStackTrace();
             if (loadIfNeed)
-                startLoad(tabHost.getCurrentTabTag());
+                startLoad();
         }
         adMain.notifyDataSetChanged();
         if (adMain.getCount() == 0)
@@ -439,18 +445,23 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         }
     }
 
-    private void startLoad(String name) {
+    @Override
+    public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        String url = Const.SITE;
-        if (name.equals(NEWS))
-            url += NOVOSTI;
         initLoad();
         act.status.startText();
-        model.startLoad(url, getFile(name).toString());
+        if (tab == TAB_DEV) {
+            model.loadAds();
+            return;
+        }
+        String url = Const.SITE;
+        if (tab == TAB_NEWS)
+            url += NOVOSTI;
+        model.startLoad(url, getFile().toString());
     }
 
-    private File getFile(String name) {
-        return new File(act.getFilesDir() + name);
+    private File getFile() {
+        return new File(act.getFilesDir() + tabHost.getCurrentTabTag());
     }
 }
