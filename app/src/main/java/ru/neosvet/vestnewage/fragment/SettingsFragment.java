@@ -51,7 +51,7 @@ import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 
-public class SettingsFragment extends NeoFragment implements Observer<Data> {
+public class SettingsFragment extends NeoFragment {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
     private SetNotifDialog dialog = null;
     private TextView tvCheck, tvPromNotif;
@@ -83,26 +83,17 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         setViews();
         model = new ViewModelProvider(this).get(BaseModel.class);
         restoreState(savedInstanceState);
+        if (ProgressHelper.isBusy())
+            setStatus(true);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy())
-            initProgress();
-    }
-
-    private void initProgress() {
-        bClearDo.setEnabled(false);
-        initRotate();
-        ProgressHelper.addObserver(act, this);
+    public void setStatus(boolean load) {
+        if(load) {
+            bClearDo.setEnabled(false);
+            initRotate();
+        } else
+            stopRotate = true;
     }
 
     @Override
@@ -116,7 +107,6 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
             bPanels = new boolean[]{true, false, false, false, false};
             return;
         }
-        act.setCurFragment(this);
         bPanels = state.getBooleanArray(Const.PANEL);
         if (bPanels == null)
             bPanels = new boolean[]{true, false, false, false, false};
@@ -133,10 +123,9 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         if (!ProgressHelper.isBusy() || data == null)
             return;
         if (data.getBoolean(Const.FINISH, false)) {
-            ProgressHelper.removeObservers(act);
-            stopRotate = true;
+            setStatus(false);
             ProgressHelper.setBusy(false);
-            bClearDo.setEnabled(false);
+            //bClearDo.setEnabled(false); true?
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 Lib.showToast(act, getString(R.string.error) + ": " + error);
@@ -319,8 +308,8 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
         for (CheckBox checkBox : cbsClear)
             checkBox.setOnCheckedChangeListener(ClearChecked);
         bClearDo.setOnClickListener(view -> {
-            initRotate();
-            bClearDo.setEnabled(false);
+            setStatus(true);
+            ProgressHelper.setBusy(true);
             List<String> list = new ArrayList<>();
             if (cbsClear[0].isChecked()) //book prev years
                 list.add(Const.START);
@@ -332,7 +321,6 @@ public class SettingsFragment extends NeoFragment implements Observer<Data> {
                 list.add(DataBase.MARKERS);
             if (cbsClear[4].isChecked()) //cache
                 list.add(Const.FILE);
-            initProgress();
             model.startClear(list.toArray(new String[]{}));
             for (CheckBox checkBox : cbsClear)
                 checkBox.setChecked(false);

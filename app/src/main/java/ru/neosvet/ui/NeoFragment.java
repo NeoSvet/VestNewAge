@@ -3,7 +3,9 @@ package ru.neosvet.ui;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.work.Data;
 
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -14,6 +16,7 @@ public class NeoFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         act = (MainActivity) getActivity();
+        act.setFragment(this);
         super.onAttach(context);
     }
 
@@ -35,11 +38,18 @@ public class NeoFragment extends Fragment {
         return true;
     }
 
+    public void onChanged(@Nullable Data data) {
+    }
+
     public void startLoad() {
+    }
+
+    public void setStatus(boolean load) {
     }
 
     public void onStatusClick(boolean reset) {
         if (reset) {
+            setStatus(false);
             if (!act.status.isStop())
                 act.status.setLoad(false);
             else

@@ -23,7 +23,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
@@ -45,7 +44,7 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.storage.MarkersStorage;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
-public class CollectionsFragment extends NeoFragment implements Observer<Data> {
+public class CollectionsFragment extends NeoFragment {
     private MarkersStorage dbMarker;
     private ListView lvMarker;
     private View container, fabEdit, fabMenu, fabBack, pEdit, bExport;
@@ -98,7 +97,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     @Override
     public void onDestroyView() {
         dbMarker.close();
-        CollectionsModel.state.removeObserver(this);
         super.onDestroyView();
     }
 
@@ -127,14 +125,13 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     private void restoreState(Bundle state) {
         if (state != null) {
-            act.setCurFragment(this);
             sCol = state.getString(DataBase.COLLECTIONS);
             iSel = state.getInt(Const.SELECT, -1);
             sName = state.getString(Const.RENAME, null);
             delete = state.getBoolean(Const.DIALOG, false);
             if (state.getBoolean(Const.PAGE, false)
                     && LoaderModel.inProgress)
-                initLoad();
+                setStatus(true);
         }
 
         if (sCol == null)
@@ -152,11 +149,10 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void initModel() {
-        CollectionsModel.state.observe(act, this);
         model = new ViewModelProvider(this).get(CollectionsModel.class);
         switch (model.task) {
             case 1:
-                initLoad();
+                setStatus(true);
                 break;
             case 2:
                 initRotate();
@@ -491,7 +487,8 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                     if (ProgressHelper.isBusy())
                         return;
                     ProgressHelper.setBusy(true);
-                    initLoad();
+                    setStatus(true);
+                    act.status.setLoad(true);
                     act.status.startText();
                     model.loadPage(adMarker.getItem(pos).getData());
                     return;
@@ -608,9 +605,12 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         container.findViewById(R.id.bImport).setOnClickListener(view -> selectFile(false));
     }
 
-    private void initLoad() {
-        fabBack.setVisibility(View.GONE);
-        act.status.setLoad(true);
+    @Override
+    public void setStatus(boolean load) {
+        if (load)
+            fabBack.setVisibility(View.GONE);
+        else
+            fabBack.setVisibility(View.VISIBLE);
     }
 
     private void deleteDialog() {

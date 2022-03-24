@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
@@ -52,7 +51,7 @@ import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.storage.JournalStorage;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
-public class BookFragment extends NeoFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
+public class BookFragment extends NeoFragment implements DateDialog.Result, View.OnClickListener {
     private final String DIALOG_DATE = "date";
     private Animation anMin, anMax;
     private ListAdapter adBook;
@@ -94,26 +93,17 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             dialog = DIALOG_DATE + d;
             showDatePicker(d);
         }
+        if (ProgressHelper.isBusy())
+            setStatus(true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
         editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
         editor.apply();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy())
-            initLoad();
-        else if (LoaderModel.inProgress)
-            ProgressHelper.addObserver(act, this);
     }
 
     @Override
@@ -138,13 +128,12 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (!data.getBoolean(Const.FINISH, false))
             return;
         ProgressHelper.setBusy(false);
-        ProgressHelper.removeObservers(act);
+        setStatus(false);
         String error = data.getString(Const.ERROR);
         if (error != null) {
             act.status.setError(error);
             return;
         }
-        act.status.setLoad(false);
         String name = data.getString(Const.TITLE);
         finishLoad(name);
     }
@@ -179,7 +168,6 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (!fromOtkr && dPoslanie.getYear() < 2016)
             dPoslanie = DateHelper.putYearMonth(act, 2016, 1);
         if (state != null) {
-            act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
             if (!ProgressHelper.isBusy()) {
                 dialog = state.getString(Const.DIALOG);
@@ -467,6 +455,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         fabRefresh.setVisibility(View.VISIBLE);
         fabRndMenu.setVisibility(View.VISIBLE);
         ProgressHelper.setBusy(false);
+        openList(false);
+        setStatus(false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             return;
@@ -489,7 +479,6 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                         (dialog, id) -> dialog.dismiss());
                 builder.setPositiveButton(getString(R.string.yes),
                         (dialog, id) -> {
-                            ProgressHelper.addObserver(act, BookFragment.this);
                             ivPrev.setEnabled(false);
                             LoaderHelper.postCommand(act, LoaderHelper.DOWNLOAD_OTKR, "");
                         });
@@ -520,19 +509,25 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        initLoad();
+        setStatus(true);
+        act.status.setLoad(true);
         act.status.startText();
         model.startLoad(fromOtkr, tab == 0);
     }
 
-    private void initLoad() {
-        fabRefresh.setVisibility(View.GONE);
-        fabRndMenu.setVisibility(View.GONE);
-        act.status.setLoad(true);
-        ProgressHelper.addObserver(act, this);
+    @Override
+    public void setStatus(boolean load) {
+        if (load) {
+            fabRefresh.setVisibility(View.GONE);
+            fabRndMenu.setVisibility(View.GONE);
+        } else {
+            fabRefresh.setVisibility(View.VISIBLE);
+            fabRndMenu.setVisibility(View.VISIBLE);
+        }
     }
 
     private void finishLoad(String result) {
+        act.status.setLoad(false);
         if (tabHost.getCurrentTab() != tab)
             tabHost.setCurrentTab(tab);
         DateHelper d;
@@ -540,8 +535,6 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             d = dKatren;
         else
             d = dPoslanie;
-        fabRefresh.setVisibility(View.VISIBLE);
-        fabRndMenu.setVisibility(View.VISIBLE);
         if (result == null)
             return;
 

@@ -30,13 +30,8 @@ public class ProgressHelper {
         return (int) (cur / max * 100f);
     }
 
-    public static void removeObservers(LifecycleOwner owner) {
-        live.removeObservers(owner);
-    }
-
     public static void addObserver(LifecycleOwner owner, Observer<Data> observer) {
-        if (!live.hasObservers())
-            live.observe(owner, observer);
+        live.observe(owner, observer);
     }
 
     public static void postProgress(Data data) {

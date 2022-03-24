@@ -17,11 +17,11 @@ import androidx.work.WorkManager;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.loader.PageLoader;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
 
 public class CollectionsModel extends AndroidViewModel {
-    public static final MutableLiveData<Data> state = new MutableLiveData<>();
     public static final String TAG = "markers";
     public byte task = 0;
 
@@ -63,7 +63,7 @@ public class CollectionsModel extends AndroidViewModel {
                 ErrorUtils.setError(e);
                 error = e.getMessage();
             }
-            state.postValue(new Data.Builder()
+            ProgressHelper.postProgress(new Data.Builder()
                     .putBoolean(Const.FINISH, true)
                     .putString(Const.ERROR, error)
                     .build());

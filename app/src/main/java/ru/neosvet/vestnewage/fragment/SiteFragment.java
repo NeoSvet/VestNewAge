@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
@@ -35,7 +34,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
-public class SiteFragment extends NeoFragment implements Observer<Data> {
+public class SiteFragment extends NeoFragment {
     private final int TAB_NEWS = 0, TAB_MAIN = 1, TAB_DEV = 2;
     public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
     private ListAdapter adMain;
@@ -61,13 +60,8 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         model = new ViewModelProvider(this).get(SiteModel.class);
         initTabs();
         restoreState(savedInstanceState);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
         if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
+            setStatus(true);
     }
 
     @Override
@@ -77,16 +71,11 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy())
-            initLoad();
-    }
-
-    private void initLoad() {
-        fabRefresh.setVisibility(View.GONE);
-        act.status.setLoad(true);
-        ProgressHelper.addObserver(act, this);
+    public void setStatus(boolean load) {
+        if (load)
+            fabRefresh.setVisibility(View.GONE);
+        else
+            fabRefresh.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -101,7 +90,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
             act.status.setProgress(data.getInt(Const.PROG, 0));
             return;
         }
-        fabRefresh.setVisibility(View.VISIBLE);
+        setStatus(false);
         act.status.setLoad(false);
         ProgressHelper.setBusy(false);
         if (data.getBoolean(Const.ADS, false)) {
@@ -116,16 +105,13 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         }
         if (data.getBoolean(Const.FINISH, false)) {
             String error = data.getString(Const.ERROR);
-            ProgressHelper.removeObservers(act);
             if (error != null) {
                 act.status.setError(error);
                 if (adMain.getCount() == 0) {
                     tab = TAB_DEV;
                     showDevads();
                 }
-                return;
             }
-
         }
     }
 
@@ -139,7 +125,6 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     private void restoreState(Bundle state) {
         int index_ads = -1;
         if (state != null) {
-            act.setCurFragment(this);
             tab = state.getInt(Const.TAB);
             index_ads = state.getInt(Const.ADS);
         } else if (getArguments() != null)
@@ -289,6 +274,8 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
         fabRefresh.setVisibility(View.VISIBLE);
         ProgressHelper.cancelled();
         ProgressHelper.setBusy(false);
+        setStatus(false);
+        openList(getFile(), false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             return;
@@ -449,7 +436,7 @@ public class SiteFragment extends NeoFragment implements Observer<Data> {
     public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        initLoad();
+        setStatus(true);
         act.status.startText();
         if (tab == TAB_DEV) {
             model.loadAds();

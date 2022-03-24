@@ -27,7 +27,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,7 +58,7 @@ import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
 import ru.neosvet.vestnewage.storage.SearchStorage;
 
-public class SearchFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
+public class SearchFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
     private View fabSettings, fabOk, pSettings, pPages, pStatus, bShow, pAdditionSet;
     private CheckBox cbSearchInResults;
@@ -109,20 +108,8 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         setViews(view);
         initModel();
         restoreState(savedInstanceState);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
         if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.addObserver(act, this);
+            setStatus(true);
     }
 
     private void initModel() {
@@ -140,7 +127,6 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             return;
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.setBusy(false);
-            ProgressHelper.removeObservers(act);
             page = 0;
             etSearch.setEnabled(true);
             pStatus.setVisibility(View.GONE);
@@ -196,7 +182,6 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                 startSearch();
             }
         } else {
-            act.setCurFragment(this);
             page = state.getInt(Const.SEARCH, -1);
             if (page > -1) {
                 fabSettings.setVisibility(View.GONE);
@@ -505,7 +490,6 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             tvStatus.setText(getString(R.string.search));
         } else
             mode = sMode.getSelectedItemPosition();
-        ProgressHelper.addObserver(act, this);
         model.search(string, mode, dStart.getMY(), dEnd.getMY());
         boolean needAdd = true;
         for (int i = 0; i < adSearch.getCount(); i++) {

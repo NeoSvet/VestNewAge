@@ -28,14 +28,8 @@ public class SlashModel extends AndroidViewModel {
         super(application);
     }
 
-    public static void removeObservers(LifecycleOwner owner) {
-        if (live.hasObservers())
-            live.removeObservers(owner);
-    }
-
     public static void addObserver(LifecycleOwner owner, Observer<Bundle> observer) {
-        if (!live.hasObservers())
-            live.observe(owner, observer);
+        live.observe(owner, observer);
     }
 
     public static void post(Bundle data) {

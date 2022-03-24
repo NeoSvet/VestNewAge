@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         unread = new UnreadHelper(this);
         initInterface();
         initAnim();
+        initProgress();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
@@ -140,6 +141,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (isInMultiWindowMode())
                 MultiWindowSupport.resizeFloatTextView(tvNew, true);
         }
+    }
+
+    public void setFragment(NeoFragment fragment) {
+        curFragment = fragment;
+    }
+
+    private void initProgress() {
+        ProgressHelper.addObserver(this, data -> {
+            if (curFragment != null)
+                curFragment.onChanged(data);
+        });
+        if (ProgressHelper.isBusy())
+            status.setLoad(true);
     }
 
     private void initStar() {
@@ -223,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onPause();
         if (prom != null)
             prom.stop();
-        SlashModel.removeObservers(this);
     }
 
     @Override
@@ -231,8 +244,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         if (prom != null)
             prom.resume();
-        if (SlashModel.inProgress)
-            SlashModel.addObserver(this, this);
     }
 
     @Override
@@ -358,10 +369,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!item.isChecked())
             setFragment(item.getItemId(), false);
         return true;
-    }
-
-    public void setCurFragment(NeoFragment fragment) {
-        curFragment = fragment;
     }
 
     public void setFrMenu(MenuFragment frMenu) {
@@ -621,8 +628,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onChanged(Bundle data) {
         SlashModel.inProgress = false;
-        SlashModel.removeObservers(this);
-
         int timediff = 0;
         if (data.getBoolean(Const.TIME, false)) {
             timediff = data.getInt(Const.TIMEDIFF, 0);

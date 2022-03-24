@@ -36,7 +36,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CabModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
-public class CabmainFragment extends NeoFragment implements Observer<Data> {
+public class CabmainFragment extends NeoFragment {
     public static String error = null;
     private ListAdapter adMain;
     private SoftKeyboard softKeyboard;
@@ -57,21 +57,14 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
         initViews(view);
         setViews();
         restoreState(savedInstanceState);
-        initModel();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        model = new ViewModelProvider(this).get(CabModel.class);
         if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
+            setStatus(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.addObserver(act, this);
         if (error != null) {
             act.status.setError(error);
             act.status.setClick(view -> onStatusClick(false));
@@ -108,17 +101,10 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
             } else { //CabModel.CABINET
                 mode_list = CabModel.LOGIN;
                 initLoad();
-                act.status.startText();
                 model.login(etEmail.getText().toString(), etPassword.getText().toString());
             }
             return false;
         }
-    }
-
-    private void initModel() {
-        model = new ViewModelProvider(this).get(CabModel.class);
-        if (ProgressHelper.isBusy())
-            initLoad();
     }
 
     @Override
@@ -132,7 +118,6 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
         if (!result.getBoolean(Const.FINISH, false))
             return;
         ProgressHelper.setBusy(false);
-        ProgressHelper.removeObservers(act);
         String error = result.getString(Const.ERROR);
         if (error != null) {
             if (error.equals("Connection reset") || error.equals("Read timed out"))
@@ -190,7 +175,6 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
             }
             loginList();
         } else {
-            act.setCurFragment(this);
             mode_list = state.getByte(Const.PANEL);
             if (mode_list > CabModel.LOGIN) {
                 pMain.setVisibility(View.GONE);
@@ -272,7 +256,6 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
                         if (adMain.getItem(pos).getDes().equals(
                                 getString(R.string.select_status))) {
                             initLoad();
-                            act.status.startText();
                             model.getListWord();
                         } else
                             Lib.showToast(act, getString(R.string.send_unlivable));
@@ -288,15 +271,14 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
                 }
             } else if (mode_list == CabModel.WORDS) {
                 initLoad();
-                act.status.startText();
                 model.selectWord(pos);
             }
         });
     }
 
     private void initLoad() {
-        ProgressHelper.addObserver(act, this);
         act.status.setLoad(true);
+        act.status.startText();
     }
 
     private void loginList() {
@@ -411,7 +393,6 @@ public class CabmainFragment extends NeoFragment implements Observer<Data> {
             editor.apply();
         }
         initLoad();
-        act.status.startText();
         model.login(etEmail.getText().toString(), etPassword.getText().toString());
     }
 

@@ -116,14 +116,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     protected void onPause() {
         super.onPause();
         prom.stop();
-        ProgressHelper.removeObservers(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         prom.resume();
-        ProgressHelper.addObserver(this, this);
     }
 
     @Override
@@ -134,6 +132,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void initModel() {
         model = new ViewModelProvider(this).get(LoaderModel.class);
+        ProgressHelper.addObserver(this, this);
         if (LoaderModel.inProgress)
             status.setLoad(true);
     }

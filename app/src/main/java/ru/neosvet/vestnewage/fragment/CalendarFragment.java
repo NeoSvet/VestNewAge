@@ -14,7 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,7 +37,7 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
-public class CalendarFragment extends NeoFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
+public class CalendarFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -77,22 +76,8 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
         if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy()) {
             setStatus(true);
-            ProgressHelper.addObserver(act, this);
-        }
     }
 
     @Override
@@ -119,12 +104,11 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             act.updateNew();
             openCalendar(false);
             String error = data.getString(Const.ERROR);
-            ProgressHelper.removeObservers(act);
             if (error != null) {
                 act.status.setError(error);
                 return;
             }
-            fabRefresh.setVisibility(View.VISIBLE);
+            setStatus(false);
             act.status.setLoad(false);
             ProgressHelper.setBusy(false);
         }
@@ -144,7 +128,6 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             dCurrent = DateHelper.initToday(act);
             dCurrent.setDay(1);
         } else {
-            act.setCurFragment(this);
             dCurrent = DateHelper.putDays(act, state.getInt(Const.CURRENT_DATE));
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
@@ -172,7 +155,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     public void onStatusClick(boolean reset) {
         ProgressHelper.cancelled();
         ProgressHelper.setBusy(false);
-        fabRefresh.setVisibility(View.VISIBLE);
+        setStatus(false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             return;
@@ -346,10 +329,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     private void checkTime(int sec) {
         if (isCurMonth()) {
-            if (act.status.checkTime(sec))
-                fabRefresh.setVisibility(View.GONE);
-            else
-                fabRefresh.setVisibility(View.VISIBLE);
+            setStatus(act.status.checkTime(sec));
             return;
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
@@ -365,19 +345,17 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         if (ProgressHelper.isBusy())
             return;
         setStatus(true);
+        act.status.setLoad(true);
         act.status.startText();
         model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
     }
 
-    private void setStatus(boolean load) {
-        act.status.setLoad(load);
-        if (load) {
+    @Override
+    public void setStatus(boolean load) {
+        if (load)
             fabRefresh.setVisibility(View.GONE);
-            ProgressHelper.addObserver(act, this);
-        } else {
+        else
             fabRefresh.setVisibility(View.VISIBLE);
-            ProgressHelper.removeObservers(act);
-        }
     }
 
     private void showDatePicker() {

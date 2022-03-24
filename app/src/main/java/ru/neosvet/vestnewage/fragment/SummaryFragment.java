@@ -10,7 +10,6 @@ import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
@@ -29,7 +28,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
-public class SummaryFragment extends NeoFragment implements Observer<Data> {
+public class SummaryFragment extends NeoFragment {
     private ListView lvSummary;
     private ListAdapter adSummary;
     private View fabRefresh;
@@ -54,26 +53,16 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
         }
+        if (ProgressHelper.isBusy())
+            setStatus(true);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (ProgressHelper.isBusy())
-            ProgressHelper.removeObservers(act);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (ProgressHelper.isBusy())
-            initLoad();
-    }
-
-    private void initLoad() {
-        fabRefresh.setVisibility(View.GONE);
-        act.status.setLoad(true);
-        ProgressHelper.addObserver(act, this);
+    public void setStatus(boolean load) {
+        if (load)
+            fabRefresh.setVisibility(View.GONE);
+        else
+            fabRefresh.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -103,8 +92,6 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
     }
 
     private void restoreState(Bundle state) {
-        if (state != null)
-            act.setCurFragment(this);
         File f = new File(act.getFilesDir() + Const.RSS);
         if (f.exists()) {
             if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))
@@ -148,8 +135,9 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
     @Override
     public void onStatusClick(boolean reset) {
         ProgressHelper.cancelled();
-        fabRefresh.setVisibility(View.VISIBLE);
+        setStatus(false);
         ProgressHelper.setBusy(false);
+        openList(false);
         if (!act.status.isStop()) {
             act.status.setLoad(false);
             return;
@@ -194,13 +182,14 @@ public class SummaryFragment extends NeoFragment implements Observer<Data> {
     public void startLoad() {
         if (ProgressHelper.isBusy())
             return;
-        initLoad();
+        setStatus(true);
+        act.status.setLoad(true);
         act.status.startText();
         model.startLoad();
     }
 
     private void finishLoad(String error) {
-        ProgressHelper.removeObservers(act);
+        setStatus(false);
         if (error != null) {
             act.status.setError(error);
             return;
