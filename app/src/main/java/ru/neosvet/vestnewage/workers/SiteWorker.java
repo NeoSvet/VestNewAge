@@ -7,16 +7,11 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
@@ -32,7 +27,6 @@ import ru.neosvet.vestnewage.model.SiteModel;
 public class SiteWorker extends Worker {
     private final Context context;
     private final List<ListItem> list = new ArrayList<>();
-    private static final Pattern patternList = Pattern.compile("\\d{4}\\.html");
 
     public SiteWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -214,37 +208,4 @@ public class SiteWorker extends Worker {
         }
     }
 
-    public static int getListLink(Context context, String file) throws Exception {
-        if (file.contains(SiteFragment.NEWS))
-            return 0;
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        File f = LoaderHelper.getFileList(context);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
-        String s;
-        int k = 0;
-        while ((s = br.readLine()) != null) {
-            if (isNeedLoad(s)) {
-                if (s.contains("@"))
-                    bw.write(s.substring(9));
-                else
-                    bw.write(s);
-                bw.newLine();
-                bw.flush();
-                k++;
-            }
-        }
-        bw.close();
-        br.close();
-        return k;
-    }
-
-    private static boolean isNeedLoad(String link) {
-        if (!link.contains(Const.HTML))
-            return false;
-        if (link.contains("tolkovaniya") || (link.contains("/") && link.length() < 18))
-            return false;
-        if (patternList.matcher(link).matches())
-            return false;
-        return true;
-    }
 }

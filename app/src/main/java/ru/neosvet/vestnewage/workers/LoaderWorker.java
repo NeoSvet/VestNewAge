@@ -21,8 +21,12 @@ import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
+import ru.neosvet.vestnewage.loader.CalendarLoader;
+import ru.neosvet.vestnewage.loader.ListLoader;
 import ru.neosvet.vestnewage.loader.PageLoader;
+import ru.neosvet.vestnewage.loader.SiteLoader;
 import ru.neosvet.vestnewage.loader.StyleLoader;
+import ru.neosvet.vestnewage.loader.SummaryLoader;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
@@ -58,71 +62,13 @@ public class LoaderWorker extends Worker {
         ErrorUtils.setData(getInputData());
         name = getInputData().getString(Const.TASK);
         try {
-            if (name.equals(CheckHelper.class.getSimpleName())) {
-                page = new PageLoader(context, lib, false);
-                downloadList();
-                CheckHelper.postCommand(context, false);
-                LoaderModel.inProgress = false;
+            if (name.equals(LoaderModel.TAG)) {
+                doLoad();
                 return Result.success();
-            }
-            if (name.equals(CalendarModel.class.getSimpleName())) {
-                page = new PageLoader(context, lib, false);
-                max = CalendarWorker.getListLink(context,
-                        getInputData().getInt(Const.YEAR, 0),
-                        getInputData().getInt(Const.MONTH, 0));
-                downloadList();
+            } else {
+                loadList();
                 return postFinish();
             }
-            if (name.equals(SummaryModel.class.getSimpleName())) {
-                page = new PageLoader(context, lib, false);
-                max = SummaryWorker.getListLink(context);
-                downloadList();
-                return postFinish();
-            }
-            if (name.equals(SiteModel.class.getSimpleName())) {
-                page = new PageLoader(context, lib, false);
-                max = SiteWorker.getListLink(context, getInputData().getString(Const.FILE));
-                downloadList();
-                return postFinish();
-            }
-            if (!isCancelled()) {
-                StyleLoader style = new StyleLoader(context, lib);
-                int mode = getInputData().getInt(Const.MODE, 0);
-                if (mode != LoaderHelper.DOWNLOAD_PAGE)
-                    style.download(false);
-                switch (mode) {
-                    case LoaderHelper.DOWNLOAD_ALL:
-                        download(LoaderHelper.ALL);
-                        break;
-                    case LoaderHelper.DOWNLOAD_ID:
-                        int p = getInputData().getInt(Const.SELECT, 0);
-                        download(p);
-                        break;
-                    case LoaderHelper.DOWNLOAD_YEAR:
-                        downloadYear(getInputData().getInt(Const.YEAR, 0));
-                        break;
-                    case LoaderHelper.DOWNLOAD_PAGE:
-                        ProgressHelper.postProgress(new Data.Builder()
-                                .putBoolean(Const.START, true)
-                                .build());
-                        String link = getInputData().getString(Const.LINK);
-                        style.download(getInputData().getBoolean(Const.STYLE, false));
-                        if (link != null) {
-                            page = new PageLoader(context, lib, false);
-                            page.download(link, true);
-                        }
-                        ProgressHelper.postProgress(new Data.Builder()
-                                .putBoolean(Const.FINISH, true)
-                                .build());
-                        if (name.equals(LoaderHelper.TAG))
-                            LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
-                        LoaderModel.inProgress = false;
-                        return Result.success();
-                }
-            }
-            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
-            LoaderModel.inProgress = false;
-            return Result.success();
         } catch (Exception e) {
             File file = LoaderHelper.getFileList(context);
             if (file.exists())
@@ -145,6 +91,72 @@ public class LoaderWorker extends Worker {
                 .putString(Const.ERROR, error)
                 .build());
         return Result.failure();
+    }
+
+    private void loadList() throws Exception {
+        if (name.equals(CheckHelper.class.getSimpleName())) {
+            page = new PageLoader(context, lib, false);
+            downloadList();
+            CheckHelper.postCommand(context, false);
+            LoaderModel.inProgress = false;
+            return;
+        }
+
+        ListLoader loader;
+        if (name.equals(CalendarModel.class.getSimpleName())) {
+            page = new PageLoader(context, lib, false);
+            loader = new CalendarLoader(
+                    getInputData().getInt(Const.YEAR, 0),
+                    getInputData().getInt(Const.MONTH, 0));
+        } else if (name.equals(SummaryModel.class.getSimpleName())) {
+            page = new PageLoader(context, lib, false);
+            loader = new SummaryLoader();
+        } else if (name.equals(SiteModel.class.getSimpleName())) {
+            page = new PageLoader(context, lib, false);
+            loader = new SiteLoader(getInputData().getString(Const.FILE));
+        } else
+            return;
+
+        max = loader.getLinkList(context);
+        downloadList();
+    }
+
+    private void doLoad() throws Exception {
+        StyleLoader style = new StyleLoader(context, lib);
+        int mode = getInputData().getInt(Const.MODE, 0);
+        if (mode != LoaderHelper.DOWNLOAD_PAGE)
+            style.download(false);
+        switch (mode) {
+            case LoaderHelper.DOWNLOAD_ALL:
+                download(LoaderHelper.ALL);
+                break;
+            case LoaderHelper.DOWNLOAD_ID:
+                int p = getInputData().getInt(Const.SELECT, 0);
+                download(p);
+                break;
+            case LoaderHelper.DOWNLOAD_YEAR:
+                downloadYear(getInputData().getInt(Const.YEAR, 0));
+                break;
+            case LoaderHelper.DOWNLOAD_PAGE:
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.START, true)
+                        .build());
+                String link = getInputData().getString(Const.LINK);
+                style.download(getInputData().getBoolean(Const.STYLE, false));
+                if (link != null) {
+                    page = new PageLoader(context, lib, false);
+                    page.download(link, true);
+                }
+                ProgressHelper.postProgress(new Data.Builder()
+                        .putBoolean(Const.FINISH, true)
+                        .build());
+                if (name.equals(LoaderHelper.TAG))
+                    LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
+                LoaderModel.inProgress = false;
+        }
+
+        LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
+        LoaderModel.inProgress = false;
     }
 
     private Result postFinish() {
@@ -171,8 +183,10 @@ public class LoaderWorker extends Worker {
             n += countBookList(d.getMY());
         }
         ProgressHelper.setMax(n);
+        CalendarLoader loader = new CalendarLoader();
         for (m = 1; m < k && !isCancelled(); m++) {
-            CalendarWorker.getListLink(context, year, m);
+            loader.setDate(year, m);
+            loader.getLinkList(context);
             downloadList();
         }
     }
@@ -205,14 +219,15 @@ public class LoaderWorker extends Worker {
         page = new PageLoader(context, lib, true);
         // подсчёт количества страниц:
         int k = 0;
-        if (id == LoaderHelper.ALL || id == R.id.nav_site)
-            k = SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
-            k += workWithBook(true);
+            k = workWithBook(true);
+        if (id == LoaderHelper.ALL || id == R.id.nav_site) {
+            SiteLoader loader = new SiteLoader(lib.getFileByName(SiteFragment.MAIN).toString());
+            k += loader.getLinkList(context);
+        }
         ProgressHelper.setMax(k);
         // загрузка страниц:
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
-            SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.MAIN).toString());
             downloadList();
             //SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.NEWS).toString());
             //downloadList();

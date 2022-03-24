@@ -10,8 +10,6 @@ import androidx.work.WorkerParameters;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -124,25 +122,5 @@ public class SummaryWorker extends Worker {
         bw.close();
         unread.setBadge();
         unread.close();
-    }
-
-    public static int getListLink(Context context) throws Exception {
-        BufferedReader br = new BufferedReader(new FileReader(context.getFilesDir() + Const.RSS));
-        File file = LoaderHelper.getFileList(context);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        String s;
-        int k = 0;
-        while (br.readLine() != null) { //title
-            s = br.readLine(); //link
-            bw.write(s);
-            bw.newLine();
-            bw.flush();
-            k++;
-            br.readLine(); //des
-            br.readLine(); //time
-        }
-        bw.close();
-        br.close();
-        return k;
     }
 }

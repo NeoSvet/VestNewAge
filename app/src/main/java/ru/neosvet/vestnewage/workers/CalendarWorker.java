@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.workers;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -14,9 +13,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -110,30 +106,6 @@ public class CalendarWorker extends Worker {
             loadListMonth(year, m, false);
             ProgressHelper.upProg();
         }
-    }
-
-    public static int getListLink(Context context, int year, int month) throws Exception {
-        DateHelper d = DateHelper.putYearMonth(context, year, month);
-        PageStorage storage = new PageStorage(context, d.getMY());
-        Cursor curTitle = storage.getLinks();
-        int k = 0;
-        if (curTitle.moveToFirst()) {
-            // пропускаем первую запись - там только дата изменения списка
-            String link;
-            File file = LoaderHelper.getFileList(context);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            while (curTitle.moveToNext()) {
-                link = curTitle.getString(0);
-                bw.write(link);
-                k++;
-                bw.newLine();
-                bw.flush();
-            }
-            bw.close();
-        }
-        curTitle.close();
-        storage.close();
-        return k;
     }
 
     private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
