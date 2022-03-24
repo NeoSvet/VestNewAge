@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.loader;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 
 import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
@@ -10,6 +9,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class PageLoader {
     private final Context context;
@@ -28,9 +28,9 @@ public class PageLoader {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (withMsg)
             ProgressHelper.setMessage(initMessage(link));
-        DataBase dataBase = new DataBase(context, link);
-        if (!singlePage && dataBase.existsPage(link)) {
-            dataBase.close();
+        PageStorage storage = new PageStorage(context, link);
+        if (!singlePage && storage.existsPage(link)) {
+            storage.close();
             return false;
         }
         if (!singlePage)
@@ -44,14 +44,14 @@ public class PageLoader {
         }
 
         int n = k;
-        boolean boolArticle = dataBase.isArticle();
+        boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser(context);
         if (lib.isMainSite())
             page.load(Const.SITE + Const.PRINT + s, "page-title");
         else
             page.load(Const.SITE2 + Const.PRINT + s, "<h2>");
 
-        ContentValues cv;
+        ContentValues row;
         int id = 0, bid = 0;
 
         s = page.getFirstElem();
@@ -66,52 +66,48 @@ public class PageLoader {
                     k = 0;
                 }
                 if (k == 0) {
-                    Cursor cursor = dataBase.query(Const.TITLE, new String[]{DataBase.ID, Const.TITLE}, Const.LINK + DataBase.Q, link);
-                    if (cursor.moveToFirst())
-                        id = cursor.getInt(0);
-                    else id = 0;
-                    cursor.close();
-                    cv = new ContentValues();
-                    cv.put(Const.TIME, System.currentTimeMillis());
+                    id = storage.getPageId(link);
+                    row = new ContentValues();
+                    row.put(Const.TIME, System.currentTimeMillis());
 
-                    if (id == 0) { // id не найден, материала нет - добавляем
+                    if (id == -1) { // id не найден, материала нет - добавляем
                         if (link.contains("#")) {
                             id = bid;
-                            cv = new ContentValues();
-                            cv.put(DataBase.ID, id);
-                            cv.put(DataBase.PARAGRAPH, s);
-                            dataBase.insert(DataBase.PARAGRAPH, cv);
+                            row = new ContentValues();
+                            row.put(DataBase.ID, id);
+                            row.put(DataBase.PARAGRAPH, s);
+                            storage.insertParagraph(row);
                         } else {
-                            cv.put(Const.TITLE, getTitle(s, dataBase.getDatabaseName()));
-                            cv.put(Const.LINK, link);
-                            id = (int) dataBase.insert(Const.TITLE, cv);
+                            row.put(Const.TITLE, getTitle(s, storage.getName()));
+                            row.put(Const.LINK, link);
+                            id = (int) storage.insertTitle(row);
                             //обновляем дату изменения списка:
-                            cv = new ContentValues();
-                            cv.put(Const.TIME, System.currentTimeMillis());
-                            dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1");
+                            row = new ContentValues();
+                            row.put(Const.TIME, System.currentTimeMillis());
+                            storage.updateTitle(1, row);
                         }
                     } else { // id найден, значит материал есть
                         //обновляем заголовок
-                        cv.put(Const.TITLE, getTitle(s, dataBase.getDatabaseName()));
+                        row.put(Const.TITLE, getTitle(s, storage.getName()));
                         //обновляем дату загрузки материала
-                        dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, id);
+                        storage.updateTitle(id, row);
                         //удаляем содержимое материала
-                        dataBase.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, id);
+                        storage.deleteParagraph(id);
                     }
                     bid = id;
                     s = page.getNextElem();
                 }
             }
             if ((k == 0 || boolArticle) && !page.isEmpty()) {
-                cv = new ContentValues();
-                cv.put(DataBase.ID, id);
-                cv.put(DataBase.PARAGRAPH, s);
-                dataBase.insert(DataBase.PARAGRAPH, cv);
+                row = new ContentValues();
+                row.put(DataBase.ID, id);
+                row.put(DataBase.PARAGRAPH, s);
+                storage.insertParagraph(row);
             }
             s = page.getNextElem();
         } while (s != null);
 
-        dataBase.close();
+        storage.close();
         page.clear();
         return true;
     }

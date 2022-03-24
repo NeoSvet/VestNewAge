@@ -34,9 +34,12 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CheckAdapter;
+import ru.neosvet.vestnewage.storage.MarkersStorage;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 @SuppressLint("DefaultLocale")
 public class MarkerActivity extends AppCompatActivity {
+    private MarkersStorage dbMarker;
     private float density;
     private String pageCon;
     private CheckAdapter adPage, adCol;
@@ -58,8 +61,8 @@ public class MarkerActivity extends AppCompatActivity {
         marker.putExtra(Const.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
-            DataBase dataBase = new DataBase(context, DataBase.getDatePage(link));
-            Cursor cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, dataBase.getPageId(link));
+            PageStorage storage = new PageStorage(context, link);
+            Cursor cursor = storage.getParagraphs(storage.getPageId(link));
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;
@@ -74,7 +77,7 @@ public class MarkerActivity extends AppCompatActivity {
                 } while (cursor.moveToNext());
             }
             cursor.close();
-            dataBase.close();
+            storage.close();
             if (s.length() > 0) {
                 s.delete(s.length() - 2, s.length());
                 if (s.indexOf(Const.COMMA) > 0) {
@@ -97,6 +100,8 @@ public class MarkerActivity extends AppCompatActivity {
         link = getIntent().getStringExtra(Const.LINK);
         id = getIntent().getIntExtra(DataBase.ID, -1);
         density = getResources().getDisplayMetrics().density;
+        dbMarker = new MarkersStorage(MarkerActivity.this);
+
         initViews();
         restoreState(savedInstanceState);
         setViews();
@@ -178,15 +183,13 @@ public class MarkerActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        dbMarker.close();
         softKeyboard.unRegisterSoftKeyboardCallback();
+        super.onDestroy();
     }
 
     private void loadCol() {
-        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
-                new String[]{DataBase.ID, Const.TITLE},
-                null, null, null, null, Const.PLACE);
+        Cursor cursor = dbMarker.getCollectionsTitle();
         if (cursor.moveToFirst()) {
             int iID = cursor.getColumnIndex(DataBase.ID);
             int iTitle = cursor.getColumnIndex(Const.TITLE);
@@ -195,7 +198,6 @@ public class MarkerActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        dbMarker.close();
     }
 
     @SuppressLint("Range")
@@ -268,8 +270,7 @@ public class MarkerActivity extends AppCompatActivity {
             sel = getString(R.string.sel_pos) +
                     String.format("%.1f%%", getIntent().getFloatExtra(Const.PLACE, 0f));
         } else { //edit mode
-            DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-            Cursor cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, id);
+            Cursor cursor = dbMarker.getMarker(String.valueOf(id));
             cursor.moveToFirst();
             etDes.setText(cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION)));
             String s = cursor.getString(cursor.getColumnIndex(Const.PLACE));
@@ -291,19 +292,16 @@ public class MarkerActivity extends AppCompatActivity {
             s = cursor.getString(cursor.getColumnIndex(DataBase.COLLECTIONS));
             cursor.close();
 
-            String[] mId = DataBase.getList(s);
+            String[] mId = dbMarker.getList(s);
             StringBuilder b = new StringBuilder(getString(R.string.sel_col));
             for (String id : mId) {
-                cursor = dbMarker.query(DataBase.COLLECTIONS, null,
-                        DataBase.ID + DataBase.Q, new String[]{id}
-                        , null, null, Const.PLACE);
+                cursor = dbMarker.getCollection(id);
                 if (cursor.moveToFirst()) {
                     b.append(cursor.getString(cursor.getColumnIndex(Const.TITLE)));
                     b.append(", ");
                 }
                 cursor.close();
             }
-            dbMarker.close();
             b.delete(b.length() - 2, b.length());
             setColList(b.toString());
             tvCol.setText(b);
@@ -312,7 +310,9 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void loadPage() {
         k_par = 5; // имитация нижнего "колонтитула" страницы
-        pageCon = DataBase.getContentPage(this, link, false);
+        PageStorage storage = new PageStorage(this, link);
+        pageCon = storage.getContentPage(link, false);
+        storage.close();
         adPage.clear();
         if (pageCon == null) // страница не загружена...
             return;
@@ -475,11 +475,9 @@ public class MarkerActivity extends AppCompatActivity {
                         }
                     }
                     etCol.setText("");
-                    DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-                    ContentValues cv;
+                    ContentValues row;
                     //освобождаем первую позицию (PLACE) путем смещения всех вперед..
-                    Cursor cursor = dbMarker.query(DataBase.COLLECTIONS,
-                            new String[]{DataBase.ID, Const.PLACE});
+                    Cursor cursor = dbMarker.getCollectionsPlace();
                     if (cursor.moveToFirst()) {
                         int iID = cursor.getColumnIndex(DataBase.ID);
                         int iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -488,26 +486,24 @@ public class MarkerActivity extends AppCompatActivity {
                             i = cursor.getInt(iPlace);
                             if (i > 0) { // нулевую позицию не трогаем ("Вне подборок")
                                 id = cursor.getInt(iID);
-                                cv = new ContentValues();
-                                cv.put(Const.PLACE, i + 1);
-                                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, id);
+                                row = new ContentValues();
+                                row.put(Const.PLACE, i + 1);
+                                dbMarker.updateCollection(id, row);
                             }
                         } while (cursor.moveToNext());
                     }
                     cursor.close();
                     //добавляем новую подборку на первую позицию
-                    cv = new ContentValues();
-                    cv.put(Const.PLACE, 1);
-                    cv.put(Const.TITLE, s);
-                    dbMarker.insert(DataBase.COLLECTIONS, cv);
-                    cursor = dbMarker.query(DataBase.COLLECTIONS, null,
-                            Const.PLACE + DataBase.Q, "1");
+                    row = new ContentValues();
+                    row.put(Const.PLACE, 1);
+                    row.put(Const.TITLE, s);
+                    dbMarker.insertCollection(row);
+                    cursor = dbMarker.getCollectionByPlace(1);
                     if (cursor.moveToFirst()) {
                         adCol.insertItem(1, cursor.getInt(cursor.getColumnIndex(DataBase.ID)),
                                 cursor.getString(cursor.getColumnIndex(Const.TITLE)));
                     }
                     cursor.close();
-                    dbMarker.close();
                     //добавляем подборку в поле
                     tvCol.setText(tvCol.getText() + ", " + s);
                 }
@@ -519,49 +515,46 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void updateMarker() {
         //формуируем закладку
-        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        ContentValues cv = getMarkerValues();
+        ContentValues row = getMarkerValues();
         //обновляем закладку в базе
-        String sid = String.valueOf(id);
-        dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, sid);
+        dbMarker.updateMarker(String.valueOf(id), row);
 
         //обновляем подборки
         Cursor cursor;
         int col_id;
         String s;
-        sid = DataBase.closeList(sid);
+        String sid = dbMarker.closeList(String.valueOf(id));
         for (int i = 0; i < adCol.getCount(); i++) {
             col_id = adCol.getItem(i).getId();
             //получаем список закладок в подборке
-            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, col_id);
+            cursor = dbMarker.getMarkersList(String.valueOf(col_id));
             if (cursor.moveToFirst()) {
                 s = cursor.getString(0); //список закладок в подборке
                 if (adCol.getItem(i).isCheck()) { //в этой подоборке должна быть
-                    if (!DataBase.closeList(s).contains(sid)) { //отсутствует - добавляем
+                    if (!dbMarker.closeList(s).contains(sid)) { //отсутствует - добавляем
                         if (s != null)
                             s = Const.COMMA + s;
                         else
                             s = "";
                         //добавляем новую закладку в самое начало
-                        cv = new ContentValues();
-                        cv.put(DataBase.MARKERS, id + s);
-                        dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
+                        row = new ContentValues();
+                        row.put(DataBase.MARKERS, id + s);
+                        dbMarker.updateCollection(col_id, row);
                     }
                 } else { //в этой подоборке не должна быть
-                    if (DataBase.closeList(s).contains(sid)) {//присутствует - удаляем
-                        s = DataBase.closeList(s);
-                        s = s.replace(DataBase.closeList(String.valueOf(id)), "");
-                        s = DataBase.openList(s);
+                    if (dbMarker.closeList(s).contains(sid)) {//присутствует - удаляем
+                        s = dbMarker.closeList(s);
+                        s = s.replace(dbMarker.closeList(String.valueOf(id)), "");
+                        s = dbMarker.openList(s);
                         //обновляем подборку
-                        cv = new ContentValues();
-                        cv.put(DataBase.MARKERS, s);
-                        dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
+                        row = new ContentValues();
+                        row.put(DataBase.MARKERS, s);
+                        dbMarker.updateCollection(col_id, row);
                     }
                 }
             }
             cursor.close();
         }
-        dbMarker.close();
     }
 
     private void newProgPos() {
@@ -571,10 +564,9 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void addMarker() {
         //формулируем закладку
-        DataBase dbMarker = new DataBase(MarkerActivity.this, DataBase.MARKERS);
-        ContentValues cv = getMarkerValues();
+        ContentValues row = getMarkerValues();
         //добавляем в базу и получаем id
-        long mar_id = dbMarker.insert(DataBase.MARKERS, null, cv);
+        long mar_id = dbMarker.insertMarker(row);
         //обновляем подборки, в которые добавлена закладка
         Cursor cursor;
         int col_id;
@@ -583,8 +575,7 @@ public class MarkerActivity extends AppCompatActivity {
             if (adCol.getItem(i).isCheck()) {
                 col_id = adCol.getItem(i).getId();
                 //получаем список закладок в подборке
-                cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                        DataBase.ID + DataBase.Q, col_id);
+                cursor = dbMarker.getMarkersList(String.valueOf(col_id));
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(0); //список закладок в подборке
                     if (s != null)
@@ -592,14 +583,13 @@ public class MarkerActivity extends AppCompatActivity {
                     else
                         s = "";
                     //добавляем новую закладку в самое начало
-                    cv = new ContentValues();
-                    cv.put(DataBase.MARKERS, mar_id + s);
-                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, col_id);
+                    row = new ContentValues();
+                    row.put(DataBase.MARKERS, mar_id + s);
+                    dbMarker.updateCollection(col_id, row);
                 }
                 cursor.close();
             }
         }
-        dbMarker.close();
     }
 
     private void setPageList(String s) {
@@ -617,10 +607,10 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void setColList(String s) {
-        s = DataBase.closeList(s.substring(getString(R.string.sel_col).length()).replace(", ", Const.COMMA));
+        s = dbMarker.closeList(s.substring(getString(R.string.sel_col).length()).replace(", ", Const.COMMA));
         String t;
         for (int i = 0; i < adCol.getCount(); i++) {
-            t = DataBase.closeList(adCol.getItem(i).getTitle());
+            t = dbMarker.closeList(adCol.getItem(i).getTitle());
             adCol.getItem(i).setCheck(s.contains(t));
         }
     }
@@ -694,16 +684,16 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     public ContentValues getMarkerValues() {
-        ContentValues cv = new ContentValues();
-        cv.put(Const.LINK, link);
-        cv.put(Const.DESCTRIPTION, etDes.getText().toString());
+        ContentValues row = new ContentValues();
+        row.put(Const.LINK, link);
+        row.put(Const.DESCTRIPTION, etDes.getText().toString());
         //определяем место
         String s = tvSel.getText().toString();
         if (s.contains(":"))
             s = s.substring(s.indexOf(":") + 2).replace(", ", Const.COMMA);
         else
             s = "0";
-        cv.put(Const.PLACE, s);
+        row.put(Const.PLACE, s);
         //формулируем список подборок
         StringBuilder b = new StringBuilder();
         setColList(tvCol.getText().toString());
@@ -714,8 +704,8 @@ public class MarkerActivity extends AppCompatActivity {
             }
         }
         b.delete(b.length() - 1, b.length());
-        cv.put(DataBase.COLLECTIONS, b.toString());
-        return cv;
+        row.put(DataBase.COLLECTIONS, b.toString());
+        return row;
     }
 }
 

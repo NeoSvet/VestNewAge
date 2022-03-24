@@ -24,13 +24,16 @@ import java.util.HashMap;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.model.CollectionsModel;
+import ru.neosvet.vestnewage.storage.MarkersStorage;
 
 public class MarkersWorker extends Worker {
     private final Context context;
+    private MarkersStorage dbMarker;
 
     public MarkersWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.context = context;
+        dbMarker = new MarkersStorage(context);
     }
 
     @NonNull
@@ -63,9 +66,8 @@ public class MarkersWorker extends Worker {
     }
 
     private void doExport(Uri file) throws Exception {
-        DataBase dbMarker = new DataBase(context, DataBase.MARKERS);
         int i1, i2, i3;
-        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, null, null, null, null, null, DataBase.ID);
+        Cursor cursor = dbMarker.getCollections(DataBase.ID);
         //DocumentFile file = folder.createFile(DataBase.MARKERS, DataBase.MARKERS);
         OutputStream outStream = context.getContentResolver().openOutputStream(file);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outStream, Const.ENCODING));
@@ -82,7 +84,7 @@ public class MarkersWorker extends Worker {
         }
         cursor.close();
         bw.write(Const.AND + Const.N);
-        cursor = dbMarker.query(DataBase.MARKERS, null, null, null, null, null, DataBase.ID);
+        cursor = dbMarker.getMarkers();
         int i4, i5;
         if (cursor.moveToFirst()) {
             i1 = cursor.getColumnIndex(DataBase.ID);
@@ -107,13 +109,12 @@ public class MarkersWorker extends Worker {
     }
 
     private void doImport(Uri file) throws Exception {
-        DataBase dbMarker = new DataBase(context, DataBase.MARKERS);
         InputStream inputStream = context.getContentResolver().openInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, Const.ENCODING), 1000);
         String s;
         int id, nid;
         Cursor cursor;
-        ContentValues cv;
+        ContentValues row;
 
         //определение новых id для подборок
         HashMap<Integer, Integer> hC = new HashMap<>();
@@ -122,14 +123,13 @@ public class MarkersWorker extends Worker {
                 break;
             id = Integer.parseInt(s);
             s = br.readLine();//title
-            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
-                    Const.TITLE + DataBase.Q, s);
+            cursor = dbMarker.getMarkersListByTitle(s);
             if (cursor.moveToFirst()) {
                 nid = cursor.getInt(0);
             } else {
-                cv = new ContentValues();
-                cv.put(Const.TITLE, s);
-                nid = (int) dbMarker.insert(DataBase.COLLECTIONS, cv);
+                row = new ContentValues();
+                row.put(Const.TITLE, s);
+                nid = (int) dbMarker.insertCollection(row);
             }
             hC.put(id, nid);
             cursor.close();
@@ -144,21 +144,15 @@ public class MarkersWorker extends Worker {
             s = br.readLine();
             d = br.readLine();
             br.readLine(); //col
-            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.ID},
-                    Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
-                            DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
-                    new String[]{p, s, d});
-            if (cursor.moveToFirst()) {
-                nid = cursor.getInt(0);
-            } else {
-                cv = new ContentValues();
-                cv.put(Const.PLACE, p);
-                cv.put(Const.LINK, s);
-                cv.put(Const.DESCTRIPTION, d);
-                nid = (int) dbMarker.insert(DataBase.MARKERS, cv);
+            nid = dbMarker.foundMarker(new String[]{p, s, d});
+            if (nid == -1) {
+                row = new ContentValues();
+                row.put(Const.PLACE, p);
+                row.put(Const.LINK, s);
+                row.put(Const.DESCTRIPTION, d);
+                nid = (int) dbMarker.insertMarker(row);
             }
             hM.put(id, nid);
-            cursor.close();
         }
         br.close();
         inputStream.close();
@@ -174,7 +168,7 @@ public class MarkersWorker extends Worker {
             bw.write(hC.get(id) + Const.N);
             br.readLine(); //title
             s = br.readLine();
-            bw.write(getNewId(hM, DataBase.getList(s)) + Const.N); //markers
+            bw.write(getNewId(hM, dbMarker.getList(s)) + Const.N); //markers
             bw.flush();
         }
         //изменение id в закладках
@@ -186,7 +180,7 @@ public class MarkersWorker extends Worker {
             br.readLine(); //link
             br.readLine(); //des
             s = br.readLine();
-            bw.write(getNewId(hC, DataBase.getList(s)) + Const.N); //col
+            bw.write(getNewId(hC, dbMarker.getList(s)) + Const.N); //col
             bw.flush();
         }
         bw.close();
@@ -199,23 +193,23 @@ public class MarkersWorker extends Worker {
         while ((s = br.readLine()) != null) {
             if (s.equals(Const.AND))
                 break;
-            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, s);
+            cursor = dbMarker.getMarkersList(s);
             if (cursor.moveToFirst()) {
                 p = br.readLine();
-                cv = new ContentValues();
-                cv.put(DataBase.MARKERS, combineIds(cursor.getString(0), DataBase.getList(p)));
-                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, s);
+                row = new ContentValues();
+                row.put(DataBase.MARKERS, combineIds(cursor.getString(0), dbMarker.getList(p)));
+                dbMarker.updateCollection(Integer.parseInt(s), row);
             }
             cursor.close();
         }
         //совмещение закладок
         while ((s = br.readLine()) != null) {
-            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, s);
+            cursor = dbMarker.getMarkerCollections(s);
             if (cursor.moveToFirst()) {
                 p = br.readLine();
-                cv = new ContentValues();
-                cv.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), DataBase.getList(p)));
-                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, s);
+                row = new ContentValues();
+                row.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), dbMarker.getList(p)));
+                dbMarker.updateMarker(s, row);
             }
             cursor.close();
         }
@@ -236,9 +230,9 @@ public class MarkersWorker extends Worker {
             b.delete(0, 1);
         } else {
             b = new StringBuilder(ids);
-            ids = DataBase.closeList(ids);
+            ids = dbMarker.closeList(ids);
             for (String s : m) {
-                if (!ids.contains(DataBase.closeList(s))) {
+                if (!ids.contains(dbMarker.closeList(s))) {
                     b.append(Const.COMMA);
                     b.append(s);
                 }

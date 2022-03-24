@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -28,6 +27,7 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class LoaderWorker extends Worker {
     private final Context context;
@@ -244,17 +244,17 @@ public class LoaderWorker extends Worker {
     }
 
     private int countBookList(String name) throws Exception {
-        DataBase dataBase = new DataBase(context, name);
-        Cursor curTitle = dataBase.query(Const.TITLE, null);
+        PageStorage storage = new PageStorage(context, name);
+        Cursor curTitle = storage.getLinks();
         int k = curTitle.getCount() - 1;
         curTitle.close();
-        dataBase.close();
+        storage.close();
         return k;
     }
 
     private void downloadBookList(String name) throws Exception {
-        DataBase dataBase = new DataBase(context, name);
-        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.LINK});
+        PageStorage storage = new PageStorage(context, name);
+        Cursor curTitle = storage.getLinks();
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
@@ -263,6 +263,6 @@ public class LoaderWorker extends Worker {
             }
         }
         curTitle.close();
-        dataBase.close();
+        storage.close();
     }
 }

@@ -21,10 +21,12 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.SearchModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
+import ru.neosvet.vestnewage.storage.SearchStorage;
 
 public class SearchWorker extends Worker {
     private final Context context;
-    private DataBase dbSearch;
+    private SearchStorage dbSearch;
     private String str;
     private int mode, count1 = 0, count2 = 0;
 
@@ -49,7 +51,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new DataBase(context, Const.SEARCH);
+            dbSearch = new SearchStorage(context);
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
             str = getInputData().getString(Const.START); // начальная дата
@@ -68,7 +70,7 @@ public class SearchWorker extends Worker {
                 dbSearch.close();
                 return getResult();
             }
-            dbSearch.delete(Const.SEARCH);
+            dbSearch.clear();
             DateHelper d;
             if (mode == 3 && list.contains(DataBase.ARTICLES)) { //режим "по всем материалам"
                 //поиск по материалам (статьям)
@@ -119,9 +121,7 @@ public class SearchWorker extends Worker {
         List<String> title = new ArrayList<>();
         List<String> link = new ArrayList<>();
         List<String> id = new ArrayList<>();
-        Cursor curSearch = dbSearch.query(Const.SEARCH,
-                null, null, null, null, null,
-                DataBase.ID + (reverseOrder ? DataBase.DESC : ""));
+        Cursor curSearch = dbSearch.getResults(reverseOrder);
         if (curSearch.moveToFirst()) {
             int iTitle = curSearch.getColumnIndex(Const.TITLE);
             int iLink = curSearch.getColumnIndex(Const.LINK);
@@ -133,37 +133,35 @@ public class SearchWorker extends Worker {
             } while (curSearch.moveToNext());
         }
         curSearch.close();
-        DataBase dataBase = null;
+        PageStorage storage = null;
         Cursor cursor;
         String name1, name2 = "";
-        ContentValues cv;
+        ContentValues row;
         StringBuilder des;
         int p1 = -1, p2;
         for (int i = 0; i < title.size(); i++) {
-            name1 = DataBase.getDatePage(link.get(i));
+            name1 = PageStorage.Companion.getDatePage(link.get(i));
             if (i == 0 || !name1.equals(name2)) {
-                if (dataBase != null)
-                    dataBase.close();
-                dataBase = new DataBase(context, name1);
+                if (storage != null)
+                    storage.close();
+                storage = new PageStorage(context, name1);
                 name2 = name1;
             }
-            cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH},
-                    DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
-                    new String[]{String.valueOf(dataBase.getPageId(link.get(i))), "%" + find + "%"});
+            cursor = storage.searchParagraphs(link.get(i), find);
             if (cursor.moveToFirst()) {
-                cv = new ContentValues();
-                cv.put(Const.TITLE, title.get(i));
-                cv.put(Const.LINK, link.get(i));
+                row = new ContentValues();
+                row.put(Const.TITLE, title.get(i));
+                row.put(Const.LINK, link.get(i));
                 des = new StringBuilder(getDes(cursor.getString(0), find));
                 count2++;
                 while (cursor.moveToNext()) {
                     des.append(Const.BR + Const.BR);
                     des.append(getDes(cursor.getString(0), find));
                 }
-                cv.put(Const.DESCTRIPTION, des.toString());
-                dbSearch.update(Const.SEARCH, cv, DataBase.ID + DataBase.Q, id.get(i));
+                row.put(Const.DESCTRIPTION, des.toString());
+                dbSearch.update(id.get(i), row);
             } else {
-                dbSearch.delete(Const.SEARCH, DataBase.ID + DataBase.Q, id.get(i));
+                dbSearch.delete(id.get(i));
             }
             cursor.close();
             p2 = ProgressHelper.getProcent(i, title.size());
@@ -175,8 +173,8 @@ public class SearchWorker extends Worker {
                         .build());
             }
         }
-        if (dataBase != null)
-            dataBase.close();
+        if (storage != null)
+            storage.close();
         title.clear();
         link.clear();
         id.clear();
@@ -184,23 +182,23 @@ public class SearchWorker extends Worker {
 
     @SuppressLint("Range")
     private void searchList(String name, final String find, int mode) {
-        DataBase dataBase = new DataBase(context, name);
+        PageStorage storage = new PageStorage(context, name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
         Cursor curSearch;
         if (mode == 2) { //Искать в заголовках
-            curSearch = dataBase.query(Const.TITLE, null, Const.TITLE + DataBase.LIKE, "%" + find + "%");
+            curSearch = storage.searchTitle(find);
         } else if (mode == 4) { //Искать по дате - ищем по ссылкам
-            curSearch = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.LIKE, "%" + find + "%");
+            curSearch = storage.searchLink(find);
         } else { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
             //фильтрация по 0 и 1 будет позже
-            curSearch = dataBase.query(DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + DataBase.LIKE, "%" + find + "%");
+            curSearch = storage.searchParagraphs(find);
         }
         if (curSearch.moveToFirst()) {
             int iPar = curSearch.getColumnIndex(DataBase.PARAGRAPH);
             int iID = curSearch.getColumnIndex(DataBase.ID);
             String t, s;
-            ContentValues cv = null;
+            ContentValues row = null;
             int id = -1;
             Cursor curTitle;
             boolean add = true;
@@ -211,7 +209,7 @@ public class SearchWorker extends Worker {
                     des.append(getDes(curSearch.getString(iPar), find));
                 } else {
                     id = curSearch.getInt(iID);
-                    curTitle = dataBase.query(Const.TITLE, null, DataBase.ID + DataBase.Q, id);
+                    curTitle = storage.getPageById(id);
                     if (curTitle.moveToFirst()) {
                         s = curTitle.getString(curTitle.getColumnIndex(Const.LINK));
                         if (mode == 0) //Искать в Посланиях
@@ -219,18 +217,18 @@ public class SearchWorker extends Worker {
                         else if (mode == 1) //Искать в Катренах
                             add = s.contains(Const.POEMS);
                         if (add) {
-                            t = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), s);
-                            if (cv != null) {
+                            t = storage.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), s);
+                            if (row != null) {
                                 if (des != null) {
-                                    cv.put(Const.DESCTRIPTION, des.toString());
+                                    row.put(Const.DESCTRIPTION, des.toString());
                                     des = null;
                                 }
-                                dbSearch.insert(Const.SEARCH, cv);
+                                dbSearch.insert(row);
                             }
-                            cv = new ContentValues();
-                            cv.put(Const.TITLE, t);
-                            cv.put(Const.LINK, s);
-                            cv.put(DataBase.ID, n);
+                            row = new ContentValues();
+                            row.put(Const.TITLE, t);
+                            row.put(Const.LINK, s);
+                            row.put(DataBase.ID, n);
                             n++;
                             count2++;
                             if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
@@ -240,14 +238,14 @@ public class SearchWorker extends Worker {
                     curTitle.close();
                 }
             } while (curSearch.moveToNext());
-            if (cv != null) {
+            if (row != null) {
                 if (des != null)
-                    cv.put(Const.DESCTRIPTION, des.toString());
-                dbSearch.insert(Const.SEARCH, cv);
+                    row.put(Const.DESCTRIPTION, des.toString());
+                dbSearch.insert(row);
             }
         }
         curSearch.close();
-        dataBase.close();
+        storage.close();
     }
 
     private String getDes(String d, String sel) {

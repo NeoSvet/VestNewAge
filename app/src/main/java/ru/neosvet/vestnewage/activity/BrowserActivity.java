@@ -58,6 +58,8 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.storage.JournalStorage;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class BrowserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, Observer<Data> {
     public static final String THEME = "theme", NOMENU = "nomenu",
@@ -71,7 +73,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private SoftKeyboard softKeyboard;
     private LoaderModel model;
     private WebView wvBrowser;
-    private DataBase dbPage;
+    private PageStorage storage;
     private EditText etSearch;
     private StatusButton status;
     private LinearLayout mainLayout;
@@ -126,8 +128,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     @Override
     protected void onDestroy() {
+        storage.close();
         super.onDestroy();
-        dbPage.close();
     }
 
     private void initModel() {
@@ -178,7 +180,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         } else {
             link = state.getString(Const.LINK);
             if (link == null) return;
-            dbPage = new DataBase(this, link);
+            storage = new PageStorage(this, link);
             if (!LoaderModel.inProgress) {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);
@@ -602,10 +604,10 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 else if (!link.equals(Const.LINK) && add_history) //first value
                     history.add(0, link);
                 link = url;
-                dbPage = new DataBase(this, link);
+                storage = new PageStorage(this, link);
             }
         }
-        if (dbPage.existsPage(link))
+        if (storage.existsPage(link))
             openPage(true);
         else
             downloadPage(false);
@@ -631,15 +633,15 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void generatePage(File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        dbPage = new DataBase(this, link);
-        Cursor cursor = dbPage.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
+        storage = new PageStorage(this, link);
+        Cursor cursor = storage.getPage(link);
         int id;
         DateHelper d;
         if (cursor.moveToFirst()) {
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
-            String s = dbPage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
+            String s = storage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
             d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
-            if (dbPage.isArticle()) //раз в неделю предлагать обновить статьи
+            if (storage.isArticle()) //раз в неделю предлагать обновить статьи
                 status.checkTime(d.getTimeInSeconds());
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
             bw.write("<title>");
@@ -659,7 +661,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             return;
         }
         cursor.close();
-        cursor = dbPage.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id);
+        cursor = storage.getParagraphs(id);
         boolean poems = link.contains("poems/");
         if (cursor.moveToFirst()) {
             do {
@@ -674,7 +676,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         }
         cursor.close();
         bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n");
-        if (dbPage.isBook()) {
+        if (storage.isBook()) {
             bw.write(script);
             bw.write("PrevPage();'>На предыдущую</a> | ");
             bw.write(script);
@@ -753,7 +755,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (runNextPage == null)
             runNextPage = () -> {
                 try {
-                    String s = dbPage.getNextPage(link);
+                    String s = storage.getNextPage(link);
                     if (s != null) {
                         openLink(s, false);
                         return;
@@ -765,11 +767,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         return;
                     }
                     d.changeMonth(1);
-                    dbPage.close();
-                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    storage.close();
+                    storage = new PageStorage(BrowserActivity.this, d.getMY());
+                    Cursor cursor = storage.getList(link.contains(Const.POEMS));
                     if (cursor.moveToFirst()) {
-                        openLink(cursor.getString(0), false);
+                        int iLink = cursor.getColumnIndex(Const.LINK);
+                        openLink(cursor.getString(iLink), false);
                         return;
                     }
                 } catch (Exception e) {
@@ -794,7 +797,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (runPrevPage == null)
             runPrevPage = () -> {
                 try {
-                    String s = dbPage.getPrevPage(link);
+                    String s = storage.getPrevPage(link);
                     if (s != null) {
                         openLink(s, false);
                         return;
@@ -806,11 +809,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         return;
                     }
                     d.changeMonth(-1);
-                    dbPage.close();
-                    dbPage = new DataBase(BrowserActivity.this, d.getMY());
-                    Cursor cursor = dbPage.getCursor(link.contains(Const.POEMS));
+                    storage.close();
+                    storage = new PageStorage(BrowserActivity.this, d.getMY());
+                    Cursor cursor = storage.getList(link.contains(Const.POEMS));
                     if (cursor.moveToLast()) {
-                        openLink(cursor.getString(0), false);
+                        int iLink = cursor.getColumnIndex(Const.LINK);
+                        openLink(cursor.getString(iLink), false);
                         return;
                     }
                 } catch (Exception e) {
@@ -841,23 +845,21 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         return d.getMY();
     }
 
-
     public void runJournal() {
-        ContentValues cv = new ContentValues();
-        cv.put(Const.TIME, System.currentTimeMillis());
-        String id = dbPage.getDatePage(link) + Const.AND + dbPage.getPageId(link);
-        DataBase dbJournal = new DataBase(BrowserActivity.this, DataBase.JOURNAL);
+        ContentValues row = new ContentValues();
+        row.put(Const.TIME, System.currentTimeMillis());
+        String id = PageStorage.Companion.getDatePage(link) + Const.AND + storage.getPageId(link);
+        JournalStorage dbJournal = new JournalStorage(BrowserActivity.this);
         try {
-            int i = dbJournal.update(DataBase.JOURNAL, cv, DataBase.ID + DataBase.Q, id);
-            if (i == 0) {// no update
-                cv.put(DataBase.ID, id);
-                dbJournal.insert(DataBase.JOURNAL, cv);
+            if (!dbJournal.update(id, row)) {
+                row.put(DataBase.ID, id);
+                dbJournal.insert(row);
             }
-            Cursor cursor = dbJournal.query(DataBase.JOURNAL, new String[]{DataBase.ID});
-            i = cursor.getCount();
+            Cursor cursor = dbJournal.getIds();
+            int i = cursor.getCount();
             cursor.moveToFirst();
             while (i > 100) {
-                dbJournal.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, cursor.getString(0));
+                dbJournal.delete(cursor.getString(0));
                 cursor.moveToNext();
                 i--;
             }

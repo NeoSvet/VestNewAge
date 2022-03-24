@@ -18,12 +18,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.model.SlashModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class SlashWorker extends Worker {
     private final Context context;
@@ -57,7 +57,7 @@ public class SlashWorker extends Worker {
         BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         long time;
-        DataBase dbPage;
+        PageStorage dbPage;
         Cursor cursor;
         s = br.readLine();
         List<String> titles = new ArrayList<>();
@@ -65,10 +65,8 @@ public class SlashWorker extends Worker {
         while (!s.equals(Const.END)) {
             time = Long.parseLong(s);
             s = br.readLine(); //link
-            dbPage = new DataBase(context, s);
-            cursor = dbPage.query(Const.TITLE, new String[]{Const.TITLE, Const.TIME},
-                    Const.LINK + DataBase.Q, new String[]{s},
-                    null, null, null);
+            dbPage = new PageStorage(context, s);
+            cursor = dbPage.getPage(s);
             if (cursor.moveToFirst()) {
                 int iTime = cursor.getColumnIndex(Const.TIME);
                 if (time > cursor.getLong(iTime)) {

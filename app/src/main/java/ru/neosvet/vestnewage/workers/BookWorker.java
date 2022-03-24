@@ -29,6 +29,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class BookWorker extends Worker {
     private final long SIZE_EMPTY_BASE = 24576L;
@@ -193,7 +194,7 @@ public class BookWorker extends Worker {
         in.close();
 
         url = url.substring(0, url.lastIndexOf("/") + 1);
-        DataBase dataBase;
+        PageStorage storage;
         boolean isTitle;
         HashMap<String, Integer> ids = new HashMap<>();
         int n, id;
@@ -213,7 +214,7 @@ public class BookWorker extends Worker {
                 ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
             }
 
-            dataBase = new DataBase(context, item);
+            storage = new PageStorage(context, item);
             isTitle = true;
             in = new BufferedInputStream(lib.getStream(url + item));
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
@@ -226,20 +227,20 @@ public class BookWorker extends Worker {
                 v = br.readLine();
 
                 if (isTitle) {
-                    id = dataBase.getPageId(s);
+                    id = storage.getPageId(s);
                     if (id == -1)
-                        id = (int) dataBase.insert(Const.TITLE, getRow(s, v, time));
+                        id = (int) storage.insertTitle(getRow(s, v, time));
                     else
-                        dataBase.update(Const.TITLE, getRow(s, v, time), Const.LINK + DataBase.Q, s);
+                        storage.updateTitle(s, getRow(s, v, time));
                     ids.put(String.valueOf(n), id);
                     n++;
                 } else {
-                    dataBase.insert(DataBase.PARAGRAPH, getRow(ids.get(s), v));
+                    storage.insertParagraph(getRow(ids.get(s), v));
                 }
             }
             br.close();
             in.close();
-            dataBase.close();
+            storage.close();
             name = item;
             if (withDialog)
                 ProgressHelper.upProg();
@@ -250,18 +251,18 @@ public class BookWorker extends Worker {
     }
 
     private ContentValues getRow(String link, String title, long time) {
-        ContentValues cv = new ContentValues();
-        cv.put(Const.LINK, link);
-        cv.put(Const.TITLE, title);
-        cv.put(Const.TIME, time);
-        return cv;
+        ContentValues row = new ContentValues();
+        row.put(Const.LINK, link);
+        row.put(Const.TITLE, title);
+        row.put(Const.TIME, time);
+        return row;
     }
 
     private ContentValues getRow(int id, String par) {
-        ContentValues cv = new ContentValues();
-        cv.put(DataBase.ID, id);
-        cv.put(DataBase.PARAGRAPH, par);
-        return cv;
+        ContentValues row = new ContentValues();
+        row.put(DataBase.ID, id);
+        row.put(DataBase.PARAGRAPH, par);
+        return row;
     }
 
     private String loadPoems() throws Exception {
@@ -294,7 +295,7 @@ public class BookWorker extends Worker {
             if (a == null)
                 break;
             if (a.length() < 19) continue;
-            date2 = DataBase.getDatePage(a);
+            date2 = PageStorage.Companion.getDatePage(a);
             if (date1.equals(""))
                 date1 = date2;
             else if (!date2.equals(date1)) {
@@ -320,25 +321,25 @@ public class BookWorker extends Worker {
         return date1;
     }
 
-    private void saveData(String date) throws Exception {
+    private void saveData(String date) {
         if (title.size() > 0) {
-            DataBase dataBase = new DataBase(context, date);
-            ContentValues cv = new ContentValues();
-            cv.put(Const.TIME, System.currentTimeMillis());
-            if (dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1") == 0) {
-                dataBase.insert(Const.TITLE, cv);
+            PageStorage storage = new PageStorage(context, date);
+            ContentValues row = new ContentValues();
+            row.put(Const.TIME, System.currentTimeMillis());
+            if (!storage.updateTitle(1, row)) {
+                storage.insertTitle(row);
             }
             for (int i = 0; i < title.size(); i++) {
-                cv = new ContentValues();
-                cv.put(Const.TITLE, title.get(i));
+                row = new ContentValues();
+                row.put(Const.TITLE, title.get(i));
                 // пытаемся обновить запись:
-                if (dataBase.update(Const.TITLE, cv, Const.LINK + DataBase.Q, links.get(i)) == 0) {
+                if (!storage.updateTitle(links.get(i), row)) {
                     // обновить не получилось, добавляем:
-                    cv.put(Const.LINK, links.get(i));
-                    dataBase.insert(Const.TITLE, cv);
+                    row.put(Const.LINK, links.get(i));
+                    storage.insertTitle(row);
                 }
             }
-            dataBase.close();
+            storage.close();
             title.clear();
             links.clear();
         }

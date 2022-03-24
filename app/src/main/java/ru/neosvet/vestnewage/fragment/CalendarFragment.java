@@ -24,11 +24,10 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
-import ru.neosvet.utils.Lib;
-import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -37,6 +36,7 @@ import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarFragment extends NeoFragment implements DateDialog.Result, Observer<Data>, View.OnTouchListener {
     private int today_m, today_y;
@@ -286,8 +286,8 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         try {
             for (int i = 0; i < adCalendar.getItemCount(); i++)
                 adCalendar.getItem(i).clear();
-            DataBase dataBase = new DataBase(act, dCurrent.getMY());
-            Cursor cursor = dataBase.query(Const.TITLE, null);
+            PageStorage storage = new PageStorage(requireContext(), dCurrent.getMY());
+            Cursor cursor = storage.getListAll();
             boolean empty = true;
             if (cursor.moveToFirst()) {
                 if (loadIfNeed) {
@@ -311,8 +311,8 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
                     }
                     i = adCalendar.indexOf(i);
                     adCalendar.getItem(i).addLink(link);
-                    if (dataBase.existsPage(link)) {
-                        title = dataBase.getPageTitle(title, link);
+                    if (storage.existsPage(link)) {
+                        title = storage.getPageTitle(title, link);
                         adCalendar.getItem(i).addTitle(title.substring(title.indexOf(" ") + 1));
                     } else {
                         title = getTitleByLink(link);
@@ -322,7 +322,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
                 }
             }
             cursor.close();
-            dataBase.close();
+            storage.close();
             adCalendar.notifyDataSetChanged();
 
             if (empty && loadIfNeed)
@@ -335,12 +335,12 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     }
 
     private String getTitleByLink(String s) {
-        DataBase dataBase = new DataBase(act, DataBase.ARTICLES);
-        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.TITLE}, Const.LINK + DataBase.Q, s);
+        PageStorage storage = new PageStorage(requireContext(), DataBase.ARTICLES);
+        Cursor curTitle = storage.getTitle(s);
         if (curTitle.moveToFirst())
             s = curTitle.getString(0);
         curTitle.close();
-        dataBase.close();
+        storage.close();
         return s;
     }
 

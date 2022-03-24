@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.storage.AdsStorage;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -69,9 +70,9 @@ public class SlashUtils {
             }
         }
         if (ver > 44 && ver < 47) {
-            DataBase db = new DataBase(context, DevadsHelper.NAME);
-            db.delete(DevadsHelper.NAME);
-            db.close();
+            AdsStorage storage = new AdsStorage(context);
+            storage.delete();
+            storage.close();
         }
         if (ver == 0)
             showSummaryNotif();

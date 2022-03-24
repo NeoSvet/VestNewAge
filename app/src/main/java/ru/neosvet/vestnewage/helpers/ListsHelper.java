@@ -6,9 +6,9 @@ import android.database.Cursor;
 import java.io.File;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class ListsHelper {
     private final Context context;
@@ -39,8 +39,8 @@ public class ListsHelper {
         if (bookIsOld == 0) {
             DateHelper d = DateHelper.initNow(context);
             d.changeMonth(-1);
-            DataBase dataBase = new DataBase(context, d.getMY());
-            Cursor curTime = dataBase.query(Const.TITLE, new String[]{Const.TIME});
+            PageStorage storage = new PageStorage(context, d.getMY());
+            Cursor curTime = storage.getTime();
             if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                 bookIsOld = 1;
             } else {
@@ -48,10 +48,10 @@ public class ListsHelper {
                 bookIsOld = timeNow - time > DateHelper.DAY_IN_SEC ? 1 : (byte) 2;
                 if (bookIsOld == 2) {
                     curTime.close();
-                    dataBase.close();
+                    storage.close();
                     d = DateHelper.putYearMonth(context, 2016, 1);
-                    dataBase = new DataBase(context, d.getMY());
-                    curTime = dataBase.query(Const.TITLE, new String[]{Const.TIME});
+                    storage = new PageStorage(context, d.getMY());
+                    curTime = storage.getTime();
                     if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                         bookIsOld = 1;
                     } else {
@@ -61,7 +61,7 @@ public class ListsHelper {
                 }
             }
             curTime.close();
-            dataBase.close();
+            storage.close();
         }
         return bookIsOld == 1;
     }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -33,10 +32,11 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarWorker extends Worker {
     private final Context context;
-    private DataBase dataBase;
+    private PageStorage storage;
     private final Lib lib;
     private final List<ListItem> list = new ArrayList<>();
 
@@ -114,8 +114,8 @@ public class CalendarWorker extends Worker {
 
     public static int getListLink(Context context, int year, int month) throws Exception {
         DateHelper d = DateHelper.putYearMonth(context, year, month);
-        DataBase dataBase = new DataBase(context, d.getMY());
-        Cursor curTitle = dataBase.query(Const.TITLE, new String[]{Const.LINK});
+        PageStorage storage = new PageStorage(context, d.getMY());
+        Cursor curTitle = storage.getLinks();
         int k = 0;
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
@@ -132,7 +132,7 @@ public class CalendarWorker extends Worker {
             bw.close();
         }
         curTitle.close();
-        dataBase.close();
+        storage.close();
         return k;
     }
 
@@ -185,9 +185,9 @@ public class CalendarWorker extends Worker {
                 }
             }
         }
-        if (dataBase != null) {
-            dataBase.close();
-            dataBase = null;
+        if (storage != null) {
+            storage.close();
+            storage = null;
         }
         if (ProgressHelper.isCancelled()) {
             list.clear();
@@ -208,19 +208,17 @@ public class CalendarWorker extends Worker {
         list.clear();
     }
 
-
-    private void initDatebase(String name) throws Exception {
-        if (dataBase != null)
-            dataBase.close();
-        dataBase = new DataBase(context, name);
-        ContentValues cv = new ContentValues();
-        cv.put(Const.TIME, System.currentTimeMillis());
-        if (dataBase.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1") == 0) {
-            dataBase.insert(Const.TITLE, cv);
-        }
+    private void initDatebase(String name) {
+        if (storage != null)
+            storage.close();
+        storage = new PageStorage(context, name);
+        ContentValues row = new ContentValues();
+        row.put(Const.TIME, System.currentTimeMillis());
+        if (!storage.updateTitle(1, row))
+            storage.insertTitle(row);
     }
 
-    private void addLink(int n, String link) throws Exception {
+    private void addLink(int n, String link) {
         if (list.get(n).getCount() > 0) {
             for (int i = 0; i < list.get(n).getCount(); i++) {
                 if (list.get(n).getLink(i).contains(link))
@@ -228,16 +226,16 @@ public class CalendarWorker extends Worker {
             }
         }
         list.get(n).addLink(link);
-        ContentValues cv = new ContentValues();
-        cv.put(Const.LINK, link);
+        ContentValues row = new ContentValues();
+        row.put(Const.LINK, link);
         // пытаемся обновить запись:
-        if (dataBase.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) == 0) {
+        if (!storage.updateTitle(link, row)) {
             // обновить не получилось, добавляем:
             if (link.contains("@"))
-                cv.put(Const.TITLE, link.substring(9));
+                row.put(Const.TITLE, link.substring(9));
             else
-                cv.put(Const.TITLE, link);
-            dataBase.insert(Const.TITLE, cv);
+                row.put(Const.TITLE, link);
+            storage.insertTitle(row);
         }
     }
 }

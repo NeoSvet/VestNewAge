@@ -11,16 +11,14 @@ import java.io.InputStreamReader;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.storage.AdsStorage;
 
 public class DevadsHelper {
-    public static final String NAME = "devads";
-    private final byte MODE_T = 0, MODE_U = 1, MODE_TLD = 2, MODE_TD = 3, MODE_TL = 4;
-    private DataBase db;
+    private AdsStorage storage;
     private CustomDialog alert;
     private final Context context;
     private long time = -1;
@@ -29,7 +27,7 @@ public class DevadsHelper {
 
     public DevadsHelper(Context context) {
         this.context = context;
-        db = new DataBase(context, NAME);
+        storage = new AdsStorage(context);
         isClosed = false;
     }
 
@@ -51,7 +49,7 @@ public class DevadsHelper {
 
     public long getTime() {
         if (time == -1) {
-            Cursor cursor = db.query(NAME, new String[]{Const.TITLE}, Const.MODE + DataBase.Q, MODE_T);
+            Cursor cursor = storage.getTime();
             if (cursor.moveToFirst())
                 time = Long.parseLong(cursor.getString(0));
             else
@@ -62,7 +60,7 @@ public class DevadsHelper {
     }
 
     public String[] getItem(int index) {
-        Cursor cursor = db.query(NAME, null);
+        Cursor cursor = storage.getAll();
         String[] m = new String[3];
         if (!cursor.moveToFirst())
             return m;
@@ -89,10 +87,10 @@ public class DevadsHelper {
         Cursor cursor;
         String ad;
         if (onlyUnread) {
-            cursor = db.query(NAME, null, Const.UNREAD + DataBase.Q, 1);
+            cursor = storage.getUnread();
             ad = context.getString(R.string.ad) + ": ";
         } else {
-            cursor = db.query(NAME, null);
+            cursor = storage.getAll();
             ad = "";
         }
         if (!cursor.moveToFirst())
@@ -115,9 +113,9 @@ public class DevadsHelper {
             if (onlyUnread && !unread)
                 continue;
             switch (m) {
-                case MODE_T:
+                case AdsStorage.MODE_T:
                     continue;
-                case MODE_U:
+                case AdsStorage.MODE_U:
                     m = Integer.parseInt(t);
                     if (m > context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode) {
                         list.insertItem(0, new ListItem(ad + context.getString(R.string.access_new_version)));
@@ -129,9 +127,9 @@ public class DevadsHelper {
                     break;
                 default:
                     list.insertItem(0, new ListItem(ad + t));
-                    if (m != MODE_TD)
+                    if (m != AdsStorage.MODE_TD)
                         list.getItem(0).addLink(l);
-                    if (m != MODE_TL)
+                    if (m != AdsStorage.MODE_TL)
                         list.getItem(0).addHead(d);
                     break;
             }
@@ -145,14 +143,14 @@ public class DevadsHelper {
 
     public void clear() {
         time = 0;
-        db.delete(NAME, Const.MODE + " != ?", MODE_T);
+        storage.clear();
     }
 
     public void showAd(String title, final String link, String des) {
-        ContentValues cv = new ContentValues();
-        cv.put(Const.UNREAD, 0);
-        if (db.update(NAME, cv, Const.TITLE + DataBase.Q, title) == 0) {
-            db.update(NAME, cv, Const.DESCTRIPTION + DataBase.Q, des);
+        ContentValues row = new ContentValues();
+        row.put(Const.UNREAD, 0);
+        if (!storage.updateByTitle(title, row)) {
+            storage.updateByDes(des, row);
         }
 
         if (des.equals("")) {// only link
@@ -188,33 +186,28 @@ public class DevadsHelper {
         String s;
         String[] m = new String[]{"", "", ""};
         byte mode, n = 0, index = 0;
-        Cursor cursor;
         index_warn = -1;
         boolean isNew = false;
         while ((s = br.readLine()) != null) {
             if (s.contains("<e>")) {
                 if (m[0].contains("<u>"))
-                    mode = MODE_U;
+                    mode = AdsStorage.MODE_U;
                 else if (m[2].contains("<d>"))
-                    mode = MODE_TLD;
+                    mode = AdsStorage.MODE_TLD;
                 else if (m[1].contains("<d>"))
-                    mode = MODE_TD;
+                    mode = AdsStorage.MODE_TD;
                 else
-                    mode = MODE_TL;
+                    mode = AdsStorage.MODE_TL;
                 if (m[0].contains("<w>"))
                     index_warn = index;
                 index++;
                 m[0] = m[0].substring(3);
                 if (isNew)
                     addRow(mode, m);
-                else {
-                    cursor = db.query(NAME, new String[]{Const.TITLE}, Const.TITLE + DataBase.Q, m[0]);
-                    if (!cursor.moveToFirst()) {
-                        clear();
-                        isNew = true;
-                        addRow(mode, m);
-                    }
-                    cursor.close();
+                else if (!storage.existsTitle(m[0])) {
+                    clear();
+                    isNew = true;
+                    addRow(mode, m);
                 }
                 n = 0;
                 m[2] = "";
@@ -225,46 +218,46 @@ public class DevadsHelper {
                 n++;
             }
         }
-        ContentValues cv = new ContentValues();
-        cv.put(Const.MODE, MODE_T);
-        cv.put(Const.UNREAD, 0);
+        ContentValues row = new ContentValues();
+        row.put(Const.MODE, AdsStorage.MODE_T);
+        row.put(Const.UNREAD, 0);
         time = System.currentTimeMillis();
-        cv.put(Const.TITLE, time);
-        if (db.update(NAME, cv, Const.MODE + DataBase.Q, MODE_T) == 0)
-            db.insert(NAME, cv);
+        row.put(Const.TITLE, time);
+        if (!storage.updateTime(row))
+            storage.insert(row);
         return isNew;
     }
 
     private void addRow(byte mode, String[] m) {
-        ContentValues cv = new ContentValues();
-        cv.put(Const.MODE, mode);
-        cv.put(Const.TITLE, m[0]);
-        if (mode == MODE_U || mode == MODE_TD) {
-            cv.put(Const.DESCTRIPTION, m[1].substring(3));
+        ContentValues row = new ContentValues();
+        row.put(Const.MODE, mode);
+        row.put(Const.TITLE, m[0]);
+        if (mode == AdsStorage.MODE_U || mode == AdsStorage.MODE_TD) {
+            row.put(Const.DESCTRIPTION, m[1].substring(3));
         } else {
-            cv.put(Const.LINK, m[1].substring(3));
-            if (mode == MODE_TLD)
-                cv.put(Const.DESCTRIPTION, m[2].substring(3));
+            row.put(Const.LINK, m[1].substring(3));
+            if (mode == AdsStorage.MODE_TLD)
+                row.put(Const.DESCTRIPTION, m[2].substring(3));
         }
-        db.insert(NAME, cv);
+        storage.insert(row);
     }
 
     public void close() {
         if (isClosed)
             return;
-        db.close();
+        storage.close();
         isClosed = true;
     }
 
     public void reopen() {
         if (isClosed) {
-            db = new DataBase(context, NAME);
+            storage = new AdsStorage(context);
             isClosed = false;
         }
     }
 
     public int getUnreadCount() {
-        Cursor cursor = db.query(NAME, new String[]{Const.TITLE}, Const.UNREAD + DataBase.Q, 1);
+        Cursor cursor = storage.getUnread();
         int k = cursor.getCount();
         cursor.close();
         return k;

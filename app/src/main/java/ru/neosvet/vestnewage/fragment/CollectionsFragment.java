@@ -42,8 +42,11 @@ import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.vestnewage.model.CollectionsModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.storage.MarkersStorage;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CollectionsFragment extends NeoFragment implements Observer<Data> {
+    private MarkersStorage dbMarker;
     private ListView lvMarker;
     private View container, fabEdit, fabMenu, fabBack, pEdit, bExport;
     private TextView tvEmpty;
@@ -85,6 +88,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        dbMarker = new MarkersStorage(requireContext());
         initViews();
         setViews();
         initModel();
@@ -93,6 +97,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     @Override
     public void onDestroyView() {
+        dbMarker.close();
         CollectionsModel.state.removeObserver(this);
         super.onDestroyView();
     }
@@ -251,7 +256,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         fabBack.setVisibility(View.VISIBLE);
         adMarker.clear();
         act.setTitle(sCol.substring(0, sCol.indexOf(Const.N)));
-        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         int iID, iPlace, iLink, iDes;
         String[] mId;
         String link = sCol.substring(sCol.indexOf(Const.N) + 1);
@@ -263,7 +267,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         String place;
         int k = 0;
         for (String s : mId) {
-            cursor = dbMarker.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, s);
+            cursor = dbMarker.getMarker(s);
             if (cursor.moveToFirst()) {
                 iID = cursor.getColumnIndex(DataBase.ID);
                 iPlace = cursor.getColumnIndex(Const.PLACE);
@@ -279,7 +283,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             }
             cursor.close();
         }
-        dbMarker.close();
         adMarker.notifyDataSetChanged();
         if (adMarker.getCount() == 0) {
             tvEmpty.setText(getString(R.string.collection_is_empty));
@@ -293,9 +296,10 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             return getString(R.string.page_entirely);
         try {
             StringBuilder b = new StringBuilder();
+            PageStorage storage = new PageStorage(requireContext(), link);
             if (p.contains("%")) { //позиция
                 b.append(Const.N);
-                b.append(DataBase.getContentPage(act, link, false));
+                b.append(storage.getContentPage(link, false));
                 int k = 5; // имитация нижнего "колонтитула" страницы
                 int i = b.indexOf(Const.N);
                 while (i > -1) {
@@ -333,25 +337,24 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                 b.append(p.replace(Const.COMMA, ", "));
                 b.append(":");
                 b.append(Const.N);
-                p = DataBase.closeList(p);
+                p = dbMarker.closeList(p);
 
-                DataBase dataBase = new DataBase(act, link);
-                Cursor cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
+                Cursor cursor = storage.getPage(link);
                 int id;
                 if (cursor.moveToFirst()) {
                     id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
                 } else { // страница не загружена...
                     cursor.close();
-                    dataBase.close();
+                    storage.close();
                     b.append(getString(R.string.not_load_page));
                     return b.toString();
                 }
                 cursor.close();
-                cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id);
+                cursor = storage.getParagraphs(id);
                 int i = 1;
                 if (cursor.moveToFirst()) {
                     do {
-                        if (p.contains(DataBase.closeList(String.valueOf(i)))) {
+                        if (p.contains(dbMarker.closeList(String.valueOf(i)))) {
                             b.append(Lib.withOutTags(cursor.getString(0)));
                             b.append(Const.N);
                             b.append(Const.N);
@@ -360,11 +363,11 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
                     } while (cursor.moveToNext());
                 } else { // страница не загружена...
                     cursor.close();
-                    dataBase.close();
+                    storage.close();
                     throw new Exception();
                 }
                 cursor.close();
-                dataBase.close();
+                storage.close();
                 b.delete(b.length() - 2, b.length());
             }
             if (b.length() > 0)
@@ -376,12 +379,13 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         if (p.contains("%"))
             p = act.getString(R.string.sel_pos) + p;
         else
-            p = act.getString(R.string.sel_par) + DataBase.openList(p).replace(Const.COMMA, ", ");
+            p = act.getString(R.string.sel_par) + dbMarker.openList(p).replace(Const.COMMA, ", ");
         return p;
     }
 
     private String getTitle(String link) {
-        String t = DataBase.getContentPage(act, link, true);
+        PageStorage storage = new PageStorage(requireContext(), link);
+        String t = storage.getContentPage(link, true);
         if (t == null)
             return link;
         return t;
@@ -397,8 +401,7 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
         fabBack.setVisibility(View.GONE);
         adMarker.clear();
         act.setTitle(getString(R.string.collections));
-        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, null, null, null, null, null, Const.PLACE);
+        Cursor cursor = dbMarker.getCollections(Const.PLACE);
         String s;
         boolean isNull = false;
         if (cursor.moveToFirst()) {
@@ -415,7 +418,6 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        dbMarker.close();
         if (isNull && adMarker.getCount() == 1) {
             adMarker.clear();
             tvEmpty.setText(getString(R.string.empty_collections));
@@ -672,13 +674,9 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
             Lib.showToast(act, getString(R.string.cancel_rename));
             return;
         }
-        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        ContentValues cv = new ContentValues();
-        cv.put(Const.TITLE, name);
-        int r = dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                adMarker.getItem(iSel).getStrId());
-        dbMarker.close();
-        if (r == 1) {
+        ContentValues row = new ContentValues();
+        row.put(Const.TITLE, name);
+        if (dbMarker.updateCollection(adMarker.getItem(iSel).getId(), row)) {
             adMarker.getItem(iSel).setTitle(name);
             adMarker.notifyDataSetChanged();
         } else
@@ -697,106 +695,37 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     private void saveChange() {
         if (change) {
-            DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-            ContentValues cv;
+            ContentValues row;
             if (sCol == null) {
                 for (int i = 1; i < adMarker.getCount(); i++) {
-                    cv = new ContentValues();
-                    cv.put(Const.PLACE, i);
-                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q,
-                            adMarker.getItem(i).getStrId());
+                    row = new ContentValues();
+                    row.put(Const.PLACE, i);
+                    dbMarker.updateCollection(adMarker.getItem(i).getId(), row);
                 }
             } else {
-                cv = new ContentValues();
+                row = new ContentValues();
                 final String t = getListId();
-                cv.put(DataBase.MARKERS, t);
-                dbMarker.update(DataBase.COLLECTIONS, cv, Const.TITLE + DataBase.Q,
-                        sCol.substring(0, sCol.indexOf(Const.N)));
+                row.put(DataBase.MARKERS, t);
+                dbMarker.updateCollectionByTitle(sCol.substring(0, sCol.indexOf(Const.N)), row);
                 sCol = sCol.substring(0, sCol.indexOf(Const.N) + 1) + t;
             }
-            dbMarker.close();
             change = false;
         }
     }
 
     private void deleteElement() {
-        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
         int n;
-        String s, id = String.valueOf(adMarker.getItem(iSel).getId());
-        ContentValues cv;
-        Cursor cursor;
-        String[] mId;
-        StringBuilder b = new StringBuilder();
+        String id = String.valueOf(adMarker.getItem(iSel).getId());
         if (sCol == null) { //удаляем подборку
             n = 1;
-            //получаем список закладок у удаляемой подборки:
-            s = adMarker.getItem(iSel).getData();
-            mId = DataBase.getList(s);
-            cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.ID},
-                    Const.TITLE + DataBase.Q, getString(R.string.no_collections));
-            cursor.moveToFirst();
-            int nc_id = cursor.getInt(0); //id подборки "Вне подборок"
-            cursor.close();
-            for (String item : mId) { //перебираем список закладок.
-                cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, item);
-                if (!cursor.moveToFirst()) continue;
-                s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
-                cursor.close();
-                s = s.replace(DataBase.closeList(id), Const.COMMA); //убираем удаляемую подборку
-                if (s.length() == 1) { //в списке не осталось подборок
-                    s = String.valueOf(nc_id); //указываем "Вне подборок"
-                    // добавляем в список на добавление в "Вне подборок":
-                    b.append(item);
-                    b.append(Const.COMMA);
-                } else
-                    s = DataBase.openList(s);
-                //обновляем закладку:
-                cv = new ContentValues();
-                cv.put(DataBase.COLLECTIONS, s);
-                dbMarker.update(DataBase.MARKERS, cv, DataBase.ID + DataBase.Q, item);
-            }
-            //удаляем подборку:
-            dbMarker.delete(DataBase.COLLECTIONS, DataBase.ID + DataBase.Q, id);
-            //дополняем список "Вне подоборок"
-            if (b.length() > 0) { //список на добавление не пуст
-                //получаем список закладок в "Вне подоборок":
-                cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, nc_id);
-                if (cursor.moveToFirst())
-                    s = cursor.getString(0);
-                else
-                    s = "";
-                cursor.close();
-                //дополняем список:
-                cv = new ContentValues();
-                cv.put(DataBase.MARKERS, b + s);
-                dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, nc_id);
-                loadColList(); //обновляем список подборок
-            } else //иначе просто удаляем подборку из списка
-                adMarker.removeAt(iSel);
+            String s = adMarker.getItem(iSel).getData();
+            dbMarker.deleteCollection(id, dbMarker.getList(s),
+                    getString(R.string.no_collections));
         } else { //удаляем закладку
             n = 0;
-            cursor = dbMarker.query(DataBase.MARKERS, new String[]{DataBase.COLLECTIONS}, DataBase.ID + DataBase.Q, id);
-            if (cursor.moveToFirst()) {
-                s = DataBase.closeList(cursor.getString(0)); //список подборок у закладки
-                mId = DataBase.getList(s);
-                for (String item : mId) { //перебираем список подборок
-                    cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS}, DataBase.ID + DataBase.Q, item);
-                    if (!cursor.moveToFirst()) continue;
-                    s = DataBase.closeList(cursor.getString(0)); //список закладок у подборки
-                    s = s.replace(DataBase.closeList(id), Const.COMMA); //убираем удаляемую закладку
-                    s = DataBase.openList(s);
-                    //обновляем подборку:
-                    cv = new ContentValues();
-                    cv.put(DataBase.MARKERS, s);
-                    dbMarker.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, item);
-                }
-            }
-            cursor.close();
-            //удаляем закладку:
-            dbMarker.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, id);
-            adMarker.removeAt(iSel);
+            dbMarker.deleteMarker(id);
         }
-        dbMarker.close();
+        adMarker.removeAt(iSel);
         if (adMarker.getCount() == n) { //не осталось элементов для редактирования
             if (n == 0) { //список закладок пуст
                 tvEmpty.setText(getString(R.string.collection_is_empty));
@@ -848,15 +777,12 @@ public class CollectionsFragment extends NeoFragment implements Observer<Data> {
 
     private void updateMarkersList() {
         sCol = sCol.substring(0, sCol.indexOf(Const.N));
-        DataBase dbMarker = new DataBase(act, DataBase.MARKERS);
-        Cursor cursor = dbMarker.query(DataBase.COLLECTIONS, new String[]{DataBase.MARKERS},
-                Const.TITLE + DataBase.Q, sCol);
+        Cursor cursor = dbMarker.getMarkersListByTitle(sCol);
         if (cursor.moveToFirst())
             sCol += Const.N + cursor.getString(0); //список закладок в подборке
         else
             sCol += Const.N;
         cursor.close();
-        dbMarker.close();
 
         loadMarList();
         if (iSel == adMarker.getCount())

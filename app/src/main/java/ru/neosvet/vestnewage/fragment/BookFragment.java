@@ -32,13 +32,13 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.Tip;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
@@ -49,6 +49,8 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.storage.JournalStorage;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class BookFragment extends NeoFragment implements DateDialog.Result, View.OnClickListener, Observer<Data> {
     private final String DIALOG_DATE = "date";
@@ -263,25 +265,25 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             }
             ivNext.setEnabled(existsList(d, katren));
             d.changeMonth(-1);
-            DataBase dataBase;
+            PageStorage storage;
             String t, s;
             Cursor cursor;
 
             if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
-                dataBase = new DataBase(act, "12.04");
-                cursor = dataBase.query(Const.TITLE, null);
+                storage = new PageStorage(requireContext(), "12.04");
+                cursor = storage.getListAll();
                 if (cursor.moveToFirst() && cursor.moveToNext()) {
                     t = cursor.getString(cursor.getColumnIndex(Const.TITLE));
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK));
                     adBook.addItem(new ListItem(t, s));
                 }
                 cursor.close();
-                dataBase.close();
+                storage.close();
             }
 
-            dataBase = new DataBase(act, d.getMY());
-            cursor = dataBase.query(Const.TITLE, null);
+            storage = new PageStorage(requireContext(), d.getMY());
+            cursor = storage.getListAll();
 
             DateHelper dModList;
             if (cursor.moveToFirst()) {
@@ -289,17 +291,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                         cursor.getLong(cursor.getColumnIndex(Const.TIME)));
                 if (d.getYear() > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close();
-                    if (katren) { // катрены
-                        cursor = dataBase.query(Const.TITLE, null,
-                                Const.LINK + DataBase.LIKE,
-                                new String[]{"%" + Const.POEMS + "%"}
-                                , null, null, Const.LINK);
-                    } else { // послания
-                        cursor = dataBase.query(Const.TITLE, null,
-                                Const.LINK + " NOT" + DataBase.LIKE,
-                                new String[]{"%" + Const.POEMS + "%"}
-                                , null, null, Const.LINK);
-                    }
+                    cursor = storage.getList(katren);
                     cursor.moveToFirst();
                 } else // в случае списков с сайта Откровений надо просто перейти к следующей записи
                     cursor.moveToNext();
@@ -322,7 +314,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             } else
                 dModList = d;
             cursor.close();
-            dataBase.close();
+            storage.close();
             DateHelper today = DateHelper.initToday(act);
             if (d.getMonth() == today.getMonth() && d.getYear() == today.getYear()) {
                 //если выбранный месяц - текущий
@@ -352,8 +344,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     }
 
     private boolean existsList(DateHelper d, boolean katren) {
-        DataBase dataBase = new DataBase(act, d.getMY());
-        Cursor cursor = dataBase.query(Const.TITLE, new String[]{Const.LINK});
+        PageStorage storage = new PageStorage(requireContext(), d.getMY());
+        Cursor cursor = storage.getLinks();
         String s;
         if (cursor.moveToFirst()) {
             // первую запись пропускаем, т.к. там дата изменения списка
@@ -362,13 +354,13 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                 if ((s.contains(Const.POEMS) && katren) ||
                         (!s.contains(Const.POEMS) && !katren)) {
                     cursor.close();
-                    dataBase.close();
+                    storage.close();
                     return true;
                 }
             }
         }
         cursor.close();
-        dataBase.close();
+        storage.close();
         return false;
     }
 
@@ -655,18 +647,18 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         }
         //открываем базу по случайной дате:
         String name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
-        DataBase dataBase = new DataBase(act, name);
+        PageStorage storage = new PageStorage(requireContext(), name);
         Cursor curTitle;
         String title = null;
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         if (view.getId() == R.id.bRndKat) { //случайный катрен
             title = getString(R.string.rnd_kat);
-            curTitle = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.LIKE, "%" + Const.POEMS + "%");
+            curTitle = storage.getList(true);
         } else if (view.getId() == R.id.bRndPos) { //случайное послание
             title = getString(R.string.rnd_pos);
-            curTitle = dataBase.query(Const.TITLE, null, Const.LINK + " NOT" + DataBase.LIKE, "%" + Const.POEMS + "%");
+            curTitle = storage.getList(false);
         } else { //случайных стих
-            curTitle = dataBase.query(Const.TITLE, null);
+            curTitle = storage.getListAll();
         }
         //определяем случайных текст:
         if (curTitle.getCount() < 2)
@@ -677,16 +669,14 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         }
         if (!curTitle.moveToPosition(n)) {
             curTitle.close();
-            dataBase.close();
+            storage.close();
             Lib.showToast(act, getString(R.string.alert_rnd));
             return;
         }
         //если случайный текст найден
         String s = "";
         if (view.getId() == R.id.bRndStih) { //случайных стих
-            s = String.valueOf(curTitle.getInt(curTitle.getColumnIndex(DataBase.ID)));
-            Cursor curPar = dataBase.query(DataBase.PARAGRAPH,
-                    new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, s);
+            Cursor curPar = storage.getParagraphs(curTitle);
             if (curPar.getCount() > 1) { //если текст скачен
                 g = new Random();
                 n = curPar.getCount(); //номер случайного стиха
@@ -714,7 +704,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (link == null)
             msg = getString(R.string.try_again);
         else
-            msg = dataBase.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
+            msg = storage.getPageTitle(curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link);
         curTitle.close();
         if (title == null) {
             title = msg;
@@ -723,16 +713,16 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         dialog = title + Const.AND + link + Const.AND + msg + Const.AND + s + Const.AND + n;
         showRndAlert(title, link, msg, s, n);
         if (link == null) {
-            dataBase.close();
+            storage.close();
             return;
         }
         //добавляем в журнал:
-        ContentValues cv = new ContentValues();
-        cv.put(Const.TIME, System.currentTimeMillis());
-        DataBase dbJournal = new DataBase(act, DataBase.JOURNAL);
-        cv.put(DataBase.ID, DataBase.getDatePage(link) + Const.AND + dataBase.getPageId(link) + Const.AND + n);
-        dataBase.close();
-        dbJournal.insert(DataBase.JOURNAL, cv);
+        ContentValues row = new ContentValues();
+        row.put(Const.TIME, System.currentTimeMillis());
+        JournalStorage dbJournal = new JournalStorage(requireContext());
+        row.put(DataBase.ID, PageStorage.Companion.getDatePage(link) + Const.AND + storage.getPageId(link) + Const.AND + n);
+        storage.close();
+        dbJournal.insert(row);
         dbJournal.close();
     }
 

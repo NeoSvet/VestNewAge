@@ -24,6 +24,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 /**
  * Created by NeoSvet on 11.06.2018.
@@ -53,31 +54,31 @@ public class SummaryHelper {
         File file = new File(context.getFilesDir() + Const.RSS);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String title, link, name;
-        DataBase dataBase = null;
-        ContentValues cv;
+        PageStorage storage = null;
+        ContentValues row;
         Cursor cursor;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             br.readLine(); //des
             br.readLine(); //time
-            name = DataBase.getDatePage(link);
-            if (dataBase == null || !dataBase.getDatabaseName().equals(name)) {
-                if (dataBase != null)
-                    dataBase.close();
-                dataBase = new DataBase(context, name);
+            name = PageStorage.Companion.getDatePage(link);
+            if (storage == null || !storage.getName().equals(name)) {
+                if (storage != null)
+                    storage.close();
+                storage = new PageStorage(context, name);
             }
-            cursor = dataBase.query(Const.TITLE, null, Const.LINK + DataBase.Q, link);
+            cursor = storage.getPage(link);
             if (!cursor.moveToFirst()) {
-                cv = new ContentValues();
-                cv.put(Const.TITLE, title);
-                cv.put(Const.LINK, link);
-                dataBase.insert(Const.TITLE, cv);
+                row = new ContentValues();
+                row.put(Const.TITLE, title);
+                row.put(Const.LINK, link);
+                storage.insertTitle(row);
             }
             cursor.close();
         }
         br.close();
-        if (dataBase != null)
-            dataBase.close();
+        if (storage != null)
+            storage.close();
     }
 
     public void createNotification(String text, String link) {

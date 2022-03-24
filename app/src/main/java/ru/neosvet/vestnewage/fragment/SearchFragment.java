@@ -42,13 +42,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.ResizeAnim;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
@@ -58,6 +57,7 @@ import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.list.PageAdapter;
 import ru.neosvet.vestnewage.model.SearchModel;
+import ru.neosvet.vestnewage.storage.SearchStorage;
 
 public class SearchFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener, Observer<Data> {
     private final String SETTINGS = "s", ADDITION = "a", LABEL = "l", LAST_RESULTS = "r", CLEAR_RESULTS = "c";
@@ -549,9 +549,8 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     private void showResult() {
         adResults.clear();
         adResults.notifyDataSetChanged();
-        DataBase dataBase = new DataBase(act, Const.SEARCH);
-        Cursor cursor = dataBase.query(Const.SEARCH, null, null, null, null, null,
-                DataBase.ID + (dStart.getTimeInMills() > dEnd.getTimeInMills() ? DataBase.DESC : ""));
+        SearchStorage storage = new SearchStorage(requireContext());
+        Cursor cursor = storage.getResults(dStart.getTimeInMills() > dEnd.getTimeInMills());
         if (cursor.getCount() == 0) {
             bShow.setVisibility(View.GONE);
             pAdditionSet.setVisibility(View.GONE);
@@ -594,7 +593,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                 }
             }
         }
-        dataBase.close();
+        storage.close();
     }
 
     @SuppressLint("ClickableViewAccessibility")

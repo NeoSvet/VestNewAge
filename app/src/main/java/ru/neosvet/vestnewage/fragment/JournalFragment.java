@@ -28,9 +28,11 @@ import ru.neosvet.vestnewage.activity.MarkerActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.storage.JournalStorage;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class JournalFragment extends Fragment {
-    private DataBase dbJournal;
+    private JournalStorage dbJournal;
     private ListAdapter adJournal;
     private MainActivity act;
     private Tip tip;
@@ -88,9 +90,9 @@ public class JournalFragment extends Fragment {
     @SuppressLint("Range")
     private void openList() {
         tip.hide();
-        Cursor curJ = dbJournal.query(DataBase.JOURNAL, null, null, null, null, null, Const.TIME + DataBase.DESC);
+        Cursor curJ = dbJournal.getAll();
         if (curJ.moveToFirst()) {
-            DataBase dataBase;
+            PageStorage storage;
             Cursor cursor;
             int iTime = curJ.getColumnIndex(Const.TIME);
             int iID = curJ.getColumnIndex(DataBase.ID);
@@ -105,11 +107,11 @@ public class JournalFragment extends Fragment {
             long t;
             do {
                 id = curJ.getString(iID).split(Const.AND);
-                dataBase = new DataBase(act, id[0]);
-                cursor = dataBase.query(Const.TITLE, null, DataBase.ID + DataBase.Q, id[1]);
+                storage = new PageStorage(requireContext(), id[0]);
+                cursor = storage.getPageById(id[1]);
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK));
-                    item = new ListItem(dataBase.getPageTitle(cursor.getString(
+                    item = new ListItem(storage.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(Const.TITLE)), s), s);
                     t = curJ.getLong(iTime);
                     d = DateHelper.putMills(act, t);
@@ -123,7 +125,7 @@ public class JournalFragment extends Fragment {
                                 s = getString(R.string.rnd_pos);
                         } else { //случаный стих
                             cursor.close();
-                            cursor = dataBase.query(DataBase.PARAGRAPH, new String[]{DataBase.PARAGRAPH}, DataBase.ID + DataBase.Q, id[1]);
+                            cursor = storage.getParagraphs(id[1]);
                             s = getString(R.string.rnd_stih);
                             if (cursor.moveToPosition(Integer.parseInt(id[2])))
                                 s += ":" + Const.N + Lib.withOutTags(cursor.getString(0));
@@ -133,10 +135,10 @@ public class JournalFragment extends Fragment {
                     adJournal.addItem(item);
                     i++;
                 } else { //материал отсутствует в базе - удаляем запись о нём из журнала
-                    dbJournal.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, curJ.getString(iID));
+                    dbJournal.delete(curJ.getString(iID));
                 }
                 cursor.close();
-                dataBase.close();
+                storage.close();
             } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE);
             if (curJ.moveToNext()) {
                 fabPrev.setVisibility(View.VISIBLE);
@@ -186,7 +188,7 @@ public class JournalFragment extends Fragment {
         fabClear.setOnClickListener(view -> {
             fabClear.setVisibility(View.GONE);
             container.findViewById(R.id.tvEmptyJournal).setVisibility(View.VISIBLE);
-            dbJournal.delete(DataBase.JOURNAL);
+            dbJournal.clear();
             dbJournal.close();
             adJournal.clear();
             adJournal.notifyDataSetChanged();
@@ -195,7 +197,7 @@ public class JournalFragment extends Fragment {
             finish = true;
             offset = 0;
         });
-        dbJournal = new DataBase(act, DataBase.JOURNAL);
+        dbJournal = new JournalStorage(requireContext());
         lvJournal = container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);

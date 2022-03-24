@@ -12,6 +12,7 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.storage.PageStorage;
 
 /**
  * Created by NeoSvet on 03.02.2018.
@@ -20,7 +21,8 @@ import ru.neosvet.vestnewage.R;
 public class UnreadHelper {
     public static final String NAME = "noread";
     private final Context context;
-    private DataBase dbUnread, dbPages;
+    private DataBase dbUnread;
+    private PageStorage dbPages;
     private long time = 0;
     private int[] ids_new;
 
@@ -32,10 +34,10 @@ public class UnreadHelper {
     public boolean addLink(String link, DateHelper date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
-            dbPages = new DataBase(context, link);
-        } else if (!dbPages.getDatabaseName().equals(DataBase.getDatePage(link))) {
+            dbPages = new PageStorage(context, link);
+        } else if (!dbPages.getName().equals(PageStorage.Companion.getDatePage(link))) {
             dbPages.close();
-            dbPages = new DataBase(context, link);
+            dbPages = new PageStorage(context, link);
         }
         if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
@@ -43,10 +45,10 @@ public class UnreadHelper {
         boolean exists = cursor.moveToFirst();
         cursor.close();
         if (exists) return true; // уже есть в списке непрочитанного
-        ContentValues cv = new ContentValues();
-        cv.put(Const.TIME, date.getTimeInMills());
-        cv.put(Const.LINK, link);
-        dbUnread.insert(NAME, cv);
+        ContentValues row = new ContentValues();
+        row.put(Const.TIME, date.getTimeInMills());
+        row.put(Const.LINK, link);
+        dbUnread.insert(NAME, row);
         time = System.currentTimeMillis();
         return true;
     }
