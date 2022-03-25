@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.loader
 
-import android.content.Context
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.LoaderHelper
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -18,15 +17,15 @@ class CalendarLoader(
         this.month = month
     }
 
-    override fun getLinkList(context: Context): Int {
-        val d = DateHelper.putYearMonth(context, year, month)
-        val storage = PageStorage(context, d.my)
+    override fun getLinkList(): Int {
+        val d = DateHelper.putYearMonth(year, month)
+        val storage = PageStorage(d.my)
         val curTitle = storage.getLinks()
         var k = 0
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
             var link: String?
-            val file = LoaderHelper.getFileList(context)
+            val file = LoaderHelper.getFileList()
             val bw = BufferedWriter(FileWriter(file))
             while (curTitle.moveToNext()) {
                 link = curTitle.getString(0)

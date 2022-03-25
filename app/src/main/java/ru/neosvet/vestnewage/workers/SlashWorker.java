@@ -19,6 +19,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -26,12 +27,10 @@ import ru.neosvet.vestnewage.model.SlashModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class SlashWorker extends Worker {
-    private final Context context;
     private final Bundle result = new Bundle();
 
     public SlashWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
@@ -53,7 +52,7 @@ public class SlashWorker extends Worker {
 
     private void loadNew() throws Exception {
         String s = "http://neosvet.ucoz.ru/vna/new.txt";
-        Lib lib = new Lib(context);
+        Lib lib = new Lib();
         BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         long time;
@@ -65,12 +64,12 @@ public class SlashWorker extends Worker {
         while (!s.equals(Const.END)) {
             time = Long.parseLong(s);
             s = br.readLine(); //link
-            dbPage = new PageStorage(context, s);
+            dbPage = new PageStorage(s);
             cursor = dbPage.getPage(s);
             if (cursor.moveToFirst()) {
                 int iTime = cursor.getColumnIndex(Const.TIME);
                 if (time > cursor.getLong(iTime)) {
-                    LoaderHelper.postCommand(context, LoaderHelper.DOWNLOAD_PAGE, s);
+                    LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_PAGE, s);
                     int iTitle = cursor.getColumnIndex(Const.TITLE);
                     titles.add(cursor.getString(iTitle));
                     links.add(s);
@@ -91,7 +90,7 @@ public class SlashWorker extends Worker {
     }
 
     private void loadAds() throws Exception {
-        DevadsHelper ads = new DevadsHelper(context);
+        DevadsHelper ads = new DevadsHelper(App.context);
         ads.loadAds();
         ads.close();
         result.putBoolean(Const.ADS, ads.hasNew());
@@ -101,13 +100,13 @@ public class SlashWorker extends Worker {
     private void synchronTime() throws Exception {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(Const.SITE);
-        builderRequest.header(Const.USER_AGENT, context.getPackageName());
+        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
         OkHttpClient client = Lib.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
         String s = response.headers().value(1);
-        long timeServer = DateHelper.parse(context, s).getTimeInSeconds();
+        long timeServer = DateHelper.parse(s).getTimeInSeconds();
         response.close();
-        long timeDevice = DateHelper.initNow(context).getTimeInSeconds();
+        long timeDevice = DateHelper.initNow().getTimeInSeconds();
         int timeDiff = (int) (timeDevice - timeServer);
         result.putBoolean(Const.TIME, true);
         result.putInt(Const.TIMEDIFF, timeDiff);

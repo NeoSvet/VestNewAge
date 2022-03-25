@@ -1,16 +1,16 @@
 package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
+import ru.neosvet.vestnewage.App
 
 /**
  * Created by NeoSvet on 24.03.2022.
  */
 
-class AdsStorage(context: Context) {
+class AdsStorage {
     companion object {
         const val NAME = "devads"
         const val MODE_T: Byte = 0
@@ -20,7 +20,7 @@ class AdsStorage(context: Context) {
         const val MODE_TL: Byte = 4
     }
 
-    private val db = DataBase(context, NAME)
+    private val db = DataBase(NAME)
 
     fun insert(row: ContentValues) =
         db.insert(NAME, row)

@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.loader;
 
-import android.content.Context;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,16 +11,16 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 
 public class StyleLoader {
-    private final Lib lib;
+    private final Lib lib = new Lib();
     private final Request.Builder builderRequest;
     private final OkHttpClient client;
 
-    public StyleLoader(Context context, Lib lib) {
-        this.lib = lib;
+    public StyleLoader() {
         builderRequest = new Request.Builder();
-        builderRequest.header(Const.USER_AGENT, context.getPackageName());
+        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
         client = Lib.createHttpClient();
     }

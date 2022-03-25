@@ -23,6 +23,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
 import ru.neosvet.vestnewage.model.CabModel;
@@ -33,12 +34,12 @@ public class CabpageActivity extends AppCompatActivity {
     private View fabClose;
     private boolean twoPointers = false;
 
-    public static void openPage(Context context, String link) {
-        Intent intent = new Intent(context, CabpageActivity.class);
+    public static void openPage(String link) {
+        Intent intent = new Intent(App.context, CabpageActivity.class);
         intent.putExtra(Const.LINK, link);
-        if (!(context instanceof Activity))
+        if (!(App.context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        App.context.startActivity(intent);
     }
 
     @Override

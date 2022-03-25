@@ -140,7 +140,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
             return;
         }
         if (Objects.equals(data.getString(Const.MODE), Const.TIME)) {
-            DateHelper d = DateHelper.putDays(act, data.getInt(Const.TIME, 0));
+            DateHelper d = DateHelper.putDays(data.getInt(Const.TIME, 0));
             tvStatus.setText(String.format(getString(R.string.format_search_date),
                     d.getMonthString(), d.getYear() + 2000));
         } else { //Const.PROG
@@ -222,13 +222,13 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     private void initDates() {
         int d = pref.getInt(Const.START, 0);
         if (d == 0) {
-            dEnd = DateHelper.initToday(act);
+            dEnd = DateHelper.initToday();
             //if (mode < 5)// открываем ссылку с сайта Благая Весть
             //    dStart = DateHelper.putYearMonth(act, 2016, 1);
-            dStart = DateHelper.putYearMonth(act, min_y, min_m);
+            dStart = DateHelper.putYearMonth(min_y, min_m);
         } else {
-            dStart = DateHelper.putDays(act, d);
-            dEnd = DateHelper.putDays(act, pref.getInt(Const.END, 0));
+            dStart = DateHelper.putDays(d);
+            dEnd = DateHelper.putDays(pref.getInt(Const.END, 0));
         }
 
         bStart.setText(formatDate(dStart));
@@ -357,15 +357,15 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
                 adResults.clear();
                 adResults.notifyDataSetChanged();
             } else {
-                Lib.showToast(act, getString(R.string.long_press_for_mark));
-                BrowserActivity.openReader(act, adResults.getItem(pos).getLink(), string);
+                Lib.showToast(getString(R.string.long_press_for_mark));
+                BrowserActivity.openReader(adResults.getItem(pos).getLink(), string);
             }
         });
         lvResult.setOnItemLongClickListener((adapterView, view, pos, l) -> {
             String des = tvLabel.getText().toString();
             des = getString(R.string.search_for) +
                     des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1);
-            MarkerActivity.addMarker(act, adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
+            MarkerActivity.addMarker(adResults.getItem(pos).getLink(), adResults.getItem(pos).getDes(), des);
             return true;
         });
         View.OnClickListener click = view -> {
@@ -438,7 +438,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     private void enterSearch() {
         etSearch.dismissDropDown();
         if (etSearch.length() < 3)
-            Lib.showToast(act, getString(R.string.low_sym_for_search));
+            Lib.showToast(getString(R.string.low_sym_for_search));
         else {
             pPages.setVisibility(View.GONE);
             page = 0;
@@ -531,7 +531,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     private void showResult() {
         adResults.clear();
         adResults.notifyDataSetChanged();
-        SearchStorage storage = new SearchStorage(requireContext());
+        SearchStorage storage = new SearchStorage();
         Cursor cursor = storage.getResults(dStart.getTimeInMills() > dEnd.getTimeInMills());
         if (cursor.getCount() == 0) {
             bShow.setVisibility(View.GONE);

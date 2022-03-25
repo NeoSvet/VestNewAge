@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.activity;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -31,6 +30,7 @@ import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.list.CheckAdapter;
@@ -56,17 +56,17 @@ public class MarkerActivity extends AppCompatActivity {
     private byte modeList = 0;
     private boolean posVisible = false;
 
-    public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
-        Intent marker = new Intent(context, MarkerActivity.class);
+    public static void addMarker(String link, @Nullable String par, @Nullable final String des) {
+        Intent marker = new Intent(App.context, MarkerActivity.class);
         marker.putExtra(Const.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
-            PageStorage storage = new PageStorage(context, link);
+            PageStorage storage = new PageStorage(link);
             Cursor cursor = storage.getParagraphs(storage.getPageId(link));
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
                 int n = 0;
-                if (des != null && des.equals(context.getString(R.string.search_for)))
+                if (des != null && des.equals(App.context.getString(R.string.search_for)))
                     n = 1;
                 do {
                     if (par.contains(Lib.withOutTags(cursor.getString(0)))) {
@@ -89,7 +89,7 @@ public class MarkerActivity extends AppCompatActivity {
         }
         if (des != null)
             marker.putExtra(Const.DESCTRIPTION, des);
-        context.startActivity(marker);
+        App.context.startActivity(marker);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class MarkerActivity extends AppCompatActivity {
         link = getIntent().getStringExtra(Const.LINK);
         id = getIntent().getIntExtra(DataBase.ID, -1);
         density = getResources().getDisplayMetrics().density;
-        dbMarker = new MarkersStorage(MarkerActivity.this);
+        dbMarker = new MarkersStorage();
 
         initViews();
         restoreState(savedInstanceState);
@@ -249,7 +249,7 @@ public class MarkerActivity extends AppCompatActivity {
             if (getIntent().hasExtra(Const.DESCTRIPTION))
                 etDes.setText(getIntent().getStringExtra(Const.DESCTRIPTION));
             else {
-                DateHelper d = DateHelper.initNow(this);
+                DateHelper d = DateHelper.initNow();
                 etDes.setText(d.toString());
             }
             rPar.setChecked(true);
@@ -310,7 +310,7 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void loadPage() {
         k_par = 5; // имитация нижнего "колонтитула" страницы
-        PageStorage storage = new PageStorage(this, link);
+        PageStorage storage = new PageStorage(link);
         pageCon = storage.getContentPage(link, false);
         storage.close();
         adPage.clear();
@@ -423,14 +423,14 @@ public class MarkerActivity extends AppCompatActivity {
             } else if (modeList == 1) { //page
                 String s = getPageList();
                 if (s == null) {
-                    Lib.showToast(MarkerActivity.this, getString(R.string.one_for_sel));
+                    Lib.showToast(getString(R.string.one_for_sel));
                     return;
                 }
                 tvSel.setText(s);
             } else if (modeList == 2) { //col
                 String s = getColList();
                 if (s == null) {
-                    Lib.showToast(MarkerActivity.this, getString(R.string.one_for_sel));
+                    Lib.showToast(getString(R.string.one_for_sel));
                     return;
                 }
                 tvCol.setText(s);
@@ -463,14 +463,12 @@ public class MarkerActivity extends AppCompatActivity {
                 if (view.equals(etCol)) { //add col
                     String s = etCol.getText().toString();
                     if (s.contains(Const.COMMA)) {
-                        Lib.showToast(MarkerActivity.this,
-                                getString(R.string.unuse_dot));
+                        Lib.showToast(getString(R.string.unuse_dot));
                         return true;
                     }
                     for (int i = 0; i < adCol.getCount(); i++) {
                         if (adCol.getItem(i).equals(s)) {
-                            Lib.showToast(MarkerActivity.this,
-                                    getString(R.string.title_already_used));
+                            Lib.showToast(getString(R.string.title_already_used));
                             return true;
                         }
                     }

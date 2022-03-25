@@ -228,7 +228,7 @@ public class CabmainFragment extends NeoFragment {
                 switch (pos) {
                     case 0: //не открывает
                         s = "http://neosvet.ucoz.ru/vna/vpn.html";
-                        Lib lib = new Lib(act);
+                        Lib lib = new Lib();
                         lib.openInApps(s, null);
                         return;
                     case 1: //восстановить доступ
@@ -247,7 +247,7 @@ public class CabmainFragment extends NeoFragment {
                         s = "trans.html";
                         break;
                 }
-                CabpageActivity.openPage(act, s);
+                CabpageActivity.openPage(s);
             } else if (mode_list == CabModel.CABINET) {
                 switch (pos) {
                     case 0: //передача ощущений
@@ -256,13 +256,13 @@ public class CabmainFragment extends NeoFragment {
                             initLoad();
                             model.getListWord();
                         } else
-                            Lib.showToast(act, getString(R.string.send_unlivable));
+                            Lib.showToast(getString(R.string.send_unlivable));
                         break;
                     case 1: //анкета
-                        CabpageActivity.openPage(act, "edinenie/anketa.html");
+                        CabpageActivity.openPage("edinenie/anketa.html");
                         break;
                     case 2: //единомышленники
-                        CabpageActivity.openPage(act, "edinenie/edinomyshlenniki.html");
+                        CabpageActivity.openPage("edinenie/edinomyshlenniki.html");
                         break;
                     default:
                         break;

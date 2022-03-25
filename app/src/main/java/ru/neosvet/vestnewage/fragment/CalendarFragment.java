@@ -33,11 +33,12 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.vestnewage.presenter.CalendarModel;
+import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.presenter.view.CalendarView;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
-public class CalendarFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener {
+public class CalendarFragment extends NeoFragment implements CalendarView, DateDialog.Result, View.OnTouchListener {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -70,7 +71,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         restoreState(savedInstanceState);
         if (savedInstanceState == null) {
             String path = act.getFilesDir().getParent() + "/databases/";
-            DateHelper d = DateHelper.initNow(act);
+            DateHelper d = DateHelper.initNow();
             File f = new File(path + d.getMY());
             if (!f.exists() || System.currentTimeMillis()
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
@@ -123,10 +124,10 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     private void restoreState(Bundle state) {
         if (state == null) {
-            dCurrent = DateHelper.initToday(act);
+            dCurrent = DateHelper.initToday();
             dCurrent.setDay(1);
         } else {
-            dCurrent = DateHelper.putDays(act, state.getInt(Const.CURRENT_DATE));
+            dCurrent = DateHelper.putDays(state.getInt(Const.CURRENT_DATE));
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
                 showDatePicker();
@@ -139,7 +140,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
         rvCalendar = container.findViewById(R.id.rvCalendar);
-        DateHelper d = DateHelper.initToday(act);
+        DateHelper d = DateHelper.initToday();
         today_m = d.getMonth();
         today_y = d.getYear();
         fabRefresh = container.findViewById(R.id.fabRefresh);
@@ -198,7 +199,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     }
 
     private void openLink(String link) {
-        BrowserActivity.openReader(act, link, null);
+        BrowserActivity.openReader(link, null);
     }
 
     private void openMonth(int offset) {
@@ -214,7 +215,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     }
 
     private void createCalendar(int offsetMonth) {
-        DateHelper d = DateHelper.putDays(act, dCurrent.getTimeInDays());
+        DateHelper d = DateHelper.putDays(dCurrent.getTimeInDays());
         if (offsetMonth != 0) {
             d.changeMonth(offsetMonth);
             dCurrent.changeMonth(offsetMonth);
@@ -222,8 +223,8 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         tvDate.setText(d.getCalendarString());
         adCalendar.clear();
         for (int i = -1; i > -7; i--) //add label monday-saturday
-            adCalendar.addItem(new CalendarItem(act, i, R.color.light_gray));
-        adCalendar.addItem(new CalendarItem(act, 0, R.color.light_gray)); //sunday
+            adCalendar.addItem(new CalendarItem(i, R.color.light_gray));
+        adCalendar.addItem(new CalendarItem(0, R.color.light_gray)); //sunday
         final int cur_month = d.getMonth();
         if (d.getDayWeek() != DateHelper.MONDAY) {
             if (d.getDayWeek() == DateHelper.SUNDAY)
@@ -231,22 +232,22 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             else
                 d.changeDay(1 - d.getDayWeek());
             while (d.getMonth() != cur_month) {
-                adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
+                adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.darker_gray));
                 d.changeDay(1);
             }
         }
-        DateHelper today = DateHelper.initToday(act);
+        DateHelper today = DateHelper.initToday();
         int n_today = 0;
         if (today.getMonth() == cur_month)
             n_today = today.getDay();
         while (d.getMonth() == cur_month) {
-            adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.white));
+            adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.white));
             if (d.getDay() == n_today)
                 adCalendar.getItem(adCalendar.getItemCount() - 1).setBold();
             d.changeDay(1);
         }
         while (d.getDayWeek() != DateHelper.MONDAY) {
-            adCalendar.addItem(new CalendarItem(act, d.getDay(), android.R.color.darker_gray));
+            adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.darker_gray));
             d.changeDay(1);
         }
         openCalendar(true);
@@ -267,7 +268,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         try {
             for (int i = 0; i < adCalendar.getItemCount(); i++)
                 adCalendar.getItem(i).clear();
-            PageStorage storage = new PageStorage(requireContext(), dCurrent.getMY());
+            PageStorage storage = new PageStorage(dCurrent.getMY());
             Cursor cursor = storage.getListAll();
             boolean empty = true;
             if (cursor.moveToFirst()) {
@@ -316,7 +317,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     }
 
     private String getTitleByLink(String s) {
-        PageStorage storage = new PageStorage(requireContext(), DataBase.ARTICLES);
+        PageStorage storage = new PageStorage(DataBase.ARTICLES);
         Cursor curTitle = storage.getTitle(s);
         if (curTitle.moveToFirst())
             s = curTitle.getString(0);
@@ -332,7 +333,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         }
         if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
                 (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-            DateHelper d = DateHelper.putSeconds(act, sec);
+            DateHelper d = DateHelper.putSeconds(sec);
             if (d.getMonth() != today_m)
                 act.status.checkTime(sec);
         }

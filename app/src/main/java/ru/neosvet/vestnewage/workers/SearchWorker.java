@@ -25,14 +25,12 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 import ru.neosvet.vestnewage.storage.SearchStorage;
 
 public class SearchWorker extends Worker {
-    private final Context context;
     private SearchStorage dbSearch;
     private String str;
     private int mode, count1 = 0, count2 = 0;
 
     public SearchWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
@@ -41,7 +39,7 @@ public class SearchWorker extends Worker {
         ProgressHelper.setBusy(true);
         String error;
         try {
-            Lib lib = new Lib(context);
+            Lib lib = new Lib();
             List<String> list = new ArrayList<>();
             for (File f : Objects.requireNonNull(lib.getDBFolder().listFiles())) {
                 if (f.getName().length() == 5)
@@ -51,7 +49,7 @@ public class SearchWorker extends Worker {
             }
             if (list.size() == 0) //empty list
                 return getResult();
-            dbSearch = new SearchStorage(context);
+            dbSearch = new SearchStorage();
             int start_year, start_month, end_year, end_month, step;
             mode = getInputData().getInt(Const.MODE, 0);
             str = getInputData().getString(Const.START); // начальная дата
@@ -76,7 +74,7 @@ public class SearchWorker extends Worker {
                 //поиск по материалам (статьям)
                 searchList(DataBase.ARTICLES, str, mode);
             }
-            d = DateHelper.putYearMonth(context, start_year, start_month);
+            d = DateHelper.putYearMonth(start_year, start_month);
             while (!SearchModel.cancel) {
                 if (list.contains(d.getMY())) {
                     publishProgress(d.getTimeInDays());
@@ -144,7 +142,7 @@ public class SearchWorker extends Worker {
             if (i == 0 || !name1.equals(name2)) {
                 if (storage != null)
                     storage.close();
-                storage = new PageStorage(context, name1);
+                storage = new PageStorage(name1);
                 name2 = name1;
             }
             cursor = storage.searchParagraphs(link.get(i), find);
@@ -182,7 +180,7 @@ public class SearchWorker extends Worker {
 
     @SuppressLint("Range")
     private void searchList(String name, final String find, int mode) {
-        PageStorage storage = new PageStorage(context, name);
+        PageStorage storage = new PageStorage(name);
         int n = Integer.parseInt(name.substring(3)) * 650 +
                 Integer.parseInt(name.substring(0, 2)) * 50;
         Cursor curSearch;

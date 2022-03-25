@@ -17,6 +17,7 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
@@ -33,13 +34,13 @@ public class CheckHelper extends LifecycleService {
         super.onCreate();
     }
 
-    public static void postCommand(Context context, boolean start) {
-        Intent intent = new Intent(context, CheckHelper.class);
+    public static void postCommand(boolean start) {
+        Intent intent = new Intent(App.context, CheckHelper.class);
         intent.putExtra(Const.START, start);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            context.startForegroundService(intent);
+            App.context.startForegroundService(intent);
         else
-            context.startService(intent);
+            App.context.startService(intent);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class CheckHelper extends LifecycleService {
         }
 
         Context context = getApplicationContext();
-        NotificationHelper notifHelper = new NotificationHelper(context);
+        NotificationHelper notifHelper = new NotificationHelper();
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
                 context.getString(R.string.site_name),
                 context.getString(R.string.check_new),

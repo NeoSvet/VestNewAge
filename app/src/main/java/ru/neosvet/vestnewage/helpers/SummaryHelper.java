@@ -22,6 +22,7 @@ import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.storage.PageStorage;
@@ -34,7 +35,6 @@ public class SummaryHelper {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-    private final Context context;
     private final NotificationHelper notifHelper;
     private final Intent intent;
     private final PendingIntent piEmpty;
@@ -42,16 +42,15 @@ public class SummaryHelper {
     private NotificationCompat.Builder notifBuilder;
 
 
-    public SummaryHelper(Context context) {
-        this.context = context;
+    public SummaryHelper() {
         notif_id = NotificationHelper.NOTIF_SUMMARY + 1;
-        notifHelper = new NotificationHelper(context);
-        intent = new Intent(context, MainActivity.class);
-        piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
+        notifHelper = new NotificationHelper();
+        intent = new Intent(App.context, MainActivity.class);
+        piEmpty = PendingIntent.getActivity(App.context, 0, new Intent(), FLAGS);
     }
 
     public void updateBook() throws Exception {
-        File file = new File(context.getFilesDir() + Const.RSS);
+        File file = new File(App.context.getFilesDir() + Const.RSS);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String title, link, name;
         PageStorage storage = null;
@@ -65,7 +64,7 @@ public class SummaryHelper {
             if (storage == null || !storage.getName().equals(name)) {
                 if (storage != null)
                     storage.close();
-                storage = new PageStorage(context, name);
+                storage = new PageStorage(name);
             }
             cursor = storage.getPage(link);
             if (!cursor.moveToFirst()) {
@@ -85,14 +84,14 @@ public class SummaryHelper {
         if (!link.contains("://"))
             link = Const.SITE + link;
         intent.setData(Uri.parse(link));
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, FLAGS);
+        PendingIntent piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(notif_id, text, link);
         notifBuilder = notifHelper.getNotification(
-                context.getString(R.string.site_name), text,
+                App.context.getString(R.string.site_name), text,
                 NotificationHelper.CHANNEL_SUMMARY);
         notifBuilder.setContentIntent(piSummary)
                 .setGroup(NotificationHelper.GROUP_SUMMARY)
-                .addAction(0, context.getString(R.string.postpone), piPostpone);
+                .addAction(0, App.context.getString(R.string.postpone), piPostpone);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }
@@ -112,25 +111,25 @@ public class SummaryHelper {
 
     public void groupNotification() {
         notifBuilder = notifHelper.getSummaryNotif(
-                context.getString(R.string.appeared_new_some),
+                App.context.getString(R.string.appeared_new_some),
                 NotificationHelper.CHANNEL_SUMMARY);
         intent.setData(Uri.parse(Const.SITE + Const.RSS));
         intent.putExtra(DataBase.ID, notif_id);
-        PendingIntent piSummary = PendingIntent.getActivity(context, 0, intent, FLAGS);
+        PendingIntent piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         notifBuilder.setContentIntent(piSummary)
                 .setGroup(NotificationHelper.GROUP_SUMMARY);
         notifBuilder.setFullScreenIntent(piEmpty, true);
     }
 
     public void singleNotification(String text) {
-        notifBuilder.setContentText(context.getString(R.string.appeared_new) + text);
+        notifBuilder.setContentText(App.context.getString(R.string.appeared_new) + text);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }
 
     public void setPreferences() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            SharedPreferences pref = context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
+            SharedPreferences pref = App.context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
             boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
             boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
             notifBuilder.setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);
@@ -146,19 +145,19 @@ public class SummaryHelper {
         }
     }
 
-    public static void postpone(Context context, String des, String link) {
-        Lib.showToast(context, context.getString(R.string.postpone_alert));
-        Intent intent = new Intent(context, Rec.class);
+    public static void postpone(String des, String link) {
+        Lib.showToast(App.context.getString(R.string.postpone_alert));
+        Intent intent = new Intent(App.context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);
-        PendingIntent piPostpone = PendingIntent.getBroadcast(context, 3, intent, FLAGS);
-        NotificationHelper.setAlarm(context, piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
+        PendingIntent piPostpone = PendingIntent.getBroadcast(App.context, 3, intent, FLAGS);
+        NotificationHelper.setAlarm(piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis());
     }
 
     public static class Rec extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            SummaryHelper summaryHelper = new SummaryHelper(context);
+            SummaryHelper summaryHelper = new SummaryHelper();
             summaryHelper.createNotification(
                     intent.getStringExtra(Const.DESCTRIPTION),
                     intent.getStringExtra(Const.LINK));

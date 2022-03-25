@@ -15,6 +15,7 @@ import java.io.FileReader;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
@@ -34,16 +35,12 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class LoaderWorker extends Worker {
-    private final Context context;
-    private final Lib lib;
     private PageLoader page;
     private int cur, max;
     private String name;
 
     public LoaderWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
-        lib = new Lib(context);
     }
 
     private boolean isCancelled() {
@@ -70,7 +67,7 @@ public class LoaderWorker extends Worker {
                 return postFinish();
             }
         } catch (Exception e) {
-            File file = LoaderHelper.getFileList(context);
+            File file = LoaderHelper.getFileList();
             if (file.exists())
                 file.delete();
             e.printStackTrace();
@@ -79,11 +76,11 @@ public class LoaderWorker extends Worker {
         }
         LoaderModel.inProgress = false;
         if (name.equals(CheckHelper.class.getSimpleName())) {
-            CheckHelper.postCommand(context, false);
+            CheckHelper.postCommand(false);
             return Result.failure();
         }
         if (name.equals(LoaderHelper.TAG)) {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, error);
+            LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, error);
             return Result.failure();
         }
         ProgressHelper.postProgress(new Data.Builder()
@@ -95,34 +92,34 @@ public class LoaderWorker extends Worker {
 
     private void loadList() throws Exception {
         if (name.equals(CheckHelper.class.getSimpleName())) {
-            page = new PageLoader(context, lib, false);
+            page = new PageLoader(false);
             downloadList();
-            CheckHelper.postCommand(context, false);
+            CheckHelper.postCommand(false);
             LoaderModel.inProgress = false;
             return;
         }
 
         ListLoader loader;
         if (name.equals(CalendarModel.class.getSimpleName())) {
-            page = new PageLoader(context, lib, false);
+            page = new PageLoader(false);
             loader = new CalendarLoader(
                     getInputData().getInt(Const.YEAR, 0),
                     getInputData().getInt(Const.MONTH, 0));
         } else if (name.equals(SummaryModel.class.getSimpleName())) {
-            page = new PageLoader(context, lib, false);
+            page = new PageLoader(false);
             loader = new SummaryLoader();
         } else if (name.equals(SiteModel.class.getSimpleName())) {
-            page = new PageLoader(context, lib, false);
+            page = new PageLoader(false);
             loader = new SiteLoader(getInputData().getString(Const.FILE));
         } else
             return;
 
-        max = loader.getLinkList(context);
+        max = loader.getLinkList();
         downloadList();
     }
 
     private void doLoad() throws Exception {
-        StyleLoader style = new StyleLoader(context, lib);
+        StyleLoader style = new StyleLoader();
         int mode = getInputData().getInt(Const.MODE, 0);
         if (mode != LoaderHelper.DOWNLOAD_PAGE)
             style.download(false);
@@ -144,18 +141,18 @@ public class LoaderWorker extends Worker {
                 String link = getInputData().getString(Const.LINK);
                 style.download(getInputData().getBoolean(Const.STYLE, false));
                 if (link != null) {
-                    page = new PageLoader(context, lib, false);
+                    page = new PageLoader(false);
                     page.download(link, true);
                 }
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
                         .build());
                 if (name.equals(LoaderHelper.TAG))
-                    LoaderHelper.postCommand(context, LoaderHelper.STOP, null);
+                    LoaderHelper.postCommand(LoaderHelper.STOP, null);
                 LoaderModel.inProgress = false;
         }
 
-        LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
+        LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, null);
         LoaderModel.inProgress = false;
     }
 
@@ -168,9 +165,9 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadYear(int year) throws Exception {
-        ProgressHelper.setMessage(context.getString(R.string.start));
-        page = new PageLoader(context, lib, true);
-        DateHelper d = DateHelper.initToday(context);
+        ProgressHelper.setMessage(App.context.getString(R.string.start));
+        page = new PageLoader(true);
+        DateHelper d = DateHelper.initToday();
         int k;
         if (year == d.getYear())
             k = d.getMonth() + 1;
@@ -186,13 +183,13 @@ public class LoaderWorker extends Worker {
         CalendarLoader loader = new CalendarLoader();
         for (m = 1; m < k && !isCancelled(); m++) {
             loader.setDate(year, m);
-            loader.getLinkList(context);
+            loader.getLinkList();
             downloadList();
         }
     }
 
     private void downloadList() throws Exception {
-        File file = LoaderHelper.getFileList(context);
+        File file = LoaderHelper.getFileList();
         if (!file.exists())
             return;
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -215,15 +212,15 @@ public class LoaderWorker extends Worker {
     private void download(int id) throws Exception {
         if (isCancelled())
             return;
-        ProgressHelper.setMessage(context.getString(R.string.start));
-        page = new PageLoader(context, lib, true);
+        ProgressHelper.setMessage(App.context.getString(R.string.start));
+        page = new PageLoader(true);
         // подсчёт количества страниц:
         int k = 0;
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
             k = workWithBook(true);
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
-            SiteLoader loader = new SiteLoader(lib.getFileByName(SiteFragment.MAIN).toString());
-            k += loader.getLinkList(context);
+            SiteLoader loader = new SiteLoader(Lib.getFileByName(SiteFragment.MAIN).toString());
+            k += loader.getLinkList();
         }
         ProgressHelper.setMax(k);
         // загрузка страниц:
@@ -240,7 +237,7 @@ public class LoaderWorker extends Worker {
 
     private int workWithBook(boolean count) throws Exception {
         int end_year, end_month, k = 0;
-        DateHelper d = DateHelper.initToday(context);
+        DateHelper d = DateHelper.initToday();
         d.setDay(1);
         end_month = d.getMonth();
         end_year = d.getYear();
@@ -258,8 +255,8 @@ public class LoaderWorker extends Worker {
         return k;
     }
 
-    private int countBookList(String name) throws Exception {
-        PageStorage storage = new PageStorage(context, name);
+    private int countBookList(String name) {
+        PageStorage storage = new PageStorage(name);
         Cursor curTitle = storage.getLinks();
         int k = curTitle.getCount() - 1;
         curTitle.close();
@@ -268,7 +265,7 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadBookList(String name) throws Exception {
-        PageStorage storage = new PageStorage(context, name);
+        PageStorage storage = new PageStorage(name);
         Cursor curTitle = storage.getLinks();
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка

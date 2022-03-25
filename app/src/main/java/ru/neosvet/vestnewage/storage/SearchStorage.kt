@@ -10,8 +10,8 @@ import ru.neosvet.utils.DataBase
  * Created by NeoSvet on 24.03.2022.
  */
 
-class SearchStorage(context: Context) {
-    private val db = DataBase(context, Const.SEARCH)
+class SearchStorage {
+    private val db = DataBase(Const.SEARCH)
 
     fun getResults(sortDesc: Boolean): Cursor = db.query(
         Const.SEARCH, null, null, null, null,

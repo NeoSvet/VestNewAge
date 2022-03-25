@@ -426,7 +426,7 @@ public class SiteFragment extends NeoFragment {
                 act.lib.openInApps(url, null);
             }
         } else {
-            BrowserActivity.openReader(act, url, null);
+            BrowserActivity.openReader(url, null);
         }
     }
 

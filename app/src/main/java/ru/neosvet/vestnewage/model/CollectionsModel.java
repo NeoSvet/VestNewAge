@@ -1,11 +1,9 @@
 package ru.neosvet.vestnewage.model;
 
 import android.app.Application;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MutableLiveData;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
@@ -16,7 +14,6 @@ import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.loader.PageLoader;
 import ru.neosvet.vestnewage.workers.MarkersWorker;
@@ -51,9 +48,7 @@ public class CollectionsModel extends AndroidViewModel {
 
     public void loadPage(String link) {
         task = 2;
-        Context context = getApplication().getApplicationContext();
-        Lib lib = new Lib(context);
-        PageLoader loader = new PageLoader(context, lib, false);
+        PageLoader loader = new PageLoader(false);
         new Thread(() -> {
             String error = null;
             try {

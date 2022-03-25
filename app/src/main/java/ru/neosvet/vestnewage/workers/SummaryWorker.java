@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -25,12 +26,10 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.model.SummaryModel;
 
 public class SummaryWorker extends Worker {
-    private final Context context;
     private boolean SUMMARY;
 
     public SummaryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
@@ -46,7 +45,7 @@ public class SummaryWorker extends Worker {
                         .putBoolean(Const.START, true)
                         .build());
                 loadList();
-                SummaryHelper summaryHelper = new SummaryHelper(context);
+                SummaryHelper summaryHelper = new SummaryHelper();
                 summaryHelper.updateBook();
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.LIST, true)
@@ -69,7 +68,7 @@ public class SummaryWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            LoaderHelper.postCommand(LoaderHelper.STOP, error);
             return Result.failure();
         }
         return Result.failure();
@@ -80,7 +79,7 @@ public class SummaryWorker extends Worker {
     }
 
     private void loadList() throws Exception {
-        Lib lib = new Lib(context);
+        Lib lib = new Lib();
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
         String site;
@@ -89,9 +88,9 @@ public class SummaryWorker extends Worker {
         else
             site = Const.SITE2.substring(Const.SITE2.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(context.getFilesDir() + Const.RSS));
-        DateHelper now = DateHelper.initNow(context);
-        UnreadHelper unread = new UnreadHelper(context);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(App.context.getFilesDir() + Const.RSS));
+        DateHelper now = DateHelper.initNow();
+        UnreadHelper unread = new UnreadHelper();
         String[] m = br.readLine().split("<item>");
         br.close();
         in.close();
@@ -115,7 +114,7 @@ public class SummaryWorker extends Worker {
             bw.write(withOutTag(m[i].substring(b + 10, a))); //des
             bw.write(Const.N);
             b = m[i].indexOf("</a10");
-            bw.write(DateHelper.parse(context, withOutTag(m[i].substring(a + 15, b)))
+            bw.write(DateHelper.parse(withOutTag(m[i].substring(a + 15, b)))
                     .getTimeInMills() + Const.N); //time
             bw.flush();
         }

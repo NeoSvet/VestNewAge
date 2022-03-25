@@ -1,26 +1,23 @@
 package ru.neosvet.vestnewage.loader;
 
 import android.content.ContentValues;
-import android.content.Context;
 
 import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class PageLoader {
-    private final Context context;
-    private final Lib lib;
+    private final Lib lib = new Lib();
     private final boolean withMsg; //name.contains(LoaderModel.TAG)
     private int k_requests = 0;
     private long time_requests = 0;
 
-    public PageLoader(Context context, Lib lib, boolean withMsg) {
-        this.context = context;
-        this.lib = lib;
+    public PageLoader(boolean withMsg) {
         this.withMsg = withMsg;
     }
 
@@ -28,7 +25,7 @@ public class PageLoader {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (withMsg)
             ProgressHelper.setMessage(initMessage(link));
-        PageStorage storage = new PageStorage(context, link);
+        PageStorage storage = new PageStorage(link);
         if (!singlePage && storage.existsPage(link)) {
             storage.close();
             return false;
@@ -45,7 +42,7 @@ public class PageLoader {
 
         int n = k;
         boolean boolArticle = storage.isArticle();
-        PageParser page = new PageParser(context);
+        PageParser page = new PageParser();
         if (lib.isMainSite())
             page.load(Const.SITE + Const.PRINT + s, "page-title");
         else
@@ -119,7 +116,7 @@ public class PageLoader {
             s = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
             if (s.contains("_"))
                 s = s.substring(0, s.length() - 2);
-            DateHelper d = DateHelper.parse(context, s);
+            DateHelper d = DateHelper.parse(s);
             return d.getMonthString() + " " + d.getYear();
         } catch (Exception ignored) {
         }

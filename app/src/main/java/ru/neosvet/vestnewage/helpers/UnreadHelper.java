@@ -11,6 +11,7 @@ import java.util.List;
 import me.leolin.shortcutbadger.ShortcutBadger;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
@@ -20,24 +21,22 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class UnreadHelper {
     public static final String NAME = "noread";
-    private final Context context;
     private DataBase dbUnread;
     private PageStorage dbPages;
     private long time = 0;
     private int[] ids_new;
 
-    public UnreadHelper(Context context) {
-        this.context = context;
-        dbUnread = new DataBase(context, NAME);
+    public UnreadHelper() {
+        dbUnread = new DataBase(NAME);
     }
 
     public boolean addLink(String link, DateHelper date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
         if (dbPages == null) {
-            dbPages = new PageStorage(context, link);
+            dbPages = new PageStorage(link);
         } else if (!dbPages.getName().equals(PageStorage.Companion.getDatePage(link))) {
             dbPages.close();
-            dbPages = new PageStorage(context, link);
+            dbPages = new PageStorage(link);
         }
         if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
@@ -85,7 +84,7 @@ public class UnreadHelper {
         if (cursor.moveToFirst())
             k = cursor.getCount();
         cursor.close();
-        DevadsHelper ads = new DevadsHelper(context);
+        DevadsHelper ads = new DevadsHelper(App.context);
         k += ads.getUnreadCount();
         ads.close();
         return k;
@@ -103,7 +102,7 @@ public class UnreadHelper {
     }
 
     public long lastModified() {
-        SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = App.context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
         return pref.getLong(Const.TIME, 0);
     }
 
@@ -113,7 +112,7 @@ public class UnreadHelper {
     }
 
     public void open() {
-        dbUnread = new DataBase(context, NAME);
+        dbUnread = new DataBase(NAME);
     }
 
     public void close() {
@@ -121,7 +120,7 @@ public class UnreadHelper {
             dbPages.close();
         dbUnread.close();
         if (time > 0) {
-            SharedPreferences pref = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+            SharedPreferences pref = App.context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putLong(Const.TIME, time);
             editor.apply();
@@ -129,7 +128,7 @@ public class UnreadHelper {
     }
 
     public void setBadge() {
-        DevadsHelper ads = new DevadsHelper(context);
+        DevadsHelper ads = new DevadsHelper(App.context);
         setBadge(ads.getUnreadCount());
         ads.close();
     }
@@ -138,9 +137,9 @@ public class UnreadHelper {
         Cursor cursor = dbUnread.query(NAME, null, Const.TIME + " > ?", "0");
         count_ads += cursor.getCount();
         if (count_ads == 0)
-            ShortcutBadger.removeCount(context);
+            ShortcutBadger.removeCount(App.context);
         else
-            ShortcutBadger.applyCount(context, count_ads);
+            ShortcutBadger.applyCount(App.context, count_ads);
         cursor.close();
     }
 }

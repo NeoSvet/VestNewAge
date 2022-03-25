@@ -23,12 +23,12 @@ import java.util.TimerTask;
 
 import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class PromHelper {
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
-    private final Context context;
     private TextView tvPromTime = null;
     private Handler hTime = null;
     private Timer timer = null;
@@ -37,9 +37,8 @@ public class PromHelper {
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
 
-    public PromHelper(Context context, @Nullable View textView) {
-        this.context = context;
-        pref = context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
+    public PromHelper(@Nullable View textView) {
+        pref = App.context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         if (textView != null) {
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
@@ -73,7 +72,7 @@ public class PromHelper {
 
     private void setViews() {
         if (tvPromTime.getId() == R.id.tvPromTime) {
-            final Animation anMin = AnimationUtils.loadAnimation(context, R.anim.minimize);
+            final Animation anMin = AnimationUtils.loadAnimation(App.context, R.anim.minimize);
             anMin.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -90,7 +89,7 @@ public class PromHelper {
 
                 }
             });
-            final Animation anMax = AnimationUtils.loadAnimation(context, R.anim.maximize);
+            final Animation anMax = AnimationUtils.loadAnimation(App.context, R.anim.maximize);
             tvPromTime.setOnClickListener(view -> {
                 tvPromTime.startAnimation(anMin);
                 timer = new Timer();
@@ -124,7 +123,7 @@ public class PromHelper {
 
     private DateHelper getPromDate(boolean next) {
         int timeDiff = pref.getInt(Const.TIMEDIFF, 0);
-        DateHelper prom = DateHelper.initNow(context);
+        DateHelper prom = DateHelper.initNow();
         int hour = 8;
         if (next) {
             while (prom.getHours() > hour)
@@ -152,8 +151,8 @@ public class PromHelper {
     private void setPromTime() {
         String t = getPromText();
         if (t == null) { //t.contains("-")
-            tvPromTime.setText(context.getString(R.string.prom));
-            Animation an = AnimationUtils.loadAnimation(context, R.anim.hide);
+            tvPromTime.setText(App.context.getString(R.string.prom));
+            Animation an = AnimationUtils.loadAnimation(App.context, R.anim.hide);
             an.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -177,8 +176,8 @@ public class PromHelper {
         }
         tvPromTime.setText(t);
         if (tvPromTime.getId() == R.id.tvPromTime &&
-                t.contains(context.getResources().getStringArray(R.array.time)[6])) {
-            t = t.substring(context.getString(R.string.to_prom).length() + 1);
+                t.contains(App.context.getResources().getStringArray(R.array.time)[6])) {
+            t = t.substring(App.context.getString(R.string.to_prom).length() + 1);
             int h = 0;
             if (t.contains(","))
                 t = t.substring(0, t.indexOf(","));
@@ -197,7 +196,7 @@ public class PromHelper {
             }
             tvPromTime.setVisibility(View.VISIBLE);
         }
-        if (t.equals(context.getString(R.string.prom))) {
+        if (t.equals(App.context.getString(R.string.prom))) {
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -205,7 +204,7 @@ public class PromHelper {
                     hTime.sendEmptyMessage(SET_PROM_TEXT);
                 }
             }, 3 * DateHelper.SEC_IN_MILLS);
-            tvPromTime.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
+            tvPromTime.startAnimation(AnimationUtils.loadAnimation(App.context, R.anim.blink));
         }
     }
 
@@ -213,15 +212,15 @@ public class PromHelper {
         DateHelper prom = getPromDate(false);
         String t = prom.getDiffDate(System.currentTimeMillis());
         if (t.contains("-") || // prom was been
-                t.equals(context.getResources().getStringArray(R.array.time)[0])) //second
+                t.equals(App.context.getResources().getStringArray(R.array.time)[0])) //second
             return null;
-        t = context.getString(R.string.to_prom) + " " + t;
+        t = App.context.getString(R.string.to_prom) + " " + t;
         int delay;
-        if (t.contains(context.getString(R.string.sec)))
+        if (t.contains(App.context.getString(R.string.sec)))
             delay = DateHelper.SEC_IN_MILLS; // 1 sec
-        else if (t.contains(context.getString(R.string.min))) {
-            t = t.replace(context.getResources().getStringArray(R.array.time)[3],
-                    context.getString(R.string.minute));
+        else if (t.contains(App.context.getString(R.string.min))) {
+            t = t.replace(App.context.getResources().getStringArray(R.array.time)[3],
+                    App.context.getString(R.string.minute));
             delay = 6 * DateHelper.SEC_IN_MILLS; // 1/10 of min in sec
         } else
             delay = 360 * DateHelper.SEC_IN_MILLS; // 1/10 of hour in sec
@@ -238,28 +237,28 @@ public class PromHelper {
     }
 
     public void showNotif() {
-        SharedPreferences pref = context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
+        SharedPreferences pref = App.context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p == Const.TURN_OFF)
             return;
         boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(App.context, MainActivity.class);
         intent.setData(Uri.parse(Const.SITE + "Posyl-na-Edinenie.html"));
-        PendingIntent piEmpty = PendingIntent.getActivity(context, 0, new Intent(), FLAGS);
-        PendingIntent piProm = PendingIntent.getActivity(context, 0, intent, FLAGS);
-        NotificationHelper notifHelper = new NotificationHelper(context);
+        PendingIntent piEmpty = PendingIntent.getActivity(App.context, 0, new Intent(), FLAGS);
+        PendingIntent piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
+        NotificationHelper notifHelper = new NotificationHelper();
         String msg = getPromText();
         if (msg == null) //msg.contains("-")
-            msg = context.getString(R.string.prom);
+            msg = App.context.getString(R.string.prom);
         PendingIntent piCancel = notifHelper.getCancelPromNotif();
 
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                context.getString(R.string.prom_for_soul_unite),
+                App.context.getString(R.string.prom_for_soul_unite),
                 msg, NotificationHelper.CHANNEL_PROM);
         notifBuilder.setContentIntent(piProm)
                 .setFullScreenIntent(piEmpty, true)
-                .addAction(0, context.getString(R.string.accept), piCancel)
+                .addAction(0, App.context.getString(R.string.accept), piCancel)
                 .setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (p == 0)
@@ -282,27 +281,27 @@ public class PromHelper {
     }
 
     public void initNotif(int p) {
-        Intent intent = new Intent(context, Rec.class);
-        PendingIntent piProm = PendingIntent.getBroadcast(context, 2, intent, FLAGS);
+        Intent intent = new Intent(App.context, Rec.class);
+        PendingIntent piProm = PendingIntent.getBroadcast(App.context, 2, intent, FLAGS);
         if (p == Const.TURN_OFF) {
-            NotificationHelper.setAlarm(context, piProm, p);
+            NotificationHelper.setAlarm(piProm, p);
             return;
         }
-        PromHelper prom = new PromHelper(context, null);
+        PromHelper prom = new PromHelper(null);
         DateHelper d = prom.getPromDate(false);
         p++;
         d.changeMinutes(-p);
-        if (d.getTimeInSeconds() < DateHelper.initNow(context).getTimeInSeconds()) {
+        if (d.getTimeInSeconds() < DateHelper.initNow().getTimeInSeconds()) {
             d = prom.getPromDate(true);
             d.changeMinutes(-p);
         }
-        NotificationHelper.setAlarm(context, piProm, d.getTimeInMills());
+        NotificationHelper.setAlarm(piProm, d.getTimeInMills());
     }
 
     public static class Rec extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            PromHelper prom = new PromHelper(context, null);
+            PromHelper prom = new PromHelper(null);
             prom.showNotif();
         }
     }

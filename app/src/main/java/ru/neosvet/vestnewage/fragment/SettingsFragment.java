@@ -126,11 +126,11 @@ public class SettingsFragment extends NeoFragment {
             //bClearDo.setEnabled(false); true?
             String error = data.getString(Const.ERROR);
             if (error != null) {
-                Lib.showToast(act, getString(R.string.error) + ": " + error);
+                Lib.showToast(getString(R.string.error) + ": " + error);
                 return;
             }
             float size = data.getLong(Const.PROG, 0) / 1024f / 1024f; //to MegaByte
-            Lib.showToast(act, String.format(getString(R.string.format_freed_size), size));
+            Lib.showToast(String.format(getString(R.string.format_freed_size), size));
         }
     }
 
@@ -449,7 +449,7 @@ public class SettingsFragment extends NeoFragment {
             p = Const.TURN_OFF;
         editor.putInt(Const.TIME, p);
         editor.apply();
-        PromHelper prom = new PromHelper(act, null);
+        PromHelper prom = new PromHelper(null);
         prom.initNotif(p);
     }
 

@@ -7,6 +7,7 @@ import androidx.work.Data;
 
 import java.util.Map;
 
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class ErrorUtils {
@@ -27,10 +28,10 @@ public class ErrorUtils {
             ErrorUtils.error = error;
     }
 
-    public static String getInformation(Context context) {
+    public static String getInformation() {
         StringBuilder des = new StringBuilder();
         if (ErrorUtils.error != null) {
-            des.append(context.getString(R.string.error_des));
+            des.append(App.context.getString(R.string.error_des));
             des.append(Const.N);
             des.append(ErrorUtils.error.getMessage());
             des.append(Const.N);
@@ -44,7 +45,7 @@ public class ErrorUtils {
         }
         if (ErrorUtils.data != null) {
             des.append(Const.N);
-            des.append(context.getString(R.string.input_data));
+            des.append(App.context.getString(R.string.input_data));
             des.append(Const.N);
             Map<String, Object> map = ErrorUtils.data.getKeyValueMap();
             for (String key : map.keySet()) {
@@ -55,10 +56,10 @@ public class ErrorUtils {
             }
         }
         try {
-            des.append(context.getString(R.string.srv_info));
-            des.append(String.format(context.getString(R.string.format_info),
-                    context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName,
-                    context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode,
+            des.append(App.context.getString(R.string.srv_info));
+            des.append(String.format(App.context.getString(R.string.format_info),
+                    App.context.getPackageManager().getPackageInfo(App.context.getPackageName(), 0).versionName,
+                    App.context.getPackageManager().getPackageInfo(App.context.getPackageName(), 0).versionCode,
                     Build.VERSION.RELEASE,
                     Build.VERSION.SDK_INT));
         } catch (Exception e) {

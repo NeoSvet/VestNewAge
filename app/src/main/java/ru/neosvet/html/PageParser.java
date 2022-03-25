@@ -1,7 +1,5 @@
 package ru.neosvet.html;
 
-import android.content.Context;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -10,20 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class PageParser {
-    private final Context context;
     private int cur, index;
     private final List<HTMLElem> content = new ArrayList<>();
 
-    public PageParser(Context context) {
-        this.context = context;
-    }
-
     public void load(String url, String start) throws Exception {
-        Lib lib = new Lib(context);
+        Lib lib = new Lib();
         InputStream in = new BufferedInputStream(lib.getStream(url));
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s;
@@ -139,7 +133,7 @@ public class PageParser {
                 elem.tag = Const.LINK;
                 n = s.indexOf("src") + 5;
                 elem.par = s.substring(n, s.indexOf("\"", n));
-                elem.setHtml(context.getString(R.string.video_on_site));
+                elem.setHtml(App.context.getString(R.string.video_on_site));
             }
             if (elem.tag.equals(Const.PAR) || elem.tag.indexOf(Const.HEAD) == 0) {
                 s = s.substring(0, s.indexOf(">")).replace("\"", "'");

@@ -144,7 +144,7 @@ public class StatusButton {
     public boolean checkTime(long time) {
         if (!stop || isCrash())
             return true;
-        if (DateHelper.initNow(context).getTimeInSeconds() - time > DateHelper.DAY_IN_SEC * 7) {
+        if (DateHelper.initNow().getTimeInSeconds() - time > DateHelper.DAY_IN_SEC * 7) {
             this.time = true;
             initResizeMax();
             visible = true;
@@ -205,8 +205,8 @@ public class StatusButton {
     }
 
     private void sendError() {
-        Lib lib = new Lib(context);
-        lib.openInApps(Const.mailto + ErrorUtils.getInformation(context), null);
+        Lib lib = new Lib();
+        lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
     }
 
     public boolean isTime() {

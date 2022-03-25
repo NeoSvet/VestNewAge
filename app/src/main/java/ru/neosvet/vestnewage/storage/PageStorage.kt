@@ -2,11 +2,11 @@ package ru.neosvet.vestnewage.storage
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import java.util.regex.Pattern
 
@@ -14,17 +14,8 @@ import java.util.regex.Pattern
  * Created by NeoSvet on 23.03.2022.
  */
 
-class PageStorage(
-    context: Context,
-    name: String
-) {
-    init {
-        if (katren.isEmpty())
-            katren = context.getString(R.string.katren)
-    }
-
+class PageStorage(name: String) {
     companion object {
-        private var katren: String = ""
         fun getDatePage(link: String): String {
             return if (!link.contains("/") || link.contains("press"))
                 DataBase.ARTICLES
@@ -53,9 +44,9 @@ class PageStorage(
     }
 
     private val db: DataBase = if (name.contains(Const.HTML))
-        DataBase(context, getDatePage(name))
+        DataBase(getDatePage(name))
     else
-        DataBase(context, name)
+        DataBase(name)
     val name: String
         get() = db.databaseName
     private val patternBook = Pattern.compile("\\d{2}\\.\\d{2}")
@@ -68,7 +59,7 @@ class PageStorage(
             if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
             if (s.contains("#")) s = s.substring(0, s.indexOf("#"))
             if (link.contains(Const.POEMS)) {
-                s + (" " + katren + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
+                s + (" " + App.context.getString(R.string.katren) + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
             } else "$s $title"
         }
     }

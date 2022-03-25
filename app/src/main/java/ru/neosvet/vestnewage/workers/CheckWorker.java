@@ -19,6 +19,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -26,13 +27,11 @@ import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
 public class CheckWorker extends Worker {
-    private final Context context;
     public static final String TAG_PERIODIC = "check periodic";
     private final List<String> list = new ArrayList<>();
 
     public CheckWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
@@ -40,10 +39,10 @@ public class CheckWorker extends Worker {
     public Result doWork() {
         try {
             if (getInputData().getBoolean(Const.CHECK, false)) {
-                CheckHelper.postCommand(context, true);
+                CheckHelper.postCommand(true);
             } else {
                 if (checkSummary()) {
-                    SummaryHelper summaryHelper = new SummaryHelper(context);
+                    SummaryHelper summaryHelper = new SummaryHelper();
                     summaryHelper.updateBook();
                     makeNotification();
                 }
@@ -52,12 +51,12 @@ public class CheckWorker extends Worker {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        CheckHelper.postCommand(context, false);
+        CheckHelper.postCommand(false);
         return Result.failure();
     }
 
     private boolean checkSummary() throws Exception {
-        Lib lib = new Lib(context);
+        Lib lib = new Lib();
         InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
                 + "rss/?" + System.currentTimeMillis()));
         String site;
@@ -70,20 +69,20 @@ public class CheckWorker extends Worker {
         br.close();
         in.close();
         int a = s.indexOf("lastBuildDate") + 14;
-        long secList = DateHelper.parse(context, s.substring(a, s.indexOf("<", a))).getTimeInSeconds();
+        long secList = DateHelper.parse(s.substring(a, s.indexOf("<", a))).getTimeInSeconds();
 
-        File file = new File(context.getFilesDir() + Const.RSS);
+        File file = Lib.getFileByName(Const.RSS);
         long secFile = 0;
         if (file.exists())
-            secFile = DateHelper.putMills(context, file.lastModified()).getTimeInSeconds();
+            secFile = DateHelper.putMills(file.lastModified()).getTimeInSeconds();
         if (secFile > secList) { //список в загрузке не нуждается
             br.close();
             return false;
         }
         BufferedWriter bwRSS = new BufferedWriter(new FileWriter(file));
-        file = LoaderHelper.getFileList(context);
+        file = LoaderHelper.getFileList();
         BufferedWriter bwList = new BufferedWriter(new FileWriter(file));
-        UnreadHelper unread = new UnreadHelper(context);
+        UnreadHelper unread = new UnreadHelper();
         DateHelper d;
         String title, link;
         int b;
@@ -106,7 +105,7 @@ public class CheckWorker extends Worker {
             bwRSS.write(Const.N);
             b = m[i].indexOf("</a10");
             s = withOutTag(m[i].substring(a + 15, b));
-            d = DateHelper.parse(context, s);
+            d = DateHelper.parse(s);
             bwRSS.write(d.getTimeInMills() + Const.N); //time
             bwRSS.flush();
             if (unread.addLink(link, d)) {
@@ -134,7 +133,7 @@ public class CheckWorker extends Worker {
     private void makeNotification() {
         if (list.size() == 0)
             return;
-        SummaryHelper summaryHelper = new SummaryHelper(getApplicationContext());
+        SummaryHelper summaryHelper = new SummaryHelper();
         boolean several = list.size() > 2;
         int start, end, step;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {

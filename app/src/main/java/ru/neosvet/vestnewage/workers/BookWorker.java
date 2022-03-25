@@ -23,6 +23,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MyException;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -33,7 +34,6 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class BookWorker extends Worker {
     private final long SIZE_EMPTY_BASE = 24576L;
-    private final Context context;
     private final List<String> title = new ArrayList<>();
     private final List<String> links = new ArrayList<>();
     private final Lib lib;
@@ -42,8 +42,7 @@ public class BookWorker extends Worker {
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
-        lib = new Lib(context);
+        lib = new Lib();
     }
 
     private boolean isCancelled() {
@@ -73,17 +72,17 @@ public class BookWorker extends Worker {
                         .putBoolean(Const.OTKR, true)
                         .putString(Const.TITLE, s)
                         .build());
-                SharedPreferences pref = context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
+                SharedPreferences pref = App.context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putBoolean(Const.OTKR, true);
                 editor.apply();
-                LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, null);
+                LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, null);
                 return Result.success();
             }
             if (BOOK) { // book section
                 boolean kat = getInputData().getBoolean(Const.KATRENY, false);
                 boolean fromOtkr = getInputData().getBoolean(Const.FROM_OTKR, false);
-                DateHelper d = DateHelper.initToday(context);
+                DateHelper d = DateHelper.initToday();
                 if (!kat && fromOtkr) { //все Послания
                     max = 146; //август 2004 - сентябрь 2016
                     loadListUcoz(false, UcozType.OLD); //обновление старых Посланий
@@ -110,7 +109,7 @@ public class BookWorker extends Worker {
             loadPoems();
             if (!LoaderHelper.start)
                 return Result.success();
-            DateHelper d = DateHelper.initToday(context);
+            DateHelper d = DateHelper.initToday();
             ProgressHelper.setMax((d.getYear() - 2016) * 12);
             loadListUcoz(true, UcozType.PART1);
             loadListUcoz(true, UcozType.PART2);
@@ -126,7 +125,7 @@ public class BookWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP_WITH_NOTIF, error);
+            LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, error);
             return Result.failure();
         }
         return Result.failure();
@@ -135,7 +134,7 @@ public class BookWorker extends Worker {
     private String loadTolkovaniya() throws Exception {
         if (lib.isMainSite())
             return loadListBook(Const.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
-        throw new MyException(context.getString(R.string.site_not_available));
+        throw new MyException(App.context.getString(R.string.site_not_available));
     }
 
     private enum UcozType {
@@ -210,11 +209,11 @@ public class BookWorker extends Worker {
                         .build());
                 cur++;
             } else {
-                d = DateHelper.parse(context, item);
+                d = DateHelper.parse(item);
                 ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
             }
 
-            storage = new PageStorage(context, item);
+            storage = new PageStorage(item);
             isTitle = true;
             in = new BufferedInputStream(lib.getStream(url + item));
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
@@ -267,7 +266,7 @@ public class BookWorker extends Worker {
 
     private String loadPoems() throws Exception {
         String s = null;
-        int y = DateHelper.initToday(context).getYear();
+        int y = DateHelper.initToday().getYear();
         for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
             if (lib.isMainSite())
                 s = loadListBook(Const.SITE + Const.PRINT + Const.POEMS
@@ -279,7 +278,7 @@ public class BookWorker extends Worker {
     }
 
     private String loadListBook(String url) throws Exception {
-        PageParser page = new PageParser(context);
+        PageParser page = new PageParser();
         if (lib.isMainSite())
             page.load(url, "page-title");
         else
@@ -323,7 +322,7 @@ public class BookWorker extends Worker {
 
     private void saveData(String date) {
         if (title.size() > 0) {
-            PageStorage storage = new PageStorage(context, date);
+            PageStorage storage = new PageStorage(date);
             ContentValues row = new ContentValues();
             row.put(Const.TIME, System.currentTimeMillis());
             if (!storage.updateTitle(1, row)) {

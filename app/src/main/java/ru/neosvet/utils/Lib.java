@@ -15,26 +15,22 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class Lib {
-    private final Context context;
     private boolean first = true;
 
     public boolean isMainSite() {
         return first;
     }
 
-    public Lib(Context context) {
-        this.context = context;
-    }
-
 //    public static void LOG(String msg) {
 //        Log.d("neotag", msg);
 //    }
 
-    public static void showToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    public static void showToast(String msg) {
+        Toast.makeText(App.context, msg, Toast.LENGTH_LONG).show();
     }
 
     public static OkHttpClient createHttpClient() {
@@ -53,7 +49,7 @@ public class Lib {
         try {
             Request.Builder builderRequest = new Request.Builder();
             builderRequest.url(url);
-            builderRequest.header(Const.USER_AGENT, context.getPackageName());
+            builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
             if (url.contains(Const.SITE)) {
                 builderRequest.header("Referer", Const.SITE);
             }
@@ -66,7 +62,7 @@ public class Lib {
                 first = false;
                 return getStream(url.replace(Const.SITE, Const.SITE2));
             } else
-                throw new MyException(context.getString(R.string.error_site));
+                throw new MyException(App.context.getString(R.string.error_site));
         }
 
         if (response.code() != 200) {
@@ -74,30 +70,30 @@ public class Lib {
                 first = false;
                 return getStream(url.replace(Const.SITE, Const.SITE2));
             } else
-                throw new MyException(context.getString(R.string.error_code)
+                throw new MyException(App.context.getString(R.string.error_code)
                         + response.code());
         }
 
         if (response.body() == null)
-            throw new MyException(context.getString(R.string.error_site));
+            throw new MyException(App.context.getString(R.string.error_site));
         return response.body().byteStream();
     }
 
     public File getDBFolder() {
-        String s = context.getFilesDir().toString();
+        String s = App.context.getFilesDir().toString();
         return new File(s.substring(0, s.length() - 5) + "databases");
     }
 
     public File getFile(String link) {
-        File file = new File(context.getFilesDir() + link.substring(0, link.lastIndexOf("/")));
+        File file = getFileByName(link.substring(0, link.lastIndexOf("/")));
         if (!file.exists())
             file.mkdirs();
-        file = new File(context.getFilesDir() + link);
+        file = getFileByName(link);
         return file;
     }
 
-    public File getFileByName(String name) {
-        return new File(context.getFilesDir() + name);
+    public static File getFileByName(String name) {
+        return new File(App.context.getFilesDir() + name);
     }
 
     public void openInApps(String url, @Nullable String titleChooser) {
@@ -105,9 +101,9 @@ public class Lib {
             Intent myIntent = new Intent(Intent.ACTION_VIEW);
             myIntent.setData(android.net.Uri.parse(url));
             if (titleChooser == null)
-                context.startActivity(myIntent);
+                App.context.startActivity(myIntent);
             else
-                context.startActivity(Intent.createChooser(myIntent, titleChooser));
+                App.context.startActivity(Intent.createChooser(myIntent, titleChooser));
         } catch (Exception e) {
             url = url.substring(url.indexOf(":") + 1);
             if (url.indexOf("/") == 0)
@@ -117,10 +113,10 @@ public class Lib {
     }
 
     public void copyAddress(String txt) {
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(context.getString(R.string.app_name), txt);
+        ClipboardManager clipboard = (ClipboardManager) App.context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(App.context.getString(R.string.app_name), txt);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, context.getString(R.string.address_copied), Toast.LENGTH_LONG).show();
+        Toast.makeText(App.context, App.context.getString(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
 
     public static String withOutTags(String s) {

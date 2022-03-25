@@ -21,6 +21,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 /**
@@ -40,8 +41,8 @@ public class NotificationHelper extends ContextWrapper {
             PendingIntent.FLAG_CANCEL_CURRENT :
             PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE;
 
-    public static void setAlarm(Context context, PendingIntent pi, long time) {
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    public static void setAlarm(PendingIntent pi, long time) {
+        AlarmManager am = (AlarmManager) App.context.getSystemService(Context.ALARM_SERVICE);
         am.cancel(pi);
         if (time == Const.TURN_OFF)
             return;
@@ -52,12 +53,12 @@ public class NotificationHelper extends ContextWrapper {
         @Override
         public void onReceive(Context context, Intent intent) {
             int mode = intent.getIntExtra(MODE, -1);
-            NotificationHelper notifHelper = new NotificationHelper(context);
+            NotificationHelper notifHelper = new NotificationHelper();
             if (mode == ID_ACCEPT) {
                 notifHelper.cancel(NOTIF_PROM);
             } else if (mode == ID_SUMMARY_POSTPONE) {
                 notifHelper.cancel(intent.getIntExtra(DataBase.ID, 0));
-                SummaryHelper.postpone(context,
+                SummaryHelper.postpone(
                         intent.getStringExtra(Const.DESCTRIPTION),
                         intent.getStringExtra(Const.LINK));
             }
@@ -81,11 +82,9 @@ public class NotificationHelper extends ContextWrapper {
 
     /**
      * Registers notification channels, which can be used later by individual notifications.
-     *
-     * @param context The application context
      */
-    public NotificationHelper(Context context) {
-        super(context);
+    public NotificationHelper() {
+        super(App.context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (getManager().getNotificationChannels().size() == 0) // no channels
                 createChannels();

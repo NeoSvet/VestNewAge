@@ -17,6 +17,7 @@ import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -25,12 +26,10 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteWorker extends Worker {
-    private final Context context;
     private final List<ListItem> list = new ArrayList<>();
 
     public SiteWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
     }
 
     @NonNull
@@ -46,7 +45,7 @@ public class SiteWorker extends Worker {
                         .putBoolean(Const.START, true)
                         .build());
                 if (getInputData().getBoolean(Const.ADS, false)) {
-                    DevadsHelper ads = new DevadsHelper(context);
+                    DevadsHelper ads = new DevadsHelper(App.context);
                     ads.clear();
                     ads.loadAds();
                     ads.close();
@@ -71,7 +70,7 @@ public class SiteWorker extends Worker {
                     Const.SITE,
                     Const.SITE + "novosti.html",
             };
-            Lib lib = new Lib(context);
+            Lib lib = new Lib();
             String[] file = new String[]{
                     lib.getFileByName(SiteFragment.MAIN).toString(),
                     lib.getFileByName(SiteFragment.NEWS).toString()
@@ -93,7 +92,7 @@ public class SiteWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            LoaderHelper.postCommand(LoaderHelper.STOP, error);
             return Result.failure();
         }
         return Result.failure();
@@ -124,7 +123,7 @@ public class SiteWorker extends Worker {
     }
 
     private void loadList(String url) throws Exception {
-        PageParser page = new PageParser(context);
+        PageParser page = new PageParser();
         boolean isSite = url.equals(Const.SITE);
         int i;
         if (isSite) {

@@ -23,17 +23,16 @@ import java.util.HashMap;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.MarkersStorage;
 
 public class MarkersWorker extends Worker {
-    private final Context context;
     private MarkersStorage dbMarker;
 
     public MarkersWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
-        dbMarker = new MarkersStorage(context);
+        dbMarker = new MarkersStorage();
     }
 
     @NonNull
@@ -69,7 +68,7 @@ public class MarkersWorker extends Worker {
         int i1, i2, i3;
         Cursor cursor = dbMarker.getCollections(DataBase.ID);
         //DocumentFile file = folder.createFile(DataBase.MARKERS, DataBase.MARKERS);
-        OutputStream outStream = context.getContentResolver().openOutputStream(file);
+        OutputStream outStream = App.context.getContentResolver().openOutputStream(file);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outStream, Const.ENCODING));
         if (cursor.moveToFirst()) {
             i1 = cursor.getColumnIndex(DataBase.ID);
@@ -109,7 +108,7 @@ public class MarkersWorker extends Worker {
     }
 
     private void doImport(Uri file) throws Exception {
-        InputStream inputStream = context.getContentResolver().openInputStream(file);
+        InputStream inputStream = App.context.getContentResolver().openInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, Const.ENCODING), 1000);
         String s;
         int id, nid;
@@ -157,9 +156,9 @@ public class MarkersWorker extends Worker {
         br.close();
         inputStream.close();
         //изменение id в подборках
-        inputStream = context.getContentResolver().openInputStream(file);
+        inputStream = App.context.getContentResolver().openInputStream(file);
         br = new BufferedReader(new InputStreamReader(inputStream, Const.ENCODING), 1000);
-        File f = new File(context.getFilesDir() + File.separator + DataBase.MARKERS);
+        File f = new File(App.context.getFilesDir() + File.separator + DataBase.MARKERS);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), Const.ENCODING));
         while ((s = br.readLine()) != null) {
             if (s.equals(Const.AND))

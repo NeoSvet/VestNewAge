@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.helpers;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -18,57 +16,51 @@ import org.threeten.bp.format.DateTimeFormatter;
 import java.util.Locale;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class DateHelper {
     public static final byte MONDAY = 1, SUNDAY = 0;
     public static final int DAY_IN_SEC = 86400, //MONTH_IN_SEC = 2592000,
             HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000;
-    private final Context context;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
     private LocalTime time;
 
-//    private DateHelper(Context context) {
-//        AndroidThreeTen.init(context);
-//        this.context = context;
-//    }
-
-    private DateHelper(Context context, LocalDate date, @Nullable LocalTime time) {
-        AndroidThreeTen.init(context);
-        this.context = context;
+    private DateHelper(LocalDate date, @Nullable LocalTime time) {
+        AndroidThreeTen.init(App.context);
         this.date = date;
         this.time = time;
     }
 
-    public static DateHelper putDays(Context context, int days) {
-        return new DateHelper(context, LocalDate.ofEpochDay(days), null);
+    public static DateHelper putDays(int days) {
+        return new DateHelper(LocalDate.ofEpochDay(days), null);
     }
 
-    public static DateHelper putMills(Context context, long mills) {
-        return putSeconds(context, (int) (mills / SEC_IN_MILLS));
+    public static DateHelper putMills(long mills) {
+        return putSeconds((int) (mills / SEC_IN_MILLS));
     }
 
-    public static DateHelper putSeconds(Context context, int sec) {
+    public static DateHelper putSeconds(int sec) {
         int days = sec / DAY_IN_SEC;
         int secs = sec % DAY_IN_SEC;
-        return new DateHelper(context, LocalDate.ofEpochDay(days), LocalTime.ofSecondOfDay(secs));
+        return new DateHelper(LocalDate.ofEpochDay(days), LocalTime.ofSecondOfDay(secs));
     }
 
-    public static DateHelper putYearMonth(Context context, int year, int month) {
-        return new DateHelper(context, LocalDate.of(year, month, 1), null);
+    public static DateHelper putYearMonth(int year, int month) {
+        return new DateHelper(LocalDate.of(year, month, 1), null);
     }
 
-    public static DateHelper initToday(Context context) {
-        return new DateHelper(context, LocalDate.now(Clock.system(ZoneId.of("UTC"))), null);
+    public static DateHelper initToday() {
+        return new DateHelper(LocalDate.now(Clock.system(ZoneId.of("UTC"))), null);
     }
 
-    public static DateHelper initNow(Context context) {
+    public static DateHelper initNow() {
         Clock clock = Clock.system(ZoneId.of("UTC"));
-        return new DateHelper(context, LocalDate.now(clock), LocalTime.now(clock));
+        return new DateHelper(LocalDate.now(clock), LocalTime.now(clock));
     }
 
-    public static DateHelper parse(Context context, String s) {
+    public static DateHelper parse(String s) {
         DateTimeFormatter fDate = null;
         switch (s.length()) {
             case 5:
@@ -90,7 +82,7 @@ public class DateHelper {
                 break;
         }
         if (fDate != null)
-            return new DateHelper(context, LocalDate.parse(s, fDate), null);
+            return new DateHelper(LocalDate.parse(s, fDate), null);
         boolean offset = s.contains("+0300");
         if (s.contains("-")) { //2020-03-25T00:00:00+03:00
             s = s.substring(0, s.length() - 6).replace("T", " ");
@@ -106,7 +98,7 @@ public class DateHelper {
         LocalDateTime dateTime = LocalDateTime.parse(s, fDate);
         if (offset)
             dateTime = dateTime.minusHours(3);
-        return new DateHelper(context, dateTime.toLocalDate(), dateTime.toLocalTime());
+        return new DateHelper(dateTime.toLocalDate(), dateTime.toLocalTime());
     }
 
     public long getTimeInSeconds() {
@@ -125,7 +117,7 @@ public class DateHelper {
     }
 
     public String getMonthString() {
-        return context.getResources().getStringArray(R.array.months)[getMonth() - 1];
+        return App.context.getResources().getStringArray(R.array.months)[getMonth() - 1];
     }
 
     public String getCalendarString() {
@@ -160,20 +152,21 @@ public class DateHelper {
             }
         }
         String result;
+        String[] arrTime = App.context.getResources().getStringArray(R.array.time);
         if (time > 4.95f && time < 20.95f)
-            result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[1 + k];
+            result = formatFloat(time) + arrTime[1 + k];
         else {
             if (time == 1f)
-                result = context.getResources().getStringArray(R.array.time)[k];
+                result = arrTime[k];
             else {
                 int n = (time - Math.floor(time) < 0.95f ? 0 : 1);
                 n = ((int) time + n) % 10;
                 if (n == 1)
-                    result = formatFloat(time) + " " + context.getResources().getStringArray(R.array.time)[k];
+                    result = formatFloat(time) + " " + arrTime[k];
                 else if (n > 1 && n < 5)
-                    result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[2 + k];
+                    result = formatFloat(time) + arrTime[2 + k];
                 else
-                    result = formatFloat(time) + context.getResources().getStringArray(R.array.time)[1 + k];
+                    result = formatFloat(time) + arrTime[1 + k];
             }
         }
 

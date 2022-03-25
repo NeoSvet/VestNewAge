@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.helpers;
 
-import android.content.Context;
 import android.database.Cursor;
 
 import java.io.File;
@@ -11,35 +10,32 @@ import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class ListsHelper {
-    private final Context context;
     private final long timeNow;
     private byte bookIsOld = 0;
 
-    public ListsHelper(Context context) {
-        this.context = context;
-        timeNow = DateHelper.initNow(context).getTimeInSeconds();
+    public ListsHelper() {
+        timeNow = DateHelper.initNow().getTimeInSeconds();
     }
 
     public boolean summaryIsOld() {
-        File file = new File(context.getFilesDir() + Const.RSS);
+        File file = Lib.getFileByName(Const.RSS);
         long time = file.lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 
     public boolean siteIsOld() {
-        Lib lib = new Lib(context);
-        long time = lib.getFileByName(SiteFragment.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
+        long time = Lib.getFileByName(SiteFragment.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
         if (timeNow - time > DateHelper.DAY_IN_SEC)
             return true;
-        time = lib.getFileByName(SiteFragment.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
+        time = Lib.getFileByName(SiteFragment.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 
     public boolean bookIsOld() {
         if (bookIsOld == 0) {
-            DateHelper d = DateHelper.initNow(context);
+            DateHelper d = DateHelper.initNow();
             d.changeMonth(-1);
-            PageStorage storage = new PageStorage(context, d.getMY());
+            PageStorage storage = new PageStorage(d.getMY());
             Cursor curTime = storage.getTime();
             if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                 bookIsOld = 1;
@@ -49,8 +45,8 @@ public class ListsHelper {
                 if (bookIsOld == 2) {
                     curTime.close();
                     storage.close();
-                    d = DateHelper.putYearMonth(context, 2016, 1);
-                    storage = new PageStorage(context, d.getMY());
+                    d = DateHelper.putYearMonth(2016, 1);
+                    storage = new PageStorage(d.getMY());
                     curTime = storage.getTime();
                     if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                         bookIsOld = 1;

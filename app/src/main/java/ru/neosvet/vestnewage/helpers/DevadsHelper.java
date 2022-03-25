@@ -27,7 +27,7 @@ public class DevadsHelper {
 
     public DevadsHelper(Context context) {
         this.context = context;
-        storage = new AdsStorage(context);
+        storage = new AdsStorage();
         isClosed = false;
     }
 
@@ -154,7 +154,7 @@ public class DevadsHelper {
         }
 
         if (des.equals("")) {// only link
-            Lib lib = new Lib(context);
+            Lib lib = new Lib();
             lib.openInApps(link, null);
             index_ads = -1;
             return;
@@ -173,7 +173,7 @@ public class DevadsHelper {
                     view -> alert.dismiss());
         } else {
             alert.setRightButton(context.getString(R.string.open_link), view -> {
-                Lib lib = new Lib(context);
+                Lib lib = new Lib();
                 lib.openInApps(link, null);
                 alert.dismiss();
             });
@@ -251,7 +251,7 @@ public class DevadsHelper {
 
     public void reopen() {
         if (isClosed) {
-            storage = new AdsStorage(context);
+            storage = new AdsStorage();
             isClosed = false;
         }
     }
@@ -267,14 +267,14 @@ public class DevadsHelper {
         isNew = false;
         long t = getTime();
         String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-        Lib lib = new Lib(context);
+        Lib lib = new Lib();
         BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();
         if (Long.parseLong(s) > t) {
             if (update(br)) {
                 isNew = true;
-                UnreadHelper unread = new UnreadHelper(context);
+                UnreadHelper unread = new UnreadHelper();
                 unread.setBadge(getUnreadCount());
                 unread.close();
             }

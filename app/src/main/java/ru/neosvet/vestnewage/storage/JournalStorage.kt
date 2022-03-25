@@ -1,17 +1,17 @@
 package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
+import ru.neosvet.vestnewage.App
 
 /**
  * Created by NeoSvet on 23.03.2022.
  */
 
-class JournalStorage(context: Context) {
-    private val db = DataBase(context, DataBase.JOURNAL)
+class JournalStorage {
+    private val db = DataBase(DataBase.JOURNAL)
 
     fun update(id: String, row: ContentValues): Boolean =
         db.update(DataBase.JOURNAL, row, DataBase.ID + DataBase.Q, id) > 0

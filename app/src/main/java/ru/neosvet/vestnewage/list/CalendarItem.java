@@ -8,21 +8,19 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class CalendarItem {
-    private final Context context;
     private final int num;
     private int color;
     private final List<String> titles = new ArrayList<>();
     private final List<String> links = new ArrayList<>();
     private boolean bold = false, katren = false, poslanie = false;
 
-    public CalendarItem(Context context, int num, int id_color) {
-        this.context = context;
+    public CalendarItem(int num, int id_color) {
         this.num = num;
-
-        color = ContextCompat.getColor(context, id_color);
+        color = ContextCompat.getColor(App.context, id_color);
         if (num < 1)
             bold = true;
     }
@@ -74,7 +72,7 @@ public class CalendarItem {
             bg = R.drawable.cell_bg_p;
         else
             bg = R.drawable.cell_bg_n;
-        return ContextCompat.getDrawable(context, bg);
+        return ContextCompat.getDrawable(App.context, bg);
     }
 
     public boolean isBold() {
@@ -95,7 +93,7 @@ public class CalendarItem {
 
     public String getDay() {
         if (num < 1)
-            return context.getResources().getStringArray(R.array.week_day)[num * -1];
+            return App.context.getResources().getStringArray(R.array.week_day)[num * -1];
         else
             return Integer.toString(num);
     }

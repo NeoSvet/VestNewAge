@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NeoFragment curFragment;
     private FragmentManager myFragmentManager;
     private WelcomeFragment frWelcome = null;
-    public Lib lib = new Lib(this);
+    public Lib lib = new Lib();
     private Tip menuDownload;
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else
             findViewById(R.id.ivStar).setVisibility(View.GONE);
 
-        slash = new SlashUtils(MainActivity.this);
+        slash = new SlashUtils();
         SlashModel model = new ViewModelProvider(this).get(SlashModel.class);
         if (slash.openLink(getIntent())) {
             tab = slash.getIntent().getIntExtra(Const.TAB, tab);
@@ -124,16 +124,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         status = new StatusButton(this, findViewById(R.id.pStatus));
         menuDownload = new Tip(this, findViewById(R.id.pDownload));
-        unread = new UnreadHelper(this);
+        unread = new UnreadHelper();
         initInterface();
         initAnim();
         initProgress();
 
         isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true);
         if (!isCountInMenu || isMenuMode) {
-            prom = new PromHelper(this, findViewById(R.id.tvPromTime));
+            prom = new PromHelper(findViewById(R.id.tvPromTime));
         } else if (navigationView != null) { //it is not tablet and land
-            prom = new PromHelper(this, navigationView.getHeaderView(0)
+            prom = new PromHelper(navigationView.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         }
         restoreState(savedInstanceState);
@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setProm(View textView) {
-        prom = new PromHelper(this, textView);
+        prom = new PromHelper(textView);
     }
 
     public void updateNew() {
@@ -292,19 +292,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initInterface() {
         findViewById(R.id.bDownloadAll).setOnClickListener(view -> {
             menuDownload.hide();
-            LoaderHelper.postCommand(MainActivity.this,
-                    LoaderHelper.DOWNLOAD_ALL, "");
+            LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_ALL, "");
         });
         bDownloadIt = (TextView) findViewById(R.id.bDownloadIt);
         bDownloadIt.setOnClickListener(view -> {
             menuDownload.hide();
             if (cur_id == R.id.nav_calendar) {
-                LoaderHelper.postCommand(MainActivity.this,
-                        LoaderHelper.DOWNLOAD_YEAR,
+                LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_YEAR,
                         String.valueOf(((CalendarFragment) curFragment).getCurrentYear()));
             } else {
-                LoaderHelper.postCommand(MainActivity.this,
-                        LoaderHelper.DOWNLOAD_ID,
+                LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_ID,
                         String.valueOf(cur_id));
             }
         });
@@ -422,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     slash.getIntent().removeExtra(DataBase.ID);
                 }
                 if (id != 0) {
-                    NotificationHelper notifHelper = new NotificationHelper(MainActivity.this);
+                    NotificationHelper notifHelper = new NotificationHelper();
                     for (int i = NotificationHelper.NOTIF_SUMMARY; i <= id; i++)
                         notifHelper.cancel(i);
                 }
@@ -547,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setFragment(R.id.menu_fragment, false);
         } else { //  statusBack == STATUS_MENU;
             statusBack = STATUS_EXIT;
-            Lib.showToast(this, getString(R.string.click_for_exit));
+            Lib.showToast(getString(R.string.click_for_exit));
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -620,7 +617,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public boolean checkBusy() {
         if (ProgressHelper.isBusy()) {
-            Lib.showToast(this, getString(R.string.app_is_busy));
+            Lib.showToast(getString(R.string.app_is_busy));
             return true;
         }
         return false;
@@ -664,7 +661,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (item[2] != null) {
             builder.setPositiveButton(getString(R.string.open_link),
                     (dialog, id) -> {
-                        Lib lib = new Lib(this);
                         lib.openInApps(item[2], null);
                     });
         }
@@ -679,6 +675,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tab = 2;
             setFragment(R.id.nav_site, true);
         } else
-            BrowserActivity.openReader(this, link, null);
+            BrowserActivity.openReader(link, null);
     }
 }

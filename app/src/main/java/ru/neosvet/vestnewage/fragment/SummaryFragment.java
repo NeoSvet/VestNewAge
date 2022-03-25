@@ -19,6 +19,7 @@ import java.io.FileReader;
 
 import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -48,7 +49,7 @@ public class SummaryFragment extends NeoFragment {
         model = new ViewModelProvider(this).get(SummaryModel.class);
         restoreState(savedInstanceState);
         if (savedInstanceState == null) {
-            File f = new File(act.getFilesDir() + Const.RSS);
+            File f = Lib.getFileByName(Const.RSS);
             if (!f.exists() || System.currentTimeMillis()
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
@@ -115,7 +116,7 @@ public class SummaryFragment extends NeoFragment {
         act.status.setClick(view -> onStatusClick(false));
         lvSummary.setOnItemClickListener((adapterView, view, pos, l) -> {
             if (act.checkBusy()) return;
-            BrowserActivity.openReader(act, adSummary.getItem(pos).getLink(), null);
+            BrowserActivity.openReader(adSummary.getItem(pos).getLink(), null);
         });
         lvSummary.setOnTouchListener((view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
@@ -151,7 +152,7 @@ public class SummaryFragment extends NeoFragment {
     private void openList(boolean loadIfNeed) {
         try {
             adSummary.clear();
-            DateHelper dateNow = DateHelper.initNow(act);
+            DateHelper dateNow = DateHelper.initNow();
             BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + Const.RSS));
             String title, des, time, link;
             int i = 0;

@@ -94,7 +94,7 @@ public class NewFragment extends Fragment {
         act.fab = fabClear;
         fabClear.setOnClickListener(view -> {
             try {
-                UnreadHelper unread = new UnreadHelper(act);
+                UnreadHelper unread = new UnreadHelper();
                 unread.clearList();
                 unread.setBadge(ads.getUnreadCount());
                 unread.close();
@@ -119,7 +119,7 @@ public class NewFragment extends Fragment {
                 ads.setIndex(pos);
                 showAd(pos);
             } else if (!adNew.getItem(pos).getLink().equals("")) {
-                BrowserActivity.openReader(act, adNew.getItem(pos).getLink(), null);
+                BrowserActivity.openReader(adNew.getItem(pos).getLink(), null);
             }
         });
         lvNew.setOnTouchListener((view, motionEvent) -> {
@@ -136,13 +136,13 @@ public class NewFragment extends Fragment {
     }
 
     private void loadList() {
-        NotificationHelper notifHelper = new NotificationHelper(act);
+        NotificationHelper notifHelper = new NotificationHelper();
         notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         try {
             ads.loadList(adNew, true);
             String t, s;
             int n;
-            UnreadHelper unread = new UnreadHelper(act);
+            UnreadHelper unread = new UnreadHelper();
             unread.setBadge(ads.getUnreadCount());
             if (unread.lastModified() > 0) {
                 List<String> links = unread.getList();

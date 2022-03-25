@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.storage.AdsStorage;
@@ -15,12 +16,10 @@ public class DataBase extends SQLiteOpenHelper {
             MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
             COLLECTIONS = "collections", ID = "id", DESC = " DESC",
             ARTICLES = "00.00";
-    private final Context context;
     private final SQLiteDatabase db;
 
-    public DataBase(Context context, String name) {
-        super(context, name, null, 1);
-        this.context = context;
+    public DataBase(String name) {
+        super(App.context, name, null, 1);
         db = this.getWritableDatabase();
     }
 
@@ -81,7 +80,7 @@ public class DataBase extends SQLiteOpenHelper {
                         + Const.TITLE + " text);"); //название Подборки
                 // добавляем подборку по умолчанию - "вне подборок":
                 ContentValues row = new ContentValues();
-                row.put(Const.TITLE, context.getString(R.string.no_collections));
+                row.put(Const.TITLE, App.context.getString(R.string.no_collections));
                 db.insert(COLLECTIONS, null, row);
                 break;
         }

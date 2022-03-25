@@ -21,6 +21,7 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -31,15 +32,13 @@ import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarWorker extends Worker {
-    private final Context context;
     private PageStorage storage;
     private final Lib lib;
     private final List<ListItem> list = new ArrayList<>();
 
     public CalendarWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.context = context;
-        lib = new Lib(context);
+        lib = new Lib();
     }
 
     @NonNull
@@ -65,9 +64,9 @@ public class CalendarWorker extends Worker {
             //LoaderHelper
             if (!LoaderHelper.start)
                 return Result.success();
-            DateHelper d = DateHelper.initToday(context);
+            DateHelper d = DateHelper.initToday();
             if (getInputData().getInt(Const.MODE, 0) == LoaderHelper.DOWNLOAD_YEAR) {
-                ProgressHelper.setMessage(context.getString(R.string.download_list));
+                ProgressHelper.setMessage(App.context.getString(R.string.download_list));
                 int m, y = getInputData().getInt(Const.YEAR, 0);
                 if (d.getYear() != y)
                     m = 12;
@@ -95,7 +94,7 @@ public class CalendarWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(context, LoaderHelper.STOP, error);
+            LoaderHelper.postCommand(LoaderHelper.STOP, error);
             return Result.failure();
         }
         return Result.failure();
@@ -122,7 +121,7 @@ public class CalendarWorker extends Worker {
         json = json.getJSONObject("calendarData");
         if (json == null || json.names() == null)
             return;
-        initDatebase(DateHelper.putYearMonth(context, year, month).getMY());
+        initDatebase(DateHelper.putYearMonth(year, month).getMY());
         JSONObject jsonI;
         JSONArray jsonA;
         String link;
@@ -134,7 +133,7 @@ public class CalendarWorker extends Worker {
             n = list.size();
             list.add(new ListItem(s.substring(s.lastIndexOf("-") + 1)));
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
-                d = DateHelper.parse(context, s);
+                d = DateHelper.parse(s);
                 jsonA = json.optJSONArray(s);
                 if (jsonA == null)
                     continue;
@@ -166,8 +165,8 @@ public class CalendarWorker extends Worker {
             return;
         }
         if (updateUnread) {
-            DateHelper dItem = DateHelper.putYearMonth(context, year, month);
-            UnreadHelper unread = new UnreadHelper(context);
+            DateHelper dItem = DateHelper.putYearMonth(year, month);
+            UnreadHelper unread = new UnreadHelper();
             for (int i = 0; i < list.size(); i++) {
                 for (int j = 0; j < list.get(i).getCount(); j++) {
                     dItem.setDay(Integer.parseInt(list.get(i).getTitle()));
@@ -183,7 +182,7 @@ public class CalendarWorker extends Worker {
     private void initDatebase(String name) {
         if (storage != null)
             storage.close();
-        storage = new PageStorage(context, name);
+        storage = new PageStorage(name);
         ContentValues row = new ContentValues();
         row.put(Const.TIME, System.currentTimeMillis());
         if (!storage.updateTitle(1, row))

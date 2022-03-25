@@ -24,6 +24,7 @@ import java.io.File;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.model.BookModel;
@@ -63,12 +64,12 @@ public class LoaderHelper extends LifecycleService {
         work = WorkManager.getInstance(getApplication());
     }
 
-    public static void postCommand(Context context, int mode, String request) {
-        Intent intent = new Intent(context, LoaderHelper.class);
-        intent.putExtra(Const.DIALOG, context instanceof Activity);
+    public static void postCommand(int mode, String request) {
+        Intent intent = new Intent(App.context, LoaderHelper.class);
+        intent.putExtra(Const.DIALOG, App.context instanceof Activity);
         intent.putExtra(Const.MODE, mode);
         if (mode == STOP_WITH_NOTIF || mode == STOP) {
-            context.stopService(intent);
+            App.context.stopService(intent);
             return;
 //TODO on Build.VERSION_CODES.O this call error:
 // android.app.RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()
@@ -78,9 +79,9 @@ public class LoaderHelper extends LifecycleService {
             intent.putExtra(Const.TASK, request);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            context.startForegroundService(intent);
+            App.context.startForegroundService(intent);
         else
-            context.startService(intent);
+            App.context.startService(intent);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class LoaderHelper extends LifecycleService {
             start = false;
             String msg = intent.getStringExtra(Const.ERROR);
             if (mode == STOP_WITH_NOTIF || msg != null) {
-                NotificationHelper notifHelper = new NotificationHelper(this);
+                NotificationHelper notifHelper = new NotificationHelper();
                 String title;
                 Intent main;
                 if (msg == null) {
@@ -105,7 +106,7 @@ public class LoaderHelper extends LifecycleService {
                     title = getString(R.string.error_load);
                     msg += Const.N + getString(R.string.touch_to_send);
                     main = new Intent(Intent.ACTION_VIEW);
-                    main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation(getApplicationContext())));
+                    main.setData(android.net.Uri.parse(Const.mailto + ErrorUtils.getInformation()));
                     ErrorUtils.clear();
                 }
                 PendingIntent piMain = PendingIntent.getActivity(this, 0, main, FLAGS);
@@ -125,7 +126,7 @@ public class LoaderHelper extends LifecycleService {
         initNotif();
         start = true;
         if (intent.getBooleanExtra(Const.DIALOG, false))
-            Lib.showToast(getApplicationContext(), getString(R.string.load_background));
+            Lib.showToast(getString(R.string.load_background));
         startLoad(mode, intent.getStringExtra(Const.TASK));
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final Handler handler = new Handler(message -> {
@@ -156,7 +157,7 @@ public class LoaderHelper extends LifecycleService {
     }
 
     private void initNotif() {
-        NotificationHelper notifHelper = new NotificationHelper(this);
+        NotificationHelper notifHelper = new NotificationHelper();
         Intent main = new Intent(this, MainActivity.class);
         PendingIntent piMain = PendingIntent.getActivity(this, 0, main, FLAGS);
         Intent iStop = new Intent(this, LoaderHelper.class);
@@ -252,7 +253,7 @@ public class LoaderHelper extends LifecycleService {
         int k = 0;
         DateHelper d = null;
         if (id == ALL || id == R.id.nav_book) {
-            d = DateHelper.initToday(getApplication().getBaseContext());
+            d = DateHelper.initToday();
             //k = (d.getYear() - 2016) * 12 + d.getMonth() - 1; //poems from 02.16
             k = d.getMonth() - 1; //for ucoz don't need count
             k += 9; // poslaniya (01.16-09.16)
@@ -262,11 +263,11 @@ public class LoaderHelper extends LifecycleService {
             k += 4; //main, news, media and rss
         } else if (id == R.id.nav_site) //main, news
             k = 2;
-        ProgressHelper.setMessage(getApplication().getBaseContext().getString(R.string.download_list));
+        ProgressHelper.setMessage(App.context.getString(R.string.download_list));
         ProgressHelper.setMax(k);
         OneTimeWorkRequest task;
         WorkContinuation job = null;
-        ListsHelper listsHelper = new ListsHelper(getApplication().getBaseContext());
+        ListsHelper listsHelper = new ListsHelper();
         if (id == ALL && listsHelper.summaryIsOld()) { //Summary
             task = new OneTimeWorkRequest
                     .Builder(SummaryWorker.class)
@@ -321,7 +322,7 @@ public class LoaderHelper extends LifecycleService {
         return job;
     }
 
-    public static File getFileList(Context context) {
-        return new File(context.getFilesDir() + File.separator + Const.LIST);
+    public static File getFileList() {
+        return new File(App.context.getFilesDir() + File.separator + Const.LIST);
     }
 }

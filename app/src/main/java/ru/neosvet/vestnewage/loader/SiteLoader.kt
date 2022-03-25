@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.loader
 
-import android.content.Context
 import ru.neosvet.utils.Const
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.fragment.SiteFragment
 import ru.neosvet.vestnewage.helpers.LoaderHelper
 import java.io.BufferedReader
@@ -13,11 +13,11 @@ import java.util.regex.Pattern
 class SiteLoader(private val file: String) : ListLoader {
     private val patternList = Pattern.compile("\\d{4}\\.html")
 
-    override fun getLinkList(context: Context): Int {
+    override fun getLinkList(): Int {
         if (file.contains(SiteFragment.NEWS))
             return 0
         val br = BufferedReader(FileReader(file))
-        val f = LoaderHelper.getFileList(context)
+        val f = LoaderHelper.getFileList()
         val bw = BufferedWriter(FileWriter(f, true))
         var s: String
         var k = 0

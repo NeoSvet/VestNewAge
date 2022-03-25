@@ -51,6 +51,7 @@ import ru.neosvet.ui.WebClient;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -91,12 +92,12 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Runnable runBrowser = null, runNextPage = null, runPrevPage = null;
 
 
-    public static void openReader(Context context, String link, @Nullable String search) {
-        Intent intent = new Intent(context, BrowserActivity.class);
+    public static void openReader(String link, @Nullable String search) {
+        Intent intent = new Intent(App.context, BrowserActivity.class);
         intent.putExtra(Const.LINK, link);
         if (search != null)
             intent.putExtra(Const.SEARCH, search);
-        context.startActivity(intent);
+        App.context.startActivity(intent);
     }
 
     @Override
@@ -150,7 +151,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 return;
             }
             status.setLoad(false);
-            status.checkTime(DateHelper.initNow(this).getTimeInSeconds());
+            status.checkTime(DateHelper.initNow().getTimeInSeconds());
             openPage(true);
         }
     }
@@ -179,7 +180,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         } else {
             link = state.getString(Const.LINK);
             if (link == null) return;
-            storage = new PageStorage(this, link);
+            storage = new PageStorage(link);
             if (!LoaderModel.inProgress) {
                 openPage(false);
                 final float pos = state.getFloat(DataBase.PARAGRAPH);
@@ -278,11 +279,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
         SharedPreferences prMain = getSharedPreferences(MainActivity.class.getSimpleName(), MODE_PRIVATE);
         if (prMain.getBoolean(Const.COUNT_IN_MENU, true))
-            prom = new PromHelper(this, navMenu.getHeaderView(0)
+            prom = new PromHelper(navMenu.getHeaderView(0)
                     .findViewById(R.id.tvPromTimeInMenu));
         else {
             tvPromTime = findViewById(R.id.tvPromTime);
-            prom = new PromHelper(this, tvPromTime);
+            prom = new PromHelper(tvPromTime);
         }
 
         drawerMenu = findViewById(R.id.drawer_layout);
@@ -290,7 +291,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerMenu.addDrawerListener(toggle);
         toggle.syncState();
-        lib = new Lib(this);
+        lib = new Lib();
         pref = getSharedPreferences(BrowserActivity.class.getSimpleName(), MODE_PRIVATE);
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
@@ -549,7 +550,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             case R.id.nav_src_scale:
                 editor.putInt(SCALE, id == R.id.nav_opt_scale ? 0 : 100);
                 editor.apply();
-                openReader(BrowserActivity.this, link, null);
+                openReader(link, null);
                 finish();
                 return true;
             default:
@@ -603,7 +604,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 else if (!link.equals(Const.LINK) && add_history) //first value
                     history.add(0, link);
                 link = url;
-                storage = new PageStorage(this, link);
+                storage = new PageStorage(link);
             }
         }
         if (storage.existsPage(link))
@@ -632,14 +633,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
 
     private void generatePage(File file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        storage = new PageStorage(this, link);
+        storage = new PageStorage(link);
         Cursor cursor = storage.getPage(link);
         int id;
         DateHelper d;
         if (cursor.moveToFirst()) {
             id = cursor.getInt(cursor.getColumnIndex(DataBase.ID));
             String s = storage.getPageTitle(cursor.getString(cursor.getColumnIndex(Const.TITLE)), link);
-            d = DateHelper.putMills(this, cursor.getLong(cursor.getColumnIndex(Const.TIME)));
+            d = DateHelper.putMills(cursor.getLong(cursor.getColumnIndex(Const.TIME)));
             if (storage.isArticle()) //раз в неделю предлагать обновить статьи
                 status.checkTime(d.getTimeInSeconds());
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
@@ -730,7 +731,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     public void checkUnread() {
-        UnreadHelper unread = new UnreadHelper(BrowserActivity.this);
+        UnreadHelper unread = new UnreadHelper();
         unread.deleteLink(link);
     }
 
@@ -759,7 +760,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                         openLink(s, false);
                         return;
                     }
-                    final String today = DateHelper.initToday(BrowserActivity.this).getMY();
+                    final String today = DateHelper.initToday().getMY();
                     DateHelper d = getDateFromLink();
                     if (d.getMY().equals(today)) {
                         tipEndList();
@@ -767,7 +768,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     }
                     d.changeMonth(1);
                     storage.close();
-                    storage = new PageStorage(BrowserActivity.this, d.getMY());
+                    storage = new PageStorage(d.getMY());
                     Cursor cursor = storage.getList(link.contains(Const.POEMS));
                     if (cursor.moveToFirst()) {
                         int iLink = cursor.getColumnIndex(Const.LINK);
@@ -786,7 +787,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         String s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."));
         if (s.contains("_"))
             s = s.substring(0, s.indexOf("_"));
-        return DateHelper.parse(this, s);
+        return DateHelper.parse(s);
     }
 
     @JavascriptInterface
@@ -809,7 +810,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                     }
                     d.changeMonth(-1);
                     storage.close();
-                    storage = new PageStorage(BrowserActivity.this, d.getMY());
+                    storage = new PageStorage(d.getMY());
                     Cursor cursor = storage.getList(link.contains(Const.POEMS));
                     if (cursor.moveToLast()) {
                         int iLink = cursor.getColumnIndex(Const.LINK);
@@ -827,20 +828,20 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void tipEndList() {
-        Lib.showToast(this, getString(R.string.tip_end_list));
+        Lib.showToast(getString(R.string.tip_end_list));
     }
 
     private String getMinMY() {
         DateHelper d;
         if (link.contains(Const.POEMS)) {
-            d = DateHelper.putYearMonth(this, 2016, 2);
+            d = DateHelper.putYearMonth(2016, 2);
             return d.getMY();
         }
         SharedPreferences pref = getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
         if (pref.getBoolean(Const.OTKR, false))
-            d = DateHelper.putYearMonth(this, 2004, 8);
+            d = DateHelper.putYearMonth(2004, 8);
         else
-            d = DateHelper.putYearMonth(this, 2016, 1);
+            d = DateHelper.putYearMonth(2016, 1);
         return d.getMY();
     }
 
@@ -848,7 +849,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         ContentValues row = new ContentValues();
         row.put(Const.TIME, System.currentTimeMillis());
         String id = PageStorage.Companion.getDatePage(link) + Const.AND + storage.getPageId(link);
-        JournalStorage dbJournal = new JournalStorage(BrowserActivity.this);
+        JournalStorage dbJournal = new JournalStorage();
         try {
             if (!dbJournal.update(id, row)) {
                 row.put(DataBase.ID, id);

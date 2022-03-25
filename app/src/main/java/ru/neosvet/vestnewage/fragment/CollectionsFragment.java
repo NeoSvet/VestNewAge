@@ -87,7 +87,7 @@ public class CollectionsFragment extends NeoFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        dbMarker = new MarkersStorage(requireContext());
+        dbMarker = new MarkersStorage();
         initViews();
         setViews();
         initModel();
@@ -212,7 +212,7 @@ public class CollectionsFragment extends NeoFragment {
         } else { //import
             sCol = null;
             loadColList();
-            Lib.showToast(act, getString(R.string.completed));
+            Lib.showToast(getString(R.string.completed));
         }
     }
 
@@ -290,7 +290,7 @@ public class CollectionsFragment extends NeoFragment {
             return getString(R.string.page_entirely);
         try {
             StringBuilder b = new StringBuilder();
-            PageStorage storage = new PageStorage(requireContext(), link);
+            PageStorage storage = new PageStorage(link);
             if (p.contains("%")) { //позиция
                 b.append(Const.N);
                 b.append(storage.getContentPage(link, false));
@@ -378,7 +378,7 @@ public class CollectionsFragment extends NeoFragment {
     }
 
     private String getTitle(String link) {
-        PageStorage storage = new PageStorage(requireContext(), link);
+        PageStorage storage = new PageStorage(link);
         String t = storage.getContentPage(link, true);
         if (t == null)
             return link;
@@ -498,7 +498,7 @@ public class CollectionsFragment extends NeoFragment {
                     p = adMarker.getItem(pos).getDes();
                     p = p.substring(p.indexOf(Const.N, p.indexOf(Const.N) + 1) + 1);
                 }
-                BrowserActivity.openReader(act, adMarker.getItem(pos).getData(), p);
+                BrowserActivity.openReader(adMarker.getItem(pos).getData(), p);
             }
         });
         lvMarker.setOnTouchListener((view, motionEvent) -> {
@@ -527,7 +527,7 @@ public class CollectionsFragment extends NeoFragment {
         fabEdit.setOnClickListener(view -> {
             if (sCol == null) {
                 if (adMarker.getCount() == 1) {
-                    Lib.showToast(act, getString(R.string.nothing_edit));
+                    Lib.showToast(getString(R.string.nothing_edit));
                     return;
                 }
                 iSel = 1;
@@ -658,7 +658,7 @@ public class CollectionsFragment extends NeoFragment {
         boolean bCancel = (name.length() == 0);
         if (!bCancel) {
             if (name.contains(Const.COMMA)) {
-                Lib.showToast(act, getString(R.string.unuse_dot));
+                Lib.showToast(getString(R.string.unuse_dot));
                 return;
             }
             for (int i = 0; i < adMarker.getCount(); i++) {
@@ -669,7 +669,7 @@ public class CollectionsFragment extends NeoFragment {
             }
         }
         if (bCancel) {
-            Lib.showToast(act, getString(R.string.cancel_rename));
+            Lib.showToast(getString(R.string.cancel_rename));
             return;
         }
         ContentValues row = new ContentValues();
@@ -678,7 +678,7 @@ public class CollectionsFragment extends NeoFragment {
             adMarker.getItem(iSel).setTitle(name);
             adMarker.notifyDataSetChanged();
         } else
-            Lib.showToast(act, getString(R.string.cancel_rename));
+            Lib.showToast(getString(R.string.cancel_rename));
     }
 
     private void goToEdit() {
@@ -765,7 +765,7 @@ public class CollectionsFragment extends NeoFragment {
         Intent intent = new Intent(isExport ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
         if (isExport) {
-            DateHelper date = DateHelper.initToday(act);
+            DateHelper date = DateHelper.initToday();
             intent.putExtra(Intent.EXTRA_TITLE, DataBase.MARKERS + " "
                     + date.toString().replace(".", "-"));
             exportResult.launch(intent);

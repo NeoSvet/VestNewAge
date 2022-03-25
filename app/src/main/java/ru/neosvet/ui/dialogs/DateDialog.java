@@ -32,7 +32,7 @@ public class DateDialog extends Dialog implements View.OnClickListener {
     public DateDialog(Activity act, DateHelper date) {
         super(act);
         this.act = act;
-        this.date = DateHelper.putDays(act, date.getTimeInDays());
+        this.date = DateHelper.putDays(date.getTimeInDays());
     }
 
     @Override
@@ -101,7 +101,7 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         }
         rvMonth.setLayoutManager(layoutManager);
         rvMonth.setAdapter(adMonth);
-        DateHelper d = DateHelper.initToday(act);
+        DateHelper d = DateHelper.initToday();
         if (max_year == 0)
             max_year = d.getYear();
         if (max_month == 0)

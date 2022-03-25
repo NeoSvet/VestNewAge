@@ -100,21 +100,21 @@ public class JournalFragment extends Fragment {
             String s;
             String[] id;
             ListItem item;
-            DateHelper now = DateHelper.initNow(act);
+            DateHelper now = DateHelper.initNow();
             if (offset > 0)
                 curJ.moveToPosition(offset);
             DateHelper d;
             long t;
             do {
                 id = curJ.getString(iID).split(Const.AND);
-                storage = new PageStorage(requireContext(), id[0]);
+                storage = new PageStorage(id[0]);
                 cursor = storage.getPageById(id[1]);
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK));
                     item = new ListItem(storage.getPageTitle(cursor.getString(
                             cursor.getColumnIndex(Const.TITLE)), s), s);
                     t = curJ.getLong(iTime);
-                    d = DateHelper.putMills(act, t);
+                    d = DateHelper.putMills(t);
                     item.setDes(String.format(getString(R.string.format_time_back),
                             now.getDiffDate(t), d));
                     if (id.length == 3) { //случайные
@@ -197,7 +197,7 @@ public class JournalFragment extends Fragment {
             finish = true;
             offset = 0;
         });
-        dbJournal = new JournalStorage(requireContext());
+        dbJournal = new JournalStorage();
         lvJournal = container.findViewById(R.id.lvJournal);
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
@@ -208,10 +208,10 @@ public class JournalFragment extends Fragment {
             if (s.contains(getString(R.string.rnd_stih))) {
                 s = s.substring(s.indexOf(Const.N, s.indexOf(
                         getString(R.string.rnd_stih))) + 1);
-                Lib.showToast(act, getString(R.string.long_press_for_mark));
+                Lib.showToast(getString(R.string.long_press_for_mark));
             } else
                 s = null;
-            BrowserActivity.openReader(act, link, s);
+            BrowserActivity.openReader(link, s);
             adJournal.clear();
         });
         lvJournal.setOnItemLongClickListener((adapterView, view, pos, l) -> {
@@ -226,7 +226,7 @@ public class JournalFragment extends Fragment {
                 des = des.substring(des.indexOf("«"));
             } else
                 des = des.substring(des.indexOf("(") + 1, des.indexOf(")"));
-            MarkerActivity.addMarker(act, adJournal.getItem(pos).getLink(), par, des);
+            MarkerActivity.addMarker(adJournal.getItem(pos).getLink(), par, des);
             return true;
         });
         lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {
