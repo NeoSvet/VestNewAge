@@ -108,9 +108,7 @@ public class CabmainFragment extends NeoFragment {
     }
 
     @Override
-    public void onChanged(@Nullable Data result) {
-        if (!ProgressHelper.isBusy() || result == null)
-            return;
+    public void onChanged(Data result) {
         if (result.getBoolean(Const.START, false)) {
             act.status.loadText();
             return;

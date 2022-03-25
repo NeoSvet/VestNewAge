@@ -122,9 +122,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     }
 
     @Override
-    public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy() || data == null)
-            return;
+    public void onChanged(Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
             ProgressHelper.setBusy(false);
             page = 0;

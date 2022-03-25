@@ -38,7 +38,7 @@ public class NeoFragment extends Fragment {
         return true;
     }
 
-    public void onChanged(@Nullable Data data) {
+    public void onChanged(Data data) {
     }
 
     public void startLoad() {

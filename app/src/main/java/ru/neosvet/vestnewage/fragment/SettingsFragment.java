@@ -119,9 +119,7 @@ public class SettingsFragment extends NeoFragment {
     }
 
     @Override
-    public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy() || data == null)
-            return;
+    public void onChanged(Data data) {
         if (data.getBoolean(Const.FINISH, false)) {
             setStatus(false);
             ProgressHelper.setBusy(false);

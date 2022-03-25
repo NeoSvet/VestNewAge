@@ -107,16 +107,13 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     }
 
     @Override
-    public void onChanged(@Nullable Data data) {
-        if (data == null) return;
+    public void onChanged(Data data) {
         if (data.getBoolean(Const.OTKR, false)) {
             fromOtkr = true;
             if (tab == 1 && dPoslanie.getYear() == 2016 && dPoslanie.getMonth() == 1)
                 ivPrev.setEnabled(true);
             return;
         }
-        if (!ProgressHelper.isBusy())
-            return;
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
             return;

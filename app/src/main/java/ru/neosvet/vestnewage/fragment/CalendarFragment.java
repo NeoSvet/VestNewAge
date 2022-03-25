@@ -33,7 +33,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.presenter.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
@@ -81,9 +81,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     }
 
     @Override
-    public void onChanged(@Nullable Data data) {
-        if (!ProgressHelper.isBusy() || data == null)
-            return;
+    public void onChanged(Data data) {
         if (data.getBoolean(Const.START, false)) {
             act.status.loadText();
             return;

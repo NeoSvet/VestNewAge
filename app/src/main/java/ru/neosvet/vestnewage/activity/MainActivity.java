@@ -149,8 +149,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initProgress() {
         ProgressHelper.addObserver(this, data -> {
-            if (curFragment != null)
-                curFragment.onChanged(data);
+            if (curFragment == null || data == null || !ProgressHelper.isBusy())
+                return;
+            curFragment.onChanged(data);
         });
         if (ProgressHelper.isBusy())
             status.setLoad(true);
