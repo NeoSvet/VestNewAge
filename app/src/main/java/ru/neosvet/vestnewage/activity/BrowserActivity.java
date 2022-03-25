@@ -80,7 +80,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private LinearLayout mainLayout;
     private View fabMenu, fabTop, fabBottom, tvPromTime, pSearch, bPrev, bNext, bBack;
     private DrawerLayout drawerMenu;
-    private Lib lib;
     private String link = Const.LINK, string = null;
     private String[] place;
     private int iPlace = -1;
@@ -291,7 +290,6 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
                 this, drawerMenu, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerMenu.addDrawerListener(toggle);
         toggle.syncState();
-        lib = new Lib();
         pref = getSharedPreferences(BrowserActivity.class.getSimpleName(), MODE_PRIVATE);
         editor = pref.edit();
         lightTheme = pref.getInt(THEME, 0) == 0;
@@ -581,11 +579,11 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private void restoreStyle() {
-        final File fStyle = lib.getFile(STYLE);
+        final File fStyle = Lib.getFileL(STYLE);
         if (fStyle.exists()) {
-            final File fDark = lib.getFile(Const.DARK);
+            final File fDark = Lib.getFileL(Const.DARK);
             if (fDark.exists())
-                fStyle.renameTo(lib.getFile(Const.LIGHT));
+                fStyle.renameTo(Lib.getFileL(Const.LIGHT));
             else
                 fStyle.renameTo(fDark);
         }
@@ -594,7 +592,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     public void openLink(String url, boolean add_history) {
         if (url == null) return;
         if (!url.contains(Const.HTML) && !url.contains("http:")) {
-            lib.openInApps(url, null);
+            Lib.openInApps(url, null);
             return;
         }
         if (!link.equals(url)) {
@@ -619,7 +617,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
         if (!readyStyle())
             return;
         try {
-            File file = new File(getFilesDir() + PAGE);
+            File file = Lib.getFile(PAGE);
             if (newPage || !file.exists())
                 generatePage(file);
             String s = file.toString();
@@ -703,14 +701,14 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     private boolean readyStyle() {
-        final File fLight = lib.getFile(Const.LIGHT);
-        final File fDark = lib.getFile(Const.DARK);
+        final File fLight = Lib.getFileL(Const.LIGHT);
+        final File fDark = Lib.getFileL(Const.DARK);
         if (!fLight.exists() && !fDark.exists()) { //download style
             status.setLoad(true);
             model.startLoad(true, null);
             return false;
         }
-        final File fStyle = lib.getFile(STYLE);
+        final File fStyle = Lib.getFileL(STYLE);
         boolean replace = true;
         if (fStyle.exists()) {
             replace = (fDark.exists() && !lightTheme) || (fLight.exists() && lightTheme);
@@ -740,7 +738,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     }
 
     public void openInApps(String url) {
-        lib.openInApps(url, null);
+        Lib.openInApps(url, null);
     }
 
     private float getPositionOnPage() {
@@ -867,7 +865,7 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             dbJournal.close();
         } catch (Exception e) {
             dbJournal.close();
-            File file = new File(getFilesDir().getParent() + "/databases/" + DataBase.JOURNAL);
+            File file = Lib.getFileDB(DataBase.JOURNAL);
             file.delete();
                     /*db.execSQL("drop table if exists " + DataBase.JOURNAL); // удаляем таблицу старого образца
                     //создаем таблицу нового образца:

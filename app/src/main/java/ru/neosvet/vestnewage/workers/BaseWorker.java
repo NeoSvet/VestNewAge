@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters;
 import java.io.File;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.fragment.BookFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -31,7 +32,6 @@ public class BaseWorker extends Worker {
         try {
             String[] request = getInputData().getStringArray(Const.MSG);
             File f;
-            String path = App.context.getFilesDir().getParent() + "/databases/";
             for (String r : request) {
                 if (r.equals(Const.START) || r.equals(Const.END)) { //book
                     DateHelper d;
@@ -52,11 +52,11 @@ public class BaseWorker extends Worker {
                         d = DateHelper.putYearMonth(max_y, 1);
                     }
                     while (d.getYear() < max_y || (d.getYear() == max_y && d.getMonth() <= max_m)) {
-                        f = new File(path + d.getMY());
+                        f = Lib.getFileDB(d.getMY());
                         if (f.exists()) {
                             size += f.length();
                             f.delete();
-                            f = new File(path + d.getMY() + "-journal");
+                            f = Lib.getFileDB(d.getMY() + "-journal");
                             if (f.exists()) {
                                 size += f.length();
                                 f.delete();
@@ -65,9 +65,9 @@ public class BaseWorker extends Worker {
                         d.changeMonth(1);
                     }
                 } else if (r.equals(Const.FILE)) { //cache
-                    clearFolder(new File(App.context.getFilesDir().getParent() + "/cache/"));
+                    clearFolder(Lib.getFileP("/cache"));
                 } else {//markers or materials
-                    f = new File(path + r);
+                    f = Lib.getFileDB(r);
                     if (f.exists()) {
                         size += f.length();
                         f.delete();

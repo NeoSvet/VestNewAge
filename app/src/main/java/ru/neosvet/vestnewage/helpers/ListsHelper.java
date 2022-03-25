@@ -18,16 +18,16 @@ public class ListsHelper {
     }
 
     public boolean summaryIsOld() {
-        File file = Lib.getFileByName(Const.RSS);
+        File file = Lib.getFile(Const.RSS);
         long time = file.lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 
     public boolean siteIsOld() {
-        long time = Lib.getFileByName(SiteFragment.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
+        long time = Lib.getFile(SiteFragment.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
         if (timeNow - time > DateHelper.DAY_IN_SEC)
             return true;
-        time = Lib.getFileByName(SiteFragment.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
+        time = Lib.getFile(SiteFragment.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 

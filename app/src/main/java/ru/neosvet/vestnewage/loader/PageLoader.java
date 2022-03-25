@@ -6,13 +6,13 @@ import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class PageLoader {
-    private final Lib lib = new Lib();
     private final boolean withMsg; //name.contains(LoaderModel.TAG)
     private int k_requests = 0;
     private long time_requests = 0;
@@ -43,7 +43,7 @@ public class PageLoader {
         int n = k;
         boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser();
-        if (lib.isMainSite())
+        if (NeoClient.isMainSite())
             page.load(Const.SITE + Const.PRINT + s, "page-title");
         else
             page.load(Const.SITE2 + Const.PRINT + s, "<h2>");

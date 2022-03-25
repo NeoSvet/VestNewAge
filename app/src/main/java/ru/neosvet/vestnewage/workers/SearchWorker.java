@@ -39,9 +39,9 @@ public class SearchWorker extends Worker {
         ProgressHelper.setBusy(true);
         String error;
         try {
-            Lib lib = new Lib();
             List<String> list = new ArrayList<>();
-            for (File f : Objects.requireNonNull(lib.getDBFolder().listFiles())) {
+            File folder = Lib.getFileDB("");
+            for (File f : folder.listFiles()) {
                 if (f.getName().length() == 5)
                     list.add(f.getName());
                 if (SearchModel.cancel)

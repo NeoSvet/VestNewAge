@@ -70,10 +70,9 @@ public class SiteWorker extends Worker {
                     Const.SITE,
                     Const.SITE + "novosti.html",
             };
-            Lib lib = new Lib();
             String[] file = new String[]{
-                    lib.getFileByName(SiteFragment.MAIN).toString(),
-                    lib.getFileByName(SiteFragment.NEWS).toString()
+                    Lib.getFile(SiteFragment.MAIN).toString(),
+                    Lib.getFile(SiteFragment.NEWS).toString()
             };
             for (int i = 0; i < url.length && !ProgressHelper.isCancelled(); i++) {
                 loadList(url[i]);

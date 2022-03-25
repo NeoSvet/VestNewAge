@@ -27,6 +27,7 @@ import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -35,10 +36,9 @@ import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.presenter.view.CalendarView;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
-public class CalendarFragment extends NeoFragment implements CalendarView, DateDialog.Result, View.OnTouchListener {
+public class CalendarFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener {
     private int today_m, today_y;
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
@@ -70,9 +70,8 @@ public class CalendarFragment extends NeoFragment implements CalendarView, DateD
         model = new ViewModelProvider(this).get(CalendarModel.class);
         restoreState(savedInstanceState);
         if (savedInstanceState == null) {
-            String path = act.getFilesDir().getParent() + "/databases/";
             DateHelper d = DateHelper.initNow();
-            File f = new File(path + d.getMY());
+            File f = Lib.getFileDB(d.getMY());
             if (!f.exists() || System.currentTimeMillis()
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();

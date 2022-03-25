@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
@@ -154,8 +155,7 @@ public class DevadsHelper {
         }
 
         if (des.equals("")) {// only link
-            Lib lib = new Lib();
-            lib.openInApps(link, null);
+            Lib.openInApps(link, null);
             index_ads = -1;
             return;
         }
@@ -173,8 +173,7 @@ public class DevadsHelper {
                     view -> alert.dismiss());
         } else {
             alert.setRightButton(context.getString(R.string.open_link), view -> {
-                Lib lib = new Lib();
-                lib.openInApps(link, null);
+                Lib.openInApps(link, null);
                 alert.dismiss();
             });
         }
@@ -267,8 +266,7 @@ public class DevadsHelper {
         isNew = false;
         long t = getTime();
         String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-        Lib lib = new Lib();
-        BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
+        BufferedInputStream in = NeoClient.getStream(s);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();
         if (Long.parseLong(s) > t) {

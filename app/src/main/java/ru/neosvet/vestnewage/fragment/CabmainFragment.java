@@ -19,13 +19,12 @@ import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
 
+import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.SoftKeyboard;
 import ru.neosvet.ui.dialogs.CustomDialog;
-import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
@@ -228,8 +227,7 @@ public class CabmainFragment extends NeoFragment {
                 switch (pos) {
                     case 0: //не открывает
                         s = "http://neosvet.ucoz.ru/vna/vpn.html";
-                        Lib lib = new Lib();
-                        lib.openInApps(s, null);
+                        Lib.openInApps(s, null);
                         return;
                     case 1: //восстановить доступ
                         s = "sendpass.html";

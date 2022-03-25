@@ -618,7 +618,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         }
         int n = (max_y - y) * 12 + max_m - m;
         if (max_y > 16) { //проверка на существование текущего месяца
-            File f = new File(act.lib.getDBFolder() + "/" + d.getMY());
+            File f = Lib.getFileDB(d.getMY());
             if (!f.exists()) n--;
         }
         //определяем случайный месяц:

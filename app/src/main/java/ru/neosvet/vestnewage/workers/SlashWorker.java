@@ -19,6 +19,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
@@ -52,8 +53,7 @@ public class SlashWorker extends Worker {
 
     private void loadNew() throws Exception {
         String s = "http://neosvet.ucoz.ru/vna/new.txt";
-        Lib lib = new Lib();
-        BufferedInputStream in = new BufferedInputStream(lib.getStream(s));
+        BufferedInputStream in = NeoClient.getStream(s);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         long time;
         PageStorage dbPage;
@@ -101,7 +101,7 @@ public class SlashWorker extends Worker {
         Request.Builder builderRequest = new Request.Builder();
         builderRequest.url(Const.SITE);
         builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
-        OkHttpClient client = Lib.createHttpClient();
+        OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
         String s = response.headers().value(1);
         long timeServer = DateHelper.parse(s).getTimeInSeconds();

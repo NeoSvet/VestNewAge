@@ -50,7 +50,7 @@ public class SummaryHelper {
     }
 
     public void updateBook() throws Exception {
-        File file = new File(App.context.getFilesDir() + Const.RSS);
+        File file = Lib.getFile(Const.RSS);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String title, link, name;
         PageStorage storage = null;

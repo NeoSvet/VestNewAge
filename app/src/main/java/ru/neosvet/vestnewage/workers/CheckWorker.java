@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,7 +18,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.App;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -56,11 +55,10 @@ public class CheckWorker extends Worker {
     }
 
     private boolean checkSummary() throws Exception {
-        Lib lib = new Lib();
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
-                + "rss/?" + System.currentTimeMillis()));
+        InputStream in = NeoClient.getStream(Const.SITE
+                + "rss/?" + System.currentTimeMillis());
         String site;
-        if (lib.isMainSite())
+        if (NeoClient.isMainSite())
             site = Const.SITE.substring(Const.SITE.indexOf("/") + 2);
         else
             site = Const.SITE2.substring(Const.SITE2.indexOf("/") + 2);
@@ -71,7 +69,7 @@ public class CheckWorker extends Worker {
         int a = s.indexOf("lastBuildDate") + 14;
         long secList = DateHelper.parse(s.substring(a, s.indexOf("<", a))).getTimeInSeconds();
 
-        File file = Lib.getFileByName(Const.RSS);
+        File file = Lib.getFile(Const.RSS);
         long secFile = 0;
         if (file.exists())
             secFile = DateHelper.putMills(file.lastModified()).getTimeInSeconds();

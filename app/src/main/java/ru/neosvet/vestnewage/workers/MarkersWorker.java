@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.MarkersStorage;
@@ -158,7 +159,7 @@ public class MarkersWorker extends Worker {
         //изменение id в подборках
         inputStream = App.context.getContentResolver().openInputStream(file);
         br = new BufferedReader(new InputStreamReader(inputStream, Const.ENCODING), 1000);
-        File f = new File(App.context.getFilesDir() + File.separator + DataBase.MARKERS);
+        File f = Lib.getFileS(DataBase.MARKERS);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), Const.ENCODING));
         while ((s = br.readLine()) != null) {
             if (s.equals(Const.AND))

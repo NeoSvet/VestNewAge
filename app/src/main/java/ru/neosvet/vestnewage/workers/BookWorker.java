@@ -23,6 +23,7 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.MyException;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
@@ -36,13 +37,11 @@ public class BookWorker extends Worker {
     private final long SIZE_EMPTY_BASE = 24576L;
     private final List<String> title = new ArrayList<>();
     private final List<String> links = new ArrayList<>();
-    private final Lib lib;
     private int cur, max;
     private boolean BOOK;
 
     public BookWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        lib = new Lib();
     }
 
     private boolean isCancelled() {
@@ -132,7 +131,7 @@ public class BookWorker extends Worker {
     }
 
     private String loadTolkovaniya() throws Exception {
-        if (lib.isMainSite())
+        if (NeoClient.isMainSite())
             return loadListBook(Const.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
         throw new MyException(App.context.getString(R.string.site_not_available));
     }
@@ -156,8 +155,7 @@ public class BookWorker extends Worker {
                 url += "2/list.txt";
                 break;
         }
-        BufferedInputStream in = new BufferedInputStream(lib.getStream(url));
-        final String path = lib.getDBFolder() + "/";
+        BufferedInputStream in = NeoClient.getStream(url);
         File f;
         long l;
         //list format:
@@ -172,7 +170,7 @@ public class BookWorker extends Worker {
                 return name;
             }
             name = s.substring(0, s.indexOf(" "));
-            f = new File(path + name);
+            f = Lib.getFileDB(name);
             if (f.exists()) {
                 l = Long.parseLong(s.substring(s.lastIndexOf(" ") + 1));
                 if (s.contains("delete")) {
@@ -215,7 +213,7 @@ public class BookWorker extends Worker {
 
             storage = new PageStorage(item);
             isTitle = true;
-            in = new BufferedInputStream(lib.getStream(url + item));
+            in = NeoClient.getStream(url + item);
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
             n = 2;
             while ((s = br.readLine()) != null) {
@@ -268,7 +266,7 @@ public class BookWorker extends Worker {
         String s = null;
         int y = DateHelper.initToday().getYear();
         for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
-            if (lib.isMainSite())
+            if (NeoClient.isMainSite())
                 s = loadListBook(Const.SITE + Const.PRINT + Const.POEMS
                         + "/" + i + Const.HTML);
             else
@@ -279,7 +277,7 @@ public class BookWorker extends Worker {
 
     private String loadListBook(String url) throws Exception {
         PageParser page = new PageParser();
-        if (lib.isMainSite())
+        if (NeoClient.isMainSite())
             page.load(url, "page-title");
         else
             page.load(url, "<h2>");

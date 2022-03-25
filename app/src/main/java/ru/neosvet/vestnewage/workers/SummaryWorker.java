@@ -7,7 +7,6 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -17,7 +16,7 @@ import java.io.InputStreamReader;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.App;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -79,16 +78,14 @@ public class SummaryWorker extends Worker {
     }
 
     private void loadList() throws Exception {
-        Lib lib = new Lib();
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
-                + "rss/?" + System.currentTimeMillis()));
+        InputStream in = NeoClient.getStream(Const.SITE + "rss/?" + System.currentTimeMillis());
         String site;
-        if (lib.isMainSite())
+        if (NeoClient.isMainSite())
             site = Const.SITE.substring(Const.SITE.indexOf("/") + 2);
         else
             site = Const.SITE2.substring(Const.SITE2.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(App.context.getFilesDir() + Const.RSS));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(Lib.getFile(Const.RSS)));
         DateHelper now = DateHelper.initNow();
         UnreadHelper unread = new UnreadHelper();
         String[] m = br.readLine().split("<item>");

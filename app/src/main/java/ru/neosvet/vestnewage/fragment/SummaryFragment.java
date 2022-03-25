@@ -49,7 +49,7 @@ public class SummaryFragment extends NeoFragment {
         model = new ViewModelProvider(this).get(SummaryModel.class);
         restoreState(savedInstanceState);
         if (savedInstanceState == null) {
-            File f = Lib.getFileByName(Const.RSS);
+            File f = Lib.getFile(Const.RSS);
             if (!f.exists() || System.currentTimeMillis()
                     - f.lastModified() > DateHelper.HOUR_IN_MILLS)
                 startLoad();
@@ -91,7 +91,7 @@ public class SummaryFragment extends NeoFragment {
     }
 
     private void restoreState(Bundle state) {
-        File f = new File(act.getFilesDir() + Const.RSS);
+        File f = Lib.getFile(Const.RSS);
         if (f.exists()) {
             if (act.status.checkTime(f.lastModified() / DateHelper.SEC_IN_MILLS))
                 fabRefresh.setVisibility(View.GONE);
@@ -153,7 +153,7 @@ public class SummaryFragment extends NeoFragment {
         try {
             adSummary.clear();
             DateHelper dateNow = DateHelper.initNow();
-            BufferedReader br = new BufferedReader(new FileReader(act.getFilesDir() + Const.RSS));
+            BufferedReader br = new BufferedReader(new FileReader(Lib.getFile(Const.RSS)));
             String title, des, time, link;
             int i = 0;
             while ((title = br.readLine()) != null) {

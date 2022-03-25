@@ -205,8 +205,7 @@ public class StatusButton {
     }
 
     private void sendError() {
-        Lib lib = new Lib();
-        lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
+        Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
     }
 
     public boolean isTime() {

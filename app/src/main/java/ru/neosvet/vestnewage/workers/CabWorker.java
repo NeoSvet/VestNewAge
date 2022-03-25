@@ -18,6 +18,7 @@ import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -69,7 +70,7 @@ public class CabWorker extends Worker {
                 .url(Const.CAB_SITE)
                 .addHeader(Const.USER_AGENT, App.context.getPackageName())
                 .build();
-        OkHttpClient client = Lib.createHttpClient();
+        OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(request).execute();
 
         String cookie = response.header(Const.SET_COOKIE);
@@ -108,7 +109,7 @@ public class CabWorker extends Worker {
         builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
         builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
 
-        OkHttpClient client = Lib.createHttpClient();
+        OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -177,7 +178,7 @@ public class CabWorker extends Worker {
                 .build();
         builderRequest.post(requestBody);
 
-        OkHttpClient client = Lib.createHttpClient();
+        OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(

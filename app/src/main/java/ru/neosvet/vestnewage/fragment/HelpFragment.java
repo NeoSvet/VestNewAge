@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.HelpAdapter;
@@ -111,7 +112,7 @@ public class HelpFragment extends Fragment {
             case WRITE_TO_DEV:
                 var msg = getString(R.string.srv_info)
                         + adHelp.getItem(FEEDBACK + CHANGELOG).getDes();
-                act.lib.openInApps(Const.mailto + msg, null);
+                Lib.openInApps(Const.mailto + msg, null);
                 break;
             case LINK_ON_APP:
                 Intent sendIntent = new Intent(Intent.ACTION_SEND);
@@ -120,10 +121,10 @@ public class HelpFragment extends Fragment {
                 startActivity(sendIntent);
                 break;
             case LINK_ON_SITE:
-                act.lib.openInApps("http://neosvet.ucoz.ru/vna/", null);
+                Lib.openInApps("http://neosvet.ucoz.ru/vna/", null);
                 break;
             default: //CHANGELOG
-                act.lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
+                Lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null);
         }
     }
 

@@ -11,7 +11,6 @@ import androidx.work.WorkerParameters;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,7 +19,7 @@ import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
-import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -33,12 +32,10 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarWorker extends Worker {
     private PageStorage storage;
-    private final Lib lib;
     private final List<ListItem> list = new ArrayList<>();
 
     public CalendarWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        lib = new Lib();
     }
 
     @NonNull
@@ -108,8 +105,8 @@ public class CalendarWorker extends Worker {
     }
 
     private void loadListMonth(int year, int month, boolean updateUnread) throws Exception {
-        InputStream in = new BufferedInputStream(lib.getStream(Const.SITE
-                + "AjaxData/Calendar/" + year + "-" + month + ".json"));
+        InputStream in = NeoClient.getStream(Const.SITE
+                + "AjaxData/Calendar/" + year + "-" + month + ".json");
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s = br.readLine();
         br.close();

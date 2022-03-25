@@ -219,7 +219,7 @@ public class LoaderWorker extends Worker {
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
             k = workWithBook(true);
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
-            SiteLoader loader = new SiteLoader(Lib.getFileByName(SiteFragment.MAIN).toString());
+            SiteLoader loader = new SiteLoader(Lib.getFile(SiteFragment.MAIN).toString());
             k += loader.getLinkList();
         }
         ProgressHelper.setMax(k);

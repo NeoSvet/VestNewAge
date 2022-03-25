@@ -25,6 +25,7 @@ import java.io.FileReader;
 
 import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -421,9 +422,9 @@ public class SiteFragment extends NeoFragment {
     private void openPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
             if (url.contains(Const.SITE)) {
-                act.lib.openInApps(url, getString(R.string.to_load));
+                Lib.openInApps(url, getString(R.string.to_load));
             } else {
-                act.lib.openInApps(url, null);
+                Lib.openInApps(url, null);
             }
         } else {
             BrowserActivity.openReader(url, null);
@@ -447,6 +448,6 @@ public class SiteFragment extends NeoFragment {
     }
 
     private File getFile() {
-        return new File(act.getFilesDir() + tabHost.getCurrentTabTag());
+        return Lib.getFile(tabHost.getCurrentTabTag());
     }
 }

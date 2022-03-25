@@ -164,7 +164,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     }
 
     private void restoreState(Bundle state) {
-        File f = new File(act.lib.getDBFolder() + "/12.15");
+        File f = Lib.getFileDB("12.15");
         if (f.exists()) {
             // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
             min_m = 8; //aug
@@ -200,7 +200,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         }
 
         if (adResults.getCount() == 0 && !ProgressHelper.isBusy()) {
-            f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
+            f = Lib.getFileDB(Const.SEARCH);
             if (f.exists()) {
                 adResults.addItem(new ListItem(
                         getString(R.string.results_last_search),
@@ -308,7 +308,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
 
     @SuppressLint("ClickableViewAccessibility")
     private void setViews(View container) {
-        File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
+        File f = Lib.getFileS(Const.SEARCH);
         List<String> liSearch = new ArrayList<>();
         if (f.exists()) {
             try {
@@ -392,7 +392,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         container.findViewById(R.id.bClearSearch).setOnClickListener(view -> {
             adSearch.clear();
             adSearch.notifyDataSetChanged();
-            File f1 = new File(act.getFilesDir() + File.separator + Const.SEARCH);
+            File f1 = Lib.getFileS(Const.SEARCH);
             if (f1.exists()) f1.delete();
         });
         bStart.setOnClickListener(view -> showDatePicker(0));
@@ -431,7 +431,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
     }
 
     private void deleteBase() {
-        File f = new File(act.lib.getDBFolder() + File.separator + Const.SEARCH);
+        File f = Lib.getFileDB(Const.SEARCH);
         if (f.exists()) f.delete();
     }
 
@@ -499,7 +499,7 @@ public class SearchFragment extends NeoFragment implements DateDialog.Result, Vi
         if (needAdd) {
             adSearch.add(string);
             adSearch.notifyDataSetChanged();
-            File f = new File(act.getFilesDir() + File.separator + Const.SEARCH);
+            File f = Lib.getFileS(Const.SEARCH);
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(f, true));
                 bw.write(string + Const.N);

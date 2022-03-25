@@ -323,6 +323,6 @@ public class LoaderHelper extends LifecycleService {
     }
 
     public static File getFileList() {
-        return new File(App.context.getFilesDir() + File.separator + Const.LIST);
+        return Lib.getFileS(Const.LIST);
     }
 }

@@ -11,10 +11,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 
 public class StyleLoader {
-    private final Lib lib = new Lib();
     private final Request.Builder builderRequest;
     private final OkHttpClient client;
 
@@ -22,14 +22,14 @@ public class StyleLoader {
         builderRequest = new Request.Builder();
         builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
         builderRequest.header("Referer", Const.SITE);
-        client = Lib.createHttpClient();
+        client = NeoClient.createHttpClient();
     }
 
     public void download(boolean replaceStyle) throws Exception {
-        final File fLight = lib.getFile(Const.LIGHT);
-        final File fDark = lib.getFile(Const.DARK);
+        final File fLight = Lib.getFileL(Const.LIGHT);
+        final File fDark = Lib.getFileL(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
-            if (lib.isMainSite())
+            if (NeoClient.isMainSite())
                 downloadStyleFromSite(fLight, fDark);
             else
                 downloadFromUcoz(fLight, fDark);

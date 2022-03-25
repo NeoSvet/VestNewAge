@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NeoFragment curFragment;
     private FragmentManager myFragmentManager;
     private WelcomeFragment frWelcome = null;
-    public Lib lib = new Lib();
     private Tip menuDownload;
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -263,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         k_new = unread.getCount();
         unread.close();
         try {
-            File file = new File(getFilesDir() + File.separator + Const.ADS);
+            File file = Lib.getFileS(Const.ADS);
             if (file.exists()) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 br.readLine(); //time
@@ -326,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(cur_id);
 
             navigationView.getHeaderView(0).setOnClickListener(view -> {
-                lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
+                Lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
 //                    startActivity(Intent.createChooser(lib.openInApps(Const.SITE),
 //                            getString(R.string.open)));
             });
@@ -661,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (item[2] != null) {
             builder.setPositiveButton(getString(R.string.open_link),
                     (dialog, id) -> {
-                        lib.openInApps(item[2], null);
+                        Lib.openInApps(item[2], null);
                     });
         }
         builder.create().show();
