@@ -90,9 +90,9 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
     private Tip tip;
     private Runnable runBrowser = null, runNextPage = null, runPrevPage = null;
 
-
     public static void openReader(String link, @Nullable String search) {
         Intent intent = new Intent(App.context, BrowserActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Const.LINK, link);
         if (search != null)
             intent.putExtra(Const.SEARCH, search);
