@@ -27,6 +27,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
+import ru.neosvet.vestnewage.helpers.BookHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
@@ -215,6 +216,11 @@ public class CalendarFragment extends NeoFragment implements CalendarView, DateD
     private void showDatePicker() {
         dialog = true;
         dateDialog = new DateDialog(act, presenter.getDate());
+        BookHelper book = new BookHelper();
+        if (book.isLoadedOtkr()) {
+            dateDialog.setMinMonth(8);
+            dateDialog.setMinYear(2004);
+        }
         dateDialog.setResult(CalendarFragment.this);
         dateDialog.show();
     }

@@ -7,6 +7,7 @@ import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.CalendarItem
@@ -27,7 +28,7 @@ class CalendarPresenter(private val view: CalendarView) {
     private val calendar = arrayListOf<CalendarItem>()
 
     fun startLoad() {
-        if (ProgressHelper.isBusy()) return
+        if (ProgressHelper.isBusy() || date.year < 2016) return
         view.showLoading()
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -78,11 +79,14 @@ class CalendarPresenter(private val view: CalendarView) {
             d.changeMonth(offsetMonth)
             date.changeMonth(offsetMonth)
         }
-        val prev = if (date.year == 2016) date.month != 0 else true
+        val prev = if (date.year == 2016 && date.month == 1) {
+            val book = BookHelper()
+            book.isLoadedOtkr()
+        } else !(date.year == 2004 && date.month == 8)
         val next = if (date.year == todayY) date.month != todayM else true
         view.updateData(d.calendarString, prev, next)
         calendar.clear()
-        for (i in -1 downTo -7 + 1)  //add label monday-saturday
+        for (i in -1 downTo -6)  //add label monday-saturday
             calendar.add(CalendarItem(i, R.color.light_gray))
         calendar.add(CalendarItem(0, R.color.light_gray)) //sunday
         val curMonth = d.month
@@ -135,6 +139,9 @@ class CalendarPresenter(private val view: CalendarView) {
                     if (link.contains("@")) {
                         i = link.substring(0, 2).toInt()
                         link = link.substring(9)
+                    } else if (link.contains("predislovie")) {
+                        i = if (link.contains("2009")) 1 else
+                            if (link.contains("2004")) 31 else 26
                     } else {
                         i = link.lastIndexOf("/") + 1
                         i = link.substring(i, i + 2).toInt()
@@ -143,11 +150,11 @@ class CalendarPresenter(private val view: CalendarView) {
                     calendar[i].addLink(link)
                     if (storage.existsPage(link)) {
                         title = storage.getPageTitle(title, link)
-                        calendar[i].addTitle(title.substring(title.indexOf(" ") + 1))
-                    } else {
+                        if (title.contains("."))
+                            title = title.substring(title.indexOf(" ") + 1)
+                    } else
                         title = getTitleByLink(link)
-                        calendar[i].addTitle(title)
-                    }
+                    calendar[i].addTitle(title)
                     empty = false
                 }
             }
