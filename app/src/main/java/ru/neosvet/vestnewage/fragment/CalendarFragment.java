@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.fragment;
 
 import android.annotation.SuppressLint;
-import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,19 +13,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.ui.dialogs.DateDialog;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
@@ -34,18 +31,16 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.CalendarAdapter;
 import ru.neosvet.vestnewage.list.CalendarItem;
-import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
-import ru.neosvet.vestnewage.storage.PageStorage;
+import ru.neosvet.vestnewage.presenter.CalendarPresenter;
+import ru.neosvet.vestnewage.presenter.view.CalendarView;
 
-public class CalendarFragment extends NeoFragment implements DateDialog.Result, View.OnTouchListener {
-    private int today_m, today_y;
+public class CalendarFragment extends NeoFragment implements CalendarView, DateDialog.Result, CalendarAdapter.Clicker {
     private CalendarAdapter adCalendar;
     private RecyclerView rvCalendar;
-    private DateHelper dCurrent;
     private TextView tvDate;
     private View ivPrev, ivNext, fabRefresh;
-    private CalendarModel model;
+    private CalendarPresenter presenter;
     private DateDialog dateDialog;
     private boolean dialog = false;
     final Handler hTimer = new Handler(message -> {
@@ -65,18 +60,13 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         act.setTitle(getString(R.string.calendar));
+        presenter = new CalendarPresenter(this);
         initViews(view);
         initCalendar();
-        model = new ViewModelProvider(this).get(CalendarModel.class);
         restoreState(savedInstanceState);
-        if (savedInstanceState == null) {
-            DateHelper d = DateHelper.initNow();
-            File f = Lib.getFileDB(d.getMY());
-            if (!f.exists() || System.currentTimeMillis()
-                    - f.lastModified() > DateHelper.HOUR_IN_MILLS)
-                startLoad();
-        }
-        if (ProgressHelper.isBusy())
+        if (savedInstanceState == null && presenter.isNeedReload()) {
+            startLoad();
+        } else if (ProgressHelper.isBusy())
             setStatus(true);
     }
 
@@ -91,7 +81,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
             return;
         }
         if (data.getBoolean(Const.LIST, false)) {
-            openCalendar(false);
+            presenter.openCalendar(false);
             if (LoaderModel.inProgress) {
                 ProgressHelper.setBusy(false);
                 setStatus(false);
@@ -100,7 +90,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         }
         if (data.getBoolean(Const.FINISH, false)) {
             act.updateNew();
-            openCalendar(false);
+            presenter.openCalendar(false);
             String error = data.getString(Const.ERROR);
             if (error != null) {
                 act.status.setError(error);
@@ -117,21 +107,20 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         outState.putBoolean(Const.DIALOG, dialog);
         if (dialog)
             dateDialog.dismiss();
-        outState.putInt(Const.CURRENT_DATE, dCurrent.getTimeInDays());
+        outState.putInt(Const.CURRENT_DATE, presenter.getDate().getTimeInDays());
         super.onSaveInstanceState(outState);
     }
 
     private void restoreState(Bundle state) {
         if (state == null) {
-            dCurrent = DateHelper.initToday();
-            dCurrent.setDay(1);
+            presenter.createCalendar(0);
         } else {
-            dCurrent = DateHelper.putDays(state.getInt(Const.CURRENT_DATE));
+            DateHelper date = DateHelper.putDays(state.getInt(Const.CURRENT_DATE));
+            presenter.changeDate(date);
             dialog = state.getBoolean(Const.DIALOG);
             if (dialog)
                 showDatePicker();
         }
-        createCalendar(0);
     }
 
     private void initViews(View container) {
@@ -139,9 +128,6 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         ivPrev = container.findViewById(R.id.ivPrev);
         ivNext = container.findViewById(R.id.ivNext);
         rvCalendar = container.findViewById(R.id.rvCalendar);
-        DateHelper d = DateHelper.initToday();
-        today_m = d.getMonth();
-        today_y = d.getYear();
         fabRefresh = container.findViewById(R.id.fabRefresh);
         container.findViewById(R.id.bProm).setOnClickListener(v -> openLink("Posyl-na-Edinenie.html"));
         fabRefresh.setOnClickListener(view -> startLoad());
@@ -168,7 +154,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     @SuppressLint("ClickableViewAccessibility")
     private void initCalendar() {
-        GridLayoutManager layoutManager = new GridLayoutManager(act, 7);
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 7);
         adCalendar = new CalendarAdapter(this);
         rvCalendar.setLayoutManager(layoutManager);
         rvCalendar.setAdapter(adCalendar);
@@ -210,142 +196,12 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
                 hTimer.sendEmptyMessage(0);
             }
         }, 300);
-        createCalendar(offset);
-    }
-
-    private void createCalendar(int offsetMonth) {
-        DateHelper d = DateHelper.putDays(dCurrent.getTimeInDays());
-        if (offsetMonth != 0) {
-            d.changeMonth(offsetMonth);
-            dCurrent.changeMonth(offsetMonth);
-        }
-        tvDate.setText(d.getCalendarString());
-        adCalendar.clear();
-        for (int i = -1; i > -7; i--) //add label monday-saturday
-            adCalendar.addItem(new CalendarItem(i, R.color.light_gray));
-        adCalendar.addItem(new CalendarItem(0, R.color.light_gray)); //sunday
-        final int cur_month = d.getMonth();
-        if (d.getDayWeek() != DateHelper.MONDAY) {
-            if (d.getDayWeek() == DateHelper.SUNDAY)
-                d.changeDay(-6);
-            else
-                d.changeDay(1 - d.getDayWeek());
-            while (d.getMonth() != cur_month) {
-                adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.darker_gray));
-                d.changeDay(1);
-            }
-        }
-        DateHelper today = DateHelper.initToday();
-        int n_today = 0;
-        if (today.getMonth() == cur_month)
-            n_today = today.getDay();
-        while (d.getMonth() == cur_month) {
-            adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.white));
-            if (d.getDay() == n_today)
-                adCalendar.getItem(adCalendar.getItemCount() - 1).setBold();
-            d.changeDay(1);
-        }
-        while (d.getDayWeek() != DateHelper.MONDAY) {
-            adCalendar.addItem(new CalendarItem(d.getDay(), android.R.color.darker_gray));
-            d.changeDay(1);
-        }
-        openCalendar(true);
-        if (dCurrent.getYear() == 2016)
-            ivPrev.setEnabled(dCurrent.getMonth() != 0);
-        if (dCurrent.getYear() == today_y)
-            ivNext.setEnabled(dCurrent.getMonth() != today_m);
-        else
-            ivNext.setEnabled(true);
-    }
-
-    private boolean isCurMonth() {
-        return dCurrent.getMonth() == today_m && dCurrent.getYear() == today_y;
-    }
-
-    @SuppressLint({"Range", "NotifyDataSetChanged"})
-    private void openCalendar(boolean loadIfNeed) {
-        try {
-            for (int i = 0; i < adCalendar.getItemCount(); i++)
-                adCalendar.getItem(i).clear();
-            PageStorage storage = new PageStorage(dCurrent.getMY());
-            Cursor cursor = storage.getListAll();
-            boolean empty = true;
-            if (cursor.moveToFirst()) {
-                if (loadIfNeed) {
-                    checkTime((int) (cursor.getLong(cursor.getColumnIndex(
-                            Const.TIME)) / DateHelper.SEC_IN_MILLS));
-                }
-
-                int iTitle = cursor.getColumnIndex(Const.TITLE);
-                int iLink = cursor.getColumnIndex(Const.LINK);
-                int i;
-                String title, link;
-                while (cursor.moveToNext()) {
-                    title = cursor.getString(iTitle);
-                    link = cursor.getString(iLink);
-                    if (link.contains("@")) {
-                        i = Integer.parseInt(link.substring(0, 2));
-                        link = link.substring(9);
-                    } else {
-                        i = link.lastIndexOf("/") + 1;
-                        i = Integer.parseInt(link.substring(i, i + 2));
-                    }
-                    i = adCalendar.indexOf(i);
-                    adCalendar.getItem(i).addLink(link);
-                    if (storage.existsPage(link)) {
-                        title = storage.getPageTitle(title, link);
-                        adCalendar.getItem(i).addTitle(title.substring(title.indexOf(" ") + 1));
-                    } else {
-                        title = getTitleByLink(link);
-                        adCalendar.getItem(i).addTitle(title);
-                    }
-                    empty = false;
-                }
-            }
-            cursor.close();
-            storage.close();
-            adCalendar.notifyDataSetChanged();
-
-            if (empty && loadIfNeed)
-                startLoad();
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (loadIfNeed)
-                startLoad();
-        }
-    }
-
-    private String getTitleByLink(String s) {
-        PageStorage storage = new PageStorage(DataBase.ARTICLES);
-        Cursor curTitle = storage.getTitle(s);
-        if (curTitle.moveToFirst())
-            s = curTitle.getString(0);
-        curTitle.close();
-        storage.close();
-        return s;
-    }
-
-    private void checkTime(int sec) {
-        if (isCurMonth()) {
-            setStatus(act.status.checkTime(sec));
-            return;
-        }
-        if ((dCurrent.getMonth() == today_m - 1 && dCurrent.getYear() == today_y) ||
-                (dCurrent.getMonth() == 11 && dCurrent.getYear() == today_y - 1)) {
-            DateHelper d = DateHelper.putSeconds(sec);
-            if (d.getMonth() != today_m)
-                act.status.checkTime(sec);
-        }
+        presenter.createCalendar(offset);
     }
 
     @Override
     public void startLoad() {
-        if (ProgressHelper.isBusy())
-            return;
-        setStatus(true);
-        act.status.setLoad(true);
-        act.status.startText();
-        model.startLoad(dCurrent.getMonth(), dCurrent.getYear(), isCurMonth());
+        presenter.startLoad();
     }
 
     @Override
@@ -358,7 +214,7 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
 
     private void showDatePicker() {
         dialog = true;
-        dateDialog = new DateDialog(act, dCurrent);
+        dateDialog = new DateDialog(act, presenter.getDate());
         dateDialog.setResult(CalendarFragment.this);
         dateDialog.show();
     }
@@ -368,44 +224,63 @@ public class CalendarFragment extends NeoFragment implements DateDialog.Result, 
         dialog = false;
         if (date == null) // cancel
             return;
-        dCurrent = date;
-        createCalendar(0);
+        presenter.changeDate(date);
     }
 
     public int getCurrentYear() {
-        return dCurrent.getYear();
+        return presenter.getDate().getYear();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouch(View v, MotionEvent event) { //click calendar item
-        if (event.getAction() != MotionEvent.ACTION_UP)
-            return false;
-        if (act.checkBusy()) return false;
-        final int pos = (int) v.getTag();
-        int k = adCalendar.getItem(pos).getCount();
-        if (k == 0)
-            return false;
-        if (k == 1) {
-            openLink(adCalendar.getItem(pos).getLink(0));
-            return false;
+    public void showLoading() {
+        setStatus(true);
+        act.status.setLoad(true);
+        act.status.startText();
+    }
+
+    @Override
+    public void onClick(View view, CalendarItem item) {
+        if (act.checkBusy()) return;
+        switch (item.getCount()) {
+            case 1:
+                openLink(item.getLink(0));
+            case 0:
+                return;
         }
-        //k > 1
-        PopupMenu pMenu = new PopupMenu(act, rvCalendar.getChildAt(pos));
-        for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
-            pMenu.getMenu().add(adCalendar.getItem(pos).getTitle(i));
+        PopupMenu pMenu = new PopupMenu(act, view);
+        for (int i = 0; i < item.getCount(); i++) {
+            pMenu.getMenu().add(item.getTitle(i));
         }
-        pMenu.setOnMenuItemClickListener(item -> {
-            String title = item.getTitle().toString();
-            for (int i = 0; i < adCalendar.getItem(pos).getCount(); i++) {
-                if (adCalendar.getItem(pos).getTitle(i).equals(title)) {
-                    openLink(adCalendar.getItem(pos).getLink(i));
+        pMenu.setOnMenuItemClickListener(menuItem -> {
+            String title = menuItem.getTitle().toString();
+            for (int i = 0; i < item.getCount(); i++) {
+                if (item.getTitle(i).equals(title)) {
+                    openLink(item.getLink(i));
                     break;
                 }
             }
             return true;
         });
         pMenu.show();
-        return false;
+    }
+
+    @Override
+    public void updateData(@NonNull String date, boolean prev, boolean next) {
+        tvDate.setText(date);
+        ivPrev.setEnabled(prev);
+        ivNext.setEnabled(next);
+    }
+
+    @Override
+    public void updateCalendar(ArrayList<CalendarItem> data) {
+        adCalendar.setItems(data);
+    }
+
+    @Override
+    public void checkTime(int sec, boolean isCurMonth) {
+        if (isCurMonth)
+            setStatus(act.status.checkTime(sec));
+        else
+            act.status.checkTime(sec);
     }
 }

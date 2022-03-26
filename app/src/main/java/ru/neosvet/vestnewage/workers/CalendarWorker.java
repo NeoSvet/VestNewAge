@@ -27,7 +27,7 @@ import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 import ru.neosvet.vestnewage.list.ListItem;
-import ru.neosvet.vestnewage.model.CalendarModel;
+import ru.neosvet.vestnewage.presenter.CalendarPresenter;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarWorker extends Worker {
@@ -41,7 +41,7 @@ public class CalendarWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        boolean CALENDAR = getInputData().getString(Const.TASK).equals(CalendarModel.class.getSimpleName());
+        boolean CALENDAR = getInputData().getString(Const.TASK).equals(CalendarPresenter.class.getSimpleName());
         String error;
         ErrorUtils.setData(getInputData());
         try {
