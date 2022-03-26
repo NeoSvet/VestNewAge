@@ -2,9 +2,7 @@ package ru.neosvet.vestnewage.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +39,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MarkerActivity;
+import ru.neosvet.vestnewage.helpers.BookHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -64,9 +63,9 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     private Tip menuRnd;
     private BookModel model;
     private String dialog = "";
-    private boolean notClick = false, fromOtkr;
+    private boolean notClick = false;
     private DateHelper dKatren, dPoslanie;
-    private SharedPreferences pref;
+    private final BookHelper helper = new BookHelper();
     final Handler hTimer = new Handler(message -> {
         tvDate.setBackgroundResource(R.drawable.card_bg);
         return false;
@@ -99,16 +98,12 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(Const.KATRENY, dKatren.getTimeInDays());
-        editor.putInt(Const.POSLANIYA, dPoslanie.getTimeInDays());
-        editor.apply();
+        helper.saveDates(dKatren.getTimeInDays(), dPoslanie.getTimeInDays());
     }
 
     @Override
     public void onChanged(Data data) {
         if (data.getBoolean(Const.OTKR, false)) {
-            fromOtkr = true;
             if (tab == 1 && dPoslanie.getYear() == 2016 && dPoslanie.getMonth() == 1)
                 ivPrev.setEnabled(true);
             return;
@@ -146,22 +141,10 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     }
 
     private void restoreState(Bundle state) {
-        DateHelper d = DateHelper.initToday();
-        d.setDay(1);
-        int kat, pos;
-        try {
-            kat = pref.getInt(Const.KATRENY, d.getTimeInDays());
-            d.setMonth(9);
-            d.setYear(2016);
-            pos = pref.getInt(Const.POSLANIYA, d.getTimeInDays());
-        } catch (Exception e) { //if old version
-            kat = (int) (pref.getLong(Const.KATRENY, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
-            pos = (int) (pref.getLong(Const.POSLANIYA, 0) / DateHelper.SEC_IN_MILLS / DateHelper.DAY_IN_SEC);
-        }
-        dKatren = DateHelper.putDays(kat);
-        dPoslanie = DateHelper.putDays(pos);
-        fromOtkr = pref.getBoolean(Const.OTKR, false);
-        if (!fromOtkr && dPoslanie.getYear() < 2016)
+        helper.loadDates();
+        dKatren = DateHelper.putDays(helper.getKatrenDays());
+        dPoslanie = DateHelper.putDays(helper.getPoslaniyaDays());
+        if (!helper.isLoadedOtkr() && dPoslanie.getYear() < 2016)
             dPoslanie = DateHelper.putYearMonth(2016, 1);
         if (state != null) {
             tab = state.getInt(Const.TAB);
@@ -169,7 +152,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                 dialog = state.getString(Const.DIALOG);
                 if (dialog.contains(DIALOG_DATE)) {
                     if (!dialog.equals(DIALOG_DATE)) {
-                        d = DateHelper.parse(dialog.substring(DIALOG_DATE.length()));
+                        DateHelper d = DateHelper.parse(dialog.substring(DIALOG_DATE.length()));
                         showDatePicker(d);
                     } else
                         showDatePicker(null);
@@ -238,7 +221,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             }
             adBook.clear();
             tvDate.setText(d.getCalendarString());
-            if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
+            if (d.getMonth() == 1 && d.getYear() == 2016 && !helper.isLoadedOtkr()) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
                 ivPrev.setEnabled(!LoaderHelper.start);
                 d.changeMonth(1);
@@ -253,7 +236,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             String t, s;
             Cursor cursor;
 
-            if (d.getMonth() == 1 && d.getYear() == 2016 && !fromOtkr) {
+            if (d.getMonth() == 1 && d.getYear() == 2016 && !helper.isLoadedOtkr()) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
                 storage = new PageStorage("12.04");
                 cursor = storage.getListAll();
@@ -348,7 +331,6 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     }
 
     private void initViews(View container) {
-        pref = act.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
         menuRnd = new Tip(act, container.findViewById(R.id.pRnd));
         lvBook = container.findViewById(R.id.lvBook);
         fabRefresh = container.findViewById(R.id.fabRefresh);
@@ -467,7 +449,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     private void openMonth(boolean plus) {
         if (act.checkBusy()) return;
         if (!plus && tab == 1) {
-            if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !fromOtkr) {
+            if (dPoslanie.getMonth() == 1 && dPoslanie.getYear() == 2016 && !helper.isLoadedOtkr()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(act, R.style.NeoDialog);
                 builder.setMessage(getString(R.string.alert_download_otkr));
                 builder.setNegativeButton(getString(R.string.no),
@@ -507,7 +489,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         setStatus(true);
         act.status.setLoad(true);
         act.status.startText();
-        model.startLoad(fromOtkr, tab == 0);
+        model.startLoad(helper.isLoadedOtkr(), tab == 0);
     }
 
     @Override
@@ -571,9 +553,9 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         if (tab == 0) { //katreny
             dateDialog.setMinMonth(2); //feb
         } else { //poslyania
-            if (fromOtkr) {
+            if (helper.isLoadedOtkr()) {
                 dateDialog.setMinMonth(8); //aug
-                dateDialog.setMinYear(2004); //2004
+                dateDialog.setMinYear(2004);
             }
             dateDialog.setMaxMonth(9); //sep
             dateDialog.setMaxYear(2016);
@@ -604,7 +586,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             m = 2;
             y = 16;
         } else {
-            if (fromOtkr) {
+            if (helper.isLoadedOtkr()) {
                 m = 8;
                 y = 4;
             } else {

@@ -27,6 +27,7 @@ import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.helpers.BookHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
@@ -71,10 +72,8 @@ public class BookWorker extends Worker {
                         .putBoolean(Const.OTKR, true)
                         .putString(Const.TITLE, s)
                         .build());
-                SharedPreferences pref = App.context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean(Const.OTKR, true);
-                editor.apply();
+                BookHelper book = new BookHelper();
+                book.setLoadedOtkr(true);
                 LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, null);
                 return Result.success();
             }

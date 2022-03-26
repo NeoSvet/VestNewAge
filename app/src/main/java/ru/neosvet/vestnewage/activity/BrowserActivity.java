@@ -54,6 +54,7 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.helpers.BookHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -835,8 +836,8 @@ public class BrowserActivity extends AppCompatActivity implements NavigationView
             d = DateHelper.putYearMonth(2016, 2);
             return d.getMY();
         }
-        SharedPreferences pref = getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
-        if (pref.getBoolean(Const.OTKR, false))
+        BookHelper book = new BookHelper();
+        if (book.isLoadedOtkr())
             d = DateHelper.putYearMonth(2004, 8);
         else
             d = DateHelper.putYearMonth(2016, 1);

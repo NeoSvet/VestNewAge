@@ -14,6 +14,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.fragment.BookFragment;
+import ru.neosvet.vestnewage.helpers.BookHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
@@ -41,10 +42,8 @@ public class BaseWorker extends Worker {
                         max_y = d.getYear() - 1;
                         max_m = 12;
                         d = DateHelper.putYearMonth(2004, 8);
-                        SharedPreferences pref = App.context.getSharedPreferences(BookFragment.class.getSimpleName(), Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putBoolean(Const.OTKR, false);
-                        editor.apply();
+                        BookHelper book = new BookHelper();
+                        book.setLoadedOtkr(false);
                     } else { //book cur year
                         d = DateHelper.initToday();
                         max_y = d.getYear();
