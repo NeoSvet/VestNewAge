@@ -7,7 +7,6 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
-import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.PageStorage;
@@ -89,7 +88,7 @@ public class PageLoader {
                         //обновляем дату загрузки материала
                         storage.updateTitle(id, row);
                         //удаляем содержимое материала
-                        storage.deleteParagraph(id);
+                        storage.deleteParagraphs(id);
                     }
                     bid = id;
                     s = page.getNextElem();

@@ -247,8 +247,8 @@ class PageStorage(name: String) {
     fun updateTitle(link: String, cv: ContentValues): Boolean =
         db.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) > 0
 
-    fun deleteParagraph(id: Int) =
-        db.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, id.toString())
+    fun deleteParagraphs(pageId: Int) =
+        db.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, pageId.toString())
 
     fun getLinks(): Cursor =
         db.query(Const.TITLE, arrayOf(Const.LINK))
