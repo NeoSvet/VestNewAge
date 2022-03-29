@@ -1,6 +1,5 @@
 package ru.neosvet.ui;
 
-import android.os.Handler;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -8,15 +7,12 @@ import android.webkit.WebViewClient;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 
 public class WebClient extends WebViewClient {
     private final String files = "file";
     private BrowserActivity act;
-    private Handler hSearch = new Handler(message -> {
-        act.initSearch();
-        return false;
-    });
 
     public WebClient(BrowserActivity act) {
         this.act = act;
@@ -24,7 +20,7 @@ public class WebClient extends WebViewClient {
 
     private String getUrl(String url) {
         if (url.contains(act.getPackageName())) // страница во внутренем хранилище
-            url = url.substring(url.indexOf("age") + 4);
+            url = url.substring(url.indexOf("age") + 10);
         else
             url = url.substring(url.indexOf(files) + 8);
         return url;
@@ -34,28 +30,26 @@ public class WebClient extends WebViewClient {
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         view.setVisibility(View.GONE);
         if (url.contains(files)) {
-            act.openLink(getUrl(url), true);
+            act.openLink(getUrl(url));
             return true;
         }
         if (url.contains("http") || url.contains("mailto")) {
-            act.openPage(false);
-            act.openInApps(url);
+            act.onBack();
+            Lib.openInApps(url, null);
         } else
-            act.openLink(url, true);
+            act.openLink(url);
 //        super.shouldOverrideUrlLoading(view, url);
         return true;
     }
 
     public void onPageFinished(WebView view, String url) {
         view.setVisibility(View.VISIBLE);
-        if (url.contains(files)) {
-            act.checkUnread();
-            act.addJournal();
-        }
+        if (url.contains(files))
+            act.onPageFinished();
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                hSearch.sendEmptyMessage(0);
+                view.post(act::initSearch);
             }
         }, 500);
     }

@@ -139,8 +139,10 @@
     <!--Страница-->
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
     <string name="page">Страница:</string>
-    <string name="copyright">©</string>
+    <string name="copyright">Copyright © Leonid Maslov 2004-</string>
     <string name="downloaded">Загружено:</string>
+    <string name="to_prev">На предыдущую</string>
+    <string name="to_next">На следующую</string>
     <!--SettingsFragment-->
     <string name="base">Основное</string>
     <string name="notif_new">Проверка обновлений</string>
