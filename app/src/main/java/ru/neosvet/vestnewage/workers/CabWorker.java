@@ -17,7 +17,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
@@ -67,13 +66,13 @@ public class CabWorker extends Worker {
 
     private Data.Builder subLogin(String email, String pass) throws Exception {
         Request request = new Request.Builder()
-                .url(Const.CAB_SITE)
-                .addHeader(Const.USER_AGENT, App.context.getPackageName())
+                .url(NeoClient.CAB_SITE)
+                .addHeader(NeoClient.USER_AGENT, App.context.getPackageName())
                 .build();
         OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(request).execute();
 
-        String cookie = response.header(Const.SET_COOKIE);
+        String cookie = response.header(NeoClient.SET_COOKIE);
         cookie = cookie.substring(0, cookie.indexOf(";"));
         CabModel.cookie = cookie;
         response.close();
@@ -84,9 +83,9 @@ public class CabWorker extends Worker {
                 .build();
         request = new Request.Builder()
                 .post(requestBody)
-                .url(Const.CAB_SITE + "auth.php")
-                .addHeader(Const.USER_AGENT, App.context.getPackageName())
-                .addHeader(Const.COOKIE, cookie)
+                .url(NeoClient.CAB_SITE + "auth.php")
+                .addHeader(NeoClient.USER_AGENT, App.context.getPackageName())
+                .addHeader(NeoClient.COOKIE, cookie)
                 .build();
 
         response = client.newCall(request).execute();
@@ -105,9 +104,9 @@ public class CabWorker extends Worker {
 
     private Data.Builder getListWord(boolean returnSelectWord) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(Const.CAB_SITE + "edinenie/anketa.html");
-        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
-        builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
+        builderRequest.url(NeoClient.CAB_SITE + "edinenie/anketa.html");
+        builderRequest.header(NeoClient.USER_AGENT, App.context.getPackageName());
+        builderRequest.addHeader(NeoClient.COOKIE, CabModel.cookie);
 
         OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
@@ -168,9 +167,9 @@ public class CabWorker extends Worker {
 
     private Data.Builder sendWord(int index) throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(Const.CAB_SITE + "savedata.php");
-        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
-        builderRequest.addHeader(Const.COOKIE, CabModel.cookie);
+        builderRequest.url(NeoClient.CAB_SITE + "savedata.php");
+        builderRequest.header(NeoClient.USER_AGENT, App.context.getPackageName());
+        builderRequest.addHeader(NeoClient.COOKIE, CabModel.cookie);
         RequestBody requestBody = new FormBody.Builder()
                 .add("keyw", String.valueOf(index + 1))
                 .add("login", CabModel.email)

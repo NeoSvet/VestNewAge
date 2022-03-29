@@ -43,9 +43,9 @@ public class PageLoader {
         boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser();
         if (NeoClient.isMainSite())
-            page.load(Const.SITE + Const.PRINT + s, "page-title");
+            page.load(NeoClient.SITE + Const.PRINT + s, "page-title");
         else
-            page.load(Const.SITE2 + Const.PRINT + s, "<h2>");
+            page.load(NeoClient.SITE2 + Const.PRINT + s, "<h2>");
 
         ContentValues row;
         int id = 0, bid = 0;

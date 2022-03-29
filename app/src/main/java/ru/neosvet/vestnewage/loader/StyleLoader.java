@@ -20,8 +20,8 @@ public class StyleLoader {
 
     public StyleLoader() {
         builderRequest = new Request.Builder();
-        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
-        builderRequest.header("Referer", Const.SITE);
+        builderRequest.header(NeoClient.USER_AGENT, App.context.getPackageName());
+        builderRequest.header("Referer", NeoClient.SITE);
         client = NeoClient.createHttpClient();
     }
 
@@ -60,7 +60,7 @@ public class StyleLoader {
     }
 
     private void downloadStyleFromSite(File fLight, File fDark) throws Exception {
-        builderRequest.url(Const.SITE + "_content/BV/style-print.min.css");
+        builderRequest.url(NeoClient.SITE + "_content/BV/style-print.min.css");
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));

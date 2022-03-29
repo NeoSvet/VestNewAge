@@ -17,6 +17,7 @@ import ru.neosvet.html.PageParser;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DevadsHelper;
@@ -67,8 +68,8 @@ public class SiteWorker extends Worker {
             if (!LoaderHelper.start)
                 return Result.success();
             String[] url = new String[]{
-                    Const.SITE,
-                    Const.SITE + "novosti.html",
+                    NeoClient.SITE,
+                    NeoClient.SITE + "novosti.html",
             };
             String[] file = new String[]{
                     Lib.getFile(SiteFragment.MAIN).toString(),
@@ -123,7 +124,7 @@ public class SiteWorker extends Worker {
 
     private void loadList(String url) throws Exception {
         PageParser page = new PageParser();
-        boolean isSite = url.equals(Const.SITE);
+        boolean isSite = url.equals(NeoClient.SITE);
         int i;
         if (isSite) {
             page.load(url, "page-title");
@@ -188,7 +189,7 @@ public class SiteWorker extends Worker {
     private void addLink(String head, String link) {
         if (link.contains("files") || link.contains(".mp3") || link.contains(".wma")
                 || link.lastIndexOf("/") == link.length() - 1)
-            link = Const.SITE + link.substring(1);
+            link = NeoClient.SITE + link.substring(1);
         if (link.indexOf("/") == 0)
             link = link.substring(1);
         list.get(list.size() - 1).addLink(head, link);

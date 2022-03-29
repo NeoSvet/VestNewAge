@@ -9,6 +9,7 @@ import kotlinx.coroutines.*
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity
 import ru.neosvet.vestnewage.helpers.BookHelper
@@ -217,7 +218,7 @@ class BrowserPresenter(
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
-            bw.write(strings.page + " " + Const.SITE + link)
+            bw.write(strings.page + " " + NeoClient.SITE + link)
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
             bw.write(strings.downloaded + " " + d.toString())
@@ -373,7 +374,7 @@ class BrowserPresenter(
             s = s.substring(9) + " (" +
                     context.getString(R.string.from) +
                     " " + s.substring(0, 8) + ")"
-        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + Const.SITE + link)
+        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NeoClient.SITE + link)
         val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
         context.startActivity(intent)
     }

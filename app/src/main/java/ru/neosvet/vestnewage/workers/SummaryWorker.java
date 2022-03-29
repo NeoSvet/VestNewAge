@@ -78,12 +78,12 @@ public class SummaryWorker extends Worker {
     }
 
     private void loadList() throws Exception {
-        InputStream in = NeoClient.getStream(Const.SITE + "rss/?" + System.currentTimeMillis());
+        InputStream in = NeoClient.getStream(NeoClient.SITE + "rss/?" + System.currentTimeMillis());
         String site;
         if (NeoClient.isMainSite())
-            site = Const.SITE.substring(Const.SITE.indexOf("/") + 2);
+            site = NeoClient.SITE.substring(NeoClient.SITE.indexOf("/") + 2);
         else
-            site = Const.SITE2.substring(Const.SITE2.indexOf("/") + 2);
+            site = NeoClient.SITE2.substring(NeoClient.SITE2.indexOf("/") + 2);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         BufferedWriter bw = new BufferedWriter(new FileWriter(Lib.getFile(Const.RSS)));
         DateHelper now = DateHelper.initNow();

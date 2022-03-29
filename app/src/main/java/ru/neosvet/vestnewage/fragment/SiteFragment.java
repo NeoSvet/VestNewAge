@@ -26,6 +26,7 @@ import java.io.FileReader;
 import ru.neosvet.ui.NeoFragment;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -314,7 +315,7 @@ public class SiteFragment extends NeoFragment {
             } else if (link.contains("tolkovaniya") || link.contains("2016")) {
                 act.openBook(link, false);
             } else if (link.contains("files") && !link.contains("http")) {
-                openPage(Const.SITE + link);
+                openPage(NeoClient.SITE + link);
             } else
                 openPage(link);
         } else {
@@ -421,7 +422,7 @@ public class SiteFragment extends NeoFragment {
 
     private void openPage(String url) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(Const.SITE)) {
+            if (url.contains(NeoClient.SITE)) {
                 Lib.openInApps(url, getString(R.string.to_load));
             } else {
                 Lib.openInApps(url, null);
@@ -441,7 +442,7 @@ public class SiteFragment extends NeoFragment {
             model.loadAds();
             return;
         }
-        String url = Const.SITE;
+        String url = NeoClient.SITE;
         if (tab == TAB_NEWS)
             url += NOVOSTI;
         model.startLoad(url, getFile().toString());

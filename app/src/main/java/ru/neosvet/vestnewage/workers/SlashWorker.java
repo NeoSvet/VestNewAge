@@ -18,7 +18,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.utils.Const;
-import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.helpers.DateHelper;
@@ -99,8 +98,8 @@ public class SlashWorker extends Worker {
 
     private void synchronTime() throws Exception {
         Request.Builder builderRequest = new Request.Builder();
-        builderRequest.url(Const.SITE);
-        builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
+        builderRequest.url(NeoClient.SITE);
+        builderRequest.header(NeoClient.USER_AGENT, App.context.getPackageName());
         OkHttpClient client = NeoClient.createHttpClient();
         Response response = client.newCall(builderRequest.build()).execute();
         String s = response.headers().value(1);

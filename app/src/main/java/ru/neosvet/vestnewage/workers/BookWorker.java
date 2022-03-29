@@ -131,7 +131,7 @@ public class BookWorker extends Worker {
 
     private String loadTolkovaniya() throws Exception {
         if (NeoClient.isMainSite())
-            return loadListBook(Const.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
+            return loadListBook(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML);
         throw new MyException(App.context.getString(R.string.site_not_available));
     }
 
@@ -266,10 +266,10 @@ public class BookWorker extends Worker {
         int y = DateHelper.initToday().getYear();
         for (int i = BOOK ? 2016 : y - 1; i <= y && !isCancelled(); i++) {
             if (NeoClient.isMainSite())
-                s = loadListBook(Const.SITE + Const.PRINT + Const.POEMS
+                s = loadListBook(NeoClient.SITE + Const.PRINT + Const.POEMS
                         + "/" + i + Const.HTML);
             else
-                s = loadListBook(Const.SITE2 + Const.PRINT + i + Const.HTML);
+                s = loadListBook(NeoClient.SITE2 + Const.PRINT + i + Const.HTML);
         }
         return s;
     }

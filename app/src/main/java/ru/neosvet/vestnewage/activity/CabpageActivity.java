@@ -23,6 +23,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.StatusButton;
 import ru.neosvet.utils.Const;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.CabmainFragment;
@@ -47,7 +48,7 @@ public class CabpageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cabpage_activity);
         initView();
-        wvBrowser.loadUrl(Const.CAB_SITE + getIntent().getStringExtra(Const.LINK));
+        wvBrowser.loadUrl(NeoClient.CAB_SITE + getIntent().getStringExtra(Const.LINK));
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetJavaScriptEnabled"})

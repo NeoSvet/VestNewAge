@@ -1,6 +1,5 @@
 package ru.neosvet.html;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -122,9 +121,8 @@ public class PageParser {
                 else
                     elem.par = s.substring(n, s.indexOf("'", n));
                 elem.par = elem.par.replace("..", "").replace("&#x2B;", "+");
-                String SITE = ru.neosvet.utils.Const.SITE;
                 if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
-                    elem.par = SITE + elem.par.substring(1);
+                    elem.par = NeoClient.SITE + elem.par.substring(1);
             }
             if (elem.tag.equals(Const.IMAGE)) {
                 elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/");

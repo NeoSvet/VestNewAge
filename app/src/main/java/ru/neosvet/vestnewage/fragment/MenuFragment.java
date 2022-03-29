@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.list.MenuAdapter;
@@ -64,8 +65,8 @@ public class MenuFragment extends Fragment {
         if (getResources().getInteger(R.integer.screen_mode) ==
                 getResources().getInteger(R.integer.screen_tablet_land)) {
             container.findViewById(R.id.ivHeadMenu).setOnClickListener(view -> {
-                Lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
-//                startActivity(Intent.createChooser(Lib.openInApps(Const.SITE),
+                Lib.openInApps(NeoClient.SITE.substring(0, NeoClient.SITE.length() - 1), null);
+//                startActivity(Intent.createChooser(Lib.openInApps(NeoClient.SITE),
 //                        getString(R.string.open)));
             });
             if (MainActivity.isCountInMenu)

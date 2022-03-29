@@ -10,6 +10,9 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class NeoClient {
+    public static final String SITE = "https://blagayavest.info/",  SITE2 = "https://chenneling.info/",
+            CAB_SITE = "https://www.otkroveniya.eu/", USER_AGENT = "User-Agent",
+            COOKIE = "Cookie", SET_COOKIE = "Set-Cookie";
     private static boolean first = true;
 
     public static boolean isMainSite() {
@@ -25,33 +28,33 @@ public class NeoClient {
     }
 
     public static BufferedInputStream getStream(String url) throws Exception {
-        if (!first && url.contains(Const.SITE))
-            url = url.replace(Const.SITE, Const.SITE2);
+        if (!first && url.contains(SITE))
+            url = url.replace(SITE, SITE2);
 
         Response response;
         try {
             Request.Builder builderRequest = new Request.Builder();
             builderRequest.url(url);
-            builderRequest.header(Const.USER_AGENT, App.context.getPackageName());
-            if (url.contains(Const.SITE)) {
-                builderRequest.header("Referer", Const.SITE);
+            builderRequest.header(USER_AGENT, App.context.getPackageName());
+            if (url.contains(SITE)) {
+                builderRequest.header("Referer", SITE);
             }
             OkHttpClient client = createHttpClient();
             response = client.newCall(builderRequest.build()).execute();
         } catch (Exception e) {
             ErrorUtils.setError(e);
             e.printStackTrace();
-            if (url.contains(Const.SITE)) {
+            if (url.contains(SITE)) {
                 first = false;
-                return getStream(url.replace(Const.SITE, Const.SITE2));
+                return getStream(url.replace(SITE, SITE2));
             } else
                 throw new MyException(App.context.getString(R.string.error_site));
         }
 
         if (response.code() != 200) {
-            if (url.contains(Const.SITE)) {
+            if (url.contains(SITE)) {
                 first = false;
-                return getStream(url.replace(Const.SITE, Const.SITE2));
+                return getStream(url.replace(SITE, SITE2));
             } else
                 throw new MyException(App.context.getString(R.string.error_code)
                         + response.code());

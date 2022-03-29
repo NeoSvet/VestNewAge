@@ -40,6 +40,7 @@ import ru.neosvet.ui.dialogs.SetNotifDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
+import ru.neosvet.utils.NeoClient;
 import ru.neosvet.utils.SlashUtils;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.fragment.BookFragment;
@@ -325,8 +326,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(cur_id);
 
             navigationView.getHeaderView(0).setOnClickListener(view -> {
-                Lib.openInApps(Const.SITE.substring(0, Const.SITE.length() - 1), null);
-//                    startActivity(Intent.createChooser(lib.openInApps(Const.SITE),
+                Lib.openInApps(NeoClient.SITE.substring(0, NeoClient.SITE.length() - 1), null);
+//                    startActivity(Intent.createChooser(lib.openInApps(NeoClient.SITE),
 //                            getString(R.string.open)));
             });
         }
