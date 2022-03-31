@@ -28,6 +28,12 @@ public class ListAdapter extends BaseAdapter {
         data.add(pos, item);
     }
 
+    public void setItem(List<ListItem> items) {
+        data.clear();
+        data.addAll(items);
+        notifyDataSetChanged();
+    }
+
     public void addItem(ListItem item) {
         data.add(item);
     }

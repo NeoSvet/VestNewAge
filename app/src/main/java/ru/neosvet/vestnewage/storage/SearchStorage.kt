@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
@@ -11,7 +10,8 @@ import ru.neosvet.utils.DataBase
  */
 
 class SearchStorage {
-    private val db = DataBase(Const.SEARCH)
+    private var db = DataBase(Const.SEARCH)
+    private var isClosed = false
 
     fun getResults(sortDesc: Boolean): Cursor = db.query(
         Const.SEARCH, null, null, null, null,
@@ -30,6 +30,15 @@ class SearchStorage {
     fun clear() =
         db.delete(Const.SEARCH)
 
-    fun close() =
+    fun close() {
+        if (isClosed) return
         db.close()
+        isClosed = true
+    }
+
+    fun reopen() {
+        if (isClosed.not()) return
+        db = DataBase(Const.SEARCH)
+        isClosed = false
+    }
 }
