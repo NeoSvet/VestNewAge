@@ -115,7 +115,6 @@ public class CheckWorker extends Worker {
         }
         bwRSS.close();
         unread.setBadge();
-        unread.close();
         return true;
     }
 

@@ -274,7 +274,6 @@ public class DevadsHelper {
                 isNew = true;
                 UnreadHelper unread = new UnreadHelper();
                 unread.setBadge(getUnreadCount());
-                unread.close();
             }
         }
         br.close();

@@ -117,6 +117,5 @@ public class SummaryWorker extends Worker {
         }
         bw.close();
         unread.setBadge();
-        unread.close();
     }
 }

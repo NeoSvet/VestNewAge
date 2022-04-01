@@ -259,9 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void updateNew() {
-        unread.open();
         k_new = unread.getCount();
-        unread.close();
         try {
             File file = Lib.getFileS(Const.ADS);
             if (file.exists()) {

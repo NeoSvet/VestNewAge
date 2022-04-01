@@ -25,12 +25,16 @@ public class UnreadHelper {
     private PageStorage storage = new PageStorage();
     private long time = 0;
     private int[] ids_new;
+    private boolean isClosed = true;
 
-    public UnreadHelper() {
+    private void open() {
+        if (!isClosed) return;
         dbUnread = new DataBase(NAME);
+        isClosed = false;
     }
 
     public boolean addLink(String link, DateHelper date) {
+        open();
         if (!link.contains(Const.HTML)) link += Const.HTML;
         storage.open(link);
         if (storage.existsPage(link)) return false; // скаченную страницу игнорируем
@@ -48,6 +52,7 @@ public class UnreadHelper {
     }
 
     public void deleteLink(String link) {
+        open();
         link = link.replace(Const.HTML, "");
         if (dbUnread.delete(NAME, Const.LINK + DataBase.Q, link) > 0) {
             time = System.currentTimeMillis();
@@ -57,6 +62,7 @@ public class UnreadHelper {
     }
 
     public List<String> getList() {
+        open();
         List<String> links = new ArrayList<>();
         Cursor cursor = dbUnread.query(NAME, null, null,
                 null, null, null, Const.TIME);
@@ -69,10 +75,12 @@ public class UnreadHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
+        close();
         return links;
     }
 
     public int getCount() {
+        open();
         Cursor cursor = dbUnread.query(NAME, null, null,
                 null, null, null, Const.TIME);
         int k = 0;
@@ -82,6 +90,7 @@ public class UnreadHelper {
         DevadsHelper ads = new DevadsHelper(App.context);
         k += ads.getUnreadCount();
         ads.close();
+        close();
         return k;
     }
 
@@ -102,18 +111,16 @@ public class UnreadHelper {
     }
 
     public void clearList() {
+        open();
         dbUnread.delete(NAME);
         time = System.currentTimeMillis();
     }
 
-    public void open() {
-        dbUnread = new DataBase(NAME);
-    }
-
-    public void close() {
-        if (storage != null)
-            storage.close();
+    private void close() {
+        if (isClosed) return;
+        storage.close();
         dbUnread.close();
+        isClosed = true;
         if (time > 0) {
             SharedPreferences pref = App.context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -129,6 +136,7 @@ public class UnreadHelper {
     }
 
     public void setBadge(int count_ads) {
+        open();
         Cursor cursor = dbUnread.query(NAME, null, Const.TIME + " > ?", "0");
         count_ads += cursor.getCount();
         if (count_ads == 0)
@@ -136,5 +144,6 @@ public class UnreadHelper {
         else
             ShortcutBadger.applyCount(App.context, count_ads);
         cursor.close();
+        close();
     }
 }

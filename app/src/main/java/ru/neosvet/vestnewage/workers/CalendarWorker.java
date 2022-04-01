@@ -168,7 +168,6 @@ public class CalendarWorker extends Worker {
                 }
             }
             unread.setBadge();
-            unread.close();
         }
         list.clear();
     }

@@ -97,7 +97,6 @@ public class NewFragment extends Fragment {
                 UnreadHelper unread = new UnreadHelper();
                 unread.clearList();
                 unread.setBadge(ads.getUnreadCount());
-                unread.close();
                 adNew.clear();
                 adNew.notifyDataSetChanged();
                 tvEmptyNew.setVisibility(View.VISIBLE);
@@ -146,7 +145,6 @@ public class NewFragment extends Fragment {
             unread.setBadge(ads.getUnreadCount());
             if (unread.lastModified() > 0) {
                 List<String> links = unread.getList();
-                unread.close();
                 for (int i = links.size() - 1; i > -1; i--) {
                     s = links.get(i);
                     t = s.substring(s.lastIndexOf(File.separator) + 1);
@@ -164,7 +162,6 @@ public class NewFragment extends Fragment {
                 }
                 links.clear();
             }
-            unread.close();
             if (ads.getIndex() > -1)
                 showAd(ads.getIndex());
         } catch (Exception e) {
