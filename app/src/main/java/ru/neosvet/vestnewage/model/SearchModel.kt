@@ -44,7 +44,7 @@ class SearchModel : ViewModel() {
         get() = mstate
     private lateinit var strings: SearchStrings
     private val storage = SearchStorage()
-    private var pages = PageStorage()
+    private val pages = PageStorage()
     private var countMatches: Int = 0
     private var countPages: Int = 0
     var isRun: Boolean = false
@@ -70,9 +70,9 @@ class SearchModel : ViewModel() {
     }
 
     override fun onCleared() {
+        scope.cancel()
         pages.close()
         storage.close()
-        scope.cancel()
         super.onCleared()
     }
 
@@ -160,7 +160,6 @@ class SearchModel : ViewModel() {
             result.add(item)
         } while (cursor.moveToNext() && result.size < Const.MAX_ON_PAGE)
         cursor.close()
-        storage.close()
         mstate.postValue(SearchState.Result(result, max))
     }
 
@@ -261,6 +260,7 @@ class SearchModel : ViewModel() {
         var id = -1
         var add = true
         val des = StringBuilder()
+        storage.reopen()
         do {
             if (id == cursor.getInt(iID) && add) {
                 des.append(Const.BR + Const.BR)
