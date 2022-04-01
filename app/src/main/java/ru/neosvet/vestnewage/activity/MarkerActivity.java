@@ -61,7 +61,8 @@ public class MarkerActivity extends AppCompatActivity {
         marker.putExtra(Const.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
-            PageStorage storage = new PageStorage(link);
+            PageStorage storage = new PageStorage();
+            storage.open(link);
             Cursor cursor = storage.getParagraphs(storage.getPageId(link));
             StringBuilder s = new StringBuilder();
             if (cursor.moveToFirst()) {
@@ -310,7 +311,8 @@ public class MarkerActivity extends AppCompatActivity {
 
     private void loadPage() {
         k_par = 5; // имитация нижнего "колонтитула" страницы
-        PageStorage storage = new PageStorage(link);
+        PageStorage storage = new PageStorage();
+        storage.open(link);
         pageCon = storage.getContentPage(link, false);
         storage.close();
         adPage.clear();

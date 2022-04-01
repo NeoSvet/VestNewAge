@@ -35,7 +35,8 @@ public class ListsHelper {
         if (bookIsOld == 0) {
             DateHelper d = DateHelper.initNow();
             d.changeMonth(-1);
-            PageStorage storage = new PageStorage(d.getMY());
+            PageStorage storage = new PageStorage();
+            storage.open(d.getMY());
             Cursor curTime = storage.getTime();
             if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                 bookIsOld = 1;
@@ -46,7 +47,7 @@ public class ListsHelper {
                     curTime.close();
                     storage.close();
                     d = DateHelper.putYearMonth(2016, 1);
-                    storage = new PageStorage(d.getMY());
+                    storage.open(d.getMY());
                     curTime = storage.getTime();
                     if (!curTime.moveToFirst() || curTime.getCount() < 2) {
                         bookIsOld = 1;

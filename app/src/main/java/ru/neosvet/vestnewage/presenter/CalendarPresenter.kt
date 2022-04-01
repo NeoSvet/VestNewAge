@@ -120,7 +120,8 @@ class CalendarPresenter(private val view: CalendarView) {
         try {
             for (i in 0 until calendar.size)
                 calendar[i].clear()
-            val storage = PageStorage(date.my)
+            val storage = PageStorage()
+            storage.open(date.my)
             val cursor = storage.getListAll()
             var empty = true
             if (cursor.moveToFirst()) {
@@ -200,7 +201,8 @@ class CalendarPresenter(private val view: CalendarView) {
 
     private fun getTitleByLink(s: String): String {
         var result = s
-        val storage = PageStorage(DataBase.ARTICLES)
+        val storage = PageStorage()
+        storage.open(DataBase.ARTICLES)
         val curTitle = storage.getTitle(result)
         if (curTitle.moveToFirst())
             result = curTitle.getString(0)

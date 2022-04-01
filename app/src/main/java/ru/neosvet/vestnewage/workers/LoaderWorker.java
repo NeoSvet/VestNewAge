@@ -256,7 +256,8 @@ public class LoaderWorker extends Worker {
     }
 
     private int countBookList(String name) {
-        PageStorage storage = new PageStorage(name);
+        PageStorage storage = new PageStorage();
+        storage.open(name);
         Cursor curTitle = storage.getLinks();
         int k = curTitle.getCount() - 1;
         curTitle.close();
@@ -265,7 +266,8 @@ public class LoaderWorker extends Worker {
     }
 
     private void downloadBookList(String name) throws Exception {
-        PageStorage storage = new PageStorage(name);
+        PageStorage storage = new PageStorage();
+        storage.open(name);
         Cursor curTitle = storage.getLinks();
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка

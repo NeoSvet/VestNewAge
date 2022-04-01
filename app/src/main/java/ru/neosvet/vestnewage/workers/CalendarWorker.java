@@ -31,7 +31,7 @@ import ru.neosvet.vestnewage.presenter.CalendarPresenter;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class CalendarWorker extends Worker {
-    private PageStorage storage;
+    private PageStorage storage = new PageStorage();
     private final List<ListItem> list = new ArrayList<>();
 
     public CalendarWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -140,7 +140,7 @@ public class CalendarWorker extends Worker {
                     if (link.contains(d.toString()))
                         addLink(n, link);
                     else
-                        addLink(n, d.toString() + "@" + link);
+                        addLink(n, d + "@" + link);
                 }
             } else { // один элемент за день (один или несколько катренов)
                 link = jsonI.getString(Const.LINK) + Const.HTML;
@@ -153,10 +153,7 @@ public class CalendarWorker extends Worker {
                 }
             }
         }
-        if (storage != null) {
-            storage.close();
-            storage = null;
-        }
+        storage.close();
         if (ProgressHelper.isCancelled()) {
             list.clear();
             return;
@@ -177,9 +174,7 @@ public class CalendarWorker extends Worker {
     }
 
     private void initDatebase(String name) {
-        if (storage != null)
-            storage.close();
-        storage = new PageStorage(name);
+        storage.open(name);
         ContentValues row = new ContentValues();
         row.put(Const.TIME, System.currentTimeMillis());
         if (!storage.updateTitle(1, row))

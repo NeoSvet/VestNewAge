@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 public class UnreadHelper {
     public static final String NAME = "noread";
     private DataBase dbUnread;
-    private PageStorage dbPages;
+    private PageStorage storage = new PageStorage();
     private long time = 0;
     private int[] ids_new;
 
@@ -32,13 +32,8 @@ public class UnreadHelper {
 
     public boolean addLink(String link, DateHelper date) {
         if (!link.contains(Const.HTML)) link += Const.HTML;
-        if (dbPages == null) {
-            dbPages = new PageStorage(link);
-        } else if (!dbPages.getName().equals(PageStorage.Companion.getDatePage(link))) {
-            dbPages.close();
-            dbPages = new PageStorage(link);
-        }
-        if (dbPages.existsPage(link)) return false; // скаченную страницу игнорируем
+        storage.open(link);
+        if (storage.existsPage(link)) return false; // скаченную страницу игнорируем
         link = link.replace(Const.HTML, "");
         Cursor cursor = dbUnread.query(NAME, new String[]{Const.LINK}, Const.LINK + DataBase.Q, link);
         boolean exists = cursor.moveToFirst();
@@ -116,8 +111,8 @@ public class UnreadHelper {
     }
 
     public void close() {
-        if (dbPages != null)
-            dbPages.close();
+        if (storage != null)
+            storage.close();
         dbUnread.close();
         if (time > 0) {
             SharedPreferences pref = App.context.getSharedPreferences(NAME, Context.MODE_PRIVATE);

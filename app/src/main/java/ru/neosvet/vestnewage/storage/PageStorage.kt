@@ -14,8 +14,9 @@ import java.util.regex.Pattern
  * Created by NeoSvet on 23.03.2022.
  */
 
-class PageStorage(name: String) {
+class PageStorage {
     companion object {
+        @JvmStatic
         fun getDatePage(link: String): String {
             return if (!link.contains("/") || link.contains("press"))
                 DataBase.ARTICLES
@@ -43,13 +44,23 @@ class PageStorage(name: String) {
         }
     }
 
-    private val db: DataBase = if (name.contains(Const.HTML))
-        DataBase(getDatePage(name))
-    else
-        DataBase(name)
+    private lateinit var db: DataBase
     val name: String
         get() = db.databaseName
     private val patternBook = Pattern.compile("\\d{2}\\.\\d{2}")
+    private var isClosed = true
+
+    fun open(name: String) {
+        val n = if (name.contains(Const.HTML))
+            getDatePage(name)
+        else name
+        if (isClosed.not()) {
+            if (n == this.name)
+                return
+            db.close()
+        }
+        db = DataBase(n)
+    }
 
     fun getPageTitle(title: String, link: String): String {
         return if (isArticle() || link.contains("2004") || link.contains("pred")) {
@@ -167,9 +178,9 @@ class PageStorage(name: String) {
     fun getContentPage(link: String, onlyTitle: Boolean): String? {
         var cursor = db.query(Const.TITLE, null, Const.LINK + DataBase.Q, link)
         val id: Int
-        val pageCon = StringBuilder()
+        val content = StringBuilder()
         id = if (cursor.moveToFirst()) {
-            pageCon.append(
+            content.append(
                 getPageTitle(
                     cursor.getString(cursor.getColumnIndex(Const.TITLE)),
                     link
@@ -178,10 +189,10 @@ class PageStorage(name: String) {
             if (onlyTitle) {
                 cursor.close()
                 db.close()
-                return pageCon.toString()
+                return content.toString()
             }
-            pageCon.append(Const.N)
-            pageCon.append(Const.N)
+            content.append(Const.N)
+            content.append(Const.N)
             cursor.getInt(cursor.getColumnIndex(DataBase.ID))
         } else { // страница не загружена...
             cursor.close()
@@ -196,17 +207,17 @@ class PageStorage(name: String) {
         )
         if (cursor.moveToFirst()) {
             do {
-                pageCon.append(Lib.withOutTags(cursor.getString(0)))
-                pageCon.append(Const.N)
-                pageCon.append(Const.N)
+                content.append(Lib.withOutTags(cursor.getString(0)))
+                content.append(Const.N)
+                content.append(Const.N)
             } while (cursor.moveToNext())
         } else { // страница не загружена...
             cursor.close()
             return null
         }
         cursor.close()
-        pageCon.delete(pageCon.length - 2, pageCon.length)
-        return pageCon.toString()
+        content.delete(content.length - 2, content.length)
+        return content.toString()
     }
 
     fun getPage(link: String): Cursor =
@@ -278,6 +289,7 @@ class PageStorage(name: String) {
     )
 
     fun close() {
-        db.close()
+        if (isClosed.not())
+            db.close()
     }
 }

@@ -55,7 +55,7 @@ public class SlashWorker extends Worker {
         BufferedInputStream in = NeoClient.getStream(s);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         long time;
-        PageStorage dbPage;
+        PageStorage storage = new PageStorage();
         Cursor cursor;
         s = br.readLine();
         List<String> titles = new ArrayList<>();
@@ -63,8 +63,8 @@ public class SlashWorker extends Worker {
         while (!s.equals(Const.END)) {
             time = Long.parseLong(s);
             s = br.readLine(); //link
-            dbPage = new PageStorage(s);
-            cursor = dbPage.getPage(s);
+            storage.open(s);
+            cursor = storage.getPage(s);
             if (cursor.moveToFirst()) {
                 int iTime = cursor.getColumnIndex(Const.TIME);
                 if (time > cursor.getLong(iTime)) {
@@ -75,7 +75,7 @@ public class SlashWorker extends Worker {
                 }
             }
             s = br.readLine();
-            dbPage.close();
+            storage.close();
         }
         br.close();
         in.close();

@@ -53,20 +53,15 @@ public class SummaryHelper {
     public void updateBook() throws Exception {
         File file = Lib.getFile(Const.RSS);
         BufferedReader br = new BufferedReader(new FileReader(file));
-        String title, link, name;
-        PageStorage storage = null;
+        String title, link;
+        PageStorage storage = new PageStorage();
         ContentValues row;
         Cursor cursor;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             br.readLine(); //des
             br.readLine(); //time
-            name = PageStorage.Companion.getDatePage(link);
-            if (storage == null || !storage.getName().equals(name)) {
-                if (storage != null)
-                    storage.close();
-                storage = new PageStorage(name);
-            }
+            storage.open(link);
             cursor = storage.getPage(link);
             if (!cursor.moveToFirst()) {
                 row = new ContentValues();

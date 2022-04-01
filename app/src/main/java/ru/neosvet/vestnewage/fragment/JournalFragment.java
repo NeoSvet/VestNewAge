@@ -92,7 +92,7 @@ public class JournalFragment extends Fragment {
         tip.hide();
         Cursor curJ = dbJournal.getAll();
         if (curJ.moveToFirst()) {
-            PageStorage storage;
+            PageStorage storage = new PageStorage();
             Cursor cursor;
             int iTime = curJ.getColumnIndex(Const.TIME);
             int iID = curJ.getColumnIndex(DataBase.ID);
@@ -107,7 +107,7 @@ public class JournalFragment extends Fragment {
             long t;
             do {
                 id = curJ.getString(iID).split(Const.AND);
-                storage = new PageStorage(id[0]);
+                storage.open(id[0]);
                 cursor = storage.getPageById(id[1]);
                 if (cursor.moveToFirst()) {
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK));

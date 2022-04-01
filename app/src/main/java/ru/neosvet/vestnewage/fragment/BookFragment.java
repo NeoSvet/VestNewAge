@@ -232,13 +232,13 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             }
             ivNext.setEnabled(existsList(d, katren));
             d.changeMonth(-1);
-            PageStorage storage;
+            PageStorage storage = new PageStorage();
             String t, s;
             Cursor cursor;
 
             if (d.getMonth() == 1 && d.getYear() == 2016 && !helper.isLoadedOtkr()) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
-                storage = new PageStorage("12.04");
+                storage.open("12.04");
                 cursor = storage.getListAll();
                 if (cursor.moveToFirst() && cursor.moveToNext()) {
                     t = cursor.getString(cursor.getColumnIndex(Const.TITLE));
@@ -249,7 +249,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
                 storage.close();
             }
 
-            storage = new PageStorage(d.getMY());
+            storage.open(d.getMY());
             cursor = storage.getListAll();
 
             DateHelper dModList;
@@ -310,7 +310,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     }
 
     private boolean existsList(DateHelper d, boolean katren) {
-        PageStorage storage = new PageStorage(d.getMY());
+        PageStorage storage = new PageStorage();
+        storage.open(d.getMY());
         Cursor cursor = storage.getLinks();
         String s;
         if (cursor.moveToFirst()) {
@@ -616,7 +617,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         }
         //открываем базу по случайной дате:
         String name = (m < 10 ? "0" : "") + m + "." + (y < 10 ? "0" : "") + y;
-        PageStorage storage = new PageStorage(name);
+        PageStorage storage = new PageStorage();
+        storage.open(name);
         Cursor curTitle;
         String title = null;
         //определяем условие отбора в соотвтствии с выбранным пунктом:
@@ -689,7 +691,7 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         ContentValues row = new ContentValues();
         row.put(Const.TIME, System.currentTimeMillis());
         JournalStorage dbJournal = new JournalStorage();
-        row.put(DataBase.ID, PageStorage.Companion.getDatePage(link) + Const.AND + storage.getPageId(link) + Const.AND + n);
+        row.put(DataBase.ID, PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link) + Const.AND + n);
         storage.close();
         dbJournal.insert(row);
         dbJournal.close();

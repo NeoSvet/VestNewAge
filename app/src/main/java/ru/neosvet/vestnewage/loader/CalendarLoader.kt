@@ -19,7 +19,8 @@ class CalendarLoader(
 
     override fun getLinkList(): Int {
         val d = DateHelper.putYearMonth(year, month)
-        val storage = PageStorage(d.my)
+        val storage = PageStorage()
+        storage.open(d.my)
         val curTitle = storage.getLinks()
         var k = 0
         if (curTitle.moveToFirst()) {

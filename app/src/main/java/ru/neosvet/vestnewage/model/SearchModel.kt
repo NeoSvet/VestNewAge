@@ -44,7 +44,7 @@ class SearchModel : ViewModel() {
         get() = mstate
     private lateinit var strings: SearchStrings
     private val storage = SearchStorage()
-    private var pages: PageStorage? = null
+    private var pages = PageStorage()
     private var countMatches: Int = 0
     private var countPages: Int = 0
     var isRun: Boolean = false
@@ -54,9 +54,9 @@ class SearchModel : ViewModel() {
 
     private val scope = CoroutineScope(Dispatchers.IO
             + CoroutineExceptionHandler { _, throwable ->
-            if (throwable is Exception)
-                ErrorUtils.setError(throwable)
-            mstate.postValue(SearchState.Error(throwable))
+        if (throwable is Exception)
+            ErrorUtils.setError(throwable)
+        mstate.postValue(SearchState.Error(throwable))
     })
 
     fun init(context: Context) {
@@ -70,7 +70,7 @@ class SearchModel : ViewModel() {
     }
 
     override fun onCleared() {
-        pages?.close()
+        pages.close()
         storage.close()
         scope.cancel()
         super.onCleared()
@@ -98,6 +98,7 @@ class SearchModel : ViewModel() {
                     if (d.timeInDays == end.timeInDays) break
                     d.changeMonth(step)
                 }
+                pages.close()
             }
             initLabel()
             showResult()
@@ -183,19 +184,12 @@ class SearchModel : ViewModel() {
             } while (cursor.moveToNext())
         }
         cursor.close()
-        var name1: String
-        var name2 = ""
         var des: StringBuilder
         var p1 = -1
         var p2: Int
         for (i in title.indices) {
-            name1 = PageStorage.getDatePage(link[i])
-            if (i == 0 || name1 != name2) {
-                pages?.close()
-                pages = PageStorage(name1)
-                name2 = name1
-            }
-            val cursor = pages!!.searchParagraphs(link[i], request)
+            pages.open(link[i])
+            val cursor = pages.searchParagraphs(link[i], request)
             if (cursor.moveToFirst()) {
                 val row = ContentValues()
                 row.put(Const.TITLE, title[i])
@@ -218,7 +212,7 @@ class SearchModel : ViewModel() {
                 mstate.postValue(SearchState.Status(String.format(strings.format_search_proc, p1)))
             }
         }
-        pages?.close()
+        pages.close()
         title.clear()
         link.clear()
         id.clear()
@@ -242,22 +236,21 @@ class SearchModel : ViewModel() {
 
     @SuppressLint("Range")
     private fun searchList(name: String, mode: Int) {
-        pages = PageStorage(name)
+        pages.open(name)
         var n = name.substring(3).toInt() * 650 +
                 name.substring(0, 2).toInt() * 50
         val cursor: Cursor = when (mode) {
             MODE_TITLES ->
-                pages!!.searchTitle(request)
+                pages.searchTitle(request)
             MODE_LINKS ->
-                pages!!.searchLink(request)
+                pages.searchLink(request)
             else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
                 //фильтрация по 0 и 1 будет позже
-                pages!!.searchParagraphs(request)
+                pages.searchParagraphs(request)
             }
         }
         if (!cursor.moveToFirst()) {
             cursor.close()
-            pages!!.close()
             return
         }
         val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
@@ -272,7 +265,7 @@ class SearchModel : ViewModel() {
                 des.append(getDes(cursor.getString(iPar), request))
             } else {
                 id = cursor.getInt(iID)
-                val curTitle = pages!!.getPageById(id)
+                val curTitle = pages.getPageById(id)
                 if (curTitle.moveToFirst()) {
                     val link = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
                     val iTitle = curTitle.getColumnIndex(Const.TITLE)
@@ -281,7 +274,7 @@ class SearchModel : ViewModel() {
                     else if (mode == MODE_KATRENY)
                         add = link.contains(Const.POEMS)
                     if (add) {
-                        val title = pages!!.getPageTitle(curTitle.getString(iTitle), link)
+                        val title = pages.getPageTitle(curTitle.getString(iTitle), link)
                         if (row != null) {
                             if (des.isNotEmpty()) {
                                 row.put(Const.DESCTRIPTION, des.toString())
@@ -308,6 +301,5 @@ class SearchModel : ViewModel() {
             storage.insert(row)
         }
         cursor.close()
-        pages?.close()
     }
 }

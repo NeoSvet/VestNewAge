@@ -24,7 +24,8 @@ public class PageLoader {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (withMsg)
             ProgressHelper.setMessage(initMessage(link));
-        PageStorage storage = new PageStorage(link);
+        PageStorage storage = new PageStorage();
+        storage.open(link);
         if (!singlePage && storage.existsPage(link)) {
             storage.close();
             return false;

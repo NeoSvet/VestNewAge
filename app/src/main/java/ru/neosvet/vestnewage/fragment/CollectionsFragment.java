@@ -290,7 +290,8 @@ public class CollectionsFragment extends NeoFragment {
             return getString(R.string.page_entirely);
         try {
             StringBuilder b = new StringBuilder();
-            PageStorage storage = new PageStorage(link);
+            PageStorage storage = new PageStorage();
+            storage.open(link);
             if (p.contains("%")) { //позиция
                 b.append(Const.N);
                 b.append(storage.getContentPage(link, false));
@@ -378,8 +379,10 @@ public class CollectionsFragment extends NeoFragment {
     }
 
     private String getTitle(String link) {
-        PageStorage storage = new PageStorage(link);
+        PageStorage storage = new PageStorage();
+        storage.open(link);
         String t = storage.getContentPage(link, true);
+        storage.close();
         if (t == null)
             return link;
         return t;

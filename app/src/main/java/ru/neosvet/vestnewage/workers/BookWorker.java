@@ -189,7 +189,7 @@ public class BookWorker extends Worker {
         in.close();
 
         url = url.substring(0, url.lastIndexOf("/") + 1);
-        PageStorage storage;
+        PageStorage storage = new PageStorage();
         boolean isTitle;
         HashMap<String, Integer> ids = new HashMap<>();
         int n, id;
@@ -209,7 +209,7 @@ public class BookWorker extends Worker {
                 ProgressHelper.setMessage(d.getMonthString() + " " + d.getYear());
             }
 
-            storage = new PageStorage(item);
+            storage.open(item);
             isTitle = true;
             in = NeoClient.getStream(url + item);
             br = new BufferedReader(new InputStreamReader(in, Const.ENCODING), 1000);
@@ -290,7 +290,7 @@ public class BookWorker extends Worker {
             if (a == null)
                 break;
             if (a.length() < 19) continue;
-            date2 = PageStorage.Companion.getDatePage(a);
+            date2 = PageStorage.getDatePage(a);
             if (date1.equals(""))
                 date1 = date2;
             else if (!date2.equals(date1)) {
@@ -318,7 +318,8 @@ public class BookWorker extends Worker {
 
     private void saveData(String date) {
         if (title.size() > 0) {
-            PageStorage storage = new PageStorage(date);
+            PageStorage storage = new PageStorage();
+            storage.open(date);
             ContentValues row = new ContentValues();
             row.put(Const.TIME, System.currentTimeMillis());
             if (!storage.updateTitle(1, row)) {

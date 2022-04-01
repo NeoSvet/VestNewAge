@@ -19,7 +19,6 @@ import ru.neosvet.vestnewage.loader.StyleLoader
 import ru.neosvet.vestnewage.presenter.view.BrowserView
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.storage.PageStorage.Companion.getDatePage
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -56,7 +55,7 @@ class BrowserPresenter(
         toPrev = context.getString(R.string.to_prev),
         toNext = context.getString(R.string.to_next)
     )
-    private lateinit var storage: PageStorage
+    private val storage = PageStorage()
     var link = ""
         private set
     private val history = Stack<String>()
@@ -119,7 +118,7 @@ class BrowserPresenter(
     }
 
     fun openPage(newPage: Boolean) {
-        storage = PageStorage(link)
+        storage.open(link)
         if (storage.existsPage(link).not()) {
             downloadPage(false)
             return
@@ -160,7 +159,7 @@ class BrowserPresenter(
 
     private fun generatePage(file: File) {
         val bw = BufferedWriter(FileWriter(file))
-        storage = PageStorage(link)
+        storage.open(link)
         var cursor = storage.getPage(link)
         val id: Int
         val d: DateHelper
@@ -257,7 +256,7 @@ class BrowserPresenter(
         scope.launch {
             val row = ContentValues()
             row.put(Const.TIME, System.currentTimeMillis())
-            val id = getDatePage(link) + Const.AND + storage.getPageId(link)
+            val id = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)
             val dbJournal = JournalStorage()
             try {
                 if (!dbJournal.update(id, row)) {
@@ -301,7 +300,7 @@ class BrowserPresenter(
 
     fun nextPage() {
         try {
-            var storage = PageStorage(link)
+            storage.open(link)
             storage.getNextPage(link)?.let {
                 openLink(it, false)
                 return
@@ -313,8 +312,7 @@ class BrowserPresenter(
                 return
             }
             d.changeMonth(1)
-            storage.close()
-            storage = PageStorage(d.my)
+            storage.open(d.my)
             val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
             if (cursor.moveToFirst()) {
                 val iLink = cursor.getColumnIndex(Const.LINK)
@@ -328,7 +326,7 @@ class BrowserPresenter(
 
     fun prevPage() {
         try {
-            var storage = PageStorage(link)
+            storage.open(link)
             storage.getPrevPage(link)?.let {
                 openLink(it, false)
                 return
@@ -340,8 +338,7 @@ class BrowserPresenter(
                 return
             }
             d.changeMonth(-1)
-            storage.close()
-            storage = PageStorage(d.my)
+            storage.open(d.my)
             val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
             if (cursor.moveToLast()) {
                 val iLink = cursor.getColumnIndex(Const.LINK)
