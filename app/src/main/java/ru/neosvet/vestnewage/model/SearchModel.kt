@@ -187,6 +187,8 @@ class SearchModel : ViewModel() {
         var des: StringBuilder
         var p1 = -1
         var p2: Int
+        countMatches = 0
+        countPages = 0
         for (i in title.indices) {
             pages.open(link[i])
             val cursor = pages.searchParagraphs(link[i], request)
