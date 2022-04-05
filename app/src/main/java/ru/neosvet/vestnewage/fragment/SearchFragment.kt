@@ -35,7 +35,7 @@ import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.list.PageAdapter
 import ru.neosvet.vestnewage.model.SearchModel
-import ru.neosvet.vestnewage.model.SearchState
+import ru.neosvet.vestnewage.model.state.SearchState
 
 class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, OnTouchListener {
     companion object {

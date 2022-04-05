@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.model.state
 
 import ru.neosvet.vestnewage.list.ListItem
 
