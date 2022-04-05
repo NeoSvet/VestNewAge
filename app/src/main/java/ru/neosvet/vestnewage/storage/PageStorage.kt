@@ -59,6 +59,7 @@ class PageStorage {
                 return
             db.close()
         }
+        isClosed = false
         db = DataBase(n)
     }
 
