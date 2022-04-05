@@ -21,14 +21,6 @@ import ru.neosvet.vestnewage.model.state.SearchState
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 
-data class SearchStrings(
-    val format_search_date: String,
-    val format_search_proc: String,
-    val search_in_results: String,
-    val search_mode: Array<String>,
-    val format_found: String
-)
-
 class SearchModel : ViewModel() {
     companion object {
         private const val MODE_POSLANIYA = 0
