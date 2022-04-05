@@ -24,27 +24,20 @@ class CalendarLoader : ListLoader {
         date = DateHelper.putYearMonth(year, month)
     }
 
-    override fun getLinkList(): Int {
+    override fun getLinkList(): List<String> {
         storage.open(date.my)
-        val curTitle = storage.getLinks()
-        var k = 0
-        if (curTitle.moveToFirst()) {
+        val list = mutableListOf<String>()
+        val cursor = storage.getLinks()
+        if (cursor.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
-            var link: String?
-            val file = LoaderHelper.getFileList()
-            val bw = BufferedWriter(FileWriter(file))
-            while (curTitle.moveToNext()) {
-                link = curTitle.getString(0)
-                bw.write(link)
-                k++
-                bw.newLine()
-                bw.flush()
+            while (cursor.moveToNext()) {
+                val link = cursor.getString(0)
+                list.add(link)
             }
-            bw.close()
         }
-        curTitle.close()
+        cursor.close()
         storage.close()
-        return k
+        return list
     }
 
     fun loadListMonth(updateUnread: Boolean) {

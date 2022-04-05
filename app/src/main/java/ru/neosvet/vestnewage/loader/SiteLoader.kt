@@ -1,37 +1,30 @@
 package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.utils.Const
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.fragment.SiteFragment
-import ru.neosvet.vestnewage.helpers.LoaderHelper
 import java.io.BufferedReader
-import java.io.BufferedWriter
 import java.io.FileReader
-import java.io.FileWriter
 import java.util.regex.Pattern
 
 class SiteLoader(private val file: String) : ListLoader {
     private val patternList = Pattern.compile("\\d{4}\\.html")
 
-    override fun getLinkList(): Int {
+    override fun getLinkList(): List<String> {
+        val list = mutableListOf<String>()
         if (file.contains(SiteFragment.NEWS))
-            return 0
+            return list
         val br = BufferedReader(FileReader(file))
-        val f = LoaderHelper.getFileList()
-        val bw = BufferedWriter(FileWriter(f, true))
-        var s: String
-        var k = 0
-        while (br.readLine().also { s = it } != null) {
+        var s: String? = br.readLine()
+        while (s != null) {
             if (isNeedLoad(s)) {
-                if (s.contains("@")) bw.write(s.substring(9)) else bw.write(s)
-                bw.newLine()
-                bw.flush()
-                k++
+                if (s.contains("@"))
+                    list.add(s.substring(9))
+                else list.add(s)
             }
+            s = br.readLine()
         }
-        bw.close()
         br.close()
-        return k
+        return list
     }
 
     private fun isNeedLoad(link: String): Boolean {

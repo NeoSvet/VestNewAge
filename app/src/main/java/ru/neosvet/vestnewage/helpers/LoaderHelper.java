@@ -321,8 +321,4 @@ public class LoaderHelper extends LifecycleService {
         }
         return job;
     }
-
-    public static File getFileList() {
-        return Lib.getFileS(Const.LIST);
-    }
 }

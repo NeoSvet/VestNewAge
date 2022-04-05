@@ -9,23 +9,16 @@ import java.io.FileReader
 import java.io.FileWriter
 
 class SummaryLoader: ListLoader {
-    override fun getLinkList(): Int {
+    override fun getLinkList(): List<String> {
         val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
-        val file = LoaderHelper.getFileList()
-        val bw = BufferedWriter(FileWriter(file))
-        var s: String?
-        var k = 0
+        val list = mutableListOf<String>()
         while (br.readLine() != null) { //title
-            s = br.readLine() //link
-            bw.write(s)
-            bw.newLine()
-            bw.flush()
-            k++
+            val link = br.readLine() //link
+            list.add(link)
             br.readLine() //des
             br.readLine() //time
         }
-        bw.close()
         br.close()
-        return k
+        return list
     }
 }

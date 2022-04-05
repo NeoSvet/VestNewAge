@@ -8,9 +8,8 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
@@ -28,7 +27,6 @@ import ru.neosvet.vestnewage.loader.PageLoader;
 import ru.neosvet.vestnewage.loader.SiteLoader;
 import ru.neosvet.vestnewage.loader.StyleLoader;
 import ru.neosvet.vestnewage.loader.SummaryLoader;
-import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
@@ -67,9 +65,6 @@ public class LoaderWorker extends Worker {
                 return postFinish();
             }
         } catch (Exception e) {
-            File file = LoaderHelper.getFileList();
-            if (file.exists())
-                file.delete();
             e.printStackTrace();
             ErrorUtils.setError(e);
             error = e.getMessage();
@@ -91,15 +86,16 @@ public class LoaderWorker extends Worker {
     }
 
     private void loadList() throws Exception {
+        ListLoader loader;
         if (name.equals(CheckHelper.class.getSimpleName())) {
             page = new PageLoader(false);
-            downloadList();
+            loader = new SummaryLoader();
+            downloadList(loader.getLinkList());
             CheckHelper.postCommand(false);
             LoaderModel.inProgress = false;
             return;
         }
 
-        ListLoader loader;
         if (name.equals(SummaryModel.class.getSimpleName())) {
             page = new PageLoader(false);
             loader = new SummaryLoader();
@@ -109,8 +105,9 @@ public class LoaderWorker extends Worker {
         } else
             return;
 
-        max = loader.getLinkList();
-        downloadList();
+        List<String> links = loader.getLinkList();
+        max = links.size();
+        downloadList(links);
     }
 
     private void doLoad() throws Exception {
@@ -178,19 +175,13 @@ public class LoaderWorker extends Worker {
         CalendarLoader loader = new CalendarLoader();
         for (m = 1; m < k && !isCancelled(); m++) {
             loader.setDate(year, m);
-            loader.getLinkList();
-            downloadList();
+            downloadList(loader.getLinkList());
         }
     }
 
-    private void downloadList() throws Exception {
-        File file = LoaderHelper.getFileList();
-        if (!file.exists())
-            return;
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String s;
-        while ((s = br.readLine()) != null && !isCancelled()) {
-            page.download(s, false);
+    private void downloadList(List<String> links) throws Exception {
+        for (String link : links) {
+            page.download(link, false);
             if (max > 0) {
                 cur++;
                 ProgressHelper.postProgress(new Data.Builder()
@@ -199,9 +190,9 @@ public class LoaderWorker extends Worker {
                         .build());
             } else
                 ProgressHelper.upProg();
+            if (isCancelled())
+                return;
         }
-        br.close();
-        file.delete();
     }
 
     private void download(int id) throws Exception {
@@ -215,22 +206,21 @@ public class LoaderWorker extends Worker {
             k = workWithBook(true);
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
             SiteLoader loader = new SiteLoader(Lib.getFile(SiteFragment.MAIN).toString());
-            k += loader.getLinkList();
+            List<String> list = loader.getLinkList();
+            k += list.size();
+            ProgressHelper.setMax(k);
+            downloadList(list);
+        }else {
+            ProgressHelper.setMax(k);
         }
-        ProgressHelper.setMax(k);
         // загрузка страниц:
-        if (id == LoaderHelper.ALL || id == R.id.nav_site) {
-            downloadList();
-            //SiteWorker.getListLink(context, lib.getFileByName(SiteFragment.NEWS).toString());
-            //downloadList();
-        }
         if (isCancelled())
             return;
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
             workWithBook(false);
     }
 
-    private int workWithBook(boolean count) throws Exception {
+    private int workWithBook(boolean calc) throws Exception {
         int end_year, end_month, k = 0;
         DateHelper d = DateHelper.initToday();
         d.setDay(1);
@@ -239,7 +229,7 @@ public class LoaderWorker extends Worker {
         d.setMonth(1);
         d.setYear(end_year - 1);
         while (!isCancelled()) {
-            if (count)
+            if (calc)
                 k += countBookList(d.getMY());
             else
                 downloadBookList(d.getMY());

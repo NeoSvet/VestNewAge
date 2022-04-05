@@ -78,8 +78,6 @@ public class CheckWorker extends Worker {
             return false;
         }
         BufferedWriter bwRSS = new BufferedWriter(new FileWriter(file));
-        file = LoaderHelper.getFileList();
-        BufferedWriter bwList = new BufferedWriter(new FileWriter(file));
         UnreadHelper unread = new UnreadHelper();
         DateHelper d;
         String title, link;
@@ -107,9 +105,6 @@ public class CheckWorker extends Worker {
             bwRSS.write(d.getTimeInMills() + Const.N); //time
             bwRSS.flush();
             if (unread.addLink(link, d)) {
-                bwList.write(link);
-                bwList.newLine();
-                bwList.flush();
                 postItem(title, link);
             }
         }
