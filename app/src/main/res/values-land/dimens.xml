@@ -5,7 +5,6 @@
     <dimen name="cell_font">19dp</dimen>
     <dimen name="string_size">29dp</dimen>
     <dimen name="panel_height">39dp</dimen>
-    <dimen name="calendar_title">262dp</dimen>
     <dimen name="calendar_button">45dp</dimen>
     <dimen name="calendar_margin_top">3dp</dimen>
     <dimen name="margin_side">85dp</dimen>

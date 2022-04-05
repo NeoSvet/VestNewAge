@@ -28,10 +28,10 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.model.BookModel;
+import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
-import ru.neosvet.vestnewage.presenter.CalendarPresenter;
 import ru.neosvet.vestnewage.workers.BookWorker;
 import ru.neosvet.vestnewage.workers.CalendarWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
@@ -212,7 +212,7 @@ public class LoaderHelper extends LifecycleService {
                         .Builder(CalendarWorker.class)
                         .setInputData(data.build())
                         .setConstraints(constraints)
-                        .addTag(CalendarPresenter.TAG)
+                        .addTag(CalendarModel.TAG)
                         .build();
                 job = work.beginUniqueWork(TAG,
                         ExistingWorkPolicy.REPLACE, task);
@@ -298,7 +298,7 @@ public class LoaderHelper extends LifecycleService {
                     .Builder(CalendarWorker.class)
                     .setInputData(data.build())
                     .setConstraints(constraints)
-                    .addTag(CalendarPresenter.TAG)
+                    .addTag(CalendarModel.TAG)
                     .build();
             if (job != null)
                 job = job.then(task);

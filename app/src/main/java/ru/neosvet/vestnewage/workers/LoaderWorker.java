@@ -28,10 +28,10 @@ import ru.neosvet.vestnewage.loader.PageLoader;
 import ru.neosvet.vestnewage.loader.SiteLoader;
 import ru.neosvet.vestnewage.loader.StyleLoader;
 import ru.neosvet.vestnewage.loader.SummaryLoader;
+import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
 import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
-import ru.neosvet.vestnewage.presenter.CalendarPresenter;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class LoaderWorker extends Worker {
@@ -100,12 +100,7 @@ public class LoaderWorker extends Worker {
         }
 
         ListLoader loader;
-        if (name.equals(CalendarPresenter.class.getSimpleName())) {
-            page = new PageLoader(false);
-            loader = new CalendarLoader(
-                    getInputData().getInt(Const.YEAR, 0),
-                    getInputData().getInt(Const.MONTH, 0));
-        } else if (name.equals(SummaryModel.class.getSimpleName())) {
+        if (name.equals(SummaryModel.class.getSimpleName())) {
             page = new PageLoader(false);
             loader = new SummaryLoader();
         } else if (name.equals(SiteModel.class.getSimpleName())) {
