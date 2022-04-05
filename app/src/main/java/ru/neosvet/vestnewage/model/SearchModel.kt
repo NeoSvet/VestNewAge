@@ -50,10 +50,15 @@ class SearchModel : ViewModel() {
     var isRun: Boolean = false
         private set
     var helper: SearchHelper? = null
-    private var request: String = ""
+    private var request: String
+        get() = helper!!.request
+        set(value) {
+            helper!!.request = value
+        }
 
     private val scope = CoroutineScope(Dispatchers.IO
             + CoroutineExceptionHandler { _, throwable ->
+        isRun = false
         if (throwable is Exception)
             ErrorUtils.setError(throwable)
         mstate.postValue(SearchState.Error(throwable))
@@ -76,13 +81,12 @@ class SearchModel : ViewModel() {
         super.onCleared()
     }
 
-    fun startSearch(request: String) {
+    fun startSearch(request: String, mode: Int) {
         this.request = request
         scope.launch {
             isRun = true
             helper?.run {
                 storage.reopen()
-                page = 0
                 val step = if (start.timeInDays > end.timeInDays) -1 else 1
                 if (mode == MODE_RESULTS) {
                     searchInResults(step == -1)
@@ -100,19 +104,19 @@ class SearchModel : ViewModel() {
                 }
                 pages.close()
             }
-            initLabel()
-            showResult()
+            val s = if (mode == MODE_RESULTS)
+                strings.search_in_results
+            else
+                strings.search_mode[mode]
+            initLabel(s)
+            showResult(0)
         }
     }
 
-    private fun initLabel() = helper?.run {
-        val s = if (mode == MODE_RESULTS)
-            strings.search_in_results
-        else
-            strings.search_mode[mode]
+    private fun initLabel(string: String) = helper?.run {
         label = String.format(
             strings.format_found,
-            s.substring(s.indexOf(" ") + 1),
+            string.substring(string.indexOf(" ") + 1),
             request,
             countMatches,
             countPages
@@ -130,7 +134,8 @@ class SearchModel : ViewModel() {
         )
     }
 
-    fun showResult() {
+    fun showResult(page: Int) {
+        helper?.page = page
         val result = arrayListOf<ListItem>()
         val desc = helper?.let {
             it.start.timeInMills > it.end.timeInMills
@@ -144,8 +149,8 @@ class SearchModel : ViewModel() {
             helper?.deleteBase()
             return
         }
-        val p = helper?.page ?: -1 * Const.MAX_ON_PAGE
-        if (p < 0 || !cursor.moveToPosition(p)) return
+        val position = page * Const.MAX_ON_PAGE
+        if (position < 0 || !cursor.moveToPosition(position)) return
 
         var max = cursor.count / Const.MAX_ON_PAGE
         if (cursor.count % Const.MAX_ON_PAGE > 0) max++

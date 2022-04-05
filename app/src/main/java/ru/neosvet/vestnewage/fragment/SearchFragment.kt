@@ -69,7 +69,8 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
     private var dateDialog: DateDialog? = null
     private lateinit var softKeyboard: SoftKeyboard
     private var scrollToFirst = false
-    private lateinit var helper: SearchHelper
+    private val helper: SearchHelper
+        get() = model.helper!!
 
     val content: SearchContentBinding
         get() = this@SearchFragment.binding2!!
@@ -87,18 +88,15 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         super.onViewCreated(view, savedInstanceState)
         act.title = getString(R.string.search)
         if (model.helper == null) {
-            helper = SearchHelper(requireContext())
-            model.helper = helper
+            model.helper = SearchHelper(requireContext())
             model.init(requireContext())
-        } else {
-            helper = model.helper!!
         }
         initViews()
         initSearchBox()
         initSearchList()
         initSettings()
-        initModel()
         restoreState(savedInstanceState)
+        model.state.observe(act, this)
     }
 
     override fun onBackPressed(): Boolean {
@@ -116,8 +114,7 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
                 LAST_RESULTS -> {
                     binding?.fabSettings?.isVisible = false
                     bShow.isVisible = true
-                    helper.page = 0
-                    model.showResult()
+                    model.showResult(0)
                     helper.loadLastResult()
                     tvLabel.text = helper.label
                     etSearch.setText(helper.request)
@@ -191,13 +188,6 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         super.onDestroyView()
     }
 
-    private fun initModel() {
-        model.state.observe(act, this)
-        if (model.isRun) {
-            setStatus(true)
-        }
-    }
-
     override fun setStatus(load: Boolean) {
         binding?.run {
             if (load) {
@@ -223,13 +213,13 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
     }
 
     private fun restoreState(state: Bundle?) = binding?.run {
-        sMode.setSelection(helper.mode)
+        sMode.setSelection(helper.loadMode())
         bStartRange.text = formatDate(helper.start)
         bEndRange.text = formatDate(helper.end)
         if (state == null) {
             val args = arguments
             if (args != null) {
-                helper.mode = args.getInt(Const.MODE)
+                sMode.setSelection(args.getInt(Const.MODE))
                 helper.page = args.getInt(Const.PAGE)
                 helper.request = args.getString(Const.STRING) ?: ""
             }
@@ -240,7 +230,7 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         } else {
             if (helper.page > -1) {
                 fabSettings.isVisible = false
-                model.showResult()
+                model.showResult(helper.page)
                 content.etSearch.setText(helper.request)
                 content.tvLabel.text = helper.label
                 if (state.getBoolean(ADDITION))
@@ -253,6 +243,8 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
                 dialog = state.getInt(Const.DIALOG)
                 if (dialog > -1) showDatePicker(dialog)
             }
+            if (model.isRun)
+                setStatus(true)
         }
         if (adResults.count == 0 && !model.isRun && helper.existsResults()) {
             addActionsForLastResults()
@@ -339,14 +331,12 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         bStop.setOnClickListener { model.stop() }
         fabOk.setOnClickListener {
             closeSettings()
-            helper.mode = sMode.selectedItemPosition
-            helper.savePerformance()
+            helper.savePerformance(sMode.selectedItemPosition)
         }
         bClearSearch.setOnClickListener {
             adSearch.clear()
             adSearch.notifyDataSetChanged()
-            val f1 = Lib.getFileS(Const.SEARCH)
-            if (f1.exists()) f1.delete()
+            helper.clearRequests()
         }
         bStartRange.setOnClickListener { showDatePicker(0) }
         bEndRange.setOnClickListener { showDatePicker(1) }
@@ -369,7 +359,9 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
 
     private fun enterSearch() = binding?.run {
         content.etSearch.dismissDropDown()
-        if (content.etSearch.length() < 3) Lib.showToast(getString(R.string.low_sym_for_search)) else {
+        if (content.etSearch.length() < 3)
+            Lib.showToast(getString(R.string.low_sym_for_search))
+        else {
             pPages.isVisible = false
             startSearch()
         }
@@ -402,33 +394,25 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
     }
 
     private fun startSearch() = binding?.run {
-        pStatus.isVisible = true
-        fabSettings.isVisible = false
-        content.etSearch.isEnabled = false
-        val request = content.etSearch.text.toString()
-        helper.request = request
-        if (content.cbSearchInResults.isChecked) {
-            helper.mode = SearchModel.MODE_RESULTS
+        setStatus(true)
+        val mode = if (content.cbSearchInResults.isChecked) {
             tvStatus.text = getString(R.string.search)
+            SearchModel.MODE_RESULTS
         } else
-            helper.mode = sMode.selectedItemPosition
-        model.startSearch(request)
+            sMode.selectedItemPosition
+        val request = content.etSearch.text.toString()
+        model.startSearch(request, mode)
         addRequest(request)
     }
 
     private fun addRequest(request: String) {
-        var needAdd = true
         for (i in 0 until adSearch.count) {
-            if (adSearch.getItem(i) == request) {
-                needAdd = false
-                break
-            }
+            if (adSearch.getItem(i) == request)
+                return
         }
-        if (needAdd) {
-            adSearch.add(request)
-            adSearch.notifyDataSetChanged()
-            helper.saveRequest(request)
-        }
+        adSearch.add(request)
+        adSearch.notifyDataSetChanged()
+        helper.saveRequest(request)
     }
 
     private fun showResult(results: ArrayList<ListItem>) = content.run {
@@ -439,9 +423,8 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
             cbSearchInResults.isChecked = false
             val builder = AlertDialog.Builder(act, R.style.NeoDialog)
             builder.setMessage(getString(R.string.alert_search))
-            builder.setPositiveButton(
-                getString(android.R.string.ok)
-            ) { dialog: DialogInterface, _ -> dialog.dismiss() }
+            builder.setPositiveButton(getString(android.R.string.ok))
+            { dialog: DialogInterface, _ -> dialog.dismiss() }
             builder.create().show()
         } else {
             if (bShow.isVisible.not())
@@ -477,10 +460,8 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
     override fun onTouch(v: View, event: MotionEvent): Boolean { //click page item
         if (event.action != MotionEvent.ACTION_UP) return false
         val pos = v.tag as Int
-        if (helper.page != pos) {
-            helper.page = pos
-            model.showResult()
-        }
+        if (helper.page != pos)
+            model.showResult(pos)
         return false
     }
 

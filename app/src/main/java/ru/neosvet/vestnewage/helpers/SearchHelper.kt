@@ -23,7 +23,6 @@ class SearchHelper(context: Context) {
     private val editor: SharedPreferences.Editor = pref.edit()
     var start: DateHelper
     var end: DateHelper
-    var mode: Int = SearchModel.MODE_BOOK
     var page: Int = -1
     val minMonth: Int
     val minYear: Int
@@ -61,17 +60,13 @@ class SearchHelper(context: Context) {
         val f = Lib.getFileS(Const.SEARCH)
         val list = mutableListOf<String>()
         if (f.exists()) {
-            try {
-                val br = BufferedReader(FileReader(f))
-                var s: String? = br.readLine()
-                while (s != null) {
-                    list.add(s)
-                    s = br.readLine()
-                }
-                br.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val br = BufferedReader(FileReader(f))
+            var s: String? = br.readLine()
+            while (s != null) {
+                list.add(s)
+                s = br.readLine()
             }
+            br.close()
         }
         return list
     }
@@ -91,9 +86,8 @@ class SearchHelper(context: Context) {
 
     fun loadLastResult() {
         label = pref.getString(LABEL, "")!!
-        if (label.contains("“")) {
+        if (label.contains("“"))
             request = label.substring(label.indexOf("“") + 1, label.indexOf(Const.N) - 2)
-        }
     }
 
     fun saveLastResult() {
@@ -101,7 +95,7 @@ class SearchHelper(context: Context) {
             editor.putString(LABEL, label).apply()
     }
 
-    fun savePerformance() {
+    fun savePerformance(mode: Int) {
         editor.putInt(Const.MODE, mode)
         editor.putInt(Const.START, start.timeInDays)
         editor.putInt(Const.END, end.timeInDays)
@@ -112,4 +106,12 @@ class SearchHelper(context: Context) {
         val f = Lib.getFileDB(Const.SEARCH)
         if (f.exists()) f.delete()
     }
+
+    fun clearRequests() {
+        val f = Lib.getFileS(Const.SEARCH)
+        if (f.exists()) f.delete()
+    }
+
+    fun loadMode(): Int =
+        pref.getInt(Const.MODE, SearchModel.MODE_BOOK)
 }
