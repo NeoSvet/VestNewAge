@@ -100,18 +100,16 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     }
 
     override fun onStatusClick(reset: Boolean) {
-        ProgressHelper.cancelled()
-        ProgressHelper.setBusy(false)
-        setStatus(false)
-        if (!act.status.isStop) {
-            act.status.setLoad(false)
+        if (model.isRun) {
+            model.cancel()
             return
         }
         if (reset) {
             act.status.setError(null)
             return
         }
-        if (!act.status.onClick() && act.status.isTime) startLoad()
+        if (!act.status.onClick() && act.status.isTime)
+            startLoad()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -167,7 +165,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
                 ProgressHelper.setBusy(true)
                 fabRefresh.isVisible = false
                 act.status.setLoad(true)
-                act.status.startText()
+                act.status.loadText()
             } else if (fabRefresh.isVisible.not()) {
                 ProgressHelper.setBusy(false)
                 fabRefresh.isVisible = true
@@ -224,27 +222,25 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
 
     override fun onChanged(state: CalendarState) {
         when (state) {
-            CalendarState.Loading -> {
+            is CalendarState.Progress ->
+                act.status.setProgress(state.percent)
+            CalendarState.Loading ->
                 setStatus(true)
-                act.status.loadText()
-            }
             is CalendarState.Result -> binding?.run {
                 act.updateNew()
-                setStatus(false)
                 tvDate.text = state.date
                 ivPrev.isEnabled = state.prev
                 ivNext.isEnabled = state.next
                 adCalendar.setItems(state.calendar)
             }
-            is CalendarState.CheckTime -> state.run {
-                if (isCurMonth)
-                    setStatus(act.status.checkTime(sec.toLong()))
-                else act.status.checkTime(sec.toLong())
-            }
+            is CalendarState.CheckTime ->
+                act.status.checkTime(state.sec.toLong())
             is CalendarState.Error -> {
                 setStatus(false)
                 act.status.setError(state.throwable.localizedMessage)
             }
+            CalendarState.Finish ->
+                setStatus(false)
         }
     }
 }

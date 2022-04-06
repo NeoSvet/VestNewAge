@@ -13,8 +13,10 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.loader.CalendarLoader
+import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.model.state.CalendarState
 import ru.neosvet.vestnewage.storage.PageStorage
 
@@ -78,22 +80,41 @@ class CalendarModel : ViewModel() {
     fun startLoad() {
         if (isRun || date.year < 2016) return
         scope.launch {
-            doLoad()
+            loadFromSite()
         }
     }
 
-    private suspend fun doLoad() {
+    private suspend fun loadFromSite() {
         isRun = true
         mstate.postValue(CalendarState.Loading)
+        val list = loadMonth()
+        if (loadFromStorage()) {
+            mstate.postValue(CalendarState.Result(date.calendarString, prev, next, calendar))
+            loadPages(list)
+        }
+        mstate.postValue(CalendarState.Finish)
+        isRun = false
+    }
+
+    private fun loadPages(pages: List<String>) {
+        val max = pages.size.toFloat()
+        val loader = PageLoader(false)
+        var cur = 0f
+        pages.forEach { link ->
+            loader.download(link, false)
+            if (isRun.not())
+                return
+            cur++
+            mstate.postValue(CalendarState.Progress(ProgressHelper.getProcent(cur, max)))
+        }
+        loader.finish()
+    }
+
+    private fun loadMonth(): List<String> {
         val loader = CalendarLoader()
         loader.setDate(date.year, date.month)
         loader.loadListMonth(isCurMonth())
-        if (loadFromStorage())
-            mstate.postValue(CalendarState.Result(date.calendarString, prev, next, calendar))
-        if (isRun.not())
-            return
-        //TODO load pages of month and post progress
-        isRun = false
+        return loader.getLinkList()
     }
 
     fun changeDate(newDate: DateHelper) {
@@ -123,6 +144,8 @@ class CalendarModel : ViewModel() {
             }
             if (loadFromStorage())
                 mstate.postValue(CalendarState.Result(date.calendarString, prev, next, calendar))
+            else
+                loadFromSite()
         }
     }
 
@@ -205,7 +228,7 @@ class CalendarModel : ViewModel() {
         cursor.close()
         storage.close()
         if (empty && loadIfNeed) {
-            doLoad()
+            loadIfNeed = false
             return false
         }
         return true
