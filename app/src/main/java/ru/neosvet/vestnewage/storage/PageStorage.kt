@@ -290,7 +290,8 @@ class PageStorage {
     )
 
     fun close() {
-        if (isClosed.not())
-            db.close()
+        if (isClosed) return
+        db.close()
+        isClosed = true
     }
 }
