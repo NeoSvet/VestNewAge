@@ -8,7 +8,6 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.utils.Const;
@@ -193,6 +192,7 @@ public class LoaderWorker extends Worker {
             if (isCancelled())
                 return;
         }
+        page.finish();
     }
 
     private void download(int id) throws Exception {
@@ -261,6 +261,7 @@ public class LoaderWorker extends Worker {
                 ProgressHelper.upProg();
             }
         }
+        page.finish();
         curTitle.close();
         storage.close();
     }

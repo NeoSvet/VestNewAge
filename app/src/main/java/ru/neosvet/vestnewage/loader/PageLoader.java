@@ -15,6 +15,7 @@ public class PageLoader {
     private final boolean withMsg; //name.contains(LoaderModel.TAG)
     private int k_requests = 0;
     private long time_requests = 0;
+    private PageStorage storage = new PageStorage();
 
     public PageLoader(boolean withMsg) {
         this.withMsg = withMsg;
@@ -24,10 +25,8 @@ public class PageLoader {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         if (withMsg)
             ProgressHelper.setMessage(initMessage(link));
-        PageStorage storage = new PageStorage();
         storage.open(link);
         if (!singlePage && storage.existsPage(link)) {
-            storage.close();
             return false;
         }
         if (!singlePage)
@@ -104,7 +103,8 @@ public class PageLoader {
             s = page.getNextElem();
         } while (s != null);
 
-        storage.close();
+        if (singlePage)
+            storage.close();
         page.clear();
         return true;
     }
@@ -149,4 +149,7 @@ public class PageLoader {
         return line;
     }
 
+    public void finish() {
+        storage.close();
+    }
 }
