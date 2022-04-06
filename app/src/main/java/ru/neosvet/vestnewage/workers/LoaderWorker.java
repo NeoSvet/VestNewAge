@@ -32,7 +32,7 @@ import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class LoaderWorker extends Worker {
-    private PageLoader page;
+    private PageLoader loader;
     private int cur, max;
     private String name;
 
@@ -85,26 +85,26 @@ public class LoaderWorker extends Worker {
     }
 
     private void loadList() throws Exception {
-        ListLoader loader;
+        ListLoader listLoader;
         if (name.equals(CheckHelper.class.getSimpleName())) {
-            page = new PageLoader(false);
-            loader = new SummaryLoader();
-            downloadList(loader.getLinkList());
+            loader = new PageLoader(false);
+            listLoader = new SummaryLoader();
+            downloadList(listLoader.getLinkList());
             CheckHelper.postCommand(false);
             LoaderModel.inProgress = false;
             return;
         }
 
         if (name.equals(SummaryModel.class.getSimpleName())) {
-            page = new PageLoader(false);
-            loader = new SummaryLoader();
+            loader = new PageLoader(false);
+            listLoader = new SummaryLoader();
         } else if (name.equals(SiteModel.class.getSimpleName())) {
-            page = new PageLoader(false);
-            loader = new SiteLoader(getInputData().getString(Const.FILE));
+            loader = new PageLoader(false);
+            listLoader = new SiteLoader(getInputData().getString(Const.FILE));
         } else
             return;
 
-        List<String> links = loader.getLinkList();
+        List<String> links = listLoader.getLinkList();
         max = links.size();
         downloadList(links);
     }
@@ -132,8 +132,8 @@ public class LoaderWorker extends Worker {
                 String link = getInputData().getString(Const.LINK);
                 style.download(getInputData().getBoolean(Const.STYLE, false));
                 if (link != null) {
-                    page = new PageLoader(false);
-                    page.download(link, true);
+                    loader = new PageLoader(false);
+                    loader.download(link, true);
                 }
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
@@ -157,7 +157,7 @@ public class LoaderWorker extends Worker {
 
     private void downloadYear(int year) throws Exception {
         ProgressHelper.setMessage(App.context.getString(R.string.start));
-        page = new PageLoader(true);
+        loader = new PageLoader(true);
         DateHelper d = DateHelper.initToday();
         int k;
         if (year == d.getYear())
@@ -180,7 +180,7 @@ public class LoaderWorker extends Worker {
 
     private void downloadList(List<String> links) throws Exception {
         for (String link : links) {
-            page.download(link, false);
+            loader.download(link, false);
             if (max > 0) {
                 cur++;
                 ProgressHelper.postProgress(new Data.Builder()
@@ -192,14 +192,14 @@ public class LoaderWorker extends Worker {
             if (isCancelled())
                 return;
         }
-        page.finish();
+        loader.finish();
     }
 
     private void download(int id) throws Exception {
         if (isCancelled())
             return;
         ProgressHelper.setMessage(App.context.getString(R.string.start));
-        page = new PageLoader(true);
+        loader = new PageLoader(true);
         // подсчёт количества страниц:
         int k = 0;
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
@@ -257,11 +257,11 @@ public class LoaderWorker extends Worker {
         if (curTitle.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
-                page.download(curTitle.getString(0), false);
+                loader.download(curTitle.getString(0), false);
                 ProgressHelper.upProg();
             }
         }
-        page.finish();
+        loader.finish();
         curTitle.close();
         storage.close();
     }
