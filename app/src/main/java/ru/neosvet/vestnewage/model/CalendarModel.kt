@@ -103,7 +103,7 @@ class CalendarModel : ViewModel() {
         pages.forEach { link ->
             loader.download(link, false)
             if (isRun.not())
-                return
+                return@forEach
             cur++
             mstate.postValue(CalendarState.Progress(ProgressHelper.getProcent(cur, max)))
         }
