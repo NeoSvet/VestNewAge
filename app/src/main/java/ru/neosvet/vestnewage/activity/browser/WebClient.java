@@ -1,4 +1,4 @@
-package ru.neosvet.ui;
+package ru.neosvet.vestnewage.activity.browser;
 
 import android.view.View;
 import android.webkit.WebView;

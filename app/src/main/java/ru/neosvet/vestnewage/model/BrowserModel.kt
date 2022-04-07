@@ -1,22 +1,24 @@
-package ru.neosvet.vestnewage.presenter
+package ru.neosvet.vestnewage.model
 
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.database.Cursor
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.activity.BrowserActivity
 import ru.neosvet.vestnewage.helpers.BookHelper
+import ru.neosvet.vestnewage.helpers.BrowserHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.loader.StyleLoader
-import ru.neosvet.vestnewage.presenter.view.BrowserView
+import ru.neosvet.vestnewage.model.state.BrowserState
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.BufferedWriter
@@ -25,40 +27,27 @@ import java.io.FileWriter
 import java.io.IOException
 import java.util.*
 
-data class BrowserStrings(
-    val page: String,
-    val copyright: String,
-    val downloaded: String,
-    val toPrev: String,
-    val toNext: String
-)
-
-class BrowserPresenter(
-    private val view: BrowserView,
-    context: Context
-) {
+class BrowserModel : ViewModel() {
     companion object {
-        private const val THEME = "theme"
-        private const val NOMENU = "nomenu"
-        private const val NAVBUTTONS = "navb"
-        private const val SCALE = "scale"
         private const val FILE = "file://"
         private const val STYLE = "/style/style.css"
         private const val PAGE = "/page.html"
         private const val script = "<a href='javascript:NeoInterface."
     }
 
-    private val strings = BrowserStrings(
-        page = context.getString(R.string.page),
-        copyright = "<br> " + context.getString(R.string.copyright),
-        downloaded = context.getString(R.string.downloaded),
-        toPrev = context.getString(R.string.to_prev),
-        toNext = context.getString(R.string.to_next)
-    )
+    private val mstate = MutableLiveData<BrowserState>()
+    val state: LiveData<BrowserState>
+        get() = mstate
+    private lateinit var strings: BrowserStrings
     private val storage = PageStorage()
-    var link = ""
-        private set
+    var lightTheme: Boolean = true
     private val history = Stack<String>()
+    var helper: BrowserHelper? = null
+    private var link: String
+        get() = helper!!.link
+        set(value) {
+            helper!!.link = value
+        }
     private val pageLoader: PageLoader by lazy {
         PageLoader(false)
     }
@@ -67,37 +56,24 @@ class BrowserPresenter(
     }
     private val scope = CoroutineScope(Dispatchers.IO
             + CoroutineExceptionHandler { _, throwable ->
-        view.onError(throwable)
+        mstate.postValue(BrowserState.Error(throwable))
     })
 
-    private val pref: SharedPreferences =
-        context.getSharedPreferences(BrowserActivity::class.java.simpleName, Context.MODE_PRIVATE)
-    private val editor: SharedPreferences.Editor = pref.edit()
-    var isLightTheme: Boolean
-        get() = pref.getInt(THEME, 0) == 0
-        set(value) {
-            editor.putInt(THEME, if (value) 0 else 1)
-        }
-    var zoom: Int
-        get() = pref.getInt(SCALE, 0)
-        set(value) {
-            editor.putInt(SCALE, value)
-        }
-    var isNoMenu: Boolean
-        get() = pref.getBoolean(NOMENU, false)
-        set(value) {
-            editor.putBoolean(NOMENU, value)
-        }
-    var isNavButtons: Boolean
-        get() = pref.getBoolean(NAVBUTTONS, true)
-        set(value) {
-            editor.putBoolean(NAVBUTTONS, value)
-        }
+    fun init(context: Context) {
+        strings = BrowserStrings(
+            page = context.getString(R.string.page),
+            copyright = "<br> " + context.getString(R.string.copyright),
+            downloaded = context.getString(R.string.downloaded),
+            toPrev = context.getString(R.string.to_prev),
+            toNext = context.getString(R.string.to_next)
+        )
+        helper = BrowserHelper(context)
+    }
 
-    fun onDestroy() {
+    override fun onCleared() {
         scope.cancel()
-        editor.apply()
         storage.close()
+        super.onCleared()
     }
 
     fun openLink(url: String, addHistory: Boolean) {
@@ -124,22 +100,28 @@ class BrowserPresenter(
             return
         }
         if (!readyStyle()) return
-        view.endLoading()
         try {
             val file = Lib.getFile(PAGE)
-            if (newPage || !file.exists())
+            val p = if (newPage || !file.exists())
                 generatePage(file)
+            else Pair(0L, false)
             var s = file.toString()
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
-            view.openPage(FILE + s)
+            mstate.postValue(
+                BrowserState.Page(
+                    url = FILE + s,
+                    timeInSeconds = p.first,
+                    isOtkr = p.second
+                )
+            )
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
     fun downloadPage(update: Boolean) {
-        view.startLoading()
+        mstate.postValue(BrowserState.Loading)
         scope.launch {
             if (update)
                 storage.deleteParagraphs(storage.getPageId(link))
@@ -157,11 +139,13 @@ class BrowserPresenter(
         return true
     }
 
-    private fun generatePage(file: File) {
+    private fun generatePage(file: File): Pair<Long, Boolean> {
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)
         val id: Int
+        var time = 0L
+        var isOtkr = false
         val d: DateHelper
         if (cursor.moveToFirst()) {
             val iId = cursor.getColumnIndex(DataBase.ID)
@@ -171,7 +155,7 @@ class BrowserPresenter(
             val iTime = cursor.getColumnIndex(Const.TIME)
             d = DateHelper.putMills(cursor.getLong(iTime))
             if (storage.isArticle()) //раз в неделю предлагать обновить статьи
-                view.checkTime(d.timeInSeconds)
+                time = d.timeInSeconds
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n")
             bw.write("<title>")
             bw.write(s)
@@ -187,7 +171,7 @@ class BrowserPresenter(
             //заголовка нет - значит нет и страницы
             //сюда никогдане попадет, т.к. выше есть проверка existsPage
             cursor.close()
-            return
+            return Pair(time, isOtkr)
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
@@ -213,7 +197,7 @@ class BrowserPresenter(
             bw.flush()
         }
         if (link.contains("print")) { // материалы с сайта Откровений
-            view.isOtrkSite()
+            isOtkr = true
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
@@ -224,6 +208,7 @@ class BrowserPresenter(
         }
         bw.write("\n</div></body></html>")
         bw.close()
+        return Pair(time, isOtkr)
     }
 
     private fun readyStyle(): Boolean {
@@ -239,7 +224,6 @@ class BrowserPresenter(
         }
         val fStyle = Lib.getFileL(STYLE)
         var replace = true
-        val lightTheme = isLightTheme
         if (fStyle.exists()) {
             replace = fDark.exists() && !lightTheme || fLight.exists() && lightTheme
             if (replace) {
@@ -299,55 +283,45 @@ class BrowserPresenter(
     }
 
     fun nextPage() {
-        try {
-            storage.open(link)
-            storage.getNextPage(link)?.let {
-                openLink(it, false)
-                return
-            }
-            val today = DateHelper.initToday().my
-            val d: DateHelper = getDateFromLink()
-            if (d.my == today) {
-                view.tipEndList()
-                return
-            }
-            d.changeMonth(1)
-            storage.open(d.my)
-            val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
-            if (cursor.moveToFirst()) {
-                val iLink = cursor.getColumnIndex(Const.LINK)
-                openLink(cursor.getString(iLink), false)
-                return
-            }
-        } catch (e: Exception) {
+        storage.open(link)
+        storage.getNextPage(link)?.let {
+            openLink(it, false)
+            return
         }
-        view.tipEndList()
+        val today = DateHelper.initToday().my
+        val d: DateHelper = getDateFromLink()
+        if (d.my == today) {
+            mstate.postValue(BrowserState.EndList)
+            return
+        }
+        d.changeMonth(1)
+        storage.open(d.my)
+        val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
+        if (cursor.moveToFirst()) {
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            openLink(cursor.getString(iLink), false)
+        }
     }
 
     fun prevPage() {
-        try {
-            storage.open(link)
-            storage.getPrevPage(link)?.let {
-                openLink(it, false)
-                return
-            }
-            val min: String = getMinMY()
-            val d = getDateFromLink()
-            if (d.my == min) {
-                view.tipEndList()
-                return
-            }
-            d.changeMonth(-1)
-            storage.open(d.my)
-            val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
-            if (cursor.moveToLast()) {
-                val iLink = cursor.getColumnIndex(Const.LINK)
-                openLink(cursor.getString(iLink), false)
-                return
-            }
-        } catch (e: Exception) {
+        storage.open(link)
+        storage.getPrevPage(link)?.let {
+            openLink(it, false)
+            return
         }
-        view.tipEndList()
+        val min: String = getMinMY()
+        val d = getDateFromLink()
+        if (d.my == min) {
+            mstate.postValue(BrowserState.EndList)
+            return
+        }
+        d.changeMonth(-1)
+        storage.open(d.my)
+        val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
+        if (cursor.moveToLast()) {
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            openLink(cursor.getString(iLink), false)
+        }
     }
 
     private fun getMinMY(): String {

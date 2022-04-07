@@ -7,3 +7,11 @@ data class SearchStrings(
     val search_mode: Array<String>,
     val format_found: String
 )
+
+data class BrowserStrings(
+    val page: String,
+    val copyright: String,
+    val downloaded: String,
+    val toPrev: String,
+    val toNext: String
+)
