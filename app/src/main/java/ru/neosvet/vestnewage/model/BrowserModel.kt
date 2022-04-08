@@ -61,7 +61,7 @@ class BrowserModel : ViewModel() {
 
     fun init(context: Context) {
         strings = BrowserStrings(
-            page = context.getString(R.string.page),
+            page = context.getString(R.string.format_page),
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
             toPrev = context.getString(R.string.to_prev),
@@ -201,7 +201,8 @@ class BrowserModel : ViewModel() {
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
-            bw.write(strings.page + " " + NeoClient.SITE + link)
+            val url = NeoClient.SITE + link
+            bw.write(strings.page.format(url, url))
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
             bw.write(strings.downloaded + " " + d.toString())
