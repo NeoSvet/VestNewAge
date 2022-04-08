@@ -7,7 +7,6 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.webkit.JavascriptInterface
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,13 +18,13 @@ import com.google.android.material.navigation.NavigationView
 import ru.neosvet.ui.SoftKeyboard
 import ru.neosvet.ui.StatusButton
 import ru.neosvet.ui.Tip
-import ru.neosvet.vestnewage.activity.browser.WebClient
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.browser.NeoInterface
+import ru.neosvet.vestnewage.activity.browser.WebClient
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.databinding.BrowserContentBinding
 import ru.neosvet.vestnewage.helpers.BrowserHelper
@@ -401,7 +400,7 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
             R.id.nav_refresh ->
                 model.downloadPage(true)
             R.id.nav_share ->
-                model.sharePage(this, content.wvBrowser.title ?: "") //TODO default title
+                model.sharePage(this, getPageTitle())
             R.id.nav_nomenu -> {
                 binding.fabMenu.isVisible = helper.isNoMenu
                 helper.isNoMenu = helper.isNoMenu.not()
@@ -454,6 +453,13 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun getPageTitle(): String {
+        val t = content.wvBrowser.title
+        if (t.isNullOrEmpty())
+            return getString(R.string.default_title)
+        return t
     }
 
     private fun setCheckItem(item: MenuItem, check: Boolean) {

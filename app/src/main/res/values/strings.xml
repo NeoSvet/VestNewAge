@@ -137,6 +137,7 @@
     <string name="remember_password">запомнить пароль</string>
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
     <!--Страница-->
+    <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
     <string name="page">Страница:</string>
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
