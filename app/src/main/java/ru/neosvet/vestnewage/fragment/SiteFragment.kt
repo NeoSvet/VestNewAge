@@ -1,0 +1,326 @@
+package ru.neosvet.vestnewage.fragment
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.*
+import android.widget.AbsListView
+import android.widget.AdapterView.OnItemClickListener
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.work.Data
+import com.google.android.material.tabs.TabLayout
+import ru.neosvet.ui.NeoFragment
+import ru.neosvet.utils.Const
+import ru.neosvet.utils.Lib
+import ru.neosvet.utils.NeoClient
+import ru.neosvet.ui.select
+import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
+import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
+import ru.neosvet.vestnewage.helpers.DevadsHelper
+import ru.neosvet.vestnewage.helpers.ProgressHelper
+import ru.neosvet.vestnewage.list.ListAdapter
+import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.model.state.SiteState
+import kotlin.math.abs
+
+class SiteFragment : NeoFragment(), Observer<SiteState> {
+    companion object {
+        fun newInstance(tab: Int): SiteFragment {
+            val fragment = SiteFragment()
+            val args = Bundle()
+            args.putInt(Const.TAB, tab)
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
+    private val model: SiteModel by lazy {
+        ViewModelProvider(this).get(SiteModel::class.java)
+    }
+    private val adMain: ListAdapter by lazy {
+        ListAdapter(requireContext())
+    }
+    private var ads: DevadsHelper? = null
+    private var x = 0
+    private var y = 0
+    private var scrollToFirst = false
+    private var binding: SiteFragmentBinding? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ) = SiteFragmentBinding.inflate(inflater, container, false).also {
+        binding = it
+    }.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        act.fab = binding?.fabRefresh
+        setViews()
+        initTabs()
+        restoreState(savedInstanceState)
+        model.state.observe(act, this)
+    }
+
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        ads?.close()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        ads?.let {
+            outState.putInt(Const.ADS, it.index)
+        }
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun setStatus(load: Boolean) {
+        if (load) {
+            ProgressHelper.setBusy(true)
+            act.status.setLoad(true)
+            binding?.fabRefresh?.isVisible = false
+        } else {
+            ProgressHelper.setBusy(false)
+            binding?.fabRefresh?.let {
+                if (it.isVisible.not()) {
+                    act.status.setLoad(false)
+                    it.isVisible = true
+                }
+            }
+        }
+    }
+
+    override fun onChanged(data: Data) {
+    }
+
+    private fun restoreState(state: Bundle?) {
+        if (state != null) {
+            val indexAds = state.getInt(Const.ADS, -1)
+            if (indexAds > -1)
+                ads = DevadsHelper(act).apply { index = indexAds }
+        } else {
+            arguments?.let {
+                model.selectedTab = it.getInt(Const.TAB)
+            }
+            when (model.selectedTab) {
+                SiteModel.TAB_NEWS -> model.openList(true)
+                SiteModel.TAB_SITE -> binding?.tablayout?.select(model.selectedTab)
+                SiteModel.TAB_DEV -> model.openAds()
+            }
+        }
+    }
+
+    private fun initTabs() = binding?.run {
+        tablayout.addTab(tablayout.newTab().setText(R.string.news))
+        tablayout.addTab(tablayout.newTab().setText(R.string.site))
+        if (model.selectedTab == SiteModel.TAB_SITE)
+            tablayout.select(model.selectedTab)
+        tablayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab) {
+                if (model.isDevTab)
+                    onTabSelected(tab)
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                act.title = tab.text
+                model.selectedTab = tab.position
+                model.openList(true)
+            }
+        })
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setViews() = binding?.run {
+        fabRefresh.setOnClickListener { startLoad() }
+        lvMain.adapter = adMain
+        lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
+            if (act.checkBusy()) return@OnItemClickListener
+            if (isAds(pos)) return@OnItemClickListener
+            if (adMain.getItem(pos).count == 1) {
+                openSingleLink(adMain.getItem(pos).link)
+            } else {
+                openMultiLink(adMain.getItem(pos), view)
+            }
+        }
+        lvMain.setOnTouchListener { _, event: MotionEvent ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (!act.status.startMin()) act.startAnimMin()
+                    x = event.getX(0).toInt()
+                    y = event.getY(0).toInt()
+                }
+                MotionEvent.ACTION_UP -> {
+                    val x2 = event.getX(0).toInt()
+                    val r = abs(x - x2)
+                    if (r > (30 * resources.displayMetrics.density).toInt() &&
+                        r > abs(y - event.getY(0).toInt())
+                    ) {
+                        val t = tablayout.selectedTabPosition
+                        if (x > x2) { // next
+                            if (t < 1)  tablayout.select(t + 1)
+                        } else if (x < x2) { // prev
+                            if (t > 0) tablayout.select(t - 1)
+                        }
+                    }
+                    if (!act.status.startMax()) act.startAnimMax()
+                }
+                MotionEvent.ACTION_CANCEL -> if (!act.status.startMax()) act.startAnimMax()
+            }
+            false
+        }
+        act.status.setClick { onStatusClick(false) }
+        lvMain.setOnScrollListener(object : AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(absListView: AbsListView, scrollState: Int) {
+                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && scrollToFirst) {
+                    if (lvMain.firstVisiblePosition > 0)
+                        lvMain.smoothScrollToPosition(0)
+                    else scrollToFirst = false
+                }
+            }
+
+            override fun onScroll(
+                absListView: AbsListView, firstVisibleItem: Int,
+                visibleItemCount: Int, totalItemCount: Int
+            ) {
+            }
+        })
+    }
+
+    override fun onStatusClick(reset: Boolean) {
+        binding?.fabRefresh?.isVisible = true
+        setStatus(false)
+        model.openList(false)
+        if (!act.status.isStop) {
+            act.status.setLoad(false)
+            return
+        }
+        if (reset) {
+            act.status.setError(null)
+            return
+        }
+        if (!act.status.onClick() && act.status.isTime) startLoad()
+    }
+
+    private fun openMultiLink(links: ListItem, parent: View) {
+        val pMenu = PopupMenu(act, parent)
+        for (i in 1 until links.count) pMenu.menu.add(links.getHead(i))
+        pMenu.setOnMenuItemClickListener { item: MenuItem ->
+            val title = item.title.toString()
+            for (i in 0 until links.count) {
+                if (links.getHead(i) == title) {
+                    openPage(links.getLink(i))
+                    break
+                }
+            }
+            true
+        }
+        pMenu.show()
+    }
+
+    private fun openSingleLink(link: String) {
+        if (link == "#" || link == "@") return
+        if (model.isSiteTab) {
+            if (link.contains("rss")) {
+                act.setFragment(R.id.nav_rss, true)
+            } else if (link.contains("poems")) {
+                act.openBook(link, true)
+            } else if (link.contains("tolkovaniya") || link.contains("2016")) {
+                act.openBook(link, false)
+            } else if (link.contains("files") && !link.contains("http")) {
+                openPage(NeoClient.SITE + link)
+            } else openPage(link)
+        } else {
+            openPage(link)
+        }
+    }
+
+    private fun isAds(pos: Int): Boolean {
+        binding?.run {
+            if (model.isDevTab) {
+                if (pos == 0) { //back
+                    tablayout.select(SiteModel.TAB_NEWS)
+                    return true
+                }
+                if (ads == null) ads = DevadsHelper(act)
+                ads?.run {
+                    index = pos
+                    showAd(
+                        adMain.getItem(pos).title,
+                        adMain.getItem(pos).link,
+                        adMain.getItem(pos).getHead(0)
+                    )
+                }
+                adMain.getItem(pos).des = ""
+                adMain.notifyDataSetChanged()
+                return true
+            }
+            if (model.isNewsTab && pos == 0) {
+                model.selectedTab = SiteModel.TAB_DEV
+                model.openAds()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun openPage(url: String) {
+        if (url.contains("http") || url.contains("mailto")) {
+            if (url.contains(NeoClient.SITE)) {
+                Lib.openInApps(url, getString(R.string.to_load))
+            } else {
+                Lib.openInApps(url, null)
+            }
+        } else {
+            openReader(url, null)
+        }
+    }
+
+    override fun startLoad() {
+        if (ProgressHelper.isBusy()) return
+        model.load()
+    }
+
+    override fun onChanged(state: SiteState) {
+        when (state) {
+            SiteState.Loading -> setStatus(true)
+            is SiteState.Result -> {
+                setStatus(false)
+                adMain.setItem(state.list)
+                binding?.run {
+                    if (lvMain.firstVisiblePosition > 0) {
+                        scrollToFirst = true
+                        lvMain.smoothScrollToPosition(0)
+                    }
+                    tvEmptySite.isVisible = state.list.isEmpty()
+                }
+                if (model.isDevTab) ads?.run {
+                    if (index > -1)
+                        showAd(
+                            adMain.getItem(index).title,
+                            adMain.getItem(index).link,
+                            adMain.getItem(index).getHead(0)
+                        )
+                }
+            }
+            is SiteState.CheckTime ->
+                binding?.fabRefresh?.isVisible = !act.status.checkTime(state.sec)
+            is SiteState.Error -> {
+                setStatus(false)
+                act.status.setError(state.throwable.localizedMessage)
+            }
+        }
+    }
+}

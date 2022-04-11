@@ -8,13 +8,14 @@ import android.database.Cursor;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 
@@ -84,7 +85,8 @@ public class DevadsHelper {
         return m;
     }
 
-    public void loadList(ListAdapter list, boolean onlyUnread) throws Exception {
+    public List<ListItem> loadList(boolean onlyUnread) throws Exception {
+        List<ListItem> list = new ArrayList<>();
         Cursor cursor;
         String ad;
         if (onlyUnread) {
@@ -95,7 +97,7 @@ public class DevadsHelper {
             ad = "";
         }
         if (!cursor.moveToFirst())
-            return;
+            return list;
         int iMode = cursor.getColumnIndex(Const.MODE);
         int iTitle = cursor.getColumnIndex(Const.TITLE);
         int iDes = cursor.getColumnIndex(Const.DESCTRIPTION);
@@ -119,27 +121,27 @@ public class DevadsHelper {
                 case AdsStorage.MODE_U:
                     m = Integer.parseInt(t);
                     if (m > context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode) {
-                        list.insertItem(0, new ListItem(ad + context.getString(R.string.access_new_version)));
+                        list.add(0, new ListItem(ad + context.getString(R.string.access_new_version)));
                     } else {
-                        list.insertItem(0, new ListItem(ad + context.getString(R.string.current_version)));
+                        list.add(0, new ListItem(ad + context.getString(R.string.current_version)));
                     }
-                    list.getItem(0).addHead(d);
-                    list.getItem(0).addLink(context.getString(R.string.url_on_app));
+                    list.get(0).addHead(d);
+                    list.get(0).addLink(context.getString(R.string.url_on_app));
                     break;
                 default:
-                    list.insertItem(0, new ListItem(ad + t));
+                    list.add(0, new ListItem(ad + t));
                     if (m != AdsStorage.MODE_TD)
-                        list.getItem(0).addLink(l);
+                        list.get(0).addLink(l);
                     if (m != AdsStorage.MODE_TL)
-                        list.getItem(0).addHead(d);
+                        list.get(0).addHead(d);
                     break;
             }
             if (!onlyUnread && unread)
-                list.getItem(0).setDes(context.getString(R.string.new_section));
+                list.get(0).setDes(context.getString(R.string.new_section));
 
         } while (cursor.moveToNext());
         cursor.close();
-        list.notifyDataSetChanged();
+        return list;
     }
 
     public void clear() {
@@ -154,7 +156,7 @@ public class DevadsHelper {
             storage.updateByDes(des, row);
         }
 
-        if (des.equals("")) {// only link
+        if (des.isEmpty()) {// only link
             Lib.openInApps(link, null);
             index_ads = -1;
             return;

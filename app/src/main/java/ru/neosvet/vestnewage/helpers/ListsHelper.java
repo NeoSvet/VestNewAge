@@ -6,7 +6,7 @@ import java.io.File;
 
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
-import ru.neosvet.vestnewage.fragment.SiteFragment;
+import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class ListsHelper {
@@ -24,10 +24,10 @@ public class ListsHelper {
     }
 
     public boolean siteIsOld() {
-        long time = Lib.getFile(SiteFragment.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
+        long time = Lib.getFile(SiteModel.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
         if (timeNow - time > DateHelper.DAY_IN_SEC)
             return true;
-        time = Lib.getFile(SiteFragment.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
+        time = Lib.getFile(SiteModel.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 

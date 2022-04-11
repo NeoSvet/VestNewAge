@@ -35,6 +35,7 @@ import ru.neosvet.vestnewage.databinding.MainContentBinding
 import ru.neosvet.vestnewage.fragment.*
 import ru.neosvet.vestnewage.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.helpers.*
+import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.model.SlashModel
 import java.util.*
 
@@ -495,7 +496,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setFragment(firstFragment, false)
         } else if (prevId != 0) {
             if (curFragment != null && !curFragment!!.onBackPressed()) return
-            if (prevId == R.id.nav_site) tab = SiteFragment.TAB_MAIN
+            if (prevId == R.id.nav_site) tab = SiteModel.TAB_SITE
             setFragment(prevId, false)
         } else if (firstFragment == R.id.nav_new) {
             val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
@@ -638,7 +639,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onItemClick(link: String) {
         if (link.isEmpty()) return
         if (link == Const.ADS) {
-            tab = SiteFragment.TAB_DEV
+            tab = SiteModel.TAB_DEV
             setFragment(R.id.nav_site, true)
         } else openReader(link, null)
     }

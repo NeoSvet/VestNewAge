@@ -15,3 +15,10 @@ data class BrowserStrings(
     val toPrev: String,
     val toNext: String
 )
+
+data class SiteStrings(
+    val news_dev: String,
+    val novosti: String,
+    val back_title: String,
+    val back_des: String
+)

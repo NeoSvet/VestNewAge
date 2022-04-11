@@ -14,11 +14,11 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
-import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.model.SiteModel;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 
 public class SlashUtils {
@@ -192,7 +192,7 @@ public class SlashUtils {
         } else if (link.length() < 2 || link.equals("/index.html")) {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 0);
-        } else if (link.equals(SiteFragment.NOVOSTI)) {
+        } else if (link.equals(SiteModel.NOVOSTI)) {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 1);
         } else if (link.contains(Const.HTML)) {

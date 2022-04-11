@@ -15,7 +15,6 @@ import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.SiteFragment;
 import ru.neosvet.vestnewage.helpers.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.LoaderHelper;
@@ -205,12 +204,12 @@ public class LoaderWorker extends Worker {
         if (id == LoaderHelper.ALL || id == R.id.nav_book)
             k = workWithBook(true);
         if (id == LoaderHelper.ALL || id == R.id.nav_site) {
-            SiteLoader loader = new SiteLoader(Lib.getFile(SiteFragment.MAIN).toString());
+            SiteLoader loader = new SiteLoader(Lib.getFile(SiteModel.MAIN).toString());
             List<String> list = loader.getLinkList();
             k += list.size();
             ProgressHelper.setMax(k);
             downloadList(list);
-        }else {
+        } else {
             ProgressHelper.setMax(k);
         }
         // загрузка страниц:
