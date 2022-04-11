@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -31,7 +30,7 @@ import ru.neosvet.vestnewage.model.CabModel;
 
 public class CabpageActivity extends AppCompatActivity {
     private WebView wvBrowser;
-    private StatusButton status;
+    private StatusButton status = new StatusButton();
     private View fabClose;
     private boolean twoPointers = false;
 
@@ -75,7 +74,7 @@ public class CabpageActivity extends AppCompatActivity {
             }
             return false;
         });
-        status = new StatusButton(this, findViewById(R.id.pStatus));
+        status.init(this, findViewById(R.id.pStatus));
         fabClose = findViewById(R.id.fabClose);
         fabClose.setOnClickListener(view -> onBackPressed());
     }

@@ -58,7 +58,7 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
 
     private var twoPointers = false
     private lateinit var softKeyboard: SoftKeyboard
-    private lateinit var status: StatusButton
+    private val status = StatusButton()
     private lateinit var prom: PromHelper
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
@@ -212,7 +212,7 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
         }
 
         tip = Tip(this, binding.tvFinish)
-        status = StatusButton(this, binding.pStatus)
+        status.init(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainActivity::class.java.simpleName, MODE_PRIVATE)
         if (pref.getBoolean(Const.COUNT_IN_MENU, true)) {

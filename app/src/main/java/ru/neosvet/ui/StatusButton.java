@@ -19,20 +19,20 @@ import ru.neosvet.vestnewage.helpers.DateHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class StatusButton {
-    private final Context context;
-    private final Animation anRotate;
+    private Context context;
+    private Animation anRotate;
     private Animation anMin;
     private Animation anMax;
-    private final Animation anHide;
-    private final View panel;
-    private final TextView tv;
-    private final ImageView iv;
-    private final ProgressBar progBar;
+    private Animation anHide;
+    private View panel;
+    private TextView tv;
+    private ImageView iv;
+    private ProgressBar progBar;
     private ResizeAnim resizeMax = null;
     private String error = null;
     private boolean stop = true, time = false, visible, prog = false;
 
-    public StatusButton(Context context, View p) {
+    public void init(Context context, View p) {
         this.context = context;
         this.panel = p;
         tv = (TextView) panel.findViewById(R.id.tvStatus);
