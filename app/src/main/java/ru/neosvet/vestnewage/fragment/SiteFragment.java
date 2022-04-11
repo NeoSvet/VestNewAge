@@ -37,7 +37,7 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.SiteModel;
 
 public class SiteFragment extends NeoFragment {
-    private final int TAB_NEWS = 0, TAB_MAIN = 1, TAB_DEV = 2;
+    public static final int TAB_NEWS = 0, TAB_MAIN = 1, TAB_DEV = 2;
     public static final String MAIN = "/main", NEWS = "/news", FORUM = "intforum.html", NOVOSTI = "novosti.html", END = "<end>";
     private ListAdapter adMain;
     private View fabRefresh, tvEmptySite;
@@ -47,6 +47,14 @@ public class SiteFragment extends NeoFragment {
     private DevadsHelper ads;
     private int x, y, tab = TAB_NEWS;
     private boolean notClick = false, scrollToFirst = false;
+
+    public static SiteFragment newInstance(int tab) {
+        SiteFragment fragment = new SiteFragment();
+        Bundle args = new Bundle();
+        args.putInt(Const.TAB, tab);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

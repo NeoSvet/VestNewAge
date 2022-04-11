@@ -27,6 +27,14 @@ public class HelpFragment extends Fragment {
     private HelpAdapter adHelp;
     private boolean[] mHelp = null;
 
+    public static HelpFragment newInstance(int section) {
+        HelpFragment fragment = new HelpFragment();
+        Bundle args = new Bundle();
+        args.putInt(Const.TAB, section);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         act = (MainActivity) getActivity();
@@ -52,15 +60,13 @@ public class HelpFragment extends Fragment {
         restoreState(savedInstanceState);
     }
 
-    public void setOpenHelp(int i) {
-        mHelp = new boolean[COUNT];
-        mHelp[i] = true;
-    }
-
     private void restoreState(Bundle state) {
         if (state == null) {
-            if (mHelp == null)
-                mHelp = new boolean[COUNT];
+            mHelp = new boolean[COUNT];
+            if (getArguments() != null) {
+                int section = getArguments().getInt(Const.TAB);
+                mHelp[section] = true;
+            }
         } else {
             mHelp = state.getBooleanArray(Const.PANEL);
             if (mHelp[FEEDBACK])

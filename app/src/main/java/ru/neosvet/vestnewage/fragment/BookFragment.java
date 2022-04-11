@@ -71,6 +71,14 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
         return false;
     });
 
+    public static BookFragment newInstance(int tab) {
+        BookFragment fragment = new BookFragment();
+        Bundle args = new Bundle();
+        args.putInt(Const.TAB, tab);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.book_fragment, container, false);
@@ -79,6 +87,8 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (getArguments() != null)
+            tab = getArguments().getInt(Const.TAB);
         initViews(view);
         setViews();
         initTabs();
@@ -533,10 +543,6 @@ public class BookFragment extends NeoFragment implements DateDialog.Result, View
             else
                 startLoad();
         }
-    }
-
-    public void setTab(int tab) {
-        this.tab = tab;
     }
 
     public void setYear(int year) {

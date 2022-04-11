@@ -210,7 +210,7 @@ public class SettingsFragment extends NeoFragment {
         ivClear = container.findViewById(R.id.ivClear);
         cbCountFloat = container.findViewById(R.id.cbCountFloat);
         cbCountFloat.setChecked(!MainActivity.isCountInMenu);
-        if (act.isMenuMode)
+        if (act.isMenuMode())
             cbCountFloat.setText(getString(R.string.count_everywhere));
         cbNew = container.findViewById(R.id.cbNew);
         SharedPreferences pref = act.getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
