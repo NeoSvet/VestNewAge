@@ -123,7 +123,8 @@ public class HelpFragment extends Fragment {
             case LINK_ON_APP:
                 Intent sendIntent = new Intent(Intent.ACTION_SEND);
                 sendIntent.setType("text/plain");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.url_on_app));
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.title_app)
+                        + getString(R.string.url_on_app));
                 startActivity(sendIntent);
                 break;
             case LINK_ON_SITE:
