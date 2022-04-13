@@ -35,9 +35,11 @@ import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.list.PageAdapter
 import ru.neosvet.vestnewage.model.SearchModel
-import ru.neosvet.vestnewage.model.state.SearchState
+import ru.neosvet.vestnewage.model.basic.MessageState
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.SuccessList
 
-class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, OnTouchListener {
+class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnTouchListener {
     companion object {
         private const val SETTINGS = "s"
         private const val ADDITION = "a"
@@ -73,7 +75,7 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         get() = model.helper!!
 
     val content: SearchContentBinding
-        get() = this@SearchFragment.binding2!!
+        get() = binding2!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -328,7 +330,7 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         }
         fabSettings.setOnClickListener(click)
         bSettings.setOnClickListener(click)
-        bStop.setOnClickListener { model.stop() }
+        bStop.setOnClickListener { model.cancel() }
         fabOk.setOnClickListener {
             closeSettings()
             helper.savePerformance(sMode.selectedItemPosition)
@@ -415,9 +417,9 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         helper.saveRequest(request)
     }
 
-    private fun showResult(results: ArrayList<ListItem>) = content.run {
+    private fun showResult(list: List<ListItem>) = content.run {
         adResults.clear()
-        if (results.size == 0) {
+        if (list.isEmpty()) {
             bShow.isVisible = false
             pAdditionSet.isVisible = false
             cbSearchInResults.isChecked = false
@@ -430,7 +432,7 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
             if (bShow.isVisible.not())
                 pAdditionSet.isVisible = true
             tvLabel.text = helper.label
-            adResults.setItem(results)
+            adResults.setItem(list)
             if (lvResult.firstVisiblePosition > 0) {
                 scrollToFirst = true
                 lvResult.smoothScrollToPosition(0)
@@ -465,17 +467,16 @@ class SearchFragment : NeoFragment(), Observer<SearchState>, DateDialog.Result, 
         return false
     }
 
-    override fun onChanged(state: SearchState) {
+    override fun onChanged(state: NeoState) {
         when (state) {
-            is SearchState.Status -> {
-                binding?.tvStatus?.text = state.text
-            }
-            is SearchState.Result -> {
-                initPages(state.pages)
-                showResult(state.results)
+            is MessageState ->
+                binding?.tvStatus?.text = state.message
+            is SuccessList -> {
+                initPages(helper.countPages)
+                showResult(state.list)
                 setStatus(false)
             }
-            is SearchState.Error -> {
+            is NeoState.Error -> {
                 act.status.setError(state.throwable.localizedMessage)
                 setStatus(false)
             }

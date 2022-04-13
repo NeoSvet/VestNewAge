@@ -31,10 +31,12 @@ import ru.neosvet.vestnewage.helpers.BrowserHelper
 import ru.neosvet.vestnewage.helpers.PromHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
 import ru.neosvet.vestnewage.model.BrowserModel
-import ru.neosvet.vestnewage.model.state.BrowserState
+import ru.neosvet.vestnewage.model.basic.MessageState
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.SuccessPage
 import java.util.*
 
-class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
+class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     NavigationView.OnNavigationItemSelectedListener {
     companion object {
         @JvmStatic
@@ -370,7 +372,7 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
             binding.fabBottom.isVisible = false
         status.setClick {
             if (status.isTime)
-                model.downloadPage(true)
+                model.load()
             else status.onClick()
         }
     }
@@ -398,9 +400,9 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_refresh ->
-                model.downloadPage(true)
+                model.load()
             R.id.nav_share ->
-                model.sharePage(this, getPageTitle())
+                helper.sharePage(this, getPageTitle())
             R.id.nav_nomenu -> {
                 binding.fabMenu.isVisible = helper.isNoMenu
                 helper.isNoMenu = helper.isNoMenu.not()
@@ -486,15 +488,14 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
         model.openPage(false)
     }
 
-    override fun onChanged(state: BrowserState) {
+    override fun onChanged(state: NeoState) {
         when (state) {
-            BrowserState.Loading -> {
+            NeoState.Loading -> {
                 content.wvBrowser.clearCache(true)
-                model.restoreStyle()
                 status.setLoad(true)
                 status.loadText()
             }
-            is BrowserState.Page -> {
+            is SuccessPage -> {
                 finishLoading()
                 if (state.timeInSeconds > 0)
                     status.checkTime(state.timeInSeconds)
@@ -503,9 +504,9 @@ class BrowserActivity : AppCompatActivity(), Observer<BrowserState>,
                 menu.share.isVisible = state.isOtkr.not()
                 restoreSearch()
             }
-            BrowserState.EndList ->
-                Lib.showToast(getString(R.string.tip_end_list))
-            is BrowserState.Error -> {
+            is MessageState ->
+                Lib.showToast(state.message)
+            is NeoState.Error -> {
                 finishLoading()
                 status.setError(state.throwable.localizedMessage)
             }

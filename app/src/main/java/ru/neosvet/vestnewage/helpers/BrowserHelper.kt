@@ -1,8 +1,11 @@
 package ru.neosvet.vestnewage.helpers
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import ru.neosvet.utils.Const
+import ru.neosvet.utils.NeoClient
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity
 
 class BrowserHelper(context: Context) {
@@ -81,5 +84,18 @@ class BrowserHelper(context: Context) {
 
     fun downProg() {
         prog--
+    }
+
+    fun sharePage(context: Context, title: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+        var s: String = title
+        if (s.length > 9)
+            s = s.substring(9) + " (" +
+                    context.getString(R.string.from) +
+                    " " + s.substring(0, 8) + ")"
+        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NeoClient.SITE + link)
+        val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
+        context.startActivity(intent)
     }
 }

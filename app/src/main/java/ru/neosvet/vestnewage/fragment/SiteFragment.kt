@@ -12,10 +12,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.Data
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.NeoFragment
+import ru.neosvet.ui.select
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
 import ru.neosvet.utils.NeoClient
-import ru.neosvet.ui.select
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
@@ -24,10 +24,12 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.SiteModel
-import ru.neosvet.vestnewage.model.state.SiteState
+import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.SuccessList
 import kotlin.math.abs
 
-class SiteFragment : NeoFragment(), Observer<SiteState> {
+class SiteFragment : NeoFragment(), Observer<NeoState> {
     companion object {
         fun newInstance(tab: Int): SiteFragment {
             val fragment = SiteFragment()
@@ -170,7 +172,7 @@ class SiteFragment : NeoFragment(), Observer<SiteState> {
                     ) {
                         val t = tablayout.selectedTabPosition
                         if (x > x2) { // next
-                            if (t < 1)  tablayout.select(t + 1)
+                            if (t < 1) tablayout.select(t + 1)
                         } else if (x < x2) { // prev
                             if (t > 0) tablayout.select(t - 1)
                         }
@@ -293,10 +295,10 @@ class SiteFragment : NeoFragment(), Observer<SiteState> {
         model.load()
     }
 
-    override fun onChanged(state: SiteState) {
+    override fun onChanged(state: NeoState) {
         when (state) {
-            SiteState.Loading -> setStatus(true)
-            is SiteState.Result -> {
+            NeoState.Loading -> setStatus(true)
+            is SuccessList -> {
                 setStatus(false)
                 adMain.setItem(state.list)
                 binding?.run {
@@ -315,9 +317,9 @@ class SiteFragment : NeoFragment(), Observer<SiteState> {
                         )
                 }
             }
-            is SiteState.CheckTime ->
+            is CheckTime ->
                 binding?.fabRefresh?.isVisible = !act.status.checkTime(state.sec)
-            is SiteState.Error -> {
+            is NeoState.Error -> {
                 setStatus(false)
                 act.status.setError(state.throwable.localizedMessage)
             }

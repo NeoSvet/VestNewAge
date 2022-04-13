@@ -1,12 +1,8 @@
 package ru.neosvet.vestnewage.model
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.work.Data
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
-import ru.neosvet.utils.ErrorUtils
 import ru.neosvet.utils.Lib
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
@@ -15,12 +11,15 @@ import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.model.state.SiteState
+import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.SuccessList
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 
-class SiteModel : ViewModel() {
+class SiteModel : NeoViewModel() {
     companion object {
         const val TAG = "site"
         const val TAB_NEWS = 0
@@ -33,13 +32,6 @@ class SiteModel : ViewModel() {
         const val END = "<end>"
     }
 
-    private val mstate = MutableLiveData<SiteState>()
-    val state: LiveData<SiteState>
-        get() = mstate
-    private val scope = CoroutineScope(Dispatchers.IO
-            + CoroutineExceptionHandler { _, throwable ->
-        errorHandler(throwable)
-    })
     private val strings = SiteStrings(
         news_dev = App.context.getString(R.string.news_dev),
         novosti = App.context.getString(R.string.novosti),
@@ -47,7 +39,6 @@ class SiteModel : ViewModel() {
         back_des = App.context.getString(R.string.back_des)
     )
     var selectedTab = TAB_NEWS
-    private var loadIfNeed = false
     private val nameFiles = arrayOf(NEWS, MAIN)
     private val file: File
         get() = Lib.getFile(nameFiles[selectedTab])
@@ -60,68 +51,49 @@ class SiteModel : ViewModel() {
         DevadsHelper(App.context)
     }
 
-    override fun onCleared() {
-        scope.cancel()
+    override fun onDestroy() {
         ads.close()
-        super.onCleared()
     }
 
-    private fun errorHandler(throwable: Throwable) {
-        if (loadIfNeed)
-            load()
-        else {
-            if (throwable is Exception) {
-                val data = Data.Builder()
-                    .putString(Const.TASK, TAG)
-                    .putString(Const.FILE, file.toString())
-                    .putString(Const.LINK, url)
-                    .build()
-                ErrorUtils.setData(data)
-                ErrorUtils.setError(throwable)
-            }
-            mstate.postValue(SiteState.Error(throwable))
-        }
-    }
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, TAG)
+        .putString(Const.FILE, file.toString())
+        .putString(Const.LINK, url)
+        .build()
 
-    fun load() {
-        scope.launch {
-            if (selectedTab == TAB_DEV)
-                loadAds()
-            else
-                loadList()
-        }
+    override suspend fun doLoad() {
+        if (selectedTab == TAB_DEV)
+            loadAds()
+        else
+            loadList()
     }
 
     private suspend fun loadList() {
-        mstate.postValue(SiteState.Loading)
-        loadIfNeed = false
         val loader = SiteLoader(file.toString())
         val list = loader.load(url) as MutableList
         list.add(0, getFirstItem())
-        mstate.postValue(SiteState.Result(list))
+        mstate.postValue(SuccessList(list))
     }
 
     private suspend fun loadAds() {
-        mstate.postValue(SiteState.Loading)
-        loadIfNeed = false
         ads.clear()
         ads.loadAds()
         val list = ads.loadList(false)
         list.add(0, getFirstItem())
-        mstate.postValue(SiteState.Result(list))
+        mstate.postValue(SuccessList(list))
     }
 
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
+        val f = file
+        if (f.exists().not()) {
+            if (loadIfNeed) load()
+            return
+        }
         scope.launch {
-            val f = file
-            if (f.exists().not() && loadIfNeed) {
-                loadList()
-                return@launch
-            }
             val list = mutableListOf<ListItem>()
             val sec = f.lastModified() / DateHelper.SEC_IN_MILLS
-            mstate.postValue(SiteState.CheckTime(sec))
+            mstate.postValue(CheckTime(sec))
             list.add(getFirstItem())
             var i = 1
             var d: String?
@@ -152,7 +124,7 @@ class SiteModel : ViewModel() {
                 t = br.readLine()
             }
             br.close()
-            mstate.postValue(SiteState.Result(list))
+            mstate.postValue(SuccessList(list))
         }
     }
 
@@ -168,7 +140,7 @@ class SiteModel : ViewModel() {
         scope.launch {
             val list = ads.loadList(false)
             list.add(0, getFirstItem())
-            mstate.postValue(SiteState.Result(list))
+            mstate.postValue(SuccessList(list))
         }
     }
 

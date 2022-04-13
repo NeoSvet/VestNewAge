@@ -4,24 +4,23 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.*
+import androidx.work.Data
+import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.ErrorUtils
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
 import ru.neosvet.vestnewage.list.ListItem
-import ru.neosvet.vestnewage.model.state.SearchState
+import ru.neosvet.vestnewage.model.basic.MessageState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.SuccessList
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 
-class SearchModel : ViewModel() {
+class SearchModel : NeoViewModel() {
     companion object {
         private const val MODE_POSLANIYA = 0
         private const val MODE_KATRENY = 1
@@ -32,30 +31,32 @@ class SearchModel : ViewModel() {
         const val MODE_RESULTS = 6
     }
 
-    private val mstate = MutableLiveData<SearchState>()
-    val state: LiveData<SearchState>
-        get() = mstate
+    override suspend fun doLoad() {
+    }
+
+    override fun onDestroy() {
+        pages.close()
+        storage.close()
+    }
+
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, Const.SEARCH)
+        .putString(Const.STRING, request)
+        .putString(Const.START, helper?.start?.my)
+        .putString(Const.END, helper?.end?.my)
+        .build()
+
     private lateinit var strings: SearchStrings
     private val storage = SearchStorage()
     private val pages = PageStorage()
     private var countMatches: Int = 0
     private var countPages: Int = 0
-    var isRun: Boolean = false
-        private set
     var helper: SearchHelper? = null
     private var request: String
         get() = helper!!.request
         set(value) {
             helper!!.request = value
         }
-
-    private val scope = CoroutineScope(Dispatchers.IO
-            + CoroutineExceptionHandler { _, throwable ->
-        isRun = false
-        if (throwable is Exception)
-            ErrorUtils.setError(throwable)
-        mstate.postValue(SearchState.Error(throwable))
-    })
 
     fun init(context: Context) {
         strings = SearchStrings(
@@ -65,13 +66,6 @@ class SearchModel : ViewModel() {
             search_mode = context.resources.getStringArray(R.array.search_mode),
             format_found = context.getString(R.string.format_found),
         )
-    }
-
-    override fun onCleared() {
-        scope.cancel()
-        pages.close()
-        storage.close()
-        super.onCleared()
     }
 
     fun startSearch(request: String, mode: Int) {
@@ -118,7 +112,7 @@ class SearchModel : ViewModel() {
 
     private fun publishProgress(d: DateHelper) {
         mstate.postValue(
-            SearchState.Status(
+            MessageState(
                 String.format(
                     strings.format_search_date,
                     d.monthString, d.year
@@ -136,7 +130,8 @@ class SearchModel : ViewModel() {
         storage.reopen()
         val cursor = storage.getResults(desc)
         if (cursor.count == 0) {
-            mstate.postValue(SearchState.Result(result, 0))
+            helper?.countPages = 0
+            mstate.postValue(SuccessList(result))
             cursor.close()
             storage.close()
             helper?.deleteBase()
@@ -158,11 +153,8 @@ class SearchModel : ViewModel() {
             result.add(item)
         } while (cursor.moveToNext() && result.size < Const.MAX_ON_PAGE)
         cursor.close()
-        mstate.postValue(SearchState.Result(result, max))
-    }
-
-    fun stop() {
-        isRun = false
+        helper?.countPages = max
+        mstate.postValue(SuccessList(result))
     }
 
     private fun searchInResults(reverseOrder: Boolean) {
@@ -208,7 +200,7 @@ class SearchModel : ViewModel() {
             p2 = ProgressHelper.getProcent(i.toFloat(), title.size.toFloat())
             if (p1 < p2) {
                 p1 = p2
-                mstate.postValue(SearchState.Status(String.format(strings.format_search_proc, p1)))
+                mstate.postValue(MessageState(String.format(strings.format_search_proc, p1)))
             }
         }
         pages.close()

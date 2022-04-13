@@ -1,14 +1,10 @@
 package ru.neosvet.vestnewage.model
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.work.Data
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.ErrorUtils
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
@@ -17,28 +13,18 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.PageLoader
-import ru.neosvet.vestnewage.model.state.CalendarState
+import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 
-class CalendarModel : ViewModel() {
+class CalendarModel : NeoViewModel() {
     companion object {
         const val TAG = "calendar"
     }
 
-    private val mstate = MutableLiveData<CalendarState>()
-    val state: LiveData<CalendarState>
-        get() = mstate
     var date: DateHelper = DateHelper.initToday().apply { day = 1 }
-    var isRun: Boolean = false
-        private set
     private val todayM = date.month
     private val todayY = date.year
-    private var loadIfNeed: Boolean = true
     private val calendar = arrayListOf<CalendarItem>()
-    private val scope = CoroutineScope(Dispatchers.IO
-            + CoroutineExceptionHandler { _, throwable ->
-        errorHandler(throwable)
-    })
     private val prev: Boolean
         get() {
             return if (date.year == 2016 && date.month == 1) {
@@ -49,51 +35,23 @@ class CalendarModel : ViewModel() {
     private val next: Boolean
         get() = if (date.year == todayY) date.month != todayM else true
 
-    override fun onCleared() {
-        scope.cancel()
-        super.onCleared()
+    override fun onDestroy() {
     }
 
-    fun cancel() {
-        isRun = false
-    }
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, TAG)
+        .putInt(Const.MONTH, date.month)
+        .putInt(Const.YEAR, date.year)
+        .putBoolean(Const.UNREAD, isCurMonth()) //updateUnread
+        .build()
 
-    private fun errorHandler(throwable: Throwable) {
-        isRun = false
-        if (loadIfNeed)
-            startLoad()
-        else {
-            if (throwable is Exception) {
-                val data = Data.Builder()
-                    .putString(Const.TASK, TAG)
-                    .putInt(Const.MONTH, date.month)
-                    .putInt(Const.YEAR, date.year)
-                    .putBoolean(Const.UNREAD, isCurMonth()) //updateUnread
-                    .build()
-                ErrorUtils.setData(data)
-                ErrorUtils.setError(throwable)
-            }
-            mstate.postValue(CalendarState.Error(throwable))
-        }
-    }
-
-    fun startLoad() {
-        if (isRun || date.year < 2016) return
-        scope.launch {
-            loadFromSite()
-        }
-    }
-
-    private suspend fun loadFromSite() {
-        isRun = true
-        mstate.postValue(CalendarState.Loading)
+    override suspend fun doLoad() { //loadFromSite
+        if (date.year < 2016) return
         val list = loadMonth()
         if (loadFromStorage()) {
-            mstate.postValue(CalendarState.Result(date.calendarString, prev, next, calendar))
+            mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
             loadPages(list)
         }
-        mstate.postValue(CalendarState.Finish)
-        isRun = false
     }
 
     private fun loadPages(pages: List<String>) {
@@ -105,7 +63,7 @@ class CalendarModel : ViewModel() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(CalendarState.Progress(ProgressHelper.getProcent(cur, max)))
+            mstate.postValue(ProgressState(ProgressHelper.getProcent(cur, max)))
         }
         loader.finish()
     }
@@ -140,12 +98,12 @@ class CalendarModel : ViewModel() {
 
             if (calendar.isEmpty() || offsetMonth != 0) {
                 createField()
-                mstate.postValue(CalendarState.Result(date.calendarString, false, false, calendar))
+                mstate.postValue(SuccessCalendar(date.calendarString, false, false, calendar))
             }
             if (loadFromStorage())
-                mstate.postValue(CalendarState.Result(date.calendarString, prev, next, calendar))
+                mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
             else
-                loadFromSite()
+                doLoad()
         }
     }
 
@@ -190,7 +148,7 @@ class CalendarModel : ViewModel() {
         if (cursor.moveToFirst()) {
             if (loadIfNeed) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                checkTime((time / DateHelper.SEC_IN_MILLS).toInt())
+                checkTime((time / DateHelper.SEC_IN_MILLS))
             }
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)
@@ -248,17 +206,17 @@ class CalendarModel : ViewModel() {
         return -1
     }
 
-    private fun checkTime(sec: Int) {
+    private fun checkTime(sec: Long) {
         if (isCurMonth()) {
-            mstate.postValue(CalendarState.CheckTime(sec, true))
+            mstate.postValue(CheckTime(sec))
             return
         }
         if (date.month == todayM - 1 && date.year == todayY ||
             date.month == 11 && date.year == todayY - 1
         ) {
-            val d = DateHelper.putSeconds(sec)
-            if (d.month != todayM)
-                mstate.postValue(CalendarState.CheckTime(sec, false))
+            val d = DateHelper.putSeconds(sec.toInt())
+            if (d.month != todayM) //TODO think about it
+                mstate.postValue(CheckTime(sec))
         }
     }
 

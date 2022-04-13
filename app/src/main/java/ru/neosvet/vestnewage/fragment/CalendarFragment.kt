@@ -25,11 +25,14 @@ import ru.neosvet.vestnewage.list.CalendarAdapter
 import ru.neosvet.vestnewage.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.model.CalendarModel
-import ru.neosvet.vestnewage.model.state.CalendarState
+import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.model.basic.SuccessCalendar
 import java.util.*
 
 class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
-    Observer<CalendarState> {
+    Observer<NeoState> {
     private val model: CalendarModel by lazy {
         ViewModelProvider(this).get(CalendarModel::class.java)
     }
@@ -156,7 +159,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     }
 
     override fun startLoad() {
-        model.startLoad()
+        model.load()
     }
 
     override fun setStatus(load: Boolean) {
@@ -220,27 +223,26 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
         pMenu.show()
     }
 
-    override fun onChanged(state: CalendarState) {
+    override fun onChanged(state: NeoState) {
         when (state) {
-            is CalendarState.Progress ->
+            is ProgressState ->
                 act.status.setProgress(state.percent)
-            CalendarState.Loading ->
+            NeoState.Loading ->
                 setStatus(true)
-            is CalendarState.Result -> binding?.run {
+            is SuccessCalendar -> binding?.run {
+                setStatus(false)
                 act.updateNew()
                 tvDate.text = state.date
                 ivPrev.isEnabled = state.prev
                 ivNext.isEnabled = state.next
                 adCalendar.setItems(state.calendar)
             }
-            is CalendarState.CheckTime ->
-                act.status.checkTime(state.sec.toLong())
-            is CalendarState.Error -> {
+            is CheckTime ->
+                act.status.checkTime(state.sec)
+            is NeoState.Error -> {
                 setStatus(false)
                 act.status.setError(state.throwable.localizedMessage)
             }
-            CalendarState.Finish ->
-                setStatus(false)
         }
     }
 }

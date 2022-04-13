@@ -24,6 +24,7 @@ class SearchHelper(context: Context) {
     var start: DateHelper
     var end: DateHelper
     var page: Int = -1
+    var countPages: Int = 0
     val minMonth: Int
     val minYear: Int
     var label: String = ""

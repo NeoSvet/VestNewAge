@@ -2,12 +2,9 @@ package ru.neosvet.vestnewage.model
 
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.database.Cursor
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.*
+import androidx.work.Data
+import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
@@ -18,16 +15,18 @@ import ru.neosvet.vestnewage.helpers.BrowserHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.loader.StyleLoader
-import ru.neosvet.vestnewage.model.state.BrowserState
+import ru.neosvet.vestnewage.model.basic.MessageState
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.SuccessPage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import java.io.IOException
 import java.util.*
 
-class BrowserModel : ViewModel() {
+class BrowserModel : NeoViewModel() {
     companion object {
         private const val FILE = "file://"
         private const val STYLE = "/style/style.css"
@@ -35,9 +34,6 @@ class BrowserModel : ViewModel() {
         private const val script = "<a href='javascript:NeoInterface."
     }
 
-    private val mstate = MutableLiveData<BrowserState>()
-    val state: LiveData<BrowserState>
-        get() = mstate
     private lateinit var strings: BrowserStrings
     private val storage = PageStorage()
     var lightTheme: Boolean = true
@@ -54,27 +50,31 @@ class BrowserModel : ViewModel() {
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()
     }
-    private val scope = CoroutineScope(Dispatchers.IO
-            + CoroutineExceptionHandler { _, throwable ->
-        mstate.postValue(BrowserState.Error(throwable))
-    })
 
     fun init(context: Context) {
         strings = BrowserStrings(
             page = context.getString(R.string.format_page),
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
+            endList = context.getString(R.string.tip_end_list),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next)
         )
         helper = BrowserHelper(context)
     }
 
-    override fun onCleared() {
-        scope.cancel()
-        storage.close()
-        super.onCleared()
+    override suspend fun doLoad() {
+        downloadPage(true)
     }
+
+    override fun onDestroy() {
+        storage.close()
+    }
+
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, Const.PAGE)
+        .putString(Const.LINK, link)
+        .build()
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
@@ -94,13 +94,14 @@ class BrowserModel : ViewModel() {
     }
 
     fun openPage(newPage: Boolean) {
-        storage.open(link)
-        if (storage.existsPage(link).not()) {
-            downloadPage(false)
-            return
-        }
-        if (!readyStyle()) return
-        try {
+        scope.launch {
+            storage.open(link)
+            if (storage.existsPage(link).not()) {
+                mstate.postValue(NeoState.Loading)
+                downloadPage(false)
+                return@launch
+            }
+            if (!preparingStyle()) return@launch
             val file = Lib.getFile(PAGE)
             val p = if (newPage || !file.exists())
                 generatePage(file)
@@ -109,27 +110,23 @@ class BrowserModel : ViewModel() {
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
             mstate.postValue(
-                BrowserState.Page(
+                SuccessPage(
                     url = FILE + s,
                     timeInSeconds = p.first,
                     isOtkr = p.second
                 )
             )
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 
-    fun downloadPage(update: Boolean) {
-        mstate.postValue(BrowserState.Loading)
-        scope.launch {
-            if (update)
-                storage.deleteParagraphs(storage.getPageId(link))
-            storage.close()
-            styleLoader.download(false)
-            pageLoader.download(link, true)
-            openPage(true)
-        }
+    private suspend fun downloadPage(update: Boolean) {
+        if (update)
+            storage.deleteParagraphs(storage.getPageId(link))
+        storage.close()
+        restoreStyle()
+        styleLoader.download(false)
+        pageLoader.download(link, true)
+        openPage(true)
     }
 
     fun onBackBrowser(): Boolean {
@@ -139,7 +136,7 @@ class BrowserModel : ViewModel() {
         return true
     }
 
-    private fun generatePage(file: File): Pair<Long, Boolean> {
+    private fun generatePage(file: File): Pair<Long, Boolean> { //time, isOtrk
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)
@@ -212,7 +209,7 @@ class BrowserModel : ViewModel() {
         return Pair(time, isOtkr)
     }
 
-    private fun readyStyle(): Boolean {
+    private fun preparingStyle(): Boolean {
         val fLight = Lib.getFileL(Const.LIGHT)
         val fDark = Lib.getFileL(Const.DARK)
         if (!fLight.exists() && !fDark.exists()) { //download style
@@ -228,7 +225,10 @@ class BrowserModel : ViewModel() {
         if (fStyle.exists()) {
             replace = fDark.exists() && !lightTheme || fLight.exists() && lightTheme
             if (replace) {
-                if (fDark.exists()) fStyle.renameTo(fLight) else fStyle.renameTo(fDark)
+                if (fDark.exists())
+                    fStyle.renameTo(fLight)
+                else
+                    fStyle.renameTo(fDark)
             }
         }
         if (replace) {
@@ -266,7 +266,7 @@ class BrowserModel : ViewModel() {
         }
     }
 
-    fun restoreStyle() {
+    private fun restoreStyle() {
         val fStyle = Lib.getFileL(STYLE)
         if (fStyle.exists()) {
             val fDark = Lib.getFileL(Const.DARK)
@@ -292,7 +292,7 @@ class BrowserModel : ViewModel() {
         val today = DateHelper.initToday().my
         val d: DateHelper = getDateFromLink()
         if (d.my == today) {
-            mstate.postValue(BrowserState.EndList)
+            mstate.postValue(MessageState(strings.endList))
             return
         }
         d.changeMonth(1)
@@ -313,7 +313,7 @@ class BrowserModel : ViewModel() {
         val min: String = getMinMY()
         val d = getDateFromLink()
         if (d.my == min) {
-            mstate.postValue(BrowserState.EndList)
+            mstate.postValue(MessageState(strings.endList))
             return
         }
         d.changeMonth(-1)
@@ -336,18 +336,5 @@ class BrowserModel : ViewModel() {
         else
             DateHelper.putYearMonth(2016, 1)
         return d.my
-    }
-
-    fun sharePage(context: Context, title: String) {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "text/plain"
-        var s: String = title
-        if (s.length > 9)
-            s = s.substring(9) + " (" +
-                    context.getString(R.string.from) +
-                    " " + s.substring(0, 8) + ")"
-        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NeoClient.SITE + link)
-        val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
-        context.startActivity(intent)
     }
 }
