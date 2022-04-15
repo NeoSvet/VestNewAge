@@ -139,7 +139,7 @@ public class NewFragment extends Fragment {
         notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY);
         try {
             List<ListItem> list = ads.loadList(true);
-            adNew.setItem(list);
+            adNew.setItems(list);
             String t, s;
             int n;
             UnreadHelper unread = new UnreadHelper();

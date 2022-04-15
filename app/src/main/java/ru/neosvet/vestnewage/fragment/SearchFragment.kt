@@ -432,7 +432,7 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
             if (bShow.isVisible.not())
                 pAdditionSet.isVisible = true
             tvLabel.text = helper.label
-            adResults.setItem(list)
+            adResults.setItems(list)
             if (lvResult.firstVisiblePosition > 0) {
                 scrollToFirst = true
                 lvResult.smoothScrollToPosition(0)

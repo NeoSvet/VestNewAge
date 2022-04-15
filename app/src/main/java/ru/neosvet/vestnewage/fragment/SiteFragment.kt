@@ -300,7 +300,7 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
             NeoState.Loading -> setStatus(true)
             is SuccessList -> {
                 setStatus(false)
-                adMain.setItem(state.list)
+                adMain.setItems(state.list)
                 binding?.run {
                     if (lvMain.firstVisiblePosition > 0) {
                         scrollToFirst = true
