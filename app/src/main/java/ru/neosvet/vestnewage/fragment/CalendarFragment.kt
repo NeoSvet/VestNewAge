@@ -25,7 +25,6 @@ import ru.neosvet.vestnewage.list.CalendarAdapter
 import ru.neosvet.vestnewage.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.model.CalendarModel
-import ru.neosvet.vestnewage.model.basic.CheckTime
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.ProgressState
 import ru.neosvet.vestnewage.model.basic.SuccessCalendar
@@ -229,16 +228,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
                 act.status.setProgress(state.percent)
             NeoState.Loading ->
                 setStatus(true)
-            is SuccessCalendar -> binding?.run {
+            is SuccessCalendar<*> -> binding?.run {
                 setStatus(false)
                 act.updateNew()
                 tvDate.text = state.date
                 ivPrev.isEnabled = state.prev
                 ivNext.isEnabled = state.next
-                adCalendar.setItems(state.calendar)
+                adCalendar.setItems(state.list as List<CalendarItem>)
             }
-            is CheckTime ->
-                act.status.checkTime(state.sec)
             is NeoState.Error -> {
                 setStatus(false)
                 act.status.setError(state.throwable.localizedMessage)

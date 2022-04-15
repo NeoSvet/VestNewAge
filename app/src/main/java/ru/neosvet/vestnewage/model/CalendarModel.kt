@@ -13,7 +13,10 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.PageLoader
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.model.basic.SuccessCalendar
 import ru.neosvet.vestnewage.storage.PageStorage
 
 class CalendarModel : NeoViewModel() {
@@ -24,6 +27,10 @@ class CalendarModel : NeoViewModel() {
     var date: DateHelper = DateHelper.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year
+    private val prevDate = DateHelper.initToday().apply {
+        day = 1
+        changeMonth(-1)
+    }
     private val calendar = arrayListOf<CalendarItem>()
     private val prev: Boolean
         get() {
@@ -102,8 +109,10 @@ class CalendarModel : NeoViewModel() {
             }
             if (loadFromStorage())
                 mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
-            else
+            else {
+                mstate.postValue(NeoState.Loading)
                 doLoad()
+            }
         }
     }
 
@@ -148,7 +157,12 @@ class CalendarModel : NeoViewModel() {
         if (cursor.moveToFirst()) {
             if (loadIfNeed) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                checkTime((time / DateHelper.SEC_IN_MILLS))
+                if (checkTime((time / DateHelper.SEC_IN_MILLS))) {
+                    loadIfNeed = false
+                    cursor.close()
+                    storage.close()
+                    return false
+                }
             }
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)
@@ -206,18 +220,13 @@ class CalendarModel : NeoViewModel() {
         return -1
     }
 
-    private fun checkTime(sec: Long) {
-        if (isCurMonth()) {
-            mstate.postValue(CheckTime(sec))
-            return
-        }
-        if (date.month == todayM - 1 && date.year == todayY ||
-            date.month == 11 && date.year == todayY - 1
-        ) {
-            val d = DateHelper.putSeconds(sec.toInt())
-            if (d.month != todayM) //TODO think about it
-                mstate.postValue(CheckTime(sec))
-        }
+    private fun checkTime(sec: Long): Boolean {
+        if (date.my != prevDate.my)
+            return false
+        val d = DateHelper.putSeconds(sec.toInt())
+        if (d.month == prevDate.month)
+            return true
+        return false
     }
 
     private fun getTitleByLink(s: String): String {
