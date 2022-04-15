@@ -24,10 +24,6 @@ public class ListAdapter extends BaseAdapter {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void insertItem(int pos, ListItem item) {
-        data.add(pos, item);
-    }
-
     public void setItem(List<ListItem> items) {
         data.clear();
         data.addAll(items);
