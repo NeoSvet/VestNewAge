@@ -103,6 +103,11 @@ public class StatusButton {
     public void setLoad(boolean start) {
         setError(null);
         stop = !start;
+        if (prog) {
+            prog = false;
+            progBar.setProgress(0);
+            progBar.setVisibility(View.GONE);
+        }
         if (start) {
             loadText();
             time = false;
@@ -110,11 +115,6 @@ public class StatusButton {
             visible = true;
             iv.startAnimation(anRotate);
         } else {
-            if (prog) {
-                prog = false;
-                progBar.setProgress(0);
-                progBar.setVisibility(View.GONE);
-            }
             visible = false;
             iv.clearAnimation();
             tv.setText(context.getString(R.string.done));
