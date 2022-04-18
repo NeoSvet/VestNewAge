@@ -401,7 +401,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
             R.id.nav_book -> {
-                curFragment = BookFragment.newInstance(tab).also {
+                curFragment = BookFragment.newInstance(tab, -1).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
@@ -563,7 +563,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun openBook(link: String, katren: Boolean) {
         tab = if (katren) 0 else 1
-        setFragment(R.id.nav_book, true)
+        //setFragment(R.id.nav_book, true)
         var year = 2016
         try {
             var s = link
@@ -571,7 +571,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             year = s.toInt()
         } catch (ignored: Exception) {
         }
-        (curFragment as BookFragment?)?.setYear(year)
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        curFragment = BookFragment.newInstance(tab, year).also {
+            fragmentTransaction.replace(R.id.my_fragment, it)
+        }
     }
 
     fun startAnimMin() {

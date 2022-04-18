@@ -38,7 +38,7 @@ abstract class NeoViewModel : ViewModel() {
         }
     }
 
-    fun cancel() {
+    open fun cancel() {
         isRun = false
     }
 

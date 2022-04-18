@@ -13,11 +13,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="TabWidgetTheme" parent="AppTheme">
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/darker_gray</item>
-    </style>
-
     <style name="TabLayoutTheme">
         <item name="android:background">?attr/colorPrimary</item>
         <item name="tabIndicatorColor">@color/colorAccentLight</item>

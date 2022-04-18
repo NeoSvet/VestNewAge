@@ -23,3 +23,13 @@ data class SiteStrings(
     val back_title: String,
     val back_des: String
 )
+
+data class BookStrings(
+    val rnd_pos: String,
+    val rnd_kat: String,
+    val rnd_stih: String,
+    val alert_rnd: String,
+    val try_again: String,
+    val from: String,
+    val month_is_empty: String
+)

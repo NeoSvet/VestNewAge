@@ -22,11 +22,26 @@ data class SuccessCalendar(
     val date: String,
     val prev: Boolean,
     val next: Boolean,
-    val calendar: List<CalendarItem>
+    val list: List<CalendarItem>
+) : NeoState()
+
+data class SuccessBook(
+    val date: String,
+    val prev: Boolean,
+    val next: Boolean,
+    val list: List<ListItem>
 ) : NeoState()
 
 data class SuccessPage(
     val url: String,
     val timeInSeconds: Long,
     val isOtkr: Boolean = false
+) : NeoState()
+
+data class SuccessRnd(
+    val title: String,
+    val link: String,
+    val msg: String,
+    val place: String,
+    val par: Int
 ) : NeoState()
