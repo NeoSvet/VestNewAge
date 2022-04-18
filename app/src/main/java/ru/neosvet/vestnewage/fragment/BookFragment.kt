@@ -34,6 +34,7 @@ import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.LoaderHelper
+import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.model.BookModel
 import ru.neosvet.vestnewage.model.basic.*
@@ -356,6 +357,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         binding?.run {
             val tabHost = tablayout.getChildAt(0) as ViewGroup
             if (load) {
+                ProgressHelper.setBusy(true)
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
                 tvDate.isEnabled = false
@@ -365,6 +367,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                 fabRndMenu.isVisible = false
                 act.status.setLoad(true)
             } else {
+                ProgressHelper.setBusy(false)
                 tabHost.getChildAt(0).isEnabled = true
                 tabHost.getChildAt(1).isEnabled = true
                 tvDate.isEnabled = true
