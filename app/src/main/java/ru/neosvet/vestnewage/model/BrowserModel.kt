@@ -15,10 +15,7 @@ import ru.neosvet.vestnewage.helpers.BrowserHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.loader.StyleLoader
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessPage
+import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.BufferedWriter

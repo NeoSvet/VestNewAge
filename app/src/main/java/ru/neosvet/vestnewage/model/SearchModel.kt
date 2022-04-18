@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.helpers.SearchHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.SearchStrings
 import ru.neosvet.vestnewage.model.basic.SuccessList
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage

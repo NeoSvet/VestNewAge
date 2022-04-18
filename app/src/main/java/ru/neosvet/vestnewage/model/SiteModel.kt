@@ -11,10 +11,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.model.basic.CheckTime
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.model.basic.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader

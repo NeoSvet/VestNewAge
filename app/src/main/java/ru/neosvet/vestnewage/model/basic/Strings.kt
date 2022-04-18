@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.model.basic
 
 data class SearchStrings(
     val format_search_date: String,
