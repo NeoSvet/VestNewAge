@@ -228,13 +228,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
                 act.status.setProgress(state.percent)
             NeoState.Loading ->
                 setStatus(true)
-            is SuccessCalendar<*> -> binding?.run {
+            is SuccessCalendar -> binding?.run {
                 setStatus(false)
                 act.updateNew()
                 tvDate.text = state.date
                 ivPrev.isEnabled = state.prev
                 ivNext.isEnabled = state.next
-                adCalendar.setItems(state.list as List<CalendarItem>)
+                adCalendar.setItems(state.list)
             }
             is NeoState.Error -> {
                 setStatus(false)
