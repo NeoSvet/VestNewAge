@@ -184,7 +184,7 @@ public class LoaderWorker extends Worker {
                 cur++;
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.DIALOG, true)
-                        .putInt(Const.PROG, ProgressHelper.getProcent(cur, max))
+                        .putInt(Const.PROG, ProgressHelper.getPercent(cur, max))
                         .build());
             } else
                 ProgressHelper.upProg();

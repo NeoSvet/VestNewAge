@@ -70,7 +70,7 @@ class CalendarModel : NeoViewModel() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(ProgressState(ProgressHelper.getProcent(cur, max)))
+            mstate.postValue(ProgressState(ProgressHelper.getPercent(cur, max)))
         }
         loader.finish()
     }

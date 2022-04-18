@@ -197,7 +197,7 @@ class SearchModel : NeoViewModel() {
                 storage.delete(id[i])
             }
             cursor.close()
-            p2 = ProgressHelper.getProcent(i.toFloat(), title.size.toFloat())
+            p2 = ProgressHelper.getPercent(i.toFloat(), title.size.toFloat())
             if (p1 < p2) {
                 p1 = p2
                 mstate.postValue(MessageState(String.format(strings.format_search_proc, p1)))

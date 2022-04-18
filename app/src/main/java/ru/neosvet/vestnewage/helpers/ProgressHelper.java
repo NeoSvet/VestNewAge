@@ -26,7 +26,7 @@ public class ProgressHelper {
         cancel = true;
     }
 
-    public static int getProcent(float cur, float max) {
+    public static int getPercent(float cur, float max) {
         return (int) (cur / max * 100f);
     }
 
