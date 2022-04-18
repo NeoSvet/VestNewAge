@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -232,7 +231,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         adBook = ListAdapter(requireContext())
         lvBook.adapter = adBook
         lvBook.onItemClickListener =
-            OnItemClickListener { adapterView: AdapterView<*>?, view: View?, pos: Int, l: Long ->
+            OnItemClickListener { _, _, pos: Int, _ ->
                 if (notClick) return@OnItemClickListener
                 if (act.checkBusy()) return@OnItemClickListener
                 openReader(adBook.getItem(pos).link, null)
@@ -250,7 +249,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                 }
                 MotionEvent.ACTION_UP -> {
                     val x2 = event.getX(0).toInt()
-                    val r = Math.abs(x - x2)
+                    val r = abs(x - x2)
                     notClick = false
                     if (r > (30 * resources.displayMetrics.density).toInt() &&
                         r > abs(y - event.getY(0).toInt())
