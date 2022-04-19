@@ -49,6 +49,9 @@ import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.BaseModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
+import ru.neosvet.vestnewage.model.basic.NeoState;
+import ru.neosvet.vestnewage.model.basic.NeoViewModel;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 
 public class SettingsFragment extends NeoFragment {
@@ -532,5 +535,19 @@ public class SettingsFragment extends NeoFragment {
         if (uri == null) return;
         Ringtone ringTone = RingtoneManager.getRingtone(act, uri);
         dialog.putRingtone(ringTone.getTitle(act), uri.toString());
+    }
+
+    @NonNull
+    @Override
+    public NeoViewModel initViewModel() {
+        return new SummaryModel(); //заглушка
+    }
+
+    @Override
+    public void onChangedState(@NonNull NeoState state) {
+    }
+
+    @Override
+    public void onViewCreated(Bundle savedInstanceState) {
     }
 }

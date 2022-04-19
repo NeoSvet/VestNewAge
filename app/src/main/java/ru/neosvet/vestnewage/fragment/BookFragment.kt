@@ -7,16 +7,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.Data
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.Tip
@@ -33,14 +30,13 @@ import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.LoaderHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.model.BookModel
 import ru.neosvet.vestnewage.model.basic.*
 import java.util.*
 import kotlin.math.abs
 
-class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
+class BookFragment : NeoFragment(), DateDialog.Result {
     companion object {
         fun newInstance(tab: Int, year: Int): BookFragment {
             val fragment = BookFragment()
@@ -63,9 +59,8 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
     private var y = 0
     private lateinit var menuRnd: Tip
     private var binding: BookFragmentBinding? = null
-    private val model: BookModel by lazy {
-        ViewModelProvider(this).get(BookModel::class.java)
-    }
+    private val model: BookModel
+        get() = neomodel as BookModel
     private var dialog: String? = ""
     private var notClick = false
     private val helper: BookHelper
@@ -83,13 +78,15 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         binding = it
     }.root
 
+    override fun initViewModel(): NeoViewModel =
+        ViewModelProvider(this).get(BookModel::class.java)
+
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onViewCreated(savedInstanceState: Bundle?) {
         if (model.helper == null) {
             model.init(requireContext())
             arguments?.let {
@@ -98,17 +95,13 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                 if (year > 0) {
                     val d = DateHelper.initToday()
                     d.year = year
-                    dialog = DIALOG_DATE + d
                     showDatePicker(d)
                 }
             }
         }
         setViews()
         initTabs()
-        model.state.observe(act, this)
         restoreState(savedInstanceState)
-        if (model.isRun)
-            setStatus(true)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -123,7 +116,6 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
     private fun restoreState(state: Bundle?) {
         if (state != null && model.isRun.not()) {
             state.getString(Const.DIALOG)?.let {
-                dialog = it
                 if (it.contains(DIALOG_DATE)) {
                     if (it != DIALOG_DATE) {
                         val d = DateHelper.parse(it.substring(DIALOG_DATE.length))
@@ -131,6 +123,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                     } else
                         showDatePicker(model.date)
                 } else if (it.length > 1) {
+                    dialog = it
                     val m = it.split(Const.AND).toTypedArray()
                     showRndAlert(m[0], m[1], m[2], m[3], m[4].toInt())
                 }
@@ -143,7 +136,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         tablayout.addTab(tablayout.newTab().setText(R.string.katreny))
         tablayout.addTab(tablayout.newTab().setText(R.string.poslaniya))
         if (model.isKatrenTab)
-            act.title = getString(R.string.katreny)
+            act?.title = getString(R.string.katreny)
         else
             tablayout.select(model.selectedTab)
 
@@ -156,19 +149,15 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 model.cancel()
-                act.title = tab.text
+                act?.title = tab.text
                 model.selectedTab = tab.position
                 model.openList(true)
             }
         })
     }
 
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
-            is ProgressState ->
-                act.status.setProgress(state.percent)
-            NeoState.Loading ->
-                setStatus(true)
             is SuccessBook ->
                 setBook(state)
             is MessageState ->
@@ -178,24 +167,17 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                         Const.AND + place + Const.AND + par
                 showRndAlert(title, link, msg, place, par)
             }
-            is NeoState.Error -> {
-                setStatus(false)
-                act.status.setError(state.throwable.localizedMessage)
-            }
         }
     }
 
     private fun setBook(state: SuccessBook) = binding?.run {
         setStatus(false)
-        act.updateNew()
+        act?.updateNew()
         tvDate.text = state.date
         ivPrev.isEnabled = state.prev
         ivNext.isEnabled = state.next
         adBook.setItems(state.list)
         lvBook.smoothScrollToPosition(0)
-    }
-
-    override fun onChanged(data: Data) {
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -233,13 +215,13 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         lvBook.onItemClickListener =
             OnItemClickListener { _, _, pos: Int, _ ->
                 if (notClick) return@OnItemClickListener
-                if (act.checkBusy()) return@OnItemClickListener
+                if (model.isRun) return@OnItemClickListener
                 openReader(adBook.getItem(pos).link, null)
             }
         lvBook.setOnTouchListener { _, event: MotionEvent ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    if (!act.status.startMin()) {
+                    if (animMinFinished) {
                         fabRefresh.startAnimation(anMin)
                         fabRndMenu.startAnimation(anMin)
                         menuRnd.hide()
@@ -262,14 +244,14 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                             notClick = true
                         }
                     }
-                    if (!act.status.startMax()) {
+                    if (animMaxFinished) {
                         fabRefresh.isVisible = true
                         fabRefresh.startAnimation(anMax)
                         fabRndMenu.isVisible = true
                         fabRndMenu.startAnimation(anMax)
                     }
                 }
-                MotionEvent.ACTION_CANCEL -> if (!act.status.startMax()) {
+                MotionEvent.ACTION_CANCEL -> if (animMaxFinished) {
                     fabRefresh.isVisible = true
                     fabRefresh.startAnimation(anMax)
                     fabRndMenu.isVisible = true
@@ -280,35 +262,14 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         }
         ivPrev.setOnClickListener { openMonth(false) }
         ivNext.setOnClickListener { openMonth(true) }
-        act.status.setClick { onStatusClick(false) }
-        tvDate.setOnClickListener {
-            if (act.checkBusy()) return@setOnClickListener
-            dialog = DIALOG_DATE
-            showDatePicker(model.date)
-        }
+        tvDate.setOnClickListener { showDatePicker(model.date) }
         fabRndMenu.setOnClickListener {
             if (menuRnd.isShow) menuRnd.hide()
             else menuRnd.show()
         }
     }
 
-    override fun onStatusClick(reset: Boolean) {
-        model.cancel()
-        binding?.run {
-            fabRefresh.isVisible = true
-            fabRndMenu.isVisible = true
-        }
-        model.openList(false)
-        setStatus(false)
-        if (reset) {
-            act.status.setError(null)
-            return
-        }
-        if (!act.status.onClick() && act.status.isTime) startLoad()
-    }
-
     private fun openMonth(plus: Boolean) {
-        if (act.checkBusy()) return
         val d = model.date
         if (!plus && model.isKatrenTab.not()) {
             if (d.month == 1 && d.year == 2016 && helper.isLoadedOtkr().not()) {
@@ -332,7 +293,7 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
     }
 
     private fun showAlertDownloadOtkr() {
-        val builder = AlertDialog.Builder(act, R.style.NeoDialog)
+        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
         builder.setMessage(getString(R.string.alert_download_otkr))
         builder.setNegativeButton(
             getString(R.string.no)
@@ -346,17 +307,11 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
         builder.create().show()
     }
 
-    override fun startLoad() {
-        if (model.isRun) return
-        setStatus(true)
-        model.load()
-    }
-
     override fun setStatus(load: Boolean) {
+        super.setStatus(load)
         binding?.run {
             val tabHost = tablayout.getChildAt(0) as ViewGroup
             if (load) {
-                ProgressHelper.setBusy(true)
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
                 tvDate.isEnabled = false
@@ -364,21 +319,18 @@ class BookFragment : NeoFragment(), DateDialog.Result, Observer<NeoState> {
                 ivNext.isEnabled = false
                 fabRefresh.isVisible = false
                 fabRndMenu.isVisible = false
-                act.status.setLoad(true)
             } else {
-                ProgressHelper.setBusy(false)
                 tabHost.getChildAt(0).isEnabled = true
                 tabHost.getChildAt(1).isEnabled = true
                 tvDate.isEnabled = true
                 fabRefresh.isVisible = true
                 fabRndMenu.isVisible = true
-                if (act.status.isVisible)
-                    act.status.setLoad(false)
             }
         }
     }
 
     private fun showDatePicker(d: DateHelper) {
+        dialog = DIALOG_DATE + d
         dateDialog = DateDialog(act, d).apply {
             setResult(this@BookFragment)
             if (model.isKatrenTab) {

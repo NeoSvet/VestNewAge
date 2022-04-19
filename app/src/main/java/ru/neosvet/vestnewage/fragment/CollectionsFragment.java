@@ -41,6 +41,9 @@ import ru.neosvet.vestnewage.list.MarkAdapter;
 import ru.neosvet.vestnewage.list.MarkItem;
 import ru.neosvet.vestnewage.model.CollectionsModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
+import ru.neosvet.vestnewage.model.basic.NeoState;
+import ru.neosvet.vestnewage.model.basic.NeoViewModel;
 import ru.neosvet.vestnewage.storage.MarkersStorage;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
@@ -802,5 +805,19 @@ public class CollectionsFragment extends NeoFragment {
         ProgressHelper.setBusy(true);
         initRotate();
         model.start(isExport, data.getDataString());
+    }
+
+    @NonNull
+    @Override
+    public NeoViewModel initViewModel() {
+        return new SummaryModel(); //заглушка
+    }
+
+    @Override
+    public void onChangedState(@NonNull NeoState state) {
+    }
+
+    @Override
+    public void onViewCreated(Bundle savedInstanceState) {
     }
 }

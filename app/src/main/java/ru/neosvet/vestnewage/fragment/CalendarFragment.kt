@@ -8,10 +8,8 @@ import android.os.Message
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.work.Data
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.dialogs.DateDialog
 import ru.neosvet.utils.Const
@@ -20,21 +18,18 @@ import ru.neosvet.vestnewage.activity.BrowserActivity
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.CalendarAdapter
 import ru.neosvet.vestnewage.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.model.CalendarModel
 import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessCalendar
 import java.util.*
 
-class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
-    Observer<NeoState> {
-    private val model: CalendarModel by lazy {
-        ViewModelProvider(this).get(CalendarModel::class.java)
-    }
+class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
+    private val model: CalendarModel
+        get() = neomodel as CalendarModel
     private var binding: CalendarFragmentBinding? = null
     private val adCalendar: CalendarAdapter = CalendarAdapter(this)
     private var dateDialog: DateDialog? = null
@@ -44,7 +39,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     val hTimer = Handler { message: Message ->
         if (message.what == 0)
             binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
-        else act.startAnimMax()
+        else act?.startAnimMax()
         false
     }
 
@@ -56,28 +51,22 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
         binding = it
     }.root
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        act.title = getString(R.string.calendar)
+    override fun initViewModel(): NeoViewModel =
+        ViewModelProvider(this).get(CalendarModel::class.java)
+
+    override fun onViewCreated(savedInstanceState: Bundle?) {
+        act?.title = getString(R.string.calendar)
         setViews()
         initCalendar()
-        model.state.observe(act, this)
         restoreState(savedInstanceState)
-
         if (savedInstanceState == null && model.isNeedReload()) {
             startLoad()
         }
-//        else if (ProgressHelper.isBusy())
-//            setStatus(true)
     }
 
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
-    }
-
-    override fun onChanged(data: Data) {
-
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -97,21 +86,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     private fun setViews() = binding?.run {
         bProm.setOnClickListener { openLink("Posyl-na-Edinenie.html") }
         fabRefresh.setOnClickListener { startLoad() }
-        act.status.setClick { onStatusClick(false) }
-        act.fab = fabRefresh
-    }
-
-    override fun onStatusClick(reset: Boolean) {
-        if (model.isRun) {
-            model.cancel()
-            return
-        }
-        if (reset) {
-            act.status.setError(null)
-            return
-        }
-        if (!act.status.onClick() && act.status.isTime)
-            startLoad()
+        act?.fab = fabRefresh
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -121,9 +96,9 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
         rvCalendar.adapter = adCalendar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             rvCalendar.setOnTouchListener { _, event: MotionEvent ->
-                if (!act.isInMultiWindowMode) return@setOnTouchListener false
+                if (act?.isInMultiWindowMode == false) return@setOnTouchListener false
                 if (event.action == MotionEvent.ACTION_MOVE) {
-                    act.startAnimMin()
+                    if (animMinFinished) act?.startAnimMin()
                 }
                 if (event.action == MotionEvent.ACTION_UP) {
                     Timer().schedule(object : TimerTask() {
@@ -136,10 +111,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
             }
         ivPrev.setOnClickListener { openMonth(-1) }
         ivNext.setOnClickListener { openMonth(1) }
-        tvDate.setOnClickListener {
-            if (act.checkBusy()) return@setOnClickListener
-            showDatePicker()
-        }
+        tvDate.setOnClickListener { showDatePicker() }
     }
 
     private fun openLink(link: String) {
@@ -147,7 +119,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     }
 
     private fun openMonth(offset: Int) {
-        if (act.checkBusy()) return
         binding?.tvDate?.setBackgroundResource(R.drawable.selected)
         Timer().schedule(object : TimerTask() {
             override fun run() {
@@ -157,21 +128,17 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
         model.openCalendar(offset)
     }
 
-    override fun startLoad() {
-        model.load()
-    }
-
     override fun setStatus(load: Boolean) {
+        super.setStatus(load)
         binding?.run {
             if (load) {
-                ProgressHelper.setBusy(true)
+                tvDate.isEnabled = false
+                ivPrev.isEnabled = false
+                ivNext.isEnabled = false
                 fabRefresh.isVisible = false
-                act.status.setLoad(true)
-                act.status.loadText()
-            } else if (fabRefresh.isVisible.not()) {
-                ProgressHelper.setBusy(false)
+            } else {
+                tvDate.isEnabled = true
                 fabRefresh.isVisible = true
-                act.status.setLoad(false)
             }
         }
     }
@@ -197,7 +164,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
     }
 
     override fun onClick(view: View, item: CalendarItem) {
-        if (act.checkBusy()) return
+        if (model.isRun) return
         when (item.count) {
             1 -> {
                 openLink(item.getLink(0))
@@ -205,7 +172,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
             }
             0 -> return
         }
-        val pMenu = PopupMenu(act, view)
+        val pMenu = PopupMenu(requireContext(), view)
         for (i in 0 until item.count) {
             pMenu.menu.add(item.getTitle(i))
         }
@@ -222,24 +189,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker,
         pMenu.show()
     }
 
-    override fun onChanged(state: NeoState) {
-        when (state) {
-            is ProgressState ->
-                act.status.setProgress(state.percent)
-            NeoState.Loading ->
-                setStatus(true)
-            is SuccessCalendar -> binding?.run {
-                setStatus(false)
-                act.updateNew()
-                tvDate.text = state.date
-                ivPrev.isEnabled = state.prev
-                ivNext.isEnabled = state.next
-                adCalendar.setItems(state.list)
-            }
-            is NeoState.Error -> {
-                setStatus(false)
-                act.status.setError(state.throwable.localizedMessage)
-            }
+    override fun onChangedState(state: NeoState) {
+        if (state is SuccessCalendar) binding?.run {
+            setStatus(false)
+            act?.updateNew()
+            tvDate.text = state.date
+            ivPrev.isEnabled = state.prev
+            ivNext.isEnabled = state.next
+            adCalendar.setItems(state.list)
         }
     }
 }

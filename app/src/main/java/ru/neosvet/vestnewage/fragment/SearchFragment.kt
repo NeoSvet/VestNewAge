@@ -15,7 +15,6 @@ import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import ru.neosvet.ui.NeoFragment
@@ -37,9 +36,10 @@ import ru.neosvet.vestnewage.list.PageAdapter
 import ru.neosvet.vestnewage.model.SearchModel
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
 
-class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnTouchListener {
+class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     companion object {
         private const val SETTINGS = "s"
         private const val ADDITION = "a"
@@ -58,9 +58,8 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
         }
     }
 
-    private val model: SearchModel by lazy {
-        ViewModelProvider(this).get(SearchModel::class.java)
-    }
+    private val model: SearchModel
+        get() = neomodel as SearchModel
     private var binding: SearchFragmentBinding? = null
     private var binding2: SearchContentBinding? = null
     private var adPages: PageAdapter? = null
@@ -86,9 +85,11 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
         binding = it
     }.root
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        act.title = getString(R.string.search)
+    override fun initViewModel(): NeoViewModel =
+        ViewModelProvider(this).get(SearchModel::class.java)
+
+    override fun onViewCreated(savedInstanceState: Bundle?) {
+        act?.title = getString(R.string.search)
         if (model.helper == null) {
             model.helper = SearchHelper(requireContext())
             model.init(requireContext())
@@ -98,7 +99,6 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
         initSearchList()
         initSettings()
         restoreState(savedInstanceState)
-        model.state.observe(act, this)
     }
 
     override fun onBackPressed(): Boolean {
@@ -111,7 +111,7 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
 
     private fun initSearchList() = binding2?.run {
         lvResult.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
-            if (act.checkBusy()) return@OnItemClickListener
+            if (model.isRun) return@OnItemClickListener
             when (adResults.getItem(pos).link) {
                 LAST_RESULTS -> {
                     binding?.fabSettings?.isVisible = false
@@ -163,7 +163,7 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSearchBox() = binding2?.run {
-        adSearch = ArrayAdapter(act, R.layout.spinner_item, helper.getListRequests())
+        adSearch = ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
         etSearch.threshold = 1
         etSearch.setAdapter(adSearch)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
@@ -312,15 +312,16 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
     private fun initViews() = binding?.run {
         adResults = ListAdapter(requireContext())
         content.lvResult.adapter = adResults
-        val im = act.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-        softKeyboard = SoftKeyboard(content.root, im)
-        act.status.setClick { onStatusClick(false) }
+        act?.run {
+            val im = getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+            softKeyboard = SoftKeyboard(content.root, im)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSettings() = binding?.run {
         val adMode = ArrayAdapter(
-            act, R.layout.spinner_button,
+            requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode)
         )
         adMode.setDropDownViewResource(R.layout.spinner_item)
@@ -423,7 +424,7 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
             bShow.isVisible = false
             pAdditionSet.isVisible = false
             cbSearchInResults.isChecked = false
-            val builder = AlertDialog.Builder(act, R.style.NeoDialog)
+            val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
             builder.setMessage(getString(R.string.alert_search))
             builder.setPositiveButton(getString(android.R.string.ok))
             { dialog: DialogInterface, _ -> dialog.dismiss() }
@@ -467,17 +468,13 @@ class SearchFragment : NeoFragment(), Observer<NeoState>, DateDialog.Result, OnT
         return false
     }
 
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
             is MessageState ->
                 binding?.tvStatus?.text = state.message
             is SuccessList -> {
                 initPages(helper.countPages)
                 showResult(state.list)
-                setStatus(false)
-            }
-            is NeoState.Error -> {
-                act.status.setError(state.throwable.localizedMessage)
                 setStatus(false)
             }
         }

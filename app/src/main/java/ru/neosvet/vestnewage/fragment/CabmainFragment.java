@@ -33,6 +33,9 @@ import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.list.ListAdapter;
 import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.model.CabModel;
+import ru.neosvet.vestnewage.model.SummaryModel;
+import ru.neosvet.vestnewage.model.basic.NeoState;
+import ru.neosvet.vestnewage.model.basic.NeoViewModel;
 import ru.neosvet.vestnewage.workers.CabWorker;
 
 public class CabmainFragment extends NeoFragment {
@@ -64,10 +67,8 @@ public class CabmainFragment extends NeoFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (error != null) {
+        if (error != null)
             act.status.setError(error);
-            act.status.setClick(view -> onStatusClick(false));
-        }
     }
 
     @Override
@@ -411,5 +412,19 @@ public class CabmainFragment extends NeoFragment {
             adMain.addItem(new ListItem(getResources().getStringArray(R.array.cabinet_enter)[i]));
         }
         adMain.notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public NeoViewModel initViewModel() {
+        return new SummaryModel(); //заглушка
+    }
+
+    @Override
+    public void onChangedState(@NonNull NeoState state) {
+    }
+
+    @Override
+    public void onViewCreated(Bundle savedInstanceState) {
     }
 }

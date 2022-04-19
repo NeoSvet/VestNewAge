@@ -7,9 +7,7 @@ import android.widget.AbsListView
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.Data
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.select
@@ -20,16 +18,16 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.model.basic.CheckTime
 import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
 import kotlin.math.abs
 
-class SiteFragment : NeoFragment(), Observer<NeoState> {
+class SiteFragment : NeoFragment() {
     companion object {
         fun newInstance(tab: Int): SiteFragment {
             val fragment = SiteFragment()
@@ -40,9 +38,8 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         }
     }
 
-    private val model: SiteModel by lazy {
-        ViewModelProvider(this).get(SiteModel::class.java)
-    }
+    private val model: SiteModel
+        get() = neomodel as SiteModel
     private val adMain: ListAdapter by lazy {
         ListAdapter(requireContext())
     }
@@ -60,13 +57,14 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         binding = it
     }.root
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        act.fab = binding?.fabRefresh
+    override fun initViewModel(): NeoViewModel =
+        ViewModelProvider(this).get(SiteModel::class.java)
+
+    override fun onViewCreated(savedInstanceState: Bundle?) {
+        act?.fab = binding?.fabRefresh
         setViews()
         initTabs()
         restoreState(savedInstanceState)
-        model.state.observe(act, this)
     }
 
     override fun onDestroyView() {
@@ -87,22 +85,19 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
     }
 
     override fun setStatus(load: Boolean) {
-        if (load) {
-            ProgressHelper.setBusy(true)
-            act.status.setLoad(true)
-            binding?.fabRefresh?.isVisible = false
-        } else {
-            ProgressHelper.setBusy(false)
-            binding?.fabRefresh?.let {
-                if (it.isVisible.not()) {
-                    act.status.setLoad(false)
-                    it.isVisible = true
-                }
+        super.setStatus(load)
+        binding?.run {
+            val tabHost = tablayout.getChildAt(0) as ViewGroup
+            if (load) {
+                tabHost.getChildAt(0).isEnabled = false
+                tabHost.getChildAt(1).isEnabled = false
+                fabRefresh.isVisible = false
+            } else {
+                tabHost.getChildAt(0).isEnabled = true
+                tabHost.getChildAt(1).isEnabled = true
+                fabRefresh.isVisible = true
             }
         }
-    }
-
-    override fun onChanged(data: Data) {
     }
 
     private fun restoreState(state: Bundle?) {
@@ -137,7 +132,7 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                act.title = tab.text
+                act?.title = tab.text
                 model.selectedTab = tab.position
                 model.openList(true)
             }
@@ -149,7 +144,7 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         fabRefresh.setOnClickListener { startLoad() }
         lvMain.adapter = adMain
         lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
-            if (act.checkBusy()) return@OnItemClickListener
+            if (model.isRun) return@OnItemClickListener
             if (isAds(pos)) return@OnItemClickListener
             if (adMain.getItem(pos).count == 1) {
                 openSingleLink(adMain.getItem(pos).link)
@@ -160,7 +155,7 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         lvMain.setOnTouchListener { _, event: MotionEvent ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    if (!act.status.startMin()) act.startAnimMin()
+                    if (animMinFinished) act?.startAnimMin()
                     x = event.getX(0).toInt()
                     y = event.getY(0).toInt()
                 }
@@ -177,13 +172,13 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
                             if (t > 0) tablayout.select(t - 1)
                         }
                     }
-                    if (!act.status.startMax()) act.startAnimMax()
+                    if (animMaxFinished) act?.startAnimMax()
                 }
-                MotionEvent.ACTION_CANCEL -> if (!act.status.startMax()) act.startAnimMax()
+                MotionEvent.ACTION_CANCEL ->
+                    if (animMaxFinished) act?.startAnimMax()
             }
             false
         }
-        act.status.setClick { onStatusClick(false) }
         lvMain.setOnScrollListener(object : AbsListView.OnScrollListener {
             override fun onScrollStateChanged(absListView: AbsListView, scrollState: Int) {
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && scrollToFirst) {
@@ -201,23 +196,8 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         })
     }
 
-    override fun onStatusClick(reset: Boolean) {
-        binding?.fabRefresh?.isVisible = true
-        setStatus(false)
-        model.openList(false)
-        if (!act.status.isStop) {
-            act.status.setLoad(false)
-            return
-        }
-        if (reset) {
-            act.status.setError(null)
-            return
-        }
-        if (!act.status.onClick() && act.status.isTime) startLoad()
-    }
-
     private fun openMultiLink(links: ListItem, parent: View) {
-        val pMenu = PopupMenu(act, parent)
+        val pMenu = PopupMenu(requireContext(), parent)
         for (i in 1 until links.count) pMenu.menu.add(links.getHead(i))
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
             val title = item.title.toString()
@@ -236,11 +216,11 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         if (link == "#" || link == "@") return
         if (model.isSiteTab) {
             if (link.contains("rss")) {
-                act.setFragment(R.id.nav_rss, true)
+                act?.setFragment(R.id.nav_rss, true)
             } else if (link.contains("poems")) {
-                act.openBook(link, true)
+                act?.openBook(link, true)
             } else if (link.contains("tolkovaniya") || link.contains("2016")) {
-                act.openBook(link, false)
+                act?.openBook(link, false)
             } else if (link.contains("files") && !link.contains("http")) {
                 openPage(NeoClient.SITE + link)
             } else openPage(link)
@@ -290,14 +270,8 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
         }
     }
 
-    override fun startLoad() {
-        if (ProgressHelper.isBusy()) return
-        model.load()
-    }
-
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
-            NeoState.Loading -> setStatus(true)
             is SuccessList -> {
                 setStatus(false)
                 adMain.setItems(state.list)
@@ -318,11 +292,7 @@ class SiteFragment : NeoFragment(), Observer<NeoState> {
                 }
             }
             is CheckTime ->
-                binding?.fabRefresh?.isVisible = !act.status.checkTime(state.sec)
-            is NeoState.Error -> {
-                setStatus(false)
-                act.status.setError(state.throwable.localizedMessage)
-            }
+                binding?.fabRefresh?.isVisible = act?.status?.checkTime(state.sec) == false
         }
     }
 }
