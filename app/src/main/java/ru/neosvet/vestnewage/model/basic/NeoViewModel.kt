@@ -11,29 +11,33 @@ abstract class NeoViewModel : ViewModel() {
     protected val mstate = MutableLiveData<NeoState>()
     val state: LiveData<NeoState>
         get() = mstate
-    protected val scope = CoroutineScope(Dispatchers.IO
-            + CoroutineExceptionHandler { _, throwable ->
-        errorHandler(throwable)
-    })
+    protected var scope = initScope()
     protected var loadIfNeed = false
     var isRun: Boolean = false
         protected set
 
+    private fun initScope() = CoroutineScope(Dispatchers.IO
+            + CoroutineExceptionHandler { _, throwable ->
+        errorHandler(throwable)
+    })
+
     override fun onCleared() {
+        cancel()
         scope.cancel()
         onDestroy()
         super.onCleared()
     }
 
     private fun errorHandler(throwable: Throwable) {
+        throwable.printStackTrace()
+        scope = initScope()
         isRun = false
         if (loadIfNeed)
             load()
         else {
-            if (throwable is Exception) {
-                ErrorUtils.setData(getInputData())
+            ErrorUtils.setData(getInputData())
+            if (throwable is Exception)
                 ErrorUtils.setError(throwable)
-            }
             mstate.postValue(NeoState.Error(throwable))
         }
     }
