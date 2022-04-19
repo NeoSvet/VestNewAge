@@ -1,53 +1,91 @@
-package ru.neosvet.vestnewage.model;
+package ru.neosvet.vestnewage.model
 
-import android.app.Application;
+import android.content.Context
+import androidx.work.Data
+import kotlinx.coroutines.launch
+import ru.neosvet.utils.Const
+import ru.neosvet.utils.Lib
+import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.helpers.ProgressHelper
+import ru.neosvet.vestnewage.helpers.SummaryHelper
+import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.model.basic.SuccessList
+import java.io.BufferedReader
+import java.io.FileReader
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkContinuation;
-import androidx.work.WorkManager;
-
-import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.workers.LoaderWorker;
-import ru.neosvet.vestnewage.workers.SummaryWorker;
-
-public class SummaryModel extends AndroidViewModel {
-    public static final String TAG = "summary";
-
-    public SummaryModel(@NonNull Application application) {
-        super(application);
+class SummaryModel : NeoViewModel() {
+    companion object {
+        const val TAG = "summary"
     }
 
-    public void startLoad() {
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(false)
-                .build();
-        Data data = new Data.Builder()
-                .putString(Const.TASK, this.getClass().getSimpleName())
-                .build();
-        OneTimeWorkRequest task = new OneTimeWorkRequest
-                .Builder(SummaryWorker.class)
-                .setInputData(data)
-                .setConstraints(constraints)
-                .addTag(TAG)
-                .build();
-        WorkContinuation job = WorkManager.getInstance(getApplication())
-                .beginUniqueWork(TAG, ExistingWorkPolicy.REPLACE, task);
-        if (!LoaderModel.inProgress) {
-            task = new OneTimeWorkRequest
-                    .Builder(LoaderWorker.class)
-                    .setInputData(data)
-                    .setConstraints(constraints)
-                    .addTag(TAG)
-                    .build();
-            job = job.then(task);
+    private var sBack: String = ""
+
+    fun init(context: Context) {
+        sBack = context.getString(R.string.back)
+    }
+
+    override suspend fun doLoad() {
+        val loader = SummaryLoader()
+        loader.loadList(true)
+        val summaryHelper = SummaryHelper()
+        summaryHelper.updateBook()
+        val list = openList()
+        mstate.postValue(SuccessList(list))
+        loadPages(list)
+    }
+
+    private fun loadPages(pages: List<ListItem>) {
+        val max = pages.size.toFloat()
+        val loader = PageLoader(false)
+        var cur = 0f
+        pages.forEach { item ->
+            loader.download(item.link, false)
+            if (isRun.not())
+                return@forEach
+            cur++
+            mstate.postValue(ProgressState(ProgressHelper.getPercent(cur, max)))
         }
-        job.enqueue();
+        loader.finish()
+    }
+
+    override fun onDestroy() {
+    }
+
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, TAG)
+        .build()
+
+    fun openList(loadIfNeed: Boolean) {
+        this.loadIfNeed = loadIfNeed
+        scope.launch {
+            val list = openList()
+            mstate.postValue(SuccessList(list))
+        }
+    }
+
+    private fun openList(): List<ListItem> {
+        val list = mutableListOf<ListItem>()
+        val dateNow = DateHelper.initNow()
+        val br = BufferedReader(FileReader(Lib.getFile(Const.RSS)))
+        var title: String? = br.readLine()
+        var des: String
+        while (title != null) {
+            val link = br.readLine()
+            des = br.readLine()
+            val time = br.readLine()
+            des = dateNow.getDiffDate(time.toLong()) +
+                    sBack + Const.N + des
+            list.add(ListItem(title, link).apply {
+                setDes(des)
+            })
+            title = br.readLine()
+        }
+        br.close()
+        return list
     }
 }

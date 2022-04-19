@@ -1,14 +1,14 @@
 package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.utils.Const
+import ru.neosvet.utils.Lib
+import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.helpers.LoaderHelper
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.FileReader
-import java.io.FileWriter
+import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.helpers.UnreadHelper
+import java.io.*
 
-class SummaryLoader: ListLoader {
+class SummaryLoader : ListLoader {
     override fun getLinkList(): List<String> {
         val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
         val list = mutableListOf<String>()
@@ -20,5 +20,52 @@ class SummaryLoader: ListLoader {
         }
         br.close()
         return list
+    }
+
+    fun loadList(addUnread: Boolean) {
+        val stream: InputStream =
+            NeoClient.getStream(NeoClient.SITE + "rss/?" + System.currentTimeMillis())
+        val site = if (NeoClient.isMainSite())
+            NeoClient.SITE.substring(NeoClient.SITE.indexOf("/") + 2)
+        else
+            NeoClient.SITE2.substring(NeoClient.SITE2.indexOf("/") + 2)
+
+        val br = BufferedReader(InputStreamReader(stream), 1000)
+        val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
+        val now = DateHelper.initNow()
+        val unread: UnreadHelper? = if (addUnread) UnreadHelper() else null
+        val m = br.readLine().split("<item>").toTypedArray()
+        br.close()
+        stream.close()
+        var line: String
+        var a: Int
+        var b: Int
+        for (i in 1 until m.size) {
+            a = m[i].indexOf("</link")
+            line = withOutTag(m[i].substring(0, a))
+            if (line.contains(site)) line = line.substring(line.indexOf("info/") + 5)
+            if (line.contains("#0")) line = line.replace("#0", "#2")
+            b = m[i].indexOf("</title")
+            bw.write(withOutTag(m[i].substring(a + 10, b))) //title
+            bw.write(Const.N)
+            bw.write(withOutTag(line)) //link
+            bw.write(Const.N)
+            unread?.addLink(line, now)
+            a = m[i].indexOf("</des")
+            bw.write(withOutTag(m[i].substring(b + 10, a))) //des
+            bw.write(Const.N)
+            b = m[i].indexOf("</a10")
+            bw.write(
+                DateHelper.parse(withOutTag(m[i].substring(a + 15, b)))
+                    .timeInMills.toString() + Const.N
+            ) //time
+            bw.flush()
+        }
+        bw.close()
+        unread?.setBadge()
+    }
+
+    private fun withOutTag(s: String): String {
+        return s.substring(s.indexOf(">") + 1)
     }
 }
