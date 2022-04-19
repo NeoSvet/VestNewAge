@@ -63,8 +63,12 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private var binding: SearchFragmentBinding? = null
     private var binding2: SearchContentBinding? = null
     private var adPages: PageAdapter? = null
-    private lateinit var adSearch: ArrayAdapter<String>
-    private lateinit var adResults: ListAdapter
+    private val adSearch: ArrayAdapter<String> by lazy {
+        ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
+    }
+    private val adResults: ListAdapter by lazy {
+        ListAdapter(requireContext())
+    }
     private var anim: ResizeAnim? = null
     private var dialog = -1
     private var dateDialog: DateDialog? = null
@@ -163,7 +167,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSearchBox() = binding2?.run {
-        adSearch = ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
         etSearch.threshold = 1
         etSearch.setAdapter(adSearch)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
@@ -310,7 +313,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     }
 
     private fun initViews() = binding?.run {
-        adResults = ListAdapter(requireContext())
         content.lvResult.adapter = adResults
         act?.run {
             val im = getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager

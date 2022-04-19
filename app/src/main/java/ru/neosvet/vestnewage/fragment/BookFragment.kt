@@ -52,7 +52,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
-    private lateinit var adBook: ListAdapter
+    private val adBook: ListAdapter by lazy {
+        ListAdapter(requireContext())
+    }
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
     private var x = 0
@@ -210,7 +212,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize)
 
         fabRefresh.setOnClickListener { startLoad() }
-        adBook = ListAdapter(requireContext())
         lvBook.adapter = adBook
         lvBook.onItemClickListener =
             OnItemClickListener { _, _, pos: Int, _ ->

@@ -23,7 +23,9 @@ import ru.neosvet.vestnewage.model.basic.SuccessList
 
 class SummaryFragment : NeoFragment() {
     private var binding: SummaryFragmentBinding? = null
-    private lateinit var adSummary: ListAdapter
+    private val adSummary: ListAdapter by lazy {
+        ListAdapter(requireContext())
+    }
     private val model: SummaryModel
         get() = neomodel as SummaryModel
 
@@ -68,7 +70,6 @@ class SummaryFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        adSummary = ListAdapter(act)
         lvSummary.adapter = adSummary
         act?.fab = fabRefresh
         fabRefresh.setOnClickListener { startLoad() }
