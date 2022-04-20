@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var binding: MainActivityBinding? = null
     private lateinit var content: MainContentBinding
-    var menuType = MenuType.FLOAT
+    private var menuType = MenuType.FLOAT
     val isMenuMode: Boolean
         get() = menuType == MenuType.FULL
     var isBlinked = false
@@ -192,6 +192,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                 if (firstFragment != 0) setFragment(firstFragment, false)
                 if (frWelcome != null && !frWelcome!!.isAdded && isBlinked) showWelcome()
+                updateNew()
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -234,9 +235,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             curId = state.getInt(Const.CUR_ID)
             if (menuType == MenuType.SIDE)
                 setMenuFragment()
+            updateNew()
+            content.tvNew.clearAnimation()
         }
-        updateNew()
-        content.tvNew.clearAnimation()
     }
 
     override fun onPause() {
@@ -263,7 +264,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun updateNew() {
-        countNew = unread.count
+        val k = unread.count
+        if (countNew == k) return
+        countNew = k
         binding?.navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
         content.tvNew.text = countNew.toString()
         if (setNew())
@@ -472,7 +475,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun setNew(): Boolean {
         if (countNew > 0 && (curId == R.id.nav_new || curId == R.id.nav_rss ||
-                    curId == R.id.nav_site || curId == R.id.nav_calendar)) {
+                    curId == R.id.nav_site || curId == R.id.nav_calendar)
+        ) {
             content.tvNew.isVisible = true
             return true
         }
@@ -606,7 +610,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (timediff < 0) timediff *= -1
         }
         if (data.getBoolean(Const.ADS, false) || timediff > LIMIT_DIFF_SEC
-            || data.getBoolean( Const.PAGE,false)
+            || data.getBoolean(Const.PAGE, false)
         ) {
             frWelcome = WelcomeFragment().apply {
                 arguments = data
