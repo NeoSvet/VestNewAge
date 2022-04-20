@@ -88,7 +88,7 @@ class SiteFragment : NeoFragment() {
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
         binding?.run {
-            val tabHost = tablayout.getChildAt(0) as ViewGroup
+            val tabHost = act!!.tabLayout.getChildAt(0) as ViewGroup
             if (load) {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
@@ -112,18 +112,18 @@ class SiteFragment : NeoFragment() {
             }
             when (model.selectedTab) {
                 SiteModel.TAB_NEWS -> model.openList(true)
-                SiteModel.TAB_SITE -> binding?.tablayout?.select(model.selectedTab)
+                SiteModel.TAB_SITE -> act?.tabLayout?.select(model.selectedTab)
                 SiteModel.TAB_DEV -> model.openAds()
             }
         }
     }
 
-    private fun initTabs() = binding?.run {
-        tablayout.addTab(tablayout.newTab().setText(R.string.news))
-        tablayout.addTab(tablayout.newTab().setText(R.string.site))
+    private fun initTabs() = act?.run {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.news))
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.site))
         if (model.selectedTab == SiteModel.TAB_SITE)
-            tablayout.select(model.selectedTab)
-        tablayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            tabLayout.select(model.selectedTab)
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
                 if (model.isDevTab)
                     onTabSelected(tab)
@@ -165,12 +165,12 @@ class SiteFragment : NeoFragment() {
                     val r = abs(x - x2)
                     if (r > (30 * resources.displayMetrics.density).toInt() &&
                         r > abs(y - event.getY(0).toInt())
-                    ) {
-                        val t = tablayout.selectedTabPosition
+                    ) act?.run {
+                        val t = tabLayout.selectedTabPosition
                         if (x > x2) { // next
-                            if (t < 1) tablayout.select(t + 1)
+                            if (t < 1) tabLayout.select(t + 1)
                         } else if (x < x2) { // prev
-                            if (t > 0) tablayout.select(t - 1)
+                            if (t > 0) tabLayout.select(t - 1)
                         }
                     }
                     if (animMaxFinished) act?.startAnimMax()
@@ -234,7 +234,7 @@ class SiteFragment : NeoFragment() {
         binding?.run {
             if (model.isDevTab) {
                 if (pos == 0) { //back
-                    tablayout.select(SiteModel.TAB_NEWS)
+                    act?.tabLayout?.select(SiteModel.TAB_NEWS)
                     return true
                 }
                 if (ads == null) ads = DevadsHelper(act)

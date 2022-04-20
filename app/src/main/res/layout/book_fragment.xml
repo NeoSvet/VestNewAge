@@ -5,13 +5,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg">
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tablayout"
-        style="@style/TabLayoutTheme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <LinearLayout
         android:id="@+id/pDate"
         android:layout_width="match_parent"
@@ -19,7 +12,7 @@
         android:layout_gravity="center"
         android:layout_margin="10dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/tablayout">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/ivPrev"
@@ -52,6 +45,7 @@
         android:id="@+id/lvBook"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingTop="5dp"
         android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/pDate" />

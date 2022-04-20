@@ -131,18 +131,18 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 }
             }
         }
-        binding?.tablayout?.select(model.selectedTab)
+        act?.tabLayout?.select(model.selectedTab)
     }
 
-    private fun initTabs() = binding?.run {
-        tablayout.addTab(tablayout.newTab().setText(R.string.katreny))
-        tablayout.addTab(tablayout.newTab().setText(R.string.poslaniya))
+    private fun initTabs() = act?.run {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.katreny))
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.poslaniya))
         if (model.isKatrenTab)
             act?.title = getString(R.string.katreny)
         else
-            tablayout.select(model.selectedTab)
+            tabLayout.select(model.selectedTab)
 
-        tablayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
             }
 
@@ -311,7 +311,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
         binding?.run {
-            val tabHost = tablayout.getChildAt(0) as ViewGroup
+            val tabHost = act!!.tabLayout.getChildAt(0) as ViewGroup
             if (load) {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false

@@ -12,6 +12,7 @@ import androidx.core.view.allViews
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.Tip
 import ru.neosvet.utils.Const
 import ru.neosvet.vestnewage.R
@@ -35,6 +36,7 @@ class MainHelper(private val act: MainActivity) {
     var toolbar: Toolbar? = null
     lateinit var tvPromTime: TextView
     var drawer: DrawerLayout? = null
+    lateinit var tabLayout: TabLayout
 
     val unread = UnreadHelper()
     var countNew = 0
@@ -73,6 +75,7 @@ class MainHelper(private val act: MainActivity) {
         pDownload = act.findViewById(R.id.pDownload)
         toolbar = act.findViewById(R.id.toolbar)
         tvPromTime = act.findViewById(R.id.tvPromTime)
+        tabLayout = act.findViewById(R.id.tablayout)
         menuDownload = Tip(act, pDownload)
 
         val content = act.findViewById<View>(android.R.id.content).rootView as View

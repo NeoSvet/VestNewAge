@@ -20,6 +20,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.Data
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.MultiWindowSupport
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.StatusButton
@@ -69,8 +70,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     val newId: Int
         get() = helper.newId
 
+    val tabLayout: TabLayout
+        get() = helper.tabLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         helper = MainHelper(this)
         firstFragment = helper.getFirstFragment()
         if (isMenuMode)
@@ -78,6 +81,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         else
             setContentView(R.layout.main_activity)
         helper.initViews()
+        super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null)
             initStar()
@@ -120,6 +124,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun setFragment(fragment: NeoFragment) {
         curFragment = fragment
+        if (helper.tabLayout.isVisible)
+            tabLayout.removeAllTabs()
+        helper.tabLayout.isVisible = fragment is BookFragment || fragment is SiteFragment
     }
 
     private fun initProgress() {
