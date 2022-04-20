@@ -29,6 +29,14 @@ class SummaryFragment : NeoFragment() {
     private val model: SummaryModel
         get() = neomodel as SummaryModel
 
+    override fun initViewModel(): NeoViewModel =
+        ViewModelProvider(this).get(SummaryModel::class.java)
+
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,9 +44,6 @@ class SummaryFragment : NeoFragment() {
     ) = SummaryFragmentBinding.inflate(inflater, container, false).also {
         binding = it
     }.root
-
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SummaryModel::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         act?.title = getString(R.string.rss)
