@@ -8,6 +8,8 @@ sealed class NeoState {
     data class Error(val throwable: Throwable) : NeoState()
 }
 
+object Ready : NeoState()
+
 data class CheckTime(val sec: Long) : NeoState()
 
 data class ProgressState(val percent: Int) : NeoState()
