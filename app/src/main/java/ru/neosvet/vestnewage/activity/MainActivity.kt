@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.activity
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -17,7 +16,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.Data
@@ -25,13 +23,10 @@ import com.google.android.material.navigation.NavigationView
 import ru.neosvet.ui.MultiWindowSupport
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.StatusButton
-import ru.neosvet.ui.Tip
 import ru.neosvet.ui.dialogs.SetNotifDialog
 import ru.neosvet.utils.*
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.databinding.MainActivityBinding
-import ru.neosvet.vestnewage.databinding.MainContentBinding
 import ru.neosvet.vestnewage.fragment.*
 import ru.neosvet.vestnewage.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.helpers.*
@@ -42,8 +37,6 @@ import java.util.*
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
     Observer<Bundle>, ItemClicker {
     companion object {
-        var isFirst = false
-
         @JvmField
         var isCountInMenu = false
         private const val LIMIT_DIFF_SEC = 4
@@ -53,36 +46,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         MENU, PAGE, EXIT
     }
 
-    enum class MenuType {
-        FLOAT, SIDE, FULL
-    }
-
-    private var binding: MainActivityBinding? = null
-    private lateinit var content: MainContentBinding
-    private var menuType = MenuType.FLOAT
+    private lateinit var helper: MainHelper
     val isMenuMode: Boolean
-        get() = menuType == MenuType.FULL
+        get() = helper.menuType == MainHelper.MenuType.FULL
     var isBlinked = false
     private var firstFragment = Const.SCREEN_CALENDAR
-    private var frMenu: MenuFragment? = null
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
-    private lateinit var menuDownload: Tip
 
     @JvmField
     val status = StatusButton()
     private var prom: PromHelper? = null
-    private val pref: SharedPreferences by lazy {
-        getSharedPreferences(MainActivity::class.java.simpleName, MODE_PRIVATE)
-    }
-    private lateinit var unread: UnreadHelper
-    private var curId = 0
-    private var prevId = 0
     private var tab = 0
     private var statusBack = StatusBack.MENU
-    private var countNew = 0
-    private val drawer: DrawerLayout?
-        get() = binding?.drawerLayout as DrawerLayout?
 
     @JvmField
     var fab: View? = null
@@ -91,29 +67,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var anMax: Animation
 
     val newId: Int
-        get() = unread.getNewId(countNew)
+        get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initFirstFragment()
-        initContentView()
+        helper = MainHelper(this)
+        firstFragment = helper.getFirstFragment()
+        if (isMenuMode)
+            setContentView(R.layout.main_content)
+        else
+            setContentView(R.layout.main_activity)
+        helper.initViews()
+
         if (savedInstanceState == null)
             initStar()
         else
-            content.ivStar.isVisible = false
+            helper.ivStar.isVisible = false
         initSlash()
 
-        status.init(this, content.pStatus)
-        menuDownload = Tip(this, content.pDownload)
-        unread = UnreadHelper()
+        status.init(this, helper.pStatus)
         initInterface()
         initAnim()
         initProgress()
-        isCountInMenu = pref.getBoolean(Const.COUNT_IN_MENU, true)
+        isCountInMenu = helper.isCountInMenu
         if (isCountInMenu.not() || isMenuMode) {
-            prom = PromHelper(content.tvPromTime)
-        } else //it is not tablet and land
-            binding?.navView?.let {
+            prom = PromHelper(helper.tvPromTime)
+        } else //it is not land
+            helper.navView?.let {
                 prom = PromHelper(
                     it.getHeaderView(0).findViewById(R.id.tvPromTimeInMenu)
                 )
@@ -121,7 +101,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         restoreState(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
-            MultiWindowSupport.resizeFloatTextView(content.tvNew, true)
+            MultiWindowSupport.resizeFloatTextView(helper.tvNew, true)
         }
     }
 
@@ -135,34 +115,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             slash.checkAdapterNewVersion()
             SlashModel.addObserver(this, this)
             model.startLoad()
-        }
-    }
-
-    private fun initContentView() {
-        if (isMenuMode) {
-            content = MainContentBinding.inflate(layoutInflater)
-            setContentView(content.root)
-        } else {
-            binding = MainActivityBinding.inflate(layoutInflater).also {
-                content = MainContentBinding.bind(it.root.findViewById(R.id.content_main))
-                setContentView(it.root)
-            }
-        }
-    }
-
-    private fun initFirstFragment() {
-        val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-        val mode = resources.getInteger(R.integer.screen_mode)
-        val tablet = resources.getInteger(R.integer.screen_tablet_port)
-        firstFragment = when {
-            startScreen == Const.SCREEN_MENU && mode < tablet -> {
-                menuType = MenuType.FULL
-                R.id.menu_fragment
-            }
-            startScreen == Const.SCREEN_SUMMARY ->
-                R.id.nav_rss
-            else -> //startScreen == Const.SCREEN_CALENDAR || !isMenuMode ->
-                R.id.nav_calendar
         }
     }
 
@@ -184,20 +136,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         anStar.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                content.ivStar.isVisible = false
-                if (isFirst) {
+                helper.ivStar.isVisible = false
+                if (helper.isFirstRun) {
                     setFragment(R.id.nav_help, false)
-                    isFirst = true
                     return
                 }
-                if (firstFragment != 0) setFragment(firstFragment, false)
+                if (firstFragment != 0)
+                    setFragment(firstFragment, false)
                 if (frWelcome != null && !frWelcome!!.isAdded && isBlinked) showWelcome()
                 updateNew()
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
         })
-        content.ivStar.startAnimation(anStar)
+        helper.ivStar.startAnimation(anStar)
     }
 
     private fun initAnim() {
@@ -205,7 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         anMin.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                content.tvNew.isVisible = false
+                helper.tvNew.isVisible = false
                 fab?.isVisible = false
             }
 
@@ -218,25 +170,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (state == null) {
             val intent = intent
             tab = intent.getIntExtra(Const.TAB, tab)
-            if (pref.getBoolean(Const.FIRST, true)) {
-                val editor = pref.edit()
-                editor.putBoolean(Const.FIRST, false)
-                editor.apply()
+            if (helper.isFirstRun)
                 tab = -1
-                isFirst = true
-            } else {
-                val startNew = pref.getBoolean(Const.START_NEW, false)
-                firstFragment = if (startNew && countNew > 0)
-                    R.id.nav_new
-                else
-                    intent.getIntExtra(Const.CUR_ID, firstFragment)
+            else {
+                val id = intent.getIntExtra(Const.CUR_ID, 0)
+                firstFragment = if (id == 0)
+                    helper.getFirstFragment()
+                else id
             }
-        } else {
+        } else helper.run {
             curId = state.getInt(Const.CUR_ID)
-            if (menuType == MenuType.SIDE)
+            navView?.setCheckedItem(curId)
+            if (isSideMenu)
                 setMenuFragment()
             updateNew()
-            content.tvNew.clearAnimation()
+            tvNew.clearAnimation()
         }
     }
 
@@ -254,7 +202,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             MultiWindowSupport.resizeFloatTextView(
-                content.tvNew,
+                helper.tvNew,
                 isInMultiWindowMode
             )
     }
@@ -264,20 +212,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun updateNew() {
-        val k = unread.count
-        if (countNew == k) return
-        countNew = k
-        binding?.navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
-        content.tvNew.text = countNew.toString()
-        if (setNew())
-            content.tvNew.startAnimation(AnimationUtils.loadAnimation(this, R.anim.blink))
+        helper.updateNew()
     }
 
-    private fun initInterface() = content.run {
-        bDownloadAll.setOnClickListener {
-            menuDownload.hide()
-            LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_ALL, "")
-        }
+    private fun initInterface() = helper.run {
         bDownloadIt.setOnClickListener {
             menuDownload.hide()
             if (curId == R.id.nav_calendar) {
@@ -293,29 +231,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (!ProgressHelper.isBusy())
                 setFragment(R.id.nav_new, true)
         }
-        if (resources.getInteger(R.integer.screen_mode) !=
-            resources.getInteger(R.integer.screen_tablet_land)
-        ) {
-            setSupportActionBar(toolbar)
+        toolbar?.let {
+            setSupportActionBar(it)
             if (isMenuMode.not())
                 initDrawerMenu()
         }
     }
 
-    private fun initDrawerMenu() = binding?.run {
-        val toggle = ActionBarDrawerToggle(
-            this@MainActivity,
-            drawer,
-            content.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        drawer?.addDrawerListener(toggle)
-        toggle.syncState()
+    private fun initDrawerMenu() = helper.run {
+        drawer?.let { drawer ->
+            val toggle = ActionBarDrawerToggle(
+                this@MainActivity,
+                drawer,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+            )
+            drawer.addDrawerListener(toggle)
+            toggle.syncState()
+        }
 
         navView?.run {
             setNavigationItemSelectedListener(this@MainActivity)
-            setCheckedItem(curId)
             getHeaderView(0).setOnClickListener {
                 val url = NeoClient.SITE.substring(0, NeoClient.SITE.length - 1)
                 Lib.openInApps(url, null)
@@ -323,24 +260,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun setMenuFragment() {
-        if (frMenu == null) {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            frMenu = MenuFragment().also {
-                it.setSelect(curId)
-                fragmentTransaction.replace(R.id.menu_fragment, it).commit()
-            }
-        } else frMenu?.setSelect(curId)
-        frMenu?.setNew(newId)
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(Const.CUR_ID, curId)
+        outState.putInt(Const.CUR_ID, helper.curId)
         super.onSaveInstanceState(outState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        //getMenuInflater().inflate(R.menu.menu_table, menu);
         val miDownloadAll = menu.add(getString(R.string.download_title))
         miDownloadAll.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         miDownloadAll.setIcon(R.drawable.download_button)
@@ -348,44 +273,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        drawer?.closeDrawer(GravityCompat.START)
+        helper.drawer?.closeDrawer(GravityCompat.START)
         if (checkBusy()) return false
         if (!item.isChecked) setFragment(item.itemId, false)
         return true
     }
 
     fun setFrMenu(frMenu: MenuFragment) {
-        this.frMenu = frMenu
+        helper.frMenu = frMenu
         frMenu.setNew(newId)
     }
 
     @SuppressLint("NonConstantResourceId")
     fun setFragment(id: Int, savePrev: Boolean) {
         statusBack = StatusBack.PAGE
-        isFirst = false
-        menuDownload.hide()
-        prevId = if (savePrev) curId else 0
-        curId = id
-        when (menuType) {
-            MenuType.FLOAT -> binding?.navView?.setCheckedItem(id)
-            MenuType.SIDE -> setMenuFragment()
-            MenuType.FULL -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
+        helper.changeId(id, savePrev)
+        when (helper.menuType) {
+            MainHelper.MenuType.FLOAT -> helper.navView?.setCheckedItem(id)
+            MainHelper.MenuType.SIDE -> helper.setMenuFragment()
+            MainHelper.MenuType.FULL -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
         }
         status.setError(null)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
-        setNew()
+        helper.setNew()
         when (id) {
             R.id.menu_fragment -> {
                 statusBack = StatusBack.MENU
-                frMenu = MenuFragment().also {
+                helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
                 if (isCountInMenu) prom?.show()
             }
             R.id.nav_new -> {
                 fragmentTransaction.replace(R.id.my_fragment, NewFragment())
-                frMenu?.setSelect(R.id.nav_new)
+                helper.frMenu?.setSelect(R.id.nav_new)
             }
             R.id.nav_rss -> {
                 curFragment = SummaryFragment().also {
@@ -473,17 +395,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun setNew(): Boolean {
-        if (countNew > 0 && (curId == R.id.nav_new || curId == R.id.nav_rss ||
-                    curId == R.id.nav_site || curId == R.id.nav_calendar)
-        ) {
-            content.tvNew.isVisible = true
-            return true
-        }
-        content.tvNew.isVisible = false
-        return false
-    }
-
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (curFragment == null || resultCode != RESULT_OK) return
@@ -494,21 +405,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (drawer != null && drawer!!.isDrawerOpen(GravityCompat.START)) {
-            drawer!!.closeDrawer(GravityCompat.START)
-        } else if (isFirst) {
+        if (helper.drawer != null && helper.drawer!!.isDrawerOpen(GravityCompat.START)) {
+            helper.drawer!!.closeDrawer(GravityCompat.START)
+        } else if (helper.isFirstRun) {
             setFragment(firstFragment, false)
-        } else if (prevId != 0) {
+        } else if (helper.hasPrevId) {
             if (curFragment != null && !curFragment!!.onBackPressed()) return
-            if (prevId == R.id.nav_site) tab = SiteModel.TAB_SITE
-            setFragment(prevId, false)
+            if (helper.prevId == R.id.nav_site) tab = SiteModel.TAB_SITE
+            setFragment(helper.prevId, false)
         } else if (firstFragment == R.id.nav_new) {
-            val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-            firstFragment = when (startScreen) {
-                Const.SCREEN_MENU -> R.id.menu_fragment
-                Const.SCREEN_SUMMARY -> R.id.nav_rss
-                else -> R.id.nav_calendar
-            }
+            firstFragment = helper.getFirstFragment()
             setFragment(firstFragment, false)
         } else if (curFragment != null) {
             if (curFragment!!.onBackPressed()) exit()
@@ -538,31 +444,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return super.onOptionsItemSelected(item)
     }
 
-    @SuppressLint("NonConstantResourceId")
     fun showDownloadMenu() {
-        if (menuDownload.isShow)
-            menuDownload.hide()
-        else {
-            if (ProgressHelper.isBusy()) return
-            with(content.bDownloadIt) {
-                when (curId) {
-                    R.id.nav_site -> {
-                        isVisible = true
-                        text = getString(R.string.download_it_main)
-                    }
-                    R.id.nav_calendar -> {
-                        isVisible = true
-                        text = getString(R.string.download_it_calendar)
-                    }
-                    R.id.nav_book -> {
-                        isVisible = true
-                        text = getString(R.string.download_it_book)
-                    }
-                    else -> isVisible = false
-                }
-            }
-            menuDownload.show()
-        }
+        helper.showDownloadMenu()
     }
 
     fun openBook(link: String, katren: Boolean) {
@@ -583,12 +466,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun startAnimMin() {
         if (fab?.isVisible == false) return
-        if (countNew > 0) content.tvNew.startAnimation(anMin)
+        if (helper.countNew > 0) helper.tvNew.startAnimation(anMin)
         fab?.startAnimation(anMin)
     }
 
     fun startAnimMax() {
-        if (setNew()) content.tvNew.startAnimation(anMax)
+        if (helper.setNew()) helper.tvNew.startAnimation(anMax)
         fab?.isVisible = true
         fab?.startAnimation(anMax)
     }
