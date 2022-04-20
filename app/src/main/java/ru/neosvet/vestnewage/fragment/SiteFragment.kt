@@ -61,6 +61,7 @@ class SiteFragment : NeoFragment() {
         ViewModelProvider(this).get(SiteModel::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        act?.title = getString(R.string.news)
         act?.fab = binding?.fabRefresh
         setViews()
         initTabs()
