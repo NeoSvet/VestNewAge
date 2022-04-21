@@ -33,12 +33,16 @@ import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.fragment.*
 import ru.neosvet.vestnewage.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.helpers.*
+import ru.neosvet.vestnewage.model.MainModel
 import ru.neosvet.vestnewage.model.SiteModel
-import ru.neosvet.vestnewage.model.SlashModel
+import ru.neosvet.vestnewage.model.basic.AdsState
+import ru.neosvet.vestnewage.model.basic.NeoState
+import ru.neosvet.vestnewage.model.basic.SuccessList
 import java.util.*
+import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
-    Observer<Bundle>, ItemClicker {
+    Observer<NeoState>, ItemClicker {
     companion object {
         @JvmField
         var isCountInMenu = false
@@ -52,7 +56,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var helper: MainHelper
     val isMenuMode: Boolean
         get() = helper.menuType == MainHelper.MenuType.FULL
-    var isBlinked = false
     private var firstFragment = Const.SCREEN_CALENDAR
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
@@ -134,15 +137,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun initSlash() {
-        val model = ViewModelProvider(this).get(SlashModel::class.java)
+        val model = ViewModelProvider(this).get(MainModel::class.java)
+        model.init(this)
         slash = SlashUtils()
         if (slash.openLink(intent)) {
             tab = slash.intent.getIntExtra(Const.TAB, tab)
             firstFragment = slash.intent.getIntExtra(Const.CUR_ID, firstFragment)
         } else if (slash.isNeedLoad) {
             slash.checkAdapterNewVersion()
-            SlashModel.addObserver(this, this)
-            model.startLoad()
+            model.state.observe(this, this)
+            model.load()
         }
     }
 
@@ -170,7 +174,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         if (firstFragment != 0)
             setFragment(firstFragment, false)
-        if (frWelcome != null && !frWelcome!!.isAdded && isBlinked) showWelcome()
+        showWelcome()
         updateNew()
     }
 
@@ -472,7 +476,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun openBook(link: String, katren: Boolean) {
         tab = if (katren) 0 else 1
-        //setFragment(R.id.nav_book, true)
         var year = 2016
         try {
             var s = link
@@ -506,25 +509,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return false
     }
 
-    override fun onChanged(data: Bundle) {
-        SlashModel.inProgress = false
-        var timediff = 0
-        if (data.getBoolean(Const.TIME, false)) {
-            timediff = data.getInt(Const.TIMEDIFF, 0)
-            slash.reInitProm(timediff)
-            if (timediff < 0) timediff *= -1
-        }
-        if (data.getBoolean(Const.ADS, false) || timediff > LIMIT_DIFF_SEC
-            || data.getBoolean(Const.PAGE, false)
-        ) {
-            frWelcome = WelcomeFragment().apply {
-                arguments = data
-            }
-            val warn = data.getInt(Const.WARN, -1)
-            if (warn > -1) showWarnAds(warn) else isBlinked = true
-        }
-    }
-
     private fun showWelcome() {
         frWelcome?.show(supportFragmentManager, null)
     }
@@ -554,5 +538,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             tab = SiteModel.TAB_DEV
             setFragment(R.id.nav_site, true)
         } else openReader(link, null)
+    }
+
+    override fun onChanged(state: NeoState) {
+        when (state) {
+            is AdsState -> {
+                slash.reInitProm(state.timediff)
+                if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
+                    frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
+                if (state.warnIndex > -1)
+                    showWarnAds(state.warnIndex)
+            }
+            is SuccessList -> {
+                if (frWelcome == null)
+                    frWelcome = WelcomeFragment.newInstance(false, 0)
+                frWelcome?.pagesList = state.list
+            }
+            is NeoState.Error ->
+                status.setError(state.throwable.localizedMessage)
+        }
     }
 }

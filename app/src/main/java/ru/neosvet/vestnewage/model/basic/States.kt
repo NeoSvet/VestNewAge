@@ -47,3 +47,9 @@ data class SuccessRnd(
     val place: String,
     val par: Int
 ) : NeoState()
+
+data class AdsState(
+    val hasNew: Boolean,
+    val warnIndex: Int,
+    val timediff: Int
+) : NeoState()
