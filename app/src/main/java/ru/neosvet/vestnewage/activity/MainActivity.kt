@@ -137,13 +137,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun initSlash() {
-        val model = ViewModelProvider(this).get(MainModel::class.java)
-        model.init(this)
         splash = SplashUtils()
         if (splash.openLink(intent)) {
             tab = splash.intent.getIntExtra(Const.TAB, tab)
             firstFragment = splash.intent.getIntExtra(Const.CUR_ID, firstFragment)
         } else if (splash.isNeedLoad) {
+            val model = ViewModelProvider(this).get(MainModel::class.java)
+            model.init(this)
             splash.checkAdapterNewVersion()
             model.state.observe(this, this)
             model.load()
