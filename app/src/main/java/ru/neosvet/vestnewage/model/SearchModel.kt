@@ -32,6 +32,28 @@ class SearchModel : NeoViewModel() {
         const val MODE_RESULTS = 6
     }
 
+    private var isInit = false
+    private lateinit var strings: SearchStrings
+    private val storage = SearchStorage()
+    private val pages = PageStorage()
+    private var countMatches: Int = 0
+    private var countPages: Int = 0
+    lateinit var helper: SearchHelper
+        private set
+
+    fun init(context: Context) {
+        if (isInit) return
+        helper = SearchHelper(context)
+        strings = SearchStrings(
+            format_search_date = context.getString(R.string.format_search_date),
+            format_search_proc = context.getString(R.string.format_search_proc),
+            search_in_results = context.getString(R.string.search_in_results),
+            search_mode = context.resources.getStringArray(R.array.search_mode),
+            format_found = context.getString(R.string.format_found),
+        )
+        isInit = true
+    }
+
     override suspend fun doLoad() {
     }
 
@@ -42,38 +64,16 @@ class SearchModel : NeoViewModel() {
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, Const.SEARCH)
-        .putString(Const.STRING, request)
-        .putString(Const.START, helper?.start?.my)
-        .putString(Const.END, helper?.end?.my)
+        .putString(Const.STRING, helper.request)
+        .putString(Const.START, helper.start.my)
+        .putString(Const.END, helper.end.my)
         .build()
 
-    private lateinit var strings: SearchStrings
-    private val storage = SearchStorage()
-    private val pages = PageStorage()
-    private var countMatches: Int = 0
-    private var countPages: Int = 0
-    var helper: SearchHelper? = null
-    private var request: String
-        get() = helper!!.request
-        set(value) {
-            helper!!.request = value
-        }
-
-    fun init(context: Context) {
-        strings = SearchStrings(
-            format_search_date = context.getString(R.string.format_search_date),
-            format_search_proc = context.getString(R.string.format_search_proc),
-            search_in_results = context.getString(R.string.search_in_results),
-            search_mode = context.resources.getStringArray(R.array.search_mode),
-            format_found = context.getString(R.string.format_found),
-        )
-    }
-
     fun startSearch(request: String, mode: Int) {
-        this.request = request
+        helper.request = request
         scope.launch {
             isRun = true
-            helper?.run {
+            helper.run {
                 storage.reopen()
                 val step = if (start.timeInDays > end.timeInDays) -1 else 1
                 if (mode == MODE_RESULTS) {
@@ -101,7 +101,7 @@ class SearchModel : NeoViewModel() {
         }
     }
 
-    private fun initLabel(string: String) = helper?.run {
+    private fun initLabel(string: String) = helper.run {
         label = String.format(
             strings.format_found,
             string.substring(string.indexOf(" ") + 1),
@@ -123,19 +123,17 @@ class SearchModel : NeoViewModel() {
     }
 
     fun showResult(page: Int) {
-        helper?.page = page
+        helper.page = page
         val result = arrayListOf<ListItem>()
-        val desc = helper?.let {
-            it.start.timeInMills > it.end.timeInMills
-        } ?: false
+        val desc = helper.start.timeInMills > helper.end.timeInMills
         storage.reopen()
         val cursor = storage.getResults(desc)
         if (cursor.count == 0) {
-            helper?.countPages = 0
+            helper.countPages = 0
             mstate.postValue(SuccessList(result))
             cursor.close()
             storage.close()
-            helper?.deleteBase()
+            helper.deleteBase()
             return
         }
         val position = page * Const.MAX_ON_PAGE
@@ -154,7 +152,7 @@ class SearchModel : NeoViewModel() {
             result.add(item)
         } while (cursor.moveToNext() && result.size < Const.MAX_ON_PAGE)
         cursor.close()
-        helper?.countPages = max
+        helper.countPages = max
         mstate.postValue(SuccessList(result))
     }
 
@@ -181,16 +179,16 @@ class SearchModel : NeoViewModel() {
         countPages = 0
         for (i in title.indices) {
             pages.open(link[i])
-            val cursor = pages.searchParagraphs(link[i], request)
+            val cursor = pages.searchParagraphs(link[i], helper.request)
             if (cursor.moveToFirst()) {
                 val row = ContentValues()
                 row.put(Const.TITLE, title[i])
                 row.put(Const.LINK, link[i])
-                des = StringBuilder(getDes(cursor.getString(0), request))
+                des = StringBuilder(getDes(cursor.getString(0), helper.request))
                 countPages++
                 while (cursor.moveToNext()) {
                     des.append(Const.BR + Const.BR)
-                    des.append(getDes(cursor.getString(0), request))
+                    des.append(getDes(cursor.getString(0), helper.request))
                 }
                 row.put(Const.DESCTRIPTION, des.toString())
                 storage.update(id[i], row)
@@ -233,12 +231,12 @@ class SearchModel : NeoViewModel() {
                 name.substring(0, 2).toInt() * 50
         val cursor: Cursor = when (mode) {
             MODE_TITLES ->
-                pages.searchTitle(request)
+                pages.searchTitle(helper.request)
             MODE_LINKS ->
-                pages.searchLink(request)
+                pages.searchLink(helper.request)
             else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
                 //фильтрация по 0 и 1 будет позже
-                pages.searchParagraphs(request)
+                pages.searchParagraphs(helper.request)
             }
         }
         if (!cursor.moveToFirst()) {
@@ -255,7 +253,7 @@ class SearchModel : NeoViewModel() {
         do {
             if (id == cursor.getInt(iID) && add) {
                 des.append(Const.BR + Const.BR)
-                des.append(getDes(cursor.getString(iPar), request))
+                des.append(getDes(cursor.getString(iPar), helper.request))
             } else {
                 id = cursor.getInt(iID)
                 val curTitle = pages.getPageById(id)
@@ -282,7 +280,7 @@ class SearchModel : NeoViewModel() {
                         n++
                         countPages++
                         if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
-                            des.append(getDes(cursor.getString(iPar), request))
+                            des.append(getDes(cursor.getString(iPar), helper.request))
                     }
                 }
                 curTitle.close()

@@ -32,7 +32,7 @@ class SummaryFragment : NeoFragment() {
         get() = getString(R.string.rss)
 
     override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SummaryModel::class.java)
+        ViewModelProvider(this).get(SummaryModel::class.java).apply { init(requireContext()) }
 
     override fun onDestroyView() {
         binding = null
@@ -48,7 +48,6 @@ class SummaryFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        model.init(requireContext())
         setViews()
         restoreState(savedInstanceState)
     }

@@ -75,7 +75,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private lateinit var softKeyboard: SoftKeyboard
     private var scrollToFirst = false
     private val helper: SearchHelper
-        get() = model.helper!!
+        get() = model.helper
     val content: SearchContentBinding
         get() = binding2!!
     override val title: String
@@ -91,13 +91,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     }.root
 
     override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SearchModel::class.java)
+        ViewModelProvider(this).get(SearchModel::class.java).apply { init(requireContext()) }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (model.helper == null) {
-            model.helper = SearchHelper(requireContext())
-            model.init(requireContext())
-        }
         initViews()
         initSearchBox()
         initSearchList()

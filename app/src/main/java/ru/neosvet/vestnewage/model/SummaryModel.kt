@@ -26,7 +26,8 @@ class SummaryModel : NeoViewModel() {
     private var sBack: String = ""
 
     fun init(context: Context) {
-        sBack = context.getString(R.string.back)
+        if (sBack.isEmpty())
+            sBack = context.getString(R.string.back)
     }
 
     override suspend fun doLoad() {
