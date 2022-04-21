@@ -75,11 +75,16 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.BrowserActivity" />
+        <activity
+            android:name=".activity.BrowserActivity"
+            android:theme="@style/Theme.MainTheme" />
         <activity
             android:name=".activity.MarkerActivity"
-            android:label="@string/marker" />
-        <activity android:name=".activity.CabpageActivity" />
+            android:label="@string/marker"
+            android:theme="@style/Theme.MainTheme" />
+        <activity
+            android:name=".activity.CabpageActivity"
+            android:theme="@style/Theme.MainTheme" />
 
         <service
             android:name=".helpers.CheckHelper"
