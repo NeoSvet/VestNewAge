@@ -37,7 +37,6 @@ class SearchModel : NeoViewModel() {
     private val storage = SearchStorage()
     private val pages = PageStorage()
     private var countMatches: Int = 0
-    private var countPages: Int = 0
     lateinit var helper: SearchHelper
         private set
 
@@ -176,7 +175,7 @@ class SearchModel : NeoViewModel() {
         var p1 = -1
         var p2: Int
         countMatches = 0
-        countPages = 0
+        helper.countPages = 0
         for (i in title.indices) {
             pages.open(link[i])
             val cursor = pages.searchParagraphs(link[i], helper.request)
@@ -185,7 +184,7 @@ class SearchModel : NeoViewModel() {
                 row.put(Const.TITLE, title[i])
                 row.put(Const.LINK, link[i])
                 des = StringBuilder(getDes(cursor.getString(0), helper.request))
-                countPages++
+                helper.countPages++
                 while (cursor.moveToNext()) {
                     des.append(Const.BR + Const.BR)
                     des.append(getDes(cursor.getString(0), helper.request))
@@ -278,7 +277,7 @@ class SearchModel : NeoViewModel() {
                         row.put(Const.LINK, link)
                         row.put(DataBase.ID, n)
                         n++
-                        countPages++
+                        helper.countPages++
                         if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
                             des.append(getDes(cursor.getString(iPar), helper.request))
                     }
