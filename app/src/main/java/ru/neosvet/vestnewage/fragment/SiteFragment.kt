@@ -48,6 +48,8 @@ class SiteFragment : NeoFragment() {
     private var y = 0
     private var scrollToFirst = false
     private var binding: SiteFragmentBinding? = null
+    override val title: String
+        get() = getString(R.string.news)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,7 +63,6 @@ class SiteFragment : NeoFragment() {
         ViewModelProvider(this).get(SiteModel::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.title = getString(R.string.news)
         act?.fab = binding?.fabRefresh
         setViews()
         initTabs()
@@ -133,7 +134,6 @@ class SiteFragment : NeoFragment() {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                act?.title = tab.text
                 model.selectedTab = tab.position
                 model.openList(true)
             }

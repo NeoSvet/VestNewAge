@@ -28,6 +28,8 @@ class SummaryFragment : NeoFragment() {
     }
     private val model: SummaryModel
         get() = neomodel as SummaryModel
+    override val title: String
+        get() = getString(R.string.rss)
 
     override fun initViewModel(): NeoViewModel =
         ViewModelProvider(this).get(SummaryModel::class.java)
@@ -46,7 +48,6 @@ class SummaryFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.title = getString(R.string.rss)
         model.init(requireContext())
         setViews()
         restoreState(savedInstanceState)

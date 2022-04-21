@@ -26,6 +26,8 @@ class NewFragment : NeoFragment() {
     }
     private val model: NewModel
         get() = neomodel as NewModel
+    override val title: String
+        get() = getString(R.string.new_section)
 
     override fun initViewModel(): NeoViewModel =
         ViewModelProvider(this).get(NewModel::class.java).apply { init(requireActivity()) }
@@ -44,7 +46,6 @@ class NewFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.title = getString(R.string.new_section)
         initView()
     }
 

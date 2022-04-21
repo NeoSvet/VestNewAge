@@ -80,7 +80,6 @@ public class SettingsFragment extends NeoFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        act.setTitle(getString(R.string.settings));
         initViews(view);
         initSections(view);
         setViews();
@@ -549,5 +548,11 @@ public class SettingsFragment extends NeoFragment {
 
     @Override
     public void onViewCreated(Bundle savedInstanceState) {
+    }
+
+    @NonNull
+    @Override
+    public String getTitle() {
+        return getString(R.string.settings);
     }
 }

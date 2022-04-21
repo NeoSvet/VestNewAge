@@ -207,7 +207,6 @@ public class CabmainFragment extends NeoFragment {
     }
 
     private void initViews(View container) {
-        act.setTitle(getString(R.string.cabinet));
         pMain = container.findViewById(R.id.pMain);
         fabEnter = container.findViewById(R.id.fabEnter);
         fabExit = container.findViewById(R.id.fabExit);
@@ -426,5 +425,11 @@ public class CabmainFragment extends NeoFragment {
 
     @Override
     public void onViewCreated(Bundle savedInstanceState) {
+    }
+
+    @NonNull
+    @Override
+    public String getTitle() {
+        return getString(R.string.cabinet);
     }
 }

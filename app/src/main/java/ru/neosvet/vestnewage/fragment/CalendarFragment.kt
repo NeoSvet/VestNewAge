@@ -42,6 +42,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         else act?.startAnimMax()
         false
     }
+    override val title: String
+        get() = getString(R.string.calendar)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,7 +57,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         ViewModelProvider(this).get(CalendarModel::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.title = getString(R.string.calendar)
         setViews()
         initCalendar()
         restoreState(savedInstanceState)

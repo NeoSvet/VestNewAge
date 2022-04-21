@@ -76,9 +76,10 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private var scrollToFirst = false
     private val helper: SearchHelper
         get() = model.helper!!
-
     val content: SearchContentBinding
         get() = binding2!!
+    override val title: String
+        get() = getString(R.string.search)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -93,7 +94,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         ViewModelProvider(this).get(SearchModel::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.title = getString(R.string.search)
         if (model.helper == null) {
             model.helper = SearchHelper(requireContext())
             model.init(requireContext())

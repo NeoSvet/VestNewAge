@@ -19,6 +19,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
         initViewModel()
     }
 
+    abstract val title: String
+
     abstract fun initViewModel(): NeoViewModel
 
     abstract fun onViewCreated(savedInstanceState: Bundle?)
@@ -37,6 +39,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
         super.onAttach(context)
         act = activity as MainActivity
         act?.setFragment(this)
+        act?.title = title
     }
 
     override fun onDestroyView() {

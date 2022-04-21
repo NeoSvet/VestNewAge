@@ -820,4 +820,10 @@ public class CollectionsFragment extends NeoFragment {
     @Override
     public void onViewCreated(Bundle savedInstanceState) {
     }
+
+    @NonNull
+    @Override
+    public String getTitle() {
+        return getString(R.string.markers);
+    }
 }

@@ -71,6 +71,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
         false
     }
+    override val title: String
+        get() = getString(R.string.book)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -137,9 +139,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private fun initTabs() = act?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.katreny))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.poslaniya))
-        if (model.isKatrenTab)
-            act?.title = getString(R.string.katreny)
-        else
+        if (model.isKatrenTab.not())
             tabLayout.select(model.selectedTab)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -151,7 +151,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 model.cancel()
-                act?.title = tab.text
                 model.selectedTab = tab.position
                 model.openList(true)
             }
