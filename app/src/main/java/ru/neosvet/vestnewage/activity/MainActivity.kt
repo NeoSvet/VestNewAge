@@ -14,6 +14,8 @@ import android.view.animation.AnimationUtils
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -74,6 +76,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null)
+            launchSplashScreen()
+        else
+            setTheme(R.style.Theme_MainTheme)
         helper = MainHelper(this)
         firstFragment = helper.getFirstFragment()
         if (isMenuMode)
@@ -84,9 +90,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null)
-            initStar()
-        else
-            helper.ivStar.isVisible = false
+            helper.toolbar?.isVisible = false
         initSlash()
 
         status.init(this, helper.pStatus)
@@ -106,6 +110,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         restoreState(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
             MultiWindowSupport.resizeFloatTextView(helper.tvNew, true)
+        }
+    }
+
+    private fun launchSplashScreen() {
+        val splashScreen = installSplashScreen()
+        splashScreen.setOnExitAnimationListener { provider ->
+            provider.view.setBackgroundColor(
+                ContextCompat.getColor(this, android.R.color.transparent)
+            )
+            val anStar = AnimationUtils.loadAnimation(this, R.anim.flash)
+            anStar.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    provider.remove()
+                    finishFlashStar()
+                }
+
+                override fun onAnimationRepeat(animation: Animation) {}
+            })
+            provider.view.startAnimation(anStar)
         }
     }
 
@@ -138,25 +162,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (ProgressHelper.isBusy()) status.setLoad(true)
     }
 
-    private fun initStar() {
-        val anStar = AnimationUtils.loadAnimation(this, R.anim.flash)
-        anStar.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                helper.ivStar.isVisible = false
-                if (helper.isFirstRun) {
-                    setFragment(R.id.nav_help, false)
-                    return
-                }
-                if (firstFragment != 0)
-                    setFragment(firstFragment, false)
-                if (frWelcome != null && !frWelcome!!.isAdded && isBlinked) showWelcome()
-                updateNew()
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        helper.ivStar.startAnimation(anStar)
+    private fun finishFlashStar() {
+        helper.toolbar?.isVisible = true
+        if (helper.isFirstRun) {
+            setFragment(R.id.nav_help, false)
+            return
+        }
+        if (firstFragment != 0)
+            setFragment(firstFragment, false)
+        if (frWelcome != null && !frWelcome!!.isAdded && isBlinked) showWelcome()
+        updateNew()
     }
 
     private fun initAnim() {

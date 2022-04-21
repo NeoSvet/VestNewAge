@@ -125,12 +125,4 @@
             android:padding="15dp"
             android:src="@drawable/refresh" />
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/ivStar"
-        android:layout_width="256dp"
-        android:layout_height="match_parent"
-        android:src="@drawable/big_star"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

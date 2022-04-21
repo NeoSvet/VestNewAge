@@ -1,6 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
+    <style name="Theme.StartTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/big_star</item>
+        <item name="postSplashScreenTheme">@style/Theme.MainTheme</item>
+    </style>
     <style name="Theme.MainTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

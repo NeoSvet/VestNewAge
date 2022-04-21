@@ -133,11 +133,4 @@
         android:background="@drawable/field"
         android:padding="10dp"
         android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/ivStar"
-        android:layout_width="256dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:src="@drawable/big_star" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

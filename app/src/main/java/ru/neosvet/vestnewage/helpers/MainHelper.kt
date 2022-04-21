@@ -30,7 +30,6 @@ class MainHelper(private val act: MainActivity) {
     lateinit var bDownloadAll: TextView
     lateinit var bDownloadIt: TextView
     lateinit var tvNew: TextView
-    lateinit var ivStar: ImageView
     lateinit var pStatus: View
     lateinit var pDownload: View
     var toolbar: Toolbar? = null
@@ -70,7 +69,6 @@ class MainHelper(private val act: MainActivity) {
         bDownloadAll = act.findViewById(R.id.bDownloadAll)
         bDownloadIt = act.findViewById(R.id.bDownloadIt)
         tvNew = act.findViewById(R.id.tvNew)
-        ivStar = act.findViewById(R.id.ivStar)
         pStatus = act.findViewById(R.id.pStatus)
         pDownload = act.findViewById(R.id.pDownload)
         toolbar = act.findViewById(R.id.toolbar)
