@@ -3,7 +3,6 @@
     android:id="@+id/content_cabmain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/starsky_bg"
     android:orientation="horizontal"
     tools:context=".fragment.CabmainFragment"
     tools:showIn="@layout/cabmain_fragment">

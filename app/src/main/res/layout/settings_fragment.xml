@@ -3,7 +3,6 @@
     android:id="@+id/content_settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/starsky_bg"
     android:orientation="vertical">
 
     <ScrollView
