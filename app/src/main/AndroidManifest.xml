@@ -16,13 +16,12 @@
         android:label="@string/app_name"
         android:resizeableActivity="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.MainTheme"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -76,16 +75,11 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.BrowserActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".activity.BrowserActivity" />
         <activity
             android:name=".activity.MarkerActivity"
-            android:label="@string/marker"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".activity.CabpageActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/marker" />
+        <activity android:name=".activity.CabpageActivity" />
 
         <service
             android:name=".helpers.CheckHelper"
