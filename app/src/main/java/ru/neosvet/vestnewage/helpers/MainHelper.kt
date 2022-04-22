@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -197,5 +196,15 @@ class MainHelper(private val act: MainActivity) {
             }
             menuDownload.show()
         }
+    }
+
+    fun getYear(link: String): Int {
+        try {
+            var s = link
+            s = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."))
+            return s.toInt()
+        } catch (ignored: Exception) {
+        }
+        return 2016
     }
 }

@@ -215,8 +215,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onPause() {
-        super.onPause()
         prom?.stop()
+        super.onPause()
     }
 
     override fun onResume() {
@@ -431,21 +431,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (helper.drawer != null && helper.drawer!!.isDrawerOpen(GravityCompat.START)) {
+        if (helper.drawer?.isDrawerOpen(GravityCompat.START) == true) {
             helper.drawer!!.closeDrawer(GravityCompat.START)
         } else if (helper.isFirstRun) {
             setFragment(firstFragment, false)
         } else if (helper.hasPrevId) {
-            if (curFragment != null && !curFragment!!.onBackPressed()) return
+            if (canBack) return
             if (helper.prevId == R.id.nav_site) tab = SiteModel.TAB_SITE
             setFragment(helper.prevId, false)
         } else if (firstFragment == R.id.nav_new) {
             firstFragment = helper.getFirstFragment()
             setFragment(firstFragment, false)
-        } else if (curFragment != null) {
-            if (curFragment!!.onBackPressed()) exit()
-        } else exit()
+        } else if (canBack)
+            exit()
     }
+
+    private val canBack: Boolean
+        get() = curFragment?.onBackPressed() ?: true
 
     private fun exit() {
         if (statusBack == StatusBack.EXIT) {
@@ -476,13 +478,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun openBook(link: String, katren: Boolean) {
         tab = if (katren) 0 else 1
-        var year = 2016
-        try {
-            var s = link
-            s = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."))
-            year = s.toInt()
-        } catch (ignored: Exception) {
-        }
+        val year = helper.getYear(link)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = BookFragment.newInstance(tab, year).also {
             fragmentTransaction.replace(R.id.my_fragment, it)
