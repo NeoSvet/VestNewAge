@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_markers"
     android:layout_width="match_parent"
@@ -7,11 +8,10 @@
     android:orientation="vertical"
     tools:showIn="@layout/markers_fragment">
 
-    <ListView
-        android:id="@+id/lvMarker"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMarker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="30"
         android:paddingTop="5dp"
         android:paddingBottom="5dp" />
 
@@ -26,7 +26,8 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingBottom="5dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageButton
             android:id="@+id/bTop"
@@ -77,4 +78,4 @@
             android:scaleType="fitXY"
             android:src="@drawable/ok" />
     </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

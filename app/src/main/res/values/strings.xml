@@ -94,7 +94,7 @@
     <string name="dark_theme">Темное оформление</string>
     <string name="load_unavailable_t">Загрузка недоступна</string>
     <string name="load_unavailable_m">Потому что имеется активная загрузка в фоне (смотрите уведомления). Остановите её или дождитесь её завершения прежде, чем повторить попытку.</string>
-    <!--CollectionsFragment-->
+    <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
     <string name="send_file">Отправить файл?</string>
@@ -103,7 +103,7 @@
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
     <string name="nothing_edit">Редактировать нечего!</string>
-    <string name="empty_collections">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
+    <string name="no_markers">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
     <!--MarkerActivity-->
     <string name="marker">Закладка</string>
     <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>

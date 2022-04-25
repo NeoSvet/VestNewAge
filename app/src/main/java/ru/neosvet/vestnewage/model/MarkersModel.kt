@@ -12,12 +12,10 @@ import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.list.MarkItem
+import ru.neosvet.vestnewage.activity.BrowserActivity
+import ru.neosvet.vestnewage.list.MarkerItem
 import ru.neosvet.vestnewage.loader.PageLoader
-import ru.neosvet.vestnewage.model.basic.MarkerStrings
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.Ready
+import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.*
@@ -33,6 +31,7 @@ class MarkersModel : NeoViewModel() {
 
     private val storage = MarkersStorage()
     var iSel = -1
+        private set
     var change = false
     var diDelete = false
     private var sCol: String? = null
@@ -40,7 +39,7 @@ class MarkersModel : NeoViewModel() {
     private lateinit var strings: MarkerStrings
     var task: Type = Type.NONE
         private set
-    val list = mutableListOf<MarkItem>()
+    val list = mutableListOf<MarkerItem>()
     val title: String
         get() = if (sCol == null) strings.collections
         else sCol!!.substring(0, sCol!!.indexOf(Const.N))
@@ -49,8 +48,8 @@ class MarkersModel : NeoViewModel() {
     val isCollections: Boolean
         get() = sCol == null
     private var page: String? = null
-    val selectedItem: MarkItem
-        get() = list[iSel]
+    val selectedItem: MarkerItem?
+        get() = if (iSel == -1) null else list[iSel]
     private var isInit = false
 
     fun init(context: Context) {
@@ -136,7 +135,7 @@ class MarkersModel : NeoViewModel() {
         }
     }
 
-    fun loadPage(index: Int) {
+    private fun loadPage(index: Int) {
         page = list[index].data
         load()
     }
@@ -156,7 +155,13 @@ class MarkersModel : NeoViewModel() {
                 do {
                     s = cursor.getString(iMarkers) ?: ""
                     if (s.isEmpty()) isNull = true
-                    list.add(MarkItem(cursor.getString(iTitle), cursor.getInt(iID), s))
+                    list.add(
+                        MarkerItem(
+                            id = cursor.getInt(iID),
+                            title = cursor.getString(iTitle),
+                            data = s
+                        )
+                    )
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -164,11 +169,11 @@ class MarkersModel : NeoViewModel() {
                 list.clear()
                 iSel = -1
             }
-            mstate.postValue(Ready)
+            mstate.postValue(UpdateList(ListEvent.RELOAD))
         }
     }
 
-    fun loadMarList(iCol: Int = -1) {
+    private fun loadMarList(iCol: Int = -1) {
         task = Type.LIST
         if (iCol > -1)
             sCol = list[iCol].title + Const.N + list[iCol].data
@@ -195,7 +200,11 @@ class MarkersModel : NeoViewModel() {
                     iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
                     link = cursor.getString(iLink)
                     place = cursor.getString(iPlace)
-                    val item = MarkItem(getTitle(link), cursor.getInt(iID), link)
+                    val item = MarkerItem(
+                        id = cursor.getInt(iID),
+                        title = getTitle(link),
+                        data = link
+                    )
                     item.place = place
                     item.des =
                         cursor.getString(iDes) + Const.N + getPlace(link, place)
@@ -204,7 +213,7 @@ class MarkersModel : NeoViewModel() {
                 }
                 cursor.close()
             }
-            mstate.postValue(Ready)
+            mstate.postValue(UpdateList(ListEvent.RELOAD))
         }
     }
 
@@ -343,10 +352,11 @@ class MarkersModel : NeoViewModel() {
                 n = 0
                 storage.deleteMarker(id)
             }
-            list.removeAt(iSel)
+            val index = iSel
+            list.removeAt(index)
             if (list.size == n) iSel = -1
             else if (list.size == iSel) iSel--
-            mstate.postValue(Ready)
+            mstate.postValue(UpdateList(ListEvent.REMOTE, index))
         }
     }
 
@@ -372,6 +382,7 @@ class MarkersModel : NeoViewModel() {
         list.removeAt(n)
         list.add(iSel, item)
         iSel = n
+        mstate.postValue(UpdateList(ListEvent.MOVE, n + 1))
     }
 
     fun moveToBottom() {
@@ -384,7 +395,7 @@ class MarkersModel : NeoViewModel() {
         list.removeAt(n)
         list.add(iSel, item)
         iSel = n
-        mstate.postValue(Ready)
+        mstate.postValue(UpdateList(ListEvent.MOVE, n - 1))
     }
 
     fun renameSelected(name: String) {
@@ -409,7 +420,7 @@ class MarkersModel : NeoViewModel() {
         row.put(Const.TITLE, name)
         if (storage.updateCollection(list[iSel].id, row)) {
             list[iSel].title = name
-            mstate.postValue(Ready)
+            mstate.postValue(UpdateList(ListEvent.CHANGE))
         } else
             mstate.postValue(MessageState(strings.cancel_rename))
     }
@@ -465,7 +476,6 @@ class MarkersModel : NeoViewModel() {
         var nid: Int
         var cursor: Cursor
         var row: ContentValues
-
         //определение новых id для подборок
         val hC = HashMap<Int, Int>()
         var s: String? = br.readLine()
@@ -607,5 +617,28 @@ class MarkersModel : NeoViewModel() {
         }
         b.delete(b.length - 1, b.length)
         return b.toString()
+    }
+
+    fun selected(index: Int) {
+        iSel = index
+    }
+
+    private fun getPlace(index: Int): String? {
+        return if (list[index].place == "0") null
+        else list[index].des.let { d ->
+            d.substring(d.indexOf(Const.N, d.indexOf(Const.N) + 1) + 1)
+        }
+    }
+
+    fun onClick(index: Int) {
+        if (isRun) return
+        when {
+            isCollections ->
+                loadMarList(index)
+            list[index].title.contains("/") ->
+                loadPage(index)
+            else ->
+                BrowserActivity.openReader(list[index].data, getPlace(index))
+        }
     }
 }

@@ -20,6 +20,15 @@ data class SuccessList(
     val list: List<ListItem>
 ) : NeoState()
 
+enum class ListEvent {
+    REMOTE, CHANGE, MOVE, RELOAD
+}
+
+data class UpdateList(
+    val event: ListEvent,
+    val index: Int = -1
+) : NeoState()
+
 data class SuccessCalendar(
     val date: String,
     val prev: Boolean,

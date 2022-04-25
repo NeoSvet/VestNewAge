@@ -10,9 +10,12 @@
     <dimen name="margin_top">0dp</dimen>
     <integer name="top_minus">180</integer>
     <dimen name="calendar_button">70dp</dimen>
+    <integer name="screen_phone_port">0</integer>
+    <integer name="screen_phone_land">1</integer>
     <integer name="screen_tablet_port">2</integer>
     <integer name="screen_tablet_land">3</integer>
     <integer name="screen_mode">0</integer>
+    <integer name="tablet_7">0</integer>
     <dimen name="menu_width">260dp</dimen>
     <dimen name="calendar_margin_top">8dp</dimen>
     <dimen name="menu_fragment_top">0dp</dimen>

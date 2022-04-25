@@ -12,12 +12,12 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView.OnItemClickListener
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.Tip
 import ru.neosvet.ui.dialogs.CustomDialog
@@ -25,25 +25,20 @@ import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.MarkersContentBinding
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
-import ru.neosvet.vestnewage.list.MarkAdapter
-import ru.neosvet.vestnewage.list.MarkItem
+import ru.neosvet.vestnewage.list.MarkerAdapter
 import ru.neosvet.vestnewage.model.MarkersModel
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.Ready
+import ru.neosvet.vestnewage.model.basic.*
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
     private var binding2: MarkersContentBinding? = null
-    private val adMarker: MarkAdapter by lazy {
-        MarkAdapter(requireContext(), model)
+    private val adapter: MarkerAdapter by lazy {
+        MarkerAdapter(model)
     }
     private lateinit var menu: Tip
     private lateinit var anMin: Animation
@@ -107,7 +102,7 @@ class MarkersFragment : NeoFragment() {
             return
         }
         model.run {
-            adMarker.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
             if (iSel > -1) {
                 goToEdit()
                 if (diName != null) renameDialog(diName!!)
@@ -162,7 +157,7 @@ class MarkersFragment : NeoFragment() {
             if (model.isRun) return@setOnClickListener
             if (menu.isShow) menu.hide()
             else {
-                bExport.isVisible = adMarker.count > 0
+                bExport.isVisible = model.list.isNotEmpty()
                 menu.show()
             }
         }
@@ -172,34 +167,18 @@ class MarkersFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initContent() = binding2?.run {
-        lvMarker.adapter = adMarker
-        lvMarker.onItemClickListener =
-            OnItemClickListener { _, _, pos: Int, _ ->
-                if (act?.checkBusy() == true) return@OnItemClickListener
-                when {
-                    model.iSel > -1 -> {
-                        if (model.isCollections && pos == 0) return@OnItemClickListener // вне подборок
-                        adMarker.getItem(model.iSel).isSelect = false
-                        model.iSel = pos
-                        adMarker.getItem(pos).isSelect = true
-                        adMarker.notifyDataSetChanged()
-                    }
-                    model.isCollections -> {
-                        model.loadMarList(pos)
-                    }
-                    adMarker.getItem(pos).title.contains("/") -> {
-                        setStatus(true)
-                        model.loadPage(pos)
-                        return@OnItemClickListener
-                    }
-                    else -> {
-                        val p = getPlace(adMarker.getItem(pos))
-                        openReader(adMarker.getItem(pos).data, p)
-                    }
-                }
-            }
-        lvMarker.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (model.iSel > -1 || adMarker.count == 0) return@setOnTouchListener false
+        val span = when (resources.getInteger(R.integer.screen_mode)) {
+            resources.getInteger(R.integer.screen_phone_port) -> 1
+            resources.getInteger(R.integer.screen_phone_land) -> 2
+            resources.getInteger(R.integer.screen_tablet_land) ->
+                if (resources.getInteger(R.integer.tablet_7) == 1) 2 else 3
+            resources.getInteger(R.integer.screen_tablet_port) -> 2
+            else -> 1
+        }
+        rvMarker.layoutManager = GridLayoutManager(requireContext(), span)
+        rvMarker.adapter = adapter
+        rvMarker.setOnTouchListener { _, motionEvent: MotionEvent ->
+            if (model.iSel > -1 || model.list.size == 0) return@setOnTouchListener false
             binding?.run {
                 if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                     fabEdit.startAnimation(anMin)
@@ -223,35 +202,31 @@ class MarkersFragment : NeoFragment() {
         }
         bOk.setOnClickListener {
             model.saveChange()
-            adMarker.getItem(model.iSel).isSelect = false
-            adMarker.notifyDataSetChanged()
-            unSelect()
+            val index = model.iSel
+            unSelected()
+            adapter.notifyItemChanged(index)
         }
         bTop.setOnClickListener { model.moveToTop() }
         bBottom.setOnClickListener { model.moveToBottom() }
         bEdit.setOnClickListener {
-            if (model.isCollections) {
-                renameDialog(model.selectedItem.title)
-            } else {
-                val marker = Intent(requireContext(), MarkerActivity::class.java)
-                marker.putExtra(DataBase.ID, model.selectedItem.id)
-                marker.putExtra(Const.LINK, model.selectedItem.data)
-                markerResult.launch(marker)
+            model.selectedItem?.let { item ->
+                if (model.isCollections) {
+                    renameDialog(item.title)
+                } else {
+                    val marker = Intent(requireContext(), MarkerActivity::class.java)
+                    marker.putExtra(DataBase.ID, item.id)
+                    marker.putExtra(Const.LINK, item.data)
+                    markerResult.launch(marker)
+                }
             }
         }
         bDelete.setOnClickListener { deleteDialog() }
     }
 
-    private fun getPlace(item: MarkItem): String? {
-        return if (item.place == "0") null
-        else item.des.let { d ->
-            d.substring(d.indexOf(Const.N, d.indexOf(Const.N) + 1) + 1)
-        }
-    }
-
     override fun setStatus(load: Boolean) {
+        if (load)
+            binding?.fabBack?.isVisible = false
         if (model.task == MarkersModel.Type.PAGE) {
-            binding?.fabBack?.isVisible = load.not()
             super.setStatus(load)
         } else if (model.workOnFile) {
             if (load) {
@@ -265,12 +240,12 @@ class MarkersFragment : NeoFragment() {
         }
     }
 
-    private fun deleteDialog() {
+    private fun deleteDialog() = model.selectedItem?.title?.let { title ->
         model.diDelete = true
-        binding2?.lvMarker?.smoothScrollToPosition(model.iSel)
+        binding2?.rvMarker?.smoothScrollToPosition(model.iSel)
         val dialog = CustomDialog(act)
         dialog.setTitle(getString(R.string.delete) + "?")
-        dialog.setMessage(model.selectedItem.title)
+        dialog.setMessage(title)
         dialog.setLeftButton(getString(R.string.no)) { dialog.dismiss() }
         dialog.setRightButton(getString(R.string.yes)) {
             model.deleteSelected()
@@ -314,8 +289,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun goToEdit() {
-        adMarker.getItem(model.iSel).isSelect = true
-        adMarker.notifyDataSetChanged()
+        adapter.notifyItemChanged(model.iSel)
         binding?.run {
             fabEdit.isVisible = false
             fabBack.isVisible = false
@@ -324,13 +298,13 @@ class MarkersFragment : NeoFragment() {
         binding2?.pEdit?.isVisible = true
     }
 
-    private fun unSelect() = binding?.run {
+    private fun unSelected() = binding?.run {
         model.change = false
-        if (adMarker.count > 0) fabEdit.isVisible = true
+        if (model.list.isNotEmpty()) fabEdit.isVisible = true
         if (model.isCollections.not()) fabBack.isVisible = true
         else fabMenu.isVisible = true
         binding2?.pEdit?.isVisible = false
-        model.iSel = -1
+        model.selected(-1)
     }
 
     private fun selectFile(isExport: Boolean) {
@@ -370,14 +344,13 @@ class MarkersFragment : NeoFragment() {
                 doneExport(state.message)
             else
                 Lib.showToast(state.message)
-            Ready -> when (model.task) {
-                MarkersModel.Type.FILE -> { //import
-                    setStatus(false)
-                    model.loadColList()
-                    Lib.showToast(getString(R.string.completed))
-                }
-                else -> updateList()
+            is UpdateList -> updateList(state)
+            Ready -> {//import model.task==MarkersModel.Type.FILE
+                setStatus(false)
+                model.loadColList()
+                Lib.showToast(getString(R.string.completed))
             }
+
         }
     }
 
@@ -399,32 +372,44 @@ class MarkersFragment : NeoFragment() {
         builder.create().show()
     }
 
-    private fun updateList() = binding?.run {
+    @SuppressLint("NotifyDataSetChanged")
+    private fun updateList(state: UpdateList) = binding?.run {
         setStatus(false)
         binding?.run {
             fabEdit.clearAnimation()
             fabMenu.clearAnimation()
-            fabMenu.isVisible = model.isCollections
-            fabBack.isVisible = model.isCollections.not()
+            fabMenu.isVisible = model.isCollections && model.iSel == -1
+            fabBack.isVisible = model.isCollections.not() && model.iSel == -1
         }
         act?.title = title
         if (model.list.isEmpty()) {
+            adapter.notifyDataSetChanged()
             tvEmpty.text = if (model.isCollections)
-                getString(R.string.collection_is_empty)
+                getString(R.string.no_markers)
             else
-                getString(R.string.empty_collections)
+                getString(R.string.collection_is_empty)
             tvEmpty.isVisible = true
             fabEdit.isVisible = false
             binding2?.pEdit?.isVisible = false
-            unSelect()
+            unSelected()
         } else {
-            fabEdit.isVisible = true
+            when (state.event) {
+                ListEvent.REMOTE ->
+                    adapter.notifyItemRemoved(state.index)
+                ListEvent.CHANGE -> if (state.index > -1)
+                    adapter.notifyItemChanged(state.index)
+                ListEvent.MOVE ->
+                    adapter.notifyItemMoved(state.index, model.iSel)
+                ListEvent.RELOAD ->
+                    adapter.notifyDataSetChanged()
+            }
             tvEmpty.isVisible = false
-            adMarker.notifyDataSetChanged()
-            if (model.iSel == -1)
-                unSelect()
-            else
-                goToEdit()
+            if (model.iSel == -1) {
+                fabEdit.isVisible = true
+                unSelected()
+            } else
+                adapter.notifyItemChanged(model.iSel)
+            //goToEdit()
         }
     }
 }
