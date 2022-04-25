@@ -1,75 +1,43 @@
-package ru.neosvet.vestnewage.list;
+package ru.neosvet.vestnewage.list
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.TextView
+import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.model.MarkersModel
 
-import java.util.ArrayList;
-import java.util.List;
+class MarkAdapter(context: Context, private val model: MarkersModel) : BaseAdapter() {
+    private val inflater: LayoutInflater =
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private val data: List<MarkItem>
+        get() = model.list
 
-import ru.neosvet.vestnewage.R;
+    override fun getCount(): Int = data.size
 
-public class MarkAdapter extends BaseAdapter {
-    private final Context context;
-    private final LayoutInflater inflater;
-    private final List<MarkItem> data = new ArrayList<>();
+    override fun getItem(i: Int): MarkItem = data[i]
 
-    public MarkAdapter(Context context) {
-        this.context = context;
-        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
+    override fun getItemId(i: Int): Long = 0
 
-    public void insertItem(int pos, MarkItem item) {
-        data.add(pos, item);
-    }
-
-    public void addItem(MarkItem item) {
-        data.add(item);
-    }
-
-    @Override
-    public int getCount() {
-        return data.size();
-    }
-
-    @Override
-    public MarkItem getItem(int i) {
-        return data.get(i); //data == null ? null :
-    }
-
-    public void clear() {
-        data.clear();
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        TextView tv;
-        if (data.get(position).getDes().equals("")) {
-            convertView = inflater.inflate(R.layout.item_list, null);
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        var tv: TextView
+        val view: View
+        if (data[position].des.isEmpty()) {
+            view = inflater.inflate(R.layout.item_list, null)
         } else {
-            convertView = inflater.inflate(R.layout.item_detail, null);
-            tv = (TextView) convertView.findViewById(R.id.des_item);
-            tv.setText(data.get(position).getDes());
+            view = inflater.inflate(R.layout.item_detail, null)
+            tv = view.findViewById(R.id.des_item)
+            tv.text = data[position].des
         }
-        tv = (TextView) convertView.findViewById(R.id.text_item);
-        tv.setText(data.get(position).getTitle());
-        View item_bg = convertView.findViewById(R.id.item_bg);
-        if (data.get(position).isSelect())
-            item_bg.setBackgroundResource(R.drawable.select_item_bg);
+        tv = view.findViewById(R.id.text_item)
+        tv.text = data[position].title
+        val item_bg = view.findViewById<View>(R.id.item_bg)
+        if (data[position].isSelect)
+            item_bg.setBackgroundResource(R.drawable.select_item_bg)
         else
-            item_bg.setBackgroundResource(R.drawable.item_bg);
-        return convertView;
-    }
-
-    public void removeAt(int i) {
-        data.remove(i);
+            item_bg.setBackgroundResource(R.drawable.item_bg)
+        return view
     }
 }

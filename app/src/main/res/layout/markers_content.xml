@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_collections"
+    android:id="@+id/content_markers"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="ru.neosvet.vestnewage.fragment.CollectionsFragment"
-    tools:showIn="@layout/collections_fragment">
+    tools:showIn="@layout/markers_fragment">
 
     <ListView
         android:id="@+id/lvMarker"

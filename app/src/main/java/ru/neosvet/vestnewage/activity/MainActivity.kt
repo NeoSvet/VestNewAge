@@ -378,7 +378,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_journal ->
                 fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
             R.id.nav_marker -> {
-                curFragment = CollectionsFragment().also {
+                curFragment = MarkersFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }

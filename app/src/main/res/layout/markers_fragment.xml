@@ -4,12 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/include"
-        layout="@layout/collections_content" />
+    <include layout="@layout/markers_content" />
 
     <TextView
-        android:id="@+id/tvEmptyCollections"
+        android:id="@+id/tvEmpty"
         style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

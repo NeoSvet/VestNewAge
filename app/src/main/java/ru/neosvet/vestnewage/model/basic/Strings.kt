@@ -33,3 +33,16 @@ data class BookStrings(
     val from: String,
     val month_is_empty: String
 )
+
+data class MarkerStrings(
+    val collections: String,
+    val no_collections: String,
+    val sel_pos: String,
+    val sel_par: String,
+    val pos_n: String,
+    val par_n: String,
+    val page_entirely: String,
+    val not_load_page: String,
+    val unuse_dot: String,
+    val cancel_rename: String
+)
