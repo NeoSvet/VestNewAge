@@ -226,7 +226,8 @@ public class JournalFragment extends Fragment {
                 des = des.substring(des.indexOf("«"));
             } else
                 des = des.substring(des.indexOf("(") + 1, des.indexOf(")"));
-            MarkerActivity.addMarker(adJournal.getItem(pos).getLink(), par, des);
+            MarkerActivity.addMarker(requireContext(),
+                    adJournal.getItem(pos).getLink(), par, des);
             return true;
         });
         lvJournal.setOnScrollListener(new AbsListView.OnScrollListener() {

@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage.activity;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -56,8 +57,8 @@ public class MarkerActivity extends AppCompatActivity {
     private byte modeList = 0;
     private boolean posVisible = false;
 
-    public static void addMarker(String link, @Nullable String par, @Nullable final String des) {
-        Intent marker = new Intent(App.context, MarkerActivity.class);
+    public static void addMarker(Context context,String link, @Nullable String par, @Nullable final String des) {
+        Intent marker = new Intent(context, MarkerActivity.class);
         marker.putExtra(Const.LINK, link);
         if (par != null) {
             par = Lib.withOutTags(par);
@@ -90,7 +91,7 @@ public class MarkerActivity extends AppCompatActivity {
         }
         if (des != null)
             marker.putExtra(Const.DESCTRIPTION, des);
-        App.context.startActivity(marker);
+        context.startActivity(marker);
     }
 
     @Override

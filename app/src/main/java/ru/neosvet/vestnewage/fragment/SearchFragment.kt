@@ -140,6 +140,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             des = getString(R.string.search_for) +
                     des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)
             MarkerActivity.addMarker(
+                requireContext(),
                 adResults.getItem(pos).link,
                 adResults.getItem(pos).des, des
             )
@@ -148,8 +149,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         lvResult.setOnScrollListener(object : AbsListView.OnScrollListener {
             override fun onScrollStateChanged(absListView: AbsListView, scrollState: Int) {
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && scrollToFirst) {
-                    if (lvResult.firstVisiblePosition > 0) lvResult.smoothScrollToPosition(0) else scrollToFirst =
-                        false
+                    if (lvResult.firstVisiblePosition > 0)
+                        lvResult.smoothScrollToPosition(0)
+                    else scrollToFirst = false
                 }
             }
 
