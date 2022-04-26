@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     @JvmField
     var fab: View? = null
-    private lateinit var splash: SplashUtils
+    private lateinit var utils: LaunchUtils
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
 
@@ -137,14 +137,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun initSlash() {
-        splash = SplashUtils()
-        if (splash.openLink(intent)) {
-            tab = splash.intent.getIntExtra(Const.TAB, tab)
-            firstFragment = splash.intent.getIntExtra(Const.CUR_ID, firstFragment)
-        } else if (splash.isNeedLoad) {
+        utils = LaunchUtils()
+        if (utils.openLink(intent)) {
+            tab = utils.intent.getIntExtra(Const.TAB, tab)
+            firstFragment = utils.intent.getIntExtra(Const.CUR_ID, firstFragment)
+        } else if (utils.isNeedLoad) {
             val model = ViewModelProvider(this).get(MainModel::class.java)
             model.init(this)
-            splash.checkAdapterNewVersion()
+            utils.checkAdapterNewVersion()
             model.state.observe(this, this)
             model.load()
         }
@@ -364,10 +364,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             tab, intent.getIntExtra(Const.SEARCH, 1)
                         )
                     }
-                    splash.intent.hasExtra(Const.LINK) -> {
+                    utils.intent.hasExtra(Const.LINK) -> {
                         SearchFragment.newInstance(
-                            splash.intent.getStringExtra(Const.LINK),
-                            tab, splash.intent.getIntExtra(Const.SEARCH, 1)
+                            utils.intent.getStringExtra(Const.LINK),
+                            tab, utils.intent.getIntExtra(Const.SEARCH, 1)
                         )
                     }
                     else -> SearchFragment()
@@ -407,9 +407,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (intent.hasExtra(DataBase.ID)) {
             id = intent.getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY)
             intent.removeExtra(DataBase.ID)
-        } else if (splash.intent.hasExtra(DataBase.ID)) {
-            id = splash.intent.getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY)
-            splash.intent.removeExtra(DataBase.ID)
+        } else if (utils.intent.hasExtra(DataBase.ID)) {
+            id = utils.intent.getIntExtra(DataBase.ID, NotificationHelper.NOTIF_SUMMARY)
+            utils.intent.removeExtra(DataBase.ID)
         }
         if (id != 0) {
             val helper = NotificationHelper()
@@ -539,7 +539,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onChanged(state: NeoState) {
         when (state) {
             is AdsState -> {
-                splash.reInitProm(state.timediff)
+                utils.reInitProm(state.timediff)
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
                     frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1)

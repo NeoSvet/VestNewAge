@@ -22,7 +22,7 @@
     <!--AdsUtils-->
     <string name="back_title">Назад</string>
     <string name="back_des">К объявлениям сайта</string>
-    <!--SlashUtils-->
+    <!--LaunchUtils-->
     <string name="downloads_all_title">Скачайте все Катрены!</string>
     <string name="downloads_all_msg">Нажмите, чтобы скачать все материалы.</string>
     <string name="are_you_know">А вы знали?</string>
