@@ -22,15 +22,16 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
-            android:src="@drawable/left" />
+            android:src="@drawable/left"
+            android:contentDescription="@string/to_prev_month" />
 
         <TextView
             android:id="@+id/tvDate"
             style="@style/Label"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/card_bg"
             android:gravity="center"
@@ -41,7 +42,8 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
-            android:src="@drawable/right" />
+            android:src="@drawable/right"
+            android:contentDescription="@string/to_next_month" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -76,6 +78,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/refresh"
         app:srcCompat="@drawable/refresh" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

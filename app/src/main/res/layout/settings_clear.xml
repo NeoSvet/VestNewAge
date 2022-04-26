@@ -19,7 +19,8 @@
             android:id="@+id/imgClear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/free_storage"
             android:src="@drawable/plus" />
 
         <TextView
@@ -84,8 +85,8 @@
             android:layout_below="@id/cbCache"
             android:layout_margin="10dp"
             android:enabled="false"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:text="@string/delete" />
 
         <ImageView

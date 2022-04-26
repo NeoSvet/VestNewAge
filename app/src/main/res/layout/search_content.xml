@@ -13,9 +13,9 @@
         android:layout_marginBottom="3dp"
         android:background="@drawable/card_bg"
         android:orientation="horizontal"
-        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
         android:paddingTop="5dp"
-        android:paddingRight="10dp"
+        android:paddingEnd="10dp"
         android:paddingBottom="5dp">
 
         <ImageButton
@@ -23,7 +23,7 @@
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/button"
             android:padding="5dp"
             android:scaleType="fitXY"
@@ -49,7 +49,7 @@
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:background="@drawable/button"
             android:padding="5dp"
             android:scaleType="fitXY"
@@ -74,7 +74,7 @@
             android:layout_height="34dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/button"
             android:padding="5dp"
@@ -99,8 +99,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/bHide"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="5dp" />
     </RelativeLayout>
 

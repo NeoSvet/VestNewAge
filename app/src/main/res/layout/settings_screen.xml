@@ -19,7 +19,8 @@
             android:id="@+id/imgScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/start_screen"
             android:src="@drawable/plus" />
 
         <TextView

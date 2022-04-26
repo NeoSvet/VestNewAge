@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_cabmain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragment.CabmainFragment"
     tools:showIn="@layout/cabmain_fragment">
 
     <ScrollView
@@ -24,8 +24,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/card_bg"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:text="@string/cabinet_title" />
 
             <LinearLayout
@@ -40,9 +40,10 @@
                     style="@style/Label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:autofillHints="emailAddress"
                     android:background="@color/colorPrimary"
                     android:hint="@string/email"
                     android:imeOptions="actionNext"
@@ -56,6 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
+                    android:autofillHints="password"
                     android:background="@color/colorPrimary"
                     android:hint="@string/password"
                     android:imeOptions="actionGo"
@@ -68,7 +70,7 @@
                     style="@style/CheckBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
                     android:text="@string/remember_email" />
 
                 <CheckBox
@@ -76,7 +78,7 @@
                     style="@style/CheckBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
                     android:enabled="false"
                     android:text="@string/remember_password" />
             </LinearLayout>

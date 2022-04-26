@@ -18,6 +18,7 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
+            android:contentDescription="@string/to_prev_month"
             android:src="@drawable/left" />
 
         <TextView
@@ -25,8 +26,8 @@
             style="@style/Label"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/card_bg"
             android:gravity="center"
@@ -37,6 +38,7 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
+            android:contentDescription="@string/to_next_month"
             android:src="@drawable/right" />
     </LinearLayout>
 
@@ -107,6 +109,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/rnd_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/list" />
@@ -116,6 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/refresh" />

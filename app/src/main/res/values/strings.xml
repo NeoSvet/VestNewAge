@@ -61,6 +61,8 @@
     <!--CalendarFragment-->
     <string name="ad">Объявление</string>
     <string name="katren">Катрен</string>
+    <string name="to_prev_month">На предыдущий месяц</string>
+    <string name="to_next_month">На следующий месяц</string>
     <!--DevAds-->
     <string name="new_dev_ads">Новые объявления от разработчика</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
@@ -75,6 +77,7 @@
     <string name="katreny">Катрены</string>
     <string name="month_is_empty">Список за этот месяц пуст!</string>
     <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,58 МБ.\nНа устройстве потребуется 18 МБ памяти.</string>
+    <string name="rnd_menu">Меню «случайных»</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
@@ -83,6 +86,11 @@
     <string name="open">Открыть</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
+    <string name="to_top">Наверх</string>
+    <string name="to_bottom">Вниз</string>
+    <string name="close">Закрыть</string>
+    <string name="to_prev_result">К предыдущему результату</string>
+    <string name="to_next_result">К следующему результату</string>
     <string name="tip_end_list">Достигнут конец списка</string>
     <string name="share">Поделиться</string>
     <string name="in_markers">В закладки</string>
@@ -97,6 +105,7 @@
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
+    <string name="edit">Редактировать</string>
     <string name="send_file">Отправить файл?</string>
     <string name="not_load_page">Страница не загружена</string>
     <string name="collections">Подборки</string>
@@ -136,6 +145,8 @@
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <string name="enter">Войти</string>
+    <string name="exit">Выйти</string>
     <!--Страница-->
     <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
@@ -186,6 +197,7 @@
     <!--JournalFragment-->
     <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
     <string name="finish_list">Список закончился</string>
+    <string name="clear">Очистить</string>
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
     <string name="prom">Посыл</string>

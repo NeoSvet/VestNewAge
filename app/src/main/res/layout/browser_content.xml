@@ -21,8 +21,9 @@
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/button"
+            android:contentDescription="@string/close"
             android:padding="5dp"
             android:scaleType="fitXY"
             android:src="@drawable/close" />
@@ -30,10 +31,10 @@
         <EditText
             android:id="@+id/etSearch"
             style="@style/Label"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/field_trans"
             android:hint="@string/string_for_search"
@@ -47,8 +48,9 @@
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/button"
+            android:contentDescription="@string/to_prev_result"
             android:padding="5dp"
             android:scaleType="fitXY"
             android:src="@drawable/left2" />
@@ -59,6 +61,7 @@
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
             android:background="@drawable/button"
+            android:contentDescription="@string/to_next_result"
             android:padding="5dp"
             android:scaleType="fitXY"
             android:src="@drawable/right2" />

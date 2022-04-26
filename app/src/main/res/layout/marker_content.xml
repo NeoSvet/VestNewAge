@@ -1,117 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_marker"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="false"
     android:orientation="vertical"
     android:paddingTop="?attr/actionBarSize"
-    tools:context="ru.neosvet.vestnewage.activity.MarkerActivity"
     tools:showIn="@layout/marker_activity">
 
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/content_marker"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fadeScrollbars="false">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/card_bg"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+
+        <RadioGroup
+            style="@style/ItemBG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rPar"
+                style="@style/CheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/paragraph" />
+
+            <RadioButton
+                android:id="@+id/rPos"
+                style="@style/CheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/position" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/tvSel"
+            style="@style/ItemBG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:padding="10dp" />
+
+        <LinearLayout
+            style="@style/ItemBG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/card_bg"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvTitle"
-                style="@style/ItemBG"
+            <EditText
+                android:id="@+id/etDes"
+                style="@style/Label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/card_bg"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" />
-
-            <RadioGroup
-                style="@style/ItemBG"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_bg"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rPar"
-                    style="@style/CheckBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/paragraph" />
-
-                <RadioButton
-                    android:id="@+id/rPos"
-                    style="@style/CheckBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/position" />
-            </RadioGroup>
-
-            <TextView
-                android:id="@+id/tvSel"
-                style="@style/ItemBG"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_bg"
-                android:padding="10dp" />
-
-            <LinearLayout
-                style="@style/ItemBG"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/card_bg"
-                android:orientation="vertical">
-
-                <EditText
-                    android:id="@+id/etDes"
-                    style="@style/Label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@color/colorPrimary"
-                    android:hint="@string/desctription"
-                    android:imeOptions="actionDone"
-                    android:inputType="text"
-                    android:padding="5dp"
-                    android:textColorHint="@color/light_gray" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/ItemBG"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/card_bg"
-                android:orientation="vertical">
-
-                <EditText
-                    android:id="@+id/etCol"
-                    style="@style/Label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@color/colorPrimary"
-                    android:hint="@string/add_col"
-                    android:imeOptions="actionGo"
-                    android:inputType="text"
-                    android:padding="5dp"
-                    android:textColorHint="@color/light_gray" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvCol"
-                style="@style/ItemBG"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_bg"
-                android:padding="10dp" />
+                android:autofillHints="no"
+                android:background="@color/colorPrimary"
+                android:hint="@string/desctription"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:padding="5dp"
+                android:textColorHint="@color/light_gray" />
 
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+
+        <LinearLayout
+            style="@style/ItemBG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/etCol"
+                style="@style/Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:autofillHints="no"
+                android:background="@color/colorPrimary"
+                android:hint="@string/add_col"
+                android:imeOptions="actionGo"
+                android:inputType="text"
+                android:padding="5dp"
+                android:textColorHint="@color/light_gray" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvCol"
+            style="@style/ItemBG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:padding="10dp" />
+
+    </LinearLayout>
+</ScrollView>

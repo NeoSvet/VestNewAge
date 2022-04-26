@@ -20,7 +20,12 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/cabpage_content" />
+    <WebView
+        android:id="@+id/wvBrowser"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="?attr/actionBarSize"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/pStatus"
@@ -38,8 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:gravity="center_vertical"
-            android:paddingLeft="30dp"
-            android:paddingRight="10dp"
+            android:paddingStart="30dp"
+            android:paddingEnd="10dp"
             android:text="@string/load"
             android:textSize="20sp" />
 
@@ -47,6 +52,7 @@
             android:id="@+id/ivStatus"
             android:layout_width="56dp"
             android:layout_height="56dp"
+            android:contentDescription="@string/load"
             android:padding="15dp"
             android:src="@drawable/refresh" />
     </LinearLayout>
@@ -57,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/close"
         android:visibility="gone"
         app:srcCompat="@drawable/close" />
 
