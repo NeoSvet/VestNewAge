@@ -17,6 +17,7 @@ import ru.neosvet.utils.Const
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.fragment.MenuFragment
+import ru.neosvet.vestnewage.service.LoaderService
 
 class MainHelper(private val act: MainActivity) {
     enum class MenuType {
@@ -85,7 +86,8 @@ class MainHelper(private val act: MainActivity) {
 
         bDownloadAll.setOnClickListener {
             menuDownload.hide()
-            LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_ALL, "")
+            LoaderService.postCommand(
+                LoaderService.DOWNLOAD_ALL, "")
         }
     }
 

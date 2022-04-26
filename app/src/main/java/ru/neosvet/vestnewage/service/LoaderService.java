@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.helpers;
+package ru.neosvet.vestnewage.service;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -19,14 +19,16 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
-import java.io.File;
-
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.ListsHelper;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
+import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.model.BookModel;
 import ru.neosvet.vestnewage.model.CalendarModel;
 import ru.neosvet.vestnewage.model.LoaderModel;
@@ -42,8 +44,8 @@ import ru.neosvet.vestnewage.workers.SummaryWorker;
  * Created by NeoSvet on 19.11.2019.
  */
 
-public class LoaderHelper extends LifecycleService {
-    public static final String TAG = "LoaderHelper";
+public class LoaderService extends LifecycleService {
+    public static final String TAG = "LoaderService";
     public static final int notif_id = 777;
     private NotificationCompat.Builder notif;
     private NotificationManager manager;
@@ -65,7 +67,7 @@ public class LoaderHelper extends LifecycleService {
     }
 
     public static void postCommand(int mode, String request) {
-        Intent intent = new Intent(App.context, LoaderHelper.class);
+        Intent intent = new Intent(App.context, LoaderService.class);
         intent.putExtra(Const.DIALOG, App.context instanceof Activity);
         intent.putExtra(Const.MODE, mode);
         if (mode == STOP_WITH_NOTIF || mode == STOP) {
@@ -160,7 +162,7 @@ public class LoaderHelper extends LifecycleService {
         NotificationHelper notifHelper = new NotificationHelper();
         Intent main = new Intent(this, MainActivity.class);
         PendingIntent piMain = PendingIntent.getActivity(this, 0, main, FLAGS);
-        Intent iStop = new Intent(this, LoaderHelper.class);
+        Intent iStop = new Intent(this, LoaderService.class);
         iStop.putExtra(Const.FINISH, true);
         iStop.putExtra(Const.MODE, STOP);
         PendingIntent piStop = PendingIntent.getService(this, 0, iStop, FLAGS);

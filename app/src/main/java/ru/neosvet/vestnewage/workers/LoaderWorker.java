@@ -15,9 +15,9 @@ import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.helpers.CheckHelper;
+import ru.neosvet.vestnewage.service.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.loader.CalendarLoader;
 import ru.neosvet.vestnewage.loader.ListLoader;
@@ -42,8 +42,8 @@ public class LoaderWorker extends Worker {
     private boolean isCancelled() {
         if (name.equals(LoaderModel.TAG))
             return !LoaderModel.inProgress;
-        if (name.equals(LoaderHelper.TAG))
-            return !LoaderHelper.start;
+        if (name.equals(LoaderService.TAG))
+            return !LoaderService.start;
         return ProgressHelper.isCancelled();
     }
 
@@ -72,8 +72,8 @@ public class LoaderWorker extends Worker {
             CheckHelper.postCommand(false);
             return Result.failure();
         }
-        if (name.equals(LoaderHelper.TAG)) {
-            LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, error);
+        if (name.equals(LoaderService.TAG)) {
+            LoaderService.postCommand(LoaderService.STOP_WITH_NOTIF, error);
             return Result.failure();
         }
         ProgressHelper.postProgress(new Data.Builder()
@@ -111,20 +111,20 @@ public class LoaderWorker extends Worker {
     private void doLoad() throws Exception {
         StyleLoader style = new StyleLoader();
         int mode = getInputData().getInt(Const.MODE, 0);
-        if (mode != LoaderHelper.DOWNLOAD_PAGE)
+        if (mode != LoaderService.DOWNLOAD_PAGE)
             style.download(false);
         switch (mode) {
-            case LoaderHelper.DOWNLOAD_ALL:
-                download(LoaderHelper.ALL);
+            case LoaderService.DOWNLOAD_ALL:
+                download(LoaderService.ALL);
                 break;
-            case LoaderHelper.DOWNLOAD_ID:
+            case LoaderService.DOWNLOAD_ID:
                 int p = getInputData().getInt(Const.SELECT, 0);
                 download(p);
                 break;
-            case LoaderHelper.DOWNLOAD_YEAR:
+            case LoaderService.DOWNLOAD_YEAR:
                 downloadYear(getInputData().getInt(Const.YEAR, 0));
                 break;
-            case LoaderHelper.DOWNLOAD_PAGE:
+            case LoaderService.DOWNLOAD_PAGE:
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.START, true)
                         .build());
@@ -137,12 +137,12 @@ public class LoaderWorker extends Worker {
                 ProgressHelper.postProgress(new Data.Builder()
                         .putBoolean(Const.FINISH, true)
                         .build());
-                if (name.equals(LoaderHelper.TAG))
-                    LoaderHelper.postCommand(LoaderHelper.STOP, null);
+                if (name.equals(LoaderService.TAG))
+                    LoaderService.postCommand(LoaderService.STOP, null);
                 LoaderModel.inProgress = false;
         }
 
-        LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, null);
+        LoaderService.postCommand(LoaderService.STOP_WITH_NOTIF, null);
         LoaderModel.inProgress = false;
     }
 
@@ -201,9 +201,9 @@ public class LoaderWorker extends Worker {
         loader = new PageLoader(true);
         // подсчёт количества страниц:
         int k = 0;
-        if (id == LoaderHelper.ALL || id == R.id.nav_book)
+        if (id == LoaderService.ALL || id == R.id.nav_book)
             k = workWithBook(true);
-        if (id == LoaderHelper.ALL || id == R.id.nav_site) {
+        if (id == LoaderService.ALL || id == R.id.nav_site) {
             SiteLoader loader = new SiteLoader(Lib.getFile(SiteModel.MAIN).toString());
             List<String> list = loader.getLinkList();
             k += list.size();
@@ -215,7 +215,7 @@ public class LoaderWorker extends Worker {
         // загрузка страниц:
         if (isCancelled())
             return;
-        if (id == LoaderHelper.ALL || id == R.id.nav_book)
+        if (id == LoaderService.ALL || id == R.id.nav_book)
             workWithBook(false);
     }
 

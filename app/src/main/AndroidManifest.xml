@@ -87,12 +87,12 @@
             android:theme="@style/Theme.MainTheme" />
 
         <service
-            android:name=".helpers.CheckHelper"
+            android:name=".service.CheckService"
             android:icon="@drawable/rss"
             android:label="@string/check_summary"
             android:process=":check" />
         <service
-            android:name=".helpers.LoaderHelper"
+            android:name=".service.LoaderService"
             android:icon="@drawable/download"
             android:label="@string/load" />
 

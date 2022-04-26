@@ -7,8 +7,8 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.LoaderHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.PageStorage.Companion.getDatePage
 import java.io.BufferedReader
@@ -61,7 +61,8 @@ class BookLoader {
         }
         val book = BookHelper()
         book.setLoadedOtkr(true)
-        LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, null)
+        LoaderService.postCommand(
+            LoaderService.STOP_WITH_NOTIF, null)
     }
 
     fun loadPoems(all: Boolean): String? {
@@ -77,7 +78,7 @@ class BookLoader {
                 loadListBook(NeoClient.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
             else
                 loadListBook(NeoClient.SITE2 + Const.PRINT + i + Const.HTML)
-            if(isRun.not()) break
+            if (isRun.not()) break
             i++
         }
         return s

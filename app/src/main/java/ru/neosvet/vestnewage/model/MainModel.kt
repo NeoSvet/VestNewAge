@@ -6,13 +6,12 @@ import android.database.Cursor
 import androidx.work.Data
 import okhttp3.Request
 import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.helpers.LoaderHelper
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.basic.AdsState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
@@ -61,7 +60,8 @@ class MainModel : NeoViewModel() {
             if (cursor.moveToFirst()) {
                 val iTime = cursor.getColumnIndex(Const.TIME)
                 if (time > cursor.getLong(iTime)) {
-                    LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_PAGE, s)
+                    LoaderService.postCommand(
+                        LoaderService.DOWNLOAD_PAGE, s)
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
                     list.add(ListItem(cursor.getString(iTitle), s).apply {
                         des=updated_page

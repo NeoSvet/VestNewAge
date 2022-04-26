@@ -12,7 +12,7 @@ import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.loader.CalendarLoader;
 import ru.neosvet.vestnewage.model.CalendarModel;
@@ -45,10 +45,10 @@ public class CalendarWorker extends Worker {
                 return Result.success();
             }
             //LoaderHelper
-            if (!LoaderHelper.start)
+            if (!LoaderService.start)
                 return Result.success();
             DateHelper d = DateHelper.initToday();
-            if (getInputData().getInt(Const.MODE, 0) == LoaderHelper.DOWNLOAD_YEAR) {
+            if (getInputData().getInt(Const.MODE, 0) == LoaderService.DOWNLOAD_YEAR) {
                 ProgressHelper.setMessage(App.context.getString(R.string.download_list));
                 int m, y = getInputData().getInt(Const.YEAR, 0);
                 if (d.getYear() != y)
@@ -59,7 +59,7 @@ public class CalendarWorker extends Worker {
                 loader.loadListYear(y, m + 1);
             } else { //all calendar
                 int max_y = d.getYear() + 1, max_m = 13;
-                for (int y = 2016; y < max_y && LoaderHelper.start; y++) {
+                for (int y = 2016; y < max_y && LoaderService.start; y++) {
                     if (y == d.getYear())
                         max_m = d.getMonth() + 1;
                     loader.loadListYear(y, max_m);
@@ -77,7 +77,7 @@ public class CalendarWorker extends Worker {
                     .putString(Const.ERROR, error)
                     .build());
         } else {
-            LoaderHelper.postCommand(LoaderHelper.STOP, error);
+            LoaderService.postCommand(LoaderService.STOP, error);
             return Result.failure();
         }
         return Result.failure();

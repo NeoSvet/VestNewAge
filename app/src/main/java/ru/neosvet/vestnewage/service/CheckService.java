@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.helpers;
+package ru.neosvet.vestnewage.service;
 
 import android.app.Service;
 import android.content.Context;
@@ -19,6 +19,7 @@ import androidx.work.WorkManager;
 import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.workers.CheckWorker;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
@@ -26,8 +27,8 @@ import ru.neosvet.vestnewage.workers.LoaderWorker;
  * Created by NeoSvet on 09.11.2019.
  */
 
-public class CheckHelper extends LifecycleService {
-    public static final String TAG = "CheckHelper";
+public class CheckService extends LifecycleService {
+    public static final String TAG = "CheckService";
 
     @Override
     public void onCreate() {
@@ -35,7 +36,7 @@ public class CheckHelper extends LifecycleService {
     }
 
     public static void postCommand(boolean start) {
-        Intent intent = new Intent(App.context, CheckHelper.class);
+        Intent intent = new Intent(App.context, CheckService.class);
         intent.putExtra(Const.START, start);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             App.context.startForegroundService(intent);

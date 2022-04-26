@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
 import ru.neosvet.vestnewage.model.SiteModel;
@@ -72,8 +72,8 @@ public class LaunchUtils {
     }
 
     private void showNotifDownloadAll() {
-        Intent intent = new Intent(App.context, LoaderHelper.class);
-        intent.putExtra(Const.MODE, LoaderHelper.DOWNLOAD_ALL);
+        Intent intent = new Intent(App.context, LoaderService.class);
+        intent.putExtra(Const.MODE, LoaderService.DOWNLOAD_ALL);
         intent.putExtra(Const.TASK, "");
         PendingIntent piStart = PendingIntent.getService(App.context, 0, intent, FLAGS);
         NotificationCompat.Builder notifBuilder = notifHelper.getNotification(

@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.LoaderHelper
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.model.BookModel
 import ru.neosvet.vestnewage.model.basic.*
@@ -302,7 +302,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             getString(R.string.yes)
         ) { _, _ ->
             binding?.ivPrev?.isEnabled = false
-            LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_OTKR, "")
+            LoaderService.postCommand(
+                LoaderService.DOWNLOAD_OTKR, "")
         }
         builder.create().show()
     }

@@ -12,7 +12,7 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.LoaderHelper
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.model.basic.*
@@ -111,7 +111,7 @@ class BookModel : NeoViewModel(), BookLoader.HandlerLite {
             val prev: Boolean
             if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
-                prev = !LoaderHelper.start
+                prev = !LoaderService.start
                 d.changeMonth(1)
             } else {
                 d.changeMonth(-1)

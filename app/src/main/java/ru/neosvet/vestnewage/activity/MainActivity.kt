@@ -38,6 +38,7 @@ import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.model.basic.AdsState
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.service.LoaderService
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -245,12 +246,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         bDownloadIt.setOnClickListener {
             menuDownload.hide()
             if (curId == R.id.nav_calendar) {
-                LoaderHelper.postCommand(
-                    LoaderHelper.DOWNLOAD_YEAR,
+                LoaderService.postCommand(
+                    LoaderService.DOWNLOAD_YEAR,
                     (curFragment as CalendarFragment?)!!.currentYear.toString()
                 )
             } else {
-                LoaderHelper.postCommand(LoaderHelper.DOWNLOAD_ID, curId.toString())
+                LoaderService.postCommand(
+                    LoaderService.DOWNLOAD_ID, curId.toString())
             }
         }
         tvNew.setOnClickListener {

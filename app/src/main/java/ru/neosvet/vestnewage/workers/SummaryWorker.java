@@ -7,7 +7,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import ru.neosvet.utils.ErrorUtils;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.loader.SummaryLoader;
 
 public class SummaryWorker extends Worker {
@@ -29,7 +29,7 @@ public class SummaryWorker extends Worker {
             ErrorUtils.setError(e);
             error = e.getMessage();
         }
-        LoaderHelper.postCommand(LoaderHelper.STOP, error);
+        LoaderService.postCommand(LoaderService.STOP, error);
         return Result.failure();
     }
 }

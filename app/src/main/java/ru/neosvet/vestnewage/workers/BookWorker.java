@@ -9,7 +9,7 @@ import androidx.work.WorkerParameters;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.ErrorUtils;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.loader.BookLoader;
 
@@ -32,7 +32,7 @@ public class BookWorker extends Worker implements BookLoader.Handler {
             //LoaderHelper
             loader.loadTolkovaniya();
             loader.loadPoems(false);
-            if (!LoaderHelper.start)
+            if (!LoaderService.start)
                 return Result.success();
             DateHelper d = DateHelper.initToday();
             ProgressHelper.setMax((d.getYear() - 2016) * 12);
@@ -43,7 +43,7 @@ public class BookWorker extends Worker implements BookLoader.Handler {
             ErrorUtils.setError(e);
             error = e.getMessage();
         }
-        LoaderHelper.postCommand(LoaderHelper.STOP_WITH_NOTIF, error);
+        LoaderService.postCommand(LoaderService.STOP_WITH_NOTIF, error);
         return Result.failure();
     }
 

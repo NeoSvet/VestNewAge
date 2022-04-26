@@ -6,7 +6,7 @@ import org.json.JSONObject
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.LoaderHelper
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
 import ru.neosvet.vestnewage.list.ListItem
@@ -118,7 +118,7 @@ class CalendarLoader : ListLoader {
 
     fun loadListYear(year: Int, max_m: Int) {
         var m = 1
-        while (m < max_m && LoaderHelper.start) {
+        while (m < max_m && LoaderService.start) {
             setDate(year, m)
             loadListMonth(false)
             ProgressHelper.upProg()

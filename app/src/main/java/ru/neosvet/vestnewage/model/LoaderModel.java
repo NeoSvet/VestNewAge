@@ -13,7 +13,7 @@ import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
 import ru.neosvet.utils.Const;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.workers.LoaderWorker;
 
 public class LoaderModel extends AndroidViewModel {
@@ -31,7 +31,7 @@ public class LoaderModel extends AndroidViewModel {
                 .build();
         Data data = new Data.Builder()
                 .putString(Const.TASK, TAG)
-                .putInt(Const.MODE, LoaderHelper.DOWNLOAD_PAGE)
+                .putInt(Const.MODE, LoaderService.DOWNLOAD_PAGE)
                 .putBoolean(Const.STYLE, withStyle)
                 .putString(Const.LINK, link).build();
         OneTimeWorkRequest task = new OneTimeWorkRequest

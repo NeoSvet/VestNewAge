@@ -19,9 +19,8 @@ import java.util.List;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
-import ru.neosvet.vestnewage.helpers.CheckHelper;
+import ru.neosvet.vestnewage.service.CheckHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.LoaderHelper;
 import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.helpers.UnreadHelper;
 
