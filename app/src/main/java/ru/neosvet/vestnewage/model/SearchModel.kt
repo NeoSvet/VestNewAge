@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
@@ -195,7 +196,7 @@ class SearchModel : NeoViewModel() {
                 storage.delete(id[i])
             }
             cursor.close()
-            p2 = ProgressHelper.getPercent(i.toFloat(), title.size.toFloat())
+            p2 = i.percent(title.size)
             if (p1 < p2) {
                 p1 = p2
                 mstate.postValue(MessageState(String.format(strings.format_search_proc, p1)))

@@ -5,6 +5,7 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
@@ -41,15 +42,14 @@ class SummaryModel : NeoViewModel() {
     }
 
     private fun loadPages(pages: List<ListItem>) {
-        val max = pages.size.toFloat()
         val loader = PageLoader()
-        var cur = 0f
+        var cur = 0
         pages.forEach { item ->
             loader.download(item.link, false)
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(ProgressState(ProgressHelper.getPercent(cur, max)))
+            mstate.postValue(ProgressState(cur.percent(pages.size)))
         }
         loader.finish()
     }

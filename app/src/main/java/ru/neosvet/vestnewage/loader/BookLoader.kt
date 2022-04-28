@@ -144,7 +144,7 @@ class BookLoader : Loader {
         var d: DateHelper
         for (item: String in list) {
             if (max > 0) {
-                handlerLite?.postPercent(getPercent())
+                handlerLite?.postPercent(cur.percent(max))
                 cur++
             } else {
                 d = DateHelper.parse(item)
@@ -188,9 +188,6 @@ class BookLoader : Loader {
         return name
     }
 
-    private fun getPercent(): Int =
-        ProgressHelper.getPercent(cur.toFloat(), max.toFloat())
-
     private fun getRow(link: String, title: String, time: Long): ContentValues {
         val row = ContentValues()
         row.put(Const.LINK, link)
@@ -230,7 +227,7 @@ class BookLoader : Loader {
             else if (date2 != date1) {
                 saveData(date1)
                 if (max > 0) {
-                    handlerLite?.postPercent(getPercent())
+                    handlerLite?.postPercent(cur.percent(max))
                     cur++
                 } else handler?.upProg()
                 date1 = date2

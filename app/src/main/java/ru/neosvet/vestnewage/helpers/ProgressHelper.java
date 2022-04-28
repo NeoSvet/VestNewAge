@@ -19,10 +19,6 @@ public class ProgressHelper {
             live.setValue(new Data.Builder().build());
     }
 
-    public static int getPercent(float cur, float max) {
-        return (int) (cur / max * 100f);
-    }
-
     public static void addObserver(LifecycleOwner owner, Observer<Data> observer) {
         live.observe(owner, observer);
     }

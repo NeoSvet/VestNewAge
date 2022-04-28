@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
@@ -62,15 +63,14 @@ class CalendarModel : NeoViewModel() {
     }
 
     private fun loadPages(pages: List<String>) {
-        val max = pages.size.toFloat()
         val loader = PageLoader()
-        var cur = 0f
+        var cur = 0
         pages.forEach { link ->
             loader.download(link, false)
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(ProgressState(ProgressHelper.getPercent(cur, max)))
+            mstate.postValue(ProgressState(cur.percent(pages.size)))
         }
         loader.finish()
     }
