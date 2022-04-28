@@ -19,15 +19,23 @@ public class ListsHelper {
 
     public boolean summaryIsOld() {
         File file = Lib.getFile(Const.RSS);
+        if (!file.exists())
+            return true;
         long time = file.lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 
     public boolean siteIsOld() {
-        long time = Lib.getFile(SiteModel.MAIN).lastModified() / DateHelper.SEC_IN_MILLS;
+        File file = Lib.getFile(SiteModel.MAIN);
+        if (!file.exists())
+            return true;
+        long time = file.lastModified() / DateHelper.SEC_IN_MILLS;
         if (timeNow - time > DateHelper.DAY_IN_SEC)
             return true;
-        time = Lib.getFile(SiteModel.NEWS).lastModified() / DateHelper.SEC_IN_MILLS;
+        file = Lib.getFile(SiteModel.NEWS);
+        if (!file.exists())
+            return true;
+        time = file.lastModified() / DateHelper.SEC_IN_MILLS;
         return timeNow - time > DateHelper.DAY_IN_SEC;
     }
 
