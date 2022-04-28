@@ -8,23 +8,15 @@ import ru.neosvet.utils.DataBase;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class PageLoader {
-    private final boolean withMsg; //name.contains(LoaderModel.TAG)
     private int k_requests = 0;
     private long time_requests = 0;
-    private PageStorage storage = new PageStorage();
-
-    public PageLoader(boolean withMsg) {
-        this.withMsg = withMsg;
-    }
+    private final PageStorage storage = new PageStorage();
 
     public boolean download(String link, boolean singlePage) throws Exception {
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        if (withMsg)
-            ProgressHelper.setMessage(initMessage(link));
         storage.open(link);
         if (!singlePage && storage.existsPage(link)) {
             return false;
@@ -107,20 +99,6 @@ public class PageLoader {
             storage.close();
         page.clear();
         return true;
-    }
-
-    private String initMessage(String s) {
-        if (!s.contains("/"))
-            return s;
-        try {
-            s = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."));
-            if (s.contains("_"))
-                s = s.substring(0, s.length() - 2);
-            DateHelper d = DateHelper.parse(s);
-            return d.getMonthString() + " " + d.getYear();
-        } catch (Exception ignored) {
-        }
-        return s;
     }
 
     private void checkRequests() {

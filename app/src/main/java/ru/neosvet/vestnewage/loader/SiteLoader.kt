@@ -4,11 +4,12 @@ import ru.neosvet.html.PageParser
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.model.SiteModel
 import java.io.*
 import java.util.regex.Pattern
 
-class SiteLoader(private val file: String) : ListLoader {
+class SiteLoader(private val file: String) : LinksProvider {
     private val patternList = Pattern.compile("\\d{4}\\.html")
     private val list = mutableListOf<ListItem>()
 
@@ -45,16 +46,15 @@ class SiteLoader(private val file: String) : ListLoader {
         return list
     }
 
-    private fun loadList(url: String) {
-        var url = url
+    private fun loadList(link: String) {
         val page = PageParser()
-        val isSite = url == NeoClient.SITE
+        val isSite = link == NeoClient.SITE
         var i: Int
         if (isSite) {
-            page.load(url, "page-title")
+            page.load(link, "page-title")
         } else {
-            i = url.lastIndexOf("/") + 1
-            url = url.substring(0, i) + Const.PRINT + url.substring(i)
+            i = link.lastIndexOf("/") + 1
+            val url  = link.substring(0, i) + Const.PRINT + link.substring(i)
             page.load(url, "razdel")
         }
         var s: String? = page.firstElem ?: return
@@ -105,12 +105,12 @@ class SiteLoader(private val file: String) : ListLoader {
     }
 
     private fun addLink(head: String, link: String) {
-        var link = link
-        if (link.contains("files") || link.contains(".mp3") || link.contains(".wma")
-            || link.lastIndexOf("/") == link.length - 1
-        ) link = NeoClient.SITE + link.substring(1)
-        if (link.indexOf("/") == 0) link = link.substring(1)
-        list[list.size - 1].addLink(head, link)
+        var url = link
+        if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
+            || url.lastIndexOf("/") == url.length - 1)
+                url = NeoClient.SITE + url.substring(1)
+        if (url.indexOf("/") == 0) url = url.substring(1)
+        list[list.size - 1].addLink(head, url)
     }
 
     private fun setDes(d: String) {

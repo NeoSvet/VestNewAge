@@ -6,9 +6,7 @@ import androidx.lifecycle.Observer;
 import androidx.work.Data;
 
 public class ProgressHelper {
-    private static boolean busy, cancel;
-    private static String msg;
-    private static int prog, max;
+    private static boolean busy;
     private static final MutableLiveData<Data> live = new MutableLiveData<>();
 
     public static boolean isBusy() {
@@ -17,13 +15,8 @@ public class ProgressHelper {
 
     public static void setBusy(boolean v) {
         busy = v;
-        cancel = false;
         if (!busy)
             live.setValue(new Data.Builder().build());
-    }
-
-    public static void cancelled() {
-        cancel = true;
     }
 
     public static int getPercent(float cur, float max) {
@@ -36,34 +29,5 @@ public class ProgressHelper {
 
     public static void postProgress(Data data) {
         live.postValue(data);
-    }
-
-    public static boolean isCancelled() {
-        return cancel;
-    }
-
-    public static void upProg() {
-        prog++;
-    }
-
-    public static void setMax(int n_max) {
-        prog = 0;
-        max = n_max;
-    }
-
-    public static int getMax() {
-        return max;
-    }
-
-    public static int getProg() {
-        return prog;
-    }
-
-    public static String getMessage() {
-        return msg;
-    }
-
-    public static void setMessage(String n_msg) {
-        msg = n_msg;
     }
 }

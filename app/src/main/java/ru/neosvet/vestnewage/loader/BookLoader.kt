@@ -8,37 +8,28 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
-import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.loader.basic.LoadHandler
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
+import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.storage.PageStorage.Companion.getDatePage
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class BookLoader {
-    interface Handler {
-        fun setMax(value: Int)
-        fun upProg()
-        fun postMessage(value: String)
-    }
-
-    interface HandlerLite {
-        fun postPercent(value: Int)
-    }
-
+class BookLoader : Loader {
     companion object {
         private const val SIZE_EMPTY_BASE = 24576L
     }
 
-    private val handler: Handler?
-    private val handlerLite: HandlerLite?
+    private val handler: LoadHandler?
+    private val handlerLite: LoadHandlerLite?
 
-    constructor(handler: Handler) {
+    constructor(handler: LoadHandler) {
         this.handler = handler
         handlerLite = null
     }
 
-    constructor(handler: HandlerLite) {
+    constructor(handler: LoadHandlerLite) {
         this.handler = null
         handlerLite = handler
     }
@@ -49,11 +40,11 @@ class BookLoader {
     private var max = 0
     private var isRun = true
 
-    fun cancel() {
+    override fun cancel() {
         isRun = false
     }
 
-    fun loadOtrk() { //загрузка Посланий за 2004-2015
+    fun loadOldPoslaniya() { //загрузка Посланий за 2004-2015
         isRun = true
         handler?.setMax(137) //август 2004 - декабрь 2015
         loadListUcoz(UcozType.OLD)?.let {
@@ -61,44 +52,38 @@ class BookLoader {
         }
         val book = BookHelper()
         book.setLoadedOtkr(true)
-        LoaderService.postCommand(
-            LoaderService.STOP_WITH_NOTIF, null)
     }
 
-    fun loadPoems(all: Boolean): String? {
+    fun loadPoemsList(startYear: Int): String? {
         isRun = true
         val d = DateHelper.initToday()
-        val y = d.year
-        var i = if (all) 2016 else y - 1
-        max = (y - i) * 12 + d.month - 1
+        val finalYear = d.year
+        max = (finalYear - startYear) * 12 + d.month - 1
         cur = 0
         var s: String? = null
-        while (i <= y) {
+        for (i in startYear..finalYear) {
             s = if (NeoClient.isMainSite())
-                loadListBook(NeoClient.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
+                loadList(NeoClient.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
             else
-                loadListBook(NeoClient.SITE2 + Const.PRINT + i + Const.HTML)
+                loadList(NeoClient.SITE2 + Const.PRINT + i + Const.HTML)
             if (isRun.not()) break
-            i++
+            handler?.upProg()
         }
         return s
     }
 
-    fun loadPoslaniya(fromOtkr: Boolean): String? {
+    fun loadAllPoslaniya(): String? {
         isRun = true
         cur = 0
-        if (fromOtkr) { //все Послания
-            max = 146 //август 2004 - сентябрь 2016
-            loadListUcoz(UcozType.OLD) //обновление старых Посланий
-        } else //только новые Послания
-            max = 9 //январь-сентябрь 2016
-        return loadTolkovaniya()
+        max = 146 //август 2004 - сентябрь 2016
+        loadListUcoz(UcozType.OLD) //до 2016 года
+        return loadNewPoslaniya() //за 2016 год
     }
 
-    fun loadTolkovaniya(): String? {
+    fun loadNewPoslaniya(): String? {
         isRun = true
         if (NeoClient.isMainSite())
-            return loadListBook(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
+            return loadList(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
         throw MyException(App.context.getString(R.string.site_not_available))
     }
 
@@ -122,7 +107,7 @@ class BookLoader {
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
         var br = BufferedReader(InputStreamReader(NeoClient.getStream(url)), 1000)
-        val list: MutableList<String> = java.util.ArrayList()
+        val list = mutableListOf<String>()
         var s: String? = br.readLine()
         while (s != null) {
             if (isRun.not()) {
@@ -221,7 +206,7 @@ class BookLoader {
         return row
     }
 
-    private fun loadListBook(url: String): String? {
+    private fun loadList(url: String): String? {
         val page = PageParser()
         if (NeoClient.isMainSite())
             page.load(url, "page-title")
@@ -239,7 +224,7 @@ class BookLoader {
             }
             if (a == null) break
             if (a.length < 19) continue
-            date2 = getDatePage(a)
+            date2 = PageStorage.getDatePage(a)
             if (date1 == null)
                 date1 = date2
             else if (date2 != date1) {

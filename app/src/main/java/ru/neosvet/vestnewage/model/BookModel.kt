@@ -12,15 +12,16 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.BookLoader
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.util.*
 
-class BookModel : NeoViewModel(), BookLoader.HandlerLite {
+class BookModel : NeoViewModel(), LoadHandlerLite {
     companion object {
         const val TAG = "book"
         const val TAB_KATREN = 0
@@ -71,9 +72,11 @@ class BookModel : NeoViewModel(), BookLoader.HandlerLite {
 
     override suspend fun doLoad() {
         loader = BookLoader(this)
-        if (isKatrenTab) loader?.loadPoems(true)?.let {
+        if (isKatrenTab) loader?.loadPoemsList(2016)?.let {
             dKatren = DateHelper.parse(it)
-        } else loader?.loadPoslaniya(isLoadedOtkr)?.let {
+        } else if (isLoadedOtkr) loader?.loadAllPoslaniya()?.let {
+            dPoslanie = DateHelper.parse(it)
+        } else loader?.loadNewPoslaniya()?.let {
             dPoslanie = DateHelper.parse(it)
         }
         openList(false)
@@ -111,7 +114,7 @@ class BookModel : NeoViewModel(), BookLoader.HandlerLite {
             val prev: Boolean
             if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
                 // доступна для того, чтобы предложить скачать Послания за 2004-2015
-                prev = !LoaderService.start
+                prev = !LoaderService.isRun
                 d.changeMonth(1)
             } else {
                 d.changeMonth(-1)

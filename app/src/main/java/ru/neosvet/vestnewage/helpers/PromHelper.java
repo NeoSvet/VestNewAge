@@ -250,7 +250,7 @@ public class PromHelper {
         PendingIntent piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         NotificationHelper notifHelper = new NotificationHelper();
         String msg = getPromText();
-        if (msg == null) //msg.contains("-")
+        if (msg == null) //text.contains("-")
             msg = App.context.getString(R.string.prom);
         PendingIntent piCancel = notifHelper.getCancelPromNotif();
 

@@ -246,13 +246,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         bDownloadIt.setOnClickListener {
             menuDownload.hide()
             if (curId == R.id.nav_calendar) {
+                val year = (curFragment as CalendarFragment?)!!.currentYear
                 LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_YEAR,
-                    (curFragment as CalendarFragment?)!!.currentYear.toString()
+                    LoaderService.DOWNLOAD_YEAR, year.toString()
                 )
             } else {
                 LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_ID, curId.toString())
+                    LoaderService.DOWNLOAD_ID, curId.toString()
+                )
             }
         }
         tvNew.setOnClickListener {
@@ -399,7 +400,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_help -> if (tab == -1) { //first start
+            R.id.nav_help -> if (tab == -1) { //first isRun
                 val frHelp = HelpFragment.newInstance(0)
                 fragmentTransaction.replace(R.id.my_fragment, frHelp)
             } else {

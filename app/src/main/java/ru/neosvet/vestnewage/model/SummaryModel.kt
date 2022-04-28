@@ -42,7 +42,7 @@ class SummaryModel : NeoViewModel() {
 
     private fun loadPages(pages: List<ListItem>) {
         val max = pages.size.toFloat()
-        val loader = PageLoader(false)
+        val loader = PageLoader()
         var cur = 0f
         pages.forEach { item ->
             loader.download(item.link, false)

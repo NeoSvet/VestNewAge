@@ -210,12 +210,12 @@ public class LaunchUtils {
         } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
             main.putExtra(Const.CUR_ID, R.id.nav_book);
             main.putExtra(Const.TAB, 1);
-        } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&start=2
+        } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&isRun=2
             link = data.getQuery();
             if (link == null)
                 return false;
             int page = 1;
-            if (link.contains("start")) {
+            if (link.contains("isRun")) {
                 page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
                 link = link.substring(0, link.lastIndexOf("&"));
             }

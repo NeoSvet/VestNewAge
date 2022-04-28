@@ -72,7 +72,7 @@ class MarkersModel : NeoViewModel() {
     override suspend fun doLoad() {
         page?.let { link ->
             task = Type.PAGE
-            val loader = PageLoader(false)
+            val loader = PageLoader()
             loader.download(link, true)
             loadList()
         }

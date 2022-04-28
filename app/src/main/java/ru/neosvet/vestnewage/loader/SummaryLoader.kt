@@ -6,9 +6,10 @@ import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
+import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import java.io.*
 
-class SummaryLoader : ListLoader {
+class SummaryLoader : LinksProvider {
     override fun getLinkList(): List<String> {
         val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
         val list = mutableListOf<String>()

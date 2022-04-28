@@ -63,7 +63,7 @@ class CalendarModel : NeoViewModel() {
 
     private fun loadPages(pages: List<String>) {
         val max = pages.size.toFloat()
-        val loader = PageLoader(false)
+        val loader = PageLoader()
         var cur = 0f
         pages.forEach { link ->
             loader.download(link, false)

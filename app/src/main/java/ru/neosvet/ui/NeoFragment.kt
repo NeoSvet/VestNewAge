@@ -54,7 +54,6 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
         }
         if (ProgressHelper.isBusy()) {
             neomodel.cancel()
-            ProgressHelper.cancelled()
             return false
         }
         return true

@@ -10,7 +10,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class PageParser {
     private int cur, index;
@@ -20,25 +19,23 @@ public class PageParser {
         InputStream in = NeoClient.getStream(url);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s;
-        while ((s = br.readLine()) != null && !ProgressHelper.isCancelled()) {
+        while ((s = br.readLine()) != null) {
             if (s.contains(start))
                 break;
         }
-        if (ProgressHelper.isCancelled() || s == null) {
+        if (s == null) {
             br.close();
             in.close();
             return;
         }
         StringBuilder sb = new StringBuilder(s);
-        while ((s = br.readLine()) != null && !ProgressHelper.isCancelled()) {
+        while ((s = br.readLine()) != null) {
             if (s.contains("<!--/row-->"))
                 break;
             sb.append(" ").append(s);
         }
         br.close();
         in.close();
-        if (ProgressHelper.isCancelled())
-            return;
 
         String t = sb.toString();
         t = t.replace("&nbsp;", " ")

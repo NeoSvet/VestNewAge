@@ -6,18 +6,28 @@ import org.json.JSONObject
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
 import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.loader.basic.LinksProvider
+import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
-import java.io.*
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 
-class CalendarLoader : ListLoader {
+class CalendarLoader : LinksProvider, Loader {
     private var date = DateHelper.initToday()
     private val storage = PageStorage()
     private val list: MutableList<ListItem> by lazy {
         mutableListOf()
+    }
+    private var isRun = false
+    val curDate: DateHelper
+        get() = date
+
+    override fun cancel() {
+        isRun = false
     }
 
     fun setDate(year: Int, month: Int) {
@@ -41,6 +51,7 @@ class CalendarLoader : ListLoader {
     }
 
     fun loadListMonth(updateUnread: Boolean) {
+        isRun = true
         val stream: InputStream = NeoClient.getStream(
             NeoClient.SITE + "AjaxData/Calendar/"
                     + date.year + "-" + date.month + ".json"
@@ -60,7 +71,7 @@ class CalendarLoader : ListLoader {
         var d: DateHelper
         var n: Int
         var i = 0
-        while (i < json.names().length() && !ProgressHelper.isCancelled()) {
+        while (i < json.names().length() && isRun) {
             s = json.names()[i].toString()
             jsonI = json.optJSONObject(s)
             n = list.size
@@ -92,16 +103,16 @@ class CalendarLoader : ListLoader {
             i++
         }
         storage.close()
-        if (ProgressHelper.isCancelled()) {
+        if (isRun.not()) {
             list.clear()
             return
         }
         if (updateUnread) {
             val unread = UnreadHelper()
-            for (i in list.indices) {
-                for (j in 0 until list[i].count) {
-                    date.day = list[i].title.toInt()
-                    unread.addLink(list[i].getLink(j), date)
+            for (x in list.indices) {
+                for (y in 0 until list[x].count) {
+                    date.day = list[x].title.toInt()
+                    unread.addLink(list[x].getLink(y), date)
                 }
             }
             unread.setBadge()
@@ -117,11 +128,11 @@ class CalendarLoader : ListLoader {
     }
 
     fun loadListYear(year: Int, max_m: Int) {
+        isRun = true
         var m = 1
-        while (m < max_m && LoaderService.start) {
+        while (m < max_m && isRun) {
             setDate(year, m)
             loadListMonth(false)
-            ProgressHelper.upProg()
             m++
         }
     }

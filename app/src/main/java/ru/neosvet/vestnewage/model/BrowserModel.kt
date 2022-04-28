@@ -42,7 +42,7 @@ class BrowserModel : NeoViewModel() {
             helper!!.link = value
         }
     private val pageLoader: PageLoader by lazy {
-        PageLoader(false)
+        PageLoader()
     }
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()

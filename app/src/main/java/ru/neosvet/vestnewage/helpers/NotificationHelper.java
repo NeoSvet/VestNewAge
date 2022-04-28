@@ -131,7 +131,7 @@ public class NotificationHelper extends ContextWrapper {
      * changes.
      *
      * @param title the title of the notification
-     * @param msg   the msg text for the notification
+     * @param msg   the text text for the notification
      * @return the builder as it keeps a reference to the notification (since API 24)
      */
     public NotificationCompat.Builder getNotification(String title, String msg, String channel) {

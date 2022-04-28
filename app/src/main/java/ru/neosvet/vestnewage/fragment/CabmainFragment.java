@@ -84,7 +84,6 @@ public class CabmainFragment extends NeoFragment {
     @Override
     public boolean onBackPressed() {
         if (ProgressHelper.isBusy()) {
-            ProgressHelper.cancelled();
             ProgressHelper.setBusy(false);
             return false;
         }
