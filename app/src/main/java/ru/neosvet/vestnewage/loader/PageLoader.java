@@ -42,7 +42,7 @@ public class PageLoader {
         ContentValues row;
         int id = 0, bid = 0;
 
-        s = page.getFirstElem();
+        s = page.getCurrentElem();
         do {
             if (page.isHead()) {
                 k--;
@@ -86,7 +86,7 @@ public class PageLoader {
                     s = page.getNextElem();
                 }
             }
-            if ((k == 0 || boolArticle) && !page.isEmpty()) {
+            if ((k == 0 || boolArticle) && !isEmpty(s)) {
                 row = new ContentValues();
                 row.put(DataBase.ID, id);
                 row.put(DataBase.PARAGRAPH, s);
@@ -99,6 +99,10 @@ public class PageLoader {
             storage.close();
         page.clear();
         return true;
+    }
+
+    private boolean isEmpty(String s) {
+        return Lib.withOutTags(s).isEmpty();
     }
 
     private void checkRequests() {

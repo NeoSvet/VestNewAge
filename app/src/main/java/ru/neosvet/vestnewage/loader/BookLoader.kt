@@ -7,7 +7,6 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -213,7 +212,6 @@ class BookLoader : Loader {
         var s: String
         var date1: String? = null
         var date2: String
-        page.firstElem
         do {
             a = page.link
             while (a == null && page.nextItem != null) {

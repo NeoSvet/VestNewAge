@@ -57,7 +57,7 @@ class SiteLoader(private val file: String) : LinksProvider {
             val url  = link.substring(0, i) + Const.PRINT + link.substring(i)
             page.load(url, "razdel")
         }
-        var s: String? = page.firstElem ?: return
+        var s: String? = page.currentElem ?: return
         var t: String
         var a: String?
         var d = StringBuilder()
@@ -98,7 +98,8 @@ class SiteLoader(private val file: String) : LinksProvider {
                 }
             }
             s = page.nextItem
-            while (!page.curItem().start && s != null) s = page.nextItem
+            while (!page.curItem().start && s != null)
+                s = page.nextItem
         } while (s != null)
         setDes(d.toString())
         page.clear()

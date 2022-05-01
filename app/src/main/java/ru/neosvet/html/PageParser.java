@@ -3,17 +3,15 @@ package ru.neosvet.html;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
+import ru.neosvet.utils.NeoList;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 
 public class PageParser {
-    private int cur, index;
-    private final List<HTMLElem> content = new ArrayList<>();
+    private final NeoList<HTMLElem> content = new NeoList<>();
 
     public void load(String url, String start) throws Exception {
         InputStream in = NeoClient.getStream(url);
@@ -79,15 +77,14 @@ public class PageParser {
                 elem.tag = s.substring(1, n);
                 if (elem.tag.equals(Const.PAR))
                     startPar = false;
-                if (content.size() > 0) {
-                    n = content.size() - 1;
-                    if (content.get(n).tag.equals(elem.tag)) {
+                if (content.isNotEmpty()) {
+                    if (content.current().tag.equals(elem.tag)) {
                         if (s.indexOf(">") < s.length() - 1) {
                             elem = new HTMLElem(Const.TEXT);
                             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
                             content.add(elem);
                         }
-                        content.get(n).end = true;
+                        content.current().end = true;
                         continue;
                     }
                     elem.start = false;
@@ -139,9 +136,8 @@ public class PageParser {
                         elem.par = "";
                     else if (elem.par.contains("noind")) {
                         if (wasNoind) {
-                            n = content.size() - 1;
-                            content.get(n).tag = Const.LINE;
-                            content.get(n).html = elem.html;
+                            content.current().tag = Const.LINE;
+                            content.current().html = elem.html;
                             wasNoind = false;
                             continue;
                         } else
@@ -170,42 +166,37 @@ public class PageParser {
             }
             content.add(elem);
         }
+        content.reset();
     }
 
     public void clear() {
         content.clear();
     }
 
-    public String getFirstElem() {
-        index = -1;
-        cur = -1;
-        return getNextElem();
+    public String getCurrentElem() {
+        return itemToString();
     }
 
     public String getNextElem() {
-        index++;
-        if (index >= content.size())
+        if (!content.next())
             return null;
-        cur = index;
-        HTMLElem elem = content.get(index);
+        return itemToString();
+    }
+
+    private String itemToString() {
+        HTMLElem elem = content.current();
         if (elem.end)
             return elem.getCode();
         StringBuilder s = new StringBuilder(elem.getCode());
         int end = 1;
-        index++;
-        while (end > 0 && index < content.size()) {
-            s.append(content.get(index).getCode());
-            if (elem.tag.equals(content.get(index).tag)) {
-                if (content.get(index).start)
-                    end++;
-                if (content.get(index).end)
-                    end--;
+        while (end > 0 && content.next()) {
+            HTMLElem e = content.current();
+            s.append(e.getCode());
+            if (elem.tag.equals(e.tag)) {
+                if (e.start) end++;
+                if (e.end) end--;
             }
-            index++;
-            if (index == content.size())
-                break;
         }
-        index--;
         while (end > 1) {
             s.append("</").append(elem.tag).append(">");
             end--;
@@ -214,36 +205,27 @@ public class PageParser {
     }
 
     public HTMLElem curItem() {
-        return content.get(cur);
+        return content.current();
     }
 
     public String getNextItem() {
-        index++;
-        if (index >= content.size())
+        if (!content.next())
             return null;
-        cur = index;
-        return content.get(index).getCode();
+        return content.current().getCode();
     }
 
     public String getLink() {
-        if (content.get(cur).tag.equals(Const.LINK))
-            return content.get(cur).par;
+        if (content.current().tag.equals(Const.LINK))
+            return content.current().par;
         else
             return null;
     }
 
     public String getText() {
-        return Lib.withOutTags(content.get(cur).html);
-    }
-
-    public boolean isEmpty() {
-        if (content.get(cur).end)
-            return getText().length() == 0;
-        return false;
+        return Lib.withOutTags(content.current().html);
     }
 
     public boolean isHead() {
-        return content.get(cur).tag.indexOf(Const.HEAD) == 0;
+        return content.current().tag.indexOf(Const.HEAD) == 0;
     }
-
 }
