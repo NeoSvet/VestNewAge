@@ -79,12 +79,12 @@ public class PageParser {
                     startPar = false;
                 if (content.isNotEmpty()) {
                     if (content.current().tag.equals(elem.tag)) {
+                        content.current().end = true;
                         if (s.indexOf(">") < s.length() - 1) {
                             elem = new HTMLElem(Const.TEXT);
                             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
                             content.add(elem);
                         }
-                        content.current().end = true;
                         continue;
                     }
                     elem.start = false;
@@ -167,6 +167,7 @@ public class PageParser {
             content.add(elem);
         }
         content.reset();
+        content.next(); //for turn isFirst to false
     }
 
     public void clear() {
