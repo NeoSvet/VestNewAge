@@ -75,12 +75,12 @@ public class HelpAdapter extends BaseAdapter {
         } else {
             tv = convertView.findViewById(R.id.des_item);
             tv.setText(data.get(pos).getDes());
-            if (data.get(pos).getCount() == 0) {
-                item_bg.setBackgroundResource(R.drawable.card_bg);
-                tv.setVisibility(View.GONE);
-            } else {
+            if (data.get(pos).hasLink()) {
                 item_bg.setBackgroundResource(R.drawable.item_bg);
                 tv.setVisibility(View.VISIBLE);
+            } else {
+                item_bg.setBackgroundResource(R.drawable.card_bg);
+                tv.setVisibility(View.GONE);
             }
         }
         return convertView;

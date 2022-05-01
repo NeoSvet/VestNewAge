@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.fragment
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.AbsListView
@@ -147,10 +148,10 @@ class SiteFragment : NeoFragment() {
         lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
             if (model.isRun) return@OnItemClickListener
             if (isAds(pos)) return@OnItemClickListener
-            if (adMain.getItem(pos).count == 1) {
-                openSingleLink(adMain.getItem(pos).link)
-            } else {
+            if (adMain.getItem(pos).hasFewLinks()) {
                 openMultiLink(adMain.getItem(pos), view)
+            } else {
+                openSingleLink(adMain.getItem(pos).link)
             }
         }
         lvMain.setOnTouchListener { _, event: MotionEvent ->
@@ -199,14 +200,13 @@ class SiteFragment : NeoFragment() {
 
     private fun openMultiLink(links: ListItem, parent: View) {
         val pMenu = PopupMenu(requireContext(), parent)
-        for (i in 1 until links.count) pMenu.menu.add(links.getHead(i))
+        links.headsAndLinks().forEach {
+            val item = pMenu.menu.add(it.first)
+            item.intent = Intent().apply { this.action = it.second }
+        }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            val title = item.title.toString()
-            for (i in 0 until links.count) {
-                if (links.getHead(i) == title) {
-                    openPage(links.getLink(i))
-                    break
-                }
+            item.intent.action?.let {
+                openPage(it)
             }
             true
         }
@@ -243,7 +243,7 @@ class SiteFragment : NeoFragment() {
                     showAd(
                         adMain.getItem(pos).title,
                         adMain.getItem(pos).link,
-                        adMain.getItem(pos).getHead(0)
+                        adMain.getItem(pos).head
                     )
                 }
                 adMain.getItem(pos).des = ""
@@ -288,7 +288,7 @@ class SiteFragment : NeoFragment() {
                         showAd(
                             adMain.getItem(index).title,
                             adMain.getItem(index).link,
-                            adMain.getItem(index).getHead(0)
+                            adMain.getItem(index).head
                         )
                 }
             }

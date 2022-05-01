@@ -102,12 +102,12 @@ public class HelpFragment extends Fragment {
             }
             if (pos == FEEDBACK)
                 turnFeedback();
-            else if (adHelp.getItem(pos).getCount() == 0) {
-                mHelp[i] = true;
-                adHelp.getItem(pos).addLink("");
-            } else {
+            else if (adHelp.getItem(pos).hasLink()) {
                 mHelp[i] = false;
                 adHelp.getItem(pos).clear();
+            } else {
+                mHelp[i] = true;
+                adHelp.getItem(pos).addLink("");
             }
             adHelp.notifyDataSetChanged();
         });

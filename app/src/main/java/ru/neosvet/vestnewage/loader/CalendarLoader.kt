@@ -10,7 +10,6 @@ import ru.neosvet.vestnewage.helpers.UnreadHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.BufferedReader
 import java.io.InputStream
@@ -110,9 +109,9 @@ class CalendarLoader : LinksProvider, Loader {
         if (updateUnread) {
             val unread = UnreadHelper()
             for (x in list.indices) {
-                for (y in 0 until list[x].count) {
-                    date.day = list[x].title.toInt()
-                    unread.addLink(list[x].getLink(y), date)
+                date.day = list[x].title.toInt()
+                list[x].links.forEach {
+                    unread.addLink(it, date)
                 }
             }
             unread.setBadge()
@@ -124,7 +123,8 @@ class CalendarLoader : LinksProvider, Loader {
         storage.open(name)
         val row = ContentValues()
         row.put(Const.TIME, System.currentTimeMillis())
-        if (!storage.updateTitle(1, row)) storage.insertTitle(row)
+        if (!storage.updateTitle(1, row))
+            storage.insertTitle(row)
     }
 
     fun loadListYear(year: Int, max_m: Int) {
@@ -138,10 +138,8 @@ class CalendarLoader : LinksProvider, Loader {
     }
 
     private fun addLink(n: Int, link: String) {
-        if (list[n].count > 0) {
-            for (i in 0 until list[n].count) {
-                if (list[n].getLink(i).contains(link)) return
-            }
+        list[n].links.forEach {
+            if (it.contains(link)) return
         }
         list[n].addLink(link)
         val row = ContentValues()
@@ -149,10 +147,10 @@ class CalendarLoader : LinksProvider, Loader {
         // пытаемся обновить запись:
         if (!storage.updateTitle(link, row)) {
             // обновить не получилось, добавляем:
-            if (link.contains("@")) row.put(
-                Const.TITLE,
-                link.substring(9)
-            ) else row.put(Const.TITLE, link)
+            if (link.contains("@"))
+                row.put(Const.TITLE, link.substring(9))
+            else
+                row.put(Const.TITLE, link)
             storage.insertTitle(row)
         }
     }

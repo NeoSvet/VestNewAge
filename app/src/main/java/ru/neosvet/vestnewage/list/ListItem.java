@@ -1,14 +1,17 @@
 package ru.neosvet.vestnewage.list;
 
+import android.util.Pair;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
+
+import ru.neosvet.utils.NeoList;
 
 public class ListItem implements Serializable {
     private String title, des = null;
-    private final List<String> heads = new ArrayList<>();
-    private final List<String> links = new ArrayList<>();
-    private boolean select = false;
+    private final NeoList<String> heads = new NeoList<>();
+    private final NeoList<String> links = new NeoList<>();
+    private boolean select = false, few = false;
 
     public ListItem(String title, String link) {
         this.title = title;
@@ -22,11 +25,21 @@ public class ListItem implements Serializable {
     public ListItem(String title, boolean onlyTitle) {
         this.title = title;
         if (onlyTitle)
-            links.add("#");
+            addLink("#");
+    }
+
+    public boolean hasLink() {
+        return links.isNotEmpty();
+    }
+
+    public boolean hasFewLinks() {
+        return few;
     }
 
     public void clear() {
+        heads.clear();
         links.clear();
+        few = false;
     }
 
     public String getTitle() {
@@ -46,18 +59,11 @@ public class ListItem implements Serializable {
         this.des = des;
     }
 
-    public int getCount() {
-        return links.size();
-    }
-
     public String getLink() {
-        if (links.size() == 0)
+        if (links.isNotEmpty())
+            return links.first();
+        else
             return "";
-        return links.get(0);
-    }
-
-    public String getLink(int index) {
-        return links.get(index);
     }
 
     public void addLink(String head, String link) {
@@ -66,6 +72,8 @@ public class ListItem implements Serializable {
     }
 
     public void addLink(String link) {
+        if (!few)
+            few = links.isNotEmpty();
         links.add(link);
     }
 
@@ -73,14 +81,35 @@ public class ListItem implements Serializable {
         heads.add(head);
     }
 
-    public String getHead(int index) {
-        if (index < heads.size())
-            return heads.get(index);
+    public String getHead() {
+        if (heads.isNotEmpty())
+            return heads.first();
         else
             return "";
     }
 
     public boolean isSelect() {
         return select;
+    }
+
+    public Iterator<String> getLinks() {
+        links.reset();
+        return links;
+    }
+
+    public Iterator<Pair<String, String>> headsAndLinks() {
+        heads.reset();
+        links.reset();
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return heads.hasNext() && links.hasNext();
+            }
+
+            @Override
+            public Pair<String, String> next() {
+                return new Pair<>(heads.next(), links.next());
+            }
+        };
     }
 }

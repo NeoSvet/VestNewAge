@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.html.PageParser
 import ru.neosvet.utils.Const
+import ru.neosvet.utils.Lib
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
@@ -54,7 +55,7 @@ class SiteLoader(private val file: String) : LinksProvider {
             page.load(link, "page-title")
         } else {
             i = link.lastIndexOf("/") + 1
-            val url  = link.substring(0, i) + Const.PRINT + link.substring(i)
+            val url = link.substring(0, i) + Const.PRINT + link.substring(i)
             page.load(url, "razdel")
         }
         var s: String? = page.currentElem ?: return
@@ -109,38 +110,40 @@ class SiteLoader(private val file: String) : LinksProvider {
         var url = link
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
             || url.lastIndexOf("/") == url.length - 1)
-                url = NeoClient.SITE + url.substring(1)
+            url = NeoClient.SITE + url.substring(1)
         if (url.indexOf("/") == 0) url = url.substring(1)
-        list[list.size - 1].addLink(head, url)
+        val i = list.size - 1
+        if(list[i].link == "@")
+            list[i].clear()
+        list[i].addLink(head, url)
     }
 
     private fun setDes(d: String) {
         if (list.size > 0) {
             if (d != "") {
                 val i = list.size - 1
-                if (list[i].link == "#") list.add(ListItem(d)) else list[i].des =
-                    d
+                if (list[i].link == "#")
+                    list.add(ListItem(d))
+                else
+                    list[i].des = d
             }
         }
     }
 
     private fun saveList() {
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
-        var j: Int
         for (i in list.indices) {
             bw.write(list[i].title + Const.N)
             bw.write(list[i].des + Const.N)
-            when (list[i].count) {
-                0 -> bw.write("@" + Const.N)
-                1 -> bw.write(list[i].link + Const.N)
-                else -> {
-                    j = 0
-                    while (j < list[i].count) {
-                        bw.write(list[i].getLink(j) + Const.N)
-                        bw.write(list[i].getHead(j) + Const.N)
-                        j++
+            when {
+                list[i].hasFewLinks() -> {
+                    list[i].headsAndLinks().forEach {
+                        bw.write(it.second + Const.N)
+                        bw.write(it.first + Const.N)
                     }
                 }
+                list[i].hasLink() -> bw.write(list[i].link + Const.N)
+                else -> bw.write("@" + Const.N)
             }
             bw.write(SiteModel.END + Const.N)
             bw.flush()

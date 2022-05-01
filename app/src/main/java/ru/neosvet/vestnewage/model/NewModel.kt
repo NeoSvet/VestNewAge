@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.helpers.NotificationHelper
@@ -85,7 +84,7 @@ class NewModel : NeoViewModel() {
         ads.showAd(
             t.substring(t.indexOf(" ") + 1),
             item.link,
-            item.getHead(0)
+            item.head
         )
     }
 
