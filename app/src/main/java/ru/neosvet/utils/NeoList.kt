@@ -1,6 +1,6 @@
 package ru.neosvet.utils
 
-class NeoList<T> {
+class NeoList<T> : Iterator<T> {
     data class Node<T>(
         val item: T,
         var next: Node<T>? = null
@@ -8,8 +8,10 @@ class NeoList<T> {
 
     private var first: Node<T>? = null
     private var current: Node<T>? = null
+    private var isFirst = true
 
     fun reset() {
+        isFirst = true
         current = first
     }
 
@@ -28,11 +30,18 @@ class NeoList<T> {
 
     fun current(): T = current!!.item
 
-    fun next(): Boolean {
-        if (current?.next == null)
-            return false
+    override fun hasNext(): Boolean {
+        if (isFirst) return first != null
+        return current?.next != null
+    }
+
+    override fun next(): T {
+        if (isFirst) {
+            isFirst = false
+            return first()
+        }
         current = current?.next
-        return true
+        return current()
     }
 
     fun clear() {

@@ -178,8 +178,9 @@ public class PageParser {
     }
 
     public String getNextElem() {
-        if (!content.next())
+        if (!content.hasNext())
             return null;
+        content.next();
         return itemToString();
     }
 
@@ -189,8 +190,8 @@ public class PageParser {
             return elem.getCode();
         StringBuilder s = new StringBuilder(elem.getCode());
         int end = 1;
-        while (end > 0 && content.next()) {
-            HTMLElem e = content.current();
+        while (end > 0 && content.hasNext()) {
+            HTMLElem e = content.next();
             s.append(e.getCode());
             if (elem.tag.equals(e.tag)) {
                 if (e.start) end++;
@@ -209,9 +210,9 @@ public class PageParser {
     }
 
     public String getNextItem() {
-        if (!content.next())
+        if (!content.hasNext())
             return null;
-        return content.current().getCode();
+        return content.next().getCode();
     }
 
     public String getLink() {
