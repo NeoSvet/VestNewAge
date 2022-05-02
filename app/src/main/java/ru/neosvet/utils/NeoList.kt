@@ -10,8 +10,8 @@ class NeoList<T> : Iterator<T> {
     private var current: Node<T>? = null
     private var isFirst = true
 
-    fun reset() {
-        isFirst = true
+    fun reset(forIterator: Boolean) {
+        isFirst = forIterator
         current = first
     }
 

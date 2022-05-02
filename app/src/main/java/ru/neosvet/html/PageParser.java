@@ -166,8 +166,7 @@ public class PageParser {
             }
             content.add(elem);
         }
-        content.reset();
-        content.next(); //for turn isFirst to false
+        content.reset(false);
     }
 
     public void clear() {

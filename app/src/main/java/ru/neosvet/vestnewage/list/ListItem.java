@@ -93,13 +93,13 @@ public class ListItem implements Serializable {
     }
 
     public Iterator<String> getLinks() {
-        links.reset();
+        links.reset(true);
         return links;
     }
 
     public Iterator<Pair<String, String>> headsAndLinks() {
-        heads.reset();
-        links.reset();
+        heads.reset(true);
+        links.reset(true);
         return new Iterator<>() {
             @Override
             public boolean hasNext() {
