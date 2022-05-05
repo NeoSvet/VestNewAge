@@ -70,8 +70,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
             NeoState.Loading ->
                 setStatus(true)
             is NeoState.Error -> {
-                setStatus(false)
                 act?.status?.setError(state.throwable.localizedMessage)
+                setStatus(false)
             }
             else ->
                 onChangedState(state)
@@ -91,7 +91,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
                 status.setLoad(true)
             } else {
                 ProgressHelper.setBusy(false)
-                if (status.isVisible)
+                if (status.isVisible && status.isCrash.not())
                     status.setLoad(false)
             }
         }
