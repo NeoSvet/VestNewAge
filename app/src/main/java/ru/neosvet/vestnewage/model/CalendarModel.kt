@@ -84,6 +84,7 @@ class CalendarModel : NeoViewModel() {
 
     fun changeDate(newDate: DateHelper) {
         date = newDate
+        createField()
         openCalendar(0)
     }
 
