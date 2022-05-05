@@ -27,7 +27,7 @@ public class Lib {
     }
 
     public static File getFileS(String name) {
-        return new File(App.context.getFilesDir() + File.separator +name);
+        return new File(App.context.getFilesDir() + File.separator + name);
     }
 
     public static File getFileP(String name) {
@@ -48,12 +48,14 @@ public class Lib {
 
     public static void openInApps(String url, @Nullable String titleChooser) {
         try {
-            Intent myIntent = new Intent(Intent.ACTION_VIEW);
-            myIntent.setData(android.net.Uri.parse(url));
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            android.net.Uri uri = android.net.Uri.parse(url);
+            intent.setData(uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if (titleChooser == null)
-                App.context.startActivity(myIntent);
+                App.context.startActivity(intent);
             else
-                App.context.startActivity(Intent.createChooser(myIntent, titleChooser));
+                App.context.startActivity(Intent.createChooser(intent, titleChooser));
         } catch (Exception e) {
             url = url.substring(url.indexOf(":") + 1);
             if (url.indexOf("/") == 0)
