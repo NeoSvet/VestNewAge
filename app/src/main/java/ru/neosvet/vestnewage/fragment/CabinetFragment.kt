@@ -9,9 +9,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView.OnItemClickListener
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.SoftKeyboard
 import ru.neosvet.ui.dialogs.CustomDialog
@@ -20,18 +20,17 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.CabinetActivity
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helpers.CabinetHelper
-import ru.neosvet.vestnewage.list.ListAdapter
+import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.RecyclerAdapter
 import ru.neosvet.vestnewage.model.CabinetModel
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
 
-class CabinetFragment : NeoFragment() {
+class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     private var binding: CabinetFragmentBinding? = null
-    private val adMain: ListAdapter by lazy {
-        ListAdapter(requireContext())
-    }
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this)
     private lateinit var softKeyboard: SoftKeyboard
     private val model: CabinetModel
         get() = neomodel as CabinetModel
@@ -74,16 +73,34 @@ class CabinetFragment : NeoFragment() {
                         login.root.isVisible = true
                         fabEnter.isVisible = true
                         fabExit.isVisible = false
+                        rvList.layoutManager = GridLayoutManager(requireContext(), 1)
                     } else {
                         login.root.isVisible = false
                         fabEnter.isVisible = false
                         fabExit.isVisible = true
+                        initLayoutManager()
                     }
                 }
-                adMain.setItems(state.list)
+                adapter.setItems(state.list)
             }
         }
     }
+
+    private fun initLayoutManager() {
+        val span = if (model.type == CabinetModel.Type.WORDS) {
+            when (resources.getInteger(R.integer.screen_mode)) {
+                resources.getInteger(R.integer.screen_phone_port) -> 1
+                resources.getInteger(R.integer.screen_phone_land) -> 2
+                resources.getInteger(R.integer.screen_tablet_land) -> 3
+                resources.getInteger(R.integer.screen_tablet_port) -> 2
+                else -> 1
+            } //CABINET:
+        } else if (isTablet()) 3 else 1
+        binding?.rvList?.layoutManager = GridLayoutManager(requireContext(), span)
+    }
+
+    private fun isTablet() =
+        resources.getInteger(R.integer.screen_mode) > resources.getInteger(R.integer.screen_phone_land)
 
     override fun onBackPressed(): Boolean = model.onBack()
 
@@ -107,44 +124,8 @@ class CabinetFragment : NeoFragment() {
     }
 
     private fun initMain() = binding?.run {
-        lvList.adapter = adMain
-        lvList.onItemClickListener =
-            OnItemClickListener { _, _, pos: Int, _ ->
-                if (model.isRun) return@OnItemClickListener
-                when (model.type) {
-                    CabinetModel.Type.LOGIN -> {
-                        val s = when (pos) {
-                            0 -> {
-                                Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
-                                return@OnItemClickListener
-                            }
-                            1 -> "sendpass.html"
-                            2 -> "register.html"
-                            3 -> "reginfo.html"
-                            4 -> "regstat.html"
-                            else -> "trans.html"
-                        }
-                        CabinetActivity.openPage(s)
-                    }
-                    CabinetModel.Type.CABINET -> {
-                        when (pos) {
-                            0 -> if (adMain.getItem(pos).des ==
-                                getString(R.string.select_status)
-                            ) {
-                                setStatus(true)
-                                model.getListWord()
-                            } else Lib.showToast(getString(R.string.send_unlivable))
-                            1 -> CabinetActivity.openPage("edinenie/anketa.html")
-                            2 -> CabinetActivity.openPage("edinenie/edinomyshlenniki.html")
-                            else -> {}
-                        }
-                    }
-                    CabinetModel.Type.WORDS -> {
-                        setStatus(true)
-                        model.selectWord(pos, adMain.getItem(pos).title)
-                    }
-                }
-            }
+        rvList.layoutManager = GridLayoutManager(requireContext(), 1)
+        rvList.adapter = adapter
         fabEnter.setOnClickListener { subLogin() }
         fabExit.setOnClickListener { model.onBack() }
     }
@@ -162,7 +143,14 @@ class CabinetFragment : NeoFragment() {
                 binding?.fabEnter?.isVisible = ready
             }
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         }
         etEmail.addTextChangedListener(textWatcher)
@@ -193,8 +181,8 @@ class CabinetFragment : NeoFragment() {
     private fun subLogin() {
         softKeyboard.closeSoftKeyboard()
         if (model.isRun) return
-        if (adMain.count == 1) {
-            adMain.clear()
+        if (adapter.itemCount == 1) {
+            adapter.clear()
             model.loginScreen()
         }
         binding?.login?.run {
@@ -204,6 +192,40 @@ class CabinetFragment : NeoFragment() {
             model.login(email, password)
             if (cbRemEmail.isChecked) {
                 helper.save(email, if (cbRemPassword.isChecked) password else "")
+            }
+        }
+    }
+
+    override fun onItemClick(index: Int, item: ListItem) {
+        if (model.isRun) return
+        when (model.type) {
+            CabinetModel.Type.LOGIN -> {
+                val s = when (index) {
+                    0 -> {
+                        Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
+                        return
+                    }
+                    1 -> "sendpass.html"
+                    2 -> "register.html"
+                    3 -> "reginfo.html"
+                    4 -> "regstat.html"
+                    else -> "trans.html"
+                }
+                CabinetActivity.openPage(s)
+            }
+            CabinetModel.Type.CABINET -> {
+                when (index) {
+                    0 -> if (item.des == getString(R.string.select_status)) {
+                        setStatus(true)
+                        model.getListWord()
+                    } else Lib.showToast(getString(R.string.send_unlivable))
+                    1 -> CabinetActivity.openPage("edinenie/anketa.html")
+                    2 -> CabinetActivity.openPage("edinenie/edinomyshlenniki.html")
+                }
+            }
+            CabinetModel.Type.WORDS -> {
+                setStatus(true)
+                model.selectWord(index, item.title)
             }
         }
     }

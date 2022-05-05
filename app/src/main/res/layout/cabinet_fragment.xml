@@ -11,8 +11,8 @@
         android:id="@+id/login"
         layout="@layout/cabinet_login" />
 
-    <ListView
-        android:id="@+id/lvList"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:paddingTop="5dp"
