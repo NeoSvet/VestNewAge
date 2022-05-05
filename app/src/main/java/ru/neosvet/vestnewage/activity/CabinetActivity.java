@@ -21,21 +21,21 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.ui.StatusButton;
+import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.fragment.CabmainFragment;
-import ru.neosvet.vestnewage.model.CabModel;
+import ru.neosvet.vestnewage.helpers.CabinetHelper;
 
-public class CabpageActivity extends AppCompatActivity {
+public class CabinetActivity extends AppCompatActivity {
     private WebView wvBrowser;
-    private StatusButton status = new StatusButton();
+    private final StatusButton status = new StatusButton();
     private View fabClose;
     private boolean twoPointers = false;
 
     public static void openPage(String link) {
-        Intent intent = new Intent(App.context, CabpageActivity.class);
+        Intent intent = new Intent(App.context, CabinetActivity.class);
         intent.putExtra(Const.LINK, link);
         if (!(App.context instanceof Activity))
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -45,8 +45,9 @@ public class CabpageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.cabpage_activity);
+        setContentView(R.layout.cabinet_activity);
         initView();
+        status.setLoad(true);
         wvBrowser.loadUrl(NeoClient.CAB_SITE + getIntent().getStringExtra(Const.LINK));
     }
 
@@ -80,16 +81,18 @@ public class CabpageActivity extends AppCompatActivity {
     }
 
     private class wvClient extends WebViewClient {
+        private static final String SCRIPT = "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
+
         @Nullable
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            if (CabModel.cookie == null || CabModel.cookie.isEmpty())
+            if (CabinetHelper.cookie.isEmpty())
                 return super.shouldInterceptRequest(view, request);
             try {
                 OkHttpClient client = new OkHttpClient();
                 Request req = new Request.Builder()
                         .url(request.getUrl().toString())
-                        .addHeader("cookie", CabModel.cookie)
+                        .addHeader("cookie", CabinetHelper.cookie)
                         .build();
                 Response response = client.newCall(req).execute();
                 InputStream responseInputStream = response.body().byteStream();
@@ -104,7 +107,7 @@ public class CabpageActivity extends AppCompatActivity {
             if (url.contains("#")) return;
             fabClose.setVisibility(View.GONE);
             status.setLoad(true);
-            CabpageActivity.this.setTitle("");
+            CabinetActivity.this.setTitle("");
             view.setVisibility(View.GONE);
             super.onPageStarted(view, url, favicon);
         }
@@ -112,18 +115,19 @@ public class CabpageActivity extends AppCompatActivity {
         @Override
         public void onPageFinished(WebView view, String url) {
             if (url.contains("#")) return;
-            String SCRIPT = "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
-            wvBrowser.evaluateJavascript(SCRIPT,
-                    s -> wvBrowser.setVisibility(View.VISIBLE));
-            status.setLoad(false);
+            wvBrowser.evaluateJavascript(SCRIPT, s -> status.setLoad(false));
             String s = wvBrowser.getTitle();
+            fabClose.setVisibility(View.VISIBLE);
             if (!s.contains(":")) {
-                CabmainFragment.error = getString(R.string.cab_fail);
-                onBackPressed();
+                final CustomDialog alert = new CustomDialog(CabinetActivity.this);
+                alert.setTitle(getString(R.string.error));
+                alert.setMessage(getString(R.string.cab_fail));
+                alert.setRightButton(getString(android.R.string.ok), v -> alert.dismiss());
+                alert.show(null);
                 return;
             }
-            CabpageActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
-            fabClose.setVisibility(View.VISIBLE);
+            wvBrowser.setVisibility(View.VISIBLE);
+            CabinetActivity.this.setTitle(s.substring(s.indexOf(":") + 3));
             super.onPageFinished(view, url);
         }
     }

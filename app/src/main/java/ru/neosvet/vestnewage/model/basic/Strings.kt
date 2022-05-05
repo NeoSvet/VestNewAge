@@ -46,3 +46,11 @@ data class MarkerStrings(
     val unuse_dot: String,
     val cancel_rename: String
 )
+
+data class CabinetStrings(
+    val selected_status: String,
+    val anketa_failed: String,
+    val send_status: String,
+    val select_status: String,
+    val send_unlivable: String
+)

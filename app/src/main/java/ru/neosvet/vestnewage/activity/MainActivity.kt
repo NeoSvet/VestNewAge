@@ -391,7 +391,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
             R.id.nav_cabinet -> {
-                curFragment = CabmainFragment().also {
+                curFragment = CabinetFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }

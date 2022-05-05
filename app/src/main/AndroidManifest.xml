@@ -83,7 +83,7 @@
             android:label="@string/marker"
             android:theme="@style/Theme.MainTheme" />
         <activity
-            android:name=".activity.CabpageActivity"
+            android:name=".activity.CabinetActivity"
             android:theme="@style/Theme.MainTheme" />
 
         <service
