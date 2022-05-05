@@ -26,7 +26,6 @@ import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MarkerActivity
-import ru.neosvet.vestnewage.databinding.MarkersContentBinding
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.ProgressHelper
@@ -36,7 +35,6 @@ import ru.neosvet.vestnewage.model.basic.*
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
-    private var binding2: MarkersContentBinding? = null
     private val adapter: MarkerAdapter by lazy {
         MarkerAdapter(model)
     }
@@ -76,7 +74,6 @@ class MarkersFragment : NeoFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = MarkersFragmentBinding.inflate(inflater, container, false).also {
-        binding2 = MarkersContentBinding.bind(it.root.findViewById(R.id.content_markers))
         binding = it
     }.root
 
@@ -89,7 +86,6 @@ class MarkersFragment : NeoFragment() {
 
     override fun onDestroyView() {
         binding = null
-        binding2 = null
         super.onDestroyView()
     }
 
@@ -166,7 +162,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initContent() = binding2?.run {
+    private fun initContent() = binding?.content?.run {
         val span = when (resources.getInteger(R.integer.screen_mode)) {
             resources.getInteger(R.integer.screen_phone_port) -> 1
             resources.getInteger(R.integer.screen_phone_land) -> 2
@@ -242,7 +238,7 @@ class MarkersFragment : NeoFragment() {
 
     private fun deleteDialog() = model.selectedItem?.title?.let { title ->
         model.diDelete = true
-        binding2?.rvMarker?.smoothScrollToPosition(model.iSel)
+        binding?.content?.rvMarker?.smoothScrollToPosition(model.iSel)
         val dialog = CustomDialog(act)
         dialog.setTitle(getString(R.string.delete) + "?")
         dialog.setMessage(title)
@@ -294,8 +290,8 @@ class MarkersFragment : NeoFragment() {
             fabEdit.isVisible = false
             fabBack.isVisible = false
             fabMenu.isVisible = false
+            content.pEdit.isVisible = true
         }
-        binding2?.pEdit?.isVisible = true
     }
 
     private fun unSelected() = binding?.run {
@@ -303,7 +299,7 @@ class MarkersFragment : NeoFragment() {
         if (model.list.isNotEmpty()) fabEdit.isVisible = true
         if (model.isCollections.not()) fabBack.isVisible = true
         else fabMenu.isVisible = true
-        binding2?.pEdit?.isVisible = false
+        content.pEdit.isVisible = false
         model.selected(-1)
     }
 
@@ -390,7 +386,7 @@ class MarkersFragment : NeoFragment() {
                 getString(R.string.collection_is_empty)
             tvEmpty.isVisible = true
             fabEdit.isVisible = false
-            binding2?.pEdit?.isVisible = false
+            content.pEdit.isVisible = false
             unSelected()
         } else {
             when (state.event) {
