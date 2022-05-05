@@ -4,13 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +24,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Constraints;
 import androidx.work.Data;
@@ -52,7 +49,7 @@ import ru.neosvet.vestnewage.model.BaseModel;
 import ru.neosvet.vestnewage.model.SummaryModel;
 import ru.neosvet.vestnewage.model.basic.NeoState;
 import ru.neosvet.vestnewage.model.basic.NeoViewModel;
-import ru.neosvet.vestnewage.workers.CheckWorker;
+import ru.neosvet.vestnewage.service.CheckStarter;
 
 public class SettingsFragment extends NeoFragment {
     private final byte PANEL_BASE = 0, PANEL_SCREEN = 1, PANEL_CLEAR = 2, PANEL_CHECK = 3, PANEL_PROM = 4;
@@ -423,7 +420,7 @@ public class SettingsFragment extends NeoFragment {
         editor.putInt(Const.TIME, p);
         editor.apply();
         WorkManager work = WorkManager.getInstance(act.getApplicationContext());
-        work.cancelAllWorkByTag(CheckWorker.TAG_PERIODIC);
+        work.cancelAllWorkByTag(CheckStarter.TAG_PERIODIC);
         if (p == Const.TURN_OFF)
             return;
         if (p == 15) p = 20;
@@ -431,14 +428,10 @@ public class SettingsFragment extends NeoFragment {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
                 .build();
-        Data data = new Data.Builder()
-                .putBoolean(Const.CHECK, true)
-                .build();
         PeriodicWorkRequest task = new PeriodicWorkRequest
-                .Builder(CheckWorker.class, p, TimeUnit.MINUTES, p - 5, TimeUnit.MINUTES)
+                .Builder(CheckStarter.class, p, TimeUnit.MINUTES, p - 5, TimeUnit.MINUTES)
                 .setConstraints(constraints)
-                .setInputData(data)
-                .addTag(CheckWorker.TAG_PERIODIC)
+                .addTag(CheckStarter.TAG_PERIODIC)
                 .build();
         work.enqueue(task);
     }
