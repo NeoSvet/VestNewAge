@@ -6,7 +6,7 @@ import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import java.io.File
 
@@ -69,7 +69,7 @@ class SettingsModel : NeoViewModel() {
                     }
                 }
             }
-            mstate.postValue(CheckTime(size))
+            mstate.postValue(LongState(size))
         }
     }
 

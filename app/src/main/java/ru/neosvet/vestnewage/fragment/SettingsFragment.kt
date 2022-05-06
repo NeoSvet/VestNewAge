@@ -30,7 +30,7 @@ import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helpers.NotificationHelper
 import ru.neosvet.vestnewage.helpers.PromHelper
 import ru.neosvet.vestnewage.model.SettingsModel
-import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.service.CheckStarter
@@ -100,9 +100,9 @@ class SettingsFragment : NeoFragment() {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            is CheckTime -> {
+            is LongState -> {
                 setStatus(false)
-                val size = state.sec / 1048576f //to MegaByte
+                val size = state.value / 1048576f //to MegaByte
                 Lib.showToast(String.format(getString(R.string.format_freed_size), size))
             }
         }

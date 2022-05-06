@@ -10,7 +10,7 @@ sealed class NeoState {
 
 object Ready : NeoState()
 
-data class CheckTime(val sec: Long) : NeoState()
+data class LongState(val value: Long) : NeoState()
 
 data class ProgressState(val percent: Int) : NeoState()
 

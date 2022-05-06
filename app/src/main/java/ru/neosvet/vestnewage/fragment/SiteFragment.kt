@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.SiteModel
-import ru.neosvet.vestnewage.model.basic.CheckTime
+import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
@@ -292,8 +292,8 @@ class SiteFragment : NeoFragment() {
                         )
                 }
             }
-            is CheckTime ->
-                binding?.fabRefresh?.isVisible = act?.status?.checkTime(state.sec) == false
+            is LongState ->
+                binding?.fabRefresh?.isVisible = act?.status?.checkTime(state.value) == false
         }
     }
 }

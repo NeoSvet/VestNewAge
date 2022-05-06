@@ -90,7 +90,7 @@ class SiteModel : NeoViewModel() {
         scope.launch {
             val list = mutableListOf<ListItem>()
             val sec = f.lastModified() / DateHelper.SEC_IN_MILLS
-            mstate.postValue(CheckTime(sec))
+            mstate.postValue(LongState(sec))
             list.add(getFirstItem())
             var i = 1
             var d: String?
