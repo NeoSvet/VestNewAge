@@ -8,7 +8,7 @@
     android:padding="0dp">
 
     <LinearLayout
-        android:id="@+id/bCheck"
+        android:id="@+id/btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/card_bg"
@@ -16,7 +16,7 @@
         android:padding="10dp">
 
         <ImageView
-            android:id="@+id/imgCheck"
+            android:id="@+id/img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -32,7 +32,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/pCheck"
+        android:id="@+id/pnl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

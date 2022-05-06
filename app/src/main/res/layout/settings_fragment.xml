@@ -15,15 +15,25 @@
             android:orientation="vertical"
             android:paddingBottom="10dp">
 
-            <include layout="@layout/settings_base" />
+            <include
+                android:id="@+id/base"
+                layout="@layout/settings_base" />
 
-            <include layout="@layout/settings_screen" />
+            <include
+                android:id="@+id/screen"
+                layout="@layout/settings_screen" />
 
-            <include layout="@layout/settings_clear" />
+            <include
+                android:id="@+id/clear"
+                layout="@layout/settings_clear" />
 
-            <include layout="@layout/settings_check" />
+            <include
+                android:id="@+id/check"
+                layout="@layout/settings_check" />
 
-            <include layout="@layout/settings_prom" />
+            <include
+                android:id="@+id/prom"
+                layout="@layout/settings_prom" />
 
             <LinearLayout
                 style="@style/ItemBG"
