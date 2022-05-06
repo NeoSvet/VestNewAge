@@ -38,15 +38,15 @@ class MainHelper(private val act: MainActivity) {
     lateinit var tabLayout: TabLayout
 
     val unread = UnreadHelper()
-    var countNew = 0
+    var countNew: Int = unread.count
     var curId = 0
     var prevId = 0
     val hasPrevId: Boolean
         get() = prevId != 0
     val newId: Int
         get() = unread.getNewId(countNew)
-    val isTablet: Boolean
-    val isTabletLand: Boolean
+    private val isTablet: Boolean
+    private val isTabletLand: Boolean
     private val pref: SharedPreferences = act.getSharedPreferences(
         MainActivity::class.java.simpleName,
         AppCompatActivity.MODE_PRIVATE
@@ -87,7 +87,8 @@ class MainHelper(private val act: MainActivity) {
         bDownloadAll.setOnClickListener {
             menuDownload.hide()
             LoaderService.postCommand(
-                LoaderService.DOWNLOAD_ALL, "")
+                LoaderService.DOWNLOAD_ALL, ""
+            )
         }
     }
 
@@ -133,7 +134,7 @@ class MainHelper(private val act: MainActivity) {
         }
     }
 
-    fun setNew(): Boolean {
+    fun checkNew(): Boolean {
         if (countNew > 0 && (curId == R.id.nav_new || curId == R.id.nav_rss ||
                     curId == R.id.nav_site || curId == R.id.nav_calendar)
         ) {
@@ -144,13 +145,18 @@ class MainHelper(private val act: MainActivity) {
         return false
     }
 
+    fun setNewValue() {
+        tvNew.text = countNew.toString()
+        navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
+    }
+
     fun updateNew() {
         val k = unread.count
         if (countNew == k) return
         countNew = k
         navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
         tvNew.text = countNew.toString()
-        if (setNew())
+        if (checkNew())
             tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink))
     }
 

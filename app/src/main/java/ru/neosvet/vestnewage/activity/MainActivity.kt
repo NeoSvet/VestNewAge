@@ -168,6 +168,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun finishFlashStar() {
+        helper.setNewValue()
         helper.toolbar?.isVisible = true
         if (helper.isFirstRun) {
             setFragment(R.id.nav_help, false)
@@ -176,7 +177,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (firstFragment != 0)
             setFragment(firstFragment, false)
         showWelcome()
-        updateNew()
     }
 
     private fun initAnim() {
@@ -325,7 +325,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         status.setError(null)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
-        helper.setNew()
+        helper.checkNew()
         when (id) {
             R.id.menu_fragment -> {
                 statusBack = StatusBack.MENU
@@ -505,7 +505,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun startAnimMax() {
-        if (helper.setNew()) helper.tvNew.startAnimation(anMax)
+        if (helper.checkNew()) helper.tvNew.startAnimation(anMax)
         fab?.isVisible = true
         fab?.startAnimation(anMax)
     }
