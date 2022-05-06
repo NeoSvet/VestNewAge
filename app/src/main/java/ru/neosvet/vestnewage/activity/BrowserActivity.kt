@@ -26,7 +26,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.browser.NeoInterface
 import ru.neosvet.vestnewage.activity.browser.WebClient
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
-import ru.neosvet.vestnewage.databinding.BrowserContentBinding
 import ru.neosvet.vestnewage.helpers.BrowserHelper
 import ru.neosvet.vestnewage.helpers.PromHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
@@ -70,12 +69,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private val helper: BrowserHelper
         get() = model.helper!!
     private lateinit var binding: BrowserActivityBinding
-    private lateinit var content: BrowserContentBinding
     private val model: BrowserModel by lazy {
         ViewModelProvider(this).get(BrowserModel::class.java)
     }
     private val positionOnPage: Float
-        get() = content.wvBrowser.run {
+        get() = binding.content.wvBrowser.run {
             scrollY.toFloat() / scale / contentHeight.toFloat()
         }
 
@@ -87,7 +85,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         binding = BrowserActivityBinding.inflate(layoutInflater)
-        content = BrowserContentBinding.bind(binding.root.findViewById(R.id.content_browser))
         setContentView(binding.root)
         if (model.helper == null)
             model.init(this)
@@ -108,7 +105,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     override fun onDestroy() {
-        helper.zoom = (content.wvBrowser.scale * 100.0).toInt()
+        helper.zoom = (binding.content.wvBrowser.scale * 100.0).toInt()
         helper.save()
         super.onDestroy()
     }
@@ -132,7 +129,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         }
 
         if (helper.isSearch) {
-            with(content) {
+            with(binding.content) {
                 etSearch.setText(helper.request)
                 if (helper.searchIndex > -1)
                     etSearch.isEnabled = false
@@ -149,11 +146,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         findRequest()
         var i = 0
         if (prog > 0) while (i < prog) {
-            content.wvBrowser.findNext(true)
+            binding.content.wvBrowser.findNext(true)
             i++
         }
         else while (i > prog) {
-            content.wvBrowser.findNext(false)
+            binding.content.wvBrowser.findNext(false)
             i--
         }
     }
@@ -161,7 +158,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private fun restorePosition(pos: Float) {
         Timer().schedule(object : TimerTask() {
             override fun run() {
-                with(content.wvBrowser) {
+                with(binding.content.wvBrowser) {
                     post {
                         scrollTo(0, (pos * scale * contentHeight.toFloat()).toInt())
                     }
@@ -173,7 +170,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private fun closeSearch() {
         closeKeyboard()
         tip.hide()
-        with(content) {
+        with(binding.content) {
             if (helper.searchIndex > -1) {
                 etSearch.setText("")
                 etSearch.isEnabled = true
@@ -191,16 +188,16 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private fun findRequest() {
         val s = helper.request
         if (s.contains(Const.N))
-            content.wvBrowser.findAllAsync(s.substring(0, s.indexOf(Const.N)))
+            binding.content.wvBrowser.findAllAsync(s.substring(0, s.indexOf(Const.N)))
         else
-            content.wvBrowser.findAllAsync(s)
+            binding.content.wvBrowser.findAllAsync(s)
     }
 
     private fun initViews() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.isVisible = false
         val im = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        softKeyboard = SoftKeyboard(content.root, im)
+        softKeyboard = SoftKeyboard(binding.content.root, im)
         with(binding.navView) {
             setNavigationItemSelectedListener(this@BrowserActivity)
             this@BrowserActivity.menu = NeoMenu(
@@ -234,7 +231,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-        with(content) {
+        with(binding.content) {
             initTheme()
             etSearch.requestLayout()
             root.requestLayout()
@@ -266,17 +263,16 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else if (content.pSearch.isVisible) {
+        } else if (binding.content.pSearch.isVisible) {
             closeSearch()
         } else if (!model.onBackBrowser()) {
             super.onBackPressed()
         }
     }
 
-    private fun setViews() {
-        content.wvBrowser.webViewClient =
-            WebClient(this)
-        content.wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, _ ->
+    private fun setViews() = binding.content.run {
+        wvBrowser.webViewClient = WebClient(this@BrowserActivity)
+        wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, _ ->
             if (!helper.isNavButtons) return@setOnScrollChangeListener
             with(binding) {
                 if (scrollY > 300) {
@@ -288,16 +284,16 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 }
             }
         }
-        content.wvBrowser.setOnTouchListener { view: View?, event: MotionEvent ->
+        wvBrowser.setOnTouchListener { view: View?, event: MotionEvent ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                if (!helper.isNoMenu && content.pSearch.isVisible.not())
+                if (!helper.isNoMenu && pSearch.isVisible.not())
                     binding.fabMenu.startAnimation(anMin)
                 if (prom.isProm)
                     tvPromTime?.startAnimation(anMin)
             } else if (event.actionMasked == MotionEvent.ACTION_UP ||
                 event.actionMasked == MotionEvent.ACTION_CANCEL
             ) {
-                if (!helper.isNoMenu && content.pSearch.isVisible.not()) {
+                if (!helper.isNoMenu && pSearch.isVisible.not()) {
                     binding.fabMenu.isVisible = true
                     binding.fabMenu.startAnimation(anMax)
                 }
@@ -310,55 +306,53 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 twoPointers = true
             } else if (twoPointers) {
                 twoPointers = false
-                content.wvBrowser.setInitialScale((content.wvBrowser.scale * 100.0).toInt())
+                wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
             }
             false
         }
         with(binding) {
             fabMenu.setOnClickListener { drawerLayout.openDrawer(Gravity.LEFT) }
-            fabTop.setOnClickListener { content.wvBrowser.scrollTo(0, 0) }
+            fabTop.setOnClickListener { wvBrowser.scrollTo(0, 0) }
             fabBottom.setOnClickListener {
-                with(content.wvBrowser) {
-                    scrollTo(0, (contentHeight * scale).toInt())
-                }
+                wvBrowser.scrollTo(0, (wvBrowser.contentHeight * wvBrowser.scale).toInt())
             }
         }
-        content.etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
+        etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
             ) {
-                if (content.etSearch.length() > 0) {
+                if (etSearch.length() > 0) {
                     closeKeyboard()
-                    helper.setSearchString(content.etSearch.text.toString())
+                    helper.setSearchString(etSearch.text.toString())
                     findRequest()
                 }
                 return@setOnKeyListener true
             }
             false
         }
-        content.bPrev.setOnClickListener {
+        bPrev.setOnClickListener {
             if (helper.prevSearch()) {
-                content.etSearch.setText(helper.request)
+                etSearch.setText(helper.request)
                 findRequest()
                 return@setOnClickListener
             }
             closeKeyboard()
             initSearch()
             helper.downProg()
-            content.wvBrowser.findNext(false)
+            wvBrowser.findNext(false)
         }
-        content.bNext.setOnClickListener { view: View? ->
+        bNext.setOnClickListener { view: View? ->
             if (helper.nextSearch()) {
-                content.etSearch.setText(helper.request)
+                etSearch.setText(helper.request)
                 findRequest()
                 return@setOnClickListener
             }
             closeKeyboard()
             initSearch()
             helper.upProg()
-            content.wvBrowser.findNext(true)
+            wvBrowser.findNext(true)
         }
-        content.bClose.setOnClickListener { closeSearch() }
+        bClose.setOnClickListener { closeSearch() }
         val bBack = binding.navView.getHeaderView(0).findViewById(R.id.bBack) as View
         bBack.setOnClickListener { finish() }
         initTheme()
@@ -381,7 +375,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         softKeyboard.closeSoftKeyboard()
     }
 
-    private fun initTheme() = content.run {
+    private fun initTheme() = binding.content.run {
         model.lightTheme = helper.isLightTheme
         val context = this@BrowserActivity
         if (helper.isLightTheme) {
@@ -415,7 +409,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 setCheckItem(item, helper.isNavButtons)
                 binding.fabTop.isVisible = helper.isNavButtons
             }
-            R.id.nav_search -> with(content) {
+            R.id.nav_search -> with(binding.content) {
                 if (pSearch.isVisible) closeSearch()
                 binding.fabMenu.isVisible = false
                 pSearch.isVisible = true
@@ -449,7 +443,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 setCheckItem(menu.themeLight, helper.isLightTheme)
                 setCheckItem(menu.themeDark, helper.isLightTheme.not())
                 initTheme()
-                content.wvBrowser.clearCache(true)
+                binding.content.wvBrowser.clearCache(true)
                 model.openPage(false)
             }
         }
@@ -458,7 +452,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     private fun getPageTitle(): String {
-        val t = content.wvBrowser.title
+        val t = binding.content.wvBrowser.title
         if (t.isNullOrEmpty())
             return getString(R.string.default_title)
         return t
@@ -491,7 +485,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     override fun onChanged(state: NeoState) {
         when (state) {
             NeoState.Loading -> {
-                content.wvBrowser.clearCache(true)
+                binding.content.wvBrowser.clearCache(true)
                 status.setLoad(true)
                 status.loadText()
             }
@@ -499,7 +493,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 finishLoading()
                 if (state.timeInSeconds > 0)
                     status.checkTime(state.timeInSeconds)
-                content.wvBrowser.loadUrl(state.url)
+                binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
                 menu.share.isVisible = state.isOtkr.not()
                 restoreSearch()
