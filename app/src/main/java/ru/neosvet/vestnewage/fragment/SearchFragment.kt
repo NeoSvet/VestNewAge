@@ -26,7 +26,6 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity
 import ru.neosvet.vestnewage.activity.MarkerActivity
-import ru.neosvet.vestnewage.databinding.SearchContentBinding
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
@@ -61,7 +60,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private val model: SearchModel
         get() = neomodel as SearchModel
     private var binding: SearchFragmentBinding? = null
-    private var binding2: SearchContentBinding? = null
     private var adPages: PageAdapter? = null
     private val adSearch: ArrayAdapter<String> by lazy {
         ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
@@ -76,8 +74,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private var scrollToFirst = false
     private val helper: SearchHelper
         get() = model.helper
-    val content: SearchContentBinding
-        get() = binding2!!
     override val title: String
         get() = getString(R.string.search)
 
@@ -86,7 +82,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = SearchFragmentBinding.inflate(inflater, container, false).also {
-        binding2 = SearchContentBinding.bind(it.root.findViewById(R.id.content_search))
         binding = it
     }.root
 
@@ -109,7 +104,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         return super.onBackPressed()
     }
 
-    private fun initSearchList() = binding2?.run {
+    private fun initSearchList() = binding?.content?.run {
         lvResult.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
             if (model.isRun) return@OnItemClickListener
             when (adResults.getItem(pos).link) {
@@ -164,7 +159,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initSearchBox() = binding2?.run {
+    private fun initSearchBox() = binding?.content?.run {
         etSearch.threshold = 1
         etSearch.setAdapter(adSearch)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
@@ -187,7 +182,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     override fun onDestroyView() {
         helper.saveLastResult()
         binding = null
-        binding2 = null
         super.onDestroyView()
     }
 
@@ -418,7 +412,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         helper.saveRequest(request)
     }
 
-    private fun showResult(list: List<ListItem>) = content.run {
+    private fun showResult(list: List<ListItem>) = binding?.content?.run {
         adResults.clear()
         if (list.isEmpty()) {
             bShow.isVisible = false
