@@ -94,13 +94,10 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
                 resources.getInteger(R.integer.screen_tablet_land) -> 3
                 resources.getInteger(R.integer.screen_tablet_port) -> 2
                 else -> 1
-            } //CABINET:
-        } else if (isTablet()) 3 else 1
+            }
+        } else 1 //CABINET
         binding?.rvList?.layoutManager = GridLayoutManager(requireContext(), span)
     }
-
-    private fun isTablet() =
-        resources.getInteger(R.integer.screen_mode) > resources.getInteger(R.integer.screen_phone_land)
 
     override fun onBackPressed(): Boolean = model.onBack()
 
@@ -127,7 +124,7 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
         rvList.layoutManager = GridLayoutManager(requireContext(), 1)
         rvList.adapter = adapter
         fabEnter.setOnClickListener { subLogin() }
-        fabExit.setOnClickListener { model.onBack() }
+        fabExit.setOnClickListener { model.exit() }
     }
 
     private fun initLogin() = binding?.login?.run {

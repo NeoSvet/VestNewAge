@@ -251,14 +251,17 @@ class CabinetModel : NeoViewModel() {
             postError(s)
     }
 
+    fun exit() {
+        helper.clear()
+        loginScreen()
+    }
+
     fun onBack(): Boolean {
         when (type) {
             Type.LOGIN ->
                 return true
-            Type.CABINET -> {
-                helper.clear()
-                loginScreen()
-            }
+            Type.CABINET ->
+                exit()
             Type.WORDS -> {
                 wordList.clear()
                 cabinetScreen()
