@@ -21,10 +21,6 @@ import ru.neosvet.vestnewage.model.basic.SuccessCalendar
 import ru.neosvet.vestnewage.storage.PageStorage
 
 class CalendarModel : NeoViewModel() {
-    companion object {
-        const val TAG = "calendar"
-    }
-
     var date: DateHelper = DateHelper.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year
@@ -47,7 +43,7 @@ class CalendarModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, TAG)
+        .putString(Const.TASK, "Calendar")
         .putInt(Const.MONTH, date.month)
         .putInt(Const.YEAR, date.year)
         .putBoolean(Const.UNREAD, isCurMonth()) //updateUnread

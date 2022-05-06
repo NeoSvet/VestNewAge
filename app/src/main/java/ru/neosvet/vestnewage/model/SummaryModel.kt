@@ -20,10 +20,6 @@ import java.io.BufferedReader
 import java.io.FileReader
 
 class SummaryModel : NeoViewModel() {
-    companion object {
-        const val TAG = "summary"
-    }
-
     private var sBack: String = ""
 
     fun init(context: Context) {
@@ -58,7 +54,7 @@ class SummaryModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, TAG)
+        .putString(Const.TASK, "Summary")
         .build()
 
     fun openList(loadIfNeed: Boolean) {

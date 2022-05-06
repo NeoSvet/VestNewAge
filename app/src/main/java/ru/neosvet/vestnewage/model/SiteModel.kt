@@ -18,7 +18,6 @@ import java.io.FileReader
 
 class SiteModel : NeoViewModel() {
     companion object {
-        const val TAG = "site"
         const val TAB_NEWS = 0
         const val TAB_SITE = 1
         const val TAB_DEV = 2
@@ -53,7 +52,7 @@ class SiteModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, TAG)
+        .putString(Const.TASK, "Site")
         .putString(Const.FILE, file.toString())
         .putString(Const.LINK, url)
         .build()

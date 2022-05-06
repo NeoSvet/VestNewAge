@@ -21,10 +21,6 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import java.io.*
 
 class MarkersModel : NeoViewModel() {
-    companion object {
-        const val TAG = "markers"
-    }
-
     enum class Type {
         NONE, LIST, PAGE, FILE
     }
@@ -83,7 +79,7 @@ class MarkersModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, TAG)
+        .putString(Const.TASK, "Markers")
         .putString(Const.MODE, task.toString())
         .putString(Const.TITLE, sCol)
         .build()

@@ -23,7 +23,6 @@ import java.util.*
 
 class BookModel : NeoViewModel(), LoadHandlerLite {
     companion object {
-        const val TAG = "book"
         const val TAB_KATREN = 0
         //const val TAB_POSLANYA = 1
     }
@@ -92,7 +91,7 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, TAG)
+        .putString(Const.TASK, "Book")
         .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
         .putBoolean(Const.KATRENY, isKatrenTab)
         .build()
