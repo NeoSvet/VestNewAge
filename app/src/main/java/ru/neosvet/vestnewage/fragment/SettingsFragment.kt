@@ -19,16 +19,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.dialogs.SetNotifDialog
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
@@ -39,7 +34,6 @@ import ru.neosvet.vestnewage.model.basic.CheckTime
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.service.CheckStarter
-import java.util.concurrent.TimeUnit
 
 class SettingsFragment : NeoFragment() {
     private var binding: SettingsFragmentBinding? = null
@@ -338,25 +332,9 @@ class SettingsFragment : NeoFragment() {
         } else p = Const.TURN_OFF
         editor.putInt(Const.TIME, p)
         editor.apply()
-        val work = WorkManager.getInstance(App.context)
-        work.cancelAllWorkByTag(CheckStarter.TAG_PERIODIC)
         if (p == Const.TURN_OFF) return@run
         if (p == 15) p = 20
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
-        val task = PeriodicWorkRequest.Builder(
-            CheckStarter::class.java,
-            p.toLong(),
-            TimeUnit.MINUTES,
-            (p - 5).toLong(),
-            TimeUnit.MINUTES
-        )
-            .setConstraints(constraints)
-            .addTag(CheckStarter.TAG_PERIODIC)
-            .build()
-        work.enqueue(task)
+        CheckStarter.set(p)
     }
 
     private fun saveProm() = binding?.prom?.run {
