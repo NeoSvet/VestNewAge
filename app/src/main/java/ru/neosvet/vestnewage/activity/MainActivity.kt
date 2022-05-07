@@ -316,12 +316,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @SuppressLint("NonConstantResourceId")
     fun setFragment(id: Int, savePrev: Boolean) {
         statusBack = StatusBack.PAGE
-        helper.changeId(id, savePrev)
-        when (helper.menuType) {
-            MainHelper.MenuType.FLOAT -> helper.navView?.setCheckedItem(id)
-            MainHelper.MenuType.SIDE -> helper.setMenuFragment()
-            MainHelper.MenuType.FULL -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
-        }
+        setMenu(id, savePrev)
         status.setError(null)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
@@ -415,6 +410,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fragmentTransaction.commit()
     }
 
+    private fun setMenu(id: Int, savePrev: Boolean) {
+        helper.changeId(id, savePrev)
+        when (helper.menuType) {
+            MainHelper.MenuType.FLOAT -> helper.navView?.setCheckedItem(id)
+            MainHelper.MenuType.SIDE -> helper.setMenuFragment()
+            MainHelper.MenuType.FULL -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
+        }
+    }
+
     private fun clearSummaryNotif() {
         var id = 0
         if (intent.hasExtra(DataBase.ID)) {
@@ -489,13 +493,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         helper.showDownloadMenu()
     }
 
-    fun openBook(link: String, katren: Boolean) {
-        tab = if (katren) 0 else 1
+    fun openBook(link: String, isPoems: Boolean) {
+        tab = if (isPoems) 0 else 1
         val year = helper.getYear(link)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = BookFragment.newInstance(tab, year).also {
             fragmentTransaction.replace(R.id.my_fragment, it)
+            fragmentTransaction.commit()
         }
+        setMenu(R.id.nav_book, true)
     }
 
     fun startAnimMin() {
