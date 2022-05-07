@@ -28,6 +28,7 @@ import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.StatusButton
 import ru.neosvet.ui.dialogs.SetNotifDialog
 import ru.neosvet.utils.*
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.fragment.*
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        App.context = this
         if (savedInstanceState == null)
             launchSplashScreen()
         else
