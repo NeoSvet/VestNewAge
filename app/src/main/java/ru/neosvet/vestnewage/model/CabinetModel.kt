@@ -1,13 +1,16 @@
 package ru.neosvet.vestnewage.model
 
 import android.content.Context
+import android.os.Build
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
+import ru.neosvet.utils.UnsafeClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.CabinetHelper
@@ -25,6 +28,7 @@ class CabinetModel : NeoViewModel() {
         private const val WORDS_BOX = "name=\"keyw"
         private const val SELECTED = "selected>"
     }
+
     enum class Type {
         LOGIN, CABINET, WORDS
     }
@@ -117,7 +121,7 @@ class CabinetModel : NeoViewModel() {
             .url(NeoClient.CAB_SITE)
             .addHeader(NeoClient.USER_AGENT, App.context.packageName)
             .build()
-        val client = NeoClient.createHttpClient()
+        val client = createHttpClient()
         var response = client.newCall(request).execute()
         var cookie = response.header(NeoClient.SET_COOKIE)
         cookie = cookie!!.substring(0, cookie.indexOf(";"))
@@ -168,7 +172,7 @@ class CabinetModel : NeoViewModel() {
         builderRequest.url(NeoClient.CAB_SITE + "edinenie/anketa.html")
         builderRequest.header(NeoClient.USER_AGENT, App.context.packageName)
         builderRequest.addHeader(NeoClient.COOKIE, CabinetHelper.cookie)
-        val client = NeoClient.createHttpClient()
+        val client = createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
         val br = BufferedReader(
             InputStreamReader(
@@ -233,7 +237,7 @@ class CabinetModel : NeoViewModel() {
             .add("hash", "")
             .build()
         builderRequest.post(requestBody)
-        val client = NeoClient.createHttpClient()
+        val client = createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
         val br = BufferedReader(
             InputStreamReader(
@@ -280,4 +284,10 @@ class CabinetModel : NeoViewModel() {
                 mstate.postValue(SuccessList(wordList))
         }
     }
+
+    private fun createHttpClient(): OkHttpClient =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            NeoClient.createHttpClient()
+        else
+            UnsafeClient.createHttpClient()
 }
