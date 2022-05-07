@@ -453,9 +453,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (helper.isFirstRun) {
             setFragment(firstFragment, false)
         } else if (helper.hasPrevId) {
-            if (canBack) return
-            if (helper.prevId == R.id.nav_site) tab = SiteModel.TAB_SITE
+            if (canBack.not()) return
+            if (helper.prevId == R.id.nav_site)
+                tab = SiteModel.TAB_SITE
             setFragment(helper.prevId, false)
+            helper.prevId = 0
         } else if (firstFragment == R.id.nav_new) {
             firstFragment = helper.getFirstFragment()
             setFragment(firstFragment, false)
@@ -472,7 +474,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (statusBack == StatusBack.PAGE && isMenuMode) {
             statusBack = StatusBack.MENU
             setFragment(R.id.menu_fragment, false)
-        } else { //statusBack == STATUS_MENU;
+        } else {
             statusBack = StatusBack.EXIT
             Lib.showToast(getString(R.string.click_for_exit))
             Timer().schedule(object : TimerTask() {
