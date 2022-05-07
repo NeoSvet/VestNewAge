@@ -148,11 +148,10 @@ class SiteFragment : NeoFragment() {
         lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
             if (model.isRun) return@OnItemClickListener
             if (isAds(pos)) return@OnItemClickListener
-            if (adMain.getItem(pos).hasFewLinks()) {
+            if (adMain.getItem(pos).hasFewLinks())
                 openMultiLink(adMain.getItem(pos), view)
-            } else {
+            else
                 openSingleLink(adMain.getItem(pos).link)
-            }
         }
         lvMain.setOnTouchListener { _, event: MotionEvent ->
             when (event.actionMasked) {
@@ -168,11 +167,10 @@ class SiteFragment : NeoFragment() {
                         r > abs(y - event.getY(0).toInt())
                     ) act?.run {
                         val t = tabLayout.selectedTabPosition
-                        if (x > x2) { // next
+                        if (x > x2) // next
                             if (t < 1) tabLayout.select(t + 1)
-                        } else if (x < x2) { // prev
-                            if (t > 0) tabLayout.select(t - 1)
-                        }
+                            else if (x < x2) // prev
+                                if (t > 0) tabLayout.select(t - 1)
                     }
                     if (animMaxFinished) act?.startAnimMax()
                 }
@@ -216,18 +214,17 @@ class SiteFragment : NeoFragment() {
     private fun openSingleLink(link: String) {
         if (link == "#" || link == "@") return
         if (model.isSiteTab) {
-            if (link.contains("rss")) {
+            if (link.contains("rss"))
                 act?.setFragment(R.id.nav_rss, true)
-            } else if (link.contains("poems")) {
+            else if (link.contains("poems"))
                 act?.openBook(link, true)
-            } else if (link.contains("tolkovaniya") || link.contains("2016")) {
+            else if (link.contains("tolkovaniya") || link.contains("2016"))
                 act?.openBook(link, false)
-            } else if (link.contains("files") && !link.contains("http")) {
-                openPage(NeoClient.SITE + link)
-            } else openPage(link)
-        } else {
+            else if (link.contains("files"))
+                Lib.openInApps(link, null)
+            else openPage(link)
+        } else
             openPage(link)
-        }
     }
 
     private fun isAds(pos: Int): Boolean {
@@ -261,14 +258,12 @@ class SiteFragment : NeoFragment() {
 
     private fun openPage(url: String) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(NeoClient.SITE)) {
+            if (url.contains(NeoClient.SITE))
                 Lib.openInApps(url, getString(R.string.to_load))
-            } else {
+            else
                 Lib.openInApps(url, null)
-            }
-        } else {
+        } else
             openReader(url, null)
-        }
     }
 
     override fun onChangedState(state: NeoState) {
