@@ -184,10 +184,6 @@ public class StatusButton {
         return error != null;
     }
 
-    public void startText() {
-        tv.setText(context.getString(R.string.start));
-    }
-
     public void loadText() {
         tv.setText(context.getString(R.string.load));
     }
@@ -220,10 +216,6 @@ public class StatusButton {
 
     public boolean isTime() {
         return time;
-    }
-
-    public boolean isStop() {
-        return stop;
     }
 
     public boolean startMin() {
