@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ScreenUtils.init(this)
         App.context = this
         if (savedInstanceState == null)
             launchSplashScreen()

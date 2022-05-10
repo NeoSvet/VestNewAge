@@ -14,6 +14,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.Tip
 import ru.neosvet.utils.Const
+import ru.neosvet.utils.ScreenUtils
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.fragment.MenuFragment
@@ -45,8 +46,6 @@ class MainHelper(private val act: MainActivity) {
         get() = prevId != 0
     val newId: Int
         get() = unread.getNewId(countNew)
-    private val isTablet: Boolean
-    private val isTabletLand: Boolean
     private val pref: SharedPreferences = act.getSharedPreferences(
         MainActivity::class.java.simpleName,
         AppCompatActivity.MODE_PRIVATE
@@ -56,13 +55,6 @@ class MainHelper(private val act: MainActivity) {
         get() = pref.getBoolean(Const.COUNT_IN_MENU, true)
     val isSideMenu: Boolean
         get() = menuType == MenuType.SIDE
-
-    init {
-        val mode = act.resources.getInteger(R.integer.screen_mode)
-        val tablet = act.resources.getInteger(R.integer.screen_tablet_port)
-        isTablet = mode >= tablet
-        isTabletLand = mode > tablet
-    }
 
     fun initViews() {
         navView = act.findViewById(R.id.nav_view)
@@ -118,12 +110,12 @@ class MainHelper(private val act: MainActivity) {
             return R.id.nav_new
 
         val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-        menuType = if (isTabletLand)
+        menuType = if (ScreenUtils.isTabletLand)
             MenuType.SIDE
         else
             MenuType.FLOAT
         return when {
-            startScreen == Const.SCREEN_MENU && isTablet.not() -> {
+            startScreen == Const.SCREEN_MENU && ScreenUtils.isTablet.not() -> {
                 menuType = MenuType.FULL
                 R.id.menu_fragment
             }

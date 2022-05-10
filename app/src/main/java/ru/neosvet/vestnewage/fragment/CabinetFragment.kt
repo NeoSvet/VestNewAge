@@ -16,6 +16,7 @@ import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.SoftKeyboard
 import ru.neosvet.ui.dialogs.CustomDialog
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.ScreenUtils
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.CabinetActivity
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
@@ -87,15 +88,9 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     }
 
     private fun initLayoutManager() {
-        val span = if (model.type == CabinetModel.Type.WORDS) {
-            when (resources.getInteger(R.integer.screen_mode)) {
-                resources.getInteger(R.integer.screen_phone_port) -> 1
-                resources.getInteger(R.integer.screen_phone_land) -> 2
-                resources.getInteger(R.integer.screen_tablet_land) -> 3
-                resources.getInteger(R.integer.screen_tablet_port) -> 2
-                else -> 1
-            }
-        } else 1 //CABINET
+        val span = if (model.type == CabinetModel.Type.WORDS)
+            ScreenUtils.span
+        else 1 //CABINET
         binding?.rvList?.layoutManager = GridLayoutManager(requireContext(), span)
     }
 
@@ -176,7 +171,7 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     }
 
     private fun subLogin() {
-        softKeyboard.closeSoftKeyboard()
+        //softKeyboard.closeSoftKeyboard()
         if (model.isRun) return
         if (adapter.itemCount == 1) {
             adapter.clear()

@@ -24,6 +24,7 @@ import ru.neosvet.ui.dialogs.SetNotifDialog
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.ScreenUtils
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
@@ -187,7 +188,7 @@ class SettingsFragment : NeoFragment() {
 
     private fun initScreenSection() = binding?.screen?.run {
         val rbsScreen = arrayOf(rbMenu, rbCalendar, rbSummary)
-        if (resources.getInteger(R.integer.screen_mode) >= resources.getInteger(R.integer.screen_tablet_port))
+        if (ScreenUtils.isTablet)
             rbsScreen[0].isVisible = false
         val p = prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
         rbsScreen[p].isChecked = true

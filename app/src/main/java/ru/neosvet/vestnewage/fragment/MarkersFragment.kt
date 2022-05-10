@@ -24,6 +24,7 @@ import ru.neosvet.ui.dialogs.CustomDialog
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
+import ru.neosvet.utils.ScreenUtils
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
@@ -163,15 +164,7 @@ class MarkersFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initContent() = binding?.content?.run {
-        val span = when (resources.getInteger(R.integer.screen_mode)) {
-            resources.getInteger(R.integer.screen_phone_port) -> 1
-            resources.getInteger(R.integer.screen_phone_land) -> 2
-            resources.getInteger(R.integer.screen_tablet_land) ->
-                if (resources.getInteger(R.integer.tablet_7) == 1) 2 else 3
-            resources.getInteger(R.integer.screen_tablet_port) -> 2
-            else -> 1
-        }
-        rvMarker.layoutManager = GridLayoutManager(requireContext(), span)
+        rvMarker.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvMarker.adapter = adapter
         rvMarker.setOnTouchListener { _, motionEvent: MotionEvent ->
             if (model.iSel > -1 || model.list.size == 0) return@setOnTouchListener false
