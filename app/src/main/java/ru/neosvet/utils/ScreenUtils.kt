@@ -47,6 +47,5 @@ object ScreenUtils {
                 Type.PHONE_PORT
         }
         isTablet7 = context.resources.getInteger(R.integer.tablet_7) == 1
-        Lib.LOG("_____ TYPE=$type")
     }
 }
