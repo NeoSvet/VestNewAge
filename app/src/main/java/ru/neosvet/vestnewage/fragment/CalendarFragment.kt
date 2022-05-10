@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.dialogs.DateDialog
 import ru.neosvet.utils.Const
+import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
@@ -24,6 +25,7 @@ import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.model.CalendarModel
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.Ready
 import ru.neosvet.vestnewage.model.basic.SuccessCalendar
 import java.util.*
 
@@ -191,13 +193,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onChangedState(state: NeoState) {
+        setStatus(false)
         if (state is SuccessCalendar) binding?.run {
-            setStatus(false)
             act?.updateNew()
             tvDate.text = state.date
             ivPrev.isEnabled = state.prev
             ivNext.isEnabled = state.next
             adCalendar.setItems(state.list)
-        }
+        } else if (state == Ready)
+            Lib.showToast(getString(R.string.load_unavailable))
     }
 }

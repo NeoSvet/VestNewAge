@@ -13,10 +13,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.PageLoader
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.ProgressState
-import ru.neosvet.vestnewage.model.basic.SuccessCalendar
+import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 
 class CalendarModel : NeoViewModel() {
@@ -49,7 +46,10 @@ class CalendarModel : NeoViewModel() {
         .build()
 
     override suspend fun doLoad() { //loadFromSite
-        if (date.year < 2016) return
+        if (date.year < 2016) {
+            mstate.postValue(Ready)
+            return
+        }
         val list = loadMonth()
         if (loadFromStorage()) {
             mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
