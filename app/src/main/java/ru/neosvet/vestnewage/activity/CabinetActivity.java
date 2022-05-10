@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -24,6 +25,7 @@ import ru.neosvet.ui.StatusButton;
 import ru.neosvet.ui.dialogs.CustomDialog;
 import ru.neosvet.utils.Const;
 import ru.neosvet.utils.NeoClient;
+import ru.neosvet.utils.UnsafeClient;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helpers.CabinetHelper;
@@ -89,7 +91,11 @@ public class CabinetActivity extends AppCompatActivity {
             if (CabinetHelper.cookie.isEmpty())
                 return super.shouldInterceptRequest(view, request);
             try {
-                OkHttpClient client = new OkHttpClient();
+                OkHttpClient client;
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
+                    client = UnsafeClient.createHttpClient();
+                else
+                    client = new OkHttpClient();
                 Request req = new Request.Builder()
                         .url(request.getUrl().toString())
                         .addHeader("cookie", CabinetHelper.cookie)
