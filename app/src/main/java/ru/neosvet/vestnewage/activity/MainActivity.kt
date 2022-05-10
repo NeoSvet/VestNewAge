@@ -20,7 +20,6 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.Data
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.ui.MultiWindowSupport
@@ -103,7 +102,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         status.init(this, helper.pStatus)
         initInterface()
         initAnim()
-        initProgress()
         isCountInMenu = helper.isCountInMenu
         if (isCountInMenu.not() || isMenuMode) {
             prom = PromHelper(helper.tvPromTime)
@@ -159,15 +157,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (tabLayout.isVisible)
             tabLayout.removeAllTabs()
         tabLayout.isVisible = fragment is BookFragment || fragment is SiteFragment
-    }
-
-    private fun initProgress() {
-        ProgressHelper.addObserver(this) { data: Data? ->
-            if (curFragment == null || data == null || !ProgressHelper.isBusy())
-                return@addObserver
-            curFragment!!.onChanged(data)
-        }
-        if (ProgressHelper.isBusy()) status.setLoad(true)
     }
 
     private fun finishFlashStar() {
@@ -260,8 +249,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         tvNew.setOnClickListener {
-            if (!ProgressHelper.isBusy())
-                setFragment(R.id.nav_new, true)
+            setFragment(R.id.nav_new, true)
         }
         toolbar?.let {
             setSupportActionBar(it)
@@ -306,7 +294,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         helper.drawer?.closeDrawer(GravityCompat.START)
-        if (checkBusy()) return false
         if (!item.isChecked) setFragment(item.itemId, false)
         return true
     }
@@ -519,14 +506,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (helper.checkNew()) helper.tvNew.startAnimation(anMax)
         fab?.isVisible = true
         fab?.startAnimation(anMax)
-    }
-
-    fun checkBusy(): Boolean {
-        if (ProgressHelper.isBusy()) {
-            Lib.showToast(getString(R.string.app_is_busy))
-            return true
-        }
-        return false
     }
 
     private fun showWelcome() {

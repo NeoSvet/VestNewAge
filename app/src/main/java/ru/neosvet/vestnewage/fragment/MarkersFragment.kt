@@ -29,7 +29,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.list.MarkerAdapter
 import ru.neosvet.vestnewage.model.MarkersModel
 import ru.neosvet.vestnewage.model.basic.*
@@ -218,10 +217,8 @@ class MarkersFragment : NeoFragment() {
             super.setStatus(load)
         } else if (model.workOnFile) {
             if (load) {
-                ProgressHelper.setBusy(true)
                 initRotate()
             } else {
-                ProgressHelper.setBusy(false)
                 stopRotate = true
                 binding?.fabMenu?.clearAnimation()
             }

@@ -16,7 +16,6 @@ import ru.neosvet.utils.Lib;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.ProgressHelper;
 
 public class StatusButton {
     private Context context;
@@ -208,7 +207,6 @@ public class StatusButton {
                             (dialog, id) -> dialog.dismiss())
                     .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();
-            ProgressHelper.setBusy(false);
             setLoad(false);
             setError(null);
             return true;

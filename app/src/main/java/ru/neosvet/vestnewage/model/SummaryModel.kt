@@ -8,7 +8,6 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.helpers.SummaryHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.PageLoader

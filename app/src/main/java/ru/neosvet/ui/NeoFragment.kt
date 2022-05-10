@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.work.Data
 import ru.neosvet.vestnewage.activity.MainActivity
-import ru.neosvet.vestnewage.helpers.ProgressHelper
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.ProgressState
@@ -52,14 +50,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
             onStatusClick(true)
             return false
         }
-        if (ProgressHelper.isBusy()) {
-            neomodel.cancel()
-            return false
-        }
         return true
     }
-
-    open fun onChanged(data: Data) {}
 
     abstract fun onChangedState(state: NeoState)
 
@@ -86,11 +78,9 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
     open fun setStatus(load: Boolean) {
         act?.run {
             if (load) {
-                ProgressHelper.setBusy(true)
                 status.loadText()
                 status.setLoad(true)
             } else {
-                ProgressHelper.setBusy(false)
                 if (status.isVisible && status.isCrash.not())
                     status.setLoad(false)
             }

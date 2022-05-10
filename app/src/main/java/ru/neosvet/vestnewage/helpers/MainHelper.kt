@@ -176,7 +176,6 @@ class MainHelper(private val act: MainActivity) {
         if (menuDownload.isShow)
             menuDownload.hide()
         else {
-            if (ProgressHelper.isBusy()) return
             with(bDownloadIt) {
                 when (curId) {
                     R.id.nav_site -> {

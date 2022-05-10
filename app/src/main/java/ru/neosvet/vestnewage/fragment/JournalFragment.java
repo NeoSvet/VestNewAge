@@ -202,7 +202,6 @@ public class JournalFragment extends Fragment {
         adJournal = new ListAdapter(act);
         lvJournal.setAdapter(adJournal);
         lvJournal.setOnItemClickListener((adapterView, view, pos, l) -> {
-            if (act.checkBusy()) return;
             String link = adJournal.getItem(pos).getLink();
             String s = adJournal.getItem(pos).getDes();
             if (s.contains(getString(R.string.rnd_stih))) {

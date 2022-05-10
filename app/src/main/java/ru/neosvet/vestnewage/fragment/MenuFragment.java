@@ -111,7 +111,6 @@ public class MenuFragment extends Fragment {
                 return;
             }
             if (adMenu.getItem(pos).isSelect()) return;
-            if (act.checkBusy()) return;
             iSelect = pos - (isFullScreen ? 0 : 1);
             act.setFragment(mMenu[iSelect], false);
             if (isFullScreen) return;
