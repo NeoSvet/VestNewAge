@@ -39,7 +39,7 @@ class MainHelper(private val act: MainActivity) {
     lateinit var tabLayout: TabLayout
 
     val unread = UnreadHelper()
-    var countNew: Int = unread.count
+    var countNew: Int = 0
     var curId = 0
     var prevId = 0
     val hasPrevId: Boolean
