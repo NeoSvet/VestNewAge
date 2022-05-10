@@ -164,7 +164,6 @@ class MarkersFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initContent() = binding?.content?.run {
-        rvMarker.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvMarker.adapter = adapter
         rvMarker.setOnTouchListener { _, motionEvent: MotionEvent ->
             if (model.iSel > -1 || model.list.size == 0) return@setOnTouchListener false
@@ -389,8 +388,13 @@ class MarkersFragment : NeoFragment() {
                     adapter.notifyItemChanged(state.index)
                 ListEvent.MOVE ->
                     adapter.notifyItemMoved(state.index, model.iSel)
-                ListEvent.RELOAD ->
+                ListEvent.RELOAD -> {
+                    binding?.content?.rvMarker?.layoutManager = GridLayoutManager(
+                        requireContext(),
+                        if (model.isCollections) ScreenUtils.span else 1
+                    )
                     adapter.notifyDataSetChanged()
+                }
             }
             tvEmpty.isVisible = false
             if (model.iSel == -1) {
