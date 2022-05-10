@@ -123,6 +123,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
             // пропускаем первую запись - там только дата изменения списка
             while (curTitle.moveToNext()) {
                 loader.download(curTitle.getString(0), false)
+                handler.upProg()
             }
         }
         loader.finish()

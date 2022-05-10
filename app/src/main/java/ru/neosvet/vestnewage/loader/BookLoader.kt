@@ -142,12 +142,12 @@ class BookLoader : Loader {
         val time = System.currentTimeMillis()
         var d: DateHelper
         for (item: String in list) {
-            if (max > 0) {
-                handlerLite?.postPercent(cur.percent(max))
+            handlerLite?.let {
+                it.postPercent(cur.percent(max))
                 cur++
-            } else {
+            } ?: handler?.let {
                 d = DateHelper.parse(item)
-                handler?.postMessage(d.monthString + " " + d.year)
+                it.postMessage(d.monthString + " " + d.year)
             }
             storage.open(item)
             isTitle = true

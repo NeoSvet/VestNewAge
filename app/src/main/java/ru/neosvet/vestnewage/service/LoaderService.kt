@@ -119,6 +119,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         if (intent == null) return START_NOT_STICKY
         mode = intent.getIntExtra(Const.MODE, STOP)
         if (mode == STOP) {
+            isRun = false
             finishService(null)
             return START_NOT_STICKY
         }
@@ -126,6 +127,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         isRun = true
         setMax(0)
         progress.text = getString(R.string.start)
+        progress.task = 1
         initNotif()
         Lib.showToast(getString(R.string.load_background))
         request = intent.getStringExtra(Const.TASK)
