@@ -100,8 +100,6 @@
     <string name="nav_buttons">Кнопки вверх/вниз</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
-    <string name="load_unavailable_t">Загрузка недоступна</string>
-    <string name="load_unavailable_m">Потому что имеется активная загрузка в фоне (смотрите уведомления). Остановите её или дождитесь её завершения прежде, чем повторить попытку.</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
@@ -220,7 +218,8 @@
     <string name="error">Ошибка</string>
     <string name="error_code">Ошибка на сайте:&#160;</string>
     <string name="error_site">Сайт не ответил на запрос</string>
-    <string name="site_not_available">Сайт недоступен</string>
+    <string name="site_unavailable">Сайт недоступен</string>
+    <string name="load_unavailable">Загрузка недоступна</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
     <string name="done">Готово</string>

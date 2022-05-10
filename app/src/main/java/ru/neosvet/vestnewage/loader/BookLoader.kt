@@ -83,7 +83,7 @@ class BookLoader : Loader {
         isRun = true
         if (NeoClient.isMainSite())
             return loadList(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
-        throw MyException(App.context.getString(R.string.site_not_available))
+        throw MyException(App.context.getString(R.string.site_unavailable))
     }
 
     private enum class UcozType {
