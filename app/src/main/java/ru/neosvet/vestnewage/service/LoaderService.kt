@@ -47,6 +47,10 @@ class LoaderService : LifecycleService(), LoadHandler {
 
         @JvmStatic
         fun postCommand(mode: Int, request: String?) {
+            if (isRun && mode != STOP) {
+                Lib.showToast(App.context.getString(R.string.load_already_run))
+                return
+            }
             val intent = Intent(App.context, LoaderService::class.java)
             intent.putExtra(Const.MODE, mode)
             intent.putExtra(Const.TASK, request)

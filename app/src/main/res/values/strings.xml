@@ -209,6 +209,7 @@
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
     <string name="load_background">Загрузка запущена в фоне (см. уведомления)</string>
+    <string name="load_already_run">Загрузка уже запущена (см. уведомления)</string>
     <string name="stop">Остановить</string>
     <string name="download_list">Загрузка списков</string>
     <string name="download_materials">Загрузка материалов</string>
