@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             launchSplashScreen()
         else
             setTheme(R.style.Theme_MainTheme)
+        initLaunch()
         helper = MainHelper(this)
         firstFragment = helper.getFirstFragment()
         if (isMenuMode)
@@ -97,7 +98,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (savedInstanceState == null)
             helper.toolbar?.isVisible = false
-        initSlash()
 
         status.init(this, helper.pStatus)
         initInterface()
@@ -138,15 +138,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun initSlash() {
+    private fun initLaunch() {
         utils = LaunchUtils()
+        utils.checkAdapterNewVersion()
         if (utils.openLink(intent)) {
             tab = utils.intent.getIntExtra(Const.TAB, tab)
             firstFragment = utils.intent.getIntExtra(Const.CUR_ID, firstFragment)
         } else if (utils.isNeedLoad) {
             val model = ViewModelProvider(this).get(MainModel::class.java)
             model.init(this)
-            utils.checkAdapterNewVersion()
             model.state.observe(this, this)
             model.load()
         }

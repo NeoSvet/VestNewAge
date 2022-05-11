@@ -10,25 +10,32 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
+import java.io.File;
+
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
+import ru.neosvet.vestnewage.helpers.BookHelper;
+import ru.neosvet.vestnewage.helpers.BrowserHelper;
+import ru.neosvet.vestnewage.helpers.CabinetHelper;
 import ru.neosvet.vestnewage.helpers.DateHelper;
-import ru.neosvet.vestnewage.helpers.SummaryHelper;
-import ru.neosvet.vestnewage.service.LoaderService;
+import ru.neosvet.vestnewage.helpers.MainHelper;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
+import ru.neosvet.vestnewage.helpers.SearchHelper;
 import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 
 public class LaunchUtils {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-    private final String SETTINGS = "Settings";
+    private final String SETTINGS = "main";
     private final int START_ID = 900;
     private int notif_id = START_ID;
+    private static int ver = -1;
     private NotificationHelper notifHelper;
     private final Intent main = new Intent();
 
@@ -37,9 +44,12 @@ public class LaunchUtils {
     }
 
     public void checkAdapterNewVersion() {
-        int ver = getPreviosVer();
-        notifHelper = new NotificationHelper();
+        if (ver == -1)
+            ver = getPreviosVer();
         if (ver == 0) {
+            notifHelper = new NotificationHelper();
+            showNotifTip(App.context.getString(R.string.check_out_settings),
+                    App.context.getString(R.string.example_periodic_check), getSettingsIntent());
             new Thread(() -> {
                 try {
                     Thread.sleep(10000);
@@ -49,20 +59,8 @@ public class LaunchUtils {
                 }
             }).start();
         }
-        if (ver < 21) {
-            SharedPreferences pref = App.context.getSharedPreferences(SummaryHelper.TAG, MODE_PRIVATE);
-            int p = pref.getInt(Const.TIME, Const.TURN_OFF);
-            if (p == Const.TURN_OFF)
-                showNotifTip(App.context.getString(R.string.are_you_know),
-                        App.context.getString(R.string.new_option_notif), getSettingsIntent());
-            else {
-                pref = App.context.getSharedPreferences(PromHelper.TAG, MODE_PRIVATE);
-                p = pref.getInt(Const.TIME, Const.TURN_OFF);
-                if (p == Const.TURN_OFF)
-                    showNotifTip(App.context.getString(R.string.are_you_know),
-                            App.context.getString(R.string.new_option_notif), getSettingsIntent());
-            }
-        }
+        if (ver < 59)
+            renamePrefs();
         if (ver > 44 && ver < 47) {
             AdsStorage storage = new AdsStorage();
             storage.delete();
@@ -70,6 +68,28 @@ public class LaunchUtils {
         }
         if (ver == 0)
             showSummaryNotif();
+    }
+
+    private void renamePrefs() {
+        String p = "/shared_prefs/", x = ".xml";
+        File f = Lib.getFileP(p + "PromHelper.xml");
+        if (f.exists())
+            f.delete();
+        f = Lib.getFileP(p + "MainActivity.xml");
+        if (f.exists())
+            f.renameTo(Lib.getFileP(p + MainHelper.TAG + x));
+        f = Lib.getFileP(p + "BrowserActivity.xml");
+        if (f.exists())
+            f.renameTo(Lib.getFileP(p + BrowserHelper.TAG + x));
+        f = Lib.getFileP(p + "CabmainFragment.xml");
+        if (f.exists())
+            f.renameTo(Lib.getFileP(p + CabinetHelper.TAG + x));
+        f = Lib.getFileP(p + "BookFragment.xml");
+        if (f.exists())
+            f.renameTo(Lib.getFileP(p + BookHelper.TAG + x));
+        f = Lib.getFileP(p + "SearchFragment.xml");
+        if (f.exists())
+            f.renameTo(Lib.getFileP(p + SearchHelper.TAG + x));
     }
 
     private void showNotifDownloadAll() {
