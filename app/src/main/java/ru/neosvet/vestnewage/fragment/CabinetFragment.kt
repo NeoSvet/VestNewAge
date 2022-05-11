@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.fragment
 
-import android.app.Service
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,7 +7,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -32,7 +30,9 @@ import ru.neosvet.vestnewage.model.basic.SuccessList
 class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     private var binding: CabinetFragmentBinding? = null
     private val adapter: RecyclerAdapter = RecyclerAdapter(this)
-    private lateinit var softKeyboard: SoftKeyboard
+    private val softKeyboard: SoftKeyboard by lazy {
+        SoftKeyboard(binding!!.login.etPassword)
+    }
     private val model: CabinetModel
         get() = neomodel as CabinetModel
     private val helper: CabinetHelper
@@ -123,9 +123,6 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     }
 
     private fun initLogin() = binding?.login?.run {
-        val im = act!!.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-        softKeyboard = SoftKeyboard(root, im)
-
         val textWatcher: TextWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 val ready = if (etEmail.length() > 5 && etPassword.length() > 5) {
@@ -171,7 +168,6 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
     }
 
     private fun subLogin() {
-        //softKeyboard.closeSoftKeyboard()
         if (model.isRun) return
         if (adapter.itemCount == 1) {
             adapter.clear()
@@ -179,6 +175,7 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
         }
         binding?.login?.run {
             setStatus(true)
+            softKeyboard.hide()
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
             model.login(email, password)

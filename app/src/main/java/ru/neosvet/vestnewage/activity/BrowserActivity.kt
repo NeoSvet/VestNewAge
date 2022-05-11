@@ -6,7 +6,6 @@ import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -59,7 +58,9 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     )
 
     private var twoPointers = false
-    private lateinit var softKeyboard: SoftKeyboard
+    private val softKeyboard: SoftKeyboard by lazy {
+        SoftKeyboard(binding.content.etSearch)
+    }
     private val status = StatusButton()
     private lateinit var prom: PromHelper
     private lateinit var anMin: Animation
@@ -169,9 +170,9 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     private fun closeSearch() {
-        closeKeyboard()
         tip.hide()
         with(binding.content) {
+            softKeyboard.hide()
             if (helper.searchIndex > -1) {
                 etSearch.setText("")
                 etSearch.isEnabled = true
@@ -197,8 +198,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private fun initViews() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.isVisible = false
-        val im = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        softKeyboard = SoftKeyboard(binding.content.root, im)
         with(binding.navView) {
             setNavigationItemSelectedListener(this@BrowserActivity)
             this@BrowserActivity.menu = NeoMenu(
@@ -323,7 +322,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
             ) {
                 if (etSearch.length() > 0) {
-                    closeKeyboard()
+                    softKeyboard.hide()
                     helper.setSearchString(etSearch.text.toString())
                     findRequest()
                 }
@@ -337,7 +336,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 findRequest()
                 return@setOnClickListener
             }
-            closeKeyboard()
+            softKeyboard.hide()
             initSearch()
             helper.downProg()
             wvBrowser.findNext(false)
@@ -348,7 +347,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 findRequest()
                 return@setOnClickListener
             }
-            closeKeyboard()
+            softKeyboard.hide()
             initSearch()
             helper.upProg()
             wvBrowser.findNext(true)
@@ -370,10 +369,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 model.load()
             else status.onClick()
         }
-    }
-
-    private fun closeKeyboard() {
-        softKeyboard.closeSoftKeyboard()
     }
 
     private fun initTheme() = binding.content.run {
@@ -415,7 +410,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 binding.fabMenu.isVisible = false
                 pSearch.isVisible = true
                 etSearch.post { etSearch.requestFocus() }
-                softKeyboard.openSoftKeyboard()
+                softKeyboard.show()
             }
             R.id.nav_marker -> {
                 val marker = Intent(applicationContext, MarkerActivity::class.java)

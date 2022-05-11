@@ -1,19 +1,16 @@
 package ru.neosvet.vestnewage.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -55,9 +52,9 @@ public class MarkerActivity extends AppCompatActivity {
     private SoftKeyboard softKeyboard;
     private int id, heightDialog, k_par;
     private byte modeList = 0;
-    private boolean posVisible = false;
+    private boolean posVisible = false, isInit = false;
 
-    public static void addMarker(Context context,String link, @Nullable String par, @Nullable final String des) {
+    public static void addMarker(Context context, String link, @Nullable String par, @Nullable final String des) {
         Intent marker = new Intent(context, MarkerActivity.class);
         marker.putExtra(Const.LINK, link);
         if (par != null) {
@@ -159,34 +156,21 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void initKeyboard() {
-        InputMethodManager im = (InputMethodManager) getSystemService(Service.INPUT_METHOD_SERVICE);
-        softKeyboard = new SoftKeyboard(mainLayout, im);
-        final Handler hFab = new Handler(message -> {
-            if (message.what == 0)
-                fabOk.setVisibility(View.VISIBLE);
-            else
-                fabOk.setVisibility(View.GONE);
-            return false;
-        });
-        softKeyboard.setSoftKeyboardCallback(new SoftKeyboard.SoftKeyboardChanged() {
-            @Override
-            public void onSoftKeyboardHide() {
-                hFab.sendEmptyMessage(0);
-            }
-
-            @Override
-            public void onSoftKeyboardShow() {
-                hFab.sendEmptyMessage(1);
+        softKeyboard = new SoftKeyboard(mainLayout);
+        etDes.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!isInit) {
+                isInit = true;
+                etDes.post(() -> {
+                    etDes.setSelection(etDes.getText().length());
+                    softKeyboard.hide();
+                });
             }
         });
-//        softKeyboard.openSoftKeyboard();
-        softKeyboard.closeSoftKeyboard();
     }
 
     @Override
     public void onDestroy() {
         dbMarker.close();
-        softKeyboard.unRegisterSoftKeyboardCallback();
         super.onDestroy();
     }
 
@@ -373,6 +357,7 @@ public class MarkerActivity extends AppCompatActivity {
         rPar.setOnCheckedChangeListener(typeSel);
         rPos.setOnCheckedChangeListener(typeSel);
         tvSel.setOnClickListener(view -> {
+            softKeyboard.hide();
             mainLayout.setVisibility(View.GONE);
             if (rPar.isChecked()) {
                 modeList = 1;
@@ -380,7 +365,6 @@ public class MarkerActivity extends AppCompatActivity {
                 lvList.setAdapter(adPage);
                 showList();
             } else {
-                softKeyboard.closeSoftKeyboard();
                 String s = tvSel.getText().toString();
                 s = s.substring(s.indexOf(":") + 2, s.indexOf("%"));
                 float pos = Float.parseFloat(s.replace(Const.COMMA, "."));
@@ -412,6 +396,7 @@ public class MarkerActivity extends AppCompatActivity {
             }
         });
         tvCol.setOnClickListener(view -> {
+            softKeyboard.hide();
             mainLayout.setVisibility(View.GONE);
             modeList = 2;
             setColList(tvCol.getText().toString());
@@ -462,7 +447,7 @@ public class MarkerActivity extends AppCompatActivity {
         etCol.setOnKeyListener((view, keyCode, keyEvent) -> {
             if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
                     || keyCode == EditorInfo.IME_ACTION_GO) {
-                softKeyboard.closeSoftKeyboard();
+                softKeyboard.hide();
                 if (view.equals(etCol)) { //add col
                     String s = etCol.getText().toString();
                     if (s.contains(Const.COMMA)) {
@@ -617,7 +602,6 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void showList() {
-        softKeyboard.closeSoftKeyboard();
         lvList.setVisibility(View.VISIBLE);
         ResizeAnim anim = new ResizeAnim(lvList, false, heightDialog);
         anim.setDuration(800);
@@ -709,4 +693,3 @@ public class MarkerActivity extends AppCompatActivity {
         return row;
     }
 }
-

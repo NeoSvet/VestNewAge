@@ -1,14 +1,12 @@
 package ru.neosvet.vestnewage.fragment
 
 import android.annotation.SuppressLint
-import android.app.Service
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
 import android.view.View.OnTouchListener
 import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
@@ -70,7 +68,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
     private var anim: ResizeAnim? = null
     private var dialog = -1
     private var dateDialog: DateDialog? = null
-    private lateinit var softKeyboard: SoftKeyboard
+    private val softKeyboard: SoftKeyboard by lazy {
+        SoftKeyboard(binding!!.content.etSearch)
+    }
     private var scrollToFirst = false
     private val helper: SearchHelper
         get() = model.helper
@@ -263,7 +263,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         fabOk.isVisible = true
         content.root.isVisible = false
         pSettings.isVisible = true
-        softKeyboard.closeSoftKeyboard()
+        softKeyboard.hide()
         pPages.isVisible = false
         initResizeAnim()
     }
@@ -306,10 +306,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
 
     private fun initViews() = binding?.run {
         content.lvResult.adapter = adResults
-        act?.run {
-            val im = getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
-            softKeyboard = SoftKeyboard(content.root, im)
-        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
