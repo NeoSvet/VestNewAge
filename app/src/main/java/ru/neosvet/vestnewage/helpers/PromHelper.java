@@ -29,6 +29,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.MainActivity;
 
 public class PromHelper {
+    public static final String TAG = "Prom";
     private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private TextView tvPromTime = null;
     private Handler hTime = null;
@@ -39,7 +40,7 @@ public class PromHelper {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
 
     public PromHelper(@Nullable View textView) {
-        pref = App.context.getSharedPreferences(this.getClass().getSimpleName(), Context.MODE_PRIVATE);
+        pref = App.context.getSharedPreferences(PromHelper.TAG, Context.MODE_PRIVATE);
         if (textView != null) {
             tvPromTime = (TextView) textView;
             tvPromTime.setVisibility(View.VISIBLE);
@@ -238,7 +239,6 @@ public class PromHelper {
     }
 
     public void showNotif() {
-        SharedPreferences pref = App.context.getSharedPreferences(Const.PROM, Context.MODE_PRIVATE);
         final int p = pref.getInt(Const.TIME, Const.TURN_OFF);
         if (p == Const.TURN_OFF)
             return;

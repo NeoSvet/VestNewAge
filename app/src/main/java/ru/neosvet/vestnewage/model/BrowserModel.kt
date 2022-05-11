@@ -69,7 +69,7 @@ class BrowserModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, Const.PAGE)
+        .putString(Const.TASK, BrowserHelper.TAG)
         .putString(Const.LINK, link)
         .build()
 

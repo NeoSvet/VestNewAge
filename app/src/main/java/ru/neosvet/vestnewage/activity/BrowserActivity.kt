@@ -27,6 +27,7 @@ import ru.neosvet.vestnewage.activity.browser.NeoInterface
 import ru.neosvet.vestnewage.activity.browser.WebClient
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helpers.BrowserHelper
+import ru.neosvet.vestnewage.helpers.MainHelper
 import ru.neosvet.vestnewage.helpers.PromHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
 import ru.neosvet.vestnewage.model.BrowserModel
@@ -213,7 +214,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         tip = Tip(this, binding.tvFinish)
         status.init(this, binding.pStatus)
 
-        val pref = getSharedPreferences(MainActivity::class.java.simpleName, MODE_PRIVATE)
+        val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
         if (pref.getBoolean(Const.COUNT_IN_MENU, true)) {
             val tv = binding.navView.getHeaderView(0).findViewById(R.id.tvPromTimeInMenu) as View
             prom = PromHelper(tv)

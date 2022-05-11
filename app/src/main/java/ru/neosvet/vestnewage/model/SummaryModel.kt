@@ -53,7 +53,7 @@ class SummaryModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "Summary")
+        .putString(Const.TASK, SummaryHelper.TAG)
         .build()
 
     fun openList(loadIfNeed: Boolean) {

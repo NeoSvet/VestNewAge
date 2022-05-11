@@ -32,6 +32,7 @@ import ru.neosvet.vestnewage.storage.PageStorage;
  * Created by NeoSvet on 11.06.2018.
  */
 public class SummaryHelper {
+    public static final String TAG = "Summary";
     private static final int TEN_MIN_IN_MILLS = 600000;
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
@@ -41,7 +42,6 @@ public class SummaryHelper {
     private final PendingIntent piEmpty;
     private int notif_id;
     private NotificationCompat.Builder notifBuilder;
-
 
     public SummaryHelper() {
         notif_id = NotificationHelper.NOTIF_SUMMARY + 1;
@@ -125,7 +125,7 @@ public class SummaryHelper {
 
     public void setPreferences() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            SharedPreferences pref = App.context.getSharedPreferences(Const.SUMMARY, Context.MODE_PRIVATE);
+            SharedPreferences pref = App.context.getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE);
             boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
             boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
             notifBuilder.setLights(Color.GREEN, DateHelper.SEC_IN_MILLS, DateHelper.SEC_IN_MILLS);

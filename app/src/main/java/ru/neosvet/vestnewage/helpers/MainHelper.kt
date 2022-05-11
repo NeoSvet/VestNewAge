@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.helpers
 
 import android.annotation.SuppressLint
-import android.content.SharedPreferences
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.TextView
@@ -21,6 +20,10 @@ import ru.neosvet.vestnewage.fragment.MenuFragment
 import ru.neosvet.vestnewage.service.LoaderService
 
 class MainHelper(private val act: MainActivity) {
+    companion object {
+        const val TAG = "Main"
+    }
+
     enum class MenuType {
         FLOAT, SIDE, FULL
     }
@@ -46,10 +49,7 @@ class MainHelper(private val act: MainActivity) {
         get() = prevId != 0
     val newId: Int
         get() = unread.getNewId(countNew)
-    private val pref: SharedPreferences = act.getSharedPreferences(
-        MainActivity::class.java.simpleName,
-        AppCompatActivity.MODE_PRIVATE
-    )
+    private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
     var menuType = MenuType.FLOAT
     val isCountInMenu: Boolean
         get() = pref.getBoolean(Const.COUNT_IN_MENU, true)

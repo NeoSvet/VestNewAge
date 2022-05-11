@@ -6,18 +6,17 @@ import android.content.SharedPreferences
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.activity.BrowserActivity
 
 class BrowserHelper(context: Context) {
     companion object {
+        const val TAG = "Browser"
         private const val THEME = "theme"
         private const val NOMENU = "nomenu"
         private const val NAVBUTTONS = "navb"
         private const val SCALE = "scale"
     }
 
-    private val pref: SharedPreferences =
-        context.getSharedPreferences(BrowserActivity::class.java.simpleName, Context.MODE_PRIVATE)
+    private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = pref.edit()
     var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
     var zoom: Int = pref.getInt(SCALE, 0)

@@ -4,14 +4,15 @@ import android.content.Context
 import android.content.SharedPreferences
 import ru.neosvet.utils.Const
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.fragment.BookFragment
 
 class BookHelper {
     companion object {
+        const val TAG = "Book"
         private var loadedOtkr: Boolean? = null
     }
+
     private val pref: SharedPreferences by lazy {
-        App.context.getSharedPreferences(BookFragment::class.java.simpleName, Context.MODE_PRIVATE)
+        App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     }
     var katrenDays: Int = 16801 //Январь 2016
         private set

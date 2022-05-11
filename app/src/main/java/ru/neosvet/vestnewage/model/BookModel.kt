@@ -91,7 +91,7 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "Book")
+        .putString(Const.TASK, BookHelper.TAG)
         .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
         .putBoolean(Const.KATRENY, isKatrenTab)
         .build()

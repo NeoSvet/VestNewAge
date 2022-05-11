@@ -28,8 +28,10 @@ import ru.neosvet.utils.ScreenUtils
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
+import ru.neosvet.vestnewage.helpers.MainHelper
 import ru.neosvet.vestnewage.helpers.NotificationHelper
 import ru.neosvet.vestnewage.helpers.PromHelper
+import ru.neosvet.vestnewage.helpers.SummaryHelper
 import ru.neosvet.vestnewage.model.SettingsModel
 import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoState
@@ -40,19 +42,16 @@ class SettingsFragment : NeoFragment() {
     private var binding: SettingsFragmentBinding? = null
     private var dialog: SetNotifDialog? = null
     private val prefMain: SharedPreferences by lazy {
-        requireContext().getSharedPreferences(
-            MainActivity::class.java.simpleName,
-            Context.MODE_PRIVATE
-        )
+        requireContext().getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
     }
     private val prefSummary: SharedPreferences by lazy {
         requireContext().getSharedPreferences(
-            Const.SUMMARY, Context.MODE_PRIVATE
+            SummaryHelper.TAG, Context.MODE_PRIVATE
         )
     }
     private val prefProm: SharedPreferences by lazy {
         requireContext().getSharedPreferences(
-            Const.PROM, Context.MODE_PRIVATE
+            PromHelper.TAG, Context.MODE_PRIVATE
         )
     }
     private val bPanels: BooleanArray
@@ -280,11 +279,11 @@ class SettingsFragment : NeoFragment() {
 
     private fun initButtonsSet() = binding?.run {
         check.bCheckSet.setOnClickListener {
-            dialog = SetNotifDialog(requireActivity(), Const.SUMMARY)
+            dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
             dialog?.show()
         }
         prom.bPromSet.setOnClickListener {
-            dialog = SetNotifDialog(requireActivity(), Const.PROM)
+            dialog = SetNotifDialog(requireActivity(), PromHelper.TAG)
             dialog?.show()
         }
     }

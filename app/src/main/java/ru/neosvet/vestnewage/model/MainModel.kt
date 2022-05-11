@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
+import ru.neosvet.vestnewage.helpers.MainHelper
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.model.basic.AdsState
@@ -29,7 +30,7 @@ class MainModel : NeoViewModel() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "slash")
+        .putString(Const.TASK, MainHelper.TAG)
         .build()
 
     override suspend fun doLoad() {

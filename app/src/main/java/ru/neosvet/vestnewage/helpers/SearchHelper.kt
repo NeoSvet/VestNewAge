@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
-import ru.neosvet.vestnewage.fragment.SearchFragment
 import ru.neosvet.vestnewage.model.SearchModel
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -13,13 +12,11 @@ import java.io.FileWriter
 
 class SearchHelper(context: Context) {
     companion object {
+        const val TAG = "Search"
         const val LABEL = "l"
     }
 
-    private val pref: SharedPreferences = context.getSharedPreferences(
-        SearchFragment::class.java.simpleName,
-        Context.MODE_PRIVATE
-    )
+    private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = pref.edit()
     var start: DateHelper
     var end: DateHelper

@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.activity.BrowserActivity;
 import ru.neosvet.vestnewage.activity.MainActivity;
 import ru.neosvet.vestnewage.helpers.DateHelper;
+import ru.neosvet.vestnewage.helpers.SummaryHelper;
 import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.helpers.NotificationHelper;
 import ru.neosvet.vestnewage.helpers.PromHelper;
@@ -25,7 +26,7 @@ public class LaunchUtils {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-    private final String SETTINGS = "main";
+    private final String SETTINGS = "Settings";
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private NotificationHelper notifHelper;
@@ -49,13 +50,13 @@ public class LaunchUtils {
             }).start();
         }
         if (ver < 21) {
-            SharedPreferences pref = App.context.getSharedPreferences(Const.SUMMARY, MODE_PRIVATE);
+            SharedPreferences pref = App.context.getSharedPreferences(SummaryHelper.TAG, MODE_PRIVATE);
             int p = pref.getInt(Const.TIME, Const.TURN_OFF);
             if (p == Const.TURN_OFF)
                 showNotifTip(App.context.getString(R.string.are_you_know),
                         App.context.getString(R.string.new_option_notif), getSettingsIntent());
             else {
-                pref = App.context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
+                pref = App.context.getSharedPreferences(PromHelper.TAG, MODE_PRIVATE);
                 p = pref.getInt(Const.TIME, Const.TURN_OFF);
                 if (p == Const.TURN_OFF)
                     showNotifTip(App.context.getString(R.string.are_you_know),
@@ -146,13 +147,13 @@ public class LaunchUtils {
     }
 
     private void reInitProm() {
-        SharedPreferences pref = App.context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
+        SharedPreferences pref = App.context.getSharedPreferences(PromHelper.TAG, MODE_PRIVATE);
         PromHelper prom = new PromHelper(null);
         prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF));
     }
 
     public void reInitProm(int timeDiff) {
-        SharedPreferences pref = App.context.getSharedPreferences(Const.PROM, MODE_PRIVATE);
+        SharedPreferences pref = App.context.getSharedPreferences(PromHelper.TAG, MODE_PRIVATE);
         if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
             SharedPreferences.Editor editor = pref.edit();
             editor.putInt(Const.TIMEDIFF, timeDiff);
