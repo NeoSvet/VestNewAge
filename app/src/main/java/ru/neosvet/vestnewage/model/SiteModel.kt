@@ -11,7 +11,10 @@ import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.list.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.model.basic.LongState
+import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.SiteStrings
+import ru.neosvet.vestnewage.model.basic.SuccessList
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -72,7 +75,6 @@ class SiteModel : NeoViewModel() {
     }
 
     private suspend fun loadAds() {
-        ads.clear()
         ads.loadAds()
         val list = ads.loadList(false)
         list.add(0, getFirstItem())

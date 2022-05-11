@@ -516,16 +516,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val ads = DevadsHelper(this)
         val item = ads.getItem(warn)
         ads.close()
+        if (item[DevadsHelper.TITLE].isEmpty()) return
         val builder = AlertDialog.Builder(this, R.style.NeoDialog)
-            .setTitle(getString(R.string.warning) + " " + item[0])
-            .setMessage(item[1])
+            .setTitle(getString(R.string.warning) + " " + item[DevadsHelper.TITLE])
+            .setMessage(item[DevadsHelper.DES])
             .setNegativeButton(getString(android.R.string.ok)) { dialog: DialogInterface, _ ->
                 dialog.dismiss()
             }
             .setOnDismissListener { showWelcome() }
-        if (item[2] != null) {
+        if (item[DevadsHelper.LINK] != null) {
             builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
-                Lib.openInApps(item[2], null)
+                Lib.openInApps(item[DevadsHelper.LINK], null)
             }
         }
         builder.create().show()

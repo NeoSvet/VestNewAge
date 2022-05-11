@@ -44,7 +44,9 @@ class SiteFragment : NeoFragment() {
     private val adMain: ListAdapter by lazy {
         ListAdapter(requireContext())
     }
-    private var ads: DevadsHelper? = null
+    private val ads: DevadsHelper by lazy {
+        DevadsHelper(act)
+    }
     private var x = 0
     private var y = 0
     private var scrollToFirst = false
@@ -77,13 +79,12 @@ class SiteFragment : NeoFragment() {
 
     override fun onStop() {
         super.onStop()
-        ads?.close()
+        ads.close()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        ads?.let {
-            outState.putInt(Const.ADS, it.index)
-        }
+        if (ads.index > -1)
+            outState.putInt(Const.ADS, ads.index)
         super.onSaveInstanceState(outState)
     }
 
@@ -107,7 +108,7 @@ class SiteFragment : NeoFragment() {
         if (state != null) {
             val indexAds = state.getInt(Const.ADS, -1)
             if (indexAds > -1)
-                ads = DevadsHelper(act).apply { index = indexAds }
+                ads.index = indexAds
         } else {
             arguments?.let {
                 model.selectedTab = it.getInt(Const.TAB)
@@ -234,15 +235,12 @@ class SiteFragment : NeoFragment() {
                     act?.tabLayout?.select(SiteModel.TAB_NEWS)
                     return true
                 }
-                if (ads == null) ads = DevadsHelper(act)
-                ads?.run {
-                    index = pos
-                    showAd(
-                        adMain.getItem(pos).title,
-                        adMain.getItem(pos).link,
-                        adMain.getItem(pos).head
-                    )
-                }
+                ads.index = pos
+                ads.showAd(
+                    adMain.getItem(pos).title,
+                    adMain.getItem(pos).link,
+                    adMain.getItem(pos).head
+                )
                 adMain.getItem(pos).des = ""
                 adMain.notifyDataSetChanged()
                 return true
@@ -278,13 +276,12 @@ class SiteFragment : NeoFragment() {
                     }
                     tvEmptySite.isVisible = state.list.isEmpty()
                 }
-                if (model.isDevTab) ads?.run {
-                    if (index > -1)
-                        showAd(
-                            adMain.getItem(index).title,
-                            adMain.getItem(index).link,
-                            adMain.getItem(index).head
-                        )
+                if (model.isDevTab && ads.index > -1) {
+                    ads.showAd(
+                        adMain.getItem(ads.index).title,
+                        adMain.getItem(ads.index).link,
+                        adMain.getItem(ads.index).head
+                    )
                 }
             }
             is LongState ->

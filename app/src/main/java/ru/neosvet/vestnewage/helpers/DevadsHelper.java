@@ -20,17 +20,16 @@ import ru.neosvet.vestnewage.list.ListItem;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 
 public class DevadsHelper {
+    public static final int TITLE = 0, LINK = 1, DES = 2;
     private AdsStorage storage;
     private CustomDialog alert;
     private final Context context;
     private long time = -1;
     private int index_ads = -1, index_warn = -1;
-    private boolean isClosed, isNew;
+    private boolean isClosed = true, isNew;
 
     public DevadsHelper(Context context) {
         this.context = context;
-        storage = new AdsStorage();
-        isClosed = false;
     }
 
     public boolean hasNew() {
@@ -51,6 +50,7 @@ public class DevadsHelper {
 
     public long getTime() {
         if (time == -1) {
+            open();
             Cursor cursor = storage.getTime();
             if (cursor.moveToFirst())
                 time = Long.parseLong(cursor.getString(0));
@@ -62,8 +62,9 @@ public class DevadsHelper {
     }
 
     public String[] getItem(int index) {
+        open();
         Cursor cursor = storage.getAll();
-        String[] m = new String[3];
+        String[] m = new String[]{"", "", ""};
         if (!cursor.moveToFirst())
             return m;
 
@@ -74,9 +75,9 @@ public class DevadsHelper {
 
         do {
             if (index == n) {
-                m[0] = cursor.getString(iTitle);
-                m[1] = cursor.getString(iDes);
-                m[2] = cursor.getString(iLink);
+                m[TITLE] = cursor.getString(iTitle);
+                m[DES] = cursor.getString(iDes);
+                m[LINK] = cursor.getString(iLink);
                 break;
             }
             n++;
@@ -89,6 +90,7 @@ public class DevadsHelper {
         List<ListItem> list = new ArrayList<>();
         Cursor cursor;
         String ad;
+        open();
         if (onlyUnread) {
             cursor = storage.getUnread();
             ad = context.getString(R.string.ad) + ": ";
@@ -144,14 +146,10 @@ public class DevadsHelper {
         return list;
     }
 
-    public void clear() {
-        time = 0;
-        storage.clear();
-    }
-
     public void showAd(String title, final String link, String des) {
         ContentValues row = new ContentValues();
         row.put(Const.UNREAD, 0);
+        open();
         if (!storage.updateByTitle(title, row)) {
             storage.updateByDes(des, row);
         }
@@ -186,39 +184,41 @@ public class DevadsHelper {
     private boolean update(BufferedReader br) throws Exception {
         String s;
         String[] m = new String[]{"", "", ""};
-        byte mode, n = 0, index = 0;
+        List<String> titles = new ArrayList<>();
+        byte mode, index = 0;
         index_warn = -1;
         boolean isNew = false;
+        open();
         while ((s = br.readLine()) != null) {
             if (s.contains("<e>")) {
-                if (m[0].contains("<u>"))
+                if (m[TITLE].contains("<u>"))
                     mode = AdsStorage.MODE_U;
-                else if (m[2].contains("<d>"))
-                    mode = AdsStorage.MODE_TLD;
-                else if (m[1].contains("<d>"))
+                else if (m[LINK].isEmpty())
                     mode = AdsStorage.MODE_TD;
-                else
+                else if (m[DES].isEmpty())
                     mode = AdsStorage.MODE_TL;
-                if (m[0].contains("<w>"))
+                else
+                    mode = AdsStorage.MODE_TLD;
+                if (m[TITLE].contains("<w>"))
                     index_warn = index;
                 index++;
-                m[0] = m[0].substring(3);
-                if (isNew)
-                    addRow(mode, m);
-                else if (!storage.existsTitle(m[0])) {
-                    clear();
+                m[TITLE] = m[TITLE].substring(3);
+                titles.add(m[TITLE]);
+                if (!storage.existsTitle(m[TITLE])) {
                     isNew = true;
                     addRow(mode, m);
                 }
-                n = 0;
-                m[2] = "";
+                m = new String[]{"", "", ""};
             } else if (s.indexOf("<") != 0) {
-                m[n - 1] += Const.N + s; //multiline des
-            } else {
-                m[n] = s;
-                n++;
-            }
+                m[DES] += Const.N + s; //multiline des
+            } else if (s.contains("<d>"))
+                m[DES] = s.substring(3);
+            else if (s.contains("<l>"))
+                m[LINK] = s.substring(3);
+            else
+                m[TITLE] = s;
         }
+        storage.deleteItems(titles);
         ContentValues row = new ContentValues();
         row.put(Const.MODE, AdsStorage.MODE_T);
         row.put(Const.UNREAD, 0);
@@ -232,14 +232,9 @@ public class DevadsHelper {
     private void addRow(byte mode, String[] m) {
         ContentValues row = new ContentValues();
         row.put(Const.MODE, mode);
-        row.put(Const.TITLE, m[0]);
-        if (mode == AdsStorage.MODE_U || mode == AdsStorage.MODE_TD) {
-            row.put(Const.DESCTRIPTION, m[1].substring(3));
-        } else {
-            row.put(Const.LINK, m[1].substring(3));
-            if (mode == AdsStorage.MODE_TLD)
-                row.put(Const.DESCTRIPTION, m[2].substring(3));
-        }
+        row.put(Const.TITLE, m[TITLE]);
+        row.put(Const.DESCTRIPTION, m[DES]);
+        row.put(Const.LINK, m[LINK]);
         storage.insert(row);
     }
 
@@ -250,14 +245,14 @@ public class DevadsHelper {
         isClosed = true;
     }
 
-    public void reopen() {
-        if (isClosed) {
-            storage = new AdsStorage();
-            isClosed = false;
-        }
+    private void open() {
+        if (!isClosed) return;
+        storage = new AdsStorage();
+        isClosed = false;
     }
 
     public int getUnreadCount() {
+        open();
         Cursor cursor = storage.getUnread();
         int k = cursor.getCount();
         cursor.close();
