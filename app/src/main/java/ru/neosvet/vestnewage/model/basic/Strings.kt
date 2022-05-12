@@ -34,7 +34,7 @@ data class BookStrings(
     val month_is_empty: String
 )
 
-data class MarkerStrings(
+data class MarkersStrings(
     val collections: String,
     val no_collections: String,
     val sel_pos: String,

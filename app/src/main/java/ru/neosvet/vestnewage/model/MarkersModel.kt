@@ -32,7 +32,7 @@ class MarkersModel : NeoViewModel() {
     var diDelete = false
     private var sCol: String? = null
     var diName: String? = null
-    private lateinit var strings: MarkerStrings
+    private lateinit var strings: MarkersStrings
     var task: Type = Type.NONE
         private set
     val list = mutableListOf<MarkerItem>()
@@ -50,7 +50,7 @@ class MarkersModel : NeoViewModel() {
 
     fun init(context: Context) {
         if (isInit) return
-        strings = MarkerStrings(
+        strings = MarkersStrings(
             collections = context.getString(R.string.collections),
             no_collections = context.getString(R.string.no_collections),
             sel_pos = context.getString(R.string.sel_pos),
