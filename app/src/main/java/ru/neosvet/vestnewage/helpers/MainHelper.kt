@@ -50,11 +50,15 @@ class MainHelper(private val act: MainActivity) {
     val newId: Int
         get() = unread.getNewId(countNew)
     private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
-    var menuType = MenuType.FLOAT
+    private var menuType = MenuType.FLOAT
     val isCountInMenu: Boolean
         get() = pref.getBoolean(Const.COUNT_IN_MENU, true)
+    val isFloatMenu: Boolean
+        get() = menuType == MenuType.FLOAT
     val isSideMenu: Boolean
         get() = menuType == MenuType.SIDE
+    val isFullMenu: Boolean
+        get() = menuType == MenuType.FULL
 
     fun initViews() {
         navView = act.findViewById(R.id.nav_view)
@@ -99,12 +103,6 @@ class MainHelper(private val act: MainActivity) {
     }
 
     fun getFirstFragment(): Int {
-//        val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-//        firstFragment = when (startScreen) {
-//            Const.SCREEN_MENU -> R.id.menu_fragment
-//            Const.SCREEN_SUMMARY -> R.id.nav_rss
-//            else -> R.id.nav_calendar
-//        }
         val startNew = pref.getBoolean(Const.START_NEW, false)
         if (startNew && countNew > 0)
             return R.id.nav_new
@@ -121,7 +119,7 @@ class MainHelper(private val act: MainActivity) {
             }
             startScreen == Const.SCREEN_SUMMARY ->
                 R.id.nav_rss
-            else -> //startScreen == Const.SCREEN_CALENDAR || !isMenuMode ->
+            else -> //startScreen == Const.SCREEN_CALENDAR || !isFullMenu ->
                 R.id.nav_calendar
         }
     }

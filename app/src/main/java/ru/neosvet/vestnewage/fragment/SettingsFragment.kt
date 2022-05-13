@@ -171,7 +171,7 @@ class SettingsFragment : NeoFragment() {
 
     private fun initBaseSection() = binding?.base?.run {
         cbCountFloat.isChecked = !MainActivity.isCountInMenu
-        if (act?.isMenuMode == true)
+        if (prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_MENU)
             cbCountFloat.text = getString(R.string.count_everywhere)
         cbNew.isChecked = prefMain.getBoolean(Const.START_NEW, false)
         cbCountFloat.setOnCheckedChangeListener { _, check: Boolean ->

@@ -55,8 +55,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private lateinit var helper: MainHelper
-    val isMenuMode: Boolean
-        get() = helper.menuType == MainHelper.MenuType.FULL
     private var firstFragment = Const.SCREEN_CALENDAR
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
@@ -89,7 +87,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         initLaunch()
         helper = MainHelper(this)
         firstFragment = helper.getFirstFragment()
-        if (isMenuMode)
+        if (helper.isFullMenu)
             setContentView(R.layout.main_content)
         else
             setContentView(R.layout.main_activity)
@@ -103,7 +101,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         initInterface()
         initAnim()
         isCountInMenu = helper.isCountInMenu
-        if (isCountInMenu.not() || isMenuMode) {
+        if (isCountInMenu.not() || helper.isFullMenu) {
             prom = PromHelper(helper.tvPromTime)
         } else //it is not land
             helper.navView?.let {
@@ -193,15 +191,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 tab = -1
             else {
                 val id = intent.getIntExtra(Const.CUR_ID, 0)
-                firstFragment = if (id == 0)
-                    helper.getFirstFragment()
-                else id
+                if (id != 0)
+                    firstFragment = id
             }
         } else helper.run {
             curId = state.getInt(Const.CUR_ID)
-            navView?.setCheckedItem(curId)
-            if (isSideMenu)
-                setMenuFragment()
+            when {
+                isFloatMenu -> navView?.setCheckedItem(curId)
+                isSideMenu -> setMenuFragment()
+                isFullMenu -> if (curId != R.id.menu_fragment)
+                    statusBack = StatusBack.PAGE
+            }
             updateNew()
             tvNew.clearAnimation()
         }
@@ -253,12 +253,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         toolbar?.let {
             setSupportActionBar(it)
-            if (isMenuMode.not())
-                initDrawerMenu()
+            if (helper.isFloatMenu)
+                initFloatMenu()
         }
     }
 
-    private fun initDrawerMenu() = helper.run {
+    private fun initFloatMenu() = helper.run {
         drawer?.let { drawer ->
             val toggle = ActionBarDrawerToggle(
                 this@MainActivity,
@@ -402,10 +402,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun setMenu(id: Int, savePrev: Boolean) {
         helper.changeId(id, savePrev)
-        when (helper.menuType) {
-            MainHelper.MenuType.FLOAT -> helper.navView?.setCheckedItem(id)
-            MainHelper.MenuType.SIDE -> helper.setMenuFragment()
-            MainHelper.MenuType.FULL -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
+        when {
+            helper.isFloatMenu -> helper.navView?.setCheckedItem(id)
+            helper.isSideMenu -> helper.setMenuFragment()
+            helper.isFullMenu -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
         }
     }
 
@@ -461,7 +461,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun exit() {
         if (statusBack == StatusBack.EXIT) {
             super.onBackPressed()
-        } else if (statusBack == StatusBack.PAGE && isMenuMode) {
+        } else if (statusBack == StatusBack.PAGE && helper.isFullMenu) {
             statusBack = StatusBack.MENU
             setFragment(R.id.menu_fragment, false)
         } else {
