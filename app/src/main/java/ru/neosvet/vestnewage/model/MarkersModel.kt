@@ -240,7 +240,7 @@ class MarkersModel : NeoViewModel() {
         return if (place.contains("%"))
             strings.sel_pos + place
         else
-            strings.sel_par + storage.openList(place).replace(Const.COMMA, ", ")
+            strings.sel_par + MarkersStorage.openList(place).replace(Const.COMMA, ", ")
     }
 
     private fun parseParagraphs(place: String, curPar: Cursor): String? {
@@ -249,11 +249,11 @@ class MarkersModel : NeoViewModel() {
         b.append(place.replace(Const.COMMA, ", "))
         b.append(":")
         b.append(Const.N)
-        val p = storage.closeList(place)
+        val p = MarkersStorage.closeList(place)
         var i = 1
         if (curPar.moveToFirst()) {
             do {
-                if (p.contains(storage.closeList(i.toString()))) {
+                if (p.contains(MarkersStorage.closeList(i.toString()))) {
                     b.append(Lib.withOutTags(curPar.getString(0)))
                     b.append(Const.N)
                     b.append(Const.N)
@@ -341,7 +341,7 @@ class MarkersModel : NeoViewModel() {
             if (isCollections) { //удаляем подборку
                 n = 1
                 storage.deleteCollection(
-                    id, storage.getList(item.data),
+                    id, MarkersStorage.getList(item.data),
                     strings.no_collections
                 )
             } else { //удаляем закладку
@@ -528,7 +528,7 @@ class MarkersModel : NeoViewModel() {
             bw.write(hC[id].toString() + Const.N)
             br.readLine() //title
             s = br.readLine()
-            bw.write(getNewId(hM, storage.getList(s)) + Const.N) //markers
+            bw.write(getNewId(hM, MarkersStorage.getList(s)) + Const.N) //markers
             bw.flush()
             s = br.readLine()
         }
@@ -542,7 +542,7 @@ class MarkersModel : NeoViewModel() {
             br.readLine() //link
             br.readLine() //des
             s = br.readLine()
-            bw.write(getNewId(hC, storage.getList(s)) + Const.N) //col
+            bw.write(getNewId(hC, MarkersStorage.getList(s)) + Const.N) //col
             bw.flush()
             s = br.readLine()
         }
@@ -560,7 +560,10 @@ class MarkersModel : NeoViewModel() {
             if (cursor.moveToFirst()) {
                 p = br.readLine()
                 row = ContentValues()
-                row.put(DataBase.MARKERS, combineIds(cursor.getString(0), storage.getList(p)))
+                row.put(
+                    DataBase.MARKERS,
+                    combineIds(cursor.getString(0), MarkersStorage.getList(p))
+                )
                 storage.updateCollection(s.toInt(), row)
             }
             cursor.close()
@@ -573,7 +576,10 @@ class MarkersModel : NeoViewModel() {
             if (cursor.moveToFirst()) {
                 p = br.readLine()
                 row = ContentValues()
-                row.put(DataBase.COLLECTIONS, combineIds(cursor.getString(0), storage.getList(p)))
+                row.put(
+                    DataBase.COLLECTIONS,
+                    combineIds(cursor.getString(0), MarkersStorage.getList(p))
+                )
                 storage.updateMarker(s, row)
             }
             cursor.close()
@@ -594,9 +600,9 @@ class MarkersModel : NeoViewModel() {
             b.delete(0, 1)
         } else {
             b = StringBuilder(ids)
-            val list = storage.closeList(ids)
+            val list = MarkersStorage.closeList(ids)
             for (s in m) {
-                if (!list.contains(storage.closeList(s))) {
+                if (!list.contains(MarkersStorage.closeList(s))) {
                     b.append(Const.COMMA)
                     b.append(s)
                 }

@@ -1,17 +1,40 @@
 package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
-import ru.neosvet.vestnewage.App
 
 /**
  * Created by NeoSvet on 23.03.2022.
  */
 
 class MarkersStorage {
+    companion object {
+        fun closeList(s: String?): String {
+            return if (s == null) ""
+            else Const.COMMA + s + Const.COMMA
+        }
+
+        fun openList(list: String?): String {
+            if (list != null && list.isNotEmpty()) {
+                var s = list.trimStart().trimEnd()
+                if (s.lastIndexOf(Const.COMMA) == s.length - 1)
+                    s = s.substring(0, s.length - 1)
+                if (s.indexOf(Const.COMMA) == 0)
+                    s = s.substring(1)
+                return s
+            }
+            return list ?: ""
+        }
+
+        fun getList(s: String): Array<String> {
+            return if (s.contains(Const.COMMA))
+                s.split(Const.COMMA).toTypedArray()
+            else arrayOf(s)
+        }
+    }
+
     private val db = DataBase(DataBase.MARKERS)
 
     fun updateCollection(id: Int, cv: ContentValues): Boolean =
@@ -174,28 +197,5 @@ class MarkersStorage {
             cursor.getInt(0) else -1
         cursor.close()
         return result
-    }
-
-    fun closeList(s: String?): String {
-        return if (s == null) ""
-        else Const.COMMA + s + Const.COMMA
-    }
-
-    fun openList(list: String?): String {
-        if (list != null && list.isNotEmpty()) {
-            var s = list.trimStart().trimEnd()
-            if (s.lastIndexOf(Const.COMMA) == s.length - 1)
-                s = s.substring(0, s.length - 1)
-            if (s.indexOf(Const.COMMA) == 0)
-                s = s.substring(1)
-            return s
-        }
-        return list ?: ""
-    }
-
-    fun getList(s: String): Array<String> {
-        return if (s.contains(Const.COMMA))
-            s.split(Const.COMMA).toTypedArray()
-        else arrayOf(s)
     }
 }
