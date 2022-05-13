@@ -62,7 +62,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         }
 
         private fun parToNumList(link: String, par: String): String {
-            val p = Lib.withOutTags(par)
+            val p = if (par.contains("<")) Lib.withOutTags(par) else par
             val storage = PageStorage()
             storage.open(link)
             val cursor = storage.getParagraphs(storage.getPageId(link))
