@@ -113,7 +113,7 @@
     <string name="no_markers">Список закладок пуст.\nМатериалы можно добавить\nв закладки на экране чтения\n(смотрите меню).</string>
     <!--MarkerActivity-->
     <string name="marker">Закладка</string>
-    <string name="one_for_sel">Поставьте хотя бы одну галочку!</string>
+    <string name="need_set_check">Поставьте хотя бы одну галочку!</string>
     <string name="no_collections">Вне подборок</string>
     <string name="unuse_dot">Запятую нельзя использовать</string>
     <string name="title_already_used">Данный заголовок уже используется!</string>

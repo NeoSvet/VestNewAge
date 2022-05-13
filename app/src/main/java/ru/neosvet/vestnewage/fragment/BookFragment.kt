@@ -29,10 +29,10 @@ import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.list.ListAdapter
 import ru.neosvet.vestnewage.model.BookModel
 import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.service.LoaderService
 import java.util.*
 import kotlin.math.abs
 
@@ -303,7 +303,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         ) { _, _ ->
             binding?.ivPrev?.isEnabled = false
             LoaderService.postCommand(
-                LoaderService.DOWNLOAD_OTKR, "")
+                LoaderService.DOWNLOAD_OTKR, ""
+            )
         }
         builder.create().show()
     }
@@ -363,7 +364,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             setLeftButton(getString(R.string.in_markers)) {
                 val marker = Intent(requireContext(), MarkerActivity::class.java)
                 marker.putExtra(Const.LINK, link)
-                marker.putExtra(DataBase.PARAGRAPH, par)
+                marker.putExtra(DataBase.PARAGRAPH, par + 1)
                 startActivity(marker)
                 alertRnd?.dismiss()
             }

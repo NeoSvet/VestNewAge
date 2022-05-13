@@ -47,6 +47,16 @@ data class MarkersStrings(
     val cancel_rename: String
 )
 
+data class MarkerStrings(
+    val sel_pos: String,
+    val sel_par: String,
+    val sel_col: String,
+    val page_entirely: String,
+    val unuse_dot: String,
+    val title_already_used: String,
+    val no_collections: String
+)
+
 data class CabinetStrings(
     val selected_status: String,
     val anketa_failed: String,

@@ -215,7 +215,7 @@ public class JournalFragment extends Fragment {
         });
         lvJournal.setOnItemLongClickListener((adapterView, view, pos, l) -> {
             String des = adJournal.getItem(pos).getDes();
-            String par = null;
+            String par = "";
             int i = des.indexOf(getString(R.string.rnd_stih));
             if (i > -1 && i < des.lastIndexOf(Const.N)) {
                 par = des.substring(des.indexOf(Const.N, i) + 1);

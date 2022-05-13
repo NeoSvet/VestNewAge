@@ -9,7 +9,6 @@
     tools:showIn="@layout/marker_activity">
 
     <LinearLayout
-        android:id="@+id/content_marker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">

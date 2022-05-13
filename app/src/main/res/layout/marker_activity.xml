@@ -20,8 +20,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ListView
-        android:id="@+id/lvList"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -91,7 +91,9 @@
             android:text="+" />
     </RelativeLayout>
 
-    <include layout="@layout/marker_content" />
+    <include
+        android:id="@+id/content"
+        layout="@layout/marker_content" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabOk"

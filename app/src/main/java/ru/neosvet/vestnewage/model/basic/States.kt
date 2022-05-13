@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.model.basic
 
+import ru.neosvet.vestnewage.helpers.MarkerHelper
 import ru.neosvet.vestnewage.list.CalendarItem
 import ru.neosvet.vestnewage.list.ListItem
 
@@ -9,6 +10,8 @@ sealed class NeoState {
 }
 
 object Ready : NeoState()
+
+object Success : NeoState()
 
 data class LongState(val value: Long) : NeoState()
 
