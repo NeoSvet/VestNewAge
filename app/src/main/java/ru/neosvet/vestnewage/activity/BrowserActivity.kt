@@ -413,14 +413,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 softKeyboard.show()
             }
             R.id.nav_marker -> {
-                val marker = Intent(applicationContext, MarkerActivity::class.java)
-                marker.putExtra(Const.LINK, helper.link)
-                marker.putExtra(Const.PLACE, positionOnPage * 100f)
-                if (helper.isSearch) marker.putExtra(
-                    Const.DESCTRIPTION, getString(R.string.search_for)
-                            + " “" + helper.request + "”"
-                )
-                startActivity(marker)
+                val des = if (helper.isSearch)
+                    getString(R.string.search_for) + " “" + helper.request + "”"
+                else ""
+                MarkerActivity.addByPos(this, helper.link, positionOnPage * 100f, des)
             }
             R.id.nav_opt_scale, R.id.nav_src_scale -> {
                 helper.zoom = if (item.itemId == R.id.nav_opt_scale) 0 else 100

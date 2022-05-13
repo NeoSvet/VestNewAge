@@ -24,7 +24,6 @@ import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.ErrorUtils
 import ru.neosvet.utils.Lib
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helpers.MarkerHelper
@@ -39,19 +38,39 @@ import ru.neosvet.vestnewage.storage.PageStorage
 class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
     companion object {
         @JvmStatic
-        fun addMarker(context: Context, link: String, par: String, des: String) {
+        fun addByPos(context: Context, link: String, pos: Float, des: String) {
             val marker = Intent(context, MarkerActivity::class.java)
             marker.putExtra(Const.LINK, link)
+            marker.putExtra(Const.PLACE, pos)
+            marker.putExtra(Const.DESCTRIPTION, des)
+            context.startActivity(marker)
+        }
+
+        @JvmStatic
+        fun addByPar(context: Context, link: String, par: String, des: String) {
+            val marker = Intent(context, MarkerActivity::class.java)
+            marker.putExtra(Const.LINK, link)
+            if (par.isNotEmpty()) {
+                val p = parToNumList(link, par)
+                if (p.indexOf(Const.COMMA) > 0)
+                    marker.putExtra(Const.PAGE, p)
+                else if (p.isNotEmpty())
+                    marker.putExtra(DataBase.PARAGRAPH, p.toInt())
+            }
+            marker.putExtra(Const.DESCTRIPTION, des)
+            context.startActivity(marker)
+        }
+
+        private fun parToNumList(link: String, par: String): String {
             val p = Lib.withOutTags(par)
             val storage = PageStorage()
             storage.open(link)
             val cursor = storage.getParagraphs(storage.getPageId(link))
             val s = StringBuilder()
             if (cursor.moveToFirst()) {
-                var n = 0
-                if (des == App.context.getString(R.string.search_for)) n = 1
+                var n = 1
                 do {
-                    val t = Lib.withOutTags(cursor.getString(0));
+                    val t = Lib.withOutTags(cursor.getString(0))
                     if (p.contains(t)) {
                         s.append(n)
                         s.append(", ")
@@ -61,15 +80,9 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
             }
             cursor.close()
             storage.close()
-            if (s.isNotEmpty()) {
+            if (s.isNotEmpty())
                 s.delete(s.length - 2, s.length)
-                if (s.indexOf(Const.COMMA) > 0)
-                    marker.putExtra(Const.PAGE, s.toString())
-                else
-                    marker.putExtra(DataBase.PARAGRAPH, s.toString().toInt())
-            }
-            marker.putExtra(Const.DESCTRIPTION, des)
-            context.startActivity(marker)
+            return s.toString()
         }
     }
 

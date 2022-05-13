@@ -94,7 +94,7 @@ class MarkerModel : NeoViewModel() {
             }
             intent.hasExtra(DataBase.PARAGRAPH) -> {
                 isPar = true
-                val par = intent.getIntExtra(DataBase.PARAGRAPH, -1) + 1
+                val par = intent.getIntExtra(DataBase.PARAGRAPH, 0)
                 if (par == 0) {
                     sel = strings.page_entirely
                     setParList()
@@ -107,8 +107,7 @@ class MarkerModel : NeoViewModel() {
                 isPar = true
                 intent.getStringExtra(Const.PAGE)?.let {
                     it.split(", ").forEach { s ->
-                        val i = s.toInt() + 1
-                        parsList[i].isChecked = true
+                        parsList[s.toInt()].isChecked = true
                     }
                     updateSel()
                     return@run

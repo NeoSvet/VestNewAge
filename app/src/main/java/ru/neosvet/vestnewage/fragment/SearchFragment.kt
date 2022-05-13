@@ -134,7 +134,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             var des = tvLabel.text.toString()
             des = getString(R.string.search_for) +
                     des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)
-            MarkerActivity.addMarker(
+            MarkerActivity.addByPar(
                 requireContext(),
                 adResults.getItem(pos).link,
                 adResults.getItem(pos).des, des
