@@ -52,7 +52,7 @@ class SiteFragment : NeoFragment() {
     private var scrollToFirst = false
     private var binding: SiteFragmentBinding? = null
     override val title: String
-        get() = getString(R.string.news)
+        get() = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,

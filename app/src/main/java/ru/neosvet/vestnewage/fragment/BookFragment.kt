@@ -72,7 +72,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         false
     }
     override val title: String
-        get() = getString(R.string.book)
+        get() = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
