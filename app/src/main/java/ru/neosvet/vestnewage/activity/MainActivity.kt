@@ -313,6 +313,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         helper.checkNew()
         when (id) {
             R.id.menu_fragment -> {
+                hideTabs()
                 statusBack = StatusBack.MENU
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
@@ -364,10 +365,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 fragmentTransaction.replace(R.id.my_fragment, search)
             }
             R.id.nav_journal -> {
-                if (tabLayout.isVisible) {
-                    tabLayout.removeAllTabs()
-                    tabLayout.isVisible = false
-                }
+                hideTabs()
                 fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
             }
             R.id.nav_marker -> {
@@ -389,15 +387,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val frHelp = HelpFragment.newInstance(0)
                 fragmentTransaction.replace(R.id.my_fragment, frHelp)
             } else {
-                if (tabLayout.isVisible) {
-                    tabLayout.removeAllTabs()
-                    tabLayout.isVisible = false
-                }
+                hideTabs()
                 fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
         }
         tab = 0
         fragmentTransaction.commit()
+    }
+
+    private fun hideTabs() {
+        if (tabLayout.isVisible) {
+            tabLayout.removeAllTabs()
+            tabLayout.isVisible = false
+        }
     }
 
     private fun setMenu(id: Int, savePrev: Boolean) {
