@@ -64,3 +64,12 @@ data class CabinetStrings(
     val select_status: String,
     val send_unlivable: String
 )
+
+data class HelpStrings(
+    val srv_info: String,
+    val write_to_dev: String,
+    val link_on_app: String,
+    val page_app: String,
+    val changelog: String,
+    val format_info: String
+)
