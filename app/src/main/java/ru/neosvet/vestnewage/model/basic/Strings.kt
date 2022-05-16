@@ -73,3 +73,10 @@ data class HelpStrings(
     val changelog: String,
     val format_info: String
 )
+
+data class JournalStrings(
+    val format_time_back: String,
+    val rnd_kat: String,
+    val rnd_pos: String,
+    val rnd_stih: String
+)

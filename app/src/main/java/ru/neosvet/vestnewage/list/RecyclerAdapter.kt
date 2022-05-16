@@ -13,6 +13,7 @@ class RecyclerAdapter(private val clicker: ItemClicker) :
     interface ItemClicker {
         fun onItemClick(index: Int, item: ListItem)
     }
+    var onItemLongClick: ((Int, ListItem) -> Boolean)? = null
 
     companion object {
         private const val TYPE_SIMPLE = 0
@@ -74,6 +75,11 @@ class RecyclerAdapter(private val clicker: ItemClicker) :
             tvDes?.text = data[index].des
             root.setOnClickListener {
                 clicker.onItemClick(index, data[index])
+            }
+            onItemLongClick?.let { event ->
+                root.setOnLongClickListener {
+                    event.invoke(index, data[index])
+                }
             }
         }
     }
