@@ -30,12 +30,12 @@ class CheckAdapter(
         init {
             checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (isSet) return@setOnCheckedChangeListener
-                var index = adapterPosition
+                var index = layoutPosition
                 list[index].isChecked = isChecked
                 index = checker.invoke(index, isChecked)
                 if (index == -1)
                     notifyDataSetChanged()
-                else if (index != adapterPosition)
+                else if (index != layoutPosition)
                     notifyItemChanged(index)
             }
         }

@@ -58,7 +58,7 @@ class HelpAdapter(
 
         init {
             bgItem.setOnClickListener {
-                clicker.onItemClick(adapterPosition)
+                clicker.onItemClick(layoutPosition)
             }
         }
 
