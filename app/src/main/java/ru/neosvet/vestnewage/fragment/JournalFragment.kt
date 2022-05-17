@@ -29,13 +29,13 @@ import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.Ready
 import ru.neosvet.vestnewage.model.basic.SuccessList
 
-class JournalFragment : Fragment(), Observer<NeoState>, RecyclerAdapter.ItemClicker {
+class JournalFragment : Fragment(), Observer<NeoState> {
     private val model: JournalModel by lazy {
         ViewModelProvider(this).get(JournalModel::class.java)
     }
     private var binding: JournalFragmentBinding? = null
     private val adapter: RecyclerAdapter by lazy {
-        RecyclerAdapter(this).also { it.onItemLongClick = this::onItemLongClick }
+        RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     }
     private var act: MainActivity? = null
     private lateinit var tip: Tip
@@ -180,7 +180,7 @@ class JournalFragment : Fragment(), Observer<NeoState>, RecyclerAdapter.ItemClic
         }
     }
 
-    override fun onItemClick(index: Int, item: ListItem) {
+    private fun onItemClick(index: Int, item: ListItem) {
         var s = item.des
         if (s.contains(getString(R.string.rnd_stih))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_stih))) + 1

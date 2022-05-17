@@ -27,9 +27,9 @@ import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
 
-class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
+class CabinetFragment : NeoFragment() {
     private var binding: CabinetFragmentBinding? = null
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this)
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.login.etPassword)
     }
@@ -185,7 +185,7 @@ class CabinetFragment : NeoFragment(), RecyclerAdapter.ItemClicker {
         }
     }
 
-    override fun onItemClick(index: Int, item: ListItem) {
+    private fun onItemClick(index: Int, item: ListItem) {
         if (model.isRun) return
         when (model.type) {
             CabinetModel.Type.LOGIN -> {
