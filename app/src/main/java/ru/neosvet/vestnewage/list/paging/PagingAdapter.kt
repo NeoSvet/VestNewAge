@@ -1,0 +1,59 @@
+package ru.neosvet.vestnewage.list.paging
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
+import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.RecyclerHolder
+
+class PagingAdapter(
+    private val clicker: (Int, ListItem) -> Unit,
+    private val longClicker: ((Int, ListItem) -> Boolean)?,
+    private val finishedList: () -> Unit
+) : PagingDataAdapter<ListItem, RecyclerHolder>(ItemsComparator) {
+    companion object {
+        private const val TYPE_SIMPLE = 0
+        private const val TYPE_DETAIL = 1
+    }
+
+    private var isFirst = true
+
+    override fun getItemViewType(position: Int): Int {
+        val item = getItem(position)
+        return if (item?.des?.isNotEmpty() == true)
+            TYPE_DETAIL else TYPE_SIMPLE
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): RecyclerHolder {
+        val layout = if (viewType == TYPE_SIMPLE)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
+        else
+            LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
+        return RecyclerHolder(layout, clicker, longClicker)
+    }
+
+    override fun onBindViewHolder(holder: RecyclerHolder, position: Int) {
+        val item = getItem(position)
+        when {
+            isFirst -> isFirst = false
+            position == 0 -> finishedList.invoke()
+            position == itemCount - 1 -> finishedList.invoke()
+        }
+        item?.let { holder.setItem(it) }
+    }
+
+    object ItemsComparator : DiffUtil.ItemCallback<ListItem>() {
+        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+            return oldItem.title == newItem.title
+        }
+
+        override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+            return oldItem.des == newItem.des && oldItem.link == newItem.link
+        }
+    }
+}

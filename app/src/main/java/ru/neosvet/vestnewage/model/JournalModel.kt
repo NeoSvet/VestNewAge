@@ -1,29 +1,37 @@
 package ru.neosvet.vestnewage.model
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.database.Cursor
-import androidx.work.Data
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.paging.FactoryEvents
+import ru.neosvet.vestnewage.list.paging.JournalFactory
 import ru.neosvet.vestnewage.model.basic.JournalStrings
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.model.basic.Success
 import ru.neosvet.vestnewage.storage.JournalStorage
-import ru.neosvet.vestnewage.storage.PageStorage
 
-class JournalModel : NeoViewModel() {
+class JournalModel : ViewModel(), FactoryEvents {
+    private val mstate = MutableLiveData<NeoState>()
+    val state: LiveData<NeoState>
+        get() = mstate
     private val journal = JournalStorage()
-    private var offset = 0
-    private var finish = true
-    val isCanPaging: Boolean
-        get() = offset > 0 || !finish
     private lateinit var strings: JournalStrings
+    private val factory: JournalFactory by lazy {
+        JournalFactory(journal, strings, this)
+    }
+    var loading = false
+        private set
+    val offset: Int
+        get() = factory.offset
     private var isInit = false
 
     fun init(context: Context) {
@@ -37,110 +45,44 @@ class JournalModel : NeoViewModel() {
         )
     }
 
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, DataBase.JOURNAL)
-        .putInt(Const.FIRST, offset)
-        .putBoolean(Const.END, finish)
-        .build()
-
-    override suspend fun doLoad() {
-        openList()
-    }
-
-    override fun onDestroy() {
+    override fun onCleared() {
         journal.close()
+        super.onCleared()
     }
 
-    @SuppressLint("Range")
-    private fun openList() {
-        val list = mutableListOf<ListItem>()
-        val curJ = journal.getAll()
-        if (!curJ.moveToFirst()) {
-            curJ.close()
-            mstate.postValue(SuccessList(list))
-        }
-        val storage = PageStorage()
-        var cursor: Cursor
-        val iTime = curJ.getColumnIndex(Const.TIME)
-        val iID = curJ.getColumnIndex(DataBase.ID)
-        var i = 0
-        var s: String
-        var id: Array<String>
-        var item: ListItem
-        val now = DateHelper.initNow()
-        if (offset > 0) curJ.moveToPosition(offset)
-        do {
-            id = curJ.getString(iID).split(Const.AND).toTypedArray()
-            storage.open(id[0])
-            cursor = storage.getPageById(id[1])
-            if (cursor.moveToFirst()) {
-                s = cursor.getString(cursor.getColumnIndex(Const.LINK))
-                val title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
-                item = ListItem(storage.getPageTitle(title, s), s)
-                val t = curJ.getLong(iTime)
-                val d = DateHelper.putMills(t)
-                item.des = String.format(
-                    strings.format_time_back,
-                    now.getDiffDate(t), d
-                )
-                if (id.size == 3) { //случайные
-                    if (id[2] == "-1") { //случайный катрен или послание
-                        s = if (s.contains(Const.POEMS))
-                            strings.rnd_kat
-                        else
-                            strings.rnd_pos
-                    } else { //случаный стих
-                        cursor.close()
-                        cursor = storage.getParagraphs(id[1])
-                        s = strings.rnd_stih
-                        if (cursor.moveToPosition(id[2].toInt()))
-                            s += ":" + Const.N + Lib.withOutTags(
-                                cursor.getString(0)
-                            )
-                    }
-                    item.des = item.des + Const.N + s
-                }
-                list.add(item)
-                i++
-            } else { //материал отсутствует в базе - удаляем запись о нём из журнала
-                journal.delete(curJ.getString(iID))
-            }
+    fun preparing() {
+        viewModelScope.launch {
+            val cursor = journal.getAll()
+            if (cursor.moveToFirst())
+                factory.total = cursor.count
+            if (factory.total == 0)
+                mstate.postValue(Ready)
             cursor.close()
-            storage.close()
-        } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE)
-        finish = curJ.moveToNext().not()
-        curJ.close()
-        mstate.postValue(SuccessList(list))
+        }
     }
+
+    fun paging() = Pager(
+        config = PagingConfig(
+            pageSize = Const.MAX_ON_PAGE,
+            prefetchDistance = 3
+        ),
+        pagingSourceFactory = { factory }
+    ).flow
 
     fun clear() {
         journal.clear()
         journal.close()
-        finish = true
-        offset = 0
-        mstate.postValue(Ready)
     }
 
-    fun prevPage() {
-        if (offset == 0)
-            mstate.postValue(Ready)
-        else {
-            offset -= Const.MAX_ON_PAGE
-            load()
+    override fun startLoad() {
+        loading = true
+    }
+
+    override fun finishLoad() {
+        viewModelScope.launch {
+            delay(300)
+            mstate.postValue(Success)
+            loading = false
         }
-    }
-
-    fun nextPage() {
-        if (finish)
-            mstate.postValue(Ready)
-        else {
-            offset += Const.MAX_ON_PAGE
-            load()
-        }
-    }
-
-    fun reset() {
-        offset = 0
-        finish = false
     }
 }
