@@ -70,6 +70,14 @@ public class Tip {
         show = false;
     }
 
+    public void hideAnimated() {
+        if (!show)
+            return;
+        timer.cancel();
+        object.clearAnimation();
+        object.startAnimation(anHide);
+    }
+
     public boolean isShow() {
         return show;
     }

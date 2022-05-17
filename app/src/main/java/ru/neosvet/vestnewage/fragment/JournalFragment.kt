@@ -161,7 +161,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     override fun onChanged(state: NeoState) {
         when (state) {
             Success ->
-                tip.hide()
+                tip.hideAnimated()
             Ready -> binding?.run {
                 tvEmptyJournal.isVisible = true
                 fabClear.isVisible = false
