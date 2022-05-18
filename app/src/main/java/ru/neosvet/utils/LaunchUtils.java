@@ -231,32 +231,6 @@ public class LaunchUtils {
         } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
             main.putExtra(Const.CUR_ID, R.id.nav_book);
             main.putExtra(Const.TAB, 1);
-        } else if (link.contains("/search")) { //http://blagayavest.info/search/?query=любовь&where=0&isRun=2
-            link = data.getQuery();
-            if (link == null)
-                return false;
-            int page = 1;
-            if (link.contains("isRun")) {
-                page = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
-                link = link.substring(0, link.lastIndexOf("&"));
-            }
-            int mode = 5;
-            if (link.contains("where")) {
-                mode = Integer.parseInt(link.substring(link.lastIndexOf("=") + 1));
-                link = link.substring(0, link.lastIndexOf("&"));
-                    /* <option selected="" value="0">в Посланиях</option> 0
-                       <option value="5">в Катренах</option> 1
-                       <option value="1">в заголовках</option> 2
-                       <option value="2">по всему Сайту</option> 3
-                       <option value="3">по дате</option> 4
-                       <!-- <option  value="4">в цитатах</option> -->*/
-                if (mode == 5) mode = 1; // в Катренах - на сайте 5, здесь - 1
-                else if (mode > 0) mode++; // поэтому остальное смещается
-            }
-            main.putExtra(Const.PLACE, page);
-            main.putExtra(Const.TAB, mode);
-            main.putExtra(Const.CUR_ID, R.id.nav_search);
-            main.putExtra(Const.LINK, link.substring(link.indexOf("=") + 1));
         }
         return true;
     }
