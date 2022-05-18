@@ -16,7 +16,7 @@ import ru.neosvet.utils.Const;
 import ru.neosvet.utils.Lib;
 import ru.neosvet.utils.NeoClient;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.list.ListItem;
+import ru.neosvet.vestnewage.list.item.ListItem;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 
 public class DevadsHelper {

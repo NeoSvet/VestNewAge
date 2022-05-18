@@ -7,7 +7,7 @@ import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.storage.PageStorage

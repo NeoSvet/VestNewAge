@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.item.ListItem
 
 class RecyclerAdapter(
     private val clicker: (Int, ListItem) -> Unit,

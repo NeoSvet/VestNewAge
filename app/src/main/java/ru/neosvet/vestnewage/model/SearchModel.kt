@@ -13,7 +13,7 @@ import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SearchStrings

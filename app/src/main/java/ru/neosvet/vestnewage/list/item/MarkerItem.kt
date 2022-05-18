@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.list
+package ru.neosvet.vestnewage.list.item
 
 data class MarkerItem(
     val id: Int,

@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.loader
 import ru.neosvet.html.PageParser
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.NeoClient
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.model.SiteModel
 import java.io.*

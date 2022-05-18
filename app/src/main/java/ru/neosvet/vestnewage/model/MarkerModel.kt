@@ -10,7 +10,7 @@ import ru.neosvet.utils.DataBase
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.MarkerHelper
-import ru.neosvet.vestnewage.list.CheckItem
+import ru.neosvet.vestnewage.list.item.CheckItem
 import ru.neosvet.vestnewage.model.basic.MarkerStrings
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.Ready

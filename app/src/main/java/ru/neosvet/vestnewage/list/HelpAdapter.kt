@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.item.HelpItem
 
 class HelpAdapter(
     private val clicker: ItemClicker,

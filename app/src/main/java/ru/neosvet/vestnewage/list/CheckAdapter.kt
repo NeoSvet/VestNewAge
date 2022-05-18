@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.item.CheckItem
 
 class CheckAdapter(
     private val list: List<CheckItem>,

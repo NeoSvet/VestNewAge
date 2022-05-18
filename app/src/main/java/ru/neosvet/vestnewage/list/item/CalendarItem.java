@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.list;
+package ru.neosvet.vestnewage.list.item;
 
 import android.graphics.drawable.Drawable;
 

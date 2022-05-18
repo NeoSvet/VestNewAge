@@ -6,7 +6,7 @@ import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
 import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.basic.JournalStrings
 
 /**

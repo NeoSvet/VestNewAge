@@ -14,7 +14,7 @@ import ru.neosvet.utils.UnsafeClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.CabinetHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.basic.CabinetStrings
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
@@ -286,8 +286,12 @@ class CabinetModel : NeoViewModel() {
     }
 
     private fun createHttpClient(): OkHttpClient =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            NeoClient.createHttpClient()
-        else
-            UnsafeClient.createHttpClient()
+        when(Build.VERSION.SDK_INT) {
+            Build.VERSION_CODES.N ->
+                UnsafeClient.createHttpClient2()
+            Build.VERSION_CODES.M ->
+                UnsafeClient.createHttpClient()
+            else ->
+                NeoClient.createHttpClient()
+        }
 }

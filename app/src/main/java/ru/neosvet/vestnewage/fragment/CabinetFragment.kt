@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.CabinetActivity
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helpers.CabinetHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.RecyclerAdapter
 import ru.neosvet.vestnewage.model.CabinetModel
 import ru.neosvet.vestnewage.model.basic.MessageState

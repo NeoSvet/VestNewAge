@@ -13,7 +13,7 @@ import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.helpers.MainHelper
 import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.basic.AdsState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList

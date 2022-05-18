@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel

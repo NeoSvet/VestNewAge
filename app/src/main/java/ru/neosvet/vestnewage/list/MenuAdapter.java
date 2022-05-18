@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.list.item.MenuItem;
 
 public class MenuAdapter extends BaseAdapter {
     private final List<MenuItem> data = new ArrayList<>();

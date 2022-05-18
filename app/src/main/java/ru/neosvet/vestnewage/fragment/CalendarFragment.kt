@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.list.CalendarAdapter
 import ru.neosvet.vestnewage.list.CalendarAdapter.Clicker
-import ru.neosvet.vestnewage.list.CalendarItem
+import ru.neosvet.vestnewage.list.item.CalendarItem
 import ru.neosvet.vestnewage.model.CalendarModel
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel

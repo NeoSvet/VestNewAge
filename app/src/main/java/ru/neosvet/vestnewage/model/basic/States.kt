@@ -1,8 +1,7 @@
 package ru.neosvet.vestnewage.model.basic
 
-import ru.neosvet.vestnewage.helpers.MarkerHelper
-import ru.neosvet.vestnewage.list.CalendarItem
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.CalendarItem
+import ru.neosvet.vestnewage.list.item.ListItem
 
 sealed class NeoState {
     object Loading : NeoState()

@@ -10,7 +10,7 @@ import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.BookHelper
 import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.CalendarItem
+import ru.neosvet.vestnewage.list.item.CalendarItem
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.model.basic.*

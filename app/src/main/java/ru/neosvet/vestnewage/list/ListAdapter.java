@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.list.item.ListItem;
 
 public class ListAdapter extends BaseAdapter {
     private final Context context;

@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.list.ListAdapter
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoState

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.list.item.CalendarItem;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHolder> {
     private List<CalendarItem> data = null;

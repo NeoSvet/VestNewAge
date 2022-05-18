@@ -28,7 +28,7 @@ import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
 import ru.neosvet.vestnewage.list.ListAdapter
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.PageAdapter
 import ru.neosvet.vestnewage.model.SearchModel
 import ru.neosvet.vestnewage.model.basic.MessageState

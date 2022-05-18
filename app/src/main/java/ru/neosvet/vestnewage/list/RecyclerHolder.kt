@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.item.ListItem
 
 class RecyclerHolder(
     private val root: View,

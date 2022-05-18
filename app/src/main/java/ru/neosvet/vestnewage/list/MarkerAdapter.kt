@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.list.item.MarkerItem
 import ru.neosvet.vestnewage.model.MarkersModel
 
 class MarkerAdapter(private val model: MarkersModel) :

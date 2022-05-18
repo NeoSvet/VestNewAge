@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DevadsHelper
 import ru.neosvet.vestnewage.helpers.NotificationHelper
 import ru.neosvet.vestnewage.helpers.UnreadHelper
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.Ready
 import ru.neosvet.vestnewage.model.basic.SuccessList

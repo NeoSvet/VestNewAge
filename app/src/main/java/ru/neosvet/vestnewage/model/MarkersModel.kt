@@ -13,7 +13,7 @@ import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.BrowserActivity
-import ru.neosvet.vestnewage.list.MarkerItem
+import ru.neosvet.vestnewage.list.item.MarkerItem
 import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.MarkersStorage

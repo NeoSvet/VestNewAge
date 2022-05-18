@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.helpers
 
 import ru.neosvet.utils.Const
-import ru.neosvet.vestnewage.list.CheckItem
+import ru.neosvet.vestnewage.list.item.CheckItem
 import ru.neosvet.vestnewage.model.basic.MarkerStrings
 import ru.neosvet.vestnewage.storage.MarkersStorage
 

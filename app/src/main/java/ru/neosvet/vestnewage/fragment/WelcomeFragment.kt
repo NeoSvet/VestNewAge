@@ -14,7 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.neosvet.utils.Const
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.list.ListAdapter
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 
 class WelcomeFragment : BottomSheetDialogFragment() {
     interface ItemClicker {

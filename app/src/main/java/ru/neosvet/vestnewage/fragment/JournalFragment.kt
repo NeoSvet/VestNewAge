@@ -27,7 +27,7 @@ import ru.neosvet.vestnewage.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.activity.MainActivity
 import ru.neosvet.vestnewage.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.databinding.JournalFragmentBinding
-import ru.neosvet.vestnewage.list.ListItem
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.model.JournalModel
 import ru.neosvet.vestnewage.model.basic.NeoState
