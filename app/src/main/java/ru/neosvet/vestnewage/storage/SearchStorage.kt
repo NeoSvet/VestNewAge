@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
+import ru.neosvet.vestnewage.list.item.ListItem
 
 /**
  * Created by NeoSvet on 24.03.2022.
@@ -11,6 +12,7 @@ import ru.neosvet.utils.DataBase
 
 class SearchStorage {
     private var db = DataBase(Const.SEARCH)
+    var isDesc = false
     private var isClosed = false
 
     fun getResults(sortDesc: Boolean): Cursor = db.query(
@@ -36,9 +38,34 @@ class SearchStorage {
         isClosed = true
     }
 
-    fun reopen() {
+    fun open() {
         if (isClosed.not()) return
         db = DataBase(Const.SEARCH)
         isClosed = false
+    }
+
+    suspend fun getList(offset: Int): List<ListItem> {
+        val list = mutableListOf<ListItem>()
+        open()
+        val cursor = getResults(isDesc)
+        if (cursor.count == 0) {
+            cursor.close()
+            return list
+        }
+        if (!cursor.moveToPosition(offset))
+            return list
+
+        val iTitle = cursor.getColumnIndex(Const.TITLE)
+        val iLink = cursor.getColumnIndex(Const.LINK)
+        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        do {
+            val item = ListItem(cursor.getString(iTitle), cursor.getString(iLink))
+            cursor.getString(iDes)?.let {
+                item.des = it
+            }
+            list.add(item)
+        } while (cursor.moveToNext() && list.size < Const.MAX_ON_PAGE)
+        cursor.close()
+        return list
     }
 }

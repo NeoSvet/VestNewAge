@@ -1,67 +1,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="0dp"
     android:orientation="vertical"
-    android:paddingBottom="10dp">
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/pSearch">
 
-    <LinearLayout
-        style="@style/Label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="3dp"
-        android:background="@drawable/card_bg"
-        android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingTop="5dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="5dp">
-
-        <ImageButton
-            android:id="@+id/bShow"
-            android:layout_width="@dimen/string_size"
-            android:layout_height="@dimen/string_size"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/button"
-            android:padding="5dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/bottom"
-            android:visibility="gone" />
-
-
-        <AutoCompleteTextView
-            android:id="@+id/etSearch"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:hint="@string/string_for_search"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:padding="5dp"
-            android:textColorHint="@color/light_gray" />
-
-        <ImageButton
-            android:id="@+id/bSearch"
-            android:layout_width="@dimen/string_size"
-            android:layout_height="@dimen/string_size"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="5dp"
-            android:background="@drawable/button"
-            android:padding="5dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/search" />
-    </LinearLayout>
-
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pAdditionSet"
         style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-
         android:layout_marginBottom="3dp"
         android:background="@drawable/card_bg"
         android:padding="0dp"
@@ -71,42 +21,42 @@
             android:id="@+id/bHide"
             android:layout_width="34dp"
             android:layout_height="34dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
             android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/button"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/top" />
+            android:src="@drawable/top"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
             android:id="@+id/cbSearchInResults"
             style="@style/CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="0dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/press"
             android:checked="false"
-            android:text="@string/search_in_results" />
+            android:text="@string/search_in_results"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvLabel"
             style="@style/Label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/bHide"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp" />
-    </RelativeLayout>
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            app:layout_constraintTop_toBottomOf="@id/bHide" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ListView
-        android:id="@+id/lvResult"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="47dp" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

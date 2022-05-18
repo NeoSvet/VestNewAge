@@ -20,12 +20,13 @@ class SearchHelper(context: Context) {
     private val editor: SharedPreferences.Editor = pref.edit()
     var start: DateHelper
     var end: DateHelper
-    var page: Int = -1
-    var countPages: Int = 0
+    var countMaterials: Int = 0
     val minMonth: Int
     val minYear: Int
     var label: String = ""
     var request: String = ""
+    val isDesc: Boolean
+        get() = start.timeInMills > end.timeInMills
 
     init {
         val f = Lib.getFileDB("12.15")

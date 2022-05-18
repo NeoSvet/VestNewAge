@@ -349,14 +349,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val search = when {
                     intent.hasExtra(Const.LINK) -> {
                         SearchFragment.newInstance(
-                            intent.getStringExtra(Const.LINK),
-                            tab, intent.getIntExtra(Const.SEARCH, 1)
+                            intent.getStringExtra(Const.LINK), tab
                         )
                     }
                     utils.intent.hasExtra(Const.LINK) -> {
                         SearchFragment.newInstance(
-                            utils.intent.getStringExtra(Const.LINK),
-                            tab, utils.intent.getIntExtra(Const.SEARCH, 1)
+                            utils.intent.getStringExtra(Const.LINK), tab
                         )
                     }
                     else -> SearchFragment()

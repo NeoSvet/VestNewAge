@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.work.Data
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.DataBase
@@ -13,32 +17,41 @@ import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
-import ru.neosvet.vestnewage.list.item.ListItem
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SearchStrings
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.list.paging.FactoryEvents
+import ru.neosvet.vestnewage.list.paging.SearchFactory
+import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
+import java.util.*
 
-class SearchModel : NeoViewModel() {
+class SearchModel : NeoViewModel(), FactoryEvents {
     companion object {
         private const val MODE_POSLANIYA = 0
         private const val MODE_KATRENY = 1
         private const val MODE_TITLES = 2
         private const val MODE_ALL = 3
         private const val MODE_LINKS = 4
+        private const val DELAY_UPDATE = 1500
         const val MODE_BOOK = 5
         const val MODE_RESULTS = 6
     }
 
+    private val factory: SearchFactory by lazy {
+        SearchFactory(storage, this)
+    }
     private var isInit = false
     private lateinit var strings: SearchStrings
     private val storage = SearchStorage()
     private val pages = PageStorage()
     private var countMatches: Int = 0
+    private var labelMode = ""
     lateinit var helper: SearchHelper
         private set
+    var loading = false
+        private set
+    var shownResult = false
+        private set
+    private val locale = Locale.forLanguageTag("ru")
 
     fun init(context: Context) {
         if (isInit) return
@@ -52,6 +65,14 @@ class SearchModel : NeoViewModel() {
         )
         isInit = true
     }
+
+    fun paging() = Pager(
+        config = PagingConfig(
+            pageSize = Const.MAX_ON_PAGE,
+            prefetchDistance = 3
+        ),
+        pagingSourceFactory = { factory }
+    ).flow
 
     override suspend fun doLoad() {
     }
@@ -72,42 +93,77 @@ class SearchModel : NeoViewModel() {
         helper.request = request
         scope.launch {
             isRun = true
-            helper.run {
-                storage.reopen()
-                val step = if (start.timeInDays > end.timeInDays) -1 else 1
-                if (mode == MODE_RESULTS) {
-                    searchInResults(step == -1)
-                    return@run
-                }
-                storage.clear()
-                if (mode == MODE_ALL)
-                    searchList(DataBase.ARTICLES, mode)
-                val d = DateHelper.putYearMonth(start.year, start.month)
-                while (isRun) {
-                    publishProgress(d)
-                    searchList(d.my, mode)
-                    if (d.timeInDays == end.timeInDays) break
-                    d.changeMonth(step)
-                }
-                pages.close()
-            }
-            val s = if (mode == MODE_RESULTS)
+            labelMode = if (mode == MODE_RESULTS)
                 strings.search_in_results
             else
                 strings.search_mode[mode]
-            initLabel(s)
-            showResult(0)
+            countMatches = 0
+            helper.countMaterials = 0
+            SearchFactory.offset = 0
+            notifyResult()
+            shownResult = true
+            storage.open()
+            if (mode == MODE_RESULTS)
+                searchInResults(helper.isDesc)
+            else
+                searchInPages(mode)
+            isRun = false
+            notifyResult()
         }
     }
 
-    private fun initLabel(string: String) = helper.run {
-        label = String.format(
-            strings.format_found,
-            string.substring(string.indexOf(" ") + 1),
-            request,
-            countMatches,
-            countPages
-        )
+    private fun searchInPages(mode: Int) = helper.run {
+        storage.clear()
+        storage.isDesc = isDesc
+        if (mode == MODE_ALL)
+            searchList(DataBase.ARTICLES, mode)
+        val d = DateHelper.putYearMonth(start.year, start.month)
+        val step = if (isDesc) -1 else 1
+        var prev = 0
+        var time: Long = 0
+        while (isRun) {
+            publishProgress(d)
+            searchList(d.my, mode)
+            if (d.timeInDays == end.timeInDays) break
+            d.changeMonth(step)
+            val now = System.currentTimeMillis()
+            if (countMaterials - prev > Const.MAX_ON_PAGE &&
+                now - time > DELAY_UPDATE
+            ) {
+                time = now
+                notifyResult()
+                prev = countMaterials
+            }
+        }
+        pages.close()
+    }
+
+    private fun notifyResult() {
+        helper.run {
+            label = String.format(
+                strings.format_found,
+                labelMode.substring(labelMode.indexOf(" ") + 1),
+                request,
+                countMatches,
+                countMaterials
+            )
+        }
+        factory.total = helper.countMaterials
+        mstate.postValue(Success)
+    }
+
+    fun showLastResult() {
+        shownResult = true
+        scope.launch {
+            if (helper.countMaterials == 0) {
+                val cursor = storage.getResults(helper.isDesc)
+                helper.countMaterials = if (cursor.moveToFirst())
+                    cursor.count else 0
+                cursor.close()
+            }
+            factory.total = helper.countMaterials
+            mstate.postValue(Success)
+        }
     }
 
     private fun publishProgress(d: DateHelper) {
@@ -121,45 +177,11 @@ class SearchModel : NeoViewModel() {
         )
     }
 
-    fun showResult(page: Int) {
-        helper.page = page
-        val result = arrayListOf<ListItem>()
-        val desc = helper.start.timeInMills > helper.end.timeInMills
-        storage.reopen()
-        val cursor = storage.getResults(desc)
-        if (cursor.count == 0) {
-            helper.countPages = 0
-            mstate.postValue(SuccessList(result))
-            cursor.close()
-            storage.close()
-            helper.deleteBase()
-            return
-        }
-        val position = page * Const.MAX_ON_PAGE
-        if (position < 0 || !cursor.moveToPosition(position)) return
-
-        var max = cursor.count / Const.MAX_ON_PAGE
-        if (cursor.count % Const.MAX_ON_PAGE > 0) max++
-        val iTitle = cursor.getColumnIndex(Const.TITLE)
-        val iLink = cursor.getColumnIndex(Const.LINK)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
-        do {
-            val item = ListItem(cursor.getString(iTitle), cursor.getString(iLink))
-            cursor.getString(iDes)?.let {
-                item.des = it
-            }
-            result.add(item)
-        } while (cursor.moveToNext() && result.size < Const.MAX_ON_PAGE)
-        cursor.close()
-        helper.countPages = max
-        mstate.postValue(SuccessList(result))
-    }
-
     private fun searchInResults(reverseOrder: Boolean) {
         val title: MutableList<String> = ArrayList()
         val link: MutableList<String> = ArrayList()
         val id: MutableList<String> = ArrayList()
-        val cursor = storage.getResults(reverseOrder)
+        var cursor = storage.getResults(reverseOrder)
         if (cursor.moveToFirst()) {
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)
@@ -174,17 +196,17 @@ class SearchModel : NeoViewModel() {
         var des: StringBuilder
         var p1 = -1
         var p2: Int
-        countMatches = 0
-        helper.countPages = 0
+        var prev = 0
+        var time: Long = 0
         for (i in title.indices) {
             pages.open(link[i])
-            val cursor = pages.searchParagraphs(link[i], helper.request)
+            cursor = pages.searchParagraphs(link[i], helper.request)
             if (cursor.moveToFirst()) {
                 val row = ContentValues()
                 row.put(Const.TITLE, title[i])
                 row.put(Const.LINK, link[i])
                 des = StringBuilder(getDes(cursor.getString(0), helper.request))
-                helper.countPages++
+                helper.countMaterials++
                 while (cursor.moveToNext()) {
                     des.append(Const.BR + Const.BR)
                     des.append(getDes(cursor.getString(0), helper.request))
@@ -199,6 +221,15 @@ class SearchModel : NeoViewModel() {
             if (p1 < p2) {
                 p1 = p2
                 mstate.postValue(MessageState(String.format(strings.format_search_proc, p1)))
+            } else {
+                val now = System.currentTimeMillis()
+                if (helper.countMaterials - prev > Const.MAX_ON_PAGE &&
+                    now - time > DELAY_UPDATE
+                ) {
+                    time = now
+                    notifyResult()
+                    prev = helper.countMaterials
+                }
             }
         }
         pages.close()
@@ -207,15 +238,15 @@ class SearchModel : NeoViewModel() {
         id.clear()
     }
 
-    private fun getDes(d: String, sel: String): String {
-        var d = Lib.withOutTags(d)
+    private fun getDes(des: String, sel: String): String {
+        var d = Lib.withOutTags(des)
         val b = StringBuilder(d)
-        d = d.toLowerCase()
-        val sel = sel.toLowerCase()
+        d = d.lowercase(locale)
+        val s = sel.lowercase(locale)
         var i = -1
         var x = 0
-        while (d.indexOf(sel, i + 1).also { i = it } > -1) {
-            b.insert(i + x + sel.length, "</b></font>")
+        while (d.indexOf(s, i + 1).also { i = it } > -1) {
+            b.insert(i + x + s.length, "</b></font>")
             b.insert(i + x, "<font color='#99ccff'><b>")
             x += 36
             countMatches++
@@ -248,7 +279,7 @@ class SearchModel : NeoViewModel() {
         var id = -1
         var add = true
         val des = StringBuilder()
-        storage.reopen()
+        storage.open()
         do {
             if (id == cursor.getInt(iID) && add) {
                 des.append(Const.BR + Const.BR)
@@ -277,7 +308,7 @@ class SearchModel : NeoViewModel() {
                         row.put(Const.LINK, link)
                         row.put(DataBase.ID, n)
                         n++
-                        helper.countPages++
+                        helper.countMaterials++
                         if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
                             des.append(getDes(cursor.getString(iPar), helper.request))
                     }
@@ -291,5 +322,18 @@ class SearchModel : NeoViewModel() {
             storage.insert(row)
         }
         cursor.close()
+    }
+
+    override fun startLoad() {
+        loading = true
+    }
+
+    override fun finishLoad() {
+        if (isRun) return
+        viewModelScope.launch {
+            delay(300)
+            mstate.postValue(Ready)
+            loading = false
+        }
     }
 }

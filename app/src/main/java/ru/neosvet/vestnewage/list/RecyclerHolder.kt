@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.list
 
+import android.text.Html
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +22,12 @@ class RecyclerHolder(
 
     fun setItem(item: ListItem) {
         tvTitle.text = item.title
-        tvDes?.text = item.des
+        tvDes?.let {
+            if (item.des.contains("<"))
+                it.text = Html.fromHtml(item.des)
+            else
+                it.text = item.des
+        }
         root.setOnClickListener {
             clicker.invoke(layoutPosition, item)
         }

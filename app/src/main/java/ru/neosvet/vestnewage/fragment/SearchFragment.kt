@@ -4,20 +4,22 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
-import android.view.View.OnTouchListener
 import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
-import android.widget.AbsListView
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
+import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.neosvet.ui.NeoFragment
 import ru.neosvet.ui.ResizeAnim
 import ru.neosvet.ui.SoftKeyboard
+import ru.neosvet.ui.Tip
 import ru.neosvet.ui.dialogs.DateDialog
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
@@ -27,51 +29,52 @@ import ru.neosvet.vestnewage.activity.MarkerActivity
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
-import ru.neosvet.vestnewage.list.ListAdapter
+import ru.neosvet.vestnewage.list.RecyclerAdapter
 import ru.neosvet.vestnewage.list.item.ListItem
-import ru.neosvet.vestnewage.list.PageAdapter
+import ru.neosvet.vestnewage.list.paging.PagingAdapter
+import ru.neosvet.vestnewage.list.paging.SearchFactory
 import ru.neosvet.vestnewage.model.SearchModel
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.model.basic.*
 
-class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
+class SearchFragment : NeoFragment(), DateDialog.Result {
     companion object {
         private const val SETTINGS = "s"
         private const val ADDITION = "a"
-        private const val LAST_RESULTS = "r"
-        private const val CLEAR_RESULTS = "c"
+        private const val LAST_RESULTS = 0
+        private const val CLEAR_RESULTS = 1
 
         @JvmStatic
-        fun newInstance(s: String?, mode: Int, page: Int): SearchFragment {
-            val search = SearchFragment()
-            val args = Bundle()
-            args.putString(Const.STRING, s)
-            args.putInt(Const.MODE, mode)
-            args.putInt(Const.PAGE, page - 1)
-            search.arguments = args
-            return search
+        fun newInstance(s: String?, mode: Int): SearchFragment {
+            val fragment = SearchFragment()
+            fragment.arguments = Bundle().apply {
+                putString(Const.STRING, s)
+                putInt(Const.MODE, mode)
+            }
+            return fragment
         }
     }
 
     private val model: SearchModel
         get() = neomodel as SearchModel
     private var binding: SearchFragmentBinding? = null
-    private var adPages: PageAdapter? = null
-    private val adSearch: ArrayAdapter<String> by lazy {
+    private val adRequest: ArrayAdapter<String> by lazy {
         ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
     }
-    private val adResults: ListAdapter by lazy {
-        ListAdapter(requireContext())
+    private val adDefault: RecyclerAdapter by lazy {
+        RecyclerAdapter(this::defaultClick)
     }
+    private val adResult: PagingAdapter by lazy {
+        PagingAdapter(this::resultClick, this::resultLongClick, this::finishedList)
+    }
+
+    private lateinit var tip: Tip
     private var anim: ResizeAnim? = null
     private var dialog = -1
     private var dateDialog: DateDialog? = null
+    private var jobResult: Job? = null
     private val softKeyboard: SoftKeyboard by lazy {
-        SoftKeyboard(binding!!.content.etSearch)
+        SoftKeyboard(binding!!.etSearch)
     }
-    private var scrollToFirst = false
     private val helper: SearchHelper
         get() = model.helper
     override val title: String
@@ -89,79 +92,27 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         ViewModelProvider(this).get(SearchModel::class.java).apply { init(requireContext()) }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        initViews()
+        binding?.run {
+            tip = Tip(act, tvFinish)
+        }
         initSearchBox()
-        initSearchList()
         initSettings()
+        initSearchList()
         restoreState(savedInstanceState)
     }
 
     override fun onBackPressed(): Boolean {
-        if (binding?.pSettings?.isVisible == true) {
+        if (binding?.settings?.root?.isVisible == true) {
             closeSettings()
             return false
         }
         return super.onBackPressed()
     }
 
-    private fun initSearchList() = binding?.content?.run {
-        lvResult.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
-            if (model.isRun) return@OnItemClickListener
-            when (adResults.getItem(pos).link) {
-                LAST_RESULTS -> {
-                    binding?.fabSettings?.isVisible = false
-                    bShow.isVisible = true
-                    model.showResult(0)
-                    helper.loadLastResult()
-                    tvLabel.text = helper.label
-                    etSearch.setText(helper.request)
-                }
-                CLEAR_RESULTS -> {
-                    helper.deleteBase()
-                    adResults.clear()
-                    adResults.notifyDataSetChanged()
-                }
-                else -> {
-                    Lib.showToast(getString(R.string.long_press_for_mark))
-                    BrowserActivity.openReader(
-                        adResults.getItem(pos).link,
-                        helper.request
-                    )
-                }
-            }
-        }
-        lvResult.onItemLongClickListener = OnItemLongClickListener { _, _, pos: Int, _ ->
-            var des = tvLabel.text.toString()
-            des = getString(R.string.search_for) +
-                    des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)
-            MarkerActivity.addByPar(
-                requireContext(),
-                adResults.getItem(pos).link,
-                adResults.getItem(pos).des, des
-            )
-            true
-        }
-        lvResult.setOnScrollListener(object : AbsListView.OnScrollListener {
-            override fun onScrollStateChanged(absListView: AbsListView, scrollState: Int) {
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && scrollToFirst) {
-                    if (lvResult.firstVisiblePosition > 0)
-                        lvResult.smoothScrollToPosition(0)
-                    else scrollToFirst = false
-                }
-            }
-
-            override fun onScroll(
-                absListView: AbsListView, firstVisibleItem: Int,
-                visibleItemCount: Int, totalItemCount: Int
-            ) {
-            }
-        })
-    }
-
     @SuppressLint("ClickableViewAccessibility")
-    private fun initSearchBox() = binding?.content?.run {
+    private fun initSearchBox() = binding?.run {
         etSearch.threshold = 1
-        etSearch.setAdapter(adSearch)
+        etSearch.setAdapter(adRequest)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
@@ -190,11 +141,11 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             if (load) {
                 pStatus.isVisible = true
                 fabSettings.isVisible = false
-                content.etSearch.isEnabled = false
+                etSearch.isEnabled = false
             } else {
                 pStatus.isVisible = false
-                fabSettings.isVisible = pPages.isVisible.not()
-                content.etSearch.isEnabled = true
+                fabSettings.isVisible = true
+                etSearch.isEnabled = true
             }
         }
     }
@@ -204,36 +155,41 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         dateDialog?.dismiss()
         binding?.run {
             outState.putBoolean(ADDITION, content.pAdditionSet.visibility == View.VISIBLE)
-            outState.putBoolean(SETTINGS, pSettings.visibility == View.VISIBLE)
+            outState.putBoolean(SETTINGS, settings.root.visibility == View.VISIBLE)
         }
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) = binding?.run {
-        sMode.setSelection(helper.loadMode())
-        bStartRange.text = formatDate(helper.start)
-        bEndRange.text = formatDate(helper.end)
+        with(settings) {
+            root.isVisible = false
+            sMode.setSelection(helper.loadMode())
+            bStartRange.text = formatDate(helper.start)
+            bEndRange.text = formatDate(helper.end)
+        }
         if (state == null) {
-            val args = arguments
-            if (args != null) {
-                sMode.setSelection(args.getInt(Const.MODE))
-                helper.page = args.getInt(Const.PAGE)
+            arguments?.let { args ->
+                settings.sMode.setSelection(args.getInt(Const.MODE))
                 helper.request = args.getString(Const.STRING) ?: ""
             }
             if (helper.request.isNotEmpty()) {
-                content.etSearch.setText(helper.request)
+                etSearch.setText(helper.request)
+                softKeyboard.hide()
+                etSearch.setSelection(helper.request.length)
                 startSearch()
             }
         } else {
-            if (helper.page > -1) {
+            if (model.shownResult) {
                 fabSettings.isVisible = false
-                model.showResult(helper.page)
-                content.etSearch.setText(helper.request)
+                model.showLastResult()
+                etSearch.setText(helper.request)
+                softKeyboard.hide()
+                etSearch.setSelection(helper.request.length)
                 content.tvLabel.text = helper.label
                 if (state.getBoolean(ADDITION))
                     content.pAdditionSet.isVisible = true
                 else
-                    content.bShow.isVisible = true
+                    bShow.isVisible = true
             }
             if (state.getBoolean(SETTINGS)) {
                 openSettings()
@@ -243,43 +199,48 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             if (model.isRun)
                 setStatus(true)
         }
-        if (adResults.count == 0 && !model.isRun && helper.existsResults()) {
-            addActionsForLastResults()
-        }
     }
 
-    private fun addActionsForLastResults() {
-        adResults.addItem(
-            ListItem(getString(R.string.results_last_search), LAST_RESULTS)
-        )
-        adResults.addItem(
-            ListItem(getString(R.string.clear_results_search), CLEAR_RESULTS)
-        )
-        adResults.notifyDataSetChanged()
+    private fun initSearchList() = binding?.content?.run {
+        rvSearch.layoutManager = GridLayoutManager(requireContext(), 1)
+        if (model.shownResult) {
+            rvSearch.adapter = adResult
+            if (SearchFactory.offset > 0)
+                rvSearch.smoothScrollToPosition(SearchFactory.offset)
+            return@run
+        }
+        if (helper.existsResults()) {
+            val list = listOf(
+                ListItem(getString(R.string.results_last_search), true),
+                ListItem(getString(R.string.clear_results_search), true)
+            )
+            adDefault.setItems(list)
+        }
+        rvSearch.adapter = adDefault
     }
 
     private fun openSettings() = binding?.run {
+        pSearch.isVisible = false
         fabSettings.isVisible = false
         fabOk.isVisible = true
         content.root.isVisible = false
-        pSettings.isVisible = true
+        settings.root.isVisible = true
         softKeyboard.hide()
-        pPages.isVisible = false
         initResizeAnim()
     }
 
     private fun closeSettings() = binding?.run {
-        if (helper.page == -1)
-            fabSettings.isVisible = true else pPages.isVisible = true
+        pSearch.isVisible = true
+        fabSettings.isVisible = true
         fabOk.isVisible = false
         content.root.isVisible = true
-        pSettings.isVisible = false
+        settings.root.isVisible = false
     }
 
-    private fun initResizeAnim() = binding?.run {
+    private fun initResizeAnim() = binding?.settings?.run {
         if (anim == null) {
             anim = ResizeAnim(
-                pSettings,
+                root,
                 false,
                 (270 * resources.displayMetrics.density).toInt()
             ).apply {
@@ -289,75 +250,65 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             anim?.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation) {}
                 override fun onAnimationEnd(animation: Animation) {
-                    pSettings.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    pSettings.requestLayout()
+                    root.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    root.requestLayout()
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {}
             })
         }
-        pSettings.clearAnimation()
-        pSettings.startAnimation(anim)
+        root.clearAnimation()
+        root.startAnimation(anim)
     }
 
     private fun formatDate(d: DateHelper): String {
         return resources.getStringArray(R.array.months_short)[d.month - 1].toString() + " " + d.year
     }
 
-    private fun initViews() = binding?.run {
-        content.lvResult.adapter = adResults
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun initSettings() = binding?.run {
+        fabSettings.setOnClickListener { openSettings() }
+        bStop.setOnClickListener { model.cancel() }
+        fabOk.setOnClickListener {
+            closeSettings()
+            helper.savePerformance(settings.sMode.selectedItemPosition)
+        }
         val adMode = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode)
         )
         adMode.setDropDownViewResource(R.layout.spinner_item)
-        sMode.adapter = adMode
-        val click = View.OnClickListener {
-            openSettings()
-        }
-        fabSettings.setOnClickListener(click)
-        bSettings.setOnClickListener(click)
-        bStop.setOnClickListener { model.cancel() }
-        fabOk.setOnClickListener {
-            closeSettings()
-            helper.savePerformance(sMode.selectedItemPosition)
-        }
-        bClearSearch.setOnClickListener {
-            adSearch.clear()
-            adSearch.notifyDataSetChanged()
-            helper.clearRequests()
-        }
-        bStartRange.setOnClickListener { showDatePicker(0) }
-        bEndRange.setOnClickListener { showDatePicker(1) }
-        bChangeRange.setOnClickListener {
-            helper.changeDates()
-            bStartRange.text = formatDate(helper.start)
-            bEndRange.text = formatDate(helper.end)
-        }
-        with(content) {
-            bShow.setOnClickListener {
-                bShow.isVisible = false
-                pAdditionSet.isVisible = true
+        with(settings) {
+            sMode.adapter = adMode
+            bClearSearch.setOnClickListener {
+                adRequest.clear()
+                adRequest.notifyDataSetChanged()
+                helper.clearRequests()
             }
-            bHide.setOnClickListener {
-                bShow.isVisible = true
-                pAdditionSet.isVisible = false
+            bStartRange.setOnClickListener { showDatePicker(0) }
+            bEndRange.setOnClickListener { showDatePicker(1) }
+            bChangeRange.setOnClickListener {
+                helper.changeDates()
+                bStartRange.text = formatDate(helper.start)
+                bEndRange.text = formatDate(helper.end)
             }
+        }
+        bShow.setOnClickListener {
+            bShow.isVisible = false
+            content.pAdditionSet.isVisible = true
+        }
+        content.bHide.setOnClickListener {
+            bShow.isVisible = true
+            content.pAdditionSet.isVisible = false
         }
     }
 
     private fun enterSearch() = binding?.run {
-        content.etSearch.dismissDropDown()
-        if (content.etSearch.length() < 3)
+        etSearch.dismissDropDown()
+        if (etSearch.length() < 3)
             Lib.showToast(getString(R.string.low_sym_for_search))
-        else {
-            pPages.isVisible = false
+        else
             startSearch()
-        }
     }
 
     private fun showDatePicker(id: Int) {
@@ -378,10 +329,10 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
         }
         if (dialog == 0) {
             helper.start = date
-            binding?.bStartRange?.text = formatDate(helper.start)
+            binding?.settings?.bStartRange?.text = formatDate(helper.start)
         } else {
             helper.end = date
-            binding?.bEndRange?.text = formatDate(helper.end)
+            binding?.settings?.bEndRange?.text = formatDate(helper.end)
         }
         dialog = -1
     }
@@ -392,81 +343,118 @@ class SearchFragment : NeoFragment(), DateDialog.Result, OnTouchListener {
             tvStatus.text = getString(R.string.search)
             SearchModel.MODE_RESULTS
         } else
-            sMode.selectedItemPosition
-        val request = content.etSearch.text.toString()
+            settings.sMode.selectedItemPosition
+        val request = etSearch.text.toString()
+        adResult.submitData(lifecycle, PagingData.empty())
+        content.rvSearch.adapter = adResult
         model.startSearch(request, mode)
         addRequest(request)
     }
 
     private fun addRequest(request: String) {
-        for (i in 0 until adSearch.count) {
-            if (adSearch.getItem(i) == request)
+        for (i in 0 until adRequest.count) {
+            if (adRequest.getItem(i) == request)
                 return
         }
-        adSearch.add(request)
-        adSearch.notifyDataSetChanged()
+        adRequest.add(request)
+        adRequest.notifyDataSetChanged()
         helper.saveRequest(request)
-    }
-
-    private fun showResult(list: List<ListItem>) = binding?.content?.run {
-        adResults.clear()
-        if (list.isEmpty()) {
-            bShow.isVisible = false
-            pAdditionSet.isVisible = false
-            cbSearchInResults.isChecked = false
-            val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
-            builder.setMessage(getString(R.string.alert_search))
-            builder.setPositiveButton(getString(android.R.string.ok))
-            { dialog: DialogInterface, _ -> dialog.dismiss() }
-            builder.create().show()
-        } else {
-            if (bShow.isVisible.not())
-                pAdditionSet.isVisible = true
-            tvLabel.text = helper.label
-            adResults.setItems(list)
-            if (lvResult.firstVisiblePosition > 0) {
-                scrollToFirst = true
-                lvResult.smoothScrollToPosition(0)
-            }
-        }
-    }
-
-    private fun initPages(max: Int) = binding?.run {
-        if (max == 0) {
-            pPages.isVisible = false
-            fabSettings.isVisible = true
-            return@run
-        }
-        pPages.isVisible = pSettings.isVisible.not()
-        fabSettings.isVisible = false
-        if (adPages?.itemCount == max)
-            adPages?.setSelect(helper.page)
-        else {
-            adPages = PageAdapter(max, helper.page, this@SearchFragment)
-            val layoutManager = LinearLayoutManager(act, LinearLayoutManager.HORIZONTAL, false)
-            rvPages.layoutManager = layoutManager
-            rvPages.adapter = adPages
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouch(v: View, event: MotionEvent): Boolean { //click page item
-        if (event.action != MotionEvent.ACTION_UP) return false
-        val pos = v.tag as Int
-        if (helper.page != pos)
-            model.showResult(pos)
-        return false
     }
 
     override fun onChangedState(state: NeoState) {
         when (state) {
             is MessageState ->
                 binding?.tvStatus?.text = state.message
-            is SuccessList -> {
-                initPages(helper.countPages)
-                showResult(state.list)
-                setStatus(false)
+            Success -> {
+                if (model.isRun)
+                    showResult()
+                else
+                    finishSearch()
+            }
+            Ready ->
+                tip.hideAnimated()
+        }
+    }
+
+    private fun showResult() = binding?.run {
+        bShow.isVisible = content.pAdditionSet.isVisible.not()
+        content.tvLabel.text = helper.label
+
+        jobResult?.cancel()
+        jobResult = lifecycleScope.launch {
+            model.paging().collect {
+                adResult.submitData(lifecycle, it)
             }
         }
+    }
+
+    private fun finishSearch() {
+        setStatus(false)
+        if (helper.countMaterials == 0)
+            noResults()
+        else
+            showResult()
+    }
+
+    private fun noResults() {
+        adDefault.clear()
+        binding?.run {
+            bShow.isVisible = false
+            content.pAdditionSet.isVisible = false
+            content.cbSearchInResults.isChecked = false
+        }
+        AlertDialog.Builder(requireContext(), R.style.NeoDialog).apply {
+            setMessage(getString(R.string.alert_search))
+            setPositiveButton(getString(android.R.string.ok))
+            { dialog: DialogInterface, _ -> dialog.dismiss() }
+        }.create().show()
+    }
+
+    private fun defaultClick(index: Int, item: ListItem) {
+        when (index) {
+            LAST_RESULTS -> {
+                binding?.fabSettings?.isVisible = false
+                helper.loadLastResult()
+                model.showLastResult()
+                binding?.run {
+                    content.rvSearch.adapter = adResult
+                    content.tvLabel.text = helper.label
+                    bShow.isVisible = true
+                    etSearch.setText(helper.request)
+                }
+            }
+            CLEAR_RESULTS -> {
+                helper.deleteBase()
+                adDefault.clear()
+            }
+        }
+    }
+
+    private fun resultClick(index: Int, item: ListItem) {
+        Lib.showToast(getString(R.string.long_press_for_mark))
+        BrowserActivity.openReader(
+            item.link,
+            helper.request
+        )
+    }
+
+    private fun resultLongClick(index: Int, item: ListItem): Boolean {
+        var des = helper.label
+        des = getString(R.string.search_for) +
+                des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)
+        MarkerActivity.addByPar(
+            requireContext(),
+            item.link,
+            item.des, des
+        )
+        return true
+    }
+
+    private fun finishedList() {
+        if (model.isRun) return
+        binding?.tvFinish?.text = if (model.loading)
+            getString(R.string.load)
+        else getString(R.string.finish_list)
+        tip.show()
     }
 }
