@@ -73,7 +73,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     private var dateDialog: DateDialog? = null
     private var jobResult: Job? = null
     private val softKeyboard: SoftKeyboard by lazy {
-        SoftKeyboard(binding!!.etSearch)
+        SoftKeyboard(binding!!.pSearch)
     }
     private val helper: SearchHelper
         get() = model.helper
@@ -174,31 +174,29 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             }
             if (helper.request.isNotEmpty()) {
                 etSearch.setText(helper.request)
-                softKeyboard.hide()
                 etSearch.setSelection(helper.request.length)
                 startSearch()
             }
-        } else {
-            if (model.shownResult) {
-                fabSettings.isVisible = false
-                model.showLastResult()
-                etSearch.setText(helper.request)
-                softKeyboard.hide()
-                etSearch.setSelection(helper.request.length)
-                content.tvLabel.text = helper.label
-                if (state.getBoolean(ADDITION))
-                    content.pAdditionSet.isVisible = true
-                else
-                    bShow.isVisible = true
-            }
-            if (state.getBoolean(SETTINGS)) {
-                openSettings()
-                dialog = state.getInt(Const.DIALOG)
-                if (dialog > -1) showDatePicker(dialog)
-            }
-            if (model.isRun)
-                setStatus(true)
+            return@run
         }
+        if (model.shownResult) {
+            fabSettings.isVisible = false
+            model.showLastResult()
+            etSearch.setText(helper.request)
+            etSearch.setSelection(helper.request.length)
+            content.tvLabel.text = helper.label
+            if (state.getBoolean(ADDITION))
+                content.pAdditionSet.isVisible = true
+            else
+                bShow.isVisible = true
+        }
+        if (state.getBoolean(SETTINGS)) {
+            openSettings()
+            dialog = state.getInt(Const.DIALOG)
+            if (dialog > -1) showDatePicker(dialog)
+        }
+        if (model.isRun)
+            setStatus(true)
     }
 
     private fun initSearchList() = binding?.content?.run {
@@ -338,6 +336,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun startSearch() = binding?.run {
+        softKeyboard.hide()
         setStatus(true)
         val mode = if (content.cbSearchInResults.isChecked) {
             tvStatus.text = getString(R.string.search)
@@ -421,6 +420,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
                     content.tvLabel.text = helper.label
                     bShow.isVisible = true
                     etSearch.setText(helper.request)
+                    etSearch.setSelection(helper.request.length)
                 }
             }
             CLEAR_RESULTS -> {
