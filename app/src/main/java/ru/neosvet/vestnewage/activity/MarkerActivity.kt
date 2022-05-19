@@ -15,6 +15,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -102,7 +103,6 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
     private val mainLayout: View
         get() = binding.content.root
     private var density = 0f
-    private var onRun = true
 
     private val helper: MarkerHelper
         get() = model.helper
@@ -116,7 +116,6 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         density = resources.displayMetrics.density
         initActivity()
         initContent()
-        closeKeyboardOnRun()
         restoreState(savedInstanceState)
         model.state.observe(this, this)
     }
@@ -182,17 +181,6 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         }
     }
 
-    private fun closeKeyboardOnRun() = binding.content.run {
-        etDes.onFocusChangeListener = OnFocusChangeListener { _, _ ->
-            if (onRun.not()) return@OnFocusChangeListener
-            onRun = false
-            etDes.post {
-                etDes.setSelection(etDes.text.length)
-                softKeyboard.hide()
-            }
-        }
-    }
-
     private fun initActivity() = binding.run {
         setSupportActionBar(toolbar)
         val metrics = DisplayMetrics()
@@ -213,8 +201,17 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         })
         fabOk.setOnClickListener {
             when (helper.type) {
-                MarkerHelper.Type.NONE ->
-                    saveMarker()
+                MarkerHelper.Type.NONE -> {
+                    if(content.etCol.isFocused) {
+                        softKeyboard.hide()
+                        createCol(content.etCol.text.toString())
+                        content.etCol.clearFocus()
+                    } else if(content.etDes.isFocused) {
+                        content.etDes.clearFocus()
+                        softKeyboard.hide()
+                    } else
+                        saveMarker()
+                }
                 MarkerHelper.Type.PAR ->
                     saveSelectedPar()
                 MarkerHelper.Type.POS ->
