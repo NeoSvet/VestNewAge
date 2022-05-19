@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         initInterface()
         initAnim()
         isCountInMenu = helper.isCountInMenu
+        Lib.LOG("isCountInMenu=$isCountInMenu")
         if (isCountInMenu.not() || helper.isFullMenu) {
             prom = PromHelper(helper.tvPromTime)
         } else //it is not land
@@ -214,7 +215,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onResume() {
         super.onResume()
-        prom?.resume()
+        if (!helper.isFullMenu || !isCountInMenu || helper.curId == R.id.menu_fragment)
+            prom?.resume()
+        else
+            prom?.hide()
     }
 
     override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration?) {
@@ -405,7 +409,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when {
             helper.isFloatMenu -> helper.navView?.setCheckedItem(id)
             helper.isSideMenu -> helper.setMenuFragment()
-            helper.isFullMenu -> if (isCountInMenu && id != R.id.menu_fragment) prom?.hide()
+            helper.isFullMenu -> if (isCountInMenu && id != R.id.menu_fragment)
+                prom?.hide()
         }
     }
 
