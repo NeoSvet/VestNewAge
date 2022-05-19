@@ -19,18 +19,17 @@
         android:paddingEnd="10dp"
         android:text="@string/cabinet_title" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/ItemBG"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/card_bg"
-        android:orientation="vertical">
+        android:background="@drawable/card_bg">
 
         <EditText
             android:id="@+id/etEmail"
             style="@style/Label"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
@@ -39,22 +38,54 @@
             android:hint="@string/email"
             android:imeOptions="actionNext"
             android:inputType="textEmailAddress"
-            android:padding="5dp"
-            android:textColorHint="@color/light_gray" />
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="@dimen/string_size"
+            android:paddingBottom="5dp"
+            android:textColorHint="@color/light_gray"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/bClearEmail"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
+            android:padding="7dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/close"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/etEmail"
+            app:layout_constraintTop_toTopOf="@id/etEmail" />
 
         <EditText
             android:id="@+id/etPassword"
             style="@style/Label"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:layout_margin="10dp"
             android:autofillHints="password"
             android:background="@color/colorPrimary"
             android:hint="@string/password"
             android:imeOptions="actionGo"
             android:inputType="textPassword"
-            android:padding="5dp"
-            android:textColorHint="@color/light_gray" />
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="@dimen/string_size"
+            android:paddingBottom="5dp"
+            android:textColorHint="@color/light_gray"
+            app:layout_constraintTop_toBottomOf="@id/etEmail" />
+
+        <ImageView
+            android:id="@+id/bClearPassword"
+            android:layout_width="@dimen/string_size"
+            android:layout_height="@dimen/string_size"
+            android:layout_gravity="center_vertical"
+            android:padding="7dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/close"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/etPassword"
+            app:layout_constraintTop_toTopOf="@id/etPassword" />
 
         <CheckBox
             android:id="@+id/cbRemEmail"
@@ -62,7 +93,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="@string/remember_email" />
+            android:layout_marginTop="5dp"
+            android:text="@string/remember_email"
+            app:layout_constraintTop_toBottomOf="@id/etPassword" />
 
         <CheckBox
             android:id="@+id/cbRemPassword"
@@ -71,6 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:enabled="false"
-            android:text="@string/remember_password" />
-    </LinearLayout>
+            android:text="@string/remember_password"
+            app:layout_constraintTop_toBottomOf="@id/cbRemEmail" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

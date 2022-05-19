@@ -1,13 +1,12 @@
 package ru.neosvet.vestnewage.fragment
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.ui.NeoFragment
@@ -19,8 +18,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.activity.CabinetActivity
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helpers.CabinetHelper
-import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.RecyclerAdapter
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.CabinetModel
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoState
@@ -123,27 +122,14 @@ class CabinetFragment : NeoFragment() {
     }
 
     private fun initLogin() = binding?.login?.run {
-        val textWatcher: TextWatcher = object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {
-                val ready = if (etEmail.length() > 5 && etPassword.length() > 5) {
-                    (etEmail.text.toString().contains("@")
-                            && etEmail.text.toString().contains("."))
-                } else false
-                binding?.fabEnter?.isVisible = ready
-            }
-
-            override fun beforeTextChanged(
-                s: CharSequence,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        etEmail.doAfterTextChanged {
+            checkReadyEnter()
+            bClearEmail.isVisible = it?.isNotEmpty() ?: false
         }
-        etEmail.addTextChangedListener(textWatcher)
-        etPassword.addTextChangedListener(textWatcher)
+        etPassword.doAfterTextChanged {
+            checkReadyEnter()
+            bClearPassword.isVisible = it?.isNotEmpty() ?: false
+        }
         etPassword.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_GO
@@ -157,6 +143,18 @@ class CabinetFragment : NeoFragment() {
             cbRemPassword.isEnabled = check
             if (!check) cbRemPassword.isChecked = false
         }
+        bClearEmail.setOnClickListener { etEmail.setText("") }
+        bClearPassword.setOnClickListener { etPassword.setText("") }
+    }
+
+    private fun checkReadyEnter() = binding?.run {
+        val ready = login.run {
+            if (etEmail.length() > 5 && etPassword.length() > 5) {
+                (etEmail.text.toString().contains("@")
+                        && etEmail.text.toString().contains("."))
+            } else false
+        }
+        fabEnter.isVisible = ready
     }
 
     override fun onDestroyView() {

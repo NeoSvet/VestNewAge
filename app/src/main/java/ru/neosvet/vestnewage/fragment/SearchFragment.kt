@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
@@ -128,6 +129,10 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             false
         }
         bSearch.setOnClickListener { enterSearch() }
+        etSearch.doAfterTextChanged {
+            bClear.isVisible = it?.isNotEmpty() ?: false
+        }
+        bClear.setOnClickListener { etSearch.setText("") }
     }
 
     override fun onDestroyView() {
