@@ -12,6 +12,7 @@ import androidx.work.WorkerParameters;
 
 import java.util.concurrent.TimeUnit;
 
+import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.App;
 
 public class CheckStarter extends Worker {
@@ -20,6 +21,7 @@ public class CheckStarter extends Worker {
     public static void set(int time) {
         WorkManager work = WorkManager.getInstance(App.context);
         work.cancelAllWorkByTag(TAG_PERIODIC);
+        if (time == Const.TURN_OFF) return;
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)

@@ -329,11 +329,10 @@ class SettingsFragment : NeoFragment() {
         if (p < sbCheckTime.max) {
             if (p > 2) p = (p - 2) * 4 else p++
             p *= 15
+            if (p == 15) p = 20
         } else p = Const.TURN_OFF
         editor.putInt(Const.TIME, p)
         editor.apply()
-        if (p == Const.TURN_OFF) return@run
-        if (p == 15) p = 20
         CheckStarter.set(p)
     }
 
