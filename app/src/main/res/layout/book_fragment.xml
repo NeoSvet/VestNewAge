@@ -112,7 +112,7 @@
         android:contentDescription="@string/rnd_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/list" />
+        app:srcCompat="@drawable/ic_menu" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabRefresh"
@@ -122,6 +122,6 @@
         android:contentDescription="@string/refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/refresh" />
+        app:srcCompat="@drawable/ic_refresh" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

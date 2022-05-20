@@ -104,6 +104,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@android:string/ok"
-        app:srcCompat="@drawable/ok" />
+        app:srcCompat="@drawable/ic_ok" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

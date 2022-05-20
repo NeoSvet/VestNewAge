@@ -95,7 +95,7 @@
             android:layout_height="45dp"
             android:layout_alignTop="@id/bClearDo"
             android:layout_toRightOf="@id/bClearDo"
-            android:src="@drawable/clear"
+            android:src="@drawable/ic_clear"
             android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

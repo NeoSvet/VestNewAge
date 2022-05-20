@@ -88,12 +88,12 @@
 
         <service
             android:name=".service.CheckService"
-            android:icon="@drawable/rss"
+            android:icon="@drawable/ic_rss"
             android:label="@string/check_summary"
             android:process=":check" />
         <service
             android:name=".service.LoaderService"
-            android:icon="@drawable/download"
+            android:icon="@drawable/ic_download"
             android:label="@string/load" />
 
         <receiver android:name=".helpers.PromHelper$Rec" />

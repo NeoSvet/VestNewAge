@@ -52,7 +52,7 @@
             android:layout_gravity="center_vertical"
             android:padding="7dp"
             android:scaleType="fitXY"
-            android:src="@drawable/close"
+            android:src="@drawable/ic_close"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="@id/etEmail"
             app:layout_constraintTop_toTopOf="@id/etEmail" />
@@ -82,7 +82,7 @@
             android:layout_gravity="center_vertical"
             android:padding="7dp"
             android:scaleType="fitXY"
-            android:src="@drawable/close"
+            android:src="@drawable/ic_close"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="@id/etPassword"
             app:layout_constraintTop_toTopOf="@id/etPassword" />

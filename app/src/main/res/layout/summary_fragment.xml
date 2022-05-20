@@ -18,6 +18,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/refresh"
-        app:srcCompat="@drawable/refresh" />
+        app:srcCompat="@drawable/ic_refresh" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

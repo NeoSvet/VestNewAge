@@ -96,13 +96,13 @@ public class UnreadHelper {
 
     public int getNewId(int k) {
         if (ids_new == null)
-            ids_new = new int[]{R.drawable.new0, R.drawable.new1, R.drawable.new2,
-                    R.drawable.new3, R.drawable.new4, R.drawable.new5, R.drawable.new6,
-                    R.drawable.new7, R.drawable.new8, R.drawable.new9};
+            ids_new = new int[]{R.drawable.ic_0, R.drawable.ic_1, R.drawable.ic_2,
+                    R.drawable.ic_3, R.drawable.ic_4, R.drawable.ic_5, R.drawable.ic_6,
+                    R.drawable.ic_7, R.drawable.ic_8, R.drawable.ic_9};
         if (k < ids_new.length)
             return ids_new[k];
         else
-            return R.drawable.new_more;
+            return R.drawable.ic_more;
     }
 
     public long lastModified() {

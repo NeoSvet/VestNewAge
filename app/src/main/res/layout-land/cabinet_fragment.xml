@@ -32,7 +32,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ok" />
+        app:srcCompat="@drawable/ic_ok" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabExit"
@@ -43,5 +43,5 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/exit" />
+        app:srcCompat="@drawable/ic_exit" />
 </androidx.constraintlayout.widget.ConstraintLayout>

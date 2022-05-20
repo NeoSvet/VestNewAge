@@ -79,6 +79,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="@string/refresh"
-        app:srcCompat="@drawable/refresh" />
+        app:srcCompat="@drawable/ic_refresh" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

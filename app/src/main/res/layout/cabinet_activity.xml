@@ -54,7 +54,7 @@
             android:layout_height="56dp"
             android:contentDescription="@string/load"
             android:padding="15dp"
-            android:src="@drawable/refresh" />
+            android:src="@drawable/ic_refresh" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -65,6 +65,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/close"
         android:visibility="gone"
-        app:srcCompat="@drawable/close" />
+        app:srcCompat="@drawable/ic_close" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

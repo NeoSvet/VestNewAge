@@ -123,6 +123,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:padding="15dp"
-            android:src="@drawable/refresh" />
+            android:src="@drawable/ic_refresh" />
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

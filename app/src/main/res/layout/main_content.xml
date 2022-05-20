@@ -121,7 +121,7 @@
             android:layout_alignParentEnd="true"
             android:contentDescription="@string/load"
             android:padding="15dp"
-            android:src="@drawable/refresh" />
+            android:src="@drawable/ic_refresh" />
     </RelativeLayout>
 
     <TextView

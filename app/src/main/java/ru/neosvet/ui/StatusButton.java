@@ -128,7 +128,7 @@ public class StatusButton {
             time = false;
             tv.setText(context.getString(R.string.crash));
             panel.setBackgroundResource(R.drawable.shape_red);
-            iv.setImageResource(R.drawable.close);
+            iv.setImageResource(R.drawable.ic_close);
             iv.clearAnimation();
             visible = true;
             panel.setVisibility(View.VISIBLE);
@@ -136,7 +136,7 @@ public class StatusButton {
             panel.setVisibility(View.GONE);
             visible = false;
             panel.setBackgroundResource(R.drawable.shape_norm);
-            iv.setImageResource(R.drawable.refresh);
+            iv.setImageResource(R.drawable.ic_refresh);
         }
         this.error = error;
     }

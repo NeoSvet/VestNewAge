@@ -69,7 +69,7 @@
         android:contentDescription="@string/menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/list" />
+        app:srcCompat="@drawable/ic_menu" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabBack"
@@ -81,7 +81,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/left2" />
+        app:srcCompat="@drawable/ic_left" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabEdit"
@@ -92,6 +92,6 @@
         android:contentDescription="@string/edit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/edit" />
+        app:srcCompat="@drawable/ic_edit" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,7 +16,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:padding="10dp"
-            android:src="@drawable/left2" />
+            android:src="@drawable/ic_left" />
     </LinearLayout>
 
     <TextView

@@ -95,9 +95,9 @@ public class MenuFragment extends Fragment {
     private void initList(int i) {
         adMenu = new MenuAdapter();
         lvMenu.setAdapter(adMenu);
-        int[] mImage = new int[]{R.drawable.download, R.drawable.new0, R.drawable.rss, R.drawable.main,
-                R.drawable.calendar, R.drawable.book, R.drawable.search, R.drawable.marker,
-                R.drawable.journal, R.drawable.cabinet, R.drawable.settings, R.drawable.help};
+        int[] mImage = new int[]{R.drawable.ic_download, R.drawable.ic_0, R.drawable.ic_rss, R.drawable.ic_main,
+                R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
+                R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help};
         int[] mTitle = new int[]{R.string.download_title, R.string.new_section, R.string.rss,
                 R.string.news, R.string.calendar, R.string.book, R.string.search, R.string.markers,
                 R.string.journal, R.string.cabinet, R.string.settings, R.string.help};

@@ -38,7 +38,7 @@
             android:contentDescription="@string/to_top"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/top" />
+            android:src="@drawable/ic_top" />
 
         <ImageButton
             android:id="@+id/bBottom"
@@ -49,7 +49,7 @@
             android:contentDescription="@string/to_bottom"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/bottom" />
+            android:src="@drawable/ic_bottom" />
 
         <ImageButton
             android:id="@+id/bEdit"
@@ -58,9 +58,9 @@
             android:layout_marginEnd="5dp"
             android:background="@drawable/button"
             android:contentDescription="@string/edit"
-            android:padding="5dp"
+            android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/edit" />
+            android:src="@drawable/ic_edit" />
 
         <ImageButton
             android:id="@+id/bDelete"
@@ -69,9 +69,9 @@
             android:layout_marginEnd="5dp"
             android:background="@drawable/button"
             android:contentDescription="@string/delete"
-            android:padding="5dp"
+            android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/clear" />
+            android:src="@drawable/ic_clear" />
 
         <ImageButton
             android:id="@+id/bOk"
@@ -79,8 +79,8 @@
             android:layout_height="@dimen/cell_size"
             android:background="@drawable/button"
             android:contentDescription="@android:string/ok"
-            android:padding="5dp"
+            android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ok" />
+            android:src="@drawable/ic_ok" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
