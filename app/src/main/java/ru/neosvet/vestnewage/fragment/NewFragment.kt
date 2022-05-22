@@ -28,6 +28,7 @@ class NewFragment : NeoFragment() {
         get() = neomodel as NewModel
     override val title: String
         get() = getString(R.string.new_section)
+    private var openedReader = false
 
     override fun initViewModel(): NeoViewModel =
         ViewModelProvider(this).get(NewModel::class.java).apply { init(requireActivity()) }
@@ -47,11 +48,16 @@ class NewFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initView()
+        if (savedInstanceState == null)
+            model.openList()
     }
 
     override fun onResume() {
         super.onResume()
-        model.openList()
+        if (openedReader) {
+            openedReader = false
+            model.openList()
+        }
     }
 
     override fun onChangedState(state: NeoState) {
@@ -91,6 +97,7 @@ class NewFragment : NeoFragment() {
                 model.openAd(item, pos)
             } else if (item.link != "") {
                 model.needOpen = true
+                openedReader = true
                 openReader(item.link, null)
             }
         }

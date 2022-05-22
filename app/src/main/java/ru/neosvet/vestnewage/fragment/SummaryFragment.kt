@@ -30,6 +30,7 @@ class SummaryFragment : NeoFragment() {
         get() = neomodel as SummaryModel
     override val title: String
         get() = getString(R.string.rss)
+    private var openedReader = false
 
     override fun initViewModel(): NeoViewModel =
         ViewModelProvider(this).get(SummaryModel::class.java).apply { init(requireContext()) }
@@ -50,6 +51,14 @@ class SummaryFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         restoreState(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (openedReader) {
+            openedReader = false
+            act?.updateNew()
+        }
     }
 
     override fun setStatus(load: Boolean) {
@@ -80,6 +89,7 @@ class SummaryFragment : NeoFragment() {
         fabRefresh.setOnClickListener { startLoad() }
         lvSummary.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
             if (model.isRun) return@OnItemClickListener
+            openedReader = true
             openReader(adSummary.getItem(pos).link, null)
         }
         lvSummary.setOnTouchListener { _, motionEvent: MotionEvent ->

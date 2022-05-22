@@ -46,6 +46,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
     override val title: String
         get() = getString(R.string.calendar)
+    private var openedReader = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,6 +71,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (openedReader) {
+            openedReader = false
+            act?.updateNew()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -118,6 +127,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun openLink(link: String) {
+        openedReader = true
         BrowserActivity.openReader(link, null)
     }
 

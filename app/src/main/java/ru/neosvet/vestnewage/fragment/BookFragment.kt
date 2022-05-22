@@ -73,6 +73,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
     override val title: String
         get() = ""
+    private var openedReader = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,6 +107,14 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         setViews()
         initTabs()
         restoreState(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (openedReader) {
+            openedReader = false
+            act?.updateNew()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -216,6 +225,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             OnItemClickListener { _, _, pos: Int, _ ->
                 if (notClick) return@OnItemClickListener
                 if (model.isRun) return@OnItemClickListener
+                openedReader = true
                 openReader(adBook.getItem(pos).link, null)
             }
         lvBook.setOnTouchListener { _, event: MotionEvent ->
@@ -369,6 +379,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 alertRnd?.dismiss()
             }
             setRightButton(getString(R.string.open)) {
+                openedReader = true
                 openReader(link, place)
                 alertRnd?.dismiss()
             }
