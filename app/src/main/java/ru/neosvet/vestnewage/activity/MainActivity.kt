@@ -101,7 +101,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         initInterface()
         initAnim()
         isCountInMenu = helper.isCountInMenu
-        Lib.LOG("isCountInMenu=$isCountInMenu")
         if (isCountInMenu.not() || helper.isFullMenu) {
             prom = PromHelper(helper.tvPromTime)
         } else //it is not land
@@ -194,6 +193,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val id = intent.getIntExtra(Const.CUR_ID, 0)
                 if (id != 0)
                     firstFragment = id
+                if (firstFragment == R.id.menu_fragment)
+                    updateNew()
             }
         } else helper.run {
             curId = state.getInt(Const.CUR_ID)
