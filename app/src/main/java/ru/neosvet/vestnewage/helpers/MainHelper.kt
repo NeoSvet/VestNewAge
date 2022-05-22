@@ -62,6 +62,7 @@ class MainHelper(private val act: MainActivity) {
 
     fun initViews() {
         navView = act.findViewById(R.id.nav_view)
+        navView?.itemIconTintList = null
         bDownloadAll = act.findViewById(R.id.bDownloadAll)
         bDownloadIt = act.findViewById(R.id.bDownloadIt)
         tvNew = act.findViewById(R.id.tvNew)
