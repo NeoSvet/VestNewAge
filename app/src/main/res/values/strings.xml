@@ -48,9 +48,12 @@
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
     <!--Formats-->
+    <string name="format_load">Загрузка: %s</string>
     <string name="format_search_date">Поиск: %s %d</string>
     <string name="format_search_proc">Поиск %d%%</string>
     <string name="format_found">Вы искали %s “%s”.\nНайдено %d соответствий в %d материалах.</string>
+    <string name="format_page_no_loaded">Страница %s не загружена.</string>
+    <string name="format_month_no_loaded">%s %d не загружен.</string>
     <string name="format_info">Версия приложения: %s (%d)\nВерсия системы: %s (%d)</string>
     <string name="format_time_back">%s назад\n(%s)</string>
     <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
@@ -239,6 +242,7 @@
     <string name="write_to_dev">Написать разработчику</string>
     <string name="srv_info">\nСлужебная информация:\n</string>
     <!--SearchFragment-->
+    <string name="not_found">Не найдено</string>
     <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>
     <string name="alert_search">Результатов нет. Вы скачали все материалы прежде, чем приступать к поиску?</string>

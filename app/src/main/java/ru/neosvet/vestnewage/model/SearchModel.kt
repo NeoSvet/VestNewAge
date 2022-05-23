@@ -17,8 +17,11 @@ import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helpers.DateHelper
 import ru.neosvet.vestnewage.helpers.SearchHelper
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.paging.FactoryEvents
 import ru.neosvet.vestnewage.list.paging.SearchFactory
+import ru.neosvet.vestnewage.loader.CalendarLoader
+import ru.neosvet.vestnewage.loader.PageLoader
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
@@ -45,6 +48,7 @@ class SearchModel : NeoViewModel(), FactoryEvents {
     private val pages = PageStorage()
     private var countMatches: Int = 0
     private var labelMode = ""
+    private var mode: Int = -1
     lateinit var helper: SearchHelper
         private set
     var loading = false
@@ -59,6 +63,10 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         strings = SearchStrings(
             format_search_date = context.getString(R.string.format_search_date),
             format_search_proc = context.getString(R.string.format_search_proc),
+            format_month_no_loaded = context.getString(R.string.format_month_no_loaded),
+            format_page_no_loaded = context.getString(R.string.format_page_no_loaded),
+            format_load = context.getString(R.string.format_load),
+            not_found = context.getString(R.string.not_found),
             search_in_results = context.getString(R.string.search_in_results),
             search_mode = context.resources.getStringArray(R.array.search_mode),
             format_found = context.getString(R.string.format_found),
@@ -90,6 +98,7 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         .build()
 
     fun startSearch(request: String, mode: Int) {
+        this.mode = mode
         helper.request = request
         scope.launch {
             isRun = true
@@ -106,24 +115,24 @@ class SearchModel : NeoViewModel(), FactoryEvents {
             if (mode == MODE_RESULTS)
                 searchInResults(helper.isDesc)
             else
-                searchInPages(mode)
+                searchInPages()
             isRun = false
             notifyResult()
         }
     }
 
-    private fun searchInPages(mode: Int) = helper.run {
+    private fun searchInPages() = helper.run {
         storage.clear()
         storage.isDesc = isDesc
         if (mode == MODE_ALL)
-            searchList(DataBase.ARTICLES, mode)
+            searchList(DataBase.ARTICLES)
         val d = DateHelper.putYearMonth(start.year, start.month)
         val step = if (isDesc) -1 else 1
         var prev = 0
         var time: Long = 0
         while (isRun) {
             publishProgress(d)
-            searchList(d.my, mode)
+            searchList(d.my)
             if (d.timeInDays == end.timeInDays) break
             d.changeMonth(step)
             val now = System.currentTimeMillis()
@@ -255,8 +264,9 @@ class SearchModel : NeoViewModel(), FactoryEvents {
     }
 
     @SuppressLint("Range")
-    private fun searchList(name: String, mode: Int) {
+    private fun searchList(name: String) {
         pages.open(name)
+        storage.open()
         var n = name.substring(3).toInt() * 650 +
                 name.substring(0, 2).toInt() * 50
         val cursor: Cursor = when (mode) {
@@ -266,11 +276,18 @@ class SearchModel : NeoViewModel(), FactoryEvents {
                 pages.searchLink(helper.request)
             else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
                 //фильтрация по 0 и 1 будет позже
+                n = checkPages(n)
                 pages.searchParagraphs(helper.request)
             }
         }
         if (!cursor.moveToFirst()) {
             cursor.close()
+            val d = dateFromString(name)
+            val row = ContentValues()
+            row.put(Const.TITLE, String.format(strings.format_month_no_loaded, d.monthString, d.year))
+            row.put(Const.LINK, name)
+            row.put(DataBase.ID, n)
+            storage.insert(row)
             return
         }
         val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
@@ -279,7 +296,6 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         var id = -1
         var add = true
         val des = StringBuilder()
-        storage.open()
         do {
             if (id == cursor.getInt(iID) && add) {
                 des.append(Const.BR + Const.BR)
@@ -324,6 +340,28 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         cursor.close()
     }
 
+    private fun checkPages(startId: Int): Int {
+        val cursor = pages.getLinks()
+        val links = mutableListOf<String>()
+        if (cursor.moveToFirst()) {  // первую запись пропускаем, т.к. там дата изменения списка
+            while (cursor.moveToNext())
+                links.add(cursor.getString(0))
+        }
+        cursor.close()
+        var id = startId
+        for (link in links) {
+            if (pages.existsPage(link).not()) {
+                val row = ContentValues()
+                row.put(Const.TITLE, String.format(strings.format_page_no_loaded, link))
+                row.put(Const.LINK, link)
+                row.put(DataBase.ID, id)
+                id++
+                storage.insert(row)
+            }
+        }
+        return id
+    }
+
     override fun startLoad() {
         loading = true
     }
@@ -335,5 +373,102 @@ class SearchModel : NeoViewModel(), FactoryEvents {
             mstate.postValue(Ready)
             loading = false
         }
+    }
+
+    fun loadMonth(date: String) { //MM.yy
+        scope.launch {
+            isRun = true
+            val d = dateFromString(date)
+            mstate.postValue(
+                MessageState(
+                    String.format(strings.format_load, d.monthString + " " + d.year)
+                )
+            )
+            val loader = CalendarLoader()
+            loader.setDate(d.year, d.month)
+            loader.loadListMonth(false)
+            val links = loader.getLinkList()
+            val pageLoader = PageLoader()
+            storage.deleteByLink(date)
+            for (link in links) {
+                pageLoader.download(link, false)
+                if (isRun.not()) break
+            }
+            pageLoader.finish()
+            searchList(date)
+            isRun = false
+            notifyResult()
+        }
+    }
+
+    fun loadPage(link: String) {
+        scope.launch {
+            isRun = true
+            mstate.postValue(MessageState(String.format(strings.format_load, link)))
+            val id = storage.getIdByLink(link)
+            storage.delete(id.toString())
+            val pageLoader = PageLoader()
+            pageLoader.download(link, true)
+            pageLoader.finish()
+            val item = findInPage(link, id)
+            isRun = false
+            mstate.postValue(SuccessList(listOf(item)))
+        }
+    }
+
+    private fun findInPage(link: String, id: Int): ListItem {
+        var item = ListItem(link, link)
+        if (mode == MODE_POSLANIYA && link.contains(Const.POEMS))
+            return item
+        if (mode == MODE_KATRENY && !link.contains(Const.POEMS))
+            return item
+        pages.open(link)
+        val pageId = pages.getPageId(link)
+
+        val curTitle = pages.getPageById(pageId)
+        if (!curTitle.moveToFirst()) {
+            curTitle.close()
+            return item
+        }
+        val iTitle = curTitle.getColumnIndex(Const.TITLE)
+        val title = pages.getPageTitle(curTitle.getString(iTitle), link)
+        curTitle.close()
+        item = ListItem(title, link)
+        item.des = strings.not_found
+
+        val cursor = pages.getParagraphs(pageId)
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return item
+        }
+        val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
+        var row: ContentValues? = null
+        val des = StringBuilder()
+        do {
+            val par = cursor.getString(iPar)
+            if (par.contains(helper.request)) {
+                if (row == null) {
+                    row = ContentValues()
+                    row.put(Const.TITLE, title)
+                    row.put(Const.LINK, link)
+                    row.put(DataBase.ID, id)
+                    helper.countMaterials++
+                }
+                des.append(getDes(par, helper.request))
+            }
+        } while (cursor.moveToNext())
+        cursor.close()
+        if (row != null) {
+            item.des = des.toString()
+            row.put(Const.DESCTRIPTION, item.des)
+            storage.insert(row)
+        }
+        return item
+    }
+
+    private fun dateFromString(date: String): DateHelper {
+        val month = date.substring(0, 2).toInt()
+        val year = date.substring(3).toInt() + 2000
+        return DateHelper.putYearMonth(year, month)
     }
 }

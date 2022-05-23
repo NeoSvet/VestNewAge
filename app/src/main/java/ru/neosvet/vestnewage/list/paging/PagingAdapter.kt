@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.list.RecyclerHolder
+import ru.neosvet.vestnewage.list.item.ListItem
 
 class PagingAdapter(
     private val clicker: (Int, ListItem) -> Unit,
@@ -45,6 +45,20 @@ class PagingAdapter(
             position == itemCount - 1 -> finishedList.invoke()
         }
         item?.let { holder.setItem(it) }
+    }
+
+    fun update(item: ListItem) {
+        if (itemCount == 0) return
+        for (i in 0..itemCount) {
+            getItem(i)?.let {
+                if (it.link == item.link) {
+                    it.title = item.title
+                    it.des = item.des
+                    notifyItemChanged(i)
+                    return
+                }
+            }
+        }
     }
 
     object ItemsComparator : DiffUtil.ItemCallback<ListItem>() {

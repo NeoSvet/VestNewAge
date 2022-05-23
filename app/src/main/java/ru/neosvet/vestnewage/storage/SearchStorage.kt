@@ -29,6 +29,9 @@ class SearchStorage {
     fun delete(id: String) =
         db.delete(Const.SEARCH, DataBase.ID + DataBase.Q, id)
 
+    fun deleteByLink(link: String) =
+        db.delete(Const.SEARCH, Const.LINK + DataBase.Q, link)
+
     fun clear() =
         db.delete(Const.SEARCH)
 
@@ -67,5 +70,18 @@ class SearchStorage {
         } while (cursor.moveToNext() && list.size < Const.MAX_ON_PAGE)
         cursor.close()
         return list
+    }
+
+    fun getIdByLink(link: String): Int {
+        val cursor: Cursor = db.query(
+            Const.SEARCH, arrayOf(DataBase.ID),
+            Const.LINK + DataBase.Q, arrayOf(link),
+            null, null, null
+        )
+        val r = if (cursor.moveToFirst())
+            cursor.getInt(0)
+        else -1
+        cursor.close()
+        return r
     }
 }

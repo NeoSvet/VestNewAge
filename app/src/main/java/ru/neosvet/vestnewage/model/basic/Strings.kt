@@ -3,6 +3,10 @@ package ru.neosvet.vestnewage.model.basic
 data class SearchStrings(
     val format_search_date: String,
     val format_search_proc: String,
+    val format_month_no_loaded: String,
+    val format_page_no_loaded: String,
+    val format_load: String,
+    val not_found: String,
     val search_in_results: String,
     val search_mode: Array<String>,
     val format_found: String

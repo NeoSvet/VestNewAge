@@ -369,6 +369,10 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         when (state) {
             is MessageState ->
                 binding?.tvStatus?.text = state.message
+            is SuccessList -> { //finish load page
+                setStatus(false)
+                adResult.update(state.list[0])
+            }
             Success -> {
                 if (model.isRun)
                     showResult()
@@ -436,14 +440,27 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun resultClick(index: Int, item: ListItem) {
-        Lib.showToast(getString(R.string.long_press_for_mark))
-        BrowserActivity.openReader(
-            item.link,
-            helper.request
-        )
+        when (helper.getType(item)) {
+            SearchHelper.Type.NORMAL -> {
+                Lib.showToast(getString(R.string.long_press_for_mark))
+                BrowserActivity.openReader(
+                    item.link,
+                    helper.request
+                )
+            }
+            SearchHelper.Type.LOAD_MONTH -> {
+                setStatus(true)
+                model.loadMonth(item.link)
+            }
+            SearchHelper.Type.LOAD_PAGE -> {
+                setStatus(true)
+                model.loadPage(item.link)
+            }
+        }
     }
 
     private fun resultLongClick(index: Int, item: ListItem): Boolean {
+        if (helper.getType(item) != SearchHelper.Type.NORMAL) return true
         var des = helper.label
         des = getString(R.string.search_for) +
                 des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)

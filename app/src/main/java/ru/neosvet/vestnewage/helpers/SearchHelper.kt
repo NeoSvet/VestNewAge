@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import ru.neosvet.utils.Const
 import ru.neosvet.utils.Lib
+import ru.neosvet.vestnewage.list.item.ListItem
 import ru.neosvet.vestnewage.model.SearchModel
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -14,6 +15,10 @@ class SearchHelper(context: Context) {
     companion object {
         const val TAG = "Search"
         const val LABEL = "l"
+    }
+
+    enum class Type {
+        NORMAL, LOAD_MONTH, LOAD_PAGE
     }
 
     private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
@@ -113,4 +118,10 @@ class SearchHelper(context: Context) {
 
     fun loadMode(): Int =
         pref.getInt(Const.MODE, SearchModel.MODE_BOOK)
+
+    fun getType(item: ListItem): Type {
+        if (item.link.length == 5) return Type.LOAD_MONTH
+        if (item.title.contains("/")) return Type.LOAD_PAGE
+        return Type.NORMAL
+    }
 }
