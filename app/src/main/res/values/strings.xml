@@ -207,6 +207,7 @@
     <string name="prom_for_soul_unite">Посыл на Любовь и Духовное Единение</string>
     <string name="accept">Принято</string>
     <!--Загрузка-->
+    <string name="no_connected">Нет подключения к интернету</string>
     <string name="load">Загрузка&#8230;</string>
     <string name="start">Запуск&#8230;</string>
     <string name="load_background">Загрузка запущена в фоне (см. уведомления)</string>

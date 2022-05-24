@@ -5,12 +5,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.network.ConnectObserver
+import ru.neosvet.vestnewage.network.ConnectReceiver
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
 
-abstract class NeoFragment : Fragment(), Observer<NeoState> {
+abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     @JvmField
     protected var act: MainActivity? = null
     protected val neomodel: NeoViewModel by lazy {
@@ -72,7 +76,19 @@ abstract class NeoFragment : Fragment(), Observer<NeoState> {
 
     open fun startLoad() {
         if (neomodel.isRun) return
+        if (ConnectReceiver.connected.not()) {
+            ConnectReceiver.subscribe(this)
+            Lib.showToast(getString(R.string.no_connected))
+            return
+        }
         neomodel.load()
+    }
+
+    override fun connectChanged(connected: Boolean) {
+        if (connected) {
+            startLoad()
+            ConnectReceiver.unSubscribe()
+        }
     }
 
     open fun setStatus(load: Boolean) {
