@@ -3,24 +3,24 @@ package ru.neosvet.vestnewage.model
 import android.annotation.SuppressLint
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.BookHelper
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.item.CalendarItem
+import ru.neosvet.vestnewage.data.CalendarItem
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
-import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.percent
 
 class CalendarModel : NeoViewModel() {
-    var date: DateHelper = DateHelper.initToday().apply { day = 1 }
+    var date: DateUnit = DateUnit.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year
-    private val prevDate = DateHelper.initToday().apply {
+    private val prevDate = DateUnit.initToday().apply {
         day = 1
         changeMonth(-1)
     }
@@ -77,7 +77,7 @@ class CalendarModel : NeoViewModel() {
         return loader.getLinkList()
     }
 
-    fun changeDate(newDate: DateHelper) {
+    fun changeDate(newDate: DateUnit) {
         date = newDate
         createField()
         openCalendar(0)
@@ -88,9 +88,9 @@ class CalendarModel : NeoViewModel() {
     }
 
     fun isNeedReload(): Boolean {
-        val d = DateHelper.initNow()
+        val d = DateUnit.initNow()
         val f = Lib.getFileDB(d.my)
-        return !f.exists() || System.currentTimeMillis() - f.lastModified() > DateHelper.HOUR_IN_MILLS
+        return !f.exists() || System.currentTimeMillis() - f.lastModified() > DateUnit.HOUR_IN_MILLS
     }
 
     fun openCalendar(offsetMonth: Int, loadIfNeed: Boolean = true) {
@@ -113,20 +113,20 @@ class CalendarModel : NeoViewModel() {
     }
 
     private fun createField() {
-        val d = DateHelper.putDays(date.timeInDays)
+        val d = DateUnit.putDays(date.timeInDays)
         calendar.clear()
         for (i in -1 downTo -6)  //add label monday-saturday
             calendar.add(CalendarItem(i, R.color.light_gray))
         calendar.add(CalendarItem(0, R.color.light_gray)) //sunday
         val curMonth = d.month
-        if (d.dayWeek != DateHelper.MONDAY.toInt()) {
-            if (d.dayWeek == DateHelper.SUNDAY.toInt()) d.changeDay(-6) else d.changeDay(1 - d.dayWeek)
+        if (d.dayWeek != DateUnit.MONDAY.toInt()) {
+            if (d.dayWeek == DateUnit.SUNDAY.toInt()) d.changeDay(-6) else d.changeDay(1 - d.dayWeek)
             while (d.month != curMonth) {
                 calendar.add(CalendarItem(d.day, android.R.color.darker_gray))
                 d.changeDay(1)
             }
         }
-        val today = DateHelper.initToday()
+        val today = DateUnit.initToday()
         var n = 0
         if (today.month == curMonth)
             n = today.day
@@ -136,7 +136,7 @@ class CalendarModel : NeoViewModel() {
                 calendar.last().setBold()
             d.changeDay(1)
         }
-        while (d.dayWeek != DateHelper.MONDAY.toInt()) {
+        while (d.dayWeek != DateUnit.MONDAY.toInt()) {
             calendar.add(CalendarItem(d.day, android.R.color.darker_gray))
             d.changeDay(1)
         }
@@ -153,7 +153,7 @@ class CalendarModel : NeoViewModel() {
         if (cursor.moveToFirst()) {
             if (loadIfNeed) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                if (checkTime((time / DateHelper.SEC_IN_MILLS))) {
+                if (checkTime((time / DateUnit.SEC_IN_MILLS))) {
                     loadIfNeed = false
                     cursor.close()
                     storage.close()
@@ -219,7 +219,7 @@ class CalendarModel : NeoViewModel() {
     private fun checkTime(sec: Long): Boolean {
         if (date.my != prevDate.my)
             return false
-        val d = DateHelper.putSeconds(sec.toInt())
+        val d = DateUnit.putSeconds(sec.toInt())
         if (d.month == prevDate.month)
             return true
         return false

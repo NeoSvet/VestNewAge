@@ -8,17 +8,17 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.NeoClient
-import ru.neosvet.utils.UnsafeClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.CabinetHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.model.basic.CabinetStrings
 import ru.neosvet.vestnewage.model.basic.MessageState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.UnsafeClient
+import ru.neosvet.vestnewage.utils.Const
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -286,12 +286,8 @@ class CabinetModel : NeoViewModel() {
     }
 
     private fun createHttpClient(): OkHttpClient =
-        when(Build.VERSION.SDK_INT) {
-            Build.VERSION_CODES.N ->
-                UnsafeClient.createHttpClient2()
-            Build.VERSION_CODES.M ->
-                UnsafeClient.createHttpClient()
-            else ->
-                NeoClient.createHttpClient()
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            NeoClient.createHttpClient()
+        else
+            UnsafeClient.createHttpClient()
 }

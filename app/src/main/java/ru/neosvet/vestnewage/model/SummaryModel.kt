@@ -3,18 +3,18 @@ package ru.neosvet.vestnewage.model
 import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.SummaryHelper
-import ru.neosvet.vestnewage.list.item.ListItem
-import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.ProgressState
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
 import java.io.FileReader
 
@@ -66,7 +66,7 @@ class SummaryModel : NeoViewModel() {
 
     private fun openList(): List<ListItem> {
         val list = mutableListOf<ListItem>()
-        val dateNow = DateHelper.initNow()
+        val dateNow = DateUnit.initNow()
         val br = BufferedReader(FileReader(Lib.getFile(Const.RSS)))
         var title: String? = br.readLine()
         var des: String

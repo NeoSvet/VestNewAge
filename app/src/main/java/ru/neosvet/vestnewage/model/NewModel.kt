@@ -3,27 +3,27 @@ package ru.neosvet.vestnewage.model
 import android.app.Activity
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.helpers.NotificationHelper
-import ru.neosvet.vestnewage.helpers.UnreadHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.Ready
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.NotificationUtils
+import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.File
 
 class NewModel : NeoViewModel() {
     var needOpen: Boolean = true
     private var isInit = false
-    private lateinit var ads: DevadsHelper
+    private lateinit var ads: AdsUtils
     private lateinit var katren_from: String
     private var mode: String = "none"
 
     fun init(act: Activity) {
         if (isInit) return
-        ads = DevadsHelper(act)
+        ads = AdsUtils(act)
         katren_from = act.getString(R.string.katren) +
                 " " + act.getString(R.string.from) + " "
         isInit = true
@@ -42,16 +42,16 @@ class NewModel : NeoViewModel() {
     }
 
     fun openList() {
-        if(needOpen.not()) return
+        if (needOpen.not()) return
         mode = "open"
         scope.launch {
-            val notifHelper = NotificationHelper()
-            notifHelper.cancel(NotificationHelper.NOTIF_SUMMARY)
+            val notifHelper = NotificationUtils()
+            notifHelper.cancel(NotificationUtils.NOTIF_SUMMARY)
             val list = ads.loadList(true) as MutableList
             var t: String
             var s: String
             var n: Int
-            val unread = UnreadHelper()
+            val unread = UnreadUtils()
             unread.setBadge(ads.unreadCount)
             if (unread.lastModified() > 0) {
                 val links = unread.list
@@ -91,7 +91,7 @@ class NewModel : NeoViewModel() {
     fun clearList() {
         mode = "clear"
         scope.launch {
-            val unread = UnreadHelper()
+            val unread = UnreadUtils()
             unread.clearList()
             unread.setBadge(ads.unreadCount)
             mstate.postValue(Ready)

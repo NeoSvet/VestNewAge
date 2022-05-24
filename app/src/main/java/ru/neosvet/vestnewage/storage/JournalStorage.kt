@@ -2,12 +2,12 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.model.basic.JournalStrings
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 
 /**
  * Created by NeoSvet on 23.03.2022.
@@ -23,7 +23,11 @@ class JournalStorage {
         db.insert(DataBase.JOURNAL, row)
 
     fun getIds(): Cursor =
-        db.query(DataBase.JOURNAL, arrayOf(DataBase.ID))
+        db.query(
+            DataBase.JOURNAL, arrayOf(
+                DataBase.ID
+            )
+        )
 
     fun getAll(): Cursor = db.query(
         DataBase.JOURNAL, null, null, null,
@@ -54,7 +58,7 @@ class JournalStorage {
         var s: String
         var id: Array<String>
         var item: ListItem
-        val now = DateHelper.initNow()
+        val now = DateUnit.initNow()
         if (offset > 0) curJ.moveToPosition(offset)
         do {
             id = curJ.getString(iID).split(Const.AND).toTypedArray()
@@ -66,7 +70,7 @@ class JournalStorage {
                 s = cursor.getString(iLink)
                 item = ListItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
                 val t = curJ.getLong(iTime)
-                val d = DateHelper.putMills(t)
+                val d = DateUnit.putMills(t)
                 item.des = String.format(
                     strings.format_time_back,
                     now.getDiffDate(t), d

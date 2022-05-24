@@ -1,11 +1,11 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.html.PageParser
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.NeoClient
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
+import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.Const
 import java.io.*
 import java.util.regex.Pattern
 

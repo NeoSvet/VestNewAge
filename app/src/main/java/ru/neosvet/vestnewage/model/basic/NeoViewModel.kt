@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.work.Data
 import kotlinx.coroutines.*
-import ru.neosvet.utils.ErrorUtils
+import ru.neosvet.vestnewage.utils.ErrorUtils
 
 abstract class NeoViewModel : ViewModel() {
     protected val mstate = MutableLiveData<NeoState>()

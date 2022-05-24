@@ -1,16 +1,21 @@
 package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
-import ru.neosvet.html.PageParser
-import ru.neosvet.utils.*
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.BookHelper
-import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.MyException
+import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.loader.page.PageParser
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -55,7 +60,7 @@ class BookLoader : Loader {
 
     fun loadPoemsList(startYear: Int): String? {
         isRun = true
-        val d = DateHelper.initToday()
+        val d = DateUnit.initToday()
         val finalYear = d.year
         max = (finalYear - startYear) * 12 + d.month - 1
         cur = 0
@@ -140,13 +145,13 @@ class BookLoader : Loader {
         var id: Int
         var v: String
         val time = System.currentTimeMillis()
-        var d: DateHelper
+        var d: DateUnit
         for (item: String in list) {
             handlerLite?.let {
                 it.postPercent(cur.percent(max))
                 cur++
             } ?: handler?.let {
-                d = DateHelper.parse(item)
+                d = DateUnit.parse(item)
                 it.postMessage(d.monthString + " " + d.year)
             }
             storage.open(item)

@@ -1,20 +1,22 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Lib
 
 class ListLoader(private val handler: LoadHandler) : Loader {
     enum class Type {
         ALL, SITE, BOOK
     }
 
-    private var loader: PageLoader = PageLoader()
+    private var loader: PageLoader =
+        PageLoader()
     private var isRun = false
 
     override fun cancel() {
@@ -33,7 +35,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
     fun loadYear(year: Int) {
         isRun = true
         val loader = CalendarLoader()
-        var d = DateHelper.initToday()
+        var d = DateUnit.initToday()
         val m = if (d.year != year) 13
         else d.month + 1
         handler.postMessage(App.context.getString(R.string.download_list))
@@ -41,7 +43,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
         var i = 1
         var k = 0
         while (i < m && isRun) {
-            d = DateHelper.putYearMonth(year, i)
+            d = DateUnit.putYearMonth(year, i)
             k += countBookList(d.my)
             i++
         }
@@ -82,7 +84,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
         val end_year: Int
         val end_month: Int
         var k = 0
-        val d = DateHelper.initToday()
+        val d = DateUnit.initToday()
         d.day = 1
         end_month = d.month
         end_year = d.year
@@ -101,7 +103,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
         return k
     }
 
-    private fun setLoadMsg(date: DateHelper) {
+    private fun setLoadMsg(date: DateUnit) {
         handler.postMessage(date.monthString + " " + date.year)
     }
 

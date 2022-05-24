@@ -2,9 +2,9 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.utils.Const
 
 /**
  * Created by NeoSvet on 24.03.2022.

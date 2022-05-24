@@ -3,11 +3,11 @@ package ru.neosvet.vestnewage.storage
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import java.util.regex.Pattern
 
 /**
@@ -82,9 +82,9 @@ class PageStorage {
             Const.LINK + DataBase.Q, arrayOf(link),
             null, null, null
         )
-        var r = -1
-        if (cursor.moveToFirst())
-            r = cursor.getInt(0)
+        val r = if (cursor.moveToFirst())
+            cursor.getInt(0)
+        else -1
         cursor.close()
         return r
     }
@@ -242,7 +242,9 @@ class PageStorage {
     fun getParagraphs(title: Cursor): Cursor {
         val i = title.getColumnIndex(DataBase.ID)
         return db.query(
-            DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
+            DataBase.PARAGRAPH, arrayOf(
+                DataBase.PARAGRAPH
+            ),
             DataBase.ID + DataBase.Q, title.getInt(i).toString()
         )
     }

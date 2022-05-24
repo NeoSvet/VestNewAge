@@ -5,18 +5,18 @@ import android.content.Context
 import android.content.Intent
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.MarkerHelper
-import ru.neosvet.vestnewage.list.item.CheckItem
+import ru.neosvet.vestnewage.data.CheckItem
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.model.basic.MarkerStrings
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.Ready
 import ru.neosvet.vestnewage.model.basic.Success
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
 
 class MarkerModel : NeoViewModel() {
     enum class Type {
@@ -81,7 +81,7 @@ class MarkerModel : NeoViewModel() {
         des = if (intent.hasExtra(Const.DESCTRIPTION))
             intent.getStringExtra(Const.DESCTRIPTION) ?: ""
         else {
-            val d = DateHelper.initNow()
+            val d = DateUnit.initNow()
             d.toString()
         }
         cols = strings.sel_col + strings.no_collections

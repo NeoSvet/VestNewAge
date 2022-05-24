@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.model.basic
 
-import ru.neosvet.vestnewage.list.item.CalendarItem
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.CalendarItem
+import ru.neosvet.vestnewage.data.ListItem
 
 sealed class NeoState {
     object Loading : NeoState()

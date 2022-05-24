@@ -12,8 +12,8 @@ import androidx.work.WorkerParameters;
 
 import java.util.concurrent.TimeUnit;
 
-import ru.neosvet.utils.Const;
 import ru.neosvet.vestnewage.App;
+import ru.neosvet.vestnewage.utils.Const;
 
 public class CheckStarter extends Worker {
     private static final String TAG_PERIODIC = "check periodic";

@@ -7,17 +7,17 @@ import android.database.Cursor
 import android.net.Uri
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.activity.BrowserActivity
-import ru.neosvet.vestnewage.list.item.MarkerItem
-import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.MarkerItem
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import java.io.*
 
 class MarkersModel : NeoViewModel() {

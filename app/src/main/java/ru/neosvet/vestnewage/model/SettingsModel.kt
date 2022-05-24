@@ -2,12 +2,12 @@ package ru.neosvet.vestnewage.model
 
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
-import ru.neosvet.vestnewage.helpers.BookHelper
-import ru.neosvet.vestnewage.helpers.DateHelper
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import java.io.File
 
 class SettingsModel : NeoViewModel() {
@@ -30,21 +30,21 @@ class SettingsModel : NeoViewModel() {
             var f: File
             for (r in request) {
                 if (r == Const.START || r == Const.END) { //book
-                    var d: DateHelper
+                    var d: DateUnit
                     var maxY: Int
                     var maxM: Int
                     if (r == Const.START) { //book prev years
-                        d = DateHelper.initToday()
+                        d = DateUnit.initToday()
                         maxY = d.year - 1
                         maxM = 12
-                        d = DateHelper.putYearMonth(2004, 8)
+                        d = DateUnit.putYearMonth(2004, 8)
                         val book = BookHelper()
                         book.setLoadedOtkr(false)
                     } else { //book cur year
-                        d = DateHelper.initToday()
+                        d = DateUnit.initToday()
                         maxY = d.year
                         maxM = d.month
-                        d = DateHelper.putYearMonth(maxY, 1)
+                        d = DateUnit.putYearMonth(maxY, 1)
                     }
                     while (d.year < maxY || d.year == maxY && d.month <= maxM) {
                         f = Lib.getFileDB(d.my)

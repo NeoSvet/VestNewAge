@@ -3,26 +3,26 @@ package ru.neosvet.vestnewage.loader
 import android.content.ContentValues
 import org.json.JSONArray
 import org.json.JSONObject
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.NeoClient
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.UnreadHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 
 class CalendarLoader : LinksProvider, Loader {
-    private var date = DateHelper.initToday()
+    private var date = DateUnit.initToday()
     private val storage = PageStorage()
     private val list: MutableList<ListItem> by lazy {
         mutableListOf()
     }
     private var isRun = false
-    val curDate: DateHelper
+    val curDate: DateUnit
         get() = date
 
     override fun cancel() {
@@ -30,7 +30,7 @@ class CalendarLoader : LinksProvider, Loader {
     }
 
     fun setDate(year: Int, month: Int) {
-        date = DateHelper.putYearMonth(year, month)
+        date = DateUnit.putYearMonth(year, month)
     }
 
     override fun getLinkList(): List<String> {
@@ -67,7 +67,7 @@ class CalendarLoader : LinksProvider, Loader {
         var jsonI: JSONObject?
         var jsonA: JSONArray?
         var link: String
-        var d: DateHelper
+        var d: DateUnit
         var n: Int
         var i = 0
         while (i < json.names().length() && isRun) {
@@ -76,7 +76,7 @@ class CalendarLoader : LinksProvider, Loader {
             n = list.size
             list.add(ListItem(s.substring(s.lastIndexOf("-") + 1)))
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
-                d = DateHelper.parse(s)
+                d = DateUnit.parse(s)
                 jsonA = json.optJSONArray(s)
                 if (jsonA == null) {
                     i++
@@ -107,7 +107,7 @@ class CalendarLoader : LinksProvider, Loader {
             return
         }
         if (updateUnread) {
-            val unread = UnreadHelper()
+            val unread = UnreadUtils()
             for (x in list.indices) {
                 date.day = list[x].title.toInt()
                 list[x].links.forEach {

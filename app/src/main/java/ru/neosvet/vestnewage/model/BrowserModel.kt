@@ -5,19 +5,19 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.BookHelper
-import ru.neosvet.vestnewage.helpers.BrowserHelper
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.loader.PageLoader
-import ru.neosvet.vestnewage.loader.StyleLoader
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.BrowserHelper
+import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -140,14 +140,14 @@ class BrowserModel : NeoViewModel() {
         val id: Int
         var time = 0L
         var isOtkr = false
-        val d: DateHelper
+        val d: DateUnit
         if (cursor.moveToFirst()) {
             val iId = cursor.getColumnIndex(DataBase.ID)
             id = cursor.getInt(iId)
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val s = storage.getPageTitle(cursor.getString(iTitle), link)
             val iTime = cursor.getColumnIndex(Const.TIME)
-            d = DateHelper.putMills(cursor.getLong(iTime))
+            d = DateUnit.putMills(cursor.getLong(iTime))
             if (storage.isArticle()) //раз в неделю предлагать обновить статьи
                 time = d.timeInSeconds
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n")
@@ -274,10 +274,10 @@ class BrowserModel : NeoViewModel() {
         }
     }
 
-    private fun getDateFromLink(): DateHelper {
+    private fun getDateFromLink(): DateUnit {
         var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
         if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
-        return DateHelper.parse(s)
+        return DateUnit.parse(s)
     }
 
     fun nextPage() {
@@ -286,8 +286,8 @@ class BrowserModel : NeoViewModel() {
             openLink(it, false)
             return
         }
-        val today = DateHelper.initToday().my
-        val d: DateHelper = getDateFromLink()
+        val today = DateUnit.initToday().my
+        val d: DateUnit = getDateFromLink()
         if (d.my == today) {
             mstate.postValue(MessageState(strings.endList))
             return
@@ -324,14 +324,14 @@ class BrowserModel : NeoViewModel() {
 
     private fun getMinMY(): String {
         if (link.contains(Const.POEMS)) {
-            val d = DateHelper.putYearMonth(2016, 2)
+            val d = DateUnit.putYearMonth(2016, 2)
             return d.my
         }
         val book = BookHelper()
         val d = if (book.isLoadedOtkr())
-            DateHelper.putYearMonth(2004, 8)
+            DateUnit.putYearMonth(2004, 8)
         else
-            DateHelper.putYearMonth(2016, 1)
+            DateUnit.putYearMonth(2016, 1)
         return d.my
     }
 }

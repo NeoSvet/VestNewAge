@@ -1,12 +1,12 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.UnreadHelper
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.*
 
 class SummaryLoader : LinksProvider {
@@ -27,14 +27,18 @@ class SummaryLoader : LinksProvider {
         val stream: InputStream =
             NeoClient.getStream(NeoClient.SITE + "rss/?" + System.currentTimeMillis())
         val site = if (NeoClient.isMainSite())
-            NeoClient.SITE.substring(NeoClient.SITE.indexOf("/") + 2)
+            NeoClient.SITE.substring(
+                NeoClient.SITE.indexOf("/") + 2
+            )
         else
-            NeoClient.SITE2.substring(NeoClient.SITE2.indexOf("/") + 2)
+            NeoClient.SITE2.substring(
+                NeoClient.SITE2.indexOf("/") + 2
+            )
 
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
-        val now = DateHelper.initNow()
-        val unread: UnreadHelper? = if (addUnread) UnreadHelper() else null
+        val now = DateUnit.initNow()
+        val unread: UnreadUtils? = if (addUnread) UnreadUtils() else null
         val m = br.readLine().split("<item>").toTypedArray()
         br.close()
         stream.close()
@@ -57,7 +61,7 @@ class SummaryLoader : LinksProvider {
             bw.write(Const.N)
             b = m[i].indexOf("</a10")
             bw.write(
-                DateHelper.parse(withOutTag(m[i].substring(a + 15, b)))
+                DateUnit.parse(withOutTag(m[i].substring(a + 15, b)))
                     .timeInMills.toString() + Const.N
             ) //time
             bw.flush()

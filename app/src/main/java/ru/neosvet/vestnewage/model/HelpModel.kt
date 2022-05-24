@@ -5,15 +5,15 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.list.HelpAdapter
-import ru.neosvet.vestnewage.list.item.HelpItem
+import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.model.basic.HelpStrings
 import ru.neosvet.vestnewage.model.basic.ListEvent
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.UpdateList
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.view.list.HelpAdapter
 
 class HelpModel : ViewModel(), HelpAdapter.ItemClicker {
     companion object {

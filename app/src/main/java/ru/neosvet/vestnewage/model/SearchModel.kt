@@ -10,21 +10,21 @@ import androidx.paging.PagingConfig
 import androidx.work.Data
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.percent
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.SearchHelper
-import ru.neosvet.vestnewage.list.item.ListItem
-import ru.neosvet.vestnewage.list.paging.FactoryEvents
-import ru.neosvet.vestnewage.list.paging.SearchFactory
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
-import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
+import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import java.util.*
 
 class SearchModel : NeoViewModel(), FactoryEvents {
@@ -126,7 +126,7 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         storage.isDesc = isDesc
         if (mode == MODE_ALL)
             searchList(DataBase.ARTICLES)
-        val d = DateHelper.putYearMonth(start.year, start.month)
+        val d = DateUnit.putYearMonth(start.year, start.month)
         val step = if (isDesc) -1 else 1
         var prev = 0
         var time: Long = 0
@@ -175,7 +175,7 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         }
     }
 
-    private fun publishProgress(d: DateHelper) {
+    private fun publishProgress(d: DateUnit) {
         mstate.postValue(
             MessageState(
                 String.format(
@@ -284,7 +284,10 @@ class SearchModel : NeoViewModel(), FactoryEvents {
             cursor.close()
             val d = dateFromString(name)
             val row = ContentValues()
-            row.put(Const.TITLE, String.format(strings.format_month_no_loaded, d.monthString, d.year))
+            row.put(
+                Const.TITLE,
+                String.format(strings.format_month_no_loaded, d.monthString, d.year)
+            )
             row.put(Const.LINK, name)
             row.put(DataBase.ID, n)
             storage.insert(row)
@@ -466,9 +469,9 @@ class SearchModel : NeoViewModel(), FactoryEvents {
         return item
     }
 
-    private fun dateFromString(date: String): DateHelper {
+    private fun dateFromString(date: String): DateUnit {
         val month = date.substring(0, 2).toInt()
         val year = date.substring(3).toInt() + 2000
-        return DateHelper.putYearMonth(year, month)
+        return DateUnit.putYearMonth(year, month)
     }
 }

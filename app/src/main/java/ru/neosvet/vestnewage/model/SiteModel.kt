@@ -2,19 +2,19 @@ package ru.neosvet.vestnewage.model
 
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.model.basic.LongState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SiteStrings
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -46,8 +46,8 @@ class SiteModel : NeoViewModel() {
             NeoClient.SITE
         else
             NeoClient.SITE + NOVOSTI
-    private val ads: DevadsHelper by lazy {
-        DevadsHelper(App.context)
+    private val ads: AdsUtils by lazy {
+        AdsUtils(App.context)
     }
 
     override fun onDestroy() {
@@ -90,7 +90,7 @@ class SiteModel : NeoViewModel() {
         }
         scope.launch {
             val list = mutableListOf<ListItem>()
-            val sec = f.lastModified() / DateHelper.SEC_IN_MILLS
+            val sec = f.lastModified() / DateUnit.SEC_IN_MILLS
             mstate.postValue(LongState(sec))
             list.add(getFirstItem())
             var i = 1

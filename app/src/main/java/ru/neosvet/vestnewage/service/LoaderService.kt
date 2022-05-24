@@ -13,20 +13,17 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.ErrorUtils
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.activity.MainActivity
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.ListsHelper
-import ru.neosvet.vestnewage.helpers.NotificationHelper
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.*
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.view.activity.MainActivity
 
 /**
  * Created by NeoSvet on 19.11.2019.
@@ -80,10 +77,10 @@ class LoaderService : LifecycleService(), LoadHandler {
     private var mode = 0
     private var request: String? = null
     private val curYear: Int by lazy {
-        DateHelper.initToday().year
+        DateUnit.initToday().year
     }
     private val curMonth: Int by lazy {
-        DateHelper.initToday().month
+        DateUnit.initToday().month
     }
 
     private fun errorHandler(throwable: Throwable) {
@@ -147,7 +144,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
         Thread {
             try {
-                val delay = DateHelper.SEC_IN_MILLS.toLong()
+                val delay = DateUnit.SEC_IN_MILLS.toLong()
                 while (isRun) {
                     Thread.sleep(delay)
                     if (isRun) handler.sendEmptyMessage(0)
@@ -161,7 +158,7 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun finishService(error: String?) {
         curLoader?.cancel()
-        val notifHelper = NotificationHelper()
+        val notifHelper = NotificationUtils()
         val title: String
         val main: Intent
         val msg: String
@@ -180,7 +177,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
         val piEmpty = PendingIntent.getActivity(this, 0, Intent(), FLAGS)
-        notif = notifHelper.getNotification(title, msg, NotificationHelper.CHANNEL_TIPS)
+        notif = notifHelper.getNotification(title, msg, NotificationUtils.CHANNEL_TIPS)
             .setContentIntent(piMain)
             .setFullScreenIntent(piEmpty, true)
         manager.notify(FINAL_ID, notif.build())
@@ -188,7 +185,7 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun initNotif() {
         manager.cancel(FINAL_ID)
-        val notifHelper = NotificationHelper()
+        val notifHelper = NotificationUtils()
         val main = Intent(this, MainActivity::class.java)
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
         val iStop = Intent(this, LoaderService::class.java)
@@ -197,7 +194,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         notif = notifHelper.getNotification(
             getString(R.string.load),
             getString(R.string.start),
-            NotificationHelper.CHANNEL_MUTE
+            NotificationUtils.CHANNEL_MUTE
         )
             .setSmallIcon(R.drawable.star_anim)
             .setContentIntent(piMain)
@@ -269,9 +266,9 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun refreshLists(id: Int) {
         calcCountLists(id)
-        val listsHelper = ListsHelper()
+        val listsUtils = ListsUtils()
         if (id == ALL) {
-            if (listsHelper.summaryIsOld()) {
+            if (listsUtils.summaryIsOld()) {
                 val loader = SummaryLoader()
                 loader.loadList(false)
             }
@@ -279,13 +276,13 @@ class LoaderService : LifecycleService(), LoadHandler {
             upProg()
         }
         if (id == ALL || id == R.id.nav_site) {
-            if (listsHelper.siteIsOld())
+            if (listsUtils.siteIsOld())
                 loadSiteSection()
             if (isRun.not()) return
             upProg()
         }
 
-        if (listsHelper.bookIsOld()) {
+        if (listsUtils.bookIsOld()) {
             if (id == ALL)
                 loadAllCalendar()
             if (id == ALL || id == R.id.nav_book) {

@@ -6,19 +6,19 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
-import ru.neosvet.utils.Lib
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.BookHelper
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import java.util.*
 
 class BookModel : NeoViewModel(), LoadHandlerLite {
@@ -34,13 +34,13 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     var selectedTab: Int = TAB_KATREN
     val isKatrenTab: Boolean
         get() = selectedTab == TAB_KATREN
-    private lateinit var dKatren: DateHelper
-    private lateinit var dPoslanie: DateHelper
+    private lateinit var dKatren: DateUnit
+    private lateinit var dPoslanie: DateUnit
     private lateinit var strings: BookStrings
     var helper: BookHelper? = null
         private set
     var isLoadedOtkr: Boolean = false
-    var date: DateHelper
+    var date: DateUnit
         get() = if (isKatrenTab) dKatren else dPoslanie
         set(value) {
             if (isKatrenTab) dKatren = value
@@ -52,11 +52,11 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
         helper = BookHelper().also {
             isLoadedOtkr = it.isLoadedOtkr()
             it.loadDates()
-            dKatren = DateHelper.putDays(it.katrenDays)
-            dPoslanie = DateHelper.putDays(it.poslaniyaDays)
+            dKatren = DateUnit.putDays(it.katrenDays)
+            dPoslanie = DateUnit.putDays(it.poslaniyaDays)
         }
         if (isLoadedOtkr.not() && dPoslanie.year < 2016)
-            dPoslanie = DateHelper.putYearMonth(2016, 1)
+            dPoslanie = DateUnit.putYearMonth(2016, 1)
         strings = BookStrings(
             rnd_pos = context.getString(R.string.rnd_pos),
             rnd_kat = context.getString(R.string.rnd_kat),
@@ -72,11 +72,11 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     override suspend fun doLoad() {
         loader = BookLoader(this)
         if (isKatrenTab) loader?.loadPoemsList(2016)?.let {
-            dKatren = DateHelper.parse(it)
+            dKatren = DateUnit.parse(it)
         } else if (isLoadedOtkr) loader?.loadAllPoslaniya()?.let {
-            dPoslanie = DateHelper.parse(it)
+            dPoslanie = DateUnit.parse(it)
         } else loader?.loadNewPoslaniya()?.let {
-            dPoslanie = DateHelper.parse(it)
+            dPoslanie = DateUnit.parse(it)
         }
         openList(false)
     }
@@ -100,7 +100,7 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
         scope.launch {
-            val d: DateHelper = date
+            val d: DateUnit = date
             if (!existsList(d)) {
                 if (loadIfNeed) {
                     mstate.postValue(NeoState.Loading)
@@ -140,9 +140,9 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
             }
             storage.open(d.my)
             cursor = storage.getListAll()
-            val dModList: DateHelper
+            val dModList: DateUnit
             if (cursor.moveToFirst()) {
-                dModList = DateHelper.putMills(cursor.getLong(cursor.getColumnIndex(Const.TIME)))
+                dModList = DateUnit.putMills(cursor.getLong(cursor.getColumnIndex(Const.TIME)))
                 if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isKatrenTab)
@@ -170,14 +170,14 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
                 mstate.postValue(SuccessBook(calendar, prev, next, list))
                 return@launch
             }
-            val today = DateHelper.initToday()
+            val today = DateUnit.initToday()
             if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year) {
                 mstate.postValue(MessageState(strings.month_is_empty))
             } else doLoad()
         }
     }
 
-    private fun existsList(d: DateHelper): Boolean {
+    private fun existsList(d: DateUnit): Boolean {
         val storage = PageStorage()
         storage.open(d.my)
         val cursor = storage.getLinks()
@@ -203,7 +203,7 @@ class BookModel : NeoViewModel(), LoadHandlerLite {
     @SuppressLint("Range")
     fun getRnd(type: RndType) {
         //Определяем диапозон дат:
-        val d = DateHelper.initToday()
+        val d = DateUnit.initToday()
         var m: Int
         var y: Int
         var maxM = d.month

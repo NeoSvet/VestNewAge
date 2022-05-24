@@ -3,17 +3,17 @@ package ru.neosvet.vestnewage.service
 import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.LifecycleService
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.Lib
-import ru.neosvet.utils.NeoClient
-import ru.neosvet.utils.NeoList
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.NotificationHelper
-import ru.neosvet.vestnewage.helpers.SummaryHelper
-import ru.neosvet.vestnewage.helpers.UnreadHelper
-import ru.neosvet.vestnewage.loader.PageLoader
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.NeoList
+import ru.neosvet.vestnewage.helper.SummaryHelper
+import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.NotificationUtils
+import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileWriter
@@ -53,14 +53,14 @@ class CheckService : LifecycleService() {
 
     private fun initNotif() {
         val context = applicationContext
-        val notifHelper = NotificationHelper()
+        val notifHelper = NotificationUtils()
         val notif = notifHelper.getNotification(
             context.getString(R.string.site_name),
             context.getString(R.string.check_new),
-            NotificationHelper.CHANNEL_MUTE
+            NotificationUtils.CHANNEL_MUTE
         )
             .setProgress(0, 0, true)
-        startForeground(NotificationHelper.NOTIF_CHECK, notif.build())
+        startForeground(NotificationUtils.NOTIF_CHECK, notif.build())
     }
 
     private fun startLoad() {
@@ -71,28 +71,34 @@ class CheckService : LifecycleService() {
     }
 
     private fun checkSummary(): Boolean {
-        val stream = NeoClient.getStream(NeoClient.SITE + "rss/?" + System.currentTimeMillis())
+        val stream = NeoClient.getStream(
+            NeoClient.SITE + "rss/?" + System.currentTimeMillis()
+        )
         val site = if (NeoClient.isMainSite())
-            NeoClient.SITE.substring(NeoClient.SITE.indexOf("/") + 2)
+            NeoClient.SITE.substring(
+                NeoClient.SITE.indexOf("/") + 2
+            )
         else
-            NeoClient.SITE2.substring(NeoClient.SITE2.indexOf("/") + 2)
+            NeoClient.SITE2.substring(
+                NeoClient.SITE2.indexOf("/") + 2
+            )
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
         br.close()
         stream.close()
         var a = s.indexOf("lastBuildDate") + 14
-        val secList = DateHelper.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
+        val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
         val file = Lib.getFile(Const.RSS)
         var secFile: Long = 0
-        if (file.exists()) secFile = DateHelper.putMills(file.lastModified()).timeInSeconds
+        if (file.exists()) secFile = DateUnit.putMills(file.lastModified()).timeInSeconds
         if (secFile > secList) { //список в загрузке не нуждается
             br.close()
             return false
         }
         val loader = PageLoader()
         val bwRSS = BufferedWriter(FileWriter(file))
-        val unread = UnreadHelper()
-        var d: DateHelper
+        val unread = UnreadUtils()
+        var d: DateUnit
         var title: String
         var link: String
         var b: Int
@@ -113,7 +119,7 @@ class CheckService : LifecycleService() {
             bwRSS.write(Const.N)
             b = m[i].indexOf("</a10")
             s = withOutTag(m[i].substring(a + 15, b))
-            d = DateHelper.parse(s)
+            d = DateUnit.parse(s)
             bwRSS.write(d.timeInMills.toString() + Const.N) //time
             bwRSS.flush()
             if (unread.addLink(link, d)) {

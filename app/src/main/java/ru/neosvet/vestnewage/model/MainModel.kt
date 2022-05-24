@@ -5,19 +5,19 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import okhttp3.Request
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.NeoClient
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.helpers.DateHelper
-import ru.neosvet.vestnewage.helpers.DevadsHelper
-import ru.neosvet.vestnewage.helpers.MainHelper
-import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.list.item.ListItem
+import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.model.basic.AdsState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -35,7 +35,7 @@ class MainModel : NeoViewModel() {
 
     override suspend fun doLoad() {
         val timeDiff = synchronizationTime()
-        val ads = DevadsHelper(App.context)
+        val ads = AdsUtils(App.context)
         ads.loadAds()
         ads.close()
         mstate.postValue(AdsState(ads.hasNew(), ads.warnIndex, timeDiff))
@@ -62,10 +62,11 @@ class MainModel : NeoViewModel() {
                 val iTime = cursor.getColumnIndex(Const.TIME)
                 if (time > cursor.getLong(iTime)) {
                     LoaderService.postCommand(
-                        LoaderService.DOWNLOAD_PAGE, s)
+                        LoaderService.DOWNLOAD_PAGE, s
+                    )
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
                     list.add(ListItem(cursor.getString(iTitle), s).apply {
-                        des=updated_page
+                        des = updated_page
                     })
                 }
             }
@@ -84,9 +85,9 @@ class MainModel : NeoViewModel() {
         val client = NeoClient.createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
         val s = response.headers.value(1)
-        val timeServer = DateHelper.parse(s).timeInSeconds
+        val timeServer = DateUnit.parse(s).timeInSeconds
         response.close()
-        val timeDevice = DateHelper.initNow().timeInSeconds
+        val timeDevice = DateUnit.initNow().timeInSeconds
         return (timeDevice - timeServer).toInt()
     }
 }

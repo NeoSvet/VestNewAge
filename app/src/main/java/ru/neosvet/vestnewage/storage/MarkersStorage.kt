@@ -2,8 +2,8 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
-import ru.neosvet.utils.Const
-import ru.neosvet.utils.DataBase
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.utils.Const
 
 /**
  * Created by NeoSvet on 23.03.2022.
@@ -75,7 +75,9 @@ class MarkersStorage {
     )
 
     fun getCollectionId(title: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(DataBase.ID),
+        DataBase.COLLECTIONS, arrayOf(
+            DataBase.ID
+        ),
         Const.TITLE + DataBase.Q, arrayOf(title),
         null, null, Const.PLACE
     )
@@ -86,7 +88,9 @@ class MarkersStorage {
     )
 
     fun getMarkersList(colId: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(DataBase.MARKERS),
+        DataBase.COLLECTIONS, arrayOf(
+            DataBase.MARKERS
+        ),
         DataBase.ID + DataBase.Q, colId
     )
 
@@ -96,7 +100,9 @@ class MarkersStorage {
     )
 
     fun getMarkersListByTitle(colTitle: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(DataBase.MARKERS),
+        DataBase.COLLECTIONS, arrayOf(
+            DataBase.MARKERS
+        ),
         Const.TITLE + DataBase.Q, colTitle
     )
 
@@ -188,7 +194,9 @@ class MarkersStorage {
 
     fun foundMarker(values: Array<String>): Int {
         val cursor = db.query(
-            DataBase.MARKERS, arrayOf(DataBase.ID),
+            DataBase.MARKERS, arrayOf(
+                DataBase.ID
+            ),
             Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
                     DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
             values
