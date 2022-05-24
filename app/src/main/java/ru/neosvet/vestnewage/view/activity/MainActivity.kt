@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private enum class StatusBack {
-        MENU, PAGE, EXIT
+        FIRST, PAGE, MENU, EXIT
     }
 
     private lateinit var helper: MainHelper
@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         helper.toolbar?.isVisible = true
         if (helper.isFirstRun) {
             setFragment(R.id.nav_help, false)
+            statusBack = StatusBack.FIRST
             return
         }
         if (firstFragment != 0)
@@ -449,8 +450,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onBackPressed() {
         if (helper.drawer?.isDrawerOpen(GravityCompat.START) == true) {
             helper.drawer!!.closeDrawer(GravityCompat.START)
-        } else if (helper.isFirstRun) {
-            setFragment(firstFragment, false)
         } else if (helper.hasPrevId) {
             if (canBack.not()) return
             if (helper.prevId == R.id.nav_site)
@@ -471,8 +470,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (statusBack == StatusBack.EXIT) {
             super.onBackPressed()
         } else if (statusBack == StatusBack.PAGE && helper.isFullMenu) {
-            statusBack = StatusBack.MENU
             setFragment(R.id.menu_fragment, false)
+        } else if (statusBack == StatusBack.FIRST) {
+            setFragment(firstFragment, false)
         } else {
             statusBack = StatusBack.EXIT
             Lib.showToast(getString(R.string.click_for_exit))
