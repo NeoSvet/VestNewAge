@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.NeoViewModel
 import ru.neosvet.vestnewage.model.basic.ProgressState
 import ru.neosvet.vestnewage.network.ConnectObserver
-import ru.neosvet.vestnewage.network.ConnectReceiver
+import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
 
@@ -76,8 +76,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     open fun startLoad() {
         if (neomodel.isRun) return
-        if (ConnectReceiver.connected.not()) {
-            ConnectReceiver.subscribe(this)
+        if (ConnectWatcher.connected.not()) {
+            ConnectWatcher.subscribe(this)
             Lib.showToast(getString(R.string.no_connected))
             return
         }
@@ -87,7 +87,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     override fun connectChanged(connected: Boolean) {
         if (connected) {
             startLoad()
-            ConnectReceiver.unSubscribe()
+            ConnectWatcher.unSubscribe()
         }
     }
 

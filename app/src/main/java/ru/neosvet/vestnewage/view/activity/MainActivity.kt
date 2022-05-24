@@ -3,9 +3,7 @@ package ru.neosvet.vestnewage.view.activity
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
-import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -34,7 +32,7 @@ import ru.neosvet.vestnewage.model.SiteModel
 import ru.neosvet.vestnewage.model.basic.AdsState
 import ru.neosvet.vestnewage.model.basic.NeoState
 import ru.neosvet.vestnewage.model.basic.SuccessList
-import ru.neosvet.vestnewage.network.ConnectReceiver
+import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
@@ -76,7 +74,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var utils: LaunchUtils
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
-    private val connectReceiver = ConnectReceiver()
 
     val newId: Int
         get() = helper.newId
@@ -85,7 +82,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        registerReceiver(connectReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        ConnectWatcher.start(this)
         ScreenUtils.init(this)
         App.context = this
         if (savedInstanceState == null)
@@ -219,7 +216,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onDestroy() {
-        unregisterReceiver(connectReceiver)
+        ConnectWatcher.stop(this)
         super.onDestroy()
     }
 
