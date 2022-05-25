@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import androidx.work.Data
@@ -10,13 +10,13 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 
-class CalendarModel : NeoViewModel() {
+class CalendarToiler : NeoToiler() {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year

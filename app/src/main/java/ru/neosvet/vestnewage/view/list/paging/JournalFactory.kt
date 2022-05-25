@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.view.list.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.model.basic.JournalStrings
+import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.utils.Const
 

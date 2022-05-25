@@ -5,7 +5,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.model.basic.JournalStrings
+import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 

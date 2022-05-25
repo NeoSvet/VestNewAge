@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.content.ContentValues
 import android.content.Context
@@ -10,15 +10,15 @@ import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.MarkerHelper
-import ru.neosvet.vestnewage.model.basic.MarkerStrings
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.Success
+import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 
-class MarkerModel : NeoViewModel() {
+class MarkerToiler : NeoToiler() {
     enum class Type {
         NONE, LOAD_PAGE, LOAD_COLS, ADD_COL, NEW_MARKER,
         LOAD_MARKER, GET_MARKER, ADD_MARKER, UPDATE_MARKER

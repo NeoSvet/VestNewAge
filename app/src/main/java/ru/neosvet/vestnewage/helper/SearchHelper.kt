@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.model.SearchModel
+import ru.neosvet.vestnewage.viewmodel.SearchToiler
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
@@ -118,7 +118,7 @@ class SearchHelper(context: Context) {
     }
 
     fun loadMode(): Int =
-        pref.getInt(Const.MODE, SearchModel.MODE_BOOK)
+        pref.getInt(Const.MODE, SearchToiler.MODE_BOOK)
 
     fun getType(item: ListItem): Type {
         if (item.link.length == 5) return Type.LOAD_MONTH

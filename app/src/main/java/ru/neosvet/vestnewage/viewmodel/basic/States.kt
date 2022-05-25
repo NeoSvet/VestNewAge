@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model.basic
+package ru.neosvet.vestnewage.viewmodel.basic
 
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem

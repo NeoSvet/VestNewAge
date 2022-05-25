@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -13,15 +13,15 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
-import ru.neosvet.vestnewage.model.basic.*
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.util.*
 
-class BookModel : NeoViewModel(), LoadHandlerLite {
+class BookToiler : NeoToiler(), LoadHandlerLite {
     companion object {
         const val TAB_KATREN = 0
         //const val TAB_POSLANYA = 1

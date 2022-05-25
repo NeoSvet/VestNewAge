@@ -20,10 +20,10 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.model.BrowserModel
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.SuccessPage
+import ru.neosvet.vestnewage.viewmodel.BrowserToiler
+import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.PromUtils
@@ -68,12 +68,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private lateinit var menu: NeoMenu
     private var tvPromTime: View? = null
     private lateinit var tip: Tip
-    private val helper: BrowserHelper
-        get() = model.helper!!
-    private lateinit var binding: BrowserActivityBinding
-    private val model: BrowserModel by lazy {
-        ViewModelProvider(this).get(BrowserModel::class.java)
+    private val toiler: BrowserToiler by lazy {
+        ViewModelProvider(this).get(BrowserToiler::class.java)
     }
+    private val helper: BrowserHelper
+        get() = toiler.helper!!
+    private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
             scrollY.toFloat() / scale / contentHeight.toFloat()
@@ -88,12 +88,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         )
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        if (model.helper == null)
-            model.init(this)
+        if (toiler.helper == null)
+            toiler.init(this)
         initViews()
         setViews()
         restoreState(savedInstanceState)
-        model.state.observe(this, this)
+        toiler.state.observe(this, this)
     }
 
     override fun onPause() {
@@ -121,12 +121,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         var pos = 0f
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
-            model.openLink(link, true)
+            toiler.openLink(link, true)
             intent.getStringExtra(Const.SEARCH)?.let {
                 helper.setSearchString(it)
             }
         } else {
-            model.openLink(helper.link, true)
+            toiler.openLink(helper.link, true)
             pos = state.getFloat(DataBase.PARAGRAPH, pos)
         }
 
@@ -240,7 +240,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             wvBrowser.settings.javaScriptEnabled = true
             wvBrowser.settings.allowContentAccess = true
             wvBrowser.settings.allowFileAccess = true
-            wvBrowser.addJavascriptInterface(NeoInterface(model), "NeoInterface")
+            wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
             if (helper.zoom > 0)
                 wvBrowser.setInitialScale(helper.zoom)
         }
@@ -265,7 +265,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else if (binding.content.pSearch.isVisible) {
             closeSearch()
-        } else if (!model.onBackBrowser()) {
+        } else if (!toiler.onBackBrowser()) {
             super.onBackPressed()
         }
     }
@@ -366,13 +366,13 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             binding.fabBottom.isVisible = false
         status.setClick {
             if (status.isTime)
-                model.load()
+                toiler.load()
             else status.onClick()
         }
     }
 
     private fun initTheme() = binding.content.run {
-        model.lightTheme = helper.isLightTheme
+        toiler.lightTheme = helper.isLightTheme
         val context = this@BrowserActivity
         if (helper.isLightTheme) {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.black))
@@ -390,7 +390,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_refresh ->
-                model.load()
+                toiler.load()
             R.id.nav_share ->
                 helper.sharePage(this, getPageTitle())
             R.id.nav_nomenu -> {
@@ -436,7 +436,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 setCheckItem(menu.themeDark, helper.isLightTheme.not())
                 initTheme()
                 binding.content.wvBrowser.clearCache(true)
-                model.openPage(false)
+                toiler.openPage(false)
             }
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -457,7 +457,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     fun onPageFinished() {
         val unread = UnreadUtils()
         unread.deleteLink(helper.link)
-        model.addJournal()
+        toiler.addJournal()
     }
 
     fun initSearch() {
@@ -467,11 +467,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
 
     fun openLink(url: String) {
         helper.clearSearch()
-        model.openLink(url, true)
+        toiler.openLink(url, true)
     }
 
     fun onBack() {
-        model.openPage(false)
+        toiler.openPage(false)
     }
 
     override fun onChanged(state: NeoState) {

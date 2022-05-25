@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.loader
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.page.PageParser
-import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.Const
 import java.io.*
@@ -16,7 +16,7 @@ class SiteLoader(private val file: String) : LinksProvider {
 
     override fun getLinkList(): List<String> {
         val list = mutableListOf<String>()
-        if (file.contains(SiteModel.NEWS))
+        if (file.contains(SiteToiler.NEWS))
             return list
         val br = BufferedReader(FileReader(file))
         var s: String? = br.readLine()
@@ -158,7 +158,7 @@ class SiteLoader(private val file: String) : LinksProvider {
                 list[i].hasLink() -> bw.write(list[i].link + Const.N)
                 else -> bw.write("@" + Const.N)
             }
-            bw.write(SiteModel.END + Const.N)
+            bw.write(SiteToiler.END + Const.N)
             bw.flush()
         }
         bw.close()

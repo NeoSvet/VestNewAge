@@ -6,9 +6,9 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.ProgressState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Lib
@@ -17,13 +17,13 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     @JvmField
     protected var act: MainActivity? = null
-    protected val neomodel: NeoViewModel by lazy {
+    protected val neotoiler: NeoToiler by lazy {
         initViewModel()
     }
 
     abstract val title: String
 
-    abstract fun initViewModel(): NeoViewModel
+    abstract fun initViewModel(): NeoToiler
 
     abstract fun onViewCreated(savedInstanceState: Bundle?)
 
@@ -32,9 +32,9 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         act?.status?.setClick { onStatusClick(false) }
         onViewCreated(savedInstanceState)
         act?.let {
-            neomodel.state.observe(it, this)
+            neotoiler.state.observe(it, this)
         }
-        if (neomodel.isRun) setStatus(true)
+        if (neotoiler.isRun) setStatus(true)
     }
 
     override fun onAttach(context: Context) {
@@ -50,7 +50,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
 
     open fun onBackPressed(): Boolean {
-        if (act?.status?.isCrash == true || neomodel.isRun) {
+        if (act?.status?.isCrash == true || neotoiler.isRun) {
             onStatusClick(true)
             return false
         }
@@ -75,13 +75,13 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
 
     open fun startLoad() {
-        if (neomodel.isRun) return
+        if (neotoiler.isRun) return
         if (ConnectWatcher.connected.not()) {
             ConnectWatcher.subscribe(this)
             Lib.showToast(getString(R.string.no_connected))
             return
         }
-        neomodel.load()
+        neotoiler.load()
     }
 
     override fun connectChanged(connected: Boolean) {
@@ -104,8 +104,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
 
     open fun onStatusClick(reset: Boolean) {
-        if (neomodel.isRun) {
-            neomodel.cancel()
+        if (neotoiler.isRun) {
+            neotoiler.cancel()
             setStatus(false)
             return
         }

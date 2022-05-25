@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Lib
 
@@ -65,7 +65,7 @@ class ListLoader(private val handler: LoadHandler) : Loader {
         if (type == Type.ALL || type == Type.BOOK)
             k = workWithBook(true)
         if (type == Type.ALL || type == Type.SITE) {
-            val loader = SiteLoader(Lib.getFile(SiteModel.MAIN).toString())
+            val loader = SiteLoader(Lib.getFile(SiteToiler.MAIN).toString())
             val list = loader.getLinkList()
             k += list.size
             handler.setMax(k)

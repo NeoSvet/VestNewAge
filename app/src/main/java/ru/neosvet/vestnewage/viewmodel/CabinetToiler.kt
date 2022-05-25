@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import android.os.Build
@@ -12,17 +12,17 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.CabinetHelper
-import ru.neosvet.vestnewage.model.basic.CabinetStrings
-import ru.neosvet.vestnewage.model.basic.MessageState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
+import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.UnsafeClient
 import ru.neosvet.vestnewage.utils.Const
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class CabinetModel : NeoViewModel() {
+class CabinetToiler : NeoToiler() {
     companion object {
         private const val ERROR_BOX = "lt_box"
         private const val WORDS_BOX = "name=\"keyw"

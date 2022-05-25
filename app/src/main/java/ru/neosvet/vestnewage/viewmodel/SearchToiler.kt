@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -27,7 +27,7 @@ import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import java.util.*
 
-class SearchModel : NeoViewModel(), FactoryEvents {
+class SearchToiler : NeoToiler(), FactoryEvents {
     companion object {
         private const val MODE_POSLANIYA = 0
         private const val MODE_KATRENY = 1

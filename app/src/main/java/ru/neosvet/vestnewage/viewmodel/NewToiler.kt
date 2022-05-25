@@ -1,20 +1,20 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.app.Activity
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.File
 
-class NewModel : NeoViewModel() {
+class NewToiler : NeoToiler() {
     var needOpen: Boolean = true
     private var isInit = false
     private lateinit var ads: AdsUtils

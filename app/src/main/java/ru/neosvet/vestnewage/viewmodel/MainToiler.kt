@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 
 import android.content.Context
@@ -10,9 +10,9 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.model.basic.AdsState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.basic.AdsState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -22,7 +22,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 
-class MainModel : NeoViewModel() {
+class MainToiler : NeoToiler() {
     private lateinit var updated_page: String
 
     fun init(context: Context) {

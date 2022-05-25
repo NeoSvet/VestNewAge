@@ -27,11 +27,11 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.model.MainModel
-import ru.neosvet.vestnewage.model.SiteModel
-import ru.neosvet.vestnewage.model.basic.AdsState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.MainToiler
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import ru.neosvet.vestnewage.viewmodel.basic.AdsState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
@@ -148,10 +148,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             tab = utils.intent.getIntExtra(Const.TAB, tab)
             firstFragment = utils.intent.getIntExtra(Const.CUR_ID, firstFragment)
         } else if (utils.isNeedLoad) {
-            val model = ViewModelProvider(this).get(MainModel::class.java)
-            model.init(this)
-            model.state.observe(this, this)
-            model.load()
+            val toiler = ViewModelProvider(this).get(MainToiler::class.java)
+            toiler.init(this)
+            toiler.state.observe(this, this)
+            toiler.load()
         }
     }
 
@@ -460,7 +460,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (helper.hasPrevId) {
             if (canBack.not()) return
             if (helper.prevId == R.id.nav_site)
-                tab = SiteModel.TAB_SITE
+                tab = SiteToiler.TAB_SITE
             setFragment(helper.prevId, false)
             helper.prevId = 0
         } else if (firstFragment == R.id.nav_new) {
@@ -551,7 +551,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onItemClick(link: String) {
         if (link.isEmpty()) return
         if (link == Const.ADS) {
-            tab = SiteModel.TAB_DEV
+            tab = SiteToiler.TAB_DEV
             setFragment(R.id.nav_site, true)
         } else openReader(link, null)
     }

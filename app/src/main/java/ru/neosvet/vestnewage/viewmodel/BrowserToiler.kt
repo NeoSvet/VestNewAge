@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.content.ContentValues
 import android.content.Context
@@ -12,7 +12,7 @@ import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -23,7 +23,7 @@ import java.io.File
 import java.io.FileWriter
 import java.util.*
 
-class BrowserModel : NeoViewModel() {
+class BrowserToiler : NeoToiler() {
     companion object {
         private const val FILE = "file://"
         private const val STYLE = "/style/style.css"

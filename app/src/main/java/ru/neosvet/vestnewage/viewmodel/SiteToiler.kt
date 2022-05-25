@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import androidx.work.Data
 import kotlinx.coroutines.launch
@@ -7,10 +7,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.model.basic.LongState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SiteStrings
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
@@ -19,7 +19,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 
-class SiteModel : NeoViewModel() {
+class SiteToiler : NeoToiler() {
     companion object {
         const val TAB_NEWS = 0
         const val TAB_SITE = 1

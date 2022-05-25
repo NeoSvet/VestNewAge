@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.app.Activity
 import android.os.Build
@@ -7,15 +7,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
-import ru.neosvet.vestnewage.model.basic.HelpStrings
-import ru.neosvet.vestnewage.model.basic.ListEvent
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.UpdateList
+import ru.neosvet.vestnewage.viewmodel.basic.HelpStrings
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.UpdateList
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 
-class HelpModel : ViewModel(), HelpAdapter.ItemClicker {
+class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     companion object {
         private const val FEEDBACK = 1
         private const val FEEDBACK_COUNT = 4

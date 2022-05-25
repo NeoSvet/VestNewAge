@@ -15,11 +15,11 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.model.CalendarModel
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.SuccessCalendar
+import ru.neosvet.vestnewage.viewmodel.CalendarToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
@@ -30,14 +30,14 @@ import ru.neosvet.vestnewage.view.list.CalendarAdapter.Clicker
 import java.util.*
 
 class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
-    private val model: CalendarModel
-        get() = neomodel as CalendarModel
+    private val toiler: CalendarToiler
+        get() = neotoiler as CalendarToiler
     private var binding: CalendarFragmentBinding? = null
     private val adCalendar: CalendarAdapter = CalendarAdapter(this)
     private var dateDialog: DateDialog? = null
     private var dialog = false
     val currentYear: Int
-        get() = model.date.year
+        get() = toiler.date.year
     val hTimer = Handler { message: Message ->
         if (message.what == 0)
             binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
@@ -56,14 +56,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         binding = it
     }.root
 
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(CalendarModel::class.java)
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(CalendarToiler::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         initCalendar()
         restoreState(savedInstanceState)
-        if (savedInstanceState == null && model.isNeedReload()) {
+        if (savedInstanceState == null && toiler.isNeedReload()) {
             startLoad()
         }
     }
@@ -88,7 +88,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun restoreState(state: Bundle?) {
-        model.openCalendar(0)
+        toiler.openCalendar(0)
         state?.let {
             dialog = it.getBoolean(Const.DIALOG)
             if (dialog) showDatePicker()
@@ -138,7 +138,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 hTimer.sendEmptyMessage(0)
             }
         }, 300)
-        model.openCalendar(offset)
+        toiler.openCalendar(offset)
     }
 
     override fun setStatus(load: Boolean) {
@@ -158,7 +158,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
 
     private fun showDatePicker() {
         dialog = true
-        dateDialog = DateDialog(act, model.date).apply {
+        dateDialog = DateDialog(act, toiler.date).apply {
             val book = BookHelper()
             if (book.isLoadedOtkr()) {
                 setMinMonth(8)
@@ -173,11 +173,11 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         dialog = false
         if (date == null) // cancel
             return
-        model.changeDate(date)
+        toiler.changeDate(date)
     }
 
     override fun onClick(view: View, item: CalendarItem) {
-        if (model.isRun) return
+        if (toiler.isRun) return
         when (item.count) {
             1 -> {
                 openLink(item.getLink(0))

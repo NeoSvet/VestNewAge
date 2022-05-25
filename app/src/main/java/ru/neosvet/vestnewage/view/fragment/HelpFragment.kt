@@ -12,10 +12,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.model.HelpModel
-import ru.neosvet.vestnewage.model.basic.ListEvent
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.UpdateList
+import ru.neosvet.vestnewage.viewmodel.HelpToiler
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.UpdateList
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 
@@ -29,11 +29,11 @@ class HelpFragment : Fragment(), Observer<NeoState> {
             }
     }
 
-    private val model: HelpModel by lazy {
-        ViewModelProvider(this).get(HelpModel::class.java)
+    private val toiler: HelpToiler by lazy {
+        ViewModelProvider(this).get(HelpToiler::class.java)
     }
     private val adapter: HelpAdapter by lazy {
-        HelpAdapter(model, model.list)
+        HelpAdapter(toiler, toiler.list)
     }
 
     override fun onCreateView(
@@ -49,7 +49,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         initList(view)
         activity?.let {
             it.title = getString(R.string.help)
-            model.state.observe(it, this)
+            toiler.state.observe(it, this)
         }
         restoreState(savedInstanceState)
     }
@@ -63,9 +63,9 @@ class HelpFragment : Fragment(), Observer<NeoState> {
     private fun restoreState(state: Bundle?) {
         if (state == null) {
             val section = arguments?.getInt(Const.TAB) ?: -1
-            model.init(requireActivity(), section)
+            toiler.init(requireActivity(), section)
         } else {
-            model.restore()
+            toiler.restore()
         }
     }
 

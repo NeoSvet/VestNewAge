@@ -21,10 +21,10 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.JournalFragmentBinding
-import ru.neosvet.vestnewage.model.JournalModel
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.Success
+import ru.neosvet.vestnewage.viewmodel.JournalToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -35,8 +35,8 @@ import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 
 class JournalFragment : Fragment(), Observer<NeoState> {
-    private val model: JournalModel by lazy {
-        ViewModelProvider(this).get(JournalModel::class.java).apply { init(requireContext()) }
+    private val toiler: JournalToiler by lazy {
+        ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
     }
     private var binding: JournalFragmentBinding? = null
     private val adapter: PagingAdapter by lazy {
@@ -68,15 +68,15 @@ class JournalFragment : Fragment(), Observer<NeoState> {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        model.preparing()
+        toiler.preparing()
         initViews()
         initAnim()
         activity?.let {
             it.title = getString(R.string.journal)
-            model.state.observe(it, this)
+            toiler.state.observe(it, this)
         }
-        if (model.offset > 0)
-            binding?.rvJournal?.smoothScrollToPosition(model.offset)
+        if (toiler.offset > 0)
+            binding?.rvJournal?.smoothScrollToPosition(toiler.offset)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -85,13 +85,13 @@ class JournalFragment : Fragment(), Observer<NeoState> {
         fabClear.setOnClickListener {
             fabClear.isVisible = false
             tvEmptyJournal.isVisible = true
-            model.clear()
+            toiler.clear()
             adapter.submitData(lifecycle, PagingData.empty())
         }
         rvJournal.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvJournal.adapter = adapter
         lifecycleScope.launch {
-            model.paging().collect {
+            toiler.paging().collect {
                 adapter.submitData(lifecycle, it)
             }
         }
@@ -152,7 +152,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     }
 
     private fun finishedList() {
-        binding?.tvFinish?.text = if (model.loading)
+        binding?.tvFinish?.text = if (toiler.loading)
             getString(R.string.load)
         else getString(R.string.finish_list)
         tip.show()

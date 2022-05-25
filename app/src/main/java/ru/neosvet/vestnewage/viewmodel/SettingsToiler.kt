@@ -1,16 +1,16 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.model.basic.LongState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.File
 
-class SettingsModel : NeoViewModel() {
+class SettingsToiler : NeoToiler() {
     private var size: Long = 0
     val panels = booleanArrayOf(true, false, false, false, false)
 

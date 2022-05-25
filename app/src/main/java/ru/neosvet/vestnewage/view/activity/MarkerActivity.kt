@@ -21,10 +21,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
-import ru.neosvet.vestnewage.model.MarkerModel
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.Success
+import ru.neosvet.vestnewage.viewmodel.MarkerToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
@@ -85,8 +85,8 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         }
     }
 
-    private val model: MarkerModel by lazy {
-        ViewModelProvider(this).get(MarkerModel::class.java).apply { init(baseContext) }
+    private val toiler: MarkerToiler by lazy {
+        ViewModelProvider(this).get(MarkerToiler::class.java).apply { init(baseContext) }
     }
     private val adPar: CheckAdapter by lazy {
         CheckAdapter(helper.parsList, helper::checkPars)
@@ -103,7 +103,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
     private var density = 0f
 
     private val helper: MarkerHelper
-        get() = model.helper
+        get() = toiler.helper
 
     private var heightDialog = 0
 
@@ -115,7 +115,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         initActivity()
         initContent()
         restoreState(savedInstanceState)
-        model.state.observe(this, this)
+        toiler.state.observe(this, this)
     }
 
     override fun onChanged(state: NeoState) {
@@ -146,7 +146,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
     private fun restoreState(state: Bundle?) {
         setResult(RESULT_CANCELED)
         if (state == null) {
-            model.open(intent)
+            toiler.open(intent)
             return
         }
         showData()
@@ -290,7 +290,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
             Lib.showToast(it)
             return@createCol
         }
-        model.addCol(title)
+        toiler.addCol(title)
         softKeyboard.hide()
         binding.content.etCol.setText("")
         helper.cols += ", $title"
@@ -343,7 +343,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
 
     private fun saveMarker() {
         setResult(RESULT_OK)
-        model.finish(binding.content.etDes.text.toString())
+        toiler.finish(binding.content.etDes.text.toString())
     }
 
     private fun newProgPos(): String {

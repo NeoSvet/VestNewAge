@@ -22,8 +22,8 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
-import ru.neosvet.vestnewage.model.SearchModel
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.viewmodel.SearchToiler
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
@@ -55,8 +55,8 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
-    private val model: SearchModel
-        get() = neomodel as SearchModel
+    private val toiler: SearchToiler
+        get() = neotoiler as SearchToiler
     private var binding: SearchFragmentBinding? = null
     private val adRequest: ArrayAdapter<String> by lazy {
         ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
@@ -77,7 +77,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         SoftKeyboard(binding!!.pSearch)
     }
     private val helper: SearchHelper
-        get() = model.helper
+        get() = toiler.helper
     override val title: String
         get() = getString(R.string.search)
 
@@ -89,8 +89,8 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         binding = it
     }.root
 
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SearchModel::class.java).apply { init(requireContext()) }
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(SearchToiler::class.java).apply { init(requireContext()) }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         binding?.run {
@@ -184,9 +184,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             }
             return@run
         }
-        if (model.shownResult) {
+        if (toiler.shownResult) {
             fabSettings.isVisible = false
-            model.showLastResult()
+            toiler.showLastResult()
             etSearch.setText(helper.request)
             etSearch.setSelection(helper.request.length)
             content.tvLabel.text = helper.label
@@ -200,13 +200,13 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             dialog = state.getInt(Const.DIALOG)
             if (dialog > -1) showDatePicker(dialog)
         }
-        if (model.isRun)
+        if (toiler.isRun)
             setStatus(true)
     }
 
     private fun initSearchList() = binding?.content?.run {
         rvSearch.layoutManager = GridLayoutManager(requireContext(), 1)
-        if (model.shownResult) {
+        if (toiler.shownResult) {
             rvSearch.adapter = adResult
             if (SearchFactory.offset > 0)
                 rvSearch.smoothScrollToPosition(SearchFactory.offset)
@@ -271,7 +271,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSettings() = binding?.run {
         fabSettings.setOnClickListener { openSettings() }
-        bStop.setOnClickListener { model.cancel() }
+        bStop.setOnClickListener { toiler.cancel() }
         fabOk.setOnClickListener {
             closeSettings()
             helper.savePerformance(settings.sMode.selectedItemPosition)
@@ -345,13 +345,13 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         setStatus(true)
         val mode = if (content.cbSearchInResults.isChecked) {
             tvStatus.text = getString(R.string.search)
-            SearchModel.MODE_RESULTS
+            SearchToiler.MODE_RESULTS
         } else
             settings.sMode.selectedItemPosition
         val request = etSearch.text.toString()
         adResult.submitData(lifecycle, PagingData.empty())
         content.rvSearch.adapter = adResult
-        model.startSearch(request, mode)
+        toiler.startSearch(request, mode)
         addRequest(request)
     }
 
@@ -374,7 +374,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
                 adResult.update(state.list[0])
             }
             Success -> {
-                if (model.isRun)
+                if (toiler.isRun)
                     showResult()
                 else
                     finishSearch()
@@ -390,7 +390,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
 
         jobResult?.cancel()
         jobResult = lifecycleScope.launch {
-            model.paging().collect {
+            toiler.paging().collect {
                 adResult.submitData(lifecycle, it)
             }
         }
@@ -423,7 +423,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             LAST_RESULTS -> {
                 binding?.fabSettings?.isVisible = false
                 helper.loadLastResult()
-                model.showLastResult()
+                toiler.showLastResult()
                 binding?.run {
                     content.rvSearch.adapter = adResult
                     content.tvLabel.text = helper.label
@@ -450,11 +450,11 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             }
             SearchHelper.Type.LOAD_MONTH -> {
                 setStatus(true)
-                model.loadMonth(item.link)
+                toiler.loadMonth(item.link)
             }
             SearchHelper.Type.LOAD_PAGE -> {
                 setStatus(true)
-                model.loadPage(item.link)
+                toiler.loadPage(item.link)
             }
         }
     }
@@ -473,8 +473,8 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun finishedList() {
-        if (model.isRun) return
-        binding?.tvFinish?.text = if (model.loading)
+        if (toiler.isRun) return
+        binding?.tvFinish?.text = if (toiler.loading)
             getString(R.string.load)
         else getString(R.string.finish_list)
         tip.show()

@@ -24,10 +24,10 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
-import ru.neosvet.vestnewage.model.SettingsModel
-import ru.neosvet.vestnewage.model.basic.LongState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
+import ru.neosvet.vestnewage.viewmodel.SettingsToiler
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.service.CheckStarter
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -51,18 +51,18 @@ class SettingsFragment : NeoFragment() {
         )
     }
     private val bPanels: BooleanArray
-        get() = model.panels
+        get() = toiler.panels
 
-    private val model: SettingsModel
-        get() = neomodel as SettingsModel
+    private val toiler: SettingsToiler
+        get() = neotoiler as SettingsToiler
     private val anRotate: Animation by lazy {
         initAnimation()
     }
 
     private var stopRotate = false
 
-    override fun initViewModel(): NeoViewModel {
-        return ViewModelProvider(this).get(SettingsModel::class.java)
+    override fun initViewModel(): NeoToiler {
+        return ViewModelProvider(this).get(SettingsToiler::class.java)
     }
 
     override val title: String
@@ -224,7 +224,7 @@ class SettingsFragment : NeoFragment() {
                 list.add(DataBase.MARKERS)
             if (cbsClear[4].isChecked) //cache
                 list.add(Const.FILE)
-            model.startClear(list)
+            toiler.startClear(list)
             for (checkBox in cbsClear)
                 checkBox.isChecked = false
         }

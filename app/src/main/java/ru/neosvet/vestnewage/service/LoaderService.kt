@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.loader.*
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.model.SiteModel
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -312,11 +312,11 @@ class LoaderService : LifecycleService(), LoadHandler {
     private fun loadSiteSection() {
         val url = arrayOf(
             NeoClient.SITE,
-            NeoClient.SITE + SiteModel.NOVOSTI
+            NeoClient.SITE + SiteToiler.NOVOSTI
         )
         val file = arrayOf(
-            Lib.getFile(SiteModel.MAIN).toString(),
-            Lib.getFile(SiteModel.NEWS).toString()
+            Lib.getFile(SiteToiler.MAIN).toString(),
+            Lib.getFile(SiteToiler.NEWS).toString()
         )
         var loader: SiteLoader
         var i = 0

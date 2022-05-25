@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.helper.BrowserHelper;
 import ru.neosvet.vestnewage.helper.CabinetHelper;
 import ru.neosvet.vestnewage.helper.MainHelper;
 import ru.neosvet.vestnewage.helper.SearchHelper;
-import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.viewmodel.SiteToiler;
 import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 import ru.neosvet.vestnewage.view.activity.BrowserActivity;
@@ -212,7 +212,7 @@ public class LaunchUtils {
         } else if (link.length() < 2 || link.equals("/index.html")) {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 0);
-        } else if (link.equals(SiteModel.NOVOSTI)) {
+        } else if (link.equals(SiteToiler.NOVOSTI)) {
             main.putExtra(Const.CUR_ID, R.id.nav_site);
             main.putExtra(Const.TAB, 1);
         } else if (link.contains(Const.HTML)) {

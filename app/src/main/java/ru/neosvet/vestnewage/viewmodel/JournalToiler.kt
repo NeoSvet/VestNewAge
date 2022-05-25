@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model
+package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.LiveData
@@ -10,16 +10,16 @@ import androidx.paging.PagingConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.model.basic.JournalStrings
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.Ready
-import ru.neosvet.vestnewage.model.basic.Success
+import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
 import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 
-class JournalModel : ViewModel(), FactoryEvents {
+class JournalToiler : ViewModel(), FactoryEvents {
     private val mstate = MutableLiveData<NeoState>()
     val state: LiveData<NeoState>
         get() = mstate

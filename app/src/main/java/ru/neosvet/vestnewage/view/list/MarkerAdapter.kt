@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerItem
-import ru.neosvet.vestnewage.model.MarkersModel
+import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 
-class MarkerAdapter(private val model: MarkersModel) :
+class MarkerAdapter(private val toiler: MarkersToiler) :
     RecyclerView.Adapter<MarkerAdapter.ViewHolder>() {
     companion object {
         private const val TYPE_SIMPLE = 0
@@ -17,7 +17,7 @@ class MarkerAdapter(private val model: MarkersModel) :
     }
 
     private val data: List<MarkerItem>
-        get() = model.list
+        get() = toiler.list
 
     override fun getItemCount(): Int = data.size
 
@@ -45,7 +45,7 @@ class MarkerAdapter(private val model: MarkersModel) :
 
         init {
             item_bg.setOnClickListener {
-                model.run {
+                toiler.run {
                     if (iSel == -1) {
                         onClick(index)
                         return@run
@@ -63,7 +63,7 @@ class MarkerAdapter(private val model: MarkersModel) :
             this.index = index
             tvTitle.text = data[index].title
             tvDes?.text = data[index].des
-            if (index == model.iSel)
+            if (index == toiler.iSel)
                 item_bg.setBackgroundResource(R.drawable.select_item_bg)
             else
                 item_bg.setBackgroundResource(R.drawable.item_bg)

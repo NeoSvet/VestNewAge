@@ -13,11 +13,11 @@ import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
-import ru.neosvet.vestnewage.model.SiteModel
-import ru.neosvet.vestnewage.model.basic.LongState
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
@@ -39,8 +39,8 @@ class SiteFragment : NeoFragment() {
         }
     }
 
-    private val model: SiteModel
-        get() = neomodel as SiteModel
+    private val toiler: SiteToiler
+        get() = neotoiler as SiteToiler
     private val adMain: ListAdapter by lazy {
         ListAdapter(requireContext())
     }
@@ -62,8 +62,8 @@ class SiteFragment : NeoFragment() {
         binding = it
     }.root
 
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SiteModel::class.java)
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(SiteToiler::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         act?.fab = binding?.fabRefresh
@@ -111,12 +111,12 @@ class SiteFragment : NeoFragment() {
                 ads.index = indexAds
         } else {
             arguments?.let {
-                model.selectedTab = it.getInt(Const.TAB)
+                toiler.selectedTab = it.getInt(Const.TAB)
             }
-            when (model.selectedTab) {
-                SiteModel.TAB_NEWS -> model.openList(true)
-                SiteModel.TAB_SITE -> act?.tabLayout?.select(model.selectedTab)
-                SiteModel.TAB_DEV -> model.openAds()
+            when (toiler.selectedTab) {
+                SiteToiler.TAB_NEWS -> toiler.openList(true)
+                SiteToiler.TAB_SITE -> act?.tabLayout?.select(toiler.selectedTab)
+                SiteToiler.TAB_DEV -> toiler.openAds()
             }
         }
     }
@@ -124,11 +124,11 @@ class SiteFragment : NeoFragment() {
     private fun initTabs() = act?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.news))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.site))
-        if (model.selectedTab == SiteModel.TAB_SITE)
-            tabLayout.select(model.selectedTab)
+        if (toiler.selectedTab == SiteToiler.TAB_SITE)
+            tabLayout.select(toiler.selectedTab)
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
-                if (model.isDevTab)
+                if (toiler.isDevTab)
                     onTabSelected(tab)
             }
 
@@ -136,8 +136,8 @@ class SiteFragment : NeoFragment() {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                model.selectedTab = tab.position
-                model.openList(true)
+                toiler.selectedTab = tab.position
+                toiler.openList(true)
             }
         })
     }
@@ -147,7 +147,7 @@ class SiteFragment : NeoFragment() {
         fabRefresh.setOnClickListener { startLoad() }
         lvMain.adapter = adMain
         lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
-            if (model.isRun) return@OnItemClickListener
+            if (toiler.isRun) return@OnItemClickListener
             if (isAds(pos)) return@OnItemClickListener
             if (adMain.getItem(pos).hasFewLinks())
                 openMultiLink(adMain.getItem(pos), view)
@@ -214,7 +214,7 @@ class SiteFragment : NeoFragment() {
 
     private fun openSingleLink(link: String) {
         if (link == "#" || link == "@") return
-        if (model.isSiteTab) {
+        if (toiler.isSiteTab) {
             if (link.contains("rss"))
                 act?.setFragment(R.id.nav_rss, true)
             else if (link.contains("poems"))
@@ -230,9 +230,9 @@ class SiteFragment : NeoFragment() {
 
     private fun isAds(pos: Int): Boolean {
         binding?.run {
-            if (model.isDevTab) {
+            if (toiler.isDevTab) {
                 if (pos == 0) { //back
-                    act?.tabLayout?.select(SiteModel.TAB_NEWS)
+                    act?.tabLayout?.select(SiteToiler.TAB_NEWS)
                     return true
                 }
                 ads.index = pos
@@ -245,9 +245,9 @@ class SiteFragment : NeoFragment() {
                 adMain.notifyDataSetChanged()
                 return true
             }
-            if (model.isNewsTab && pos == 0) {
-                model.selectedTab = SiteModel.TAB_DEV
-                model.openAds()
+            if (toiler.isNewsTab && pos == 0) {
+                toiler.selectedTab = SiteToiler.TAB_DEV
+                toiler.openAds()
                 return true
             }
         }
@@ -276,7 +276,7 @@ class SiteFragment : NeoFragment() {
                     }
                     tvEmptySite.isVisible = state.list.isEmpty()
                 }
-                if (model.isDevTab && ads.index > -1) {
+                if (toiler.isDevTab && ads.index > -1) {
                     ads.showAd(
                         adMain.getItem(ads.index).title,
                         adMain.getItem(ads.index).link,

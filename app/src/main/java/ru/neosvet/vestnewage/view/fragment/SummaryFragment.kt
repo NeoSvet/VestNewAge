@@ -11,10 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
-import ru.neosvet.vestnewage.model.SummaryModel
-import ru.neosvet.vestnewage.model.basic.NeoState
-import ru.neosvet.vestnewage.model.basic.NeoViewModel
-import ru.neosvet.vestnewage.model.basic.SuccessList
+import ru.neosvet.vestnewage.viewmodel.SummaryToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -26,14 +26,14 @@ class SummaryFragment : NeoFragment() {
     private val adSummary: ListAdapter by lazy {
         ListAdapter(requireContext())
     }
-    private val model: SummaryModel
-        get() = neomodel as SummaryModel
+    private val toiler: SummaryToiler
+        get() = neotoiler as SummaryToiler
     override val title: String
         get() = getString(R.string.rss)
     private var openedReader = false
 
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(SummaryModel::class.java).apply { init(requireContext()) }
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(SummaryToiler::class.java).apply { init(requireContext()) }
 
     override fun onDestroyView() {
         binding = null
@@ -68,7 +68,7 @@ class SummaryFragment : NeoFragment() {
 
     private fun restoreState(state: Bundle?) {
         if (state != null) {
-            model.openList(false)
+            toiler.openList(false)
             return
         }
         val f = Lib.getFile(Const.RSS)
@@ -77,7 +77,7 @@ class SummaryFragment : NeoFragment() {
                 val time = f.lastModified() / DateUnit.SEC_IN_MILLS
                 binding?.fabRefresh?.isVisible = !status.checkTime(time)
             }
-            model.openList(true)
+            toiler.openList(true)
         } else
             startLoad()
     }
@@ -88,7 +88,7 @@ class SummaryFragment : NeoFragment() {
         act?.fab = fabRefresh
         fabRefresh.setOnClickListener { startLoad() }
         lvSummary.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
-            if (model.isRun) return@OnItemClickListener
+            if (toiler.isRun) return@OnItemClickListener
             openedReader = true
             openReader(adSummary.getItem(pos).link, null)
         }

@@ -5,7 +5,7 @@ import android.database.Cursor;
 import java.io.File;
 
 import ru.neosvet.vestnewage.data.DateUnit;
-import ru.neosvet.vestnewage.model.SiteModel;
+import ru.neosvet.vestnewage.viewmodel.SiteToiler;
 import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class ListsUtils {
@@ -25,13 +25,13 @@ public class ListsUtils {
     }
 
     public boolean siteIsOld() {
-        File file = Lib.getFile(SiteModel.MAIN);
+        File file = Lib.getFile(SiteToiler.MAIN);
         if (!file.exists())
             return true;
         long time = file.lastModified() / DateUnit.SEC_IN_MILLS;
         if (timeNow - time > DateUnit.DAY_IN_SEC)
             return true;
-        file = Lib.getFile(SiteModel.NEWS);
+        file = Lib.getFile(SiteToiler.NEWS);
         if (!file.exists())
             return true;
         time = file.lastModified() / DateUnit.SEC_IN_MILLS;

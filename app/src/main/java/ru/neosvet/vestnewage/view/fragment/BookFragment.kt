@@ -20,8 +20,8 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.model.BookModel
-import ru.neosvet.vestnewage.model.basic.*
+import ru.neosvet.vestnewage.viewmodel.BookToiler
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -61,12 +61,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private var y = 0
     private lateinit var menuRnd: Tip
     private var binding: BookFragmentBinding? = null
-    private val model: BookModel
-        get() = neomodel as BookModel
+    private val toiler: BookToiler
+        get() = neotoiler as BookToiler
     private var dialog: String? = ""
     private var notClick = false
     private val helper: BookHelper
-        get() = model.helper!!
+        get() = toiler.helper!!
     val hTimer = Handler {
         binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
         false
@@ -83,8 +83,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         binding = it
     }.root
 
-    override fun initViewModel(): NeoViewModel =
-        ViewModelProvider(this).get(BookModel::class.java)
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(BookToiler::class.java)
 
     override fun onDestroyView() {
         binding = null
@@ -92,10 +92,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (model.helper == null) {
-            model.init(requireContext())
+        if (toiler.helper == null) {
+            toiler.init(requireContext())
             arguments?.let {
-                model.selectedTab = it.getInt(Const.TAB)
+                toiler.selectedTab = it.getInt(Const.TAB)
                 val year = it.getInt(Const.YEAR)
                 if (year > 0) {
                     val d = DateUnit.initToday()
@@ -127,14 +127,14 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state != null && model.isRun.not()) {
+        if (state != null && toiler.isRun.not()) {
             state.getString(Const.DIALOG)?.let {
                 if (it.contains(DIALOG_DATE)) {
                     if (it != DIALOG_DATE) {
                         val d = DateUnit.parse(it.substring(DIALOG_DATE.length))
                         showDatePicker(d)
                     } else
-                        showDatePicker(model.date)
+                        showDatePicker(toiler.date)
                 } else if (it.length > 1) {
                     dialog = it
                     val m = it.split(Const.AND).toTypedArray()
@@ -142,14 +142,14 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 }
             }
         }
-        act?.tabLayout?.select(model.selectedTab)
+        act?.tabLayout?.select(toiler.selectedTab)
     }
 
     private fun initTabs() = act?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.katreny))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.poslaniya))
-        if (model.isKatrenTab.not())
-            tabLayout.select(model.selectedTab)
+        if (toiler.isKatrenTab.not())
+            tabLayout.select(toiler.selectedTab)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
@@ -159,9 +159,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                model.cancel()
-                model.selectedTab = tab.position
-                model.openList(true)
+                toiler.cancel()
+                toiler.selectedTab = tab.position
+                toiler.openList(true)
             }
         })
     }
@@ -197,15 +197,15 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         menuRnd = Tip(requireContext(), pRnd)
         bRndStih.setOnClickListener {
             menuRnd.hide()
-            model.getRnd(BookModel.RndType.STIH)
+            toiler.getRnd(BookToiler.RndType.STIH)
         }
         bRndPos.setOnClickListener {
             menuRnd.hide()
-            model.getRnd(BookModel.RndType.POS)
+            toiler.getRnd(BookToiler.RndType.POS)
         }
         bRndKat.setOnClickListener {
             menuRnd.hide()
-            model.getRnd(BookModel.RndType.KAT)
+            toiler.getRnd(BookToiler.RndType.KAT)
         }
         anMin = AnimationUtils.loadAnimation(act, R.anim.minimize)
         anMin.setAnimationListener(object : Animation.AnimationListener {
@@ -224,7 +224,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         lvBook.onItemClickListener =
             OnItemClickListener { _, _, pos: Int, _ ->
                 if (notClick) return@OnItemClickListener
-                if (model.isRun) return@OnItemClickListener
+                if (toiler.isRun) return@OnItemClickListener
                 openedReader = true
                 openReader(adBook.getItem(pos).link, null)
             }
@@ -272,7 +272,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
         ivPrev.setOnClickListener { openMonth(false) }
         ivNext.setOnClickListener { openMonth(true) }
-        tvDate.setOnClickListener { showDatePicker(model.date) }
+        tvDate.setOnClickListener { showDatePicker(toiler.date) }
         fabRndMenu.setOnClickListener {
             if (menuRnd.isShow) menuRnd.hide()
             else menuRnd.show()
@@ -280,8 +280,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun openMonth(plus: Boolean) {
-        val d = model.date
-        if (!plus && model.isKatrenTab.not()) {
+        val d = toiler.date
+        if (!plus && toiler.isKatrenTab.not()) {
             if (d.month == 1 && d.year == 2016 && helper.isLoadedOtkr().not()) {
                 showAlertDownloadOtkr()
                 return
@@ -290,7 +290,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         if (plus) d.changeMonth(1)
         else d.changeMonth(-1)
         blinkDate()
-        model.openList(true)
+        toiler.openList(true)
     }
 
     private fun blinkDate() {
@@ -345,7 +345,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         dialog = DIALOG_DATE + d
         dateDialog = DateDialog(act, d).apply {
             setResult(this@BookFragment)
-            if (model.isKatrenTab) {
+            if (toiler.isKatrenTab) {
                 setMinMonth(2) //feb
             } else { //poslyania
                 if (helper.isLoadedOtkr()) {
@@ -363,8 +363,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         dialog = ""
         if (date == null) //cancel
             return
-        model.date = date
-        model.openList(true)
+        toiler.date = date
+        toiler.openList(true)
     }
 
     private fun showRndAlert(title: String, link: String, msg: String, place: String, par: Int) {

@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.model.basic
+package ru.neosvet.vestnewage.viewmodel.basic
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -7,7 +7,7 @@ import androidx.work.Data
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.utils.ErrorUtils
 
-abstract class NeoViewModel : ViewModel() {
+abstract class NeoToiler : ViewModel() {
     protected val mstate = MutableLiveData<NeoState>()
     val state: LiveData<NeoState>
         get() = mstate
