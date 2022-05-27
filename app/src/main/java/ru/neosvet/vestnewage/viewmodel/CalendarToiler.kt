@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import androidx.work.Data
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
@@ -14,10 +15,7 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
+import ru.neosvet.vestnewage.viewmodel.basic.*
 
 class CalendarToiler : NeoToiler() {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
@@ -46,6 +44,7 @@ class CalendarToiler : NeoToiler() {
         .build()
 
     override suspend fun doLoad() { //loadFromSite
+        loadIfNeed = false
         if (date.year < 2016) {
             mstate.postValue(Ready)
             return
@@ -68,6 +67,8 @@ class CalendarToiler : NeoToiler() {
             mstate.postValue(ProgressState(cur.percent(pages.size)))
         }
         loader.finish()
+        isRun = false
+        mstate.postValue(Success)
     }
 
     private fun loadMonth(): List<String> {
@@ -95,9 +96,7 @@ class CalendarToiler : NeoToiler() {
     }
 
     fun openCalendar(offsetMonth: Int) {
-        if (isRun) return
         loadIfNeed = true
-        isRun = true
         scope.launch {
             if (offsetMonth != 0)
                 date.changeMonth(offsetMonth)
@@ -107,9 +106,11 @@ class CalendarToiler : NeoToiler() {
             }
             if (loadFromStorage())
                 mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
-            else
+            else {
+                delay(50) //for create field
+                isRun = true
                 reLoad()
-            isRun = false
+            }
         }
     }
 
@@ -196,10 +197,8 @@ class CalendarToiler : NeoToiler() {
         }
         cursor.close()
         storage.close()
-        if (empty && loadIfNeed) {
-            loadIfNeed = false
+        if (empty && loadIfNeed)
             return false
-        }
         return true
     }
 

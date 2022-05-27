@@ -15,11 +15,6 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.viewmodel.CalendarToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
@@ -27,6 +22,11 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
 import ru.neosvet.vestnewage.view.list.CalendarAdapter.Clicker
+import ru.neosvet.vestnewage.viewmodel.CalendarToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
 import java.util.*
 
 class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
@@ -203,7 +203,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onChangedState(state: NeoState) {
-        setStatus(false)
+        if (toiler.isRun.not())
+            setStatus(false)
         if (state is SuccessCalendar) binding?.run {
             act?.updateNew()
             tvDate.text = state.date
