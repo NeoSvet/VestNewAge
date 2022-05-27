@@ -5,9 +5,10 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
+import java.util.*
 
 /**
  * Created by NeoSvet on 23.03.2022.
@@ -46,29 +47,28 @@ class JournalStorage {
     suspend fun getList(offset: Int, strings: JournalStrings): List<ListItem> {
         val list = mutableListOf<ListItem>()
         val curJ = getAll()
-        if (!curJ.moveToFirst()) {
+        if (!curJ.moveToFirst() || offset > curJ.count) {
             curJ.close()
             return list
         }
+        if (offset > 0) curJ.moveToPosition(offset)
+        val removeList = LinkedList<String>()
         val storage = PageStorage()
         var cursor: Cursor
         val iTime = curJ.getColumnIndex(Const.TIME)
         val iID = curJ.getColumnIndex(DataBase.ID)
         var i = 0
         var s: String
-        var id: Array<String>
-        var item: ListItem
         val now = DateUnit.initNow()
-        if (offset > 0) curJ.moveToPosition(offset)
         do {
-            id = curJ.getString(iID).split(Const.AND).toTypedArray()
+            val id = curJ.getString(iID).split(Const.AND)
             storage.open(id[0])
             cursor = storage.getPageById(id[1])
             if (cursor.moveToFirst()) {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 s = cursor.getString(iLink)
-                item = ListItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
+                val item = ListItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
                 val t = curJ.getLong(iTime)
                 val d = DateUnit.putMills(t)
                 item.des = String.format(
@@ -95,12 +95,15 @@ class JournalStorage {
                 list.add(item)
                 i++
             } else { //материал отсутствует в базе - удаляем запись о нём из журнала
-                delete(curJ.getString(iID))
+                removeList.add(curJ.getString(iID))
             }
             cursor.close()
             storage.close()
         } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE)
         curJ.close()
+        removeList.forEach {
+            delete(it)
+        }
         return list
     }
 }
