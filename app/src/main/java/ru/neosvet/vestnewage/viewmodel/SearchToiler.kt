@@ -4,11 +4,8 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.work.Data
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -22,12 +19,12 @@ import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
-import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.util.*
 
-class SearchToiler : NeoToiler(), FactoryEvents {
+class SearchToiler : NeoToiler(), NeoPaging.Parent {
     companion object {
         private const val MODE_POSLANIYA = 0
         private const val MODE_KATRENY = 1
@@ -39,9 +36,12 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         const val MODE_RESULTS = 6
     }
 
-    private val factory: SearchFactory by lazy {
-        SearchFactory(storage, this)
+    private val paging = NeoPaging(this)
+    override val factory: SearchFactory by lazy {
+        SearchFactory(storage, paging)
     }
+    val isLoading: Boolean
+        get() = paging.isPaging
     private var isInit = false
     private lateinit var strings: SearchStrings
     private val storage = SearchStorage()
@@ -50,8 +50,6 @@ class SearchToiler : NeoToiler(), FactoryEvents {
     private var labelMode = ""
     private var mode: Int = -1
     lateinit var helper: SearchHelper
-        private set
-    var loading = false
         private set
     var shownResult = false
         private set
@@ -75,14 +73,6 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         )
         isInit = true
     }
-
-    fun paging() = Pager(
-        config = PagingConfig(
-            pageSize = Const.MAX_ON_PAGE,
-            prefetchDistance = 3
-        ),
-        pagingSourceFactory = { factory }
-    ).flow
 
     override suspend fun doLoad() {
         loadDate?.let { date ->
@@ -414,19 +404,6 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         return id
     }
 
-    override fun startLoad() {
-        loading = true
-    }
-
-    override fun finishLoad() {
-        if (isRun) return
-        viewModelScope.launch {
-            delay(300)
-            mstate.postValue(Ready)
-            loading = false
-        }
-    }
-
     fun loadMonth(date: String) { //MM.yy
         loadDate = date
         if (checkConnect())
@@ -493,5 +470,14 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         val month = date.substring(0, 2).toInt()
         val year = date.substring(3).toInt() + 2000
         return DateUnit.putYearMonth(year, month)
+    }
+
+    fun paging() = paging.run()
+
+    override val pagingScope: CoroutineScope
+        get() = scope
+
+    override fun postFinish() {
+        mstate.postValue(Ready)
     }
 }

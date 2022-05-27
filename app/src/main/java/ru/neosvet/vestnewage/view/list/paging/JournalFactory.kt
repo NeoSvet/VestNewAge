@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.utils.Const
 class JournalFactory(
     private val storage: JournalStorage,
     private val strings: JournalStrings,
-    private val events: FactoryEvents
+    private val parent: NeoPaging
 ) : PagingSource<Int, ListItem>() {
     var total = 0
     var offset = 0
@@ -23,10 +23,10 @@ class JournalFactory(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ListItem> {
         val position = params.key ?: offset
         offset = position
-        events.startLoad()
+        parent.startPaging()
         val list = storage.getList(position, strings)
         val next = position + Const.MAX_ON_PAGE
-        events.finishLoad()
+        parent.finishPaging()
         return LoadResult.Page(
             data = list,
             prevKey = if (position == 0) null else position - Const.MAX_ON_PAGE,

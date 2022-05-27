@@ -5,34 +5,33 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.storage.JournalStorage
+import ru.neosvet.vestnewage.view.list.paging.JournalFactory
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.Success
-import ru.neosvet.vestnewage.storage.JournalStorage
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
-import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 
-class JournalToiler : ViewModel(), FactoryEvents {
+class JournalToiler : ViewModel(), NeoPaging.Parent {
     private val mstate = MutableLiveData<NeoState>()
     val state: LiveData<NeoState>
         get() = mstate
     private val journal = JournalStorage()
     private lateinit var strings: JournalStrings
-    private val factory: JournalFactory by lazy {
-        JournalFactory(journal, strings, this)
+    private val paging = NeoPaging(this)
+    override val factory: JournalFactory by lazy {
+        JournalFactory(journal, strings, paging)
     }
-    var loading = false
-        private set
+    val isLoading: Boolean
+        get() = paging.isPaging
     val offset: Int
         get() = factory.offset
     private var isInit = false
+    override val isRun: Boolean = false
 
     fun init(context: Context) {
         if (isInit) return
@@ -60,29 +59,17 @@ class JournalToiler : ViewModel(), FactoryEvents {
             cursor.close()
         }
     }
-
-    fun paging() = Pager(
-        config = PagingConfig(
-            pageSize = Const.MAX_ON_PAGE,
-            prefetchDistance = 3
-        ),
-        pagingSourceFactory = { factory }
-    ).flow
-
     fun clear() {
         journal.clear()
         journal.close()
     }
 
-    override fun startLoad() {
-        loading = true
-    }
+    fun paging() = paging.run()
 
-    override fun finishLoad() {
-        viewModelScope.launch {
-            delay(300)
-            mstate.postValue(Success)
-            loading = false
-        }
+    override val pagingScope: CoroutineScope
+        get() = viewModelScope
+
+    override fun postFinish() {
+        mstate.postValue(Success)
     }
 }

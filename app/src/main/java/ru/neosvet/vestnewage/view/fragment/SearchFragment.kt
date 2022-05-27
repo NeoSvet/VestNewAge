@@ -470,7 +470,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
 
     private fun finishedList() {
         if (toiler.isRun) return
-        binding?.tvFinish?.text = if (toiler.loading)
+        binding?.tvFinish?.text = if (toiler.isLoading)
             getString(R.string.load)
         else getString(R.string.finish_list)
         tip.show()

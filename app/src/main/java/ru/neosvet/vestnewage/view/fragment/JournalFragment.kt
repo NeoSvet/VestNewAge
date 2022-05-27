@@ -21,10 +21,6 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.JournalFragmentBinding
-import ru.neosvet.vestnewage.viewmodel.JournalToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -33,6 +29,10 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
+import ru.neosvet.vestnewage.viewmodel.JournalToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 class JournalFragment : Fragment(), Observer<NeoState> {
     private val toiler: JournalToiler by lazy {
@@ -152,7 +152,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     }
 
     private fun finishedList() {
-        binding?.tvFinish?.text = if (toiler.loading)
+        binding?.tvFinish?.text = if (toiler.isLoading)
             getString(R.string.load)
         else getString(R.string.finish_list)
         tip.show()
