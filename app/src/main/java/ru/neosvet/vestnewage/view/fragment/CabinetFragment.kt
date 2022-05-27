@@ -69,7 +69,7 @@ class CabinetFragment : NeoFragment() {
             }
             is SuccessList -> {
                 binding?.run {
-                    if (toiler.type == CabinetToiler.Type.LOGIN) {
+                    if (toiler.screen == CabinetToiler.Screen.LOGIN) {
                         login.root.isVisible = true
                         fabEnter.isVisible = true
                         fabExit.isVisible = false
@@ -87,7 +87,7 @@ class CabinetFragment : NeoFragment() {
     }
 
     private fun initLayoutManager() {
-        val span = if (toiler.type == CabinetToiler.Type.WORDS)
+        val span = if (toiler.screen == CabinetToiler.Screen.WORDS)
             ScreenUtils.span
         else 1 //CABINET
         binding?.rvList?.layoutManager = GridLayoutManager(requireContext(), span)
@@ -185,8 +185,8 @@ class CabinetFragment : NeoFragment() {
 
     private fun onItemClick(index: Int, item: ListItem) {
         if (toiler.isRun) return
-        when (toiler.type) {
-            CabinetToiler.Type.LOGIN -> {
+        when (toiler.screen) {
+            CabinetToiler.Screen.LOGIN -> {
                 val s = when (index) {
                     0 -> {
                         Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
@@ -200,7 +200,7 @@ class CabinetFragment : NeoFragment() {
                 }
                 CabinetActivity.openPage(s)
             }
-            CabinetToiler.Type.CABINET -> {
+            CabinetToiler.Screen.CABINET -> {
                 when (index) {
                     0 -> if (item.des == getString(R.string.select_status)) {
                         setStatus(true)
@@ -210,7 +210,7 @@ class CabinetFragment : NeoFragment() {
                     2 -> CabinetActivity.openPage("edinenie/edinomyshlenniki.html")
                 }
             }
-            CabinetToiler.Type.WORDS -> {
+            CabinetToiler.Screen.WORDS -> {
                 setStatus(true)
                 toiler.selectWord(index, item.title)
             }

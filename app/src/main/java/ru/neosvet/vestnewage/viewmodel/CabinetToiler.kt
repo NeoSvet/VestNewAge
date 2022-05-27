@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import android.os.Build
 import androidx.work.Data
-import kotlinx.coroutines.launch
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -12,13 +11,13 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.CabinetHelper
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.UnsafeClient
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
 import ru.neosvet.vestnewage.viewmodel.basic.MessageState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
-import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.UnsafeClient
-import ru.neosvet.vestnewage.utils.Const
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -29,14 +28,22 @@ class CabinetToiler : NeoToiler() {
         private const val SELECTED = "selected>"
     }
 
-    enum class Type {
+    sealed class Action {
+        data class Login(val email: String, val password: String) : Action()
+        data class Word(val index: Int, val word: String) : Action()
+        object Anketa : Action()
+        object None : Action()
+    }
+
+    enum class Screen {
         LOGIN, CABINET, WORDS
     }
 
-    var type: Type = Type.LOGIN
+    var screen: Screen = Screen.LOGIN
         private set
     lateinit var helper: CabinetHelper
         private set
+    private var action: Action = Action.None
     private lateinit var strings: CabinetStrings
     private val wordList: MutableList<ListItem> by lazy { mutableListOf() }
     private val loginList = mutableListOf<ListItem>()
@@ -70,53 +77,54 @@ class CabinetToiler : NeoToiler() {
     }
 
     override suspend fun doLoad() {
+        when (val a = action) {
+            is Action.Login ->
+                doLogin(a.email, a.password)
+            Action.Anketa ->
+                loadAnketa(true)
+            is Action.Word ->
+                sendWord(a.index, a.word)
+        }
+        action = Action.None
     }
 
-    override fun onDestroy() {
+    override fun getInputData(): Data {
+        val m = if (action is Action.Login)
+            "Login" else action.toString()
+        return Data.Builder()
+            .putString(Const.TASK, CabinetHelper.TAG)
+            .putString(Const.LIST, screen.toString())
+            .putString(Const.MODE, m)
+            .build()
     }
-
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, CabinetHelper.TAG)
-        .putString(Const.MODE, type.toString())
-        .putString(Const.EMAIL, helper.email)
-        .build()
 
     fun login(email: String, password: String) {
-        isRun = true
-        scope.launch {
-            helper.email = email
-            doLogin(email, password)
-            isRun = false
-        }
+        action = Action.Login(email, password)
+        load()
     }
 
     fun getListWord() {
-        isRun = true
-        scope.launch {
-            loadAnketa(true)
-            isRun = false
-        }
+        action = Action.Anketa
+        load()
     }
 
     fun selectWord(index: Int, word: String) {
-        isRun = true
-        scope.launch {
-            sendWord(index, word)
-            isRun = false
-        }
+        action = Action.Word(index, word)
+        load()
     }
 
     fun loginScreen() {
-        type = Type.LOGIN
+        screen = Screen.LOGIN
         mstate.postValue(SuccessList(loginList))
     }
 
     private fun cabinetScreen() {
-        type = Type.CABINET
+        screen = Screen.CABINET
         mstate.postValue(SuccessList(cabinetList))
     }
 
     private fun doLogin(email: String, password: String) {
+        helper.email = email
         var request: Request = Request.Builder()
             .url(NeoClient.CAB_SITE)
             .addHeader(NeoClient.USER_AGENT, App.context.packageName)
@@ -222,7 +230,7 @@ class CabinetToiler : NeoToiler() {
         wordList.clear()
         for (i in m)
             wordList.add(ListItem(i))
-        type = Type.WORDS
+        screen = Screen.WORDS
         mstate.postValue(SuccessList(wordList))
     }
 
@@ -261,12 +269,12 @@ class CabinetToiler : NeoToiler() {
     }
 
     fun onBack(): Boolean {
-        when (type) {
-            Type.LOGIN ->
+        when (screen) {
+            Screen.LOGIN ->
                 return true
-            Type.CABINET ->
+            Screen.CABINET ->
                 exit()
-            Type.WORDS -> {
+            Screen.WORDS -> {
                 wordList.clear()
                 cabinetScreen()
             }
@@ -275,12 +283,12 @@ class CabinetToiler : NeoToiler() {
     }
 
     fun restoreScreen() {
-        when (type) {
-            Type.LOGIN ->
+        when (screen) {
+            Screen.LOGIN ->
                 mstate.postValue(SuccessList(loginList))
-            Type.CABINET ->
+            Screen.CABINET ->
                 mstate.postValue(SuccessList(cabinetList))
-            Type.WORDS ->
+            Screen.WORDS ->
                 mstate.postValue(SuccessList(wordList))
         }
     }

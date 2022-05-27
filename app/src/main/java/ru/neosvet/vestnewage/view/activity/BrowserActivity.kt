@@ -20,10 +20,8 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.viewmodel.BrowserToiler
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
+import ru.neosvet.vestnewage.network.ConnectObserver
+import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.PromUtils
@@ -33,10 +31,14 @@ import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
+import ru.neosvet.vestnewage.viewmodel.BrowserToiler
+import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.util.*
 
 class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener, ConnectObserver {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -81,6 +83,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ConnectWatcher.start(this)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -107,6 +110,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     override fun onDestroy() {
+        ConnectWatcher.unSubscribe()
         helper.zoom = (binding.content.wvBrowser.scale * 100.0).toInt()
         helper.save()
         super.onDestroy()
@@ -481,6 +485,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 status.setLoad(true)
                 status.loadText()
             }
+            NeoState.NoConnected -> {
+                finishLoading()
+                ConnectWatcher.subscribe(this)
+                Lib.showToast(getString(R.string.no_connected))
+            }
             is SuccessPage -> {
                 finishLoading()
                 if (state.timeInSeconds > 0)
@@ -502,5 +511,15 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private fun finishLoading() {
         if (status.isVisible)
             status.setLoad(false)
+    }
+
+    override fun connectChanged(connected: Boolean) {
+        if (connected) {
+            this.runOnUiThread {
+                status.setLoad(true)
+                toiler.load()
+            }
+            ConnectWatcher.unSubscribe()
+        }
     }
 }

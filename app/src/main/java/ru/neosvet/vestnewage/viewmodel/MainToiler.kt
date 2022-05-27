@@ -42,10 +42,7 @@ class MainToiler : NeoToiler() {
         loadNew()
     }
 
-    override fun onDestroy() {
-    }
-
-    private fun loadNew() {
+    private suspend fun loadNew() {
         var s = "http://neosvet.ucoz.ru/vna/new.txt"
         val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
         var time: Long
@@ -78,7 +75,7 @@ class MainToiler : NeoToiler() {
             mstate.postValue(SuccessList(list))
     }
 
-    private fun synchronizationTime(): Int {
+    private suspend fun synchronizationTime(): Int {
         val builderRequest = Request.Builder()
         builderRequest.url(NeoClient.SITE)
         builderRequest.header(NeoClient.USER_AGENT, App.context.packageName)

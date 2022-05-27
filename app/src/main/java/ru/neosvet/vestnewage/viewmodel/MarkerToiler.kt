@@ -20,8 +20,8 @@ import ru.neosvet.vestnewage.utils.Const
 
 class MarkerToiler : NeoToiler() {
     enum class Type {
-        NONE, LOAD_PAGE, LOAD_COLS, ADD_COL, NEW_MARKER,
-        LOAD_MARKER, GET_MARKER, ADD_MARKER, UPDATE_MARKER
+        NONE, OPEN_PAGE, OPEN_COLS, ADD_COL, NEW_MARKER,
+        OPEN_MARKER, GET_MARKER, ADD_MARKER, UPDATE_MARKER
     }
 
     private val storage = MarkersStorage()
@@ -55,9 +55,6 @@ class MarkerToiler : NeoToiler() {
         .putString(Const.DESCTRIPTION, helper.toJson())
         .build()
 
-    override suspend fun doLoad() {
-    }
-
     override fun onDestroy() {
         storage.close()
     }
@@ -66,12 +63,12 @@ class MarkerToiler : NeoToiler() {
         link = intent.getStringExtra(Const.LINK) ?: ""
         id = intent.getIntExtra(DataBase.ID, -1)
         scope.launch {
-            helper.title = loadPage(link)
-            loadCols()
+            helper.title = openPage(link)
+            openCols()
             if (id == -1)
                 newMarker(intent)
             else
-                loadMarker(id)
+                openMarker(id)
             mstate.postValue(Success)
         }
     }
@@ -129,8 +126,8 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    private fun loadPage(link: String): String = helper.run { //return title
-        task = Type.LOAD_PAGE
+    private fun openPage(link: String): String = helper.run { //return title
+        task = Type.OPEN_PAGE
         parsList.clear()
         countPar = 5 // имитация нижнего "колонтитула" страницы
         val storage = PageStorage()
@@ -159,8 +156,8 @@ class MarkerToiler : NeoToiler() {
         m[0]
     }
 
-    private fun loadCols() = helper.run {
-        task = Type.LOAD_COLS
+    private fun openCols() = helper.run {
+        task = Type.OPEN_COLS
         colsList.clear()
         val cursor = storage.getCollectionsTitle()
         if (cursor.moveToFirst()) {
@@ -178,13 +175,13 @@ class MarkerToiler : NeoToiler() {
         cursor.close()
     }
 
-    private fun loadMarker(id: Int) {
-        task = Type.LOAD_MARKER
+    private fun openMarker(id: Int) {
+        task = Type.OPEN_MARKER
         var cursor = storage.getMarker(id.toString())
         cursor.moveToFirst()
         val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
         helper.des = cursor.getString(iDes) ?: ""
-        val iPlace = cursor.getColumnIndex(Const.PLACE);
+        val iPlace = cursor.getColumnIndex(Const.PLACE)
         var s = cursor.getString(iPlace) ?: ""
         helper.setPlace(s)
         val iCols = cursor.getColumnIndex(DataBase.COLLECTIONS)
@@ -306,7 +303,6 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    //формулируем список подборок
     private fun getMarkerValues(des: String): ContentValues {
         task = Type.GET_MARKER
         val row = ContentValues()

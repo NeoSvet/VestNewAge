@@ -5,21 +5,25 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.File
 
 class NewToiler : NeoToiler() {
+    enum class Task {
+        NONE, OPEN, CLEAR
+    }
+
     var needOpen: Boolean = true
     private var isInit = false
     private lateinit var ads: AdsUtils
     private lateinit var katren_from: String
-    private var mode: String = "none"
+    private var task: Task = Task.NONE
 
     fun init(act: Activity) {
         if (isInit) return
@@ -35,15 +39,12 @@ class NewToiler : NeoToiler() {
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "New")
-        .putString(Const.MODE, mode)
+        .putString(Const.MODE, task.toString())
         .build()
-
-    override suspend fun doLoad() {
-    }
 
     fun openList() {
         if (needOpen.not()) return
-        mode = "open"
+        task = Task.OPEN
         scope.launch {
             val notifHelper = NotificationUtils()
             notifHelper.cancel(NotificationUtils.NOTIF_SUMMARY)
@@ -89,7 +90,7 @@ class NewToiler : NeoToiler() {
     }
 
     fun clearList() {
-        mode = "clear"
+        task = Task.CLEAR
         scope.launch {
             val unread = UnreadUtils()
             unread.clearList()
@@ -99,6 +100,7 @@ class NewToiler : NeoToiler() {
     }
 
     fun openAd(item: ListItem, pos: Int) {
+        task = Task.NONE
         ads.index = pos
         showAd(item)
     }

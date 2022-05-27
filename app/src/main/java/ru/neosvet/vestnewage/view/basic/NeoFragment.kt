@@ -6,13 +6,13 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
 
 abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     @JvmField
@@ -45,6 +45,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
 
     override fun onDestroyView() {
+        ConnectWatcher.unSubscribe()
         act = null
         super.onDestroyView()
     }
@@ -65,6 +66,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
                 act?.status?.setProgress(state.percent)
             NeoState.Loading ->
                 setStatus(true)
+            NeoState.NoConnected ->
+                noConnected()
             is NeoState.Error -> {
                 act?.status?.setError(state.throwable.localizedMessage)
                 setStatus(false)
@@ -77,16 +80,24 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     open fun startLoad() {
         if (neotoiler.isRun) return
         if (ConnectWatcher.connected.not()) {
-            ConnectWatcher.subscribe(this)
-            Lib.showToast(getString(R.string.no_connected))
+            noConnected()
             return
         }
         neotoiler.load()
     }
 
+    private fun noConnected() {
+        ConnectWatcher.subscribe(this)
+        Lib.showToast(getString(R.string.no_connected))
+        setStatus(false)
+    }
+
     override fun connectChanged(connected: Boolean) {
         if (connected) {
-            startLoad()
+            act?.runOnUiThread {
+                setStatus(true)
+                neotoiler.load()
+            }
             ConnectWatcher.unSubscribe()
         }
     }

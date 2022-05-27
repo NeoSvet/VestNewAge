@@ -33,8 +33,7 @@ class MarkersToiler : NeoToiler() {
     private var sCol: String? = null
     var diName: String? = null
     private lateinit var strings: MarkersStrings
-    var task: Type = Type.NONE
-        private set
+    private var task: Type = Type.NONE
     val list = mutableListOf<MarkerItem>()
     val title: String
         get() = if (sCol == null) strings.collections
@@ -70,7 +69,8 @@ class MarkersToiler : NeoToiler() {
             task = Type.PAGE
             val loader = PageLoader()
             loader.download(link, true)
-            loadList()
+            page = null
+            openList()
         }
     }
 
@@ -136,7 +136,7 @@ class MarkersToiler : NeoToiler() {
         load()
     }
 
-    fun loadColList() {
+    fun openColList() {
         task = Type.LIST
         sCol = null
         scope.launch {
@@ -169,7 +169,7 @@ class MarkersToiler : NeoToiler() {
         }
     }
 
-    private fun loadMarList(iCol: Int = -1) {
+    private fun openMarList(iCol: Int = -1) {
         task = Type.LIST
         if (iCol > -1)
             sCol = list[iCol].title + Const.N + list[iCol].data
@@ -312,16 +312,16 @@ class MarkersToiler : NeoToiler() {
     fun onBack(): Boolean {
         if (iSel > -1) {
             iSel = -1
-            loadList()
+            openList()
             return false
         }
         return true
     }
 
-    fun loadList() {
+    fun openList() {
         iSel = -1
-        if (sCol == null) loadColList()
-        else loadMarList()
+        if (sCol == null) openColList()
+        else openMarList()
     }
 
     fun canEdit(): Boolean {
@@ -363,7 +363,7 @@ class MarkersToiler : NeoToiler() {
             Const.N + cursor.getString(0) //список закладок в подборке
         else Const.N
         cursor.close()
-        loadMarList()
+        openMarList()
     }
 
     fun moveToTop() {
@@ -636,7 +636,7 @@ class MarkersToiler : NeoToiler() {
         if (isRun) return
         when {
             isCollections ->
-                loadMarList(index)
+                openMarList(index)
             list[index].title.contains("/") ->
                 loadPage(index)
             else ->

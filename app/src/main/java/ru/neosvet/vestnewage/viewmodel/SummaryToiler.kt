@@ -9,12 +9,12 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.FileReader
 
@@ -49,9 +49,6 @@ class SummaryToiler : NeoToiler() {
         loader.finish()
     }
 
-    override fun onDestroy() {
-    }
-
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, SummaryHelper.TAG)
         .build()
@@ -60,7 +57,10 @@ class SummaryToiler : NeoToiler() {
         this.loadIfNeed = loadIfNeed
         scope.launch {
             val list = openList()
-            mstate.postValue(SuccessList(list))
+            if (loadIfNeed && list.isEmpty())
+                reLoad()
+            else
+                mstate.postValue(SuccessList(list))
         }
     }
 

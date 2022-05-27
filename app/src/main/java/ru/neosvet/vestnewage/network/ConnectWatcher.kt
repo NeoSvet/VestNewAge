@@ -9,8 +9,11 @@ object ConnectWatcher : ConnectivityManager.NetworkCallback() {
     var connected = false
         private set
     var observer: ConnectObserver? = null
+    private var isRun = false
 
     fun start(context: Context) {
+        if (isRun) return
+        isRun = true
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val request = NetworkRequest.Builder().build()
@@ -18,6 +21,8 @@ object ConnectWatcher : ConnectivityManager.NetworkCallback() {
     }
 
     fun stop(context: Context) {
+        if(isRun.not()) return
+        isRun = false
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.unregisterNetworkCallback(this)

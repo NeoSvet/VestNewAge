@@ -17,7 +17,6 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -25,6 +24,7 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.FactoryEvents
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.util.*
 
 class SearchToiler : NeoToiler(), FactoryEvents {
@@ -55,6 +55,8 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         private set
     var shownResult = false
         private set
+    private var loadDate: String? = null
+    private var loadLink: String? = null
     private val locale = Locale.forLanguageTag("ru")
 
     fun init(context: Context) {
@@ -83,6 +85,39 @@ class SearchToiler : NeoToiler(), FactoryEvents {
     ).flow
 
     override suspend fun doLoad() {
+        loadDate?.let { date ->
+            val d = dateFromString(date)
+            mstate.postValue(
+                MessageState(
+                    String.format(strings.format_load, d.monthString + " " + d.year)
+                )
+            )
+            val loader = CalendarLoader()
+            loader.setDate(d.year, d.month)
+            loader.loadListMonth(false)
+            val links = loader.getLinkList()
+            val pageLoader = PageLoader()
+            storage.deleteByLink(date)
+            for (link in links) {
+                pageLoader.download(link, false)
+                if (isRun.not()) break
+            }
+            pageLoader.finish()
+            searchList(date)
+            notifyResult()
+            loadDate = null
+        }
+        loadLink?.let { link ->
+            mstate.postValue(MessageState(String.format(strings.format_load, link)))
+            val id = storage.getIdByLink(link)
+            storage.delete(id.toString())
+            val pageLoader = PageLoader()
+            pageLoader.download(link, true)
+            pageLoader.finish()
+            val item = findInPage(link, id)
+            mstate.postValue(SuccessList(listOf(item)))
+            loadLink = null
+        }
     }
 
     override fun onDestroy() {
@@ -90,12 +125,26 @@ class SearchToiler : NeoToiler(), FactoryEvents {
         storage.close()
     }
 
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, Const.SEARCH)
-        .putString(Const.STRING, helper.request)
-        .putString(Const.START, helper.start.my)
-        .putString(Const.END, helper.end.my)
-        .build()
+    override fun getInputData(): Data {
+        loadDate?.let {
+            return Data.Builder()
+                .putString(Const.TASK, Const.SEARCH)
+                .putString(Const.TIME, it)
+                .build()
+        }
+        loadLink?.let {
+            return Data.Builder()
+                .putString(Const.TASK, Const.SEARCH)
+                .putString(Const.LINK, it)
+                .build()
+        }
+        return Data.Builder()
+            .putString(Const.TASK, Const.SEARCH)
+            .putString(Const.STRING, helper.request)
+            .putString(Const.START, helper.start.my)
+            .putString(Const.END, helper.end.my)
+            .build()
+    }
 
     fun startSearch(request: String, mode: Int) {
         this.mode = mode
@@ -379,44 +428,15 @@ class SearchToiler : NeoToiler(), FactoryEvents {
     }
 
     fun loadMonth(date: String) { //MM.yy
-        scope.launch {
-            isRun = true
-            val d = dateFromString(date)
-            mstate.postValue(
-                MessageState(
-                    String.format(strings.format_load, d.monthString + " " + d.year)
-                )
-            )
-            val loader = CalendarLoader()
-            loader.setDate(d.year, d.month)
-            loader.loadListMonth(false)
-            val links = loader.getLinkList()
-            val pageLoader = PageLoader()
-            storage.deleteByLink(date)
-            for (link in links) {
-                pageLoader.download(link, false)
-                if (isRun.not()) break
-            }
-            pageLoader.finish()
-            searchList(date)
-            isRun = false
-            notifyResult()
-        }
+        loadDate = date
+        if (checkConnect())
+            load()
     }
 
     fun loadPage(link: String) {
-        scope.launch {
-            isRun = true
-            mstate.postValue(MessageState(String.format(strings.format_load, link)))
-            val id = storage.getIdByLink(link)
-            storage.delete(id.toString())
-            val pageLoader = PageLoader()
-            pageLoader.download(link, true)
-            pageLoader.finish()
-            val item = findInPage(link, id)
-            isRun = false
-            mstate.postValue(SuccessList(listOf(item)))
-        }
+        loadLink = link
+        if (checkConnect())
+            load()
     }
 
     private fun findInPage(link: String, id: Int): ListItem {

@@ -12,12 +12,15 @@ import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
+import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -93,9 +96,13 @@ class BrowserToiler : NeoToiler() {
     fun openPage(newPage: Boolean) {
         scope.launch {
             storage.open(link)
+            loadIfNeed = true
+            if (storage.name.contains(".")) {
+                val year = storage.name.substring(3).toInt()
+                if (year < 16) loadIfNeed = false
+            }
             if (storage.existsPage(link).not()) {
-                mstate.postValue(NeoState.Loading)
-                downloadPage(false)
+                reLoad()
                 return@launch
             }
             if (!preparingStyle()) return@launch

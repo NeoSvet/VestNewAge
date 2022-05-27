@@ -94,7 +94,7 @@ class MarkersFragment : NeoFragment() {
 
     private fun restoreState(state: Bundle?) {
         if (state == null) {
-            toiler.loadList()
+            toiler.openList()
             return
         }
         toiler.run {
@@ -148,7 +148,7 @@ class MarkersFragment : NeoFragment() {
             else
                 Lib.showToast(getString(R.string.nothing_edit))
         }
-        fabBack.setOnClickListener { toiler.loadColList() }
+        fabBack.setOnClickListener { toiler.openColList() }
         fabMenu.setOnClickListener {
             if (toiler.isRun) return@setOnClickListener
             if (menu.isShow) menu.hide()
@@ -213,16 +213,15 @@ class MarkersFragment : NeoFragment() {
     override fun setStatus(load: Boolean) {
         if (load)
             binding?.fabBack?.isVisible = false
-        if (toiler.task == MarkersToiler.Type.PAGE) {
-            super.setStatus(load)
-        } else if (toiler.workOnFile) {
+        if (toiler.workOnFile) {
             if (load) {
                 initRotate()
             } else {
                 stopRotate = true
                 binding?.fabMenu?.clearAnimation()
             }
-        }
+        } else
+            super.setStatus(load)
     }
 
     private fun deleteDialog() = toiler.selectedItem?.title?.let { title ->
@@ -332,7 +331,7 @@ class MarkersFragment : NeoFragment() {
             is UpdateList -> updateList(state)
             Ready -> {//import toiler.task==MarkersModel.Type.FILE
                 setStatus(false)
-                toiler.loadColList()
+                toiler.openColList()
                 Lib.showToast(getString(R.string.completed))
             }
 

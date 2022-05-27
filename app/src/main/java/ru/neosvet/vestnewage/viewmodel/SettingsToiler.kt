@@ -4,10 +4,10 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.File
 
 class SettingsToiler : NeoToiler() {
@@ -18,13 +18,9 @@ class SettingsToiler : NeoToiler() {
         .putString(Const.TASK, "Settings.Clear")
         .build()
 
-    override suspend fun doLoad() {
-    }
-
-    override fun onDestroy() {
-    }
-
     fun startClear(request: List<String>) {
+        if (isRun) return
+        isRun = true
         scope.launch {
             size = 0
             var f: File
@@ -70,6 +66,7 @@ class SettingsToiler : NeoToiler() {
                 }
             }
             mstate.postValue(LongState(size))
+            isRun = false
         }
     }
 

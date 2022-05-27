@@ -5,6 +5,7 @@ import ru.neosvet.vestnewage.data.ListItem
 
 sealed class NeoState {
     object Loading : NeoState()
+    object NoConnected : NeoState()
     data class Error(val throwable: Throwable) : NeoState()
 }
 

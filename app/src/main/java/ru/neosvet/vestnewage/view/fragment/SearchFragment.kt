@@ -22,8 +22,6 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
-import ru.neosvet.vestnewage.viewmodel.SearchToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
@@ -36,6 +34,8 @@ import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
+import ru.neosvet.vestnewage.viewmodel.SearchToiler
+import ru.neosvet.vestnewage.viewmodel.basic.*
 
 class SearchFragment : NeoFragment(), DateDialog.Result {
     companion object {
@@ -448,14 +448,10 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
                     helper.request
                 )
             }
-            SearchHelper.Type.LOAD_MONTH -> {
-                setStatus(true)
+            SearchHelper.Type.LOAD_MONTH ->
                 toiler.loadMonth(item.link)
-            }
-            SearchHelper.Type.LOAD_PAGE -> {
-                setStatus(true)
+            SearchHelper.Type.LOAD_PAGE ->
                 toiler.loadPage(item.link)
-            }
         }
     }
 

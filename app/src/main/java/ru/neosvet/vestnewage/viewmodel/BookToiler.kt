@@ -99,13 +99,11 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     @SuppressLint("Range")
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
+        isRun = true
         scope.launch {
-            val d: DateUnit = date
+            val d = date
             if (!existsList(d)) {
-                if (loadIfNeed) {
-                    mstate.postValue(NeoState.Loading)
-                    doLoad()
-                }
+                reLoad()
                 return@launch
             }
             val list = mutableListOf<ListItem>()
@@ -166,14 +164,15 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             } else dModList = d
             cursor.close()
             storage.close()
+            isRun = false
             if (list.isNotEmpty()) {
                 mstate.postValue(SuccessBook(calendar, prev, next, list))
                 return@launch
             }
             val today = DateUnit.initToday()
-            if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year) {
+            if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year)
                 mstate.postValue(MessageState(strings.month_is_empty))
-            } else doLoad()
+            else reLoad()
         }
     }
 

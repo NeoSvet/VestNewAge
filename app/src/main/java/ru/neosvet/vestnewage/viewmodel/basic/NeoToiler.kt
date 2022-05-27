@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.work.Data
 import kotlinx.coroutines.*
+import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.ErrorUtils
 
 abstract class NeoToiler : ViewModel() {
@@ -48,6 +49,7 @@ abstract class NeoToiler : ViewModel() {
 
     fun load() {
         if (isRun) return
+        if (checkConnect().not()) return
         isRun = true
         scope.launch {
             loadIfNeed = false
@@ -57,9 +59,29 @@ abstract class NeoToiler : ViewModel() {
         }
     }
 
-    protected abstract suspend fun doLoad()
+    protected fun checkConnect(): Boolean {
+        if (ConnectWatcher.connected)
+            return true
+        mstate.postValue(NeoState.NoConnected)
+        return false
+    }
 
-    protected abstract fun onDestroy()
+    protected open suspend fun doLoad() {}
+
+    protected suspend fun reLoad() {
+        if (loadIfNeed) {
+            if (checkConnect().not()) {
+                isRun = false
+                return
+            }
+            mstate.postValue(NeoState.Loading)
+            loadIfNeed = false
+            doLoad()
+        }
+        isRun = false
+    }
+
+    protected open fun onDestroy() {}
 
     protected abstract fun getInputData(): Data
 }

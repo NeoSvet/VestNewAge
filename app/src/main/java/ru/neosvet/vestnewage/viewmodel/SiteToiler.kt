@@ -7,14 +7,14 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -83,12 +83,12 @@ class SiteToiler : NeoToiler() {
 
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
-        val f = file
-        if (f.exists().not()) {
-            if (loadIfNeed) load()
-            return
-        }
         scope.launch {
+            val f = file
+            if (f.exists().not()) {
+                reLoad()
+                return@launch
+            }
             val list = mutableListOf<ListItem>()
             val sec = f.lastModified() / DateUnit.SEC_IN_MILLS
             mstate.postValue(LongState(sec))
@@ -134,7 +134,7 @@ class SiteToiler : NeoToiler() {
         }
 
     fun openAds() {
-        loadIfNeed = true
+        loadIfNeed = false
         scope.launch {
             val list = ads.loadList(false)
             list.add(0, getFirstItem())

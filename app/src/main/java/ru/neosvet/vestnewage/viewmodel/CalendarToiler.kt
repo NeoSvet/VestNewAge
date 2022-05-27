@@ -10,11 +10,14 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
 
 class CalendarToiler : NeoToiler() {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
@@ -35,9 +38,6 @@ class CalendarToiler : NeoToiler() {
     private val next: Boolean
         get() = if (date.year == todayY) date.month != todayM else true
 
-    override fun onDestroy() {
-    }
-
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
         .putInt(Const.MONTH, date.month)
@@ -53,7 +53,7 @@ class CalendarToiler : NeoToiler() {
         val list = loadMonth()
         if (loadFromStorage()) {
             mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
-            loadPages(list)
+            if (isRun) loadPages(list)
         }
     }
 
@@ -78,6 +78,7 @@ class CalendarToiler : NeoToiler() {
     }
 
     fun changeDate(newDate: DateUnit) {
+        if (isRun) return
         date = newDate
         createField()
         openCalendar(0)
@@ -93,22 +94,22 @@ class CalendarToiler : NeoToiler() {
         return !f.exists() || System.currentTimeMillis() - f.lastModified() > DateUnit.HOUR_IN_MILLS
     }
 
-    fun openCalendar(offsetMonth: Int, loadIfNeed: Boolean = true) {
-        this.loadIfNeed = loadIfNeed
+    fun openCalendar(offsetMonth: Int) {
+        if (isRun) return
+        loadIfNeed = true
+        isRun = true
         scope.launch {
             if (offsetMonth != 0)
                 date.changeMonth(offsetMonth)
-
             if (calendar.isEmpty() || offsetMonth != 0) {
                 createField()
                 mstate.postValue(SuccessCalendar(date.calendarString, false, false, calendar))
             }
             if (loadFromStorage())
                 mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
-            else {
-                mstate.postValue(NeoState.Loading)
-                doLoad()
-            }
+            else
+                reLoad()
+            isRun = false
         }
     }
 
