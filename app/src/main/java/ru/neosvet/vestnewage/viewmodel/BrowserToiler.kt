@@ -252,15 +252,7 @@ class BrowserToiler : NeoToiler() {
                     row.put(DataBase.ID, id)
                     dbJournal.insert(row)
                 }
-                val cursor = dbJournal.getIds()
-                var i = cursor.count
-                cursor.moveToFirst()
-                while (i > 100) {
-                    dbJournal.delete(cursor.getString(0))
-                    cursor.moveToNext()
-                    i--
-                }
-                cursor.close()
+                dbJournal.checkLimit()
                 dbJournal.close()
             } catch (e: Exception) {
                 dbJournal.close()

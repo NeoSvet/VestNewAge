@@ -15,6 +15,10 @@ import java.util.*
  */
 
 class JournalStorage {
+    companion object {
+        private const val LIMIT = 100
+    }
+
     private val db = DataBase(DataBase.JOURNAL)
 
     fun update(id: String, row: ContentValues): Boolean =
@@ -105,5 +109,17 @@ class JournalStorage {
             delete(it)
         }
         return list
+    }
+
+    suspend fun checkLimit() {
+        val cursor = getIds()
+        var i = cursor.count
+        cursor.moveToFirst()
+        while (i > LIMIT) {
+            delete(cursor.getString(0))
+            cursor.moveToNext()
+            i--
+        }
+        cursor.close()
     }
 }
