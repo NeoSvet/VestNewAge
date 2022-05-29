@@ -9,32 +9,37 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.CompoundButton
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
-import androidx.annotation.RequiresApi
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
-import ru.neosvet.vestnewage.viewmodel.SettingsToiler
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.service.CheckStarter
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
+import ru.neosvet.vestnewage.view.list.SettingsAdapter
+import ru.neosvet.vestnewage.viewmodel.SettingsToiler
+import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class SettingsFragment : NeoFragment() {
+    companion object {
+        private const val CHECK_MAX = 7
+        private const val PROM_MAX = 60
+    }
+
     private var binding: SettingsFragmentBinding? = null
     private var dialog: SetNotifDialog? = null
     private val prefMain: SharedPreferences by lazy {
@@ -50,16 +55,15 @@ class SettingsFragment : NeoFragment() {
             PromUtils.TAG, Context.MODE_PRIVATE
         )
     }
-    private val bPanels: BooleanArray
-        get() = toiler.panels
-
     private val toiler: SettingsToiler
         get() = neotoiler as SettingsToiler
     private val anRotate: Animation by lazy {
         initAnimation()
     }
-
     private var stopRotate = false
+    private val adapter: SettingsAdapter by lazy {
+        SettingsAdapter(toiler.panels, ScreenUtils.span == 2)
+    }
 
     override fun initViewModel(): NeoToiler {
         return ViewModelProvider(this).get(SettingsToiler::class.java)
@@ -77,16 +81,16 @@ class SettingsFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        initMain()
         initBaseSection()
         initScreenSection()
-        initClearSection()
         initCheckSection()
         initPromSection()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            initButtonsSet()
-        else
-            initButtonsSetNew()
+        initClearSection()
+        initMessageSection()
+        binding?.run {
+            rvSettings.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+            rvSettings.adapter = adapter
+        }
     }
 
     override fun onDestroyView() {
@@ -100,16 +104,16 @@ class SettingsFragment : NeoFragment() {
                 setStatus(false)
                 val size = state.value / 1048576f //to MegaByte
                 Lib.showToast(String.format(getString(R.string.format_freed_size), size))
+                toiler.clearState()
             }
         }
     }
 
     override fun setStatus(load: Boolean) {
         if (load) {
-            binding?.clear?.run {
-                bClearDo.isEnabled = false
+            binding?.run {
                 stopRotate = false
-                ivClear.isVisible = true
+                pClear.isVisible = true
                 ivClear.startAnimation(anRotate)
             }
         } else stopRotate = true
@@ -120,9 +124,9 @@ class SettingsFragment : NeoFragment() {
         animation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                binding?.clear?.run {
+                binding?.run {
                     if (stopRotate)
-                        ivClear.isVisible = false
+                        pClear.isVisible = false
                     else
                         ivClear.startAnimation(anRotate)
                 }
@@ -133,176 +137,174 @@ class SettingsFragment : NeoFragment() {
         return animation
     }
 
-    private fun initMain() = binding?.run {
-        val imgSections = arrayOf(
-            base.img, screen.img, clear.img, check.img, prom.img
-        )
-        val pSections = arrayOf(
-            base.pnl, screen.pnl, clear.pnl, check.pnl, prom.pnl
-        )
-        val btnSections = arrayOf(
-            base.btn, screen.btn, clear.btn, check.btn, prom.btn
-        )
-        val listener = View.OnClickListener { view: View ->
-            val i = btnSections.indexOf(view)
-            if (bPanels[i]) { //if open
-                pSections[i].isVisible = false
-                imgSections[i].setImageResource(R.drawable.plus)
-            } else { //if close
-                pSections[i].isVisible = true
-                imgSections[i].setImageResource(R.drawable.minus)
-            }
-            bPanels[i] = bPanels[i].not()
-        }
-        for (button in btnSections)
-            button.setOnClickListener(listener)
-
-        for (i in bPanels.indices) {
-            if (bPanels[i]) {
-                pSections[i].isVisible = true
-                imgSections[i].setImageResource(R.drawable.minus)
-            }
-        }
-    }
-
-    private fun initBaseSection() = binding?.base?.run {
-        cbCountFloat.isChecked = !MainActivity.isCountInMenu
-        if (prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_MENU)
-            cbCountFloat.text = getString(R.string.count_everywhere)
-        cbNew.isChecked = prefMain.getBoolean(Const.START_NEW, false)
-        cbCountFloat.setOnCheckedChangeListener { _, check: Boolean ->
-            setMainCheckBox(Const.COUNT_IN_MENU, !check, -1)
-            MainActivity.isCountInMenu = !check
-        }
-        cbNew.setOnCheckedChangeListener { _, check: Boolean ->
-            setMainCheckBox(
-                Const.START_NEW, check, -1
+    private fun initBaseSection() {
+        val list = mutableListOf<CheckItem>()
+        val s = if (prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_MENU)
+            getString(R.string.count_everywhere)
+        else getString(R.string.count_float)
+        list.add(CheckItem(title = s, isChecked = !MainActivity.isCountInMenu))
+        list.add(
+            CheckItem(
+                title = getString(R.string.start_with_new),
+                isChecked = prefMain.getBoolean(Const.START_NEW, false)
             )
-        }
-    }
-
-    private fun initScreenSection() = binding?.screen?.run {
-        val rbsScreen = arrayOf(rbMenu, rbCalendar, rbSummary)
-        if (ScreenUtils.isTablet)
-            rbsScreen[0].isVisible = false
-        val p = prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-        rbsScreen[p].isChecked = true
-
-        val listener =
-            CompoundButton.OnCheckedChangeListener { view: CompoundButton, checked: Boolean ->
-                if (checked) {
-                    val i = rbsScreen.indexOf(view)
-                    setMainCheckBox(Const.START_SCEEN, false, i)
+        )
+        adapter.addItem(SettingsItem.CheckList(
+            title = getString(R.string.base),
+            isSingleSelect = false,
+            list = list,
+            onChecked = { index, checked ->
+                if (index == 0) {
+                    setMainCheckBox(Const.COUNT_IN_MENU, !checked, -1)
+                    MainActivity.isCountInMenu = !checked
+                } else {
+                    setMainCheckBox(
+                        Const.START_NEW, checked, -1
+                    )
                 }
             }
-        for (radioButton in rbsScreen)
-            radioButton.setOnCheckedChangeListener(listener)
+        ))
     }
 
-    private fun initClearSection() = binding?.clear?.run {
-        val cbsClear = arrayOf(cbBookPrev, cbBookCur, cbMaterials, cbMarkers, cbCache)
-
-        val listener = CompoundButton.OnCheckedChangeListener { _, _ ->
-            var k = 0
-            for (checkBox in cbsClear)
-                if (checkBox.isChecked) k++
-            bClearDo.isEnabled = k > 0
-        }
-        for (checkBox in cbsClear)
-            checkBox.setOnCheckedChangeListener(listener)
-
-        bClearDo.setOnClickListener {
-            setStatus(true)
-            val list = mutableListOf<String>()
-            if (cbsClear[0].isChecked) //book prev years
-                list.add(Const.START)
-            if (cbsClear[1].isChecked) //book cur year
-                list.add(Const.END)
-            if (cbsClear[2].isChecked) //materials
-                list.add(DataBase.ARTICLES)
-            if (cbsClear[3].isChecked) //markers
-                list.add(DataBase.MARKERS)
-            if (cbsClear[4].isChecked) //cache
-                list.add(Const.FILE)
-            toiler.startClear(list)
-            for (checkBox in cbsClear)
-                checkBox.isChecked = false
-        }
-    }
-
-    private fun initCheckSection() = binding?.check?.run {
-        var p = prefSummary.getInt(Const.TIME, Const.TURN_OFF)
-        if (p == Const.TURN_OFF)
-            sbCheckTime.progress = sbCheckTime.max
+    private fun initScreenSection() {
+        val list = mutableListOf<CheckItem>()
+        var screen = prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
+        if (ScreenUtils.isTablet)
+            screen--
         else {
-            p /= 15
-            if (p > 3) p = p / 4 + 2 else p--
-            sbCheckTime.progress = p
+            list.add(
+                CheckItem(title = getString(R.string.menu), isChecked = screen == list.size)
+            )
         }
-        setCheckTime()
-
-        sbCheckTime.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                setCheckTime()
+        list.add(
+            CheckItem(title = getString(R.string.calendar), isChecked = screen == list.size)
+        )
+        list.add(
+            CheckItem(title = getString(R.string.rss), isChecked = screen == list.size)
+        )
+        adapter.addItem(SettingsItem.CheckList(
+            title = getString(R.string.start_screen),
+            isSingleSelect = true,
+            list = list,
+            onChecked = { index, _ ->
+                val i = if (ScreenUtils.isTablet) index + 1 else index
+                setMainCheckBox(Const.START_SCEEN, false, i)
             }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                saveCheck()
-            }
-        })
+        ))
     }
 
-    private fun initPromSection() = binding?.prom?.run {
-        val p = prefProm.getInt(Const.TIME, Const.TURN_OFF)
-        if (p == Const.TURN_OFF)
-            sbPromTime.progress = sbPromTime.max
-        else
-            sbPromTime.progress = p
-        setPromTime()
+    private fun initClearSection() {
+        val list = mutableListOf<CheckItem>()
+        list.add(CheckItem(getString(R.string.book_prev)))
+        list.add(CheckItem(getString(R.string.book_cur)))
+        list.add(CheckItem(getString(R.string.materials)))
+        list.add(CheckItem(getString(R.string.markers)))
+        list.add(CheckItem(getString(R.string.cache)))
 
-        sbPromTime.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                setPromTime()
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                saveProm()
-            }
-        })
+        adapter.addItem(
+            SettingsItem.CheckListButton(
+                title = getString(R.string.free_storage),
+                list = list,
+                buttonLabel = getString(R.string.delete),
+                onClick = this::clearStorage
+            )
+        )
     }
 
-    private fun initButtonsSet() = binding?.run {
-        check.bCheckSet.setOnClickListener {
-            dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
-            dialog?.show()
-        }
-        prom.bPromSet.setOnClickListener {
-            dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
-            dialog?.show()
-        }
+    private fun clearStorage(checkedList: List<Int>) {
+        setStatus(true)
+        val request = mutableListOf<String>()
+        if (checkedList.contains(0)) //book prev years
+            request.add(Const.START)
+        if (checkedList.contains(1)) //book cur year
+            request.add(Const.END)
+        if (checkedList.contains(2)) //materials
+            request.add(DataBase.ARTICLES)
+        if (checkedList.contains(3)) //markers
+            request.add(DataBase.MARKERS)
+        if (checkedList.contains(4)) //cache
+            request.add(Const.FILE)
+        toiler.startClear(request)
     }
 
-    @RequiresApi(26)
-    private fun initButtonsSetNew() = binding?.run {
-        check.bCheckSet.setOnClickListener {
-            val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_SUMMARY)
-            startActivity(intent)
+    private fun initCheckSection() {
+        var v = prefSummary.getInt(Const.TIME, Const.TURN_OFF)
+        if (v == Const.TURN_OFF)
+            v = CHECK_MAX
+        else {
+            v /= 15
+            if (v > 3) v = v / 4 + 2 else v--
         }
-        prom.bPromSet.setOnClickListener {
-            val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_PROM)
-            startActivity(intent)
+
+        adapter.addItem(SettingsItem.Notification(
+            title = getString(R.string.notif_new),
+            offLabel = getString(R.string.less),
+            onLabel = getString(R.string.often),
+            valueSeek = v,
+            maxSeek = CHECK_MAX,
+            changeValue = this::setCheckTime,
+            stopTracking = this::saveCheck,
+            onClick = {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
+                    dialog?.show()
+                } else {
+                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_SUMMARY)
+                    startActivity(intent)
+                }
+            }
+        ))
+    }
+
+    private fun initPromSection() {
+        var v = prefProm.getInt(Const.TIME, Const.TURN_OFF)
+        if (v == Const.TURN_OFF)
+            v = PROM_MAX
+
+        adapter.addItem(SettingsItem.Notification(
+            title = getString(R.string.notif_prom),
+            offLabel = getString(R.string.advance),
+            onLabel = getString(R.string.prom),
+            valueSeek = v,
+            maxSeek = PROM_MAX,
+            changeValue = this::setPromTime,
+            stopTracking = this::saveProm,
+            onClick = {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
+                    dialog?.show()
+                } else {
+                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_PROM)
+                    startActivity(intent)
+                }
+            }
+        ))
+    }
+
+    private fun initMessageSection() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            adapter.addItem(SettingsItem.Message(
+                title = getString(R.string.about_manager),
+                text = getString(R.string.info_manager),
+                buttonLabel = "",
+                onClick = {}
+            ))
+            return
         }
-        pBattery.isVisible = true
-        bSetBattery.setOnClickListener {
-            val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-            startActivity(intent)
-        }
+
+        adapter.addItem(SettingsItem.Message(
+            title = getString(R.string.about_manager),
+            text = getString(R.string.info_manager) + Const.NN + getString(R.string.info_battery),
+            buttonLabel = getString(R.string.set_battery),
+            onClick = {
+                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                startActivity(intent)
+            }
+        ))
     }
 
     private fun setMainCheckBox(name: String, check: Boolean, value: Int) {
@@ -319,98 +321,86 @@ class SettingsFragment : NeoFragment() {
         act?.finish()
     }
 
-    private fun saveCheck() = binding?.check?.run {
+    private fun saveCheck(value: Int) {
         val editor = prefSummary.edit()
-        var p = sbCheckTime.progress
-        if (p < sbCheckTime.max) {
-            if (p > 2) p = (p - 2) * 4 else p++
-            p *= 15
-            if (p == 15) p = 20
-        } else p = Const.TURN_OFF
-        editor.putInt(Const.TIME, p)
+        var v = value
+        if (v < CHECK_MAX) {
+            if (v > 2) v = (v - 2) * 4 else v++
+            v *= 15
+            if (v == 15) v = 20
+        } else v = Const.TURN_OFF
+        editor.putInt(Const.TIME, v)
         editor.apply()
-        CheckStarter.set(p)
+        CheckStarter.set(v)
     }
 
-    private fun saveProm() = binding?.prom?.run {
+    private fun saveProm(value: Int) {
         val editor = prefProm.edit()
-        var p = sbPromTime.progress
-        if (p == sbPromTime.max) p = Const.TURN_OFF
-        editor.putInt(Const.TIME, p)
+        val v = if (value == PROM_MAX)
+            Const.TURN_OFF else value
+        editor.putInt(Const.TIME, v)
         editor.apply()
         val prom = PromUtils(null)
-        prom.initNotif(p)
+        prom.initNotif(v)
     }
 
-    private fun setCheckTime() = binding?.check?.run {
+    private fun setCheckTime(label: TextView, value: Int) {
         val t = StringBuilder(getString(R.string.check_summary))
         t.append(" ")
-        if (sbCheckTime.progress == sbCheckTime.max) {
-            tvCheckOn.isVisible = true
-            tvCheckOff.isVisible = false
+        if (value == CHECK_MAX) {
             t.append(getString(R.string.turn_off))
-            tvCheck.text = t
-            bCheckSet.isEnabled = false
-            return@run
+            label.text = t
+            return
         }
-        bCheckSet.isEnabled = true
-        tvCheckOn.isVisible = false
-        tvCheckOff.isVisible = true
-        var p = sbCheckTime.progress + 1
+        var v = value + 1
         var bH = false
-        if (p > 3) {
+        if (v > 3) {
             bH = true
-            p -= 3
-        } else p *= 15
-        if (p == 1)
+            v -= 3
+        } else v *= 15
+        if (v == 1)
             t.append(getString(R.string.each_one))
         else {
             t.append(getString(R.string.each_more))
             t.append(" ")
-            t.append(p)
+            t.append(v)
             t.append(" ")
             if (bH) t.append(getString(R.string.hours))
             else t.append(getString(R.string.minutes))
         }
-        tvCheck.text = t
+        label.text = t
     }
 
-    private fun setPromTime() = binding?.prom?.run {
-        var p = sbPromTime.progress
-        if (p == sbPromTime.max) {
-            tvPromOn.isVisible = true
-            tvPromOff.isVisible = false
-            tvPromNotif.text = getString(R.string.prom_notif_off)
-            bPromSet.isEnabled = false
-            return@run
+    private fun setPromTime(label: TextView, value: Int) {
+        var v = value
+        if (v == PROM_MAX) {
+            label.text = getString(R.string.prom_notif_off)
+            return
         }
-        bPromSet.isEnabled = true
-        tvPromOn.isVisible = false
-        tvPromOff.isVisible = true
         val t = StringBuilder(getString(R.string.prom_notif))
         t.append(" ")
         t.append(getString(R.string.`in`))
         t.append(" ")
-        p++
-        when (p) {
+        v++
+        when (v) {
             1 ->
                 t.append(resources.getStringArray(R.array.time)[3])
             in 5..20 -> {
-                t.append(p)
+                t.append(v)
                 t.append(" ")
                 t.append(resources.getStringArray(R.array.time)[4])
             }
             else -> {
-                t.append(p)
+                t.append(v)
                 t.append(" ")
-                when (p % 10) {
+                when (v % 10) {
                     1 -> t.append(resources.getStringArray(R.array.time)[3])
                     in 2..4 -> t.append(resources.getStringArray(R.array.time)[5])
                     else -> t.append(resources.getStringArray(R.array.time)[4])
                 }
             }
         }
-        tvPromNotif.text = t
+        label.text = t
     }
 
     fun putRingtone(data: Intent?) {

@@ -8,11 +8,12 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import java.io.File
 
 class SettingsToiler : NeoToiler() {
     private var size: Long = 0
-    val panels = booleanArrayOf(true, false, false, false, false)
+    val panels = mutableListOf(true, false, false, false, false, false)
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Settings.Clear")
@@ -78,5 +79,9 @@ class SettingsToiler : NeoToiler() {
                 clearFolder(f)
             f.delete()
         }
+    }
+
+    fun clearState() {
+        mstate.postValue(Ready)
     }
 }
