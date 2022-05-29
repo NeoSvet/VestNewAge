@@ -1,8 +1,8 @@
 <resources>
     <!--MainActivity-->
     <string name="app_name">Весть Века</string>
-    <string name="navigation_drawer_open">Открытие панели</string>
-    <string name="navigation_drawer_close">Закрытие панели</string>
+    <string name="navigation_drawer_open">Открытие меню</string>
+    <string name="navigation_drawer_close">Закрытие меню</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
     <string name="download_title">Скачать&#8230;</string>
     <string name="download_all">Скачать все материалы</string>
