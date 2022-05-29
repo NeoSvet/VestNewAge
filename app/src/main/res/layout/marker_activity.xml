@@ -31,7 +31,10 @@
         android:layout_marginTop="@dimen/margin_top"
         android:layout_marginEnd="@dimen/margin_side"
         android:background="@drawable/field_trans"
-        android:padding="3dp"
+        android:paddingTop="3dp"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="10dp"
         android:visibility="gone" />
 
     <RelativeLayout

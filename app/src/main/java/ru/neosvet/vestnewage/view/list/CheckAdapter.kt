@@ -4,14 +4,15 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
+import android.widget.CheckedTextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 
 class CheckAdapter(
     private val list: List<CheckItem>,
-    private val checker: (Int, Boolean) -> Int
+    private val checkByBg: Boolean = true,
+    private val onChecked: (Int, Boolean) -> Int
 ) : RecyclerView.Adapter<CheckAdapter.ViewHolder>() {
 
     override fun getItemCount(): Int = list.size
@@ -25,15 +26,20 @@ class CheckAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     inner class ViewHolder(root: View) : RecyclerView.ViewHolder(root) {
-        private val checkBox: CheckBox = root.findViewById(R.id.check_box)
+        private val checkBox = root.findViewById(R.id.check_box) as CheckedTextView
         private var isSet = true
 
         init {
-            checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (isSet) return@setOnCheckedChangeListener
+            if (checkByBg)
+                checkBox.setBackgroundResource(R.drawable.menu_bg)
+            else
+                checkBox.setCheckMarkDrawable(R.drawable.check_selector)
+            checkBox.setOnClickListener {
                 var index = layoutPosition
+                val isChecked = list[index].isChecked.not()
                 list[index].isChecked = isChecked
-                index = checker.invoke(index, isChecked)
+                notifyItemChanged(index)
+                index = onChecked.invoke(index, isChecked)
                 if (index == -1)
                     notifyDataSetChanged()
                 else if (index != layoutPosition)

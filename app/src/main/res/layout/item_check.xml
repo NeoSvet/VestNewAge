@@ -4,12 +4,11 @@
     android:layout_height="match_parent"
     android:padding="5dp">
 
-    <CheckBox
+    <CheckedTextView
         android:id="@+id/check_box"
-        style="@style/CheckBox"
+        style="@style/CheckedTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/item_bg"
-        android:paddingEnd="10dp" />
+        android:gravity="center_vertical" />
 
 </FrameLayout>

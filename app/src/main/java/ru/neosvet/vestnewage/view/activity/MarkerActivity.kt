@@ -89,10 +89,10 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         ViewModelProvider(this).get(MarkerToiler::class.java).apply { init(baseContext) }
     }
     private val adPar: CheckAdapter by lazy {
-        CheckAdapter(helper.parsList, helper::checkPars)
+        CheckAdapter(list = helper.parsList, onChecked = helper::checkPars)
     }
     private val adCol: CheckAdapter by lazy {
-        CheckAdapter(helper.colsList, helper::checkCols)
+        CheckAdapter(list = helper.colsList, onChecked = helper::checkCols)
     }
     private lateinit var binding: MarkerActivityBinding
     private val softKeyboard: SoftKeyboard by lazy {
