@@ -23,7 +23,7 @@ object ScreenUtils {
 
     @JvmStatic
     val isTablet: Boolean
-        get() = type == Type.TABLET_PORT
+        get() = type >= Type.TABLET_PORT
     val span: Int
         get() = when (type) {
             Type.PHONE_PORT -> 1
