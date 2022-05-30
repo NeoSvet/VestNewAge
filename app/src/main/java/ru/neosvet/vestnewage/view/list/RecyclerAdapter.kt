@@ -12,8 +12,9 @@ class RecyclerAdapter(
     private val longClicker: ((Int, ListItem) -> Boolean)? = null
 ) : RecyclerView.Adapter<RecyclerHolder>() {
     companion object {
-        private const val TYPE_SIMPLE = 0
-        private const val TYPE_DETAIL = 1
+        private const val TYPE_TITLE = 0
+        private const val TYPE_SIMPLE = 1
+        private const val TYPE_DETAIL = 2
     }
 
     private val data = mutableListOf<ListItem>()
@@ -34,14 +35,22 @@ class RecyclerAdapter(
     override fun getItemCount(): Int = data.size
 
     override fun getItemViewType(position: Int): Int =
-        if (data[position].des.isEmpty())
-            TYPE_SIMPLE else TYPE_DETAIL
+        if (data[position].link == "#")
+            TYPE_TITLE
+        else if (data[position].des.isEmpty())
+            TYPE_SIMPLE
+        else
+            TYPE_DETAIL
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerHolder {
-        val layout = if (viewType == TYPE_SIMPLE)
-            LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
-        else
-            LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
+        val layout = when (viewType) {
+            TYPE_SIMPLE ->
+                LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
+            TYPE_TITLE ->
+                LayoutInflater.from(parent.context).inflate(R.layout.item_title, null)
+            else ->
+                LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
+        }
         return RecyclerHolder(layout, clicker, longClicker)
     }
 
