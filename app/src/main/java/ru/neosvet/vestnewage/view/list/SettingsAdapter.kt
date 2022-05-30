@@ -15,12 +15,12 @@ import ru.neosvet.vestnewage.data.SettingsItem
 
 class SettingsAdapter(
     private val visList: MutableList<Boolean>,
-    private val twoColumn: Boolean
+    private val twoColumns: Boolean
 ) : RecyclerView.Adapter<SettingsAdapter.ViewHolder>() {
     private val data = mutableListOf<SettingsItem>()
 
     init {
-        if (twoColumn) {
+        if (twoColumns) {
             var b: Int
             for (a in visList.indices step 2) {
                 b = a + 1
@@ -62,7 +62,7 @@ class SettingsAdapter(
     fun switchPanel(index: Int) {
         visList[index] = visList[index].not()
         notifyItemChanged(index)
-        if (twoColumn) {
+        if (twoColumns) {
             val i = if (index % 2 == 0)
                 index + 1
             else
