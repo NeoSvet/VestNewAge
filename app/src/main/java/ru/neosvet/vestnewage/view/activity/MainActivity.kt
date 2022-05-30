@@ -27,11 +27,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.viewmodel.MainToiler
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.AdsState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
@@ -43,6 +38,11 @@ import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
+import ru.neosvet.vestnewage.viewmodel.MainToiler
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import ru.neosvet.vestnewage.viewmodel.basic.AdsState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -513,15 +513,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun startAnimMin() {
-        if (fab?.isVisible == false) return
-        if (helper.countNew > 0) helper.tvNew.startAnimation(anMin)
-        fab?.startAnimation(anMin)
+        if (helper.countNew > 0 && helper.tvNew.isVisible)
+            helper.tvNew.startAnimation(anMin)
+        if (fab?.isVisible == true)
+            fab?.startAnimation(anMin)
     }
 
     fun startAnimMax() {
-        if (helper.checkNew()) helper.tvNew.startAnimation(anMax)
-        fab?.isVisible = true
-        fab?.startAnimation(anMax)
+        if (helper.checkNew() && helper.tvNew.isVisible.not()) {
+            helper.tvNew.isVisible = true
+            helper.tvNew.startAnimation(anMax)
+        }
+        if (fab?.isVisible == false) {
+            fab?.isVisible = true
+            fab?.startAnimation(anMax)
+        }
     }
 
     private fun showWelcome() {
