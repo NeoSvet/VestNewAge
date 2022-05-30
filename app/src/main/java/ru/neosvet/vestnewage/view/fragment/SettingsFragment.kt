@@ -62,7 +62,7 @@ class SettingsFragment : NeoFragment() {
     }
     private var stopRotate = false
     private val adapter: SettingsAdapter by lazy {
-        SettingsAdapter(toiler.panels, ScreenUtils.span == 2)
+        SettingsAdapter(toiler.panels, ScreenUtils.isWide)
     }
 
     override fun initViewModel(): NeoToiler {
@@ -88,7 +88,10 @@ class SettingsFragment : NeoFragment() {
         initClearSection()
         initMessageSection()
         binding?.run {
-            rvSettings.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+            rvSettings.layoutManager = GridLayoutManager(
+                requireContext(),
+                if (ScreenUtils.isWide) 2 else 1
+            )
             rvSettings.adapter = adapter
         }
     }
