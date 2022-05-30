@@ -87,5 +87,6 @@ class WelcomeFragment : BottomSheetDialogFragment() {
 
     private fun onItemClick(index: Int, item: ListItem) {
         clicker?.onItemClick(item.link)
+        if (item.link == Const.ADS) dismiss()
     }
 }
