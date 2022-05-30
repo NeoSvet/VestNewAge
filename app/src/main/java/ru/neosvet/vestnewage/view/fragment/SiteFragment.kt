@@ -4,28 +4,28 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import android.widget.AbsListView
-import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
+import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.select
+import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
-import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.utils.AdsUtils
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.select
-import ru.neosvet.vestnewage.view.list.ListAdapter
 import kotlin.math.abs
 
 class SiteFragment : NeoFragment() {
@@ -41,15 +41,12 @@ class SiteFragment : NeoFragment() {
 
     private val toiler: SiteToiler
         get() = neotoiler as SiteToiler
-    private val adMain: ListAdapter by lazy {
-        ListAdapter(requireContext())
-    }
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private val ads: AdsUtils by lazy {
         AdsUtils(act)
     }
     private var x = 0
     private var y = 0
-    private var scrollToFirst = false
     private var binding: SiteFragmentBinding? = null
     override val title: String
         get() = ""
@@ -145,16 +142,8 @@ class SiteFragment : NeoFragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         fabRefresh.setOnClickListener { startLoad() }
-        lvMain.adapter = adMain
-        lvMain.onItemClickListener = OnItemClickListener { _, view: View, pos: Int, _ ->
-            if (toiler.isRun) return@OnItemClickListener
-            if (isAds(pos)) return@OnItemClickListener
-            if (adMain.getItem(pos).hasFewLinks())
-                openMultiLink(adMain.getItem(pos), view)
-            else
-                openSingleLink(adMain.getItem(pos).link)
-        }
-        lvMain.setOnTouchListener { _, event: MotionEvent ->
+        rvSite.adapter = adapter
+        rvSite.setOnTouchListener { _, event: MotionEvent ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     if (animMinFinished) act?.startAnimMin()
@@ -180,21 +169,6 @@ class SiteFragment : NeoFragment() {
             }
             false
         }
-        lvMain.setOnScrollListener(object : AbsListView.OnScrollListener {
-            override fun onScrollStateChanged(absListView: AbsListView, scrollState: Int) {
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && scrollToFirst) {
-                    if (lvMain.firstVisiblePosition > 0)
-                        lvMain.smoothScrollToPosition(0)
-                    else scrollToFirst = false
-                }
-            }
-
-            override fun onScroll(
-                absListView: AbsListView, firstVisibleItem: Int,
-                visibleItemCount: Int, totalItemCount: Int
-            ) {
-            }
-        })
     }
 
     private fun openMultiLink(links: ListItem, parent: View) {
@@ -228,24 +202,20 @@ class SiteFragment : NeoFragment() {
             openPage(link)
     }
 
-    private fun isAds(pos: Int): Boolean {
+    private fun isAds(index: Int, item: ListItem): Boolean {
         binding?.run {
             if (toiler.isDevTab) {
-                if (pos == 0) { //back
+                if (index == 0) { //back
                     act?.tabLayout?.select(SiteToiler.TAB_NEWS)
                     return true
                 }
-                ads.index = pos
-                ads.showAd(
-                    adMain.getItem(pos).title,
-                    adMain.getItem(pos).link,
-                    adMain.getItem(pos).head
-                )
-                adMain.getItem(pos).des = ""
-                adMain.notifyDataSetChanged()
+                ads.index = index
+                ads.showAd(item.title, item.link, item.head)
+                item.des = ""
+                adapter.notifyItemChanged(index)
                 return true
             }
-            if (toiler.isNewsTab && pos == 0) {
+            if (toiler.isNewsTab && index == 0) {
                 toiler.selectedTab = SiteToiler.TAB_DEV
                 toiler.openAds()
                 return true
@@ -268,24 +238,30 @@ class SiteFragment : NeoFragment() {
         when (state) {
             is SuccessList -> {
                 setStatus(false)
-                adMain.setItems(state.list)
                 binding?.run {
-                    if (lvMain.firstVisiblePosition > 0) {
-                        scrollToFirst = true
-                        lvMain.smoothScrollToPosition(0)
-                    }
+                    rvSite.layoutManager = if (toiler.isNewsTab)
+                        GridLayoutManager(requireContext(), 1)
+                    else
+                        GridLayoutManager(requireContext(), ScreenUtils.span)
                     tvEmptySite.isVisible = state.list.isEmpty()
                 }
+                adapter.setItems(state.list)
                 if (toiler.isDevTab && ads.index > -1) {
-                    ads.showAd(
-                        adMain.getItem(ads.index).title,
-                        adMain.getItem(ads.index).link,
-                        adMain.getItem(ads.index).head
-                    )
+                    val item = state.list[ads.index]
+                    ads.showAd(item.title, item.link, item.head)
                 }
             }
             is LongState ->
                 binding?.fabRefresh?.isVisible = act?.status?.checkTime(state.value) == false
         }
+    }
+
+    private fun onItemClick(index: Int, item: ListItem) {
+        if (toiler.isRun) return
+        if (isAds(index, item)) return
+        if (item.hasFewLinks())
+            openMultiLink(item, binding!!.rvSite)
+        else
+            openSingleLink(item.link)
     }
 }

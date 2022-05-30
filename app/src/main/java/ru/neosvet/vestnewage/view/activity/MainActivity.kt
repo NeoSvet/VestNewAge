@@ -568,7 +568,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             is SuccessList -> {
                 if (frWelcome == null)
                     frWelcome = WelcomeFragment.newInstance(false, 0)
-                frWelcome?.pagesList = state.list
+                frWelcome?.list?.addAll(state.list)
             }
             is NeoState.Error ->
                 status.setError(state.throwable.localizedMessage)

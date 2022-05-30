@@ -5,25 +5,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.widget.AdapterView.OnItemClickListener
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.NewFragmentBinding
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
+import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.NewToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
-import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.list.ListAdapter
 
 class NewFragment : NeoFragment() {
     private var binding: NewFragmentBinding? = null
-    private val adNew: ListAdapter by lazy {
-        ListAdapter(requireContext())
-    }
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private val toiler: NewToiler
         get() = neotoiler as NewToiler
     override val title: String
@@ -68,15 +68,14 @@ class NewFragment : NeoFragment() {
                 if (state.list.isEmpty())
                     emptyList()
                 else
-                    adNew.setItems(state.list)
+                    adapter.setItems(state.list)
             }
         }
         act?.updateNew()
     }
 
     private fun emptyList() {
-        adNew.clear()
-        adNew.notifyDataSetChanged()
+        adapter.clear()
         binding?.run {
             tvEmptyNew.isVisible = true
             fabClear.isVisible = false
@@ -90,19 +89,10 @@ class NewFragment : NeoFragment() {
             toiler.clearList()
         }
 
-        lvNew.adapter = adNew
-        lvNew.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
-            val item = adNew.getItem(pos)
-            if (item.title.contains(getString(R.string.ad))) {
-                toiler.openAd(item, pos)
-            } else if (item.link != "") {
-                toiler.needOpen = true
-                openedReader = true
-                openReader(item.link, null)
-            }
-        }
-        lvNew.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (adNew.count == 0) return@setOnTouchListener false
+        rvNew.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rvNew.adapter = adapter
+        rvNew.setOnTouchListener { _, motionEvent: MotionEvent ->
+            if (adapter.itemCount == 0) return@setOnTouchListener false
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 if (animMinFinished) act?.startAnimMin()
             } else if (motionEvent.action == MotionEvent.ACTION_UP
@@ -111,6 +101,16 @@ class NewFragment : NeoFragment() {
                 if (animMaxFinished) act?.startAnimMax()
             }
             false
+        }
+    }
+
+    private fun onItemClick(index: Int, item: ListItem) {
+        if (item.title.contains(getString(R.string.ad))) {
+            toiler.openAd(item, index)
+        } else if (item.link != "") {
+            toiler.needOpen = true
+            openedReader = true
+            openReader(item.link, null)
         }
     }
 }

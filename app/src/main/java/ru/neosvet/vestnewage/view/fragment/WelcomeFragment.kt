@@ -6,15 +6,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.ListView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.view.list.ListAdapter
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 
 class WelcomeFragment : BottomSheetDialogFragment() {
     interface ItemClicker {
@@ -33,10 +34,8 @@ class WelcomeFragment : BottomSheetDialogFragment() {
     }
 
     private var clicker: ItemClicker? = null
-    var pagesList: List<ListItem>? = null
-    private val adapter: ListAdapter by lazy {
-        ListAdapter(requireContext())
-    }
+    val list = mutableListOf<ListItem>()
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,17 +55,13 @@ class WelcomeFragment : BottomSheetDialogFragment() {
                 BottomSheetBehavior.from(bottomSheet).setPeekHeight(height)
             }
         }
-        val lvBottom = view.findViewById(R.id.lvBottom) as ListView
-        lvBottom.adapter = adapter
-        lvBottom.onItemClickListener = OnItemClickListener { _, _, pos: Int, _ ->
-            clicker?.onItemClick(adapter.getItem(pos).link)
-        }
+        val rvBottom = view.findViewById(R.id.rvBottom) as RecyclerView
+        rvBottom.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rvBottom.adapter = adapter
         arguments?.let {
             parseArguments(it)
         }
-        pagesList?.forEach { item ->
-            adapter.addItem(item)
-        }
+        adapter.setItems(list)
     }
 
     override fun onAttach(context: Context) {
@@ -76,9 +71,6 @@ class WelcomeFragment : BottomSheetDialogFragment() {
     }
 
     private fun parseArguments(args: Bundle) {
-        if (args.getBoolean(Const.ADS))
-            adapter.addItem(ListItem(getString(R.string.new_dev_ads), Const.ADS))
-
         val timeDiff = args.getInt(Const.TIMEDIFF)
         val item = ListItem(getString(R.string.sync_time))
         item.des = if (timeDiff == 0)
@@ -88,7 +80,12 @@ class WelcomeFragment : BottomSheetDialogFragment() {
                 getString(R.string.time_deviation),
                 timeDiff
             )
-        adapter.addItem(item)
-        adapter.notifyDataSetChanged()
+        list.add(0, item)
+        if (args.getBoolean(Const.ADS))
+            list.add(0, ListItem(getString(R.string.new_dev_ads), Const.ADS))
+    }
+
+    private fun onItemClick(index: Int, item: ListItem) {
+        clicker?.onItemClick(item.link)
     }
 }

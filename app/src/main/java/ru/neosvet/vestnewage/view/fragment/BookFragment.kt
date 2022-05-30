@@ -10,21 +10,21 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.viewmodel.BookToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -32,7 +32,9 @@ import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DateDialog
-import ru.neosvet.vestnewage.view.list.ListAdapter
+import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.viewmodel.BookToiler
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.util.*
 import kotlin.math.abs
 
@@ -52,9 +54,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
-    private val adBook: ListAdapter by lazy {
-        ListAdapter(requireContext())
-    }
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
     private var x = 0
@@ -186,8 +186,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         tvDate.text = state.date
         ivPrev.isEnabled = state.prev
         ivNext.isEnabled = state.next
-        adBook.setItems(state.list)
-        lvBook.smoothScrollToPosition(0)
+        adapter.setItems(state.list)
+        rvBook.smoothScrollToPosition(0)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -220,15 +220,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         anMax = AnimationUtils.loadAnimation(act, R.anim.maximize)
 
         fabRefresh.setOnClickListener { startLoad() }
-        lvBook.adapter = adBook
-        lvBook.onItemClickListener =
-            OnItemClickListener { _, _, pos: Int, _ ->
-                if (notClick) return@OnItemClickListener
-                if (toiler.isRun) return@OnItemClickListener
-                openedReader = true
-                openReader(adBook.getItem(pos).link, null)
-            }
-        lvBook.setOnTouchListener { _, event: MotionEvent ->
+        rvBook.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rvBook.adapter = adapter
+        rvBook.setOnTouchListener { _, event: MotionEvent ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     if (animMinFinished) {
@@ -385,5 +379,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
         }
         alertRnd?.show { dialog = "" }
+    }
+
+    private fun onItemClick(index: Int, item: ListItem) {
+        if (notClick) return
+        if (toiler.isRun) return
+        openedReader = true
+        openReader(item.link, null)
     }
 }
