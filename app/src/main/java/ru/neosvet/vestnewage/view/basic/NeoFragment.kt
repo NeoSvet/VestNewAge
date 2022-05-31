@@ -5,11 +5,17 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
@@ -20,6 +26,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     protected val neotoiler: NeoToiler by lazy {
         initViewModel()
     }
+    private var jobShow: Job? = null
 
     abstract val title: String
 
@@ -136,4 +143,32 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     protected val animMaxFinished: Boolean
         get() = act?.status?.startMax() == false
+
+    protected fun setButtonsHider(rv: RecyclerView) {
+        val scroll = ScrollHelper {
+            when (it) {
+                ScrollHelper.Events.SCROLL_END ->
+                    hideButtons()
+                ScrollHelper.Events.SCROLL_START ->
+                    showButtons()
+            }
+        }
+        scroll.attach(rv)
+    }
+
+    private fun showButtons() {
+        if (animMaxFinished)
+            act?.startShowButtons()
+    }
+
+    private fun hideButtons() {
+        if (animMinFinished) {
+            act?.startHideButtons()
+            jobShow?.cancel()
+            jobShow = lifecycleScope.launch {
+                delay(1000)
+                showButtons()
+            }
+        }
+    }
 }

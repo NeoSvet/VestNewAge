@@ -69,8 +69,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var tab = 0
     private var statusBack = StatusBack.MENU
 
-    @JvmField
-    var fab: View? = null
+    private var fab1: View? = null
+    private var fab2: View? = null
     private lateinit var utils: LaunchUtils
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
@@ -180,8 +180,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         anMin.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                helper.tvNew.isVisible = false
-                fab?.isVisible = false
+                fab1?.isVisible = false
+                fab2?.isVisible = false
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -512,21 +512,40 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setMenu(R.id.nav_book, true)
     }
 
-    fun startAnimMin() {
-        if (helper.countNew > 0 && helper.tvNew.isVisible)
-            helper.tvNew.startAnimation(anMin)
-        if (fab?.isVisible == true)
-            fab?.startAnimation(anMin)
+    fun setButtons(fab1: View, fab2: View) {
+        this.fab1 = fab1
+        this.fab2 = fab2
     }
 
-    fun startAnimMax() {
-        if (helper.checkNew() && helper.tvNew.isVisible.not()) {
-            helper.tvNew.isVisible = true
-            helper.tvNew.startAnimation(anMax)
+    fun setButton(fab: View, shownNew: Boolean) {
+        fab1 = if (shownNew) helper.tvNew else null
+        fab2 = fab
+    }
+
+    fun clearButtons() {
+        fab1 = null
+        fab2 = null
+    }
+
+    fun startHideButtons() {
+        if (fab1?.isVisible == true)
+            fab1?.startAnimation(anMin)
+        if (fab2?.isVisible == true)
+            fab2?.startAnimation(anMin)
+    }
+
+    fun startShowButtons() {
+//        if (helper.checkNew() && helper.tvNew.isVisible.not()) {
+//            helper.tvNew.isVisible = true
+//            helper.tvNew.startAnimation(anMax)
+//        }
+        if (fab1?.isVisible == false) {
+            fab1?.isVisible = true
+            fab1?.startAnimation(anMax)
         }
-        if (fab?.isVisible == false) {
-            fab?.isVisible = true
-            fab?.startAnimation(anMax)
+        if (fab2?.isVisible == false) {
+            fab2?.isVisible = true
+            fab2?.startAnimation(anMax)
         }
     }
 

@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -47,7 +46,7 @@ class NewFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        initView()
+        setView()
         if (savedInstanceState == null)
             toiler.openList()
     }
@@ -83,25 +82,15 @@ class NewFragment : NeoFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initView() = binding?.run {
-        act?.fab = fabClear
+    private fun setView() = binding?.run {
+        act?.setButton(fabClear, true)
         fabClear.setOnClickListener {
             toiler.clearList()
         }
 
         rvNew.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvNew.adapter = adapter
-        rvNew.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (adapter.itemCount == 0) return@setOnTouchListener false
-            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                if (animMinFinished) act?.startAnimMin()
-            } else if (motionEvent.action == MotionEvent.ACTION_UP
-                || motionEvent.action == MotionEvent.ACTION_CANCEL
-            ) {
-                if (animMaxFinished) act?.startAnimMax()
-            }
-            false
-        }
+        setButtonsHider(rvNew)
     }
 
     private fun onItemClick(index: Int, item: ListItem) {

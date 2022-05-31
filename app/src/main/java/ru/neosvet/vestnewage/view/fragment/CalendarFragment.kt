@@ -41,7 +41,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     val hTimer = Handler { message: Message ->
         if (message.what == 0)
             binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
-        else act?.startAnimMax()
+        else act?.startShowButtons()
         false
     }
     override val title: String
@@ -98,7 +98,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     private fun setViews() = binding?.run {
         bProm.setOnClickListener { openLink("Posyl-na-Edinenie.html") }
         fabRefresh.setOnClickListener { startLoad() }
-        act?.fab = fabRefresh
+        act?.clearButtons()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -110,7 +110,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             rvCalendar.setOnTouchListener { _, event: MotionEvent ->
                 if (act?.isInMultiWindowMode == false) return@setOnTouchListener false
                 if (event.action == MotionEvent.ACTION_MOVE) {
-                    if (animMinFinished) act?.startAnimMin()
+                    if (animMinFinished) act?.startHideButtons()
                 }
                 if (event.action == MotionEvent.ACTION_UP) {
                     Timer().schedule(object : TimerTask() {

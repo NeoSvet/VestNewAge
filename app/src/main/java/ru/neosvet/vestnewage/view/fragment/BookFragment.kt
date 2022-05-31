@@ -6,15 +6,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.Job
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
@@ -33,10 +31,10 @@ import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.SwipeHelper
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.util.*
-import kotlin.math.abs
 
 class BookFragment : NeoFragment(), DateDialog.Result {
     companion object {
@@ -52,19 +50,14 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         private const val DIALOG_DATE = "date"
     }
 
-    private lateinit var anMin: Animation
-    private lateinit var anMax: Animation
     private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
-    private var x = 0
-    private var y = 0
     private lateinit var menuRnd: Tip
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
     private var dialog: String? = ""
-    private var notClick = false
     private val helper: BookHelper
         get() = toiler.helper!!
     val hTimer = Handler {
@@ -74,6 +67,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     override val title: String
         get() = ""
     private var openedReader = false
+    private var jobShow: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -192,6 +186,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
+        act?.setButtons(fabRndMenu, fabRefresh)
         ivPrev.isEnabled = false
         ivNext.isEnabled = false
         menuRnd = Tip(requireContext(), pRnd)
@@ -207,63 +202,19 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             menuRnd.hide()
             toiler.getRnd(BookToiler.RndType.KAT)
         }
-        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize)
-        anMin.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                fabRefresh.isVisible = false
-                fabRndMenu.isVisible = false
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize)
-
         fabRefresh.setOnClickListener { startLoad() }
         rvBook.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBook.adapter = adapter
-        rvBook.setOnTouchListener { _, event: MotionEvent ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    if (animMinFinished) {
-                        fabRefresh.startAnimation(anMin)
-                        fabRndMenu.startAnimation(anMin)
-                        menuRnd.hide()
-                    }
-                    x = event.getX(0).toInt()
-                    y = event.getY(0).toInt()
-                }
-                MotionEvent.ACTION_UP -> {
-                    val x2 = event.getX(0).toInt()
-                    val r = abs(x - x2)
-                    notClick = false
-                    if (r > (30 * resources.displayMetrics.density).toInt() &&
-                        r > abs(y - event.getY(0).toInt())
-                    ) {
-                        if (x > x2) { // next
-                            if (ivNext.isEnabled) openMonth(true)
-                            notClick = true
-                        } else if (x < x2) { // prev
-                            if (ivPrev.isEnabled) openMonth(false)
-                            notClick = true
-                        }
-                    }
-                    if (animMaxFinished) {
-                        fabRefresh.isVisible = true
-                        fabRefresh.startAnimation(anMax)
-                        fabRndMenu.isVisible = true
-                        fabRndMenu.startAnimation(anMax)
-                    }
-                }
-                MotionEvent.ACTION_CANCEL -> if (animMaxFinished) {
-                    fabRefresh.isVisible = true
-                    fabRefresh.startAnimation(anMax)
-                    fabRndMenu.isVisible = true
-                    fabRndMenu.startAnimation(anMax)
-                }
+        val swipe = SwipeHelper {
+            when (it) {
+                SwipeHelper.Events.SWIPE_LEFT ->
+                    if (ivNext.isEnabled) openMonth(true)
+                SwipeHelper.Events.SWIPE_RIGHT ->
+                    if (ivPrev.isEnabled) openMonth(false)
             }
-            false
         }
+        swipe.attach(rvBook)
+        setButtonsHider(rvBook)
         ivPrev.setOnClickListener { openMonth(false) }
         ivNext.setOnClickListener { openMonth(true) }
         tvDate.setOnClickListener { showDatePicker(toiler.date) }
@@ -382,7 +333,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun onItemClick(index: Int, item: ListItem) {
-        if (notClick) return
         if (toiler.isRun) return
         openedReader = true
         openReader(item.link, null)

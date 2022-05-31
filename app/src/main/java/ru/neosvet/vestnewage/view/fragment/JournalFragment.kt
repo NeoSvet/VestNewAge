@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -16,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -28,6 +29,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -47,6 +49,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     private lateinit var tip: Tip
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
+    private var jobShow: Job? = null
 
     override fun onAttach(context: Context) {
         act = activity as MainActivity?
@@ -69,7 +72,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toiler.preparing()
-        initViews()
+        setViews()
         initAnim()
         activity?.let {
             it.title = getString(R.string.journal)
@@ -80,7 +83,7 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initViews() = binding?.run {
+    private fun setViews() = binding?.run {
         tip = Tip(act, tvFinish)
         fabClear.setOnClickListener {
             fabClear.isVisible = false
@@ -95,19 +98,33 @@ class JournalFragment : Fragment(), Observer<NeoState> {
                 adapter.submitData(lifecycle, it)
             }
         }
-
-        rvJournal.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (adapter.itemCount == 0) return@setOnTouchListener false
-            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                fabClear.startAnimation(anMin)
-            } else if (motionEvent.action == MotionEvent.ACTION_UP
-                || motionEvent.action == MotionEvent.ACTION_CANCEL
-            ) {
-                fabClear.isVisible = true
-                fabClear.startAnimation(anMax)
+        val scroll = ScrollHelper {
+            when (it) {
+                ScrollHelper.Events.SCROLL_END ->
+                    hideButton(fabClear)
+                ScrollHelper.Events.SCROLL_START ->
+                    showButton(fabClear)
             }
-            false
         }
+        scroll.attach(rvJournal)
+    }
+
+    private fun hideButton(button: View) {
+        if (button.isVisible.not()) return
+        button.clearAnimation()
+        button.startAnimation(anMin)
+        jobShow?.cancel()
+        jobShow = lifecycleScope.launch {
+            delay(1000)
+            showButton(button)
+        }
+    }
+
+    private fun showButton(button: View) {
+        if (button.isVisible) return
+        button.isVisible = true
+        button.clearAnimation()
+        button.startAnimation(anMax)
     }
 
     private fun initAnim() {

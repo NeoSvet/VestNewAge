@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -86,18 +85,9 @@ class SummaryFragment : NeoFragment() {
     private fun setViews() = binding?.run {
         rvSummary.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvSummary.adapter = adapter
-        act?.fab = fabRefresh
+        act?.setButton(fabRefresh, true)
         fabRefresh.setOnClickListener { startLoad() }
-        rvSummary.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                if (animMinFinished) act?.startAnimMin()
-            } else if (motionEvent.action == MotionEvent.ACTION_UP
-                || motionEvent.action == MotionEvent.ACTION_CANCEL
-            ) {
-                if (animMaxFinished) act?.startAnimMax()
-            }
-            false
-        }
+        setButtonsHider(rvSummary)
     }
 
     override fun onChangedState(state: NeoState) {

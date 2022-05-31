@@ -3,7 +3,10 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -21,12 +24,12 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.SwipeHelper
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
-import kotlin.math.abs
 
 class SiteFragment : NeoFragment() {
     companion object {
@@ -45,8 +48,6 @@ class SiteFragment : NeoFragment() {
     private val ads: AdsUtils by lazy {
         AdsUtils(act)
     }
-    private var x = 0
-    private var y = 0
     private var binding: SiteFragmentBinding? = null
     override val title: String
         get() = ""
@@ -63,7 +64,6 @@ class SiteFragment : NeoFragment() {
         ViewModelProvider(this).get(SiteToiler::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        act?.fab = binding?.fabRefresh
         setViews()
         initTabs()
         restoreState(savedInstanceState)
@@ -141,34 +141,23 @@ class SiteFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
+        act?.setButton(fabRefresh, true)
         fabRefresh.setOnClickListener { startLoad() }
         rvSite.adapter = adapter
-        rvSite.setOnTouchListener { _, event: MotionEvent ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    if (animMinFinished) act?.startAnimMin()
-                    x = event.getX(0).toInt()
-                    y = event.getY(0).toInt()
+        val swipe = SwipeHelper {
+            when (it) {
+                SwipeHelper.Events.SWIPE_LEFT -> act?.run {
+                    val t = tabLayout.selectedTabPosition
+                    if (t < 1) tabLayout.select(t + 1)
                 }
-                MotionEvent.ACTION_UP -> {
-                    val x2 = event.getX(0).toInt()
-                    val r = abs(x - x2)
-                    if (r > (30 * resources.displayMetrics.density).toInt() &&
-                        r > abs(y - event.getY(0).toInt())
-                    ) act?.run {
-                        val t = tabLayout.selectedTabPosition
-                        if (x > x2) // next
-                            if (t < 1) tabLayout.select(t + 1)
-                            else if (x < x2) // prev
-                                if (t > 0) tabLayout.select(t - 1)
-                    }
-                    if (animMaxFinished) act?.startAnimMax()
+                SwipeHelper.Events.SWIPE_RIGHT -> act?.run {
+                    val t = tabLayout.selectedTabPosition
+                    if (t > 0) tabLayout.select(t - 1)
                 }
-                MotionEvent.ACTION_CANCEL ->
-                    if (animMaxFinished) act?.startAnimMax()
             }
-            false
         }
+        swipe.attach(rvSite)
+        setButtonsHider(rvSite)
     }
 
     private fun openMultiLink(links: ListItem, parent: View) {

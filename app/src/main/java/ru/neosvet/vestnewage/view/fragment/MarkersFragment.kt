@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -22,8 +21,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
-import ru.neosvet.vestnewage.viewmodel.MarkersToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -32,6 +29,8 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
+import ru.neosvet.vestnewage.viewmodel.MarkersToiler
+import ru.neosvet.vestnewage.viewmodel.basic.*
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
@@ -39,9 +38,9 @@ class MarkersFragment : NeoFragment() {
         MarkerAdapter(toiler)
     }
     private lateinit var menu: Tip
-    private lateinit var anMin: Animation
-    private lateinit var anMax: Animation
-    private var anRotate: Animation? = null
+    private val anRotate: Animation by lazy {
+        initAnimation()
+    }
     private var stopRotate = false
     private val toiler: MarkersToiler
         get() = neotoiler as MarkersToiler
@@ -78,7 +77,6 @@ class MarkersFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        initAnim()
         initFragment()
         initContent()
         restoreState(savedInstanceState)
@@ -107,37 +105,22 @@ class MarkersFragment : NeoFragment() {
         }
     }
 
-    private fun initRotate() {
-        stopRotate = false
-        if (anRotate == null) {
-            anRotate = AnimationUtils.loadAnimation(act, R.anim.rotate)
-            anRotate?.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) {}
-                override fun onAnimationEnd(animation: Animation) {
-                    if (!stopRotate) binding?.fabMenu?.startAnimation(anRotate)
-                }
-
-                override fun onAnimationRepeat(animation: Animation) {}
-            })
-        }
-        binding?.fabMenu?.startAnimation(anRotate)
-    }
-
-    private fun initAnim() {
-        anMin = AnimationUtils.loadAnimation(requireContext(), R.anim.minimize)
-        anMin.setAnimationListener(object : Animation.AnimationListener {
+    private fun initAnimation(): Animation {
+        val animation = AnimationUtils.loadAnimation(requireContext(), R.anim.rotate)
+        animation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                binding?.run {
-                    fabEdit.isVisible = false
-                    fabBack.isVisible = false
-                    fabMenu.isVisible = false
-                }
+                if (!stopRotate) binding?.fabMenu?.startAnimation(anRotate)
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
         })
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize)
+        return animation
+    }
+
+    private fun startRotate() {
+        stopRotate = false
+        binding?.fabMenu?.startAnimation(anRotate)
     }
 
     private fun initFragment() = binding?.run {
@@ -164,29 +147,7 @@ class MarkersFragment : NeoFragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initContent() = binding?.content?.run {
         rvMarker.adapter = adapter
-        rvMarker.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (toiler.iSel > -1 || toiler.list.size == 0) return@setOnTouchListener false
-            binding?.run {
-                if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    fabEdit.startAnimation(anMin)
-                    if (toiler.isCollections.not()) fabBack.startAnimation(anMin)
-                    else fabMenu.startAnimation(anMin)
-                } else if (motionEvent.action == MotionEvent.ACTION_UP
-                    || motionEvent.action == MotionEvent.ACTION_CANCEL
-                ) {
-                    fabEdit.isVisible = true
-                    fabEdit.startAnimation(anMax)
-                    if (toiler.isCollections.not()) {
-                        fabBack.isVisible = true
-                        fabBack.startAnimation(anMax)
-                    } else {
-                        fabMenu.isVisible = true
-                        fabMenu.startAnimation(anMax)
-                    }
-                }
-            }
-            false
-        }
+        setButtonsHider(rvMarker)
         bOk.setOnClickListener {
             toiler.saveChange()
             val index = toiler.iSel
@@ -215,7 +176,7 @@ class MarkersFragment : NeoFragment() {
             binding?.fabBack?.isVisible = false
         if (toiler.workOnFile) {
             if (load) {
-                initRotate()
+                startRotate()
             } else {
                 stopRotate = true
                 binding?.fabMenu?.clearAnimation()
@@ -274,6 +235,7 @@ class MarkersFragment : NeoFragment() {
 
     private fun goToEdit() {
         adapter.notifyItemChanged(toiler.iSel)
+        act?.clearButtons()
         binding?.run {
             fabEdit.isVisible = false
             fabBack.isVisible = false
@@ -285,10 +247,22 @@ class MarkersFragment : NeoFragment() {
     private fun unSelected() = binding?.run {
         toiler.change = false
         if (toiler.list.isNotEmpty()) fabEdit.isVisible = true
-        if (toiler.isCollections.not()) fabBack.isVisible = true
-        else fabMenu.isVisible = true
+        if (toiler.isCollections) onColButton()
+        else onMarButton()
         content.pEdit.isVisible = false
         toiler.selected(-1)
+    }
+
+    private fun onMarButton() = binding?.run {
+        fabBack.isVisible = true
+        fabMenu.isVisible = false
+        act?.setButtons(fabBack, fabEdit)
+    }
+
+    private fun onColButton() = binding?.run {
+        fabMenu.isVisible = true
+        fabBack.isVisible = false
+        act?.setButtons(fabMenu, fabEdit)
     }
 
     private fun selectFile(isExport: Boolean) {
@@ -362,8 +336,10 @@ class MarkersFragment : NeoFragment() {
         binding?.run {
             fabEdit.clearAnimation()
             fabMenu.clearAnimation()
-            fabMenu.isVisible = toiler.isCollections && toiler.iSel == -1
-            fabBack.isVisible = toiler.isCollections.not() && toiler.iSel == -1
+            if (toiler.iSel == -1) {
+                if (toiler.isCollections) onColButton()
+                else onMarButton()
+            }
         }
         act?.title = title
         if (toiler.list.isEmpty()) {
@@ -398,7 +374,6 @@ class MarkersFragment : NeoFragment() {
                 unSelected()
             } else
                 adapter.notifyItemChanged(toiler.iSel)
-            //goToEdit()
         }
     }
 }
