@@ -234,7 +234,7 @@ class MarkerToiler : NeoToiler() {
             if (cursor.moveToFirst()) {
                 val iId = cursor.getColumnIndex(DataBase.ID)
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
-                helper.colsList.add(
+                helper.colsList.add(1,
                     CheckItem(
                         id = cursor.getInt(iId),
                         title = cursor.getString(iTitle),
