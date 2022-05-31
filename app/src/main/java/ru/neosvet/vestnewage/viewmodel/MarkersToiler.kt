@@ -12,12 +12,12 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.viewmodel.basic.*
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.io.*
 
 class MarkersToiler : NeoToiler() {
@@ -202,8 +202,8 @@ class MarkersToiler : NeoToiler() {
                         data = link
                     )
                     item.place = place
-                    item.des =
-                        cursor.getString(iDes) + Const.N + getPlace(link, place)
+                    item.des = if (cursor.getString(iDes).isEmpty()) getPlace(link, place)
+                    else cursor.getString(iDes) + Const.N + getPlace(link, place)
                     k++
                     list.add(item)
                 }
