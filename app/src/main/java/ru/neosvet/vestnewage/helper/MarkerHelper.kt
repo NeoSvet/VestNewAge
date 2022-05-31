@@ -35,11 +35,17 @@ class MarkerHelper(private val strings: MarkerStrings) {
         if (isPar) {
             val s = getParList()
             sel = if (s == null) {
-                parsList[0].isChecked = true
+                checkedAllPars()
                 getParList() ?: ""
             } else s
         } else
             sel = String.format(formatPos, pos)
+    }
+
+    private fun checkedAllPars() {
+        parsList.forEach { item ->
+            item.isChecked = true
+        }
     }
 
     fun checkPars(index: Int, isChecked: Boolean): Int {
