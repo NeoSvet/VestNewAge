@@ -10,13 +10,13 @@ import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.MarkerHelper
+import ru.neosvet.vestnewage.storage.MarkersStorage
+import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.Success
-import ru.neosvet.vestnewage.storage.MarkersStorage
-import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.utils.Const
 
 class MarkerToiler : NeoToiler() {
     enum class Type {
@@ -292,10 +292,11 @@ class MarkerToiler : NeoToiler() {
                 val cursor = storage.getMarkersList(item.id.toString())
                 if (cursor.moveToFirst()) {
                     var s = cursor.getString(0) ?: "" //список закладок в подборке
-                    if (s.isNotEmpty()) s = Const.COMMA
                     //добавляем новую закладку в самое начало
+                    s = if (s.isEmpty()) marId.toString()
+                    else marId.toString() + Const.COMMA + s
                     val row = ContentValues()
-                    row.put(DataBase.MARKERS, marId.toString() + s)
+                    row.put(DataBase.MARKERS, s)
                     storage.updateCollection(item.id, row)
                 }
                 cursor.close()
