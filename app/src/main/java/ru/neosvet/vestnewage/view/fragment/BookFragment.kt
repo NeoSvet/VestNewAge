@@ -4,15 +4,17 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
@@ -34,7 +36,6 @@ import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.SwipeHelper
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.*
-import java.util.*
 
 class BookFragment : NeoFragment(), DateDialog.Result {
     companion object {
@@ -60,10 +61,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private var dialog: String? = ""
     private val helper: BookHelper
         get() = toiler.helper!!
-    val hTimer = Handler {
-        binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
-        false
-    }
     override val title: String
         get() = ""
     private var openedReader = false
@@ -238,13 +235,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         toiler.openList(true)
     }
 
-    private fun blinkDate() {
-        binding?.tvDate?.setBackgroundResource(R.drawable.selected)
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                hTimer.sendEmptyMessage(1)
-            }
-        }, 300)
+    private fun blinkDate() = binding?.tvDate?.let {
+        it.setBackgroundResource(R.drawable.selected)
+        lifecycleScope.launch {
+            delay(300)
+            it.post { it.setBackgroundResource(R.drawable.card_bg) }
+        }
     }
 
     private fun showAlertDownloadOtkr() {

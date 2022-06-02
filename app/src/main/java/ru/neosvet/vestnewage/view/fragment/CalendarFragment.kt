@@ -3,13 +3,14 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
@@ -27,7 +28,6 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
-import java.util.*
 
 class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     private val toiler: CalendarToiler
@@ -38,12 +38,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     private var dialog = false
     val currentYear: Int
         get() = toiler.date.year
-    val hTimer = Handler { message: Message ->
-        if (message.what == 0)
-            binding?.tvDate?.setBackgroundResource(R.drawable.card_bg)
-        else act?.startShowButtons()
-        false
-    }
     override val title: String
         get() = getString(R.string.calendar)
     private var openedReader = false
@@ -113,11 +107,10 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                     if (animMinFinished) act?.startHideButtons()
                 }
                 if (event.action == MotionEvent.ACTION_UP) {
-                    Timer().schedule(object : TimerTask() {
-                        override fun run() {
-                            hTimer.sendEmptyMessage(1)
-                        }
-                    }, 1000)
+                    lifecycleScope.launch {
+                        delay(1000)
+                        rvCalendar.post { act?.startShowButtons() }
+                    }
                 }
                 false
             }
@@ -132,12 +125,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun openMonth(offset: Int) {
-        binding?.tvDate?.setBackgroundResource(R.drawable.selected)
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                hTimer.sendEmptyMessage(0)
+        binding?.tvDate?.let {
+            it.setBackgroundResource(R.drawable.selected)
+            lifecycleScope.launch {
+                delay(300)
+                it.post { it.setBackgroundResource(R.drawable.card_bg) }
             }
-        }, 300)
+        }
         toiler.openCalendar(offset)
     }
 
