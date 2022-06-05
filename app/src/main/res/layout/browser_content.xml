@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:showIn="@layout/browser_activity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pSearch"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/panel_height"
+        android:layout_height="wrap_content"
         android:background="@drawable/card_bg"
-        android:orientation="horizontal"
-        android:padding="5dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp"
         android:visibility="gone">
 
         <ImageButton
@@ -20,51 +22,80 @@
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/button"
             android:contentDescription="@string/close"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_close" />
+            app:tint="@android:color/white"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="@id/tilSearch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
-        <EditText
-            android:id="@+id/etSearch"
-            style="@style/Label"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearch"
+            style="@style/TextInputStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/field_trans"
-            android:hint="@string/string_for_search"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:padding="5dp"
-            android:textColorHint="@color/light_gray" />
+            android:layout_margin="0dp"
+            android:hint="@string/search"
+            app:layout_constraintEnd_toStartOf="@id/bPrev"
+            app:layout_constraintStart_toEndOf="@id/bClose"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSearch"
+                style="@style/EditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingEnd="40dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/bClear"
+            style="@style/ClearButton"
+            android:layout_marginTop="5dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tilSearch"
+            app:layout_constraintEnd_toEndOf="@id/tilSearch"
+            app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
         <ImageButton
             android:id="@+id/bPrev"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/button"
             android:contentDescription="@string/to_prev_result"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_left" />
+            android:src="@drawable/ic_left"
+            app:layout_constraintBottom_toBottomOf="@id/tilSearch"
+            app:layout_constraintEnd_toStartOf="@id/bNext"
+            app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
         <ImageButton
             android:id="@+id/bNext"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
+            android:layout_marginTop="5dp"
             android:background="@drawable/button"
             android:contentDescription="@string/to_next_result"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_right" />
-    </LinearLayout>
+            android:src="@drawable/ic_right"
+            app:layout_constraintBottom_toBottomOf="@id/tilSearch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tilSearch" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <WebView
         android:id="@+id/wvBrowser"

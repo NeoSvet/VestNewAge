@@ -43,7 +43,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bDownloadAll"
             style="@style/Label"
             android:layout_width="match_parent"
@@ -57,7 +57,7 @@
             android:layout_height="1dp"
             android:background="@color/colorAccentLight" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bDownloadIt"
             style="@style/Label"
             android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:padding="10dp" />
     </LinearLayout>
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvPromTime"
         style="@style/Label"
         android:layout_width="wrap_content"
@@ -78,7 +78,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvNew"
         style="@style/Label"
         android:layout_width="@dimen/fab_size"
@@ -112,7 +112,7 @@
             android:progressDrawable="@drawable/status_progressbar"
             android:visibility="gone" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvStatus"
             style="@style/StatusLabel"
             android:layout_alignParentStart="true" />

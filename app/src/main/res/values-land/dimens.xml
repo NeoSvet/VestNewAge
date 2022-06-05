@@ -9,7 +9,7 @@
     <dimen name="calendar_margin_top">3dp</dimen>
     <dimen name="margin_side">85dp</dimen>
     <dimen name="margin_top">48dp</dimen>
-    <integer name="top_minus">80</integer>
+    <integer name="top_minus">90</integer>
     <integer name="screen_mode">1</integer>
     <dimen name="menu_width">260dp</dimen>
 </resources>

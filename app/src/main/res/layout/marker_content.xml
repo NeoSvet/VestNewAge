@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fadeScrollbars="false"
     android:orientation="vertical"
     android:paddingTop="?attr/actionBarSize"
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvTitle"
             style="@style/ItemBG"
             android:layout_width="match_parent"
@@ -23,31 +24,35 @@
             android:paddingStart="10dp"
             android:paddingEnd="10dp" />
 
-        <RadioGroup
+        <com.google.android.material.button.MaterialButtonToggleGroup
             style="@style/ItemBG"
+            android:background="@drawable/card_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/card_bg"
-            android:orientation="horizontal">
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            app:selectionRequired="true"
+            app:singleSelection="true">
 
-            <RadioButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/rPar"
-                style="@style/CheckBox"
+                style="@style/ButtonCheck"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/paragraph" />
 
-            <RadioButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/rPos"
-                style="@style/CheckBox"
+                style="@style/ButtonCheck"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/position" />
-        </RadioGroup>
 
-        <TextView
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvSel"
             style="@style/ItemBG"
             android:layout_width="match_parent"
@@ -55,52 +60,43 @@
             android:background="@drawable/card_bg"
             android:padding="10dp" />
 
-        <LinearLayout
-            style="@style/ItemBG"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:orientation="vertical">
+            android:hint="@string/desctription"
+            android:padding="10dp">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDes"
-                style="@style/Label"
+                style="@style/EditTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:autofillHints="no"
-                android:background="@color/colorPrimary"
-                android:hint="@string/desctription"
                 android:imeOptions="actionDone"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
+                android:inputType="text" />
 
-        </LinearLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <LinearLayout
-            style="@style/ItemBG"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:orientation="vertical">
+            android:hint="@string/add_col"
+            android:padding="10dp">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etCol"
-                style="@style/Label"
+                style="@style/EditTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:autofillHints="no"
-                android:background="@color/colorPrimary"
-                android:hint="@string/add_col"
                 android:imeOptions="actionGo"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColorHint="@color/light_gray" />
-        </LinearLayout>
+                android:inputType="text" />
 
-        <TextView
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvCol"
             style="@style/ItemBG"
             android:layout_width="match_parent"

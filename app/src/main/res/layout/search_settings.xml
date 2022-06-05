@@ -19,7 +19,7 @@
         android:background="@drawable/button"
         android:gravity="center" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
         android:layout_gravity="center"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/bStartRange"
             style="@style/Button"
             android:layout_width="wrap_content"
@@ -41,7 +41,7 @@
             android:paddingStart="10dp"
             android:paddingEnd="10dp" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
             android:text="–"
             android:textStyle="bold" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/bEndRange"
             style="@style/Button"
             android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
 
     </LinearLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bChangeRange"
         style="@style/Button"
         android:layout_width="wrap_content"
@@ -71,7 +71,7 @@
         android:paddingEnd="15dp"
         android:text="@string/change_range" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bClearSearch"
         style="@style/Button"
         android:layout_width="wrap_content"

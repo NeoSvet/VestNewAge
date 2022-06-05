@@ -5,7 +5,7 @@
     android:background="@drawable/starsky_bg"
     android:orientation="vertical">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

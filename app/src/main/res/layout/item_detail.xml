@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_item"
             style="@style/Label"
             android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:paddingEnd="15dp"
             android:textColor="@color/colorAccentLight" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/des_item"
             style="@style/Des"
             android:autoLink="web|email"

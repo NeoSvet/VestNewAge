@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.view.activity
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
 import android.view.animation.Animation
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
@@ -357,6 +359,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             wvBrowser.findNext(true)
         }
         bClose.setOnClickListener { closeSearch() }
+        etSearch.doAfterTextChanged {
+            bClear.isVisible = it?.isNotEmpty() ?: false
+        }
+        bClear.setOnClickListener { etSearch.setText("") }
         val bBack = binding.navView.getHeaderView(0).findViewById(R.id.bBack) as View
         bBack.setOnClickListener { finish() }
         initTheme()
@@ -380,12 +386,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         val context = this@BrowserActivity
         if (helper.isLightTheme) {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.black))
-            etSearch.setHintTextColor(ContextCompat.getColor(context, R.color.dark_gray))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white))
             setCheckItem(menu.themeLight, true)
         } else {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.white))
-            etSearch.setHintTextColor(ContextCompat.getColor(context, R.color.light_gray))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
             setCheckItem(menu.themeDark, true)
         }

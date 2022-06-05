@@ -19,7 +19,7 @@
             android:src="@drawable/ic_left" />
     </LinearLayout>
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvPromTimeInMenu"
         style="@style/Label"
         android:layout_width="wrap_content"

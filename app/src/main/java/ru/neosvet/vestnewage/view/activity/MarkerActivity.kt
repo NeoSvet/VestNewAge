@@ -240,15 +240,15 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
 
     @SuppressLint("Range")
     private fun initContent() = binding.content.run {
-        rPar.setOnCheckedChangeListener { _, check: Boolean ->
-            if (check) {
+        rPar.setOnClickListener {
+            if (rPar.isChecked) {
                 helper.isPar = true
                 helper.updateSel()
                 tvSel.text = helper.sel
             }
         }
-        rPos.setOnCheckedChangeListener { _, check: Boolean ->
-            if (check) {
+        rPos.setOnClickListener {
+            if (rPos.isChecked) {
                 helper.isPar = false
                 helper.updateSel()
                 tvSel.text = helper.sel

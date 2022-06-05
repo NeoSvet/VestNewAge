@@ -13,15 +13,15 @@
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/ivPrev"
+        <ImageButton
+            android:id="@+id/bPrev"
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
             android:contentDescription="@string/to_prev_month"
             android:src="@drawable/left" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvDate"
             style="@style/Label"
             android:layout_width="0dp"
@@ -33,8 +33,8 @@
             android:gravity="center"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/ivNext"
+        <ImageButton
+            android:id="@+id/bNext"
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
@@ -64,7 +64,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bRndStih"
             style="@style/Label"
             android:layout_width="match_parent"
@@ -78,7 +78,7 @@
             android:layout_height="1dp"
             android:background="@color/colorAccentLight" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bRndPos"
             style="@style/Label"
             android:layout_width="wrap_content"
@@ -92,7 +92,7 @@
             android:layout_height="1dp"
             android:background="@color/colorAccentLight" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bRndKat"
             style="@style/Label"
             android:layout_width="match_parent"

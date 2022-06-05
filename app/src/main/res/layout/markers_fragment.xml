@@ -8,7 +8,7 @@
         android:id="@+id/content"
         layout="@layout/markers_content" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvEmpty"
         style="@style/Label"
         android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bExport"
             style="@style/Label"
             android:layout_width="match_parent"
@@ -50,7 +50,7 @@
             android:layout_height="1dp"
             android:background="@color/colorAccentLight" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/bImport"
             style="@style/Label"
             android:layout_width="match_parent"

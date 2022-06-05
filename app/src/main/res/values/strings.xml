@@ -246,7 +246,6 @@
     <string name="srv_info">\nСлужебная информация:\n</string>
     <!--SearchFragment-->
     <string name="not_found">Не найдено</string>
-    <string name="string_for_search">Строка для поиска</string>
     <string name="clear_search">Очистить историю поиска</string>
     <string name="alert_search">Результатов нет. Вы скачали все материалы прежде, чем приступать к поиску?</string>
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>

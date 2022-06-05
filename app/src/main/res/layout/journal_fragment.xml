@@ -11,7 +11,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvEmptyJournal"
         style="@style/Label"
         android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_clear" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvFinish"
         style="@style/Label"
         android:layout_width="wrap_content"

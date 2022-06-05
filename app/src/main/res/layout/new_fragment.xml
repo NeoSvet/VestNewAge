@@ -11,7 +11,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvEmptyNew"
         style="@style/Label"
         android:layout_width="wrap_content"

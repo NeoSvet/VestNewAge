@@ -8,7 +8,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvTip"
         style="@style/ItemBG"
         android:layout_width="match_parent"
@@ -25,84 +25,76 @@
         android:layout_height="match_parent"
         android:background="@drawable/card_bg">
 
-        <EditText
-            android:id="@+id/etEmail"
-            style="@style/Label"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmail"
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/string_size"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:autofillHints="emailAddress"
-            android:background="@color/colorPrimary"
-            android:hint="@string/email"
-            android:imeOptions="actionNext"
-            android:inputType="textEmailAddress"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="@dimen/string_size"
-            android:paddingBottom="5dp"
-            android:textColorHint="@color/light_gray"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:hint="@string/email">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                style="@style/EditTextStyle"
+                android:imeOptions="actionNext"
+                android:paddingEnd="40dp"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <ImageView
             android:id="@+id/bClearEmail"
-            android:layout_width="@dimen/string_size"
-            android:layout_height="@dimen/string_size"
-            android:layout_gravity="center_vertical"
-            android:padding="7dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_close"
+            style="@style/ClearButton"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@id/etEmail"
-            app:layout_constraintTop_toTopOf="@id/etEmail" />
+            app:layout_constraintEnd_toEndOf="@id/tilEmail"
+            app:layout_constraintTop_toTopOf="@id/tilEmail"
+            app:layout_constraintBottom_toBottomOf="@id/tilEmail" />
 
-        <EditText
-            android:id="@+id/etPassword"
-            style="@style/Label"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassword"
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/string_size"
-            android:layout_margin="10dp"
-            android:autofillHints="password"
-            android:background="@color/colorPrimary"
+            android:layout_height="wrap_content"
             android:hint="@string/password"
-            android:imeOptions="actionGo"
-            android:inputType="textPassword"
-            android:paddingStart="5dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="@dimen/string_size"
-            android:paddingBottom="5dp"
-            android:textColorHint="@color/light_gray"
-            app:layout_constraintTop_toBottomOf="@id/etEmail" />
+            app:layout_constraintTop_toBottomOf="@id/tilEmail">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                style="@style/EditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionGo"
+                android:inputType="textPassword"
+                android:paddingEnd="40dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <ImageView
             android:id="@+id/bClearPassword"
-            android:layout_width="@dimen/string_size"
-            android:layout_height="@dimen/string_size"
-            android:layout_gravity="center_vertical"
-            android:padding="7dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_close"
+            style="@style/ClearButton"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@id/etPassword"
-            app:layout_constraintTop_toTopOf="@id/etPassword" />
+            app:layout_constraintBottom_toBottomOf="@id/tilPassword"
+            app:layout_constraintEnd_toEndOf="@id/tilPassword"
+            app:layout_constraintTop_toTopOf="@id/tilPassword" />
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbRemEmail"
             style="@style/CheckBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="5dp"
             android:text="@string/remember_email"
-            app:layout_constraintTop_toBottomOf="@id/etPassword" />
+            app:layout_constraintTop_toBottomOf="@id/tilPassword" />
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbRemPassword"
             style="@style/CheckBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="15dp"
             android:enabled="false"
             android:text="@string/remember_password"
             app:layout_constraintTop_toBottomOf="@id/cbRemEmail" />

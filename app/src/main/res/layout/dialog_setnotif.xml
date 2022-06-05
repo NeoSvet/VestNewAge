@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="14dp">
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/cbSound"
         style="@style/CheckBox"
         android:layout_width="wrap_content"
@@ -14,14 +14,14 @@
         android:layout_marginBottom="5dp"
         android:text="@string/notif_sound" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSound"
         style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bRingtone"
         style="@style/Button"
         android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
         android:paddingEnd="10dp"
         android:text="@string/select" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/cbVibr"
         style="@style/CheckBox"
         android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
         android:layout_marginBottom="20dp"
         android:text="@string/vibr" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"
         style="@style/Button"
         android:layout_width="wrap_content"

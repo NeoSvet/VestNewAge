@@ -28,15 +28,15 @@
         app:layout_constraintStart_toEndOf="@id/rvCalendar"
         app:layout_constraintTop_toTopOf="@id/rvCalendar">
 
-        <ImageView
-            android:id="@+id/ivPrev"
+        <ImageButton
+            android:id="@+id/bPrev"
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
             android:contentDescription="@string/to_prev_month"
             android:src="@drawable/left" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvDate"
             style="@style/Label"
             android:layout_width="wrap_content"
@@ -48,8 +48,8 @@
             android:minWidth="90dp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/ivNext"
+        <ImageButton
+            android:id="@+id/bNext"
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
@@ -57,7 +57,7 @@
             android:src="@drawable/right" />
     </LinearLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bProm"
         style="@style/Button"
         android:layout_width="0dp"

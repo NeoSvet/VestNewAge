@@ -217,7 +217,7 @@ public class DateDialog extends Dialog implements View.OnClickListener {
             ViewHolder(View itemView) {
                 super(itemView);
                 bg = itemView.findViewById(R.id.cell_bg);
-                tv = (TextView) itemView.findViewById(R.id.cell_tv);
+                tv = itemView.findViewById(R.id.cell_tv);
             }
         }
     }

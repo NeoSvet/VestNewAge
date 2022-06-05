@@ -10,7 +10,7 @@
     android:orientation="vertical"
     android:padding="3dp">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/cell_tv"
         style="@style/Label"
         android:layout_width="match_parent"

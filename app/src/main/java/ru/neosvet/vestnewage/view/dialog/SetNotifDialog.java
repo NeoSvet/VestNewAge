@@ -25,8 +25,6 @@ public class SetNotifDialog extends Dialog {
     private String name, uri;
     private SharedPreferences pref;
     private TextView tvSound;
-    private View bRingtone;
-    private CheckBox cbSound, cbVibr;
 
     public SetNotifDialog(@NonNull Activity act, String source) {
         super(act);
@@ -47,9 +45,9 @@ public class SetNotifDialog extends Dialog {
         setContentView(R.layout.dialog_setnotif);
 
         tvSound = findViewById(R.id.tvSound);
-        bRingtone = findViewById(R.id.bRingtone);
-        cbSound = findViewById(R.id.cbSound);
-        cbVibr = findViewById(R.id.cbVibr);
+        View bRingtone = findViewById(R.id.bRingtone);
+        CheckBox cbSound = findViewById(R.id.cbSound);
+        CheckBox cbVibr = findViewById(R.id.cbVibr);
 
         pref = act.getSharedPreferences(source, Context.MODE_PRIVATE);
         name = pref.getString(NAME, null);

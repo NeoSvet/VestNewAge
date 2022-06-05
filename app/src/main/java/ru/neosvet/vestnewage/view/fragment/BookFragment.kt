@@ -175,8 +175,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         setStatus(false)
         act?.updateNew()
         tvDate.text = state.date
-        ivPrev.isEnabled = state.prev
-        ivNext.isEnabled = state.next
+        bPrev.isEnabled = state.prev
+        bNext.isEnabled = state.next
         adapter.setItems(state.list)
         rvBook.smoothScrollToPosition(0)
     }
@@ -184,8 +184,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         act?.setButtons(fabRndMenu, fabRefresh)
-        ivPrev.isEnabled = false
-        ivNext.isEnabled = false
+        bPrev.isEnabled = false
+        bNext.isEnabled = false
         menuRnd = Tip(requireContext(), pRnd)
         bRndStih.setOnClickListener {
             menuRnd.hide()
@@ -205,15 +205,15 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         val swipe = SwipeHelper {
             when (it) {
                 SwipeHelper.Events.SWIPE_LEFT ->
-                    if (ivNext.isEnabled) openMonth(true)
+                    if (bNext.isEnabled) openMonth(true)
                 SwipeHelper.Events.SWIPE_RIGHT ->
-                    if (ivPrev.isEnabled) openMonth(false)
+                    if (bPrev.isEnabled) openMonth(false)
             }
         }
         swipe.attach(rvBook)
         setButtonsHider(rvBook)
-        ivPrev.setOnClickListener { openMonth(false) }
-        ivNext.setOnClickListener { openMonth(true) }
+        bPrev.setOnClickListener { openMonth(false) }
+        bNext.setOnClickListener { openMonth(true) }
         tvDate.setOnClickListener { showDatePicker(toiler.date) }
         fabRndMenu.setOnClickListener {
             if (menuRnd.isShow) menuRnd.hide()
@@ -252,7 +252,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         builder.setPositiveButton(
             getString(R.string.yes)
         ) { _, _ ->
-            binding?.ivPrev?.isEnabled = false
+            binding?.bPrev?.isEnabled = false
             LoaderService.postCommand(
                 LoaderService.DOWNLOAD_OTKR, ""
             )
@@ -268,8 +268,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
                 tvDate.isEnabled = false
-                ivPrev.isEnabled = false
-                ivNext.isEnabled = false
+                bPrev.isEnabled = false
+                bNext.isEnabled = false
                 fabRefresh.isVisible = false
                 fabRndMenu.isVisible = false
             } else {

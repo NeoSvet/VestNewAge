@@ -114,8 +114,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 }
                 false
             }
-        ivPrev.setOnClickListener { openMonth(-1) }
-        ivNext.setOnClickListener { openMonth(1) }
+        bPrev.setOnClickListener { openMonth(-1) }
+        bNext.setOnClickListener { openMonth(1) }
         tvDate.setOnClickListener { showDatePicker() }
     }
 
@@ -140,8 +140,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         binding?.run {
             if (load) {
                 tvDate.isEnabled = false
-                ivPrev.isEnabled = false
-                ivNext.isEnabled = false
+                bPrev.isEnabled = false
+                bNext.isEnabled = false
                 fabRefresh.isVisible = false
             } else {
                 tvDate.isEnabled = true
@@ -202,8 +202,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         if (state is SuccessCalendar) binding?.run {
             act?.updateNew()
             tvDate.text = state.date
-            ivPrev.isEnabled = state.prev
-            ivNext.isEnabled = state.next
+            bPrev.isEnabled = state.prev
+            bNext.isEnabled = state.next
             adCalendar.setItems(state.list)
         } else if (state == Ready)
             Lib.showToast(getString(R.string.load_unavailable))

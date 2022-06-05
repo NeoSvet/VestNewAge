@@ -31,7 +31,7 @@
             android:id="@+id/content"
             layout="@layout/browser_content" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvFinish"
             style="@style/Label"
             android:layout_width="wrap_content"
@@ -77,7 +77,7 @@
             android:contentDescription="@string/to_bottom"
             app:srcCompat="@drawable/ic_bottom" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvPromTime"
             style="@style/Label"
             android:layout_width="wrap_content"
@@ -98,7 +98,7 @@
             android:orientation="horizontal"
             android:visibility="gone">
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvStatus"
                 style="@style/StatusLabel" />
 
