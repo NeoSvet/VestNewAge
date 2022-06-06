@@ -14,6 +14,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,10 +22,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
-import ru.neosvet.vestnewage.viewmodel.MarkerToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
@@ -32,6 +29,10 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.list.CheckAdapter
+import ru.neosvet.vestnewage.viewmodel.MarkerToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 @SuppressLint("DefaultLocale")
 class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
@@ -282,6 +283,14 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
             }
             false
         }
+        etDes.doAfterTextChanged {
+            bClearDes.isVisible = it?.isNotEmpty() ?: false
+        }
+        bClearDes.setOnClickListener { etDes.setText("") }
+        etCol.doAfterTextChanged {
+            bClearCol.isVisible = it?.isNotEmpty() ?: false
+        }
+        bClearCol.setOnClickListener { etCol.setText("") }
     }
 
     private fun createCol(title: String) {

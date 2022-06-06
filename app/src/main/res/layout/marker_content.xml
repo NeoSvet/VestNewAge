@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fadeScrollbars="false"
     android:orientation="vertical"
     android:paddingTop="?attr/actionBarSize"
     tools:showIn="@layout/marker_activity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvTitle"
@@ -22,15 +21,18 @@
             android:layout_margin="10dp"
             android:background="@drawable/card_bg"
             android:paddingStart="10dp"
-            android:paddingEnd="10dp" />
+            android:paddingEnd="10dp"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/tgPlace"
             style="@style/ItemBG"
-            android:background="@drawable/card_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
             app:selectionRequired="true"
             app:singleSelection="true">
 
@@ -58,15 +60,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:padding="10dp" />
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tgPlace" />
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDes"
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:hint="@string/desctription"
-            android:padding="10dp">
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSel">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDes"
@@ -74,17 +79,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingEnd="40dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <ImageView
+            android:id="@+id/bClearDes"
+            style="@style/ClearButton"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tilDes"
+            app:layout_constraintEnd_toEndOf="@id/tilDes"
+            app:layout_constraintTop_toTopOf="@id/tilDes" />
+
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCol"
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:hint="@string/add_col"
-            android:padding="10dp">
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tilDes">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etCol"
@@ -92,9 +110,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionGo"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingEnd="40dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/bClearCol"
+            style="@style/ClearButton"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tilCol"
+            app:layout_constraintEnd_toEndOf="@id/tilCol"
+            app:layout_constraintTop_toTopOf="@id/tilCol" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvCol"
@@ -102,7 +131,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:padding="10dp" />
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tilCol" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

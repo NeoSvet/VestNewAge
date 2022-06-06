@@ -75,12 +75,11 @@ class MarkerToiler : NeoToiler() {
 
     private fun newMarker(intent: Intent) = helper.run {
         task = Type.NEW_MARKER
-        des = if (intent.hasExtra(Const.DESCTRIPTION))
-            intent.getStringExtra(Const.DESCTRIPTION) ?: ""
-        else {
-            val d = DateUnit.initNow()
-            d.toString()
-        }
+        val d = intent.getStringExtra(Const.DESCTRIPTION)
+        des = if (d.isNullOrEmpty()) {
+            val date = DateUnit.initNow()
+            date.toString()
+        } else d
         cols = strings.sel_col + strings.no_collections
         colsList[0].isChecked = true
         when {
@@ -234,7 +233,8 @@ class MarkerToiler : NeoToiler() {
             if (cursor.moveToFirst()) {
                 val iId = cursor.getColumnIndex(DataBase.ID)
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
-                helper.colsList.add(1,
+                helper.colsList.add(
+                    1,
                     CheckItem(
                         id = cursor.getInt(iId),
                         title = cursor.getString(iTitle),
