@@ -20,8 +20,11 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -82,13 +85,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ConnectWatcher.start(this)
-        ScreenUtils.init(this)
-        App.context = this
-        if (savedInstanceState == null)
+        val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
+        if (savedInstanceState == null && withSplash)
             launchSplashScreen()
         else
             setTheme(R.style.Theme_MainTheme)
+        ConnectWatcher.start(this)
+        ScreenUtils.init(this)
+        App.context = this
         initLaunch()
         helper = MainHelper(this)
         firstFragment = helper.getFirstFragment()
@@ -119,6 +123,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
             MultiWindowSupport.resizeFloatTextView(helper.tvNew, true)
         }
+        if (withSplash.not())
+            finishFlashStar()
     }
 
     private fun launchSplashScreen() {
@@ -132,12 +138,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 override fun onAnimationStart(animation: Animation) {}
                 override fun onAnimationEnd(animation: Animation) {
                     provider.remove()
-                    finishFlashStar()
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {}
             })
             provider.view.startAnimation(anStar)
+        }
+        lifecycleScope.launch {
+            delay(1600)
+            helper.tvNew.post {
+                finishFlashStar()
+            }
         }
     }
 
@@ -415,6 +426,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             tabLayout.isVisible = false
         }
     }
+
 
     private fun setMenu(id: Int, savePrev: Boolean) {
         helper.changeId(id, savePrev)

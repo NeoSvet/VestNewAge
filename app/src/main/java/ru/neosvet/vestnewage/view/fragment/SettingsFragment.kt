@@ -319,6 +319,7 @@ class SettingsFragment : NeoFragment() {
         editor.apply()
         if (name == Const.START_NEW) return
         val main = Intent(act, MainActivity::class.java)
+        main.putExtra(Const.START_SCEEN, false)
         if (value == -1) main.putExtra(Const.CUR_ID, R.id.nav_settings)
         startActivity(main)
         act?.finish()
