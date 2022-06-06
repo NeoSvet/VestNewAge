@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import ru.neosvet.vestnewage.utils.Lib
 import kotlin.math.abs
 
 
@@ -27,7 +26,6 @@ class SwipeHelper(
         ): Boolean = false
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            Lib.LOG("onSwiped")
             when (direction) {
                 ItemTouchHelper.LEFT ->
                     events.invoke(Events.SWIPE_LEFT)

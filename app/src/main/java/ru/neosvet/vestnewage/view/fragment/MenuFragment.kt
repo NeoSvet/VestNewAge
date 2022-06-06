@@ -80,7 +80,6 @@ class MenuFragment : Fragment() {
             initList(0)
         } else {
             isFullScreen = true
-            Lib.LOG("initView=$isFullScreen")
             act!!.title = getString(R.string.app_name)
             ivHeadMenu.isVisible = false
             initList(1)
@@ -113,7 +112,6 @@ class MenuFragment : Fragment() {
     }
 
     fun setSelect(id: Int) {
-        Lib.LOG("setSelect=$isFullScreen")
         if (isFullScreen) return
         for (i in mMenu.indices) {
             if (id == mMenu[i]) {
