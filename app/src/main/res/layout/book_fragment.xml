@@ -19,6 +19,7 @@
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
             android:contentDescription="@string/to_prev_month"
+            android:scaleType="fitXY"
             android:src="@drawable/left" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -39,6 +40,7 @@
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
             android:contentDescription="@string/to_next_month"
+            android:scaleType="fitXY"
             android:src="@drawable/right" />
     </LinearLayout>
 

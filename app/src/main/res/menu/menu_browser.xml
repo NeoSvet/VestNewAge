@@ -26,18 +26,18 @@
         android:title="@string/src_scale" />
     <item
         android:id="@+id/nav_nomenu"
-        android:icon="@drawable/none"
+        android:icon="@drawable/uncheckbox_simple"
         android:title="@string/hide_menu" />
     <item
         android:id="@+id/nav_buttons"
-        android:icon="@drawable/none"
+        android:icon="@drawable/uncheckbox_simple"
         android:title="@string/nav_buttons" />
     <item
         android:id="@+id/nav_light"
-        android:icon="@drawable/none"
+        android:icon="@drawable/uncheckbox_simple"
         android:title="@string/light_theme" />
     <item
         android:id="@+id/nav_dark"
-        android:icon="@drawable/none"
+        android:icon="@drawable/uncheckbox_simple"
         android:title="@string/dark_theme" />
 </menu>

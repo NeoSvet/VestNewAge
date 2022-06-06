@@ -24,6 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
+                android:background="@drawable/button_norm"
                 android:src="@drawable/plus" />
 
             <com.google.android.material.textview.MaterialTextView

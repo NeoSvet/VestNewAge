@@ -459,7 +459,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     private fun setCheckItem(item: MenuItem, check: Boolean) {
-        item.setIcon(if (check) R.drawable.check_transparent else R.drawable.none)
+        item.setIcon(if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple)
     }
 
     fun onPageFinished() {

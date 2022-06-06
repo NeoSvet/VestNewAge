@@ -19,8 +19,9 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
-            android:src="@drawable/left"
-            android:contentDescription="@string/to_prev_month" />
+            android:contentDescription="@string/to_prev_month"
+            android:scaleType="fitXY"
+            android:src="@drawable/left" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvDate"
@@ -39,8 +40,9 @@
             android:layout_width="@dimen/calendar_button"
             android:layout_height="@dimen/calendar_button"
             android:background="@drawable/button"
-            android:src="@drawable/right"
-            android:contentDescription="@string/to_next_month" />
+            android:contentDescription="@string/to_next_month"
+            android:scaleType="fitXY"
+            android:src="@drawable/right" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -73,9 +75,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="@string/refresh"
         app:srcCompat="@drawable/ic_refresh" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
