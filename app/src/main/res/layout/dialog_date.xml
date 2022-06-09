@@ -15,18 +15,16 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bStart"
-            style="@style/Button"
             android:layout_width="@dimen/string_size"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:gravity="center"
             android:padding="0dp"
             android:text="&lt;" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bMinus"
-            style="@style/Button"
             android:layout_width="@dimen/string_size"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:gravity="center"
@@ -35,16 +33,14 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvYear"
-            style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bPlus"
-            style="@style/Button"
             android:layout_width="@dimen/string_size"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:gravity="center"
@@ -53,9 +49,8 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bEnd"
-            style="@style/Button"
             android:layout_width="@dimen/string_size"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/string_size"
             android:gravity="center"
             android:padding="0dp"
             android:text="&gt;" />
@@ -71,14 +66,13 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"
-        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_margin="6dp"
-        android:paddingStart="10dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingEnd="20dp"
         android:text="@android:string/ok" />
 </LinearLayout>

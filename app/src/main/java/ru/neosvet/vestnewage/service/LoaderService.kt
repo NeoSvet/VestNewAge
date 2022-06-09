@@ -16,14 +16,15 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.loader.*
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
 
 /**
  * Created by NeoSvet on 19.11.2019.
@@ -35,9 +36,8 @@ class LoaderService : LifecycleService(), LoadHandler {
 
         var isRun = false
         const val STOP = -2
-        const val ALL = -1
         const val DOWNLOAD_ALL = 0
-        const val DOWNLOAD_ID = 1
+        const val DOWNLOAD_IT = 1
         const val DOWNLOAD_YEAR = 2
         const val DOWNLOAD_PAGE = 3
         const val DOWNLOAD_OTKR = 4
@@ -209,17 +209,17 @@ class LoaderService : LifecycleService(), LoadHandler {
         when (mode) {
             DOWNLOAD_ALL -> {
                 progress.count = 3
-                refreshLists(ALL)
-                loadLists(ALL)
+                refreshLists(Section.MENU)
+                loadLists(Section.MENU)
             }
-            DOWNLOAD_ID -> {
-                val id = request!!.toInt()
-                if (id == R.id.nav_book)
+            DOWNLOAD_IT -> {
+                val section = Section.valueOf(request!!)
+                if (section == Section.BOOK)
                     progress.count = 3
                 else
                     progress.count = 2
-                refreshLists(id)
-                loadLists(id)
+                refreshLists(section)
+                loadLists(section)
             }
             DOWNLOAD_OTKR -> { //загрузка Посланий за 2004-2015
                 curLoader = loaderBook
@@ -239,17 +239,17 @@ class LoaderService : LifecycleService(), LoadHandler {
         finishService(null)
     }
 
-    private fun loadLists(id: Int) {
-        val type = when (id) {
-            ALL -> {
+    private fun loadLists(section: Section) {
+        val type = when (section) {
+            Section.MENU -> {
                 loadAllUcoz()
                 ListLoader.Type.ALL
             }
-            R.id.nav_book -> {
+            Section.BOOK -> {
                 loadAllUcoz()
                 ListLoader.Type.BOOK
             }
-            R.id.nav_site -> ListLoader.Type.SITE
+            Section.SITE -> ListLoader.Type.SITE
             else -> return
         }
         if (isRun.not()) return
@@ -264,10 +264,10 @@ class LoaderService : LifecycleService(), LoadHandler {
         progress.task++
     }
 
-    private fun refreshLists(id: Int) {
-        calcCountLists(id)
+    private fun refreshLists(section: Section) {
+        calcCountLists(section)
         val listsUtils = ListsUtils()
-        if (id == ALL) {
+        if (section == Section.MENU) {
             if (listsUtils.summaryIsOld()) {
                 val loader = SummaryLoader()
                 loader.loadList(false)
@@ -275,7 +275,7 @@ class LoaderService : LifecycleService(), LoadHandler {
             if (isRun.not()) return
             upProg()
         }
-        if (id == ALL || id == R.id.nav_site) {
+        if (section == Section.MENU || section == Section.SITE) {
             if (listsUtils.siteIsOld())
                 loadSiteSection()
             if (isRun.not()) return
@@ -283,9 +283,9 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
 
         if (listsUtils.bookIsOld()) {
-            if (id == ALL)
+            if (section == Section.MENU)
                 loadAllCalendar()
-            if (id == ALL || id == R.id.nav_book) {
+            if (section == Section.MENU || section == Section.BOOK) {
                 curLoader = loaderBook
                 loaderBook.loadNewPoslaniya()
                 upProg()
@@ -327,11 +327,11 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
     }
 
-    private fun calcCountLists(id: Int) {
-        val k = when (id) {
-            ALL ->  //book (tolk + 2 year), site and rss, calendar from 2016
+    private fun calcCountLists(section: Section) {
+        val k = when (section) {
+            Section.MENU ->  //book (tolk + 2 year), site and rss, calendar from 2016
                 5 + curYear - 2015
-            R.id.nav_book ->
+            Section.BOOK ->
                 curYear - 2015 // from 2016
             else -> 1
         }

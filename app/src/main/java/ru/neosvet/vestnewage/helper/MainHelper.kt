@@ -2,16 +2,18 @@ package ru.neosvet.vestnewage.helper
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.allViews
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.drawerlayout.widget.DrawerLayout
-import com.google.android.material.navigation.NavigationView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.MenuItem
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -19,75 +21,71 @@ import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
+import ru.neosvet.vestnewage.view.list.MenuAdapter
 
 class MainHelper(private val act: MainActivity) {
     companion object {
         const val TAG = "Main"
     }
 
-    enum class MenuType {
-        FLOAT, SIDE, FULL
+    enum class ActionType {
+        MENU, ACTION, INVISIBLE
     }
 
-    var navView: NavigationView? = null
+    var type = ActionType.MENU
+        private set
+    lateinit var tipAction: Tip
+    lateinit var fabAction: FloatingActionButton
+    private val adAction = MenuAdapter(this::onActionClick)
+    var actionIcon: Int = R.drawable.star
+        private set
+    var shownActionMenu = false
+        private set
+    var tvTitle: TextView? = null
+    var bottomBar: BottomAppBar? = null
+    val bottomBarIsHide: Boolean
+        get() = bottomBar?.isVisible == false || bottomBar?.isScrolledDown == true
+
     var frMenu: MenuFragment? = null
-    lateinit var menuDownload: Tip
-    lateinit var bDownloadAll: TextView
-    lateinit var bDownloadIt: TextView
-    lateinit var tvNew: TextView
+    var tvNew: TextView? = null
     lateinit var pStatus: View
-    lateinit var pDownload: View
-    var toolbar: Toolbar? = null
     lateinit var tvPromTime: TextView
-    var drawer: DrawerLayout? = null
     lateinit var tabLayout: TabLayout
 
     val unread = UnreadUtils()
     var countNew: Int = 0
-    var curId = 0
-    var prevId = 0
-    val hasPrevId: Boolean
-        get() = prevId != 0
+    var curSection = Section.SETTINGS
+    var prevSection: Section? = null
     val newId: Int
         get() = unread.getNewId(countNew)
     private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
-    private var menuType = MenuType.FLOAT
     val isCountInMenu: Boolean
         get() = pref.getBoolean(Const.COUNT_IN_MENU, true)
-    val isFloatMenu: Boolean
-        get() = menuType == MenuType.FLOAT
-    val isSideMenu: Boolean
-        get() = menuType == MenuType.SIDE
-    val isFullMenu: Boolean
-        get() = menuType == MenuType.FULL
+    var isSideMenu: Boolean = false
+        private set
 
     fun initViews() {
-        navView = act.findViewById(R.id.nav_view)
-        navView?.itemIconTintList = null
-        bDownloadAll = act.findViewById(R.id.bDownloadAll)
-        bDownloadIt = act.findViewById(R.id.bDownloadIt)
-        tvNew = act.findViewById(R.id.tvNew)
         pStatus = act.findViewById(R.id.pStatus)
-        pDownload = act.findViewById(R.id.pDownload)
-        toolbar = act.findViewById(R.id.toolbar)
         tvPromTime = act.findViewById(R.id.tvPromTime)
         tabLayout = act.findViewById(R.id.tablayout)
-        menuDownload = Tip(act, pDownload)
+        fabAction = act.findViewById(R.id.fabAction)
+        val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
+        tipAction = Tip(act, rvAction)
+        tipAction.autoHide = false
+        rvAction.layoutManager = GridLayoutManager(act, 1)
+        rvAction.adapter = adAction
 
-        val content = act.findViewById<View>(android.R.id.content).rootView as View
-        content.allViews.forEach {
-            if (it is DrawerLayout) {
-                drawer = it
-                return@forEach
-            }
+        fabAction.setOnClickListener {
+            if (type == ActionType.MENU)
+                showActionMenu()
+            else
+                act.onAction(TAG)
         }
-
-        bDownloadAll.setOnClickListener {
-            menuDownload.hide()
-            LoaderService.postCommand(
-                LoaderService.DOWNLOAD_ALL, ""
-            )
-        }
+        isSideMenu = ScreenUtils.isTabletLand
+        if (isSideMenu) return
+        tvTitle = act.findViewById(R.id.tvTitle)
+        bottomBar = act.findViewById(R.id.bottom_app_bar)
+        bottomBar!!.setBackgroundResource(R.drawable.panel_bg)
     }
 
     private var isFirst: Boolean? = null
@@ -104,52 +102,39 @@ class MainHelper(private val act: MainActivity) {
         return isFirst!!
     }
 
-    fun getFirstFragment(): Int {
-        val startNew = pref.getBoolean(Const.START_NEW, false)
-        if (startNew && countNew > 0)
-            return R.id.nav_new
-
+    fun getFirstSection(): Section {
         val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
-        menuType = if (ScreenUtils.isTabletLand)
-            MenuType.SIDE
-        else
-            MenuType.FLOAT
         return when {
-            startScreen == Const.SCREEN_MENU && ScreenUtils.isTablet.not() -> {
-                menuType = MenuType.FULL
-                R.id.menu_fragment
-            }
+            startScreen == Const.SCREEN_MENU && ScreenUtils.isTablet.not() ->
+                Section.MENU
             startScreen == Const.SCREEN_SUMMARY ->
-                R.id.nav_rss
+                Section.SUMMARY
             else -> //startScreen == Const.SCREEN_CALENDAR || !isFullMenu ->
-                R.id.nav_calendar
+                Section.CALENDAR
         }
     }
 
-    fun checkNew(): Boolean {
-        if (countNew > 0 && (curId == R.id.nav_new || curId == R.id.nav_rss ||
-                    curId == R.id.nav_site || curId == R.id.nav_calendar)
-        ) {
-            tvNew.isVisible = true
-            return true
-        }
-        tvNew.isVisible = false
-        return false
+    fun startWithNew(): Boolean {
+        countNew = unread.count
+        val startNew = pref.getBoolean(Const.START_NEW, false)
+        return startNew && countNew > 0
+    }
+
+    fun checkNew() = tvNew?.run {
+        isVisible = countNew > 0
+        if (isVisible) text = countNew.toString()
     }
 
     fun setNewValue() {
-        tvNew.text = countNew.toString()
-        navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
+        frMenu?.setNew(newId)
     }
 
     fun updateNew() {
         val k = unread.count
         if (countNew == k) return
         countNew = k
-        navView?.menu?.getItem(0)?.setIcon(newId) ?: frMenu?.setNew(newId)
-        tvNew.text = countNew.toString()
-        if (checkNew())
-            tvNew.startAnimation(AnimationUtils.loadAnimation(act, R.anim.blink))
+        frMenu?.setNew(newId)
+        checkNew()
     }
 
     fun setMenuFragment() {
@@ -160,41 +145,87 @@ class MainHelper(private val act: MainActivity) {
             }
         }
         frMenu?.let {
-            it.setSelect(curId)
+            it.setSelect(curSection)
             it.setNew(newId)
         }
     }
 
-    fun changeId(id: Int, savePrev: Boolean) {
-        menuDownload.hide()
-        prevId = if (savePrev) curId else 0
-        curId = id
+    fun hideActionMenu() {
+        if (shownActionMenu.not()) return
+        shownActionMenu = false
+        act.unblocked()
+        tipAction.hide()
     }
 
-    @SuppressLint("NonConstantResourceId")
-    fun showDownloadMenu() {
-        if (menuDownload.isShow)
-            menuDownload.hide()
-        else {
-            with(bDownloadIt) {
-                when (curId) {
-                    R.id.nav_site -> {
-                        isVisible = true
-                        text = act.getString(R.string.download_it_main)
-                    }
-                    R.id.nav_calendar -> {
-                        isVisible = true
-                        text = act.getString(R.string.download_it_calendar)
-                    }
-                    R.id.nav_book -> {
-                        isVisible = true
-                        text = act.getString(R.string.download_it_book)
-                    }
-                    else -> isVisible = false
-                }
-            }
-            menuDownload.show()
+    fun changeSection(section: Section, savePrev: Boolean) {
+        hideActionMenu()
+        adAction.clear()
+        prevSection = if (savePrev) curSection else null
+        curSection = section
+        when (section) {
+            Section.NEW ->
+                setActionIcon(R.drawable.ic_clear)
+            Section.JOURNAL ->
+                setActionIcon(R.drawable.ic_clear)
+            Section.SUMMARY ->
+                setActionIcon(R.drawable.ic_refresh)
+            Section.CABINET ->
+                setActionIcon(0)
+            Section.SEARCH ->
+                setActionIcon(R.drawable.ic_settings)
+            Section.SETTINGS ->
+                setActionIcon(0)
+            Section.HELP ->
+                setActionIcon(0)
+            else ->
+                setActionIcon(R.drawable.star)
         }
+    }
+
+    private fun onActionClick(index: Int, item: MenuItem) {
+        hideActionMenu()
+        if (index == 0) {
+            LoaderService.postCommand(
+                LoaderService.DOWNLOAD_ALL, ""
+            )
+            return
+        }
+        if (index == adAction.itemCount - 1)
+            return
+        act.onAction(item.title)
+    }
+
+    @SuppressLint("NonConstantResourceId", "NotifyDataSetChanged")
+    private fun showActionMenu() {
+        shownActionMenu = true
+        act.blocked()
+        tipAction.show()
+        if (adAction.itemCount > 0) return
+        adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_all))
+        when (curSection) {
+            Section.SITE -> {
+                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_articles))
+                adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
+            }
+            Section.CALENDAR -> {
+                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_calendar))
+                adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
+            }
+            Section.BOOK -> {
+                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_book))
+                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_stih))
+                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_pos))
+                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_kat))
+                adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
+            }
+            Section.MARKERS -> {
+                adAction.addItem(R.drawable.ic_marker, act.getString(R.string.export))
+                adAction.addItem(R.drawable.ic_marker, act.getString(R.string.import_))
+                adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
+            }
+        }
+        adAction.addItem(R.drawable.ic_close, act.getString(R.string.close))
+        adAction.notifyDataSetChanged()
     }
 
     fun getYear(link: String): Int {
@@ -205,5 +236,18 @@ class MainHelper(private val act: MainActivity) {
         } catch (ignored: Exception) {
         }
         return 2016
+    }
+
+    fun setActionIcon(icon: Int) {
+        actionIcon = icon
+        if (icon == 0) {
+            type = ActionType.INVISIBLE
+            fabAction.isVisible = false
+        } else {
+            fabAction.isVisible = true
+            type = if (icon == R.drawable.star) ActionType.MENU else ActionType.ACTION
+            fabAction.setImageDrawable(ContextCompat.getDrawable(act, icon))
+        }
+        bottomBar?.requestLayout()
     }
 }

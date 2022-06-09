@@ -75,22 +75,15 @@ class NewFragment : NeoFragment() {
 
     private fun emptyList() {
         adapter.clear()
-        binding?.run {
-            tvEmptyNew.isVisible = true
-            fabClear.isVisible = false
-        }
+        binding?.tvEmptyNew?.isVisible = true
+        act?.setAction(0)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setView() = binding?.run {
-        act?.setButton(fabClear, true)
-        fabClear.setOnClickListener {
-            toiler.clearList()
-        }
-
         rvNew.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvNew.adapter = adapter
-        setButtonsHider(rvNew)
+        setListEvents(rvNew)
     }
 
     private fun onItemClick(index: Int, item: ListItem) {
@@ -101,5 +94,9 @@ class NewFragment : NeoFragment() {
             openedReader = true
             openReader(item.link, null)
         }
+    }
+
+    override fun onAction(title: String) {
+        toiler.clearList()
     }
 }

@@ -92,7 +92,7 @@ class CalendarToiler : NeoToiler() {
     fun isNeedReload(): Boolean {
         val d = DateUnit.initNow()
         val f = Lib.getFileDB(d.my)
-        return !f.exists() || System.currentTimeMillis() - f.lastModified() > DateUnit.HOUR_IN_MILLS
+        return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
     fun openCalendar(offsetMonth: Int) {

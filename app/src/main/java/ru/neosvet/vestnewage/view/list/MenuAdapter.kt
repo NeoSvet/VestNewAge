@@ -45,6 +45,10 @@ class MenuAdapter(
         holder.setItem(data[position])
     }
 
+    fun clear() {
+        data.clear()
+    }
+
     inner class Holder(
         private val root: View
     ) : RecyclerView.ViewHolder(root) {

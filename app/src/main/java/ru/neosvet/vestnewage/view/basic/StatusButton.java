@@ -20,8 +20,6 @@ import ru.neosvet.vestnewage.view.activity.MainActivity;
 public class StatusButton {
     private Context context;
     private Animation anRotate;
-    private Animation anMin;
-    private Animation anMax;
     private Animation anHide;
     private View panel;
     private TextView tv;
@@ -73,26 +71,6 @@ public class StatusButton {
 
             }
         });
-        if (context instanceof MainActivity) {
-            anMin = AnimationUtils.loadAnimation(context, R.anim.minimize);
-            anMin.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    panel.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-            anMax = AnimationUtils.loadAnimation(context, R.anim.maximize);
-        }
     }
 
     public boolean isVisible() {
@@ -216,20 +194,6 @@ public class StatusButton {
 
     public boolean isTime() {
         return time;
-    }
-
-    public boolean startMin() {
-        if (visible)
-            panel.startAnimation(anMin);
-        return visible;
-    }
-
-    public boolean startMax() {
-        if (visible) {
-            panel.setVisibility(View.VISIBLE);
-            panel.startAnimation(anMax);
-        }
-        return visible;
     }
 
     public void setProgress(int p) {

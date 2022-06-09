@@ -16,16 +16,17 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DataBase;
 import ru.neosvet.vestnewage.data.DateUnit;
+import ru.neosvet.vestnewage.data.Section;
 import ru.neosvet.vestnewage.helper.BookHelper;
 import ru.neosvet.vestnewage.helper.BrowserHelper;
 import ru.neosvet.vestnewage.helper.CabinetHelper;
 import ru.neosvet.vestnewage.helper.MainHelper;
 import ru.neosvet.vestnewage.helper.SearchHelper;
-import ru.neosvet.vestnewage.viewmodel.SiteToiler;
 import ru.neosvet.vestnewage.service.LoaderService;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 import ru.neosvet.vestnewage.view.activity.BrowserActivity;
 import ru.neosvet.vestnewage.view.activity.MainActivity;
+import ru.neosvet.vestnewage.viewmodel.SiteToiler;
 
 public class LaunchUtils {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
@@ -109,7 +110,7 @@ public class LaunchUtils {
     public boolean isNeedLoad() {
         SharedPreferences pref = App.context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
         long time = pref.getLong(Const.TIME, 0);
-        if (System.currentTimeMillis() - time > (DateUnit.HOUR_IN_MILLS * 3)) {
+        if (DateUnit.isLongAgo(time)) {
             SharedPreferences.Editor editor = pref.edit();
             editor.putLong(Const.TIME, System.currentTimeMillis());
             editor.apply();
@@ -185,13 +186,13 @@ public class LaunchUtils {
 
     private Intent getSettingsIntent() {
         Intent intent = new Intent(App.context, MainActivity.class);
-        intent.putExtra(Const.CUR_ID, R.id.nav_settings);
+        intent.putExtra(Const.CUR_ID, Section.SETTINGS.toString());
         return intent;
     }
 
     public boolean openLink(Intent intent) {
         if (intent.getBooleanExtra(Const.ADS, false)) {
-            main.putExtra(Const.CUR_ID, R.id.nav_site);
+            main.putExtra(Const.CUR_ID, Section.SITE.toString());
             main.putExtra(Const.TAB, 2);
             return true;
         }
@@ -205,15 +206,15 @@ public class LaunchUtils {
             return false;
 
         if (link.contains(Const.RSS)) {
-            main.putExtra(Const.CUR_ID, R.id.nav_rss);
+            main.putExtra(Const.CUR_ID, Section.SUMMARY.toString());
             if (intent.hasExtra(DataBase.ID))
                 main.putExtra(DataBase.ID, intent.getIntExtra(DataBase.ID,
                         NotificationUtils.NOTIF_SUMMARY));
         } else if (link.length() < 2 || link.equals("/index.html")) {
-            main.putExtra(Const.CUR_ID, R.id.nav_site);
+            main.putExtra(Const.CUR_ID, Section.SITE.toString());
             main.putExtra(Const.TAB, 0);
         } else if (link.equals(SiteToiler.NOVOSTI)) {
-            main.putExtra(Const.CUR_ID, R.id.nav_site);
+            main.putExtra(Const.CUR_ID, Section.SITE.toString());
             main.putExtra(Const.TAB, 1);
         } else if (link.contains(Const.HTML)) {
             BrowserActivity.openReader(link.substring(1), null);
@@ -225,10 +226,10 @@ public class LaunchUtils {
                     + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML;
             BrowserActivity.openReader(link, null);
         } else if (link.contains("/poems")) {
-            main.putExtra(Const.CUR_ID, R.id.nav_book);
+            main.putExtra(Const.CUR_ID, Section.BOOK.toString());
             main.putExtra(Const.TAB, 0);
         } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
-            main.putExtra(Const.CUR_ID, R.id.nav_book);
+            main.putExtra(Const.CUR_ID, Section.BOOK.toString());
             main.putExtra(Const.TAB, 1);
         }
         return true;

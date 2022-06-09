@@ -20,7 +20,6 @@
         android:gravity="center" />
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -35,14 +34,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bStartRange"
-            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="10dp"
             android:paddingEnd="10dp" />
 
         <com.google.android.material.textview.MaterialTextView
-            style="@style/Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
@@ -52,7 +49,6 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bEndRange"
-            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="10dp"
@@ -62,7 +58,6 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bChangeRange"
-        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -73,7 +68,6 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bClearSearch"
-        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

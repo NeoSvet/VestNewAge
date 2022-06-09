@@ -8,12 +8,12 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"
-        style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:layout_weight="1"
-        android:paddingLeft="5dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
         android:textColor="@color/colorAccentLight" />
 
     <View
@@ -22,19 +22,18 @@
         android:layout_marginBottom="5dp"
         android:background="@color/colorAccentLight" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="30">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/message"
-            style="@style/Label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingRight="10dp" />
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <EditText
         android:id="@+id/input"
@@ -62,7 +61,6 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/leftButton"
-            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
@@ -73,7 +71,6 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/rightButton"
-            style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"

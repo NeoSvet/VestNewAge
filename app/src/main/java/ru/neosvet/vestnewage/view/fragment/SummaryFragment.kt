@@ -4,15 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -28,7 +24,7 @@ class SummaryFragment : NeoFragment() {
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
     override val title: String
-        get() = getString(R.string.rss)
+        get() = getString(R.string.summary)
     private var openedReader = false
 
     override fun initViewModel(): NeoToiler =
@@ -49,7 +45,7 @@ class SummaryFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
-        restoreState(savedInstanceState)
+        toiler.openList(savedInstanceState == null)
     }
 
     override fun onResume() {
@@ -60,34 +56,11 @@ class SummaryFragment : NeoFragment() {
         }
     }
 
-    override fun setStatus(load: Boolean) {
-        super.setStatus(load)
-        binding?.fabRefresh?.isVisible = !load
-    }
-
-    private fun restoreState(state: Bundle?) {
-        if (state != null) {
-            toiler.openList(false)
-            return
-        }
-        val f = Lib.getFile(Const.RSS)
-        if (f.exists()) {
-            act?.run {
-                val time = f.lastModified() / DateUnit.SEC_IN_MILLS
-                binding?.fabRefresh?.isVisible = !status.checkTime(time)
-            }
-            toiler.openList(true)
-        } else
-            startLoad()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         rvSummary.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvSummary.adapter = adapter
-        act?.setButton(fabRefresh, true)
-        fabRefresh.setOnClickListener { startLoad() }
-        setButtonsHider(rvSummary)
+        setListEvents(rvSummary)
     }
 
     override fun onChangedState(state: NeoState) {
@@ -103,5 +76,9 @@ class SummaryFragment : NeoFragment() {
         if (toiler.isRun) return
         openedReader = true
         openReader(item.link, null)
+    }
+
+    override fun onAction(title: String) {
+        startLoad()
     }
 }

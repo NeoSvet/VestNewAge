@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/app_bar_menu"
+        android:icon="@drawable/ic_menu"
+        android:title="@string/menu"
+        app:actionLayout="@layout/menu_item_layout"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/app_bar_start"
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/calendar"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/app_bar_read"
+        android:icon="@drawable/ic_book"
+        android:title="@string/read"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/app_bar_prom"
+                android:icon="@drawable/little_star"
+                android:title="@string/text_prom" />
+            <item
+                android:id="@+id/app_bar_journal"
+                android:icon="@drawable/ic_journal"
+                android:title="@string/journal" />
+            <item
+                android:id="@+id/app_bar_marker"
+                android:icon="@drawable/ic_marker"
+                android:title="@string/markers" />
+            <item
+                android:id="@+id/app_bar_book"
+                android:icon="@drawable/ic_book"
+                android:title="@string/book" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/app_bar_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/app_bar_cabinet"
+        android:icon="@drawable/ic_cabinet"
+        android:title="@string/cabinet"
+        app:showAsAction="always" />
+</menu>

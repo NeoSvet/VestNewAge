@@ -309,15 +309,6 @@ class MarkersToiler : NeoToiler() {
         return t ?: link
     }
 
-    fun onBack(): Boolean {
-        if (iSel > -1) {
-            iSel = -1
-            openList()
-            return false
-        }
-        return true
-    }
-
     fun openList() {
         iSel = -1
         if (sCol == null) openColList()
@@ -325,6 +316,8 @@ class MarkersToiler : NeoToiler() {
     }
 
     fun canEdit(): Boolean {
+        if (list.isEmpty())
+            return false
         iSel = if (isCollections) {
             if (list.size == 1)
                 return false
@@ -634,6 +627,11 @@ class MarkersToiler : NeoToiler() {
 
     fun onClick(index: Int) {
         if (isRun) return
+        if (iSel > -1) {
+            if (isCollections && index == 0) return // вне подборок
+            selected(index)
+            return
+        }
         when {
             isCollections ->
                 openMarList(index)

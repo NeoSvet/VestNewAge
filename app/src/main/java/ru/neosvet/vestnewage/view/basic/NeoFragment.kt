@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
+import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
@@ -26,7 +27,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     protected val neotoiler: NeoToiler by lazy {
         initViewModel()
     }
-    private var jobShow: Job? = null
+    private var jobAnim: Job? = null
+    private var scroll: ScrollHelper? = null
 
     abstract val title: String
 
@@ -53,6 +55,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     override fun onDestroyView() {
         ConnectWatcher.unSubscribe()
+        scroll?.deAttach()
         act = null
         super.onDestroyView()
     }
@@ -64,6 +67,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         }
         return true
     }
+
+    open fun onAction(title: String) {}
 
     abstract fun onChangedState(state: NeoState)
 
@@ -112,11 +117,13 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     open fun setStatus(load: Boolean) {
         act?.run {
             if (load) {
+                act?.blocked()
                 status.loadText()
                 status.setLoad(true)
             } else {
                 if (status.isVisible && status.isCrash.not())
                     status.setLoad(false)
+                act?.unblocked()
             }
         }
     }
@@ -138,14 +145,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         }
     }
 
-    protected val animMinFinished: Boolean
-        get() = act?.status?.startMin() == false
-
-    protected val animMaxFinished: Boolean
-        get() = act?.status?.startMax() == false
-
-    protected fun setButtonsHider(rv: RecyclerView) {
-        val scroll = ScrollHelper {
+    protected fun setListEvents(list: RecyclerView, onlyLimit: Boolean = true) {
+        scroll = ScrollHelper {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
                     hideButtons()
@@ -153,22 +154,44 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
                     showButtons()
             }
         }
-        scroll.attach(rv)
+        scroll?.attach(list)
+        val swipe = TouchHelper {
+            when (it) {
+                TouchHelper.Events.LIST_LIMIT ->
+                    hideBottomPanel()
+                TouchHelper.Events.SWIPE_LEFT ->
+                    swipeLeft()
+                TouchHelper.Events.SWIPE_RIGHT ->
+                    swipeRight()
+            }
+        }
+        swipe.attach(list)
     }
 
-    private fun showButtons() {
-        if (animMaxFinished)
-            act?.startShowButtons()
+    open fun swipeLeft() {}
+
+    open fun swipeRight() {}
+
+    private fun showButtons() = act?.run {
+        startShowButton()
+        checkBottomPanel()
     }
 
     private fun hideButtons() {
-        if (animMinFinished) {
-            act?.startHideButtons()
-            jobShow?.cancel()
-            jobShow = lifecycleScope.launch {
-                delay(1000)
-                showButtons()
-            }
+        act?.startHideButton()
+        jobAnim?.cancel()
+        jobAnim = lifecycleScope.launch {
+            delay(1000)
+            showButtons()
+        }
+    }
+
+    private fun hideBottomPanel() {
+        act?.hideBottomPanel()
+        jobAnim?.cancel()
+        jobAnim = lifecycleScope.launch {
+            delay(1000)
+            act?.showBottomPanel()
         }
     }
 }

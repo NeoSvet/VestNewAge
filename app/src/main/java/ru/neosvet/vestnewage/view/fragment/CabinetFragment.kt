@@ -13,11 +13,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helper.CabinetHelper
-import ru.neosvet.vestnewage.viewmodel.CabinetToiler
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
@@ -25,6 +20,11 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.viewmodel.CabinetToiler
+import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class CabinetFragment : NeoFragment() {
     private var binding: CabinetFragmentBinding? = null
@@ -71,13 +71,12 @@ class CabinetFragment : NeoFragment() {
                 binding?.run {
                     if (toiler.screen == CabinetToiler.Screen.LOGIN) {
                         login.root.isVisible = true
-                        fabEnter.isVisible = true
-                        fabExit.isVisible = false
+                        act?.setAction(R.drawable.ic_ok)
                         rvList.layoutManager = GridLayoutManager(requireContext(), 1)
+                        checkReadyEnter()
                     } else {
                         login.root.isVisible = false
-                        fabEnter.isVisible = false
-                        fabExit.isVisible = true
+                        act?.setAction(R.drawable.ic_exit)
                         initLayoutManager()
                     }
                 }
@@ -117,8 +116,7 @@ class CabinetFragment : NeoFragment() {
     private fun initMain() = binding?.run {
         rvList.layoutManager = GridLayoutManager(requireContext(), 1)
         rvList.adapter = adapter
-        fabEnter.setOnClickListener { subLogin() }
-        fabExit.setOnClickListener { toiler.exit() }
+        setListEvents(rvList)
     }
 
     private fun initLogin() = binding?.login?.run {
@@ -134,7 +132,7 @@ class CabinetFragment : NeoFragment() {
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_GO
             ) {
-                if (binding?.fabEnter?.isVisible == true) subLogin()
+                if (toiler.isReadyLogin) subLogin()
                 return@setOnKeyListener true
             }
             false
@@ -147,14 +145,9 @@ class CabinetFragment : NeoFragment() {
         bClearPassword.setOnClickListener { etPassword.setText("") }
     }
 
-    private fun checkReadyEnter() = binding?.run {
-        val ready = login.run {
-            if (etEmail.length() > 5 && etPassword.length() > 5) {
-                (etEmail.text.toString().contains("@")
-                        && etEmail.text.toString().contains("."))
-            } else false
-        }
-        fabEnter.isVisible = ready
+    private fun checkReadyEnter() = binding?.login?.run {
+        toiler.check(etEmail.text.toString(), etPassword.text.toString())
+        act?.setAction(if (toiler.isReadyLogin) R.drawable.ic_ok else 0)
     }
 
     override fun onDestroyView() {
@@ -215,5 +208,11 @@ class CabinetFragment : NeoFragment() {
                 toiler.selectWord(index, item.title)
             }
         }
+    }
+
+    override fun onAction(title: String) {
+        if (toiler.screen == CabinetToiler.Screen.LOGIN)
+            subLogin()
+        else toiler.exit()
     }
 }

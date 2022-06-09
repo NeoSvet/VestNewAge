@@ -1,25 +1,21 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.storage.JournalStorage
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.Success
 
-class JournalToiler : ViewModel(), NeoPaging.Parent {
-    private val mstate = MutableLiveData<NeoState>()
-    val state: LiveData<NeoState>
-        get() = mstate
+class JournalToiler : NeoToiler(), NeoPaging.Parent {
     private val journal = JournalStorage()
     private lateinit var strings: JournalStrings
     private val paging = NeoPaging(this)
@@ -31,7 +27,6 @@ class JournalToiler : ViewModel(), NeoPaging.Parent {
     val offset: Int
         get() = factory.offset
     private var isInit = false
-    override val isRun: Boolean = false
 
     fun init(context: Context) {
         if (isInit) return
@@ -49,6 +44,10 @@ class JournalToiler : ViewModel(), NeoPaging.Parent {
         super.onCleared()
     }
 
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, "journal")
+        .build()
+
     fun preparing() {
         viewModelScope.launch {
             val cursor = journal.getAll()
@@ -59,9 +58,11 @@ class JournalToiler : ViewModel(), NeoPaging.Parent {
             cursor.close()
         }
     }
+
     fun clear() {
         journal.clear()
         journal.close()
+        mstate.postValue(Ready)
     }
 
     fun paging() = paging.run()

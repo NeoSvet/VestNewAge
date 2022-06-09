@@ -11,7 +11,6 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
@@ -90,8 +89,6 @@ class SiteToiler : NeoToiler() {
                 return@launch
             }
             val list = mutableListOf<ListItem>()
-            val sec = f.lastModified() / DateUnit.SEC_IN_MILLS
-            mstate.postValue(LongState(sec))
             list.add(getFirstItem())
             var i = 1
             var d: String?
@@ -123,6 +120,9 @@ class SiteToiler : NeoToiler() {
             }
             br.close()
             mstate.postValue(SuccessList(list))
+
+            if (loadIfNeed && DateUnit.isLongAgo(f.lastModified()))
+                reLoad()
         }
     }
 

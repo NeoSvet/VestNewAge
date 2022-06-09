@@ -1,22 +1,14 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -26,38 +18,34 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
+import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.Tip
-import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import ru.neosvet.vestnewage.viewmodel.basic.Success
 
-class JournalFragment : Fragment(), Observer<NeoState> {
-    private val toiler: JournalToiler by lazy {
-        ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
-    }
+class JournalFragment : NeoFragment() {
+    private val toiler: JournalToiler
+        get() = neotoiler as JournalToiler
     private var binding: JournalFragmentBinding? = null
     private val adapter: PagingAdapter by lazy {
         PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
     }
 
-    private var act: MainActivity? = null
-    private lateinit var tip: Tip
-    private lateinit var anMin: Animation
-    private lateinit var anMax: Animation
-    private var jobShow: Job? = null
+    override val title: String
+        get() = getString(R.string.journal)
 
-    override fun onAttach(context: Context) {
-        act = activity as MainActivity?
-        super.onAttach(context)
-    }
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
+
+    private lateinit var tip: Tip
 
     override fun onDestroyView() {
-        act = null
+        binding = null
         super.onDestroyView()
     }
 
@@ -69,11 +57,10 @@ class JournalFragment : Fragment(), Observer<NeoState> {
         binding = it
     }.root
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+
+    override fun onViewCreated(savedInstanceState: Bundle?) {
         toiler.preparing()
         setViews()
-        initAnim()
         activity?.let {
             it.title = getString(R.string.journal)
             toiler.state.observe(it, this)
@@ -85,59 +72,14 @@ class JournalFragment : Fragment(), Observer<NeoState> {
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         tip = Tip(act, tvFinish)
-        fabClear.setOnClickListener {
-            fabClear.isVisible = false
-            tvEmptyJournal.isVisible = true
-            toiler.clear()
-            adapter.submitData(lifecycle, PagingData.empty())
-        }
         rvJournal.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvJournal.adapter = adapter
+        setListEvents(rvJournal)
         lifecycleScope.launch {
             toiler.paging().collect {
                 adapter.submitData(lifecycle, it)
             }
         }
-        val scroll = ScrollHelper {
-            when (it) {
-                ScrollHelper.Events.SCROLL_END ->
-                    hideButton(fabClear)
-                ScrollHelper.Events.SCROLL_START ->
-                    showButton(fabClear)
-            }
-        }
-        scroll.attach(rvJournal)
-    }
-
-    private fun hideButton(button: View) {
-        if (button.isVisible.not()) return
-        button.clearAnimation()
-        button.startAnimation(anMin)
-        jobShow?.cancel()
-        jobShow = lifecycleScope.launch {
-            delay(1000)
-            showButton(button)
-        }
-    }
-
-    private fun showButton(button: View) {
-        if (button.isVisible) return
-        button.isVisible = true
-        button.clearAnimation()
-        button.startAnimation(anMax)
-    }
-
-    private fun initAnim() {
-        anMin = AnimationUtils.loadAnimation(act, R.anim.minimize)
-        anMin.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                binding?.fabClear?.isVisible = false
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        anMax = AnimationUtils.loadAnimation(act, R.anim.maximize)
     }
 
     private fun onItemClick(index: Int, item: ListItem) {
@@ -175,14 +117,19 @@ class JournalFragment : Fragment(), Observer<NeoState> {
         tip.show()
     }
 
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
             Success ->
                 tip.hideAnimated()
             Ready -> binding?.run {
                 tvEmptyJournal.isVisible = true
-                fabClear.isVisible = false
+                act?.setAction(0)
             }
         }
+    }
+
+    override fun onAction(title: String) {
+        toiler.clear()
+        adapter.submitData(lifecycle, PagingData.empty())
     }
 }

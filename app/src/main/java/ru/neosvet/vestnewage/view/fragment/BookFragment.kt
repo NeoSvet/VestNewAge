@@ -7,18 +7,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.service.LoaderService
@@ -28,12 +27,10 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
-import ru.neosvet.vestnewage.view.list.SwipeHelper
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.*
 
@@ -54,7 +51,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
-    private lateinit var menuRnd: Tip
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
@@ -62,9 +58,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private val helper: BookHelper
         get() = toiler.helper!!
     override val title: String
-        get() = ""
+        get() = getString(R.string.book)
     private var openedReader = false
-    private var jobShow: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -172,8 +167,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun setBook(state: SuccessBook) = binding?.run {
-        setStatus(false)
-        act?.updateNew()
+        act?.run {
+            if(status.isVisible) setStatus(false)
+            updateNew()
+        }
         tvDate.text = state.date
         bPrev.isEnabled = state.prev
         bNext.isEnabled = state.next
@@ -183,42 +180,24 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        act?.setButtons(fabRndMenu, fabRefresh)
         bPrev.isEnabled = false
         bNext.isEnabled = false
-        menuRnd = Tip(requireContext(), pRnd)
-        bRndStih.setOnClickListener {
-            menuRnd.hide()
-            toiler.getRnd(BookToiler.RndType.STIH)
-        }
-        bRndPos.setOnClickListener {
-            menuRnd.hide()
-            toiler.getRnd(BookToiler.RndType.POS)
-        }
-        bRndKat.setOnClickListener {
-            menuRnd.hide()
-            toiler.getRnd(BookToiler.RndType.KAT)
-        }
-        fabRefresh.setOnClickListener { startLoad() }
         rvBook.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBook.adapter = adapter
-        val swipe = SwipeHelper {
-            when (it) {
-                SwipeHelper.Events.SWIPE_LEFT ->
-                    if (bNext.isEnabled) openMonth(true)
-                SwipeHelper.Events.SWIPE_RIGHT ->
-                    if (bPrev.isEnabled) openMonth(false)
-            }
-        }
-        swipe.attach(rvBook)
-        setButtonsHider(rvBook)
+        setListEvents(rvBook, false)
         bPrev.setOnClickListener { openMonth(false) }
         bNext.setOnClickListener { openMonth(true) }
         tvDate.setOnClickListener { showDatePicker(toiler.date) }
-        fabRndMenu.setOnClickListener {
-            if (menuRnd.isShow) menuRnd.hide()
-            else menuRnd.show()
-        }
+    }
+
+    override fun swipeLeft() {
+        if (binding?.bNext?.isEnabled == true)
+            openMonth(true)
+    }
+
+    override fun swipeRight() {
+        if (binding?.bPrev?.isEnabled == true)
+            openMonth(false)
     }
 
     private fun openMonth(plus: Boolean) {
@@ -270,14 +249,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 tvDate.isEnabled = false
                 bPrev.isEnabled = false
                 bNext.isEnabled = false
-                fabRefresh.isVisible = false
-                fabRndMenu.isVisible = false
             } else {
                 tabHost.getChildAt(0).isEnabled = true
                 tabHost.getChildAt(1).isEnabled = true
                 tvDate.isEnabled = true
-                fabRefresh.isVisible = true
-                fabRndMenu.isVisible = true
             }
         }
     }
@@ -332,5 +307,22 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         if (toiler.isRun) return
         openedReader = true
         openReader(item.link, null)
+    }
+
+    override fun onAction(title: String) {
+        when (title) {
+            getString(R.string.download_book) ->
+                LoaderService.postCommand(
+                    LoaderService.DOWNLOAD_IT, Section.BOOK.toString()
+                )
+            getString(R.string.refresh) ->
+                startLoad()
+            getString(R.string.rnd_stih) ->
+                toiler.getRnd(BookToiler.RndType.STIH)
+            getString(R.string.rnd_pos) ->
+                toiler.getRnd(BookToiler.RndType.POS)
+            getString(R.string.rnd_kat) ->
+                toiler.getRnd(BookToiler.RndType.KAT)
+        }
     }
 }

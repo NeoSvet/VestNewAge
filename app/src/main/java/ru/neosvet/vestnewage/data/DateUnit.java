@@ -101,6 +101,10 @@ public class DateUnit {
         return new DateUnit(dateTime.toLocalDate(), dateTime.toLocalTime());
     }
 
+    public static boolean isLongAgo(long time) {
+        return System.currentTimeMillis() - time > HOUR_IN_MILLS * 3;
+    }
+
     public long getTimeInSeconds() {
         int sec = 0;
         if (time != null)

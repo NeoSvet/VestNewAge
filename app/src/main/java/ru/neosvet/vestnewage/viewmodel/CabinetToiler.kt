@@ -39,6 +39,8 @@ class CabinetToiler : NeoToiler() {
         LOGIN, CABINET, WORDS
     }
 
+    var isReadyLogin = false
+        private set
     var screen: Screen = Screen.LOGIN
         private set
     lateinit var helper: CabinetHelper
@@ -298,4 +300,10 @@ class CabinetToiler : NeoToiler() {
             NeoClient.createHttpClient()
         else
             UnsafeClient.createHttpClient()
+
+    fun check(email: String, password: String) {
+        isReadyLogin = if (email.length > 5 && password.length > 5) {
+            email.contains("@") && email.contains(".")
+        } else false
+    }
 }

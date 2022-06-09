@@ -26,7 +26,6 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
@@ -35,13 +34,13 @@ import ru.neosvet.vestnewage.viewmodel.basic.*
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
     private val adapter: MarkerAdapter by lazy {
-        MarkerAdapter(toiler)
+        MarkerAdapter(toiler, this::longClick)
     }
-    private lateinit var menu: Tip
+
     private val anRotate: Animation by lazy {
         initAnimation()
     }
-    private var stopRotate = false
+    private var isStopRotate = false
     private val toiler: MarkersToiler
         get() = neotoiler as MarkersToiler
     private val markerResult = registerForActivityResult(
@@ -63,7 +62,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     override val title: String
-        get() = toiler.title
+        get() = getString(R.string.markers)
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(MarkersToiler::class.java).apply { init(requireContext()) }
@@ -77,8 +76,7 @@ class MarkersFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        initFragment()
-        initContent()
+        setViews()
         restoreState(savedInstanceState)
     }
 
@@ -87,8 +85,17 @@ class MarkersFragment : NeoFragment() {
         super.onDestroyView()
     }
 
-    override fun onBackPressed(): Boolean =
-        toiler.onBack()
+    override fun onBackPressed(): Boolean {
+        if (toiler.iSel > -1) {
+            unSelected()
+            return false
+        }
+        if (toiler.isCollections.not()) {
+            toiler.openColList()
+            return false
+        }
+        return true
+    }
 
     private fun restoreState(state: Bundle?) {
         if (state == null) {
@@ -96,7 +103,6 @@ class MarkersFragment : NeoFragment() {
             return
         }
         toiler.run {
-            adapter.notifyDataSetChanged()
             if (iSel > -1) {
                 goToEdit()
                 if (diName != null) renameDialog(diName!!)
@@ -110,7 +116,7 @@ class MarkersFragment : NeoFragment() {
         animation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                if (!stopRotate) binding?.fabMenu?.startAnimation(anRotate)
+                if (!isStopRotate) binding?.ivMarker?.startAnimation(anRotate)
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -118,41 +124,13 @@ class MarkersFragment : NeoFragment() {
         return animation
     }
 
-    private fun startRotate() {
-        stopRotate = false
-        binding?.fabMenu?.startAnimation(anRotate)
-    }
-
-    private fun initFragment() = binding?.run {
-        menu = Tip(act, pMenu)
-        fabEdit.setOnClickListener {
-            if (toiler.canEdit())
-                goToEdit()
-            else
-                Lib.showToast(getString(R.string.nothing_edit))
-        }
-        fabBack.setOnClickListener { toiler.openColList() }
-        fabMenu.setOnClickListener {
-            if (toiler.isRun) return@setOnClickListener
-            if (menu.isShow) menu.hide()
-            else {
-                bExport.isVisible = toiler.list.isNotEmpty()
-                menu.show()
-            }
-        }
-        bExport.setOnClickListener { selectFile(true) }
-        bImport.setOnClickListener { selectFile(false) }
-    }
-
     @SuppressLint("ClickableViewAccessibility")
-    private fun initContent() = binding?.content?.run {
+    private fun setViews() = binding?.content?.run {
         rvMarker.adapter = adapter
-        setButtonsHider(rvMarker)
+        setListEvents(rvMarker)
         bOk.setOnClickListener {
             toiler.saveChange()
-            val index = toiler.iSel
             unSelected()
-            adapter.notifyItemChanged(index)
         }
         bTop.setOnClickListener { toiler.moveToTop() }
         bBottom.setOnClickListener { toiler.moveToBottom() }
@@ -172,17 +150,25 @@ class MarkersFragment : NeoFragment() {
     }
 
     override fun setStatus(load: Boolean) {
-        if (load)
-            binding?.fabBack?.isVisible = false
         if (toiler.workOnFile) {
-            if (load) {
+            if (load)
                 startRotate()
-            } else {
-                stopRotate = true
-                binding?.fabMenu?.clearAnimation()
-            }
+            else
+                stopRotate()
         } else
             super.setStatus(load)
+    }
+
+    private fun startRotate() = binding?.run {
+        isStopRotate = false
+        pFileOperation.isVisible = true
+        ivMarker.startAnimation(anRotate)
+    }
+
+    private fun stopRotate() = binding?.run {
+        isStopRotate = true
+        pFileOperation.isVisible = false
+        ivMarker.clearAnimation()
     }
 
     private fun deleteDialog() = toiler.selectedItem?.title?.let { title ->
@@ -233,40 +219,32 @@ class MarkersFragment : NeoFragment() {
         dialog.show { toiler.diName = null }
     }
 
+    private fun longClick(index: Int): Boolean {
+        if (toiler.canEdit() || index > 0) {
+            toiler.selected(index)
+            goToEdit()
+        }
+        return true
+    }
+
     private fun goToEdit() {
         adapter.notifyItemChanged(toiler.iSel)
-        act?.clearButtons()
-        binding?.run {
-            fabEdit.isVisible = false
-            fabBack.isVisible = false
-            fabMenu.isVisible = false
-            content.pEdit.isVisible = true
+        act?.blocked()
+        binding?.content?.pEdit?.isVisible = true
+    }
+
+    private fun unSelected() {
+        if (toiler.iSel > -1) {
+            val i = toiler.iSel
+            toiler.selected(-1)
+            adapter.notifyItemChanged(i)
         }
-    }
-
-    private fun unSelected() = binding?.run {
         toiler.change = false
-        if (toiler.list.isNotEmpty()) fabEdit.isVisible = true
-        if (toiler.isCollections) onColButton()
-        else onMarButton()
-        content.pEdit.isVisible = false
-        toiler.selected(-1)
-    }
-
-    private fun onMarButton() = binding?.run {
-        fabBack.isVisible = true
-        fabMenu.isVisible = false
-        act?.setButtons(fabBack, fabEdit)
-    }
-
-    private fun onColButton() = binding?.run {
-        fabMenu.isVisible = true
-        fabBack.isVisible = false
-        act?.setButtons(fabMenu, fabEdit)
+        binding?.content?.pEdit?.isVisible = false
+        act?.unblocked()
     }
 
     private fun selectFile(isExport: Boolean) {
-        menu.hide()
         val intent = Intent(
             if (isExport) Intent.ACTION_CREATE_DOCUMENT
             else Intent.ACTION_OPEN_DOCUMENT
@@ -288,10 +266,13 @@ class MarkersFragment : NeoFragment() {
 
     private fun parseFileResult(data: Intent, isExport: Boolean) {
         data.dataString?.let { file ->
-            if (isExport)
+            if (isExport) {
+                binding?.tvFileOperation?.text = getString(R.string.export)
                 toiler.startExport(file)
-            else
+            } else {
+                binding?.tvFileOperation?.text = getString(R.string.import_)
                 toiler.startImport(file)
+            }
             setStatus(true)
         }
     }
@@ -302,7 +283,8 @@ class MarkersFragment : NeoFragment() {
                 doneExport(state.message)
             else
                 Lib.showToast(state.message)
-            is UpdateList -> updateList(state)
+            is UpdateList ->
+                updateList(state)
             Ready -> {//import toiler.task==MarkersModel.Type.FILE
                 setStatus(false)
                 toiler.openColList()
@@ -332,16 +314,12 @@ class MarkersFragment : NeoFragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateList(state: UpdateList) = binding?.run {
-        setStatus(false)
-        binding?.run {
-            fabEdit.clearAnimation()
-            fabMenu.clearAnimation()
-            if (toiler.iSel == -1) {
-                if (toiler.isCollections) onColButton()
-                else onMarButton()
-            }
-        }
-        act?.title = title
+        if (toiler.iSel == -1)
+            setStatus(false)
+        if (toiler.isCollections)
+            toolbar.title = toiler.title
+        else
+            toolbar.title = String.format(getString(R.string.format_collection), toiler.title)
         if (toiler.list.isEmpty()) {
             adapter.notifyDataSetChanged()
             tvEmpty.text = if (toiler.isCollections)
@@ -349,8 +327,6 @@ class MarkersFragment : NeoFragment() {
             else
                 getString(R.string.collection_is_empty)
             tvEmpty.isVisible = true
-            fabEdit.isVisible = false
-            content.pEdit.isVisible = false
             unSelected()
         } else {
             when (state.event) {
@@ -369,11 +345,25 @@ class MarkersFragment : NeoFragment() {
                 }
             }
             tvEmpty.isVisible = false
-            if (toiler.iSel == -1) {
-                fabEdit.isVisible = true
+            if (toiler.iSel == -1)
                 unSelected()
-            } else
+            else
                 adapter.notifyItemChanged(toiler.iSel)
+        }
+    }
+
+    override fun onAction(title: String) {
+        when (title) {
+            getString(R.string.edit) -> {
+                if (toiler.canEdit())
+                    goToEdit()
+                else
+                    Lib.showToast(getString(R.string.nothing_edit))
+            }
+            getString(R.string.import_) -> if (toiler.isRun.not())
+                selectFile(false)
+            getString(R.string.export) -> if (toiler.list.isNotEmpty() && toiler.isRun.not())
+                selectFile(true)
         }
     }
 }

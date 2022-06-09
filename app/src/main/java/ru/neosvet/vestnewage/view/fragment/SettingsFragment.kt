@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.MainHelper
@@ -93,6 +94,7 @@ class SettingsFragment : NeoFragment() {
                 if (ScreenUtils.isWide) 2 else 1
             )
             rvSettings.adapter = adapter
+            setListEvents(rvSettings)
         }
     }
 
@@ -183,7 +185,7 @@ class SettingsFragment : NeoFragment() {
             CheckItem(title = getString(R.string.calendar), isChecked = screen == list.size)
         )
         list.add(
-            CheckItem(title = getString(R.string.rss), isChecked = screen == list.size)
+            CheckItem(title = getString(R.string.summary), isChecked = screen == list.size)
         )
         adapter.addItem(SettingsItem.CheckList(
             title = getString(R.string.start_screen),
@@ -320,7 +322,7 @@ class SettingsFragment : NeoFragment() {
         if (name == Const.START_NEW) return
         val main = Intent(act, MainActivity::class.java)
         main.putExtra(Const.START_SCEEN, false)
-        if (value == -1) main.putExtra(Const.CUR_ID, R.id.nav_settings)
+        if (value == -1) main.putExtra(Const.CUR_ID, Section.SETTINGS.toString())
         startActivity(main)
         act?.finish()
     }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
-import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
@@ -27,7 +26,6 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.dialog.DateDialog
@@ -69,7 +67,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     private lateinit var tip: Tip
-    private var anim: ResizeAnim? = null
+    private lateinit var tipSettings: Tip
     private var dialog = -1
     private var dateDialog: DateDialog? = null
     private var jobResult: Job? = null
@@ -145,11 +143,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         binding?.run {
             if (load) {
                 pStatus.isVisible = true
-                fabSettings.isVisible = false
                 etSearch.isEnabled = false
             } else {
                 pStatus.isVisible = false
-                fabSettings.isVisible = true
                 etSearch.isEnabled = true
             }
         }
@@ -185,7 +181,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             return@run
         }
         if (toiler.shownResult) {
-            fabSettings.isVisible = false
             toiler.showLastResult()
             etSearch.setText(helper.request)
             etSearch.setSelection(helper.request.length)
@@ -220,48 +215,24 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             adDefault.setItems(list)
         }
         rvSearch.adapter = adDefault
+        setListEvents(rvSearch)
     }
 
     private fun openSettings() = binding?.run {
         pSearch.isVisible = false
-        fabSettings.isVisible = false
-        fabOk.isVisible = true
+        act?.setAction(R.drawable.ic_ok)
         content.root.isVisible = false
         settings.root.isVisible = true
         softKeyboard.hide()
-        initResizeAnim()
+        tipSettings.show()
     }
 
     private fun closeSettings() = binding?.run {
         pSearch.isVisible = true
-        fabSettings.isVisible = true
-        fabOk.isVisible = false
+        act?.unblocked()
+        act?.setAction(R.drawable.ic_settings)
         content.root.isVisible = true
-        settings.root.isVisible = false
-    }
-
-    private fun initResizeAnim() = binding?.settings?.run {
-        if (anim == null) {
-            anim = ResizeAnim(
-                root,
-                false,
-                (270 * resources.displayMetrics.density).toInt()
-            ).apply {
-                setStart(10)
-                duration = 800
-            }
-            anim?.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) {}
-                override fun onAnimationEnd(animation: Animation) {
-                    root.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    root.requestLayout()
-                }
-
-                override fun onAnimationRepeat(animation: Animation) {}
-            })
-        }
-        root.clearAnimation()
-        root.startAnimation(anim)
+        tipSettings.hideAnimated()
     }
 
     private fun formatDate(d: DateUnit): String {
@@ -270,18 +241,15 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSettings() = binding?.run {
-        fabSettings.setOnClickListener { openSettings() }
         bStop.setOnClickListener { toiler.cancel() }
-        fabOk.setOnClickListener {
-            closeSettings()
-            helper.savePerformance(settings.sMode.selectedItemPosition)
-        }
         val adMode = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode)
         )
         adMode.setDropDownViewResource(R.layout.spinner_item)
         with(settings) {
+            tipSettings = Tip(requireContext(), root)
+            tipSettings.autoHide = false
             sMode.adapter = adMode
             bClearSearch.setOnClickListener {
                 adRequest.clear()
@@ -421,7 +389,6 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     private fun defaultClick(index: Int, item: ListItem) {
         when (index) {
             LAST_RESULTS -> {
-                binding?.fabSettings?.isVisible = false
                 helper.loadLastResult()
                 toiler.showLastResult()
                 binding?.run {
@@ -474,5 +441,16 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             getString(R.string.load)
         else getString(R.string.finish_list)
         tip.show()
+    }
+
+    override fun onAction(title: String) {
+        if (binding?.pSearch?.isVisible == true)
+            openSettings()
+        else {
+            closeSettings()
+            binding?.settings?.run {
+                helper.savePerformance(sMode.selectedItemPosition)
+            }
+        }
     }
 }

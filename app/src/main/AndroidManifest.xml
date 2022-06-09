@@ -88,7 +88,7 @@
 
         <service
             android:name=".service.CheckService"
-            android:icon="@drawable/ic_rss"
+            android:icon="@drawable/ic_summary"
             android:label="@string/check_summary"
             android:process=":check" />
         <service

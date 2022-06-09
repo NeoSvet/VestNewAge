@@ -14,8 +14,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -24,9 +26,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
-import ru.neosvet.vestnewage.view.list.SwipeHelper
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
@@ -50,7 +50,7 @@ class SiteFragment : NeoFragment() {
     }
     private var binding: SiteFragmentBinding? = null
     override val title: String
-        get() = ""
+        get() = getString(R.string.news)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,11 +92,9 @@ class SiteFragment : NeoFragment() {
             if (load) {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
-                fabRefresh.isVisible = false
             } else {
                 tabHost.getChildAt(0).isEnabled = true
                 tabHost.getChildAt(1).isEnabled = true
-                fabRefresh.isVisible = true
             }
         }
     }
@@ -141,23 +139,22 @@ class SiteFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        act?.setButton(fabRefresh, true)
-        fabRefresh.setOnClickListener { startLoad() }
         rvSite.adapter = adapter
-        val swipe = SwipeHelper {
-            when (it) {
-                SwipeHelper.Events.SWIPE_LEFT -> act?.run {
-                    val t = tabLayout.selectedTabPosition
-                    if (t < 1) tabLayout.select(t + 1)
-                }
-                SwipeHelper.Events.SWIPE_RIGHT -> act?.run {
-                    val t = tabLayout.selectedTabPosition
-                    if (t > 0) tabLayout.select(t - 1)
-                }
-            }
+        setListEvents(rvSite, false)
+    }
+
+    override fun swipeLeft() {
+        act?.run {
+            val t = tabLayout.selectedTabPosition
+            if (t < 1) tabLayout.select(t + 1)
         }
-        swipe.attach(rvSite)
-        setButtonsHider(rvSite)
+    }
+
+    override fun swipeRight() {
+        act?.run {
+            val t = tabLayout.selectedTabPosition
+            if (t > 0) tabLayout.select(t - 1)
+        }
     }
 
     private fun openMultiLink(links: ListItem, parent: View) {
@@ -179,7 +176,7 @@ class SiteFragment : NeoFragment() {
         if (link == "#" || link == "@") return
         if (toiler.isSiteTab) {
             if (link.contains("rss"))
-                act?.setFragment(R.id.nav_rss, true)
+                act?.setSection(Section.SUMMARY, true)
             else if (link.contains("poems"))
                 act?.openBook(link, true)
             else if (link.contains("tolkovaniya") || link.contains("2016"))
@@ -240,8 +237,6 @@ class SiteFragment : NeoFragment() {
                     ads.showAd(item.title, item.link, item.head)
                 }
             }
-            is LongState ->
-                binding?.fabRefresh?.isVisible = act?.status?.checkTime(state.value) == false
         }
     }
 
@@ -252,5 +247,16 @@ class SiteFragment : NeoFragment() {
             openMultiLink(item, binding!!.rvSite)
         else
             openSingleLink(item.link)
+    }
+
+    override fun onAction(title: String) {
+        when (title) {
+            getString(R.string.download_articles) ->
+                LoaderService.postCommand(
+                    LoaderService.DOWNLOAD_IT, Section.SITE.toString()
+                )
+            getString(R.string.refresh) ->
+                startLoad()
+        }
     }
 }

@@ -4,11 +4,10 @@
     <string name="navigation_drawer_open">Открытие меню</string>
     <string name="navigation_drawer_close">Закрытие меню</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="download_title">Скачать&#8230;</string>
     <string name="download_all">Скачать все материалы</string>
-    <string name="download_it_main">Скачать все статьи</string>
-    <string name="download_it_book">Скачать книгу с 2016 года</string>
-    <string name="download_it_calendar">Скачать текущий год</string>
+    <string name="download_articles">Скачать все статьи</string>
+    <string name="download_book">Скачать книгу с 2016 года</string>
+    <string name="download_calendar">Скачать текущий год</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>
@@ -35,7 +34,7 @@
     <string name="tips">Подсказки</string>
     <!--Menu-->
     <string name="new_section">Новое</string>
-    <string name="rss">Сводка</string>
+    <string name="summary">Сводка</string>
     <string name="news">Объявления</string>
     <string name="news_dev">Объявления от разработчика</string>
     <string name="novosti">Новости</string>
@@ -47,6 +46,7 @@
     <string name="cabinet">Кабинет</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
+    <string name="read">Чтение</string>
     <!--Formats-->
     <string name="format_load">Загрузка: %s</string>
     <string name="format_search_date">Поиск: %s %d</string>
@@ -80,7 +80,6 @@
     <string name="katreny">Катрены</string>
     <string name="month_is_empty">Список за этот месяц пуст!</string>
     <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,6 МБ.\nНа устройстве займёт 16,3 МБ памяти.</string>
-    <string name="rnd_menu">Меню «случайных»</string>
     <string name="rnd_stih">«Случайный» стих</string>
     <string name="rnd_pos">«Случайное» Послание</string>
     <string name="rnd_kat">«Случайный» Катрен</string>
@@ -109,6 +108,7 @@
     <string name="edit">Редактировать</string>
     <string name="send_file">Отправить файл?</string>
     <string name="not_load_page">Страница не загружена</string>
+    <string name="format_collection">Подборка: %s</string>
     <string name="collections">Подборки</string>
     <string name="cancel_rename">Переименование отменено</string>
     <string name="collection_is_empty">Подборока пуста!</string>
@@ -204,6 +204,7 @@
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
     <string name="prom">Посыл</string>
+    <string name="text_prom">Текст Посыла</string>
     <string name="sec">сек</string>
     <string name="min">мин</string>
     <string name="prom_for_soul_unite">Посыл на Любовь и Духовное Единение</string>

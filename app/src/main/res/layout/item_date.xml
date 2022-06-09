@@ -12,7 +12,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/cell_tv"
-        style="@style/Label"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"

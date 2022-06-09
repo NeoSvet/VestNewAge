@@ -1,104 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/starsky_bg">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tablayout"
+        style="@style/TabLayoutTheme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:layout_constraintTop_toTopOf="parent"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tablayout"
-                style="@style/TabLayoutTheme"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginStart="60dp"
-                android:layout_marginEnd="60dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/my_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize" />
-
-    <LinearLayout
-        android:id="@+id/pDownload"
-        android:layout_width="@dimen/menu_width"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:background="@drawable/field"
-        android:orientation="vertical"
-        android:padding="3dp"
-        android:visibility="gone">
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/bDownloadAll"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/press"
-            android:padding="10dp"
-            android:text="@string/download_all" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorAccentLight" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/bDownloadIt"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/press"
-            android:padding="10dp" />
-
-    </LinearLayout>
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvNew"
-        style="@style/Label"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="@dimen/fab_margin"
-        android:background="@drawable/oval"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:visibility="gone" />
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tablayout" />
 
     <RelativeLayout
         android:id="@+id/pStatus"
         android:layout_width="210dp"
         android:layout_height="56dp"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/shape_norm"
         android:orientation="horizontal"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ProgressBar
             android:id="@+id/progStatus"
@@ -126,12 +58,25 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvPromTime"
-        style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
         android:padding="10dp"
-        android:visibility="gone" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/field"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

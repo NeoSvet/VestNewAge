@@ -13,7 +13,6 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_item"
-            style="@style/Label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"

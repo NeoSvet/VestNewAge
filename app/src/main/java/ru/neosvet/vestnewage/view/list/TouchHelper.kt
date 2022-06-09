@@ -5,14 +5,15 @@ import android.graphics.Canvas
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.R
 import kotlin.math.abs
 
-
-class SwipeHelper(
-    val events: (Events) -> Unit
+class TouchHelper(
+    private val onlyLimit: Boolean = false,
+    private val events: (Events) -> Unit
 ) {
     enum class Events {
-        SWIPE_LEFT, SWIPE_RIGHT
+        SWIPE_LEFT, SWIPE_RIGHT, LIST_LIMIT
     }
 
     private val callback = object : ItemTouchHelper.SimpleCallback(
@@ -49,21 +50,29 @@ class SwipeHelper(
     private var isDown = false
     private var x = 0
     private var y = 0
-    var distanceForSwipe: Int = 30
-        private set
+    private var distanceForSwipe: Int = 30
+    private var limit: Int = 0
 
     fun attach(view: RecyclerView) {
+        initTouchListener(view)
+        if (onlyLimit) return
         distanceForSwipe = (30 * view.resources.displayMetrics.density).toInt()
         val helper = ItemTouchHelper(callback)
         helper.attachToRecyclerView(view)
-        initTouchListener(view)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initTouchListener(view: RecyclerView) {
         view.setOnTouchListener { _, event: MotionEvent ->
+            initLimit(view)
             when (event.actionMasked) {
+                MotionEvent.ACTION_MOVE -> {
+                    val max = view.computeVerticalScrollRange()
+                    if (max > limit && max < view.height)
+                        events.invoke(Events.LIST_LIMIT)
+                }
                 MotionEvent.ACTION_DOWN -> {
+                    if (onlyLimit) return@setOnTouchListener false
                     isDown = true
                     x = event.getX(0).toInt()
                     y = event.getY(0).toInt()
@@ -85,5 +94,11 @@ class SwipeHelper(
             }
             false
         }
+    }
+
+    private fun initLimit(view: RecyclerView) {
+        if (limit > 0) return
+        val margin = view.context.resources.getDimension(R.dimen.content_margin_bottom).toInt()
+        limit = view.height - margin
     }
 }

@@ -6,123 +6,30 @@
     android:background="@drawable/starsky_bg"
     android:fitsSystemWindows="true">
 
-    <FrameLayout
-        android:id="@+id/menu_fragment"
-        android:layout_width="320dp"
-        android:layout_height="match_parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tablayout"
-        style="@style/TabLayoutTheme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="320dp"
-        android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/menu_fragment"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <FrameLayout
-        android:id="@+id/my_fragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/menu_fragment"
-        app:layout_constraintTop_toBottomOf="@id/tablayout" />
-
     <LinearLayout
-        android:id="@+id/pDownload"
-        android:layout_width="@dimen/menu_width"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="250dp"
-        android:background="@drawable/field"
-        android:orientation="vertical"
-        android:padding="3dp"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/bDownloadAll"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/press"
-            android:padding="10dp"
-            android:text="@string/download_all" />
+        <FrameLayout
+            android:id="@+id/menu_fragment"
+            android:layout_width="320dp"
+            android:layout_height="match_parent" />
 
-        <View
+        <include
+            layout="@layout/main_content"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorAccentLight" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/bDownloadIt"
-            style="@style/Label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/press"
-            android:padding="10dp" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvPromTime"
-        style="@style/Label"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/field"
-        android:padding="10dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvNew"
-        style="@style/Label"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
-        android:layout_marginStart="336dp"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:background="@drawable/oval"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <RelativeLayout
-        android:id="@+id/pStatus"
-        android:layout_width="210dp"
-        android:layout_height="56dp"
         android:layout_margin="@dimen/fab_margin"
-        android:background="@drawable/shape_norm"
-        android:orientation="horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ProgressBar
-            android:id="@+id/progStatus"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:max="100"
-            android:progressDrawable="@drawable/status_progressbar"
-            android:visibility="gone" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvStatus"
-            style="@style/StatusLabel"
-            android:layout_alignParentStart="true" />
-
-        <ImageView
-            android:id="@+id/ivStatus"
-            android:layout_width="56dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:padding="15dp"
-            android:src="@drawable/ic_refresh" />
-    </RelativeLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/star" />
 </androidx.constraintlayout.widget.ConstraintLayout>

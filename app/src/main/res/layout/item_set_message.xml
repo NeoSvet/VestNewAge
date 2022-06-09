@@ -29,7 +29,6 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvTitle"
-                style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical" />
@@ -45,7 +44,6 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/text"
-                style="@style/Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -55,7 +53,6 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button"
-                style="@style/Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

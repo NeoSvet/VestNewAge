@@ -3,39 +3,31 @@ package ru.neosvet.vestnewage.view.activity
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.ActionMenuView
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.ConnectWatcher
-import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.MultiWindowSupport
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
@@ -46,11 +38,9 @@ import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.AdsState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
-import java.util.*
 import kotlin.math.absoluteValue
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
-    Observer<NeoState>, ItemClicker {
+class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     companion object {
         @JvmField
         var isCountInMenu = false
@@ -58,11 +48,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private enum class StatusBack {
-        FIRST, PAGE, MENU, EXIT
+        FIRST, PAGE, EXIT
     }
 
     private lateinit var helper: MainHelper
-    private var firstFragment = Const.SCREEN_CALENDAR
+    private var firstSection = Section.CALENDAR
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
 
@@ -70,13 +60,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     val status = StatusButton()
     private var prom: PromUtils? = null
     private var tab = 0
-    private var statusBack = StatusBack.MENU
+    private var isBlocked = false
+    private var statusBack = StatusBack.EXIT
 
-    private var fab1: View? = null
-    private var fab2: View? = null
     private lateinit var utils: LaunchUtils
-    private lateinit var anMin: Animation
-    private lateinit var anMax: Animation
+    private lateinit var anHide: Animation
+    private lateinit var anShow: Animation
+    private val animHideEnded: Boolean
+        get() = anHide.hasEnded() || anHide.hasStarted().not()
+    private val animShowEnded: Boolean
+        get() = anShow.hasEnded() || anShow.hasStarted().not()
 
     val newId: Int
         get() = helper.newId
@@ -90,41 +83,78 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             launchSplashScreen()
         else
             setTheme(R.style.Theme_MainTheme)
+        setContentView(R.layout.main_activity)
         ConnectWatcher.start(this)
         ScreenUtils.init(this)
         App.context = this
         initLaunch()
         helper = MainHelper(this)
-        firstFragment = helper.getFirstFragment()
-        if (helper.isFullMenu)
-            setContentView(R.layout.main_content)
-        else
-            setContentView(R.layout.main_activity)
         helper.initViews()
         super.onCreate(savedInstanceState)
-
-        if (savedInstanceState == null)
-            helper.toolbar?.isVisible = false
-
+        setBottomPanel()
         status.init(this, helper.pStatus)
-        initInterface()
         initAnim()
         isCountInMenu = helper.isCountInMenu
-        if (isCountInMenu.not() || helper.isFullMenu) {
+        if (isCountInMenu.not() || helper.isSideMenu.not()) {
             prom = PromUtils(helper.tvPromTime)
-        } else //it is not land
-            helper.navView?.let {
-                prom = PromUtils(
-                    it.getHeaderView(0).findViewById(R.id.tvPromTimeInMenu)
-                )
-            }
+        } else {//it is not land
+            //TODO move promtime to head
+        }
 
         restoreState(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) {
-            MultiWindowSupport.resizeFloatTextView(helper.tvNew, true)
-        }
         if (withSplash.not())
             finishFlashStar()
+    }
+
+    override fun setTitle(title: CharSequence?) {
+        helper.tvTitle?.text = title
+    }
+
+    private fun setBottomPanel() = helper.bottomBar?.let { bar ->
+        val isSummary = helper.getFirstSection() == Section.SUMMARY
+        if (isSummary) {
+            val item = bar.menu.getItem(1)
+            item.title = getString(R.string.summary)
+            item.icon = ContextCompat.getDrawable(this, R.drawable.ic_summary)
+        }
+        val menuView = bar.menu.getItem(0).actionView as ActionMenuView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            menuView.tooltipText = getString(R.string.menu)
+        helper.tvNew = menuView.findViewById(R.id.tvNew)
+        helper.checkNew()
+        menuView.setOnClickListener {
+            setSection(Section.MENU, false)
+        }
+        menuView.setOnLongClickListener {
+            if (helper.countNew > 0) {
+                setSection(Section.NEW, false)
+                true
+            } else false
+        }
+
+        bar.setOnMenuItemClickListener {
+            when (it.itemId) {
+//                R.id.app_bar_menu ->
+//                    setSection(Section.MENU, false)
+                R.id.app_bar_start -> if (isSummary)
+                    setSection(Section.SUMMARY, false)
+                else
+                    setSection(Section.CALENDAR, false)
+                R.id.app_bar_book ->
+                    setSection(Section.BOOK, false)
+                R.id.app_bar_marker ->
+                    setSection(Section.MARKERS, false)
+                R.id.app_bar_journal ->
+                    setSection(Section.JOURNAL, false)
+                R.id.app_bar_search ->
+                    setSection(Section.SEARCH, false)
+                R.id.app_bar_cabinet ->
+                    setSection(Section.CABINET, false)
+                R.id.app_bar_prom ->
+                    openReader("Posyl-na-Edinenie.html", null)
+            }
+            return@setOnMenuItemClickListener true
+        }
     }
 
     private fun launchSplashScreen() {
@@ -146,7 +176,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         lifecycleScope.launch {
             delay(1600)
-            helper.tvNew.post {
+            helper.fabAction.post {
                 finishFlashStar()
             }
         }
@@ -157,7 +187,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         utils.checkAdapterNewVersion()
         if (utils.openLink(intent)) {
             tab = utils.intent.getIntExtra(Const.TAB, tab)
-            firstFragment = utils.intent.getIntExtra(Const.CUR_ID, firstFragment)
+            utils.intent.getStringExtra(Const.CUR_ID)?.let {
+                firstSection = Section.valueOf(it)
+            }
         } else if (utils.isNeedLoad) {
             val toiler = ViewModelProvider(this).get(MainToiler::class.java)
             toiler.init(this)
@@ -175,29 +207,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun finishFlashStar() {
         helper.setNewValue()
-        helper.toolbar?.isVisible = true
         if (helper.isFirstRun) {
-            setFragment(R.id.nav_help, false)
+            setSection(Section.HELP, false)
             statusBack = StatusBack.FIRST
             return
         }
-        if (firstFragment != 0)
-            setFragment(firstFragment, false)
+        unblocked()
+        firstSection = helper.getFirstSection()
+        if (helper.startWithNew()) {
+            setSection(Section.NEW, false)
+            helper.prevSection = firstSection
+        } else
+            setSection(firstSection, false)
         showWelcome()
     }
 
     private fun initAnim() {
-        anMin = AnimationUtils.loadAnimation(this, R.anim.minimize)
-        anMin.setAnimationListener(object : Animation.AnimationListener {
+        anHide = AnimationUtils.loadAnimation(this, R.anim.minimize)
+        anHide.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                fab1?.isVisible = false
-                fab2?.isVisible = false
+                helper.fabAction.isVisible = false
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
         })
-        anMax = AnimationUtils.loadAnimation(this, R.anim.maximize)
+        anShow = AnimationUtils.loadAnimation(this, R.anim.maximize)
     }
 
     private fun restoreState(state: Bundle?) {
@@ -207,22 +242,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (helper.isFirstRun)
                 tab = -1
             else {
-                val id = intent.getIntExtra(Const.CUR_ID, 0)
-                if (id != 0)
-                    firstFragment = id
-                if (firstFragment == R.id.menu_fragment)
+                intent.getStringExtra(Const.CUR_ID)
+                if (firstSection == Section.MENU)
                     updateNew()
             }
         } else helper.run {
-            curId = state.getInt(Const.CUR_ID)
-            when {
-                isFloatMenu -> navView?.setCheckedItem(curId)
-                isSideMenu -> setMenuFragment()
-                isFullMenu -> if (curId != R.id.menu_fragment)
-                    statusBack = StatusBack.PAGE
+            if (state.getBoolean(Const.PANEL))
+                blocked()
+            else
+                unblocked()
+            helper.setActionIcon(state.getInt(Const.SELECT))
+            state.getString(Const.CUR_ID)?.let {
+                curSection = Section.valueOf(it)
             }
+            if (isSideMenu) setMenuFragment()
+            else if (curSection != Section.MENU)
+                statusBack = StatusBack.PAGE
             updateNew()
-            tvNew.clearAnimation()
         }
     }
 
@@ -238,19 +274,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onResume() {
         super.onResume()
-        if (!helper.isFullMenu || !isCountInMenu || helper.curId == R.id.menu_fragment)
+        if (helper.isSideMenu || !isCountInMenu || helper.curSection == Section.MENU)
             prom?.resume()
         else
             prom?.hide()
-    }
-
-    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration?) {
-        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            MultiWindowSupport.resizeFloatTextView(
-                helper.tvNew,
-                isInMultiWindowMode
-            )
     }
 
     fun setProm(textView: View) {
@@ -261,68 +288,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         helper.updateNew()
     }
 
-    private fun initInterface() = helper.run {
-        bDownloadIt.setOnClickListener {
-            menuDownload.hide()
-            if (curId == R.id.nav_calendar) {
-                val year = (curFragment as CalendarFragment?)!!.currentYear
-                LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_YEAR, year.toString()
-                )
-            } else {
-                LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_ID, curId.toString()
-                )
-            }
-        }
-        tvNew.setOnClickListener {
-            setFragment(R.id.nav_new, true)
-        }
-        toolbar?.let {
-            setSupportActionBar(it)
-            if (helper.isFloatMenu)
-                initFloatMenu()
-        }
-    }
-
-    private fun initFloatMenu() = helper.run {
-        drawer?.let { drawer ->
-            val toggle = ActionBarDrawerToggle(
-                this@MainActivity,
-                drawer,
-                toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
-            )
-            drawer.addDrawerListener(toggle)
-            toggle.syncState()
-        }
-
-        navView?.run {
-            setNavigationItemSelectedListener(this@MainActivity)
-            getHeaderView(0).setOnClickListener {
-                val url = NeoClient.SITE.substring(0, NeoClient.SITE.length - 1)
-                Lib.openInApps(url, null)
-            }
-        }
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(Const.CUR_ID, helper.curId)
+        outState.putString(Const.CUR_ID, helper.curSection.toString())
+        outState.putBoolean(Const.PANEL, isBlocked)
+        outState.putInt(Const.SELECT, helper.actionIcon)
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val miDownloadAll = menu.add(getString(R.string.download_title))
-        miDownloadAll.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-        miDownloadAll.setIcon(R.drawable.download_button)
-        return true
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        helper.drawer?.closeDrawer(GravityCompat.START)
-        if (!item.isChecked) setFragment(item.itemId, false)
-        return true
     }
 
     fun setFrMenu(frMenu: MenuFragment) {
@@ -331,48 +301,49 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     @SuppressLint("NonConstantResourceId")
-    fun setFragment(id: Int, savePrev: Boolean) {
+    fun setSection(section: Section, savePrev: Boolean) {
+        if (section == helper.curSection) return
         statusBack = StatusBack.PAGE
-        setMenu(id, savePrev)
+        setMenu(section, savePrev)
         status.setError(null)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
-        when (id) {
-            R.id.menu_fragment -> {
+        when (section) {
+            Section.MENU -> {
                 hideTabs()
-                statusBack = StatusBack.MENU
+                unblocked()
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
                 if (isCountInMenu) prom?.show()
             }
-            R.id.nav_new -> {
+            Section.NEW -> {
                 fragmentTransaction.replace(R.id.my_fragment, NewFragment())
-                helper.frMenu?.setSelect(R.id.nav_new)
+                helper.frMenu?.setSelect(Section.NEW)
             }
-            R.id.nav_rss -> {
+            Section.SUMMARY -> {
                 curFragment = SummaryFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
                 clearSummaryNotif()
             }
-            R.id.nav_site -> {
+            Section.SITE -> {
                 curFragment = SiteFragment.newInstance(tab).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_calendar -> {
+            Section.CALENDAR -> {
                 curFragment = CalendarFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_book -> {
+            Section.BOOK -> {
                 curFragment = BookFragment.newInstance(tab, -1).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_search -> {
+            Section.SEARCH -> {
                 val search = when {
                     intent.hasExtra(Const.LINK) -> {
                         SearchFragment.newInstance(
@@ -389,26 +360,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 curFragment = search
                 fragmentTransaction.replace(R.id.my_fragment, search)
             }
-            R.id.nav_journal -> {
+            Section.JOURNAL -> {
                 hideTabs()
                 fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
             }
-            R.id.nav_marker -> {
+            Section.MARKERS -> {
                 curFragment = MarkersFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_cabinet -> {
+            Section.CABINET -> {
                 curFragment = CabinetFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_settings -> {
+            Section.SETTINGS -> {
                 curFragment = SettingsFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            R.id.nav_help -> if (tab == -1) { //first isRun
+            Section.HELP -> if (tab == -1) { //first isRun
                 val frHelp = HelpFragment.newInstance(0)
                 fragmentTransaction.replace(R.id.my_fragment, frHelp)
             } else {
@@ -428,14 +399,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-    private fun setMenu(id: Int, savePrev: Boolean) {
-        helper.changeId(id, savePrev)
-        when {
-            helper.isFloatMenu -> helper.navView?.setCheckedItem(id)
-            helper.isSideMenu -> helper.setMenuFragment()
-            helper.isFullMenu -> if (isCountInMenu && id != R.id.menu_fragment)
-                prom?.hide()
-        }
+    private fun setMenu(section: Section, savePrev: Boolean) {
+        helper.changeSection(section, savePrev)
+        if (helper.isSideMenu) helper.setMenuFragment()
+        else if (isCountInMenu && section != Section.MENU)
+            prom?.hide()
     }
 
     private fun clearSummaryNotif() {
@@ -467,50 +435,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (helper.drawer?.isDrawerOpen(GravityCompat.START) == true) {
-            helper.drawer!!.closeDrawer(GravityCompat.START)
-        } else if (helper.hasPrevId) {
-            if (canBack.not()) return
-            if (helper.prevId == R.id.nav_site)
-                tab = SiteToiler.TAB_SITE
-            setFragment(helper.prevId, false)
-            helper.prevId = 0
-        } else if (firstFragment == R.id.nav_new) {
-            firstFragment = helper.getFirstFragment()
-            setFragment(firstFragment, false)
-        } else if (canBack)
-            exit()
-    }
-
-    private val canBack: Boolean
-        get() = curFragment?.onBackPressed() ?: true
-
-    private fun exit() {
-        if (statusBack == StatusBack.EXIT) {
-            super.onBackPressed()
-        } else if (statusBack == StatusBack.PAGE && helper.isFullMenu) {
-            setFragment(R.id.menu_fragment, false)
-        } else if (statusBack == StatusBack.FIRST) {
-            setFragment(firstFragment, false)
-        } else {
-            statusBack = StatusBack.EXIT
-            Lib.showToast(getString(R.string.click_for_exit))
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    if (statusBack == StatusBack.EXIT)
-                        statusBack = StatusBack.MENU
-                }
-            }, (3 * DateUnit.SEC_IN_MILLS).toLong())
+        if (curFragment?.onBackPressed() == false)
+            return
+        when {
+            helper.shownActionMenu ->
+                helper.hideActionMenu()
+            helper.bottomBarIsHide ->
+                showBottomPanel()
+            firstSection == Section.NEW -> {
+                firstSection = helper.getFirstSection()
+                setSection(firstSection, false)
+            }
+            else -> exit()
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        showDownloadMenu()
-        return super.onOptionsItemSelected(item)
-    }
-
-    fun showDownloadMenu() {
-        helper.showDownloadMenu()
+    private fun exit() {
+        when {
+            statusBack == StatusBack.EXIT ->
+                super.onBackPressed()
+            helper.prevSection != null -> {
+                if (helper.prevSection == Section.SITE)
+                    tab = SiteToiler.TAB_SITE
+                setSection(helper.prevSection!!, false)
+                helper.prevSection = null
+            }
+            statusBack == StatusBack.FIRST ->
+                setSection(firstSection, false)
+            else -> {
+                statusBack = StatusBack.EXIT
+                Lib.showToast(getString(R.string.click_for_exit))
+                lifecycleScope.launch {
+                    delay(3000)
+                    if (statusBack == StatusBack.EXIT)
+                        statusBack = StatusBack.PAGE
+                }
+            }
+        }
     }
 
     fun openBook(link: String, isPoems: Boolean) {
@@ -521,43 +482,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             fragmentTransaction.replace(R.id.my_fragment, it)
             fragmentTransaction.commit()
         }
-        setMenu(R.id.nav_book, true)
+        setMenu(Section.BOOK, true)
     }
 
-    fun setButtons(fab1: View, fab2: View) {
-        this.fab1 = fab1
-        this.fab2 = fab2
+    fun startHideButton() {
+        if (animHideEnded && helper.fabAction.isVisible)
+            helper.fabAction.startAnimation(anHide)
     }
 
-    fun setButton(fab: View, shownNew: Boolean) {
-        fab1 = if (shownNew) helper.tvNew else null
-        fab2 = fab
-    }
-
-    fun clearButtons() {
-        fab1 = null
-        fab2 = null
-    }
-
-    fun startHideButtons() {
-        if (fab1?.isVisible == true)
-            fab1?.startAnimation(anMin)
-        if (fab2?.isVisible == true)
-            fab2?.startAnimation(anMin)
-    }
-
-    fun startShowButtons() {
-//        if (helper.checkNew() && helper.tvNew.isVisible.not()) {
-//            helper.tvNew.isVisible = true
-//            helper.tvNew.startAnimation(anMax)
-//        }
-        if (fab1?.isVisible == false) {
-            fab1?.isVisible = true
-            fab1?.startAnimation(anMax)
-        }
-        if (fab2?.isVisible == false) {
-            fab2?.isVisible = true
-            fab2?.startAnimation(anMax)
+    fun startShowButton() = helper.run {
+        if (animShowEnded && fabAction.isVisible.not() && type != MainHelper.ActionType.INVISIBLE) {
+            fabAction.isVisible = true
+            fabAction.startAnimation(anShow)
         }
     }
 
@@ -589,7 +525,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (link.isEmpty()) return
         if (link == Const.ADS) {
             tab = SiteToiler.TAB_DEV
-            setFragment(R.id.nav_site, true)
+            setSection(Section.SITE, true)
         } else openReader(link, null)
     }
 
@@ -610,5 +546,51 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             is NeoState.Error ->
                 status.setError(state.throwable.localizedMessage)
         }
+    }
+
+    fun onAction(title: String) {
+        curFragment?.onAction(title)
+    }
+
+    fun hideBottomPanel() {
+        helper.tvTitle?.isVisible = false
+        helper.bottomBar?.performHide()
+        startHideButton()
+    }
+
+    fun showBottomPanel() {
+        if (status.isVisible) return
+        helper.bottomBar?.performShow()
+        helper.tvTitle?.isVisible = true
+        startShowButton()
+    }
+
+    fun blocked() = helper.run {
+        isBlocked = true
+        tipAction.hide()
+        tvTitle?.isVisible = false
+        fabAction.isVisible = false
+        bottomBar?.isVisible = false
+    }
+
+    fun unblocked() = helper.run {
+        if (status.isVisible) return@run
+        isBlocked = false
+        tvTitle?.isVisible = true
+        if (type != MainHelper.ActionType.INVISIBLE)
+            fabAction.isVisible = true
+        bottomBar?.run {
+            isVisible = true
+            performShow()
+        }
+    }
+
+    fun setAction(icon: Int) {
+        helper.setActionIcon(icon)
+    }
+
+    fun checkBottomPanel() = helper.tvTitle?.let {
+        if (status.isVisible) return@let
+        it.isVisible = helper.bottomBar?.isScrolledUp ?: false
     }
 }

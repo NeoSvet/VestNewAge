@@ -9,8 +9,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 
-class MarkerAdapter(private val toiler: MarkersToiler) :
-    RecyclerView.Adapter<MarkerAdapter.ViewHolder>() {
+class MarkerAdapter(
+    private val toiler: MarkersToiler,
+    private val longClicker: ((Int) -> Boolean)
+) : RecyclerView.Adapter<MarkerAdapter.ViewHolder>() {
     companion object {
         private const val TYPE_SIMPLE = 0
         private const val TYPE_DETAIL = 1
@@ -46,16 +48,18 @@ class MarkerAdapter(private val toiler: MarkersToiler) :
         init {
             item_bg.setOnClickListener {
                 toiler.run {
-                    if (iSel == -1) {
-                        onClick(index)
-                        return@run
-                    }
-                    if (isCollections && index == 0) return@run // вне подборок
                     val oldSel = iSel
-                    selected(index)
-                    notifyItemChanged(oldSel)
-                    notifyItemChanged(index)
+                    onClick(index)
+                    if (oldSel > -1)
+                        notifyItemChanged(oldSel)
+                    if (iSel > -1)
+                        notifyItemChanged(index)
                 }
+            }
+            item_bg.setOnLongClickListener {
+                if (toiler.iSel == -1)
+                    longClicker.invoke(index)
+                else false
             }
         }
 

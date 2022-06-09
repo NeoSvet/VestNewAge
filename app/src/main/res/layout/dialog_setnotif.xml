@@ -16,14 +16,12 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSound"
-        style="@style/Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bRingtone"
-        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
@@ -42,7 +40,6 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"
-        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
