@@ -103,7 +103,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         scope.launch {
             val d = date
             if (!existsList(d)) {
-                Lib.LOG("reload 1")
                 reLoad()
                 return@launch
             }
@@ -170,7 +169,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 mstate.postValue(SuccessBook(calendar, prev, next, list))
                 return@launch
             }
-            Lib.LOG("reload 2")
             val today = DateUnit.initToday()
             if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year)
                 mstate.postValue(MessageState(strings.month_is_empty))
