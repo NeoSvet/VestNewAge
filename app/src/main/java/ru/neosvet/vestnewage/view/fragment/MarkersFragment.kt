@@ -77,7 +77,16 @@ class MarkersFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
+        setToolbar()
         restoreState(savedInstanceState)
+    }
+
+    private fun setToolbar() {
+        act?.setSupportActionBar(binding?.toolbar)
+        binding?.toolbar?.setNavigationOnClickListener {
+            if (toiler.isCollections.not())
+                toiler.openColList()
+        }
     }
 
     override fun onDestroyView() {
@@ -317,10 +326,13 @@ class MarkersFragment : NeoFragment() {
     private fun updateList(state: UpdateList) = binding?.run {
         if (toiler.iSel == -1)
             setStatus(false)
-        if (toiler.isCollections)
+        if (toiler.isCollections) {
+            act?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
             toolbar.title = toiler.title
-        else
+        } else {
+            act?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
             toolbar.title = String.format(getString(R.string.format_collection), toiler.title)
+        }
         if (toiler.list.isEmpty()) {
             adapter.notifyDataSetChanged()
             tvEmpty.text = if (toiler.isCollections)
