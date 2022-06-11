@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             dialog.setTitle(getString(R.string.god_words))
             dialog.setMessage("words")
             dialog.setLeftButton(getString(R.string.close)) { dialog.dismiss() }
-            dialog.setRightButton(getString(R.string.in_markers)) {
+            dialog.setRightButton(getString(R.string.find)) {
                 dialog.dismiss()
             }
             dialog.show(null)

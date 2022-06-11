@@ -84,8 +84,7 @@ class MarkersFragment : NeoFragment() {
     private fun setToolbar() {
         act?.setSupportActionBar(binding?.toolbar)
         binding?.toolbar?.setNavigationOnClickListener {
-            if (toiler.isCollections.not())
-                toiler.openColList()
+            onBackPressed()
         }
     }
 

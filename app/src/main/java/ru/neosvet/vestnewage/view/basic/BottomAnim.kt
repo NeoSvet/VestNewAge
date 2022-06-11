@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.R
 class BottomAnim(private val view: View) {
     private val addition = view.context.resources.getDimension(R.dimen.content_margin_bottom)
     private var anim: ViewPropertyAnimator? = null
-    private var animListener = object : AnimatorListenerAdapter() {
+    private val animListener = object : AnimatorListenerAdapter() {
         override fun onAnimationEnd(animation: Animator) {
             anim = null
         }
