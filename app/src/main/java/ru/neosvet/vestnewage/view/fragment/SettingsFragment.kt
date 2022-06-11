@@ -144,10 +144,12 @@ class SettingsFragment : NeoFragment() {
 
     private fun initBaseSection() {
         val list = mutableListOf<CheckItem>()
-        val s = if (prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR) == Const.SCREEN_MENU)
-            getString(R.string.count_everywhere)
-        else getString(R.string.count_float)
-        list.add(CheckItem(title = s, isChecked = !MainActivity.isCountInMenu))
+        list.add(
+            CheckItem(
+                title = getString(R.string.float_prom_time),
+                isChecked = prefMain.getBoolean(Const.PROM_FLOAT, false)
+            )
+        )
         list.add(
             CheckItem(
                 title = getString(R.string.start_with_new),
@@ -159,14 +161,14 @@ class SettingsFragment : NeoFragment() {
             isSingleSelect = false,
             list = list,
             onChecked = { index, checked ->
-                if (index == 0) {
-                    setMainCheckBox(Const.COUNT_IN_MENU, !checked, -1)
-                    MainActivity.isCountInMenu = !checked
-                } else {
-                    setMainCheckBox(
-                        Const.START_NEW, checked, -1
-                    )
-                }
+                val name = if (index == 0) {
+                    act?.setFloatProm(checked)
+                    Const.PROM_FLOAT
+                } else
+                    Const.START_NEW
+                val editor = prefMain.edit()
+                editor.putBoolean(name, checked)
+                editor.apply()
             }
         ))
     }
@@ -193,7 +195,7 @@ class SettingsFragment : NeoFragment() {
             list = list,
             onChecked = { index, _ ->
                 val i = if (ScreenUtils.isTablet) index + 1 else index
-                setMainCheckBox(Const.START_SCEEN, false, i)
+                setMainCheckBox(Const.START_SCEEN, i)
             }
         ))
     }
@@ -312,14 +314,10 @@ class SettingsFragment : NeoFragment() {
         ))
     }
 
-    private fun setMainCheckBox(name: String, check: Boolean, value: Int) {
+    private fun setMainCheckBox(name: String, value: Int) {
         val editor = prefMain.edit()
-        if (value == -1)
-            editor.putBoolean(name, check)
-        else
-            editor.putInt(name, value)
+        editor.putInt(name, value)
         editor.apply()
-        if (name == Const.START_NEW) return
         val main = Intent(act, MainActivity::class.java)
         main.putExtra(Const.START_SCEEN, false)
         if (value == -1) main.putExtra(Const.CUR_ID, Section.SETTINGS.toString())

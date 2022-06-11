@@ -6,22 +6,126 @@
     android:background="@drawable/starsky_bg"
     android:fitsSystemWindows="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivHead"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/head"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvGodWords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:shadowColor="@android:color/black"
+        android:layout_marginEnd="5dp"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="3"
+        android:text="@string/god_words"
+        app:layout_constraintEnd_toStartOf="@id/btnGodWords"
+        app:layout_constraintTop_toTopOf="@id/ivHead" />
+
+    <ImageButton
+        android:id="@+id/btnGodWords"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/button"
+        android:src="@drawable/more"
+        app:layout_constraintEnd_toEndOf="@id/ivHead"
+        app:layout_constraintTop_toTopOf="@id/ivHead" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvPromTimeHead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="3"
+        app:layout_constraintBottom_toBottomOf="@id/ivHead"
+        app:layout_constraintEnd_toEndOf="@id/ivHead" />
+
+    <FrameLayout
+        android:id="@+id/menu_fragment"
+        android:layout_width="320dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivHead" />
+
+    <FrameLayout
+        android:id="@+id/my_fragment"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/menu_fragment" />
+
+    <RelativeLayout
+        android:id="@+id/pStatus"
+        android:layout_width="210dp"
+        android:layout_height="56dp"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/shape_norm"
         android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <FrameLayout
-            android:id="@+id/menu_fragment"
-            android:layout_width="320dp"
-            android:layout_height="match_parent" />
-
-        <include
-            layout="@layout/main_content"
+        <ProgressBar
+            android:id="@+id/progStatus"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:max="100"
+            android:progressDrawable="@drawable/status_progressbar"
+            android:visibility="gone" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvStatus"
+            style="@style/StatusLabel"
+            android:layout_alignParentStart="true" />
+
+        <ImageView
+            android:id="@+id/ivStatus"
+            android:layout_width="56dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/load"
+            android:padding="15dp"
+            android:src="@drawable/ic_refresh" />
+    </RelativeLayout>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvPromTimeFloat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="@dimen/content_margin_bottom"
+        android:background="@drawable/field"
+        android:padding="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/field"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAction"

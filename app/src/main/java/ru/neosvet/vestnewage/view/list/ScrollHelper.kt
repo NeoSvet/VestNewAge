@@ -17,8 +17,8 @@ class ScrollHelper(
             override fun onScrolled(view: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(view, dx, dy)
                 val value = view.computeVerticalScrollOffset() + view.computeVerticalScrollExtent()
-                if (value < view.height) return
                 val max = view.computeVerticalScrollRange()
+                if (value <= view.height) return
                 if (value >= max)
                     events.invoke(Events.SCROLL_END)
                 else

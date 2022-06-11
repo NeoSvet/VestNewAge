@@ -2,20 +2,26 @@ package ru.neosvet.vestnewage.helper
 
 import android.annotation.SuppressLint
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -35,7 +41,9 @@ class MainHelper(private val act: MainActivity) {
     var type = ActionType.MENU
         private set
     lateinit var tipAction: Tip
+        private set
     lateinit var fabAction: FloatingActionButton
+        private set
     private val adAction = MenuAdapter(this::onActionClick)
     var actionIcon: Int = R.drawable.star
         private set
@@ -43,14 +51,18 @@ class MainHelper(private val act: MainActivity) {
         private set
     var tvTitle: TextView? = null
     var bottomBar: BottomAppBar? = null
-    val bottomBarIsHide: Boolean
-        get() = bottomBar?.isVisible == false || bottomBar?.isScrolledDown == true
-
+    var topBar: AppBarLayout? = null
+    var svMain: NestedScrollView? = null
+    val bottomAreaIsHide: Boolean
+        get() = fabAction.isVisible.not() && type != ActionType.INVISIBLE || bottomBar?.isVisible == false
     var frMenu: MenuFragment? = null
     var tvNew: TextView? = null
     lateinit var pStatus: View
-    lateinit var tvPromTime: TextView
-    lateinit var tabLayout: TabLayout
+        private set
+    lateinit var tvPromTimeFloat: TextView
+        private set
+    lateinit var btnGodWords: View
+        private set
 
     val unread = UnreadUtils()
     var countNew: Int = 0
@@ -59,15 +71,15 @@ class MainHelper(private val act: MainActivity) {
     val newId: Int
         get() = unread.getNewId(countNew)
     private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
-    val isCountInMenu: Boolean
-        get() = pref.getBoolean(Const.COUNT_IN_MENU, true)
+    val isFloatPromTime: Boolean
+        get() = pref.getBoolean(Const.PROM_FLOAT, false)
     var isSideMenu: Boolean = false
         private set
 
     fun initViews() {
         pStatus = act.findViewById(R.id.pStatus)
-        tvPromTime = act.findViewById(R.id.tvPromTime)
-        tabLayout = act.findViewById(R.id.tablayout)
+        tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
+        btnGodWords = act.findViewById(R.id.btnGodWords)
         fabAction = act.findViewById(R.id.fabAction)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
         tipAction = Tip(act, rvAction)
@@ -81,11 +93,31 @@ class MainHelper(private val act: MainActivity) {
             else
                 act.onAction(TAG)
         }
+        val ivHead = act.findViewById<ImageView>(R.id.ivHead)
+        if (ScreenUtils.type == ScreenUtils.Type.TABLET_PORT)
+            ivHead.setImageResource(R.drawable.headtablet)
+        ivHead.setOnClickListener {
+            Lib.openInApps(
+                NeoClient.SITE.substring(0, NeoClient.SITE.length - 1), null
+            )
+        }
+
         isSideMenu = ScreenUtils.isTabletLand
         if (isSideMenu) return
         tvTitle = act.findViewById(R.id.tvTitle)
         bottomBar = act.findViewById(R.id.bottom_app_bar)
-        bottomBar!!.setBackgroundResource(R.drawable.panel_bg)
+        bottomBar?.setBackgroundResource(R.drawable.panel_bg)
+
+        svMain = act.findViewById(R.id.svMain)
+        topBar = act.findViewById(R.id.appbar)
+
+        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND) {
+            ivHead.setImageResource(R.drawable.headland)
+            val tv = act.findViewById<View>(R.id.tvGodWords)
+            tv.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = bottomMargin
+            }
+        }
     }
 
     private var isFirst: Boolean? = null

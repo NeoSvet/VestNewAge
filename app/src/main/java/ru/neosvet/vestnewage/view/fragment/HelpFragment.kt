@@ -10,12 +10,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -44,7 +40,6 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         HelpAdapter(toiler, toiler.list)
     }
     private var act: MainActivity? = null
-    private var jobAnim: Job? = null
     private var scroll: ScrollHelper? = null
 
     override fun onCreateView(
@@ -88,39 +83,15 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         scroll = ScrollHelper {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
-                    hideButtons()
+                    act?.hideBottomArea()
                 ScrollHelper.Events.SCROLL_START ->
-                    showButtons()
+                    act?.showBottomArea()
             }
+        }.apply { attach(rvHelp) }
+        val touch = TouchHelper(true) {
+            act?.hideBottomArea()
         }
-        scroll?.attach(rvHelp)
-        val swipe = TouchHelper {
-            if (it != TouchHelper.Events.LIST_LIMIT)
-                return@TouchHelper
-            act?.run {
-                hideBottomPanel()
-                jobAnim?.cancel()
-                jobAnim = lifecycleScope.launch {
-                    delay(1000)
-                    showBottomPanel()
-                }
-            }
-        }
-        swipe.attach(rvHelp)
-    }
-
-    private fun showButtons() = act?.run {
-        startShowButton()
-        checkBottomPanel()
-    }
-
-    private fun hideButtons() {
-        act?.startHideButton()
-        jobAnim?.cancel()
-        jobAnim = lifecycleScope.launch {
-            delay(1000)
-            showButtons()
-        }
+        touch.attach(rvHelp)
     }
 
     private fun restoreState(state: Bundle?) {

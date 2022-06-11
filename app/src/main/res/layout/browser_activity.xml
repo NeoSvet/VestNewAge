@@ -77,7 +77,7 @@
             app:srcCompat="@drawable/ic_bottom" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvPromTime"
+            android:id="@+id/tvPromTimeFloat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"

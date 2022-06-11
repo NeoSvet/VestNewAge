@@ -1,30 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent">
-
-    <ImageView
-        android:id="@+id/ivHeadMenu"
-        android:layout_width="318dp"
-        android:layout_height="201dp"
-        android:src="@drawable/side_nav_bar" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvPromTimeInMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/ivHeadMenu"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="3dp"
-        android:shadowColor="@android:color/black"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="3"
-        android:visibility="gone" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMenu"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/menu_fragment_top" />
-</RelativeLayout>
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rvMenu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

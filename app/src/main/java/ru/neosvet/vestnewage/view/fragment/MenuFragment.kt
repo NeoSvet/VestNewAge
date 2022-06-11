@@ -5,19 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils.isTabletLand
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -36,7 +29,6 @@ class MenuFragment : Fragment() {
         private var iSelect = -1
     }
 
-    private var jobAnim: Job? = null
     private var act: MainActivity? = null
     private var lastNewId = 0
     private lateinit var rvMenu: RecyclerView
@@ -78,19 +70,9 @@ class MenuFragment : Fragment() {
 
     private fun initView(container: View) {
         rvMenu = container.findViewById(R.id.rvMenu)
-        val ivHeadMenu = container.findViewById(R.id.ivHeadMenu) as View
-        if (isTabletLand) {
-            ivHeadMenu.setOnClickListener {
-                Lib.openInApps(
-                    NeoClient.SITE.substring(0, NeoClient.SITE.length - 1), null
-                )
-            }
-            if (MainActivity.isCountInMenu)
-                act!!.setProm(container.findViewById(R.id.tvPromTimeInMenu))
-        } else {
+        if (isTabletLand.not()) {
             isFullScreen = true
             act!!.title = getString(R.string.app_name)
-            ivHeadMenu.isVisible = false
         }
         initList()
     }
@@ -122,39 +104,15 @@ class MenuFragment : Fragment() {
         scroll = ScrollHelper {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
-                    hideButtons()
+                    act?.hideBottomArea()
                 ScrollHelper.Events.SCROLL_START ->
-                    showButtons()
+                    act?.showBottomArea()
             }
+        }.apply { attach(rvMenu) }
+        val touch = TouchHelper(true) {
+            act?.hideBottomArea()
         }
-        scroll?.attach(rvMenu)
-        val swipe = TouchHelper {
-            if (it != TouchHelper.Events.LIST_LIMIT)
-                return@TouchHelper
-            act?.run {
-                hideBottomPanel()
-                jobAnim?.cancel()
-                jobAnim = lifecycleScope.launch {
-                    delay(1000)
-                    showBottomPanel()
-                }
-            }
-        }
-        swipe.attach(rvMenu)
-    }
-
-    private fun showButtons() = act?.run {
-        startShowButton()
-        checkBottomPanel()
-    }
-
-    private fun hideButtons() {
-        act?.startHideButton()
-        jobAnim?.cancel()
-        jobAnim = lifecycleScope.launch {
-            delay(1000)
-            showButtons()
-        }
+        touch.attach(rvMenu)
     }
 
     fun setSelect(section: Section) {

@@ -3,13 +3,11 @@ package ru.neosvet.vestnewage.view.basic
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
@@ -27,8 +25,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     protected val neotoiler: NeoToiler by lazy {
         initViewModel()
     }
-    private var jobAnim: Job? = null
     private var scroll: ScrollHelper? = null
+    private var root: View? = null
 
     abstract val title: String
 
@@ -38,12 +36,19 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        root = view
         act?.status?.setClick { onStatusClick(false) }
         onViewCreated(savedInstanceState)
         act?.let {
             neotoiler.state.observe(it, this)
         }
         if (neotoiler.isRun) setStatus(true)
+    }
+
+    fun updateRoot(newHeight: Int) {
+        root?.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = newHeight
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -149,49 +154,25 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         scroll = ScrollHelper {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
-                    hideButtons()
+                    act?.hideBottomArea()
                 ScrollHelper.Events.SCROLL_START ->
-                    showButtons()
+                    act?.showBottomArea()
             }
-        }
-        scroll?.attach(list)
-        val swipe = TouchHelper {
+        }.apply { attach(list) }
+        val touch = TouchHelper(onlyLimit) {
             when (it) {
                 TouchHelper.Events.LIST_LIMIT ->
-                    hideBottomPanel()
+                    act?.hideBottomArea()
                 TouchHelper.Events.SWIPE_LEFT ->
                     swipeLeft()
                 TouchHelper.Events.SWIPE_RIGHT ->
                     swipeRight()
             }
         }
-        swipe.attach(list)
+        touch.attach(list)
     }
 
     open fun swipeLeft() {}
 
     open fun swipeRight() {}
-
-    private fun showButtons() = act?.run {
-        startShowButton()
-        checkBottomPanel()
-    }
-
-    private fun hideButtons() {
-        act?.startHideButton()
-        jobAnim?.cancel()
-        jobAnim = lifecycleScope.launch {
-            delay(1000)
-            showButtons()
-        }
-    }
-
-    private fun hideBottomPanel() {
-        act?.hideBottomPanel()
-        jobAnim?.cancel()
-        jobAnim = lifecycleScope.launch {
-            delay(1000)
-            act?.showBottomPanel()
-        }
-    }
 }

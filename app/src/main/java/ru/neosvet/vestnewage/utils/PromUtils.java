@@ -73,7 +73,7 @@ public class PromUtils {
     }
 
     private void setViews() {
-        if (tvPromTime.getId() == R.id.tvPromTime) {
+        if (tvPromTime.getId() == R.id.tvPromTimeFloat) {
             final Animation anMin = AnimationUtils.loadAnimation(App.context, R.anim.minimize);
             anMin.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -177,7 +177,7 @@ public class PromUtils {
             return;
         }
         tvPromTime.setText(t);
-        if (tvPromTime.getId() == R.id.tvPromTime &&
+        if (tvPromTime.getId() == R.id.tvPromTimeFloat &&
                 t.contains(App.context.getResources().getStringArray(R.array.time)[6])) {
             t = t.substring(App.context.getString(R.string.to_prom).length() + 1);
             int h = 0;

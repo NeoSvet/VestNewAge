@@ -13,6 +13,5 @@
     <integer name="screen_mode">3</integer>
     <dimen name="menu_width">350dp</dimen>
     <dimen name="fab_size">56dp</dimen>
-    <dimen name="menu_fragment_top">201dp</dimen>
     <integer name="tablet_7">0</integer>
 </resources>

@@ -8,6 +8,7 @@
     <string name="download_articles">Скачать все статьи</string>
     <string name="download_book">Скачать книгу с 2016 года</string>
     <string name="download_calendar">Скачать текущий год</string>
+    <string name="god_words">Слова Создателя</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>
@@ -160,8 +161,7 @@
     <string name="base">Основное</string>
     <string name="notif_new">Проверка обновлений</string>
     <string name="notif_prom">Напоминание о Посыле</string>
-    <string name="count_float">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
-    <string name="count_everywhere">Показывать отсчёт времени до Посыла везде</string>
+    <string name="float_prom_time">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="start_with_new">При запуске открыть Новое, если имеется</string>
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>

@@ -17,7 +17,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.tabs.TabLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -30,6 +31,7 @@ import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
@@ -42,8 +44,6 @@ import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     companion object {
-        @JvmField
-        var isCountInMenu = false
         private const val LIMIT_DIFF_SEC = 4
     }
 
@@ -66,16 +66,11 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     private lateinit var utils: LaunchUtils
     private lateinit var anHide: Animation
     private lateinit var anShow: Animation
-    private val animHideEnded: Boolean
-        get() = anHide.hasEnded() || anHide.hasStarted().not()
-    private val animShowEnded: Boolean
-        get() = anShow.hasEnded() || anShow.hasStarted().not()
+    private var jobBottomArea: Job? = null
+    private var isShowBottomArea = false
 
     val newId: Int
         get() = helper.newId
-
-    val tabLayout: TabLayout
-        get() = helper.tabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
@@ -94,16 +89,26 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         setBottomPanel()
         status.init(this, helper.pStatus)
         initAnim()
-        isCountInMenu = helper.isCountInMenu
-        if (isCountInMenu.not() || helper.isSideMenu.not()) {
-            prom = PromUtils(helper.tvPromTime)
-        } else {//it is not land
-            //TODO move promtime to head
-        }
+        setFloatProm(helper.isFloatPromTime)
+        initGodWords()
 
         restoreState(savedInstanceState)
         if (withSplash.not())
             finishFlashStar()
+    }
+
+    private fun initGodWords() {
+        helper.btnGodWords.setOnClickListener {
+            val dialog = CustomDialog(this)
+            dialog.setTitle(getString(R.string.god_words))
+            dialog.setMessage("words")
+            dialog.setLeftButton(getString(R.string.close)) { dialog.dismiss() }
+            dialog.setRightButton(getString(R.string.in_markers)) {
+                dialog.dismiss()
+            }
+            dialog.show(null)
+        }
+        //TODO load words
     }
 
     override fun setTitle(title: CharSequence?) {
@@ -200,12 +205,13 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
 
     fun setFragment(fragment: NeoFragment) {
         curFragment = fragment
-        if (tabLayout.isVisible)
-            tabLayout.removeAllTabs()
-        tabLayout.isVisible = fragment is BookFragment || fragment is SiteFragment
+        helper.svMain?.post {
+            fragment.updateRoot(helper.svMain!!.height)
+        }
     }
 
     private fun finishFlashStar() {
+        helper.topBar?.isVisible = true
         helper.setNewValue()
         if (helper.isFirstRun) {
             setSection(Section.HELP, false)
@@ -227,6 +233,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         anHide.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
+                helper.tvTitle?.isVisible = false
                 helper.fabAction.isVisible = false
             }
 
@@ -247,6 +254,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
                     updateNew()
             }
         } else helper.run {
+            helper.topBar?.isVisible = true
             if (state.getBoolean(Const.PANEL))
                 blocked()
             else
@@ -274,14 +282,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
 
     override fun onResume() {
         super.onResume()
-        if (helper.isSideMenu || !isCountInMenu || helper.curSection == Section.MENU)
-            prom?.resume()
-        else
-            prom?.hide()
-    }
-
-    fun setProm(textView: View) {
-        prom = PromUtils(textView)
+        prom?.resume()
     }
 
     fun updateNew() {
@@ -309,14 +310,13 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
+        prom?.show()
         when (section) {
             Section.MENU -> {
-                hideTabs()
                 unblocked()
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
-                if (isCountInMenu) prom?.show()
             }
             Section.NEW -> {
                 fragmentTransaction.replace(R.id.my_fragment, NewFragment())
@@ -361,7 +361,6 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
                 fragmentTransaction.replace(R.id.my_fragment, search)
             }
             Section.JOURNAL -> {
-                hideTabs()
                 fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
             }
             Section.MARKERS -> {
@@ -383,7 +382,6 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
                 val frHelp = HelpFragment.newInstance(0)
                 fragmentTransaction.replace(R.id.my_fragment, frHelp)
             } else {
-                hideTabs()
                 fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
         }
@@ -391,19 +389,9 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         fragmentTransaction.commit()
     }
 
-    private fun hideTabs() {
-        if (tabLayout.isVisible) {
-            tabLayout.removeAllTabs()
-            tabLayout.isVisible = false
-        }
-    }
-
-
     private fun setMenu(section: Section, savePrev: Boolean) {
         helper.changeSection(section, savePrev)
         if (helper.isSideMenu) helper.setMenuFragment()
-        else if (isCountInMenu && section != Section.MENU)
-            prom?.hide()
     }
 
     private fun clearSummaryNotif() {
@@ -440,8 +428,8 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         when {
             helper.shownActionMenu ->
                 helper.hideActionMenu()
-            helper.bottomBarIsHide ->
-                showBottomPanel()
+            helper.bottomAreaIsHide ->
+                showBottomArea()
             firstSection == Section.NEW -> {
                 firstSection = helper.getFirstSection()
                 setSection(firstSection, false)
@@ -483,18 +471,6 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             fragmentTransaction.commit()
         }
         setMenu(Section.BOOK, true)
-    }
-
-    fun startHideButton() {
-        if (animHideEnded && helper.fabAction.isVisible)
-            helper.fabAction.startAnimation(anHide)
-    }
-
-    fun startShowButton() = helper.run {
-        if (animShowEnded && fabAction.isVisible.not() && type != MainHelper.ActionType.INVISIBLE) {
-            fabAction.isVisible = true
-            fabAction.startAnimation(anShow)
-        }
     }
 
     private fun showWelcome() {
@@ -552,17 +528,43 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         curFragment?.onAction(title)
     }
 
-    fun hideBottomPanel() {
-        helper.tvTitle?.isVisible = false
-        helper.bottomBar?.performHide()
-        startHideButton()
+    fun hideBottomArea() {
+        if(isBlocked || isShowBottomArea.not()) return
+        jobBottomArea?.cancel()
+        helper.run {
+            bottomBar?.performHide()
+               isShowBottomArea = false
+                tvTitle?.clearAnimation()
+                tvTitle?.startAnimation(anHide)
+                if (type != MainHelper.ActionType.INVISIBLE) {
+                    fabAction.clearAnimation()
+                    fabAction.startAnimation(anHide)
+                }
+        }
+        jobBottomArea = lifecycleScope.launch {
+            delay(1500)
+            showBottomArea()
+        }
     }
 
-    fun showBottomPanel() {
-        if (status.isVisible) return
-        helper.bottomBar?.performShow()
-        helper.tvTitle?.isVisible = true
-        startShowButton()
+    fun showBottomArea() {
+        if(isBlocked) return
+        jobBottomArea?.cancel()
+        if (status.isVisible || isShowBottomArea) return
+        isShowBottomArea = true
+        helper.run {
+            bottomBar?.performShow()
+                tvTitle?.run {
+                    clearAnimation()
+                    isVisible = true
+                    startAnimation(anShow)
+                }
+                if (type != MainHelper.ActionType.INVISIBLE) {
+                    fabAction.clearAnimation()
+                    fabAction.isVisible = true
+                    fabAction.startAnimation(anShow)
+                }
+        }
     }
 
     fun blocked() = helper.run {
@@ -589,8 +591,16 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         helper.setActionIcon(icon)
     }
 
-    fun checkBottomPanel() = helper.tvTitle?.let {
-        if (status.isVisible) return@let
-        it.isVisible = helper.bottomBar?.isScrolledUp ?: false
+    fun setFloatProm(isFloat: Boolean) {
+        prom?.hide()
+        prom = if (isFloat)
+            PromUtils(helper.tvPromTimeFloat)
+        else
+            PromUtils(findViewById(R.id.tvPromTimeHead))
+        prom?.show()
+    }
+
+    fun hideHead() {
+        helper.topBar?.setExpanded(false)
     }
 }

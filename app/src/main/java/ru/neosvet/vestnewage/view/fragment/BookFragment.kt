@@ -128,10 +128,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 }
             }
         }
-        act?.tabLayout?.select(toiler.selectedTab)
+        binding?.tabLayout?.select(toiler.selectedTab)
     }
 
-    private fun initTabs() = act?.run {
+    private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.katreny))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.poslaniya))
         if (toiler.isKatrenTab.not())
@@ -168,7 +168,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private fun setBook(state: SuccessBook) = binding?.run {
         act?.run {
-            if(status.isVisible) setStatus(false)
+            if (status.isVisible) setStatus(false)
             updateNew()
         }
         tvDate.text = state.date
@@ -242,7 +242,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
         binding?.run {
-            val tabHost = act!!.tabLayout.getChildAt(0) as ViewGroup
+            val tabHost = tabLayout.getChildAt(0) as ViewGroup
             if (load) {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false

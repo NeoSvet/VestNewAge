@@ -50,13 +50,13 @@ class TouchHelper(
     private var isDown = false
     private var x = 0
     private var y = 0
-    private var distanceForSwipe: Int = 30
+    private var distanceForSwipe: Int = 50
     private var limit: Int = 0
 
     fun attach(view: RecyclerView) {
         initTouchListener(view)
         if (onlyLimit) return
-        distanceForSwipe = (30 * view.resources.displayMetrics.density).toInt()
+        distanceForSwipe = (distanceForSwipe * view.resources.displayMetrics.density).toInt()
         val helper = ItemTouchHelper(callback)
         helper.attachToRecyclerView(view)
     }
@@ -67,12 +67,7 @@ class TouchHelper(
             initLimit(view)
             when (event.actionMasked) {
                 MotionEvent.ACTION_MOVE -> {
-                    val max = view.computeVerticalScrollRange()
-                    if (max > limit && max < view.height)
-                        events.invoke(Events.LIST_LIMIT)
-                }
-                MotionEvent.ACTION_DOWN -> {
-                    if (onlyLimit) return@setOnTouchListener false
+                    if (isDown) return@setOnTouchListener false
                     isDown = true
                     x = event.getX(0).toInt()
                     y = event.getY(0).toInt()
@@ -82,9 +77,18 @@ class TouchHelper(
                     isDown = false
                     val x2 = event.getX(0).toInt()
                     val y2 = event.getY(0).toInt()
-                    val r = abs(x - x2)
-                    val r2 = abs(y - y2)
-                    if (r > distanceForSwipe && r > r2) {
+                    val rX = abs(x - x2)
+                    val rY = abs(y - y2)
+                    if (rX < rY && y > y2) {
+                        val value =
+                            view.computeVerticalScrollOffset() + view.computeVerticalScrollExtent()
+                        val max = view.computeVerticalScrollRange()
+                        if (value == max && max > limit && max <= view.height)
+                            events.invoke(Events.LIST_LIMIT)
+                        return@setOnTouchListener false
+                    }
+                    if (onlyLimit) return@setOnTouchListener false
+                    if (rX > distanceForSwipe && rX > rY) {
                         if (x > x2) // next
                             events.invoke(Events.SWIPE_LEFT)
                         else if (x < x2) // prev

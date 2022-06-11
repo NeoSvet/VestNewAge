@@ -220,12 +220,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         status.init(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
-        if (pref.getBoolean(Const.COUNT_IN_MENU, true)) {
+        if (pref.getBoolean(Const.PROM_FLOAT, false)) {
+            tvPromTime = binding.tvPromTimeFloat
+            prom = PromUtils(tvPromTime)
+        } else {
             val tv = binding.navView.getHeaderView(0).findViewById(R.id.tvPromTimeInMenu) as View
             prom = PromUtils(tv)
-        } else {
-            tvPromTime = binding.tvPromTime
-            prom = PromUtils(tvPromTime)
         }
 
         val toggle = ActionBarDrawerToggle(

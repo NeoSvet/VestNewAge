@@ -88,7 +88,7 @@ class SiteFragment : NeoFragment() {
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
         binding?.run {
-            val tabHost = act!!.tabLayout.getChildAt(0) as ViewGroup
+            val tabHost = tabLayout.getChildAt(0) as ViewGroup
             if (load) {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
@@ -110,13 +110,13 @@ class SiteFragment : NeoFragment() {
             }
             when (toiler.selectedTab) {
                 SiteToiler.TAB_NEWS -> toiler.openList(true)
-                SiteToiler.TAB_SITE -> act?.tabLayout?.select(toiler.selectedTab)
+                SiteToiler.TAB_SITE -> binding?.tabLayout?.select(toiler.selectedTab)
                 SiteToiler.TAB_DEV -> toiler.openAds()
             }
         }
     }
 
-    private fun initTabs() = act?.run {
+    private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.news))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.site))
         if (toiler.selectedTab == SiteToiler.TAB_SITE)
@@ -144,14 +144,14 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun swipeLeft() {
-        act?.run {
+        binding?.run {
             val t = tabLayout.selectedTabPosition
             if (t < 1) tabLayout.select(t + 1)
         }
     }
 
     override fun swipeRight() {
-        act?.run {
+        binding?.run {
             val t = tabLayout.selectedTabPosition
             if (t > 0) tabLayout.select(t - 1)
         }
@@ -192,7 +192,7 @@ class SiteFragment : NeoFragment() {
         binding?.run {
             if (toiler.isDevTab) {
                 if (index == 0) { //back
-                    act?.tabLayout?.select(SiteToiler.TAB_NEWS)
+                    tabLayout.select(SiteToiler.TAB_NEWS)
                     return true
                 }
                 ads.index = index

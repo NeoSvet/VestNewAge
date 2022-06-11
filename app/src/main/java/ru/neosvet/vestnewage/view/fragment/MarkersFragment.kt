@@ -228,6 +228,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun goToEdit() {
+        act?.hideHead()
         adapter.notifyItemChanged(toiler.iSel)
         act?.blocked()
         binding?.content?.pEdit?.isVisible = true

@@ -94,18 +94,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         val layoutManager = GridLayoutManager(requireContext(), 7)
         rvCalendar.layoutManager = layoutManager
         rvCalendar.adapter = adCalendar
-        svCalendar.setOnScrollChangeListener { _, _, _, _, _ ->
-            if (toiler.isRun) return@setOnScrollChangeListener
-            if (svCalendar.canScrollVertically(50)) {
-                if (isBlocked) {
-                    act?.unblocked()
-                    isBlocked = false
-                }
-            } else if (isBlocked.not()) {
-                act?.blocked()
-                isBlocked = true
-            }
-        }
         bPrev.setOnClickListener { openMonth(-1) }
         bNext.setOnClickListener { openMonth(1) }
         tvDate.setOnClickListener { showDatePicker() }
