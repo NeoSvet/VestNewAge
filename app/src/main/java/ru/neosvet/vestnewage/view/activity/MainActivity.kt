@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
@@ -17,7 +16,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,6 +27,7 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
+import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
@@ -64,10 +63,10 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     private var statusBack = StatusBack.EXIT
 
     private lateinit var utils: LaunchUtils
-    private lateinit var anHide: Animation
-    private lateinit var anShow: Animation
     private var jobBottomArea: Job? = null
     private var isShowBottomArea = false
+    private var animTitle: BottomAnim? = null
+    private lateinit var animButton: BottomAnim
 
     val newId: Int
         get() = helper.newId
@@ -228,18 +227,11 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         showWelcome()
     }
 
-    private fun initAnim() {
-        anHide = AnimationUtils.loadAnimation(this, R.anim.minimize)
-        anHide.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                helper.tvTitle?.isVisible = false
-                helper.fabAction.isVisible = false
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        anShow = AnimationUtils.loadAnimation(this, R.anim.maximize)
+    private fun initAnim() = helper.run {
+        fabAction.post {
+            tvTitle?.let { animTitle = BottomAnim(it) }
+            animButton = BottomAnim(fabAction)
+        }
     }
 
     private fun restoreState(state: Bundle?) {
@@ -529,17 +521,14 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     }
 
     fun hideBottomArea() {
-        if(isBlocked || isShowBottomArea.not()) return
+        if (isBlocked || isShowBottomArea.not()) return
         jobBottomArea?.cancel()
         helper.run {
             bottomBar?.performHide()
-               isShowBottomArea = false
-                tvTitle?.clearAnimation()
-                tvTitle?.startAnimation(anHide)
-                if (type != MainHelper.ActionType.INVISIBLE) {
-                    fabAction.clearAnimation()
-                    fabAction.startAnimation(anHide)
-                }
+            isShowBottomArea = false
+            animTitle?.hide()
+            if (type != MainHelper.ActionType.INVISIBLE)
+                animButton.hide()
         }
         jobBottomArea = lifecycleScope.launch {
             delay(1500)
@@ -548,22 +537,15 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     }
 
     fun showBottomArea() {
-        if(isBlocked) return
+        if (isBlocked) return
         jobBottomArea?.cancel()
         if (status.isVisible || isShowBottomArea) return
         isShowBottomArea = true
         helper.run {
             bottomBar?.performShow()
-                tvTitle?.run {
-                    clearAnimation()
-                    isVisible = true
-                    startAnimation(anShow)
-                }
-                if (type != MainHelper.ActionType.INVISIBLE) {
-                    fabAction.clearAnimation()
-                    fabAction.isVisible = true
-                    fabAction.startAnimation(anShow)
-                }
+            animTitle?.show()
+            if (type != MainHelper.ActionType.INVISIBLE)
+                animButton.show()
         }
     }
 
