@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import androidx.work.Data
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -121,8 +122,10 @@ class SiteToiler : NeoToiler() {
             br.close()
             mstate.postValue(SuccessList(list))
 
-            if (loadIfNeed && DateUnit.isLongAgo(f.lastModified()))
+            if (loadIfNeed && DateUnit.isLongAgo(f.lastModified())) {
+                delay(50) //for post list
                 reLoad()
+            }
         }
     }
 

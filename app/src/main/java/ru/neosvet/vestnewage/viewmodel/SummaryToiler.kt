@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import androidx.work.Data
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -63,8 +64,10 @@ class SummaryToiler : NeoToiler() {
         scope.launch {
             val list = openList()
             mstate.postValue(SuccessList(list))
-            if (loadIfNeed && (list.isEmpty() || isNeedReload()))
+            if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
+                delay(50) //for post list
                 reLoad()
+            }
         }
     }
 

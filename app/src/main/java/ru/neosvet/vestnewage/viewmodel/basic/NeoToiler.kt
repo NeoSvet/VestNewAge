@@ -69,11 +69,7 @@ abstract class NeoToiler : ViewModel() {
     protected open suspend fun doLoad() {}
 
     protected suspend fun reLoad() {
-        if (loadIfNeed) {
-            if (checkConnect().not()) {
-                isRun = false
-                return
-            }
+        if (loadIfNeed && checkConnect()) {
             mstate.postValue(NeoState.Loading)
             loadIfNeed = false
             doLoad()
