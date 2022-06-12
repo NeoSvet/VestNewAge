@@ -156,7 +156,7 @@
         android:visibility="gone"
         app:backgroundTint="@color/colorPrimary"
         app:fabAlignmentMode="end"
-        app:menu="@menu/menu_bottom_bar" />
+        app:menu="@menu/menu_main" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAction"
