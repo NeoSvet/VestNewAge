@@ -1,127 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/head_height"
+            android:background="@android:color/black"
+            app:contentScrim="@android:color/black"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:scrimVisibleHeightTrigger="40dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:src="@drawable/head"
+                app:layout_collapseMode="parallax" />
+
+            <ImageView
+                android:id="@+id/bBack"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="10dp"
+                android:src="@drawable/ic_left"
+                app:layout_collapseMode="pin" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvPromTimeHead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                android:shadowColor="@android:color/black"
+                android:shadowDx="3"
+                android:shadowDy="3"
+                android:shadowRadius="3" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/svBrowser"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimaryDark"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-        </com.google.android.material.appbar.AppBarLayout>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <include
             android:id="@+id/content"
             layout="@layout/browser_content" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvFinish"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="55dp"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/field"
-            android:padding="10dp"
-            android:text="@string/finish_list"
-            android:visibility="gone" />
+    </androidx.core.widget.NestedScrollView>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabMenu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:contentDescription="@string/menu"
-            app:srcCompat="@drawable/ic_menu" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="5dp"
-            android:layout_marginBottom="5dp"
-            android:alpha="0.5"
-            android:contentDescription="@string/to_top"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_top" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="5dp"
-            android:layout_marginBottom="5dp"
-            android:alpha="0.5"
-            android:contentDescription="@string/to_bottom"
-            app:srcCompat="@drawable/ic_bottom" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvPromTimeFloat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_margin="10dp"
-            android:background="@drawable/field"
-            android:padding="10dp"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/pStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:background="@drawable/shape_norm"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tvStatus"
-                style="@style/StatusLabel" />
-
-            <ImageView
-                android:id="@+id/ivStatus"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:contentDescription="@string/load"
-                android:padding="15dp"
-                android:src="@drawable/ic_refresh" />
-        </LinearLayout>
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvFinish"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@drawable/starsky_bg"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_browser"
-        app:itemBackground="@drawable/menu_bg"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/field"
+        android:padding="10dp"
+        android:text="@string/finish_list"
+        android:visibility="gone" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvPromTimeFloat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="10dp"
+        android:background="@drawable/field"
+        android:padding="10dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/pStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/shape_norm"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvStatus"
+            style="@style/StatusLabel" />
+
+        <ImageView
+            android:id="@+id/ivStatus"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@string/load"
+            android:padding="15dp"
+            android:src="@drawable/ic_refresh" />
+    </LinearLayout>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabAlignmentMode="end"
+        app:hideOnScroll="true"
         app:menu="@menu/menu_browser" />
 
-</androidx.drawerlayout.widget.DrawerLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="5dp"
+        android:alpha="0.5"
+        app:layout_anchor="@id/bottomBar"
+        app:srcCompat="@drawable/ic_bottom" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,21 +1,19 @@
 package ru.neosvet.vestnewage.view.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.navigation.NavigationView
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -24,10 +22,8 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.PromUtils
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Tip
@@ -39,8 +35,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.util.*
 
-class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
-    NavigationView.OnNavigationItemSelectedListener, ConnectObserver {
+class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -53,9 +48,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     data class NeoMenu(
-        val themeLight: MenuItem,
-        val themeDark: MenuItem,
-        val nomenu: MenuItem,
+        val theme: MenuItem,
         val buttons: MenuItem,
         val refresh: MenuItem,
         val share: MenuItem
@@ -70,6 +63,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     private lateinit var anMin: Animation
     private lateinit var anMax: Animation
     private lateinit var menu: NeoMenu
+    private var navIsTop = false
     private var tvPromTime: View? = null
     private lateinit var tip: Tip
     private val toiler: BrowserToiler by lazy {
@@ -96,7 +90,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         if (toiler.helper == null)
             toiler.init(this)
         initViews()
+        if (savedInstanceState != null) // for logo in topBar
+            ScreenUtils.init(this)
+        setBars()
         setViews()
+        setContent()
+        initTheme()
         restoreState(savedInstanceState)
         toiler.state.observe(this, this)
     }
@@ -143,7 +142,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                     etSearch.isEnabled = false
                 pSearch.isVisible = true
             }
-            binding.fabMenu.isVisible = false
         } else if (pos > 0f)
             restorePosition(pos)
     }
@@ -185,10 +183,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             }
             helper.clearSearch()
             pSearch.isVisible = false
-            if (helper.isNoMenu.not()) {
-                binding.fabMenu.isVisible = true
-                binding.fabMenu.startAnimation(anMax)
-            }
             wvBrowser.clearMatches()
         }
     }
@@ -202,61 +196,20 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     private fun initViews() {
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.isVisible = false
-        with(binding.navView) {
-            setNavigationItemSelectedListener(this@BrowserActivity)
-            this@BrowserActivity.menu = NeoMenu(
-                refresh = menu.getItem(0),
-                share = menu.getItem(1),
-                nomenu = menu.getItem(6),
-                buttons = menu.getItem(7),
-                themeLight = menu.getItem(8),
-                themeDark = menu.getItem(9)
-            )
-        }
-
         tip = Tip(this, binding.tvFinish)
         status.init(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
-        if (pref.getBoolean(Const.PROM_FLOAT, false)) {
+        prom = if (pref.getBoolean(Const.PROM_FLOAT, false)) {
             tvPromTime = binding.tvPromTimeFloat
-            prom = PromUtils(tvPromTime)
-        } else {
-            val tv = binding.navView.getHeaderView(0).findViewById(R.id.tvPromTimeInMenu) as View
-            prom = PromUtils(tv)
-        }
-
-        val toggle = ActionBarDrawerToggle(
-            this,
-            binding.drawerLayout,
-            binding.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        with(binding.content) {
-            initTheme()
-            etSearch.requestLayout()
-            root.requestLayout()
-            wvBrowser.settings.builtInZoomControls = true
-            wvBrowser.settings.displayZoomControls = false
-            wvBrowser.settings.javaScriptEnabled = true
-            wvBrowser.settings.allowContentAccess = true
-            wvBrowser.settings.allowFileAccess = true
-            wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
-            if (helper.zoom > 0)
-                wvBrowser.setInitialScale(helper.zoom)
-        }
+            PromUtils(tvPromTime)
+        } else
+            PromUtils(binding.tvPromTimeHead)
 
         anMin = AnimationUtils.loadAnimation(this, R.anim.minimize)
         anMin.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                if (!helper.isNoMenu)
-                    binding.fabMenu.isVisible = false
                 if (prom.isProm)
                     tvPromTime?.isVisible = false
             }
@@ -267,8 +220,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     }
 
     override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        if (binding.bottomBar.isScrolledDown) {
+            binding.bottomBar.performShow()
         } else if (binding.content.pSearch.isVisible) {
             closeSearch()
         } else if (!toiler.onBackBrowser()) {
@@ -276,36 +229,62 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         }
     }
 
-    private fun setViews() = binding.content.run {
-        wvBrowser.webViewClient = WebClient(this@BrowserActivity)
-        wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, _ ->
-            if (!helper.isNavButtons) return@setOnScrollChangeListener
-            with(binding) {
-                if (scrollY > 300) {
-                    fabTop.isVisible = true
-                    fabBottom.isVisible = false
-                } else {
-                    fabTop.isVisible = false
-                    fabBottom.isVisible = true
-                }
+    private fun setViews() = binding.run {
+        bBack.setOnClickListener { finish() }
+        svBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, _ ->
+            if (!helper.isNavButton) return@setOnScrollChangeListener
+            if (scrollY > 300) {
+                fabNav.setImageResource(R.drawable.ic_top)
+                navIsTop = true
+            } else {
+                fabNav.setImageResource(R.drawable.ic_bottom)
+                navIsTop = false
             }
         }
-        wvBrowser.setOnTouchListener { view: View?, event: MotionEvent ->
+        fabNav.setOnClickListener {
+            if (navIsTop) {
+                svBrowser.scrollTo(0, 0)
+                topBar.setExpanded(true)
+                bottomBar.performShow()
+            } else {
+                bottomBar.performHide()
+                topBar.setExpanded(false)
+                svBrowser.scrollTo(0, content.wvBrowser.height)
+            }
+        }
+        if (helper.isNavButton)
+            setCheckItem(menu.buttons, true)
+        else
+            fabNav.isVisible = false
+        status.setClick {
+            if (status.isTime)
+                toiler.load()
+            else status.onClick()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setContent() = binding.content.run {
+        etSearch.requestLayout()
+        root.requestLayout()
+        wvBrowser.settings.builtInZoomControls = true
+        wvBrowser.settings.displayZoomControls = false
+        wvBrowser.settings.javaScriptEnabled = true
+        wvBrowser.settings.allowContentAccess = true
+        wvBrowser.settings.allowFileAccess = true
+        wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
+        if (helper.zoom > 0)
+            wvBrowser.setInitialScale(helper.zoom)
+        wvBrowser.webViewClient = WebClient(this@BrowserActivity)
+        wvBrowser.setOnTouchListener { _, event: MotionEvent ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                if (!helper.isNoMenu && pSearch.isVisible.not())
-                    binding.fabMenu.startAnimation(anMin)
-                if (prom.isProm)
-                    tvPromTime?.startAnimation(anMin)
+                if (prom.isProm) tvPromTime?.startAnimation(anMin)
             } else if (event.actionMasked == MotionEvent.ACTION_UP ||
                 event.actionMasked == MotionEvent.ACTION_CANCEL
             ) {
-                if (!helper.isNoMenu && pSearch.isVisible.not()) {
-                    binding.fabMenu.isVisible = true
-                    binding.fabMenu.startAnimation(anMax)
-                }
-                if (prom.isProm) {
-                    tvPromTime?.isVisible = true
-                    tvPromTime?.startAnimation(anMax)
+                if (prom.isProm) tvPromTime?.run {
+                    isVisible = true
+                    startAnimation(anMax)
                 }
             }
             if (event.pointerCount == 2) {
@@ -315,13 +294,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
             }
             false
-        }
-        with(binding) {
-            fabMenu.setOnClickListener { drawerLayout.openDrawer(Gravity.LEFT) }
-            fabTop.setOnClickListener { wvBrowser.scrollTo(0, 0) }
-            fabBottom.setOnClickListener {
-                wvBrowser.scrollTo(0, (wvBrowser.contentHeight * wvBrowser.scale).toInt())
-            }
         }
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
@@ -347,7 +319,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             helper.downProg()
             wvBrowser.findNext(false)
         }
-        bNext.setOnClickListener { view: View? ->
+        bNext.setOnClickListener {
             if (helper.nextSearch()) {
                 etSearch.setText(helper.request)
                 findRequest()
@@ -363,22 +335,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
             bClear.isVisible = it?.isNotEmpty() ?: false
         }
         bClear.setOnClickListener { etSearch.setText("") }
-        val bBack = binding.navView.getHeaderView(0).findViewById(R.id.bBack) as View
-        bBack.setOnClickListener { finish() }
-        initTheme()
-        if (helper.isNoMenu) {
-            setCheckItem(menu.nomenu, true)
-            binding.fabMenu.isVisible = false
-        }
-        if (helper.isNavButtons)
-            setCheckItem(menu.buttons, true)
-        else
-            binding.fabBottom.isVisible = false
-        status.setClick {
-            if (status.isTime)
-                toiler.load()
-            else status.onClick()
-        }
     }
 
     private fun initTheme() = binding.content.run {
@@ -387,68 +343,83 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
         if (helper.isLightTheme) {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.black))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white))
-            setCheckItem(menu.themeLight, true)
+            menu.theme.title = getString(R.string.dark_theme)
         } else {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.white))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
-            setCheckItem(menu.themeDark, true)
+            menu.theme.title = getString(R.string.light_theme)
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_refresh ->
-                toiler.load()
-            R.id.nav_share ->
-                helper.sharePage(this, getPageTitle())
-            R.id.nav_nomenu -> {
-                binding.fabMenu.isVisible = helper.isNoMenu
-                helper.isNoMenu = helper.isNoMenu.not()
-                setCheckItem(item, helper.isNoMenu)
-            }
-            R.id.nav_buttons -> {
-                if (helper.isNavButtons)
-                    binding.fabBottom.isVisible = false
-                helper.isNavButtons = helper.isNavButtons.not()
-                setCheckItem(item, helper.isNavButtons)
-                binding.fabTop.isVisible = helper.isNavButtons
-            }
-            R.id.nav_search -> with(binding.content) {
-                if (pSearch.isVisible) closeSearch()
-                binding.fabMenu.isVisible = false
-                pSearch.isVisible = true
-                etSearch.post { etSearch.requestFocus() }
-                softKeyboard.show()
-            }
-            R.id.nav_marker -> {
-                val des = if (helper.isSearch)
-                    getString(R.string.search_for) + " “" + helper.request + "”"
-                else ""
-                MarkerActivity.addByPos(this, helper.link, positionOnPage * 100f, des)
-            }
-            R.id.nav_opt_scale, R.id.nav_src_scale -> {
-                helper.zoom = if (item.itemId == R.id.nav_opt_scale) 0 else 100
-                helper.save()
-                openReader(helper.link, null)
-                finish()
-                return true
-            }
-            else -> {
-                val id = item.itemId
-                if (id == R.id.nav_light && helper.isLightTheme)
-                    return true
-                if (id == R.id.nav_dark && helper.isLightTheme.not())
-                    return true
-                helper.isLightTheme = helper.isLightTheme.not()
-                setCheckItem(menu.themeLight, helper.isLightTheme)
-                setCheckItem(menu.themeDark, helper.isLightTheme.not())
-                initTheme()
-                binding.content.wvBrowser.clearCache(true)
-                toiler.openPage(false)
+    private fun setBars() = binding.run {
+        bottomBar.menu.let {
+            menu = NeoMenu(
+                refresh = it.getItem(4),
+                share = it.getItem(1),
+                buttons = it.getItem(0).subMenu.getItem(0),
+                theme = it.getItem(0).subMenu.getItem(1),
+            )
+        }
+        ivHead.setOnClickListener {
+            if (menu.refresh.isVisible)
+                Lib.openInApps(NeoClient.SITE + helper.link, null)
+            else
+                Lib.openInApps(NeoClient.SITE, null)
+        }
+        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND)
+            ivHead.setImageResource(R.drawable.headland)
+        else if (ScreenUtils.isTablet)
+            ivHead.setImageResource(R.drawable.headtablet)
+        svBrowser.post {
+            content.root.updateLayoutParams<ViewGroup.LayoutParams> {
+                height = svBrowser.height
             }
         }
-        binding.drawerLayout.closeDrawer(GravityCompat.START)
-        return true
+        bottomBar.setBackgroundResource(R.drawable.panel_bg)
+        bottomBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.nav_refresh ->
+                    toiler.load()
+                R.id.nav_share ->
+                    helper.sharePage(this@BrowserActivity, getPageTitle())
+                R.id.nav_buttons -> {
+                    helper.isNavButton = helper.isNavButton.not()
+                    setCheckItem(it, helper.isNavButton)
+                    fabNav.isVisible = helper.isNavButton
+                }
+                R.id.nav_search -> with(content) {
+                    topBar.setExpanded(false)
+                    if (pSearch.isVisible) closeSearch()
+                    pSearch.isVisible = true
+                    etSearch.post { etSearch.requestFocus() }
+                    softKeyboard.show()
+                }
+                R.id.nav_marker -> {
+                    val des = if (helper.isSearch)
+                        getString(R.string.search_for) + " “" + helper.request + "”"
+                    else ""
+                    MarkerActivity.addByPos(
+                        this@BrowserActivity,
+                        helper.link,
+                        positionOnPage * 100f,
+                        des
+                    )
+                }
+                R.id.nav_opt_scale, R.id.nav_src_scale -> {
+                    helper.zoom = if (it.itemId == R.id.nav_opt_scale) 0 else 100
+                    helper.save()
+                    openReader(helper.link, null)
+                    finish()
+                }
+                R.id.nav_theme -> {
+                    helper.isLightTheme = helper.isLightTheme.not()
+                    initTheme()
+                    content.wvBrowser.clearCache(true)
+                    toiler.openPage(false)
+                }
+            }
+            return@setOnMenuItemClickListener true
+        }
     }
 
     private fun getPageTitle(): String {
@@ -485,6 +456,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
     override fun onChanged(state: NeoState) {
         when (state) {
             NeoState.Loading -> {
+                binding.run {
+                    bottomBar.isVisible = false
+                    fabNav.isVisible = false
+                }
                 binding.content.wvBrowser.clearCache(true)
                 status.setLoad(true)
                 status.loadText()
@@ -509,12 +484,17 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>,
                 finishLoading()
                 status.setError(state.throwable.localizedMessage)
             }
+            else -> {}
         }
     }
 
     private fun finishLoading() {
         if (status.isVisible)
             status.setLoad(false)
+        binding.run {
+            bottomBar.isVisible = true
+            fabNav.isVisible = helper.isNavButton
+        }
     }
 
     override fun connectChanged(connected: Boolean) {

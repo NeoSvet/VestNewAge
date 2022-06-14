@@ -1,43 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/nav_refresh"
-        android:icon="@drawable/ic_refresh"
-        android:title="@string/refresh" />
-	<item
+        android:id="@+id/nav_menu"
+        android:icon="@drawable/ic_menu"
+        android:title="@string/menu"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/nav_buttons"
+                android:icon="@drawable/uncheckbox_simple"
+                android:title="@string/nav_button" />
+            <item
+                android:id="@+id/nav_theme"
+                android:icon="@drawable/ic_theme"
+                android:title="@string/dark_theme" />
+            <item
+                android:id="@+id/nav_opt_scale"
+                android:icon="@drawable/ic_opt_scale"
+                android:title="@string/opt_scale" />
+            <item
+                android:id="@+id/nav_src_scale"
+                android:icon="@drawable/ic_src_scale"
+                android:title="@string/src_scale" />
+        </menu>
+    </item>
+    <item
         android:id="@+id/nav_share"
         android:icon="@drawable/ic_share"
-        android:title="@string/share" />
+        android:title="@string/share"
+        app:showAsAction="always" />
     <item
         android:id="@+id/nav_marker"
         android:icon="@drawable/ic_marker"
-        android:title="@string/in_markers" />
+        android:title="@string/in_markers"
+        app:showAsAction="always" />
     <item
         android:id="@+id/nav_search"
         android:icon="@drawable/ic_search"
-        android:title="@string/search" />
+        android:title="@string/search"
+        app:showAsAction="always" />
     <item
-        android:id="@+id/nav_opt_scale"
-        android:icon="@drawable/ic_opt_scale"
-        android:title="@string/opt_scale" />
-    <item
-        android:id="@+id/nav_src_scale"
-        android:icon="@drawable/ic_src_scale"
-        android:title="@string/src_scale" />
-    <item
-        android:id="@+id/nav_nomenu"
-        android:icon="@drawable/uncheckbox_simple"
-        android:title="@string/hide_menu" />
-    <item
-        android:id="@+id/nav_buttons"
-        android:icon="@drawable/uncheckbox_simple"
-        android:title="@string/nav_buttons" />
-    <item
-        android:id="@+id/nav_light"
-        android:icon="@drawable/uncheckbox_simple"
-        android:title="@string/light_theme" />
-    <item
-        android:id="@+id/nav_dark"
-        android:icon="@drawable/uncheckbox_simple"
-        android:title="@string/dark_theme" />
+        android:id="@+id/nav_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:title="@string/refresh"
+        app:showAsAction="always" />
 </menu>

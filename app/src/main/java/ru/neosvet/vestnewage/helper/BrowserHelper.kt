@@ -11,7 +11,6 @@ class BrowserHelper(context: Context) {
     companion object {
         const val TAG = "Browser"
         private const val THEME = "theme"
-        private const val NOMENU = "nomenu"
         private const val NAVBUTTONS = "navb"
         private const val SCALE = "scale"
     }
@@ -20,8 +19,7 @@ class BrowserHelper(context: Context) {
     private val editor: SharedPreferences.Editor = pref.edit()
     var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
     var zoom: Int = pref.getInt(SCALE, 0)
-    var isNoMenu: Boolean = pref.getBoolean(NOMENU, false)
-    var isNavButtons: Boolean = pref.getBoolean(NAVBUTTONS, true)
+    var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
     var link: String = ""
     var search: String = ""
         private set
@@ -37,8 +35,7 @@ class BrowserHelper(context: Context) {
     fun save() {
         editor.putInt(THEME, if (isLightTheme) 0 else 1)
         editor.putInt(SCALE, zoom)
-        editor.putBoolean(NOMENU, isNoMenu)
-        editor.putBoolean(NAVBUTTONS, isNavButtons)
+        editor.putBoolean(NAVBUTTONS, isNavButton)
         editor.apply()
     }
 
