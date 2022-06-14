@@ -116,11 +116,11 @@ class MainHelper(private val act: MainActivity) {
         isSideMenu = ScreenUtils.isTabletLand
         if (isSideMenu) return
         tvTitle = act.findViewById(R.id.tvTitle)
-        bottomBar = act.findViewById(R.id.bottom_app_bar)
+        bottomBar = act.findViewById(R.id.bottomBar)
         bottomBar?.setBackgroundResource(R.drawable.panel_bg)
 
         svMain = act.findViewById(R.id.svMain)
-        topBar = act.findViewById(R.id.appbar)
+        topBar = act.findViewById(R.id.topBar)
 
         if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND) {
             ivHead.setImageResource(R.drawable.headland)
