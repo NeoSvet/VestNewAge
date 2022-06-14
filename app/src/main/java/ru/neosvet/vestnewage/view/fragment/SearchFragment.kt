@@ -349,6 +349,7 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             }
             Ready ->
                 tip.hideAnimated()
+            else -> {}
         }
     }
 

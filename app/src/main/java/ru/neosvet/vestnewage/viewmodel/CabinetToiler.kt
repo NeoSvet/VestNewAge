@@ -86,6 +86,7 @@ class CabinetToiler : NeoToiler() {
                 loadAnketa(true)
             is Action.Word ->
                 sendWord(a.index, a.word)
+            Action.None -> {}
         }
         action = Action.None
     }

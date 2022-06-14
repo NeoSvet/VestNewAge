@@ -69,6 +69,7 @@ class NewFragment : NeoFragment() {
                 else
                     adapter.setItems(state.list)
             }
+            else -> {}
         }
         act?.updateNew()
     }

@@ -120,6 +120,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
                     )
                     startActivity(sendIntent)
                 }
+                else -> {}
             }
         }
     }

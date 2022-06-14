@@ -221,21 +221,19 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun onChangedState(state: NeoState) {
-        when (state) {
-            is SuccessList -> {
-                setStatus(false)
-                binding?.run {
-                    rvSite.layoutManager = if (toiler.isNewsTab)
-                        GridLayoutManager(requireContext(), 1)
-                    else
-                        GridLayoutManager(requireContext(), ScreenUtils.span)
-                    tvEmptySite.isVisible = state.list.isEmpty()
-                }
-                adapter.setItems(state.list)
-                if (toiler.isDevTab && ads.index > -1) {
-                    val item = state.list[ads.index]
-                    ads.showAd(item.title, item.link, item.head)
-                }
+        if (state is SuccessList) {
+            setStatus(false)
+            binding?.run {
+                rvSite.layoutManager = if (toiler.isNewsTab)
+                    GridLayoutManager(requireContext(), 1)
+                else
+                    GridLayoutManager(requireContext(), ScreenUtils.span)
+                tvEmptySite.isVisible = state.list.isEmpty()
+            }
+            adapter.setItems(state.list)
+            if (toiler.isDevTab && ads.index > -1) {
+                val item = state.list[ads.index]
+                ads.showAd(item.title, item.link, item.head)
             }
         }
     }

@@ -140,6 +140,7 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
             }
             Ready ->
                 onBackPressed()
+            else -> {}
         }
     }
 

@@ -83,6 +83,7 @@ class CabinetFragment : NeoFragment() {
                 }
                 adapter.setItems(state.list)
             }
+            else -> {}
         }
     }
 

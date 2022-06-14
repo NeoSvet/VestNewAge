@@ -125,6 +125,7 @@ class JournalFragment : NeoFragment() {
                 tvEmptyJournal.isVisible = true
                 act?.setAction(0)
             }
+            else -> {}
         }
     }
 

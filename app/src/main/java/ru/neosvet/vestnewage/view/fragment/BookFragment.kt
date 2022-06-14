@@ -163,6 +163,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                         Const.AND + place + Const.AND + par
                 showRndAlert(title, link, msg, place, par)
             }
+            else -> {}
         }
     }
 

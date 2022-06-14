@@ -104,13 +104,11 @@ class SettingsFragment : NeoFragment() {
     }
 
     override fun onChangedState(state: NeoState) {
-        when (state) {
-            is LongState -> {
-                setStatus(false)
-                val size = state.value / 1048576f //to MegaByte
-                Lib.showToast(String.format(getString(R.string.format_freed_size), size))
-                toiler.clearState()
-            }
+        if (state is LongState) {
+            setStatus(false)
+            val size = state.value / 1048576f //to MegaByte
+            Lib.showToast(String.format(getString(R.string.format_freed_size), size))
+            toiler.clearState()
         }
     }
 

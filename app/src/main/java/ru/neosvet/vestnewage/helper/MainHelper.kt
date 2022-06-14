@@ -255,6 +255,7 @@ class MainHelper(private val act: MainActivity) {
                 adAction.addItem(R.drawable.ic_marker, act.getString(R.string.import_))
                 adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
             }
+            else -> {}
         }
         adAction.addItem(R.drawable.ic_close, act.getString(R.string.close))
         adAction.notifyDataSetChanged()

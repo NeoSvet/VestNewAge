@@ -299,7 +299,7 @@ class MarkersFragment : NeoFragment() {
                 toiler.openColList()
                 Lib.showToast(getString(R.string.completed))
             }
-
+            else -> {}
         }
     }
 
