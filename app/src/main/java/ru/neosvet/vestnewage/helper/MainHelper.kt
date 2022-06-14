@@ -28,10 +28,20 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
 import ru.neosvet.vestnewage.view.list.MenuAdapter
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileReader
+import java.io.FileWriter
 
 class MainHelper(private val act: MainActivity) {
     companion object {
         const val TAG = "Main"
+        private const val GOD_WORDS = "/god_words"
+        fun saveGodWords(words: String) {
+            val bw = BufferedWriter(FileWriter(Lib.getFile(GOD_WORDS)))
+            bw.write(words)
+            bw.close()
+        }
     }
 
     enum class ActionType {
@@ -63,6 +73,7 @@ class MainHelper(private val act: MainActivity) {
         private set
     lateinit var btnGodWords: View
         private set
+    private var godWords: String = ""
 
     val unread = UnreadUtils()
     var countNew: Int = 0
@@ -282,5 +293,17 @@ class MainHelper(private val act: MainActivity) {
             fabAction.setImageDrawable(ContextCompat.getDrawable(act, icon))
         }
         bottomBar?.requestLayout()
+    }
+
+    fun getGodWords(): String {
+        if (godWords.isNotEmpty())
+            return godWords
+        val f = Lib.getFile(GOD_WORDS)
+        if (f.exists().not())
+            return godWords
+        val br = BufferedReader(FileReader(f))
+        godWords = br.readLine()
+        br.close()
+        return godWords
     }
 }

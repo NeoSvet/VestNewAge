@@ -10,14 +10,14 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.viewmodel.basic.AdsState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.viewmodel.basic.AdsState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -34,12 +34,49 @@ class MainToiler : NeoToiler() {
         .build()
 
     override suspend fun doLoad() {
+        loadQuote()
         val timeDiff = synchronizationTime()
         val ads = AdsUtils(App.context)
         ads.loadAds()
         ads.close()
         mstate.postValue(AdsState(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
+    }
+
+    private suspend fun loadQuote() {
+        var s = NeoClient.SITE + "AjaxData/Calendar"
+        val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
+        s = br.readLine()
+        br.close()
+        var i = s.indexOf("quoteBlock")
+        i = s.indexOf("class", i)
+        s = s.substring(i, s.indexOf("\\u003C/p", i))
+        s = s.replace("\\u0022", "\"").replace("\\u0020", " ").replace("\\u003Cbr\\u003E", " ")
+        val bytes = mutableListOf<Byte>()
+        i = s.indexOf("\\u")
+        var n = 0
+        while (i > -1) {
+            i += 2
+            n = i + 2
+            bytes.add(s.substring(i, n).toByte(16))
+            bytes.add(s.substring(n, n + 2).toByte(16))
+            n += 2
+            i = s.indexOf("\\u", n)
+            if (i > n) {
+                for (b in s.substring(n, i)) {
+                    bytes.add(0)
+                    bytes.add(b.code.toByte())
+                }
+            }
+        }
+        if (n < s.length) {
+            for (b in s.substring(n)) {
+                bytes.add(0)
+                bytes.add(b.code.toByte())
+            }
+        }
+        s = String(bytes.toByteArray(), Charsets.UTF_16).substring(1)
+        MainHelper.saveGodWords(s)
     }
 
     private suspend fun loadNew() {
