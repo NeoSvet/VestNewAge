@@ -23,7 +23,7 @@
         <menu>
             <item
                 android:id="@+id/app_bar_prom"
-                android:icon="@drawable/little_star"
+                android:icon="@drawable/very_little_star"
                 android:title="@string/text_prom" />
             <item
                 android:id="@+id/app_bar_journal"
