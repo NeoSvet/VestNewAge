@@ -17,7 +17,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
@@ -28,14 +27,14 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.Tip
-import ru.neosvet.vestnewage.view.dialog.DateDialog
+import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.SearchToiler
 import ru.neosvet.vestnewage.viewmodel.basic.*
 
-class SearchFragment : NeoFragment(), DateDialog.Result {
+class SearchFragment : NeoFragment(), SearchDialog.Parent {
     companion object {
         private const val SETTINGS = "s"
         private const val ADDITION = "a"
@@ -65,17 +64,18 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     private val adResult: PagingAdapter by lazy {
         PagingAdapter(this::resultClick, this::resultLongClick, this::finishedList)
     }
+    override lateinit var modes: ArrayAdapter<String>
+        private set
 
     private lateinit var tip: Tip
-    private lateinit var tipSettings: Tip
-    private var dialog = -1
-    private var dateDialog: DateDialog? = null
+    private var settings: SearchDialog? = null
     private var jobResult: Job? = null
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
-    private val helper: SearchHelper
+    override val helper: SearchHelper
         get() = toiler.helper
+
     override val title: String
         get() = getString(R.string.search)
 
@@ -95,17 +95,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             tip = Tip(act, tvFinish)
         }
         initSearchBox()
-        initSettings()
+        setViews()
         initSearchList()
         restoreState(savedInstanceState)
-    }
-
-    override fun onBackPressed(): Boolean {
-        if (binding?.settings?.root?.isVisible == true) {
-            closeSettings()
-            return false
-        }
-        return super.onBackPressed()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -155,25 +147,19 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(Const.DIALOG, dialog)
-        dateDialog?.dismiss()
+        settings?.let {
+            outState.putBundle(SETTINGS, it.onSaveInstanceState())
+        }
         binding?.run {
             outState.putBoolean(ADDITION, content.pAdditionSet.visibility == View.VISIBLE)
-            outState.putBoolean(SETTINGS, settings.root.visibility == View.VISIBLE)
         }
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) = binding?.run {
-        with(settings) {
-            root.isVisible = false
-            sMode.setSelection(helper.loadMode())
-            bStartRange.text = formatDate(helper.start)
-            bEndRange.text = formatDate(helper.end)
-        }
         if (state == null) {
             arguments?.let { args ->
-                settings.sMode.setSelection(args.getInt(Const.MODE))
+                helper.mode = args.getInt(Const.MODE)
                 helper.request = args.getString(Const.STRING) ?: ""
             }
             if (helper.request.isNotEmpty()) {
@@ -193,10 +179,9 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             else
                 bShow.isVisible = true
         }
-        if (state.getBoolean(SETTINGS)) {
+        state.getBundle(SETTINGS)?.let {
             openSettings()
-            dialog = state.getInt(Const.DIALOG)
-            if (dialog > -1) showDatePicker(dialog)
+            settings?.onRestoreInstanceState(it)
         }
         if (toiler.isRun)
             setStatus(true)
@@ -221,52 +206,22 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
         setListEvents(rvSearch)
     }
 
-    private fun openSettings() = binding?.run {
-        pSearch.isVisible = false
-        act?.setAction(R.drawable.ic_ok)
-        content.root.isVisible = false
-        settings.root.isVisible = true
+    private fun openSettings() {
         softKeyboard.hide()
-        tipSettings.show()
-    }
-
-    private fun closeSettings() = binding?.run {
-        pSearch.isVisible = true
-        act?.unblocked()
-        act?.setAction(R.drawable.ic_settings)
-        content.root.isVisible = true
-        tipSettings.hideAnimated()
-    }
-
-    private fun formatDate(d: DateUnit): String {
-        return resources.getStringArray(R.array.months_short)[d.month - 1].toString() + " " + d.year
+        settings = SearchDialog(act!!, this).apply {
+            setOnDismissListener { settings = null }
+            show()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initSettings() = binding?.run {
+    private fun setViews() = binding?.run {
         bStop.setOnClickListener { toiler.cancel() }
-        val adMode = ArrayAdapter(
+        modes = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode)
         )
-        adMode.setDropDownViewResource(R.layout.spinner_item)
-        with(settings) {
-            tipSettings = Tip(requireContext(), root)
-            tipSettings.autoHide = false
-            sMode.adapter = adMode
-            bClearSearch.setOnClickListener {
-                adRequest.clear()
-                adRequest.notifyDataSetChanged()
-                helper.clearRequests()
-            }
-            bStartRange.setOnClickListener { showDatePicker(0) }
-            bEndRange.setOnClickListener { showDatePicker(1) }
-            bChangeRange.setOnClickListener {
-                helper.changeDates()
-                bStartRange.text = formatDate(helper.start)
-                bEndRange.text = formatDate(helper.end)
-            }
-        }
+        modes.setDropDownViewResource(R.layout.spinner_item)
         bShow.setOnClickListener {
             bShow.isVisible = false
             content.pAdditionSet.isVisible = true
@@ -285,40 +240,13 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
             startSearch()
     }
 
-    private fun showDatePicker(id: Int) {
-        val d = if (id == 0) helper.start else helper.end
-        dialog = id
-        dateDialog = DateDialog(act, d).apply {
-            setMinMonth(helper.minMonth)
-            setMinYear(helper.minYear)
-            setResult(this@SearchFragment)
-        }
-        dateDialog?.show()
-    }
-
-    override fun putDate(date: DateUnit?) {
-        if (date == null) { // cancel
-            dialog = -1
-            return
-        }
-        if (dialog == 0) {
-            helper.start = date
-            binding?.settings?.bStartRange?.text = formatDate(helper.start)
-        } else {
-            helper.end = date
-            binding?.settings?.bEndRange?.text = formatDate(helper.end)
-        }
-        dialog = -1
-    }
-
     private fun startSearch() = binding?.run {
         softKeyboard.hide()
         setStatus(true)
         val mode = if (content.cbSearchInResults.isChecked) {
             tvStatus.text = getString(R.string.search)
             SearchToiler.MODE_RESULTS
-        } else
-            settings.sMode.selectedItemPosition
+        } else helper.mode
         val request = etSearch.text.toString()
         adResult.submitData(lifecycle, PagingData.empty())
         content.rvSearch.adapter = adResult
@@ -448,13 +376,12 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onAction(title: String) {
-        if (binding?.pSearch?.isVisible == true)
-            openSettings()
-        else {
-            closeSettings()
-            binding?.settings?.run {
-                helper.savePerformance(sMode.selectedItemPosition)
-            }
-        }
+        openSettings()
+    }
+
+    override fun clearHistory() {
+        adRequest.clear()
+        adRequest.notifyDataSetChanged()
+        helper.clearRequests()
     }
 }

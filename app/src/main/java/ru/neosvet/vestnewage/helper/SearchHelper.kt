@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.viewmodel.SearchToiler
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.SearchToiler
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -26,6 +26,7 @@ class SearchHelper(context: Context) {
     private val editor: SharedPreferences.Editor = pref.edit()
     var start: DateUnit
     var end: DateUnit
+    var mode: Int = 0
     var countMaterials: Int = 0
     val minMonth: Int
     val minYear: Int
@@ -57,6 +58,8 @@ class SearchHelper(context: Context) {
         }
         start.day = 1
         end.day = 1
+
+        mode = pref.getInt(Const.MODE, SearchToiler.MODE_BOOK)
     }
 
     fun existsResults() = Lib.getFileDB(Const.SEARCH).exists()
@@ -74,12 +77,6 @@ class SearchHelper(context: Context) {
             br.close()
         }
         return list
-    }
-
-    fun changeDates() {
-        val d = start
-        start = end
-        end = d
     }
 
     fun saveRequest(request: String) {
@@ -101,6 +98,7 @@ class SearchHelper(context: Context) {
     }
 
     fun savePerformance(mode: Int) {
+        this.mode = mode
         editor.putInt(Const.MODE, mode)
         editor.putInt(Const.START, start.timeInDays)
         editor.putInt(Const.END, end.timeInDays)
@@ -116,9 +114,6 @@ class SearchHelper(context: Context) {
         val f = Lib.getFileS(Const.SEARCH)
         if (f.exists()) f.delete()
     }
-
-    fun loadMode(): Int =
-        pref.getInt(Const.MODE, SearchToiler.MODE_BOOK)
 
     fun getType(item: ListItem): Type {
         if (item.link.length == 5) return Type.LOAD_MONTH
