@@ -89,34 +89,34 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         status.init(this, helper.pStatus)
         initAnim()
         setFloatProm(helper.isFloatPromTime)
-        initGodWords()
 
         restoreState(savedInstanceState)
         if (withSplash.not())
             finishFlashStar()
     }
 
-    private fun initGodWords() {
-        helper.btnGodWords.setOnClickListener {
-            val msg = helper.getGodWords()
-            val dialog = CustomDialog(this)
-            dialog.setTitle(getString(R.string.god_words))
-            dialog.setRightButton(getString(R.string.close)) { dialog.dismiss() }
-            if (msg.isEmpty()) {
-                dialog.setMessage(getString(R.string.yet_load))
-            } else {
-                dialog.setMessage(msg)
-                dialog.setLeftButton(getString(R.string.find)) {
-                    helper.changeSection(Section.SEARCH, true)
-                    curFragment = SearchFragment.newInstance(msg, 5)
-                    val fragmentTransaction = supportFragmentManager.beginTransaction()
-                    fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
-                    fragmentTransaction.commit()
-                    dialog.dismiss()
-                }
+    fun showGodWords() {
+        val msg = helper.getGodWords()
+        val dialog = CustomDialog(this)
+        dialog.setTitle(getString(R.string.god_words))
+        dialog.setRightButton(getString(R.string.close)) { dialog.dismiss() }
+        if (msg.isEmpty()) {
+            dialog.setMessage(getString(R.string.yet_load))
+        } else {
+            dialog.setMessage(msg)
+            dialog.setLeftButton(getString(R.string.find)) {
+                helper.changeSection(Section.SEARCH, true)
+                curFragment = if (msg.indexOf("...") == 0)
+                    SearchFragment.newInstance(msg.substring(3), 5)
+                else
+                    SearchFragment.newInstance(msg, 5)
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
+                fragmentTransaction.commit()
+                dialog.dismiss()
             }
-            dialog.show(null)
         }
+        dialog.show(null)
     }
 
     override fun setTitle(title: CharSequence?) {

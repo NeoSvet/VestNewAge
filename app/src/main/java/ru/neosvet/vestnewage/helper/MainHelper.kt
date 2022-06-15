@@ -71,8 +71,6 @@ class MainHelper(private val act: MainActivity) {
         private set
     lateinit var tvPromTimeFloat: TextView
         private set
-    lateinit var btnGodWords: View
-        private set
     private var godWords: String = ""
 
     val unread = UnreadUtils()
@@ -90,13 +88,18 @@ class MainHelper(private val act: MainActivity) {
     fun initViews() {
         pStatus = act.findViewById(R.id.pStatus)
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
-        btnGodWords = act.findViewById(R.id.btnGodWords)
         fabAction = act.findViewById(R.id.fabAction)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
         tipAction = Tip(act, rvAction)
         tipAction.autoHide = false
         rvAction.layoutManager = GridLayoutManager(act, 1)
         rvAction.adapter = adAction
+        act.findViewById<View>(R.id.tvGodWords).setOnClickListener {
+            act.showGodWords()
+        }
+        act.findViewById<View>(R.id.btnGodWords).setOnClickListener {
+            act.showGodWords()
+        }
 
         fabAction.setOnClickListener {
             if (type == ActionType.MENU)

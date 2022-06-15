@@ -19,13 +19,13 @@
         android:id="@+id/tvGodWords"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingEnd="45dp"
         android:shadowColor="@android:color/black"
-        android:layout_marginEnd="5dp"
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/god_words"
-        app:layout_constraintEnd_toStartOf="@id/btnGodWords"
+        app:layout_constraintEnd_toEndOf="@id/ivHead"
         app:layout_constraintTop_toTopOf="@id/ivHead" />
 
     <ImageButton
