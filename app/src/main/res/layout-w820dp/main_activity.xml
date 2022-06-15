@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
         android:src="@drawable/head"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,6 +26,7 @@
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/god_words"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/ivHead"
         app:layout_constraintTop_toTopOf="@id/ivHead" />
 
@@ -36,6 +38,7 @@
         android:layout_marginEnd="5dp"
         android:background="@drawable/button"
         android:src="@drawable/more"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/ivHead"
         app:layout_constraintTop_toTopOf="@id/ivHead" />
 
@@ -49,6 +52,7 @@
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/ivHead"
         app:layout_constraintEnd_toEndOf="@id/ivHead" />
 

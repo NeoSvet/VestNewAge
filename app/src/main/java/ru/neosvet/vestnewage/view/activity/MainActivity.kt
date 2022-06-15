@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
@@ -219,7 +220,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     }
 
     private fun finishFlashStar() {
-        helper.topBar?.isVisible = true
+        showHead()
         helper.setNewValue()
         if (helper.isFirstRun) {
             setSection(Section.HELP, false)
@@ -234,6 +235,15 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         } else
             setSection(firstSection, false)
         showWelcome()
+    }
+
+    private fun showHead() {
+        if (helper.topBar == null) {
+            findViewById<View>(R.id.ivHead).isVisible = true
+            findViewById<View>(R.id.tvGodWords).isVisible = true
+            findViewById<View>(R.id.btnGodWords).isVisible = true
+            findViewById<View>(R.id.tvPromTimeHead).isVisible = true
+        } else helper.topBar!!.isVisible = true
     }
 
     private fun initAnim() = helper.run {
@@ -255,12 +265,12 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
                     updateNew()
             }
         } else helper.run {
-            helper.topBar?.isVisible = true
+            showHead()
             if (state.getBoolean(Const.PANEL))
                 blocked()
             else
                 unblocked()
-            helper.setActionIcon(state.getInt(Const.SELECT))
+            setActionIcon(state.getInt(Const.SELECT))
             state.getString(Const.CUR_ID)?.let {
                 curSection = Section.valueOf(it)
             }
