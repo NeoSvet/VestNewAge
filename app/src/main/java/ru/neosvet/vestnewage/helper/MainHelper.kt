@@ -108,9 +108,7 @@ class MainHelper(private val act: MainActivity) {
         if (ScreenUtils.type == ScreenUtils.Type.TABLET_PORT)
             ivHead.setImageResource(R.drawable.headtablet)
         ivHead.setOnClickListener {
-            Lib.openInApps(
-                NeoClient.SITE.substring(0, NeoClient.SITE.length - 1), null
-            )
+            Lib.openInApps(NeoClient.SITE, null)
         }
 
         isSideMenu = ScreenUtils.isTabletLand

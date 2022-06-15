@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     private var jobBottomArea: Job? = null
     private var isShowBottomArea = false
     private var animTitle: BottomAnim? = null
-    private lateinit var animButton: BottomAnim
+    private var animButton: BottomAnim? = null
 
     val newId: Int
         get() = helper.newId
@@ -538,7 +538,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             isShowBottomArea = false
             animTitle?.hide()
             if (type != MainHelper.ActionType.INVISIBLE)
-                animButton.hide()
+                animButton?.hide()
         }
         jobBottomArea = lifecycleScope.launch {
             delay(1500)
@@ -555,7 +555,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             bottomBar?.performShow()
             animTitle?.show()
             if (type != MainHelper.ActionType.INVISIBLE)
-                animButton.show()
+                animButton?.show()
         }
     }
 

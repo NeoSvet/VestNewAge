@@ -78,7 +78,9 @@
         <FrameLayout
             android:id="@+id/my_fragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
 
     </androidx.core.widget.NestedScrollView>
 
