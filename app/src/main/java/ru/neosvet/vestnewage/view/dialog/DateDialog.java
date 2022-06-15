@@ -21,9 +21,9 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DateUnit;
 
 public class DateDialog extends Dialog implements View.OnClickListener {
-    private Activity act;
+    private final Activity act;
     private TextView tvYear;
-    private final DateUnit date;
+    public final DateUnit date;
     private Result result;
     private MonthAdapter adMonth;
     private int min_year = 2016, min_month = 1, max_year = 0, max_month = 0;
@@ -33,12 +33,6 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         super(act);
         this.act = act;
         this.date = DateUnit.putDays(date.getTimeInDays());
-    }
-
-    @Override
-    public void setOnDismissListener(@Nullable OnDismissListener listener) {
-        act = null;
-        super.setOnDismissListener(listener);
     }
 
     public void setResult(Result result) {
@@ -126,7 +120,6 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         else
             adMonth.setMaxPos(MonthAdapter.NONE_MAX);
         adMonth.setSelect(date.getMonth() - 1);
-        adMonth.notifyDataSetChanged();
     }
 
     @Override
@@ -141,7 +134,6 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         int pos = (int) v.getTag();
         date.setMonth(pos + 1);
         adMonth.setSelect(pos);
-        adMonth.notifyDataSetChanged();
     }
 
     public interface Result {
@@ -166,16 +158,26 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         }
 
         public void setMinPos(int min_pos) {
+            int i = this.min_pos;
             this.min_pos = min_pos;
+            notifyItemChanged(i);
+            notifyItemChanged(min_pos);
         }
 
         public void setMaxPos(int max_pos) {
+            int i = this.max_pos;
             this.max_pos = max_pos;
+            notifyItemChanged(i);
+            notifyItemChanged(max_pos);
         }
 
         public void setSelect(int pos) {
-            if (pos <= max_pos && pos >= min_pos)
+            if (pos <= max_pos && pos >= min_pos) {
+                int s = select;
                 select = pos;
+                notifyItemChanged(s);
+                notifyItemChanged(select);
+            }
         }
 
         public int getSelect() {

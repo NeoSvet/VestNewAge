@@ -54,7 +54,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
-    private var dialog: String? = ""
+    private var dialog = ""
     private val helper: BookHelper
         get() = toiler.helper!!
     override val title: String
@@ -104,10 +104,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        dialog?.let {
-            outState.putString(Const.DIALOG, it)
-            if (it.contains(DIALOG_DATE)) dateDialog!!.dismiss()
-            else if (it.length > 1) alertRnd!!.dismiss()
+        if (dialog == DIALOG_DATE) dateDialog?.let { d ->
+            outState.putString(Const.DIALOG, dialog + d.date)
+            d.dismiss()
+        } else if (dialog.length > 1) {
+            outState.putString(Const.DIALOG, dialog)
+            alertRnd!!.dismiss()
         }
         super.onSaveInstanceState(outState)
     }
@@ -116,11 +118,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         if (state != null && toiler.isRun.not()) {
             state.getString(Const.DIALOG)?.let {
                 if (it.contains(DIALOG_DATE)) {
-                    if (it != DIALOG_DATE) {
-                        val d = DateUnit.parse(it.substring(DIALOG_DATE.length))
-                        showDatePicker(d)
-                    } else
-                        showDatePicker(toiler.date)
+                    val d = DateUnit.parse(it.substring(DIALOG_DATE.length))
+                    showDatePicker(d)
                 } else if (it.length > 1) {
                     dialog = it
                     val m = it.split(Const.AND).toTypedArray()
@@ -259,7 +258,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun showDatePicker(d: DateUnit) {
-        dialog = DIALOG_DATE + d
+        dialog = DIALOG_DATE
         dateDialog = DateDialog(act, d).apply {
             setResult(this@BookFragment)
             if (toiler.isKatrenTab) {
@@ -272,8 +271,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 setMaxMonth(9) //sep
                 setMaxYear(2016)
             }
+            setOnDismissListener { dateDialog = null }
+            show()
         }
-        dateDialog?.show()
     }
 
     override fun putDate(date: DateUnit?) {

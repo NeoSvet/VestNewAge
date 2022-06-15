@@ -37,11 +37,9 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     private var binding: CalendarFragmentBinding? = null
     private val adCalendar: CalendarAdapter = CalendarAdapter(this)
     private var dateDialog: DateDialog? = null
-    private var dialog = false
     override val title: String
         get() = getString(R.string.calendar)
     private var openedReader = false
-    private var isBlocked = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,16 +71,17 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(Const.DIALOG, dialog)
-        if (dialog) dateDialog?.dismiss()
+        outState.putInt(Const.DIALOG, dateDialog?.date?.timeInDays ?: 0)
+        dateDialog?.dismiss()
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
         toiler.openCalendar(0)
         state?.let {
-            dialog = it.getBoolean(Const.DIALOG)
-            if (dialog) showDatePicker()
+            val d = it.getInt(Const.DIALOG)
+            if (d > 0)
+                showDatePicker(DateUnit.putDays(d))
         }
         if (state == null && toiler.isNeedReload()) {
             startLoad()
@@ -96,7 +95,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         rvCalendar.adapter = adCalendar
         bPrev.setOnClickListener { openMonth(-1) }
         bNext.setOnClickListener { openMonth(1) }
-        tvDate.setOnClickListener { showDatePicker() }
+        tvDate.setOnClickListener { showDatePicker(toiler.date) }
     }
 
     private fun openLink(link: String) {
@@ -128,24 +127,22 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         }
     }
 
-    private fun showDatePicker() {
-        dialog = true
-        dateDialog = DateDialog(act, toiler.date).apply {
+    private fun showDatePicker(d: DateUnit) {
+        dateDialog = DateDialog(act, d).apply {
             val book = BookHelper()
             if (book.isLoadedOtkr()) {
                 setMinMonth(8)
                 setMinYear(2004)
             }
             setResult(this@CalendarFragment)
+            setOnDismissListener { dateDialog = null }
+            show()
         }
-        dateDialog?.show()
     }
 
     override fun putDate(date: DateUnit?) {
-        dialog = false
-        if (date == null) // cancel
-            return
-        toiler.changeDate(date)
+        if (date != null)
+            toiler.changeDate(date)
     }
 
     override fun onClick(view: View, item: CalendarItem) {
