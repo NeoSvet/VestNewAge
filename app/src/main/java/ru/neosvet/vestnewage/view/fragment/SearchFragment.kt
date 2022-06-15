@@ -142,9 +142,12 @@ class SearchFragment : NeoFragment(), DateDialog.Result {
     override fun setStatus(load: Boolean) {
         binding?.run {
             if (load) {
+                act?.hideHead()
+                act?.blocked()
                 pStatus.isVisible = true
                 etSearch.isEnabled = false
             } else {
+                act?.unblocked()
                 pStatus.isVisible = false
                 etSearch.isEnabled = true
             }

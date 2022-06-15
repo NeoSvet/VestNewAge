@@ -321,6 +321,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         }
         if (!cursor.moveToFirst()) {
             cursor.close()
+            if (Lib.getFileDB(name).exists()) return
             val d = dateFromString(name)
             val row = ContentValues()
             row.put(
@@ -390,18 +391,38 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 links.add(cursor.getString(0))
         }
         cursor.close()
-        var id = startId
-        for (link in links) {
-            if (pages.existsPage(link).not()) {
-                val row = ContentValues()
-                row.put(Const.TITLE, String.format(strings.format_page_no_loaded, link))
-                row.put(Const.LINK, link)
-                row.put(DataBase.ID, id)
-                id++
-                storage.insert(row)
-            }
+        if (links.isEmpty())
+            return startId
+        var i = 0
+        val all = links.size
+        while (i < links.size) {
+            if (pages.existsPage(links[i]))
+                links.removeAt(i)
+            else i++
         }
-        return id
+        if (links.size == all) {
+            val d = dateFromString(pages.name)
+            val row = ContentValues()
+            row.put(
+                Const.TITLE,
+                String.format(strings.format_month_no_loaded, d.monthString, d.year)
+            )
+            row.put(Const.LINK, pages.name)
+            row.put(DataBase.ID, startId)
+            storage.insert(row)
+            return startId
+        }
+        i = startId
+        for (link in links) {
+            val row = ContentValues()
+            row.put(Const.TITLE, String.format(strings.format_page_no_loaded, link))
+            row.put(Const.LINK, link)
+            row.put(DataBase.ID, i)
+            i++
+            storage.insert(row)
+
+        }
+        return i
     }
 
     fun loadMonth(date: String) { //MM.yy
