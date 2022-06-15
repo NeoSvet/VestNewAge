@@ -228,7 +228,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun longClick(index: Int): Boolean {
-        if (toiler.canEdit() || index > 0) {
+        if (toiler.isCollections.not() || index > 0) {
             toiler.selected(index)
             goToEdit()
         }
