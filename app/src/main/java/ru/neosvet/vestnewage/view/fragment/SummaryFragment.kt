@@ -9,8 +9,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
+import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
@@ -20,7 +22,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class SummaryFragment : NeoFragment() {
     private var binding: SummaryFragmentBinding? = null
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
     override val title: String
@@ -82,5 +84,13 @@ class SummaryFragment : NeoFragment() {
 
     override fun onAction(title: String) {
         startLoad()
+    }
+
+    private fun onItemLongClick(index: Int, item: ListItem): Boolean {
+        MarkerActivity.addByPar(
+            requireContext(),
+            item.link, "", item.des.substring(item.des.indexOf(Const.N))
+        )
+        return true
     }
 }

@@ -48,7 +48,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         private const val DIALOG_DATE = "date"
     }
 
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
     private var binding: BookFragmentBinding? = null
@@ -325,5 +325,13 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             getString(R.string.rnd_kat) ->
                 toiler.getRnd(BookToiler.RndType.KAT)
         }
+    }
+
+    private fun onItemLongClick(index: Int, item: ListItem): Boolean {
+        MarkerActivity.addByPar(
+            requireContext(),
+            item.link, "", ""
+        )
+        return true
     }
 }
