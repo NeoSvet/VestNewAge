@@ -107,10 +107,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             dialog.setMessage(msg)
             dialog.setLeftButton(getString(R.string.find)) {
                 helper.changeSection(Section.SEARCH, true)
-                curFragment = if (msg.indexOf("...") == 0)
-                    SearchFragment.newInstance(msg.substring(3), 5)
-                else
-                    SearchFragment.newInstance(msg, 5)
+                curFragment = SearchFragment.newInstance(msg.trim('.'), 5)
                 val fragmentTransaction = supportFragmentManager.beginTransaction()
                 fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
                 fragmentTransaction.commit()
