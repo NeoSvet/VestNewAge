@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import androidx.work.Data
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
@@ -156,7 +155,6 @@ class CalendarToiler : NeoToiler() {
             if (loadIfNeed) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
                 if (checkTime((time / DateUnit.SEC_IN_MILLS))) {
-                    loadIfNeed = false
                     cursor.close()
                     storage.close()
                     return false
