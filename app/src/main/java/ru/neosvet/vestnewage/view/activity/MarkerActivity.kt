@@ -123,6 +123,11 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         when (state) {
             Success ->
                 showData()
+            Ready -> {
+                if (helper.title.isEmpty())
+                    Lib.showToast(getString(R.string.not_load_page))
+                onBackPressed()
+            }
             is NeoState.Error -> {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.NeoDialog)
                     .setTitle(getString(R.string.error))
@@ -138,8 +143,6 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
                     .setOnDismissListener { _ -> ErrorUtils.clear() }
                 builder.create().show()
             }
-            Ready ->
-                onBackPressed()
             else -> {}
         }
     }

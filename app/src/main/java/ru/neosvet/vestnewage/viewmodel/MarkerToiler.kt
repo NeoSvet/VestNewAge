@@ -64,6 +64,10 @@ class MarkerToiler : NeoToiler() {
         id = intent.getIntExtra(DataBase.ID, -1)
         scope.launch {
             helper.title = openPage(link)
+            if (helper.title.isEmpty()) {
+                mstate.postValue(Ready)
+                return@launch
+            }
             openCols()
             if (id == -1)
                 newMarker(intent)
@@ -99,15 +103,15 @@ class MarkerToiler : NeoToiler() {
                     updateSel()
                 }
             }
+            intent.hasExtra(Const.PAGE) -> {
+                isPar = true
+                intent.getStringExtra(Const.PAGE)?.split(", ")?.forEach { s ->
+                    parsList[s.toInt()].isChecked = true
+                }
+                updateSel()
+            }
             else -> {
                 isPar = true
-                intent.getStringExtra(Const.PAGE)?.let {
-                    it.split(", ").forEach { s ->
-                        parsList[s.toInt()].isChecked = true
-                    }
-                    updateSel()
-                    return@run
-                }
                 sel = strings.page_entirely
                 setParList()
             }
