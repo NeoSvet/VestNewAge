@@ -107,11 +107,11 @@ class SiteFragment : NeoFragment() {
         } else {
             arguments?.let {
                 toiler.selectedTab = it.getInt(Const.TAB)
+                binding?.tabLayout?.select(toiler.selectedTab)
             }
             when (toiler.selectedTab) {
-                SiteToiler.TAB_NEWS -> toiler.openList(true)
-                SiteToiler.TAB_SITE -> binding?.tabLayout?.select(toiler.selectedTab)
                 SiteToiler.TAB_DEV -> toiler.openAds()
+                else -> toiler.openList(true)
             }
         }
     }
