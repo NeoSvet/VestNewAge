@@ -107,7 +107,7 @@ class CalendarToiler : NeoToiler() {
             if (loadFromStorage())
                 mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
             else {
-                delay(50) //for create field
+                waitPost()
                 isRun = true
                 reLoad()
             }

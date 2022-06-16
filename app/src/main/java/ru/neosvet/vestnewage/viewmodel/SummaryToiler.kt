@@ -67,7 +67,7 @@ class SummaryToiler : NeoToiler() {
             val list = openList()
             mstate.postValue(SuccessList(list))
             if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
-                delay(50) //for post list
+                waitPost()
                 reLoad()
             }
         }

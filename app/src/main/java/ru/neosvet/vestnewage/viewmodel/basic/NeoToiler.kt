@@ -43,6 +43,10 @@ abstract class NeoToiler : ViewModel() {
         }
     }
 
+    protected suspend fun waitPost() {
+        delay(200)
+    }
+
     open fun cancel() {
         isRun = false
     }
