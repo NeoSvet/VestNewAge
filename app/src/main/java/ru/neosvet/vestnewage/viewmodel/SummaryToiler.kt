@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.FileReader
@@ -53,6 +54,7 @@ class SummaryToiler : NeoToiler() {
             mstate.postValue(ProgressState(cur.percent(pages.size)))
         }
         loader.finish()
+        mstate.postValue(Success)
     }
 
     override fun getInputData(): Data = Data.Builder()
