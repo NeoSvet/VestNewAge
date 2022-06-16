@@ -2,13 +2,11 @@ package ru.neosvet.vestnewage.helper
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -94,7 +92,8 @@ class MainHelper(private val act: MainActivity) {
         tipAction.autoHide = false
         rvAction.layoutManager = GridLayoutManager(act, 1)
         rvAction.adapter = adAction
-        act.findViewById<View>(R.id.tvGodWords).setOnClickListener {
+        val tvGodWords = act.findViewById<View>(R.id.tvGodWords)
+        tvGodWords.setOnClickListener {
             act.showGodWords()
         }
         act.findViewById<View>(R.id.btnGodWords).setOnClickListener {
@@ -125,10 +124,8 @@ class MainHelper(private val act: MainActivity) {
 
         if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND) {
             ivHead.setImageResource(R.drawable.headland)
-            val tv = act.findViewById<View>(R.id.tvGodWords)
-            tv.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = bottomMargin
-            }
+            val p = tvGodWords.paddingBottom
+            tvGodWords.setPadding(p, p, tvGodWords.paddingEnd, p)
         }
     }
 
