@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -54,17 +52,13 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         val share: MenuItem
     )
 
-    private var twoPointers = false
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding.content.etSearch)
     }
     private val status = StatusButton()
     private lateinit var prom: PromUtils
-    private lateinit var anMin: Animation
-    private lateinit var anMax: Animation
     private lateinit var menu: NeoMenu
     private var navIsTop = false
-    private var tvPromTime: View? = null
     private lateinit var tip: Tip
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
@@ -200,23 +194,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         status.init(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
-        prom = if (pref.getBoolean(Const.PROM_FLOAT, false)) {
-            tvPromTime = binding.tvPromTimeFloat
-            PromUtils(tvPromTime)
-        } else
+        prom = if (pref.getBoolean(Const.PROM_FLOAT, false))
+            PromUtils(binding.tvPromTimeFloat)
+        else
             PromUtils(binding.tvPromTimeHead)
-
-        anMin = AnimationUtils.loadAnimation(this, R.anim.minimize)
-        anMin.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                if (prom.isProm)
-                    tvPromTime?.isVisible = false
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        anMax = AnimationUtils.loadAnimation(this, R.anim.maximize)
     }
 
     override fun onBackPressed() {
@@ -276,25 +257,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         if (helper.zoom > 0)
             wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
-        wvBrowser.setOnTouchListener { _, event: MotionEvent ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                if (prom.isProm) tvPromTime?.startAnimation(anMin)
-            } else if (event.actionMasked == MotionEvent.ACTION_UP ||
-                event.actionMasked == MotionEvent.ACTION_CANCEL
-            ) {
-                if (prom.isProm) tvPromTime?.run {
-                    isVisible = true
-                    startAnimation(anMax)
-                }
-            }
-            if (event.pointerCount == 2) {
-                twoPointers = true
-            } else if (twoPointers) {
-                twoPointers = false
-                wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
-            }
-            false
-        }
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH

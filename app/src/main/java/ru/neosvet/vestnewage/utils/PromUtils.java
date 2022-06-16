@@ -26,6 +26,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.network.NeoClient;
 import ru.neosvet.vestnewage.view.activity.MainActivity;
+import ru.neosvet.vestnewage.view.basic.BottomAnim;
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog;
 
 public class PromUtils {
@@ -74,26 +75,9 @@ public class PromUtils {
 
     private void setViews() {
         if (tvPromTime.getId() == R.id.tvPromTimeFloat) {
-            final Animation anMin = AnimationUtils.loadAnimation(App.context, R.anim.minimize);
-            anMin.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    tvPromTime.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-            final Animation anMax = AnimationUtils.loadAnimation(App.context, R.anim.maximize);
+            final BottomAnim anim = new BottomAnim(tvPromTime);
             tvPromTime.setOnClickListener(view -> {
-                tvPromTime.startAnimation(anMin);
+                anim.hide();
                 timer = new Timer();
                 timer.schedule(new TimerTask() {
                     @Override
@@ -105,10 +89,7 @@ public class PromUtils {
             hTime = new Handler(message -> {
                 if (message.what == SET_PROM_TEXT) {
                     setPromTime();
-                } else { //START_ANIM
-                    tvPromTime.setVisibility(View.VISIBLE);
-                    tvPromTime.startAnimation(anMax);
-                }
+                } else anim.show();
                 return false;
             });
         } else { //R.id.tvPromTimeInMenu
