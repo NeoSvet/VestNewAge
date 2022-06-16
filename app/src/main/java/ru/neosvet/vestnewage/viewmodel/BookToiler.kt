@@ -99,7 +99,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     @SuppressLint("Range")
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
-        isRun = true
         scope.launch {
             val d = date
             if (!existsList(d)) {
@@ -164,7 +163,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             } else dModList = d
             cursor.close()
             storage.close()
-            isRun = false
             if (list.isNotEmpty()) {
                 mstate.postValue(SuccessBook(calendar, prev, next, list))
                 return@launch

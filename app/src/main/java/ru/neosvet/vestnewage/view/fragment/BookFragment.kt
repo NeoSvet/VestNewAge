@@ -168,8 +168,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private fun setBook(state: SuccessBook) = binding?.run {
         act?.run {
-            if (status.isVisible) setStatus(false)
-            updateNew()
+            if (status.isVisible) {
+                setStatus(false)
+                updateNew()
+            }
         }
         tvDate.text = state.date
         bPrev.isEnabled = state.prev
