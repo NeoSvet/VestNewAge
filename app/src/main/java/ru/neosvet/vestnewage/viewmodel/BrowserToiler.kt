@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
@@ -23,6 +24,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.io.BufferedWriter
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FileWriter
 import java.util.*
 
@@ -30,6 +32,7 @@ class BrowserToiler : NeoToiler() {
     companion object {
         private const val FILE = "file://"
         private const val STYLE = "/style/style.css"
+        private const val FONT = "/style/myriad.ttf"
         private const val PAGE = "/page.html"
         private const val script = "<a href='javascript:NeoInterface."
     }
@@ -214,8 +217,8 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingStyle(): Boolean {
-        val fLight = Lib.getFileL(Const.LIGHT)
-        val fDark = Lib.getFileL(Const.DARK)
+        val fLight = Lib.getFile(Const.LIGHT)
+        val fDark = Lib.getFile(Const.DARK)
         if (!fLight.exists() && !fDark.exists()) { //download style
             storage.close()
             scope.launch {
@@ -224,7 +227,7 @@ class BrowserToiler : NeoToiler() {
             }
             return false
         }
-        val fStyle = Lib.getFileL(STYLE)
+        val fStyle = Lib.getFile(STYLE)
         var replace = true
         if (fStyle.exists()) {
             replace = fDark.exists() && !lightTheme || fLight.exists() && lightTheme
@@ -238,7 +241,24 @@ class BrowserToiler : NeoToiler() {
         if (replace) {
             if (lightTheme) fLight.renameTo(fStyle) else fDark.renameTo(fStyle)
         }
+        preparingFont()
         return true
+    }
+
+    private fun preparingFont() {
+        val font = Lib.getFile(FONT)
+        if (font.exists().not()) {
+            val inStream = App.context.resources.openRawResource(R.font.myriad)
+            val outStream = FileOutputStream(font)
+            val buffer = ByteArray(1024)
+            var length = inStream.read(buffer)
+            while (length > 0) {
+                outStream.write(buffer, 0, length)
+                length = inStream.read(buffer)
+            }
+            inStream.close()
+            outStream.close()
+        }
     }
 
     fun addJournal() {
@@ -263,11 +283,11 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun restoreStyle() {
-        val fStyle = Lib.getFileL(STYLE)
+        val fStyle = Lib.getFile(STYLE)
         if (fStyle.exists()) {
-            val fDark = Lib.getFileL(Const.DARK)
+            val fDark = Lib.getFile(Const.DARK)
             if (fDark.exists())
-                fStyle.renameTo(Lib.getFileL(Const.LIGHT))
+                fStyle.renameTo(Lib.getFile(Const.LIGHT))
             else
                 fStyle.renameTo(fDark)
         }

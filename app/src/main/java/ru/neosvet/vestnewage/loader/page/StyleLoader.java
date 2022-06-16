@@ -65,11 +65,17 @@ public class StyleLoader {
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
         BufferedWriter bwDark = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
+
         String s = br.readLine();
         br.close();
         response.close();
         int u;
         String[] m = s.split("#");
+        s = "@font-face{font-family:\"MyriadProCondensed\";src: url(\"myriad.ttf\") format(\"truetype\")} ";
+        bwLight.write(s);
+        bwDark.write(s);
+        bwLight.flush();
+        bwDark.flush();
         for (int i = 1; i < m.length; i++) {
             if (i == 1)
                 s = m[i].substring(m[i].indexOf("body"));

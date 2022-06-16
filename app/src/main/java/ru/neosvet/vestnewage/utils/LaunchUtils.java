@@ -59,8 +59,10 @@ public class LaunchUtils {
                 }
             }).start();
         }
-        if (ver < 59)
+        if (ver < 59) {
             renamePrefs();
+            deleteBrowserFiles();
+        }
         if (ver > 44 && ver < 47) {
             AdsStorage storage = new AdsStorage();
             storage.delete();
@@ -68,6 +70,17 @@ public class LaunchUtils {
         }
         if (ver == 0)
             showSummaryNotif();
+    }
+
+    private void deleteBrowserFiles() {
+        File f = Lib.getFile(Const.DARK);
+        if(f.exists()) f.delete();
+        f = Lib.getFile(Const.LIGHT);
+        if(f.exists()) f.delete();
+        f = Lib.getFile("/style/style.css");
+        if(f.exists()) f.delete();
+        f = Lib.getFile("/page.html");
+        if(f.exists()) f.delete();
     }
 
     private void renamePrefs() {
