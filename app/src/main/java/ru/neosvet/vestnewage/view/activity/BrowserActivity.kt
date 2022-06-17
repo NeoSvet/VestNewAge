@@ -90,8 +90,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         setViews()
         setContent()
         initTheme()
-        restoreState(savedInstanceState)
         toiler.state.observe(this, this)
+        restoreState(savedInstanceState)
     }
 
     override fun onPause() {
@@ -138,6 +138,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
         } else if (pos > 0f)
             restorePosition(pos)
+
+        if (ErrorUtils.isNotEmpty()) {
+            blocked()
+            status.setError(ErrorUtils.getMessage())
+        }
     }
 
     private fun restoreSearch() = helper.run {
@@ -201,12 +206,18 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     override fun onBackPressed() {
-        if (binding.bottomBar.isScrolledDown) {
-            binding.bottomBar.performShow()
-        } else if (binding.content.pSearch.isVisible) {
-            closeSearch()
-        } else if (!toiler.onBackBrowser()) {
-            super.onBackPressed()
+        when {
+            status.isVisible -> {
+                ErrorUtils.clear()
+                status.setError(null)
+                unblocked()
+            }
+            binding.bottomBar.isScrolledDown ->
+                binding.bottomBar.performShow()
+            binding.content.pSearch.isVisible ->
+                closeSearch()
+            toiler.onBackBrowser().not() ->
+                super.onBackPressed()
         }
     }
 
@@ -240,7 +251,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         status.setClick {
             if (status.isTime)
                 toiler.load()
-            else status.onClick()
+            else {
+                unblocked()
+                status.onClick()
+            }
         }
     }
 
@@ -418,10 +432,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     override fun onChanged(state: NeoState) {
         when (state) {
             NeoState.Loading -> {
-                binding.run {
-                    bottomBar.isVisible = false
-                    fabNav.isVisible = false
-                }
+                blocked()
                 binding.content.wvBrowser.clearCache(true)
                 status.setLoad(true)
                 status.loadText()
@@ -433,8 +444,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
             is SuccessPage -> {
                 finishLoading()
-                if (state.timeInSeconds > 0)
-                    status.checkTime(state.timeInSeconds)
+                if (state.timeInSeconds > 0 && status.checkTime(state.timeInSeconds))
+                    blocked()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
                 menu.share.isVisible = state.isOtkr.not()
@@ -442,10 +453,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
             is MessageState ->
                 Lib.showToast(state.message)
-            is NeoState.Error -> {
-                finishLoading()
+            is NeoState.Error ->
                 status.setError(state.throwable.localizedMessage)
-            }
             else -> {}
         }
     }
@@ -453,10 +462,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     private fun finishLoading() {
         if (status.isVisible)
             status.setLoad(false)
-        binding.run {
-            bottomBar.isVisible = true
-            fabNav.isVisible = helper.isNavButton
-        }
+        unblocked()
     }
 
     override fun connectChanged(connected: Boolean) {
@@ -467,5 +473,15 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
             ConnectWatcher.unSubscribe()
         }
+    }
+
+    fun blocked() {
+        binding.bottomBar.isVisible = false
+        binding.fabNav.isVisible = false
+    }
+
+    fun unblocked() {
+        binding.bottomBar.isVisible = true
+        binding.fabNav.isVisible = helper.isNavButton
     }
 }

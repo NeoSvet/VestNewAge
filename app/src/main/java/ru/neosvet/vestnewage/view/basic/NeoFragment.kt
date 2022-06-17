@@ -35,7 +35,6 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         root = view
-        act?.status?.setClick { onStatusClick(false) }
         onViewCreated(savedInstanceState)
         act?.let {
             neotoiler.state.observe(it, this)
@@ -64,8 +63,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
 
     open fun onBackPressed(): Boolean {
-        if (act?.status?.isCrash == true || neotoiler.isRun) {
-            onStatusClick(true)
+        if (neotoiler.isRun) {
+            onStatusClick()
             return false
         }
         return true
@@ -131,19 +130,14 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         }
     }
 
-    open fun onStatusClick(reset: Boolean) {
+    fun onStatusClick() {
         if (neotoiler.isRun) {
             neotoiler.cancel()
             setStatus(false)
             return
         }
-        if (reset) {
-            act?.status?.setError(null)
-            setStatus(false)
-            return
-        }
         act?.run {
-            if (!status.onClick() && status.isTime)
+            if (status.isTime)
                 startLoad()
         }
     }

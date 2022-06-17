@@ -15,7 +15,6 @@ import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.ErrorUtils;
 import ru.neosvet.vestnewage.utils.Lib;
-import ru.neosvet.vestnewage.view.activity.MainActivity;
 
 public class StatusButton {
     private Context context;
@@ -178,7 +177,7 @@ public class StatusButton {
                     .setPositiveButton(context.getString(R.string.send),
                             (dialog, id) -> sendError())
                     .setNegativeButton(context.getString(android.R.string.cancel),
-                            (dialog, id) -> dialog.dismiss())
+                            (dialog, id) -> ErrorUtils.clear())
                     .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();
             setLoad(false);
@@ -190,6 +189,7 @@ public class StatusButton {
 
     private void sendError() {
         Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
+        ErrorUtils.clear();
     }
 
     public boolean isTime() {

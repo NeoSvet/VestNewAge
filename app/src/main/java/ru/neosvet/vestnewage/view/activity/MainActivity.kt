@@ -87,13 +87,21 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         helper.initViews()
         super.onCreate(savedInstanceState)
         setBottomPanel()
-        status.init(this, helper.pStatus)
+        initStatusButton()
         initAnim()
         setFloatProm(helper.isFloatPromTime)
 
         restoreState(savedInstanceState)
         if (savedInstanceState == null && withSplash.not())
             finishFlashStar()
+    }
+
+    private fun initStatusButton() {
+        status.init(this, helper.pStatus)
+        status.setClick {
+            if (status.onClick()) unblocked()
+            else curFragment?.onStatusClick()
+        }
     }
 
     fun showGodWords() {
@@ -263,11 +271,11 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             }
         } else helper.run {
             showHead()
+            setActionIcon(state.getInt(Const.SELECT))
             if (state.getBoolean(Const.PANEL))
                 blocked()
             else
                 unblocked()
-            setActionIcon(state.getInt(Const.SELECT))
             state.getString(Const.CUR_ID)?.let {
                 curSection = Section.valueOf(it)
             }
@@ -275,6 +283,10 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             else if (curSection != Section.MENU)
                 statusBack = StatusBack.PAGE
             updateNew()
+            if (ErrorUtils.isNotEmpty()) {
+                status.setError(ErrorUtils.getMessage())
+                if (isBlocked.not()) status.onClick()
+            }
         }
     }
 
@@ -431,6 +443,12 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     }
 
     override fun onBackPressed() {
+        if (status.isCrash) {
+            ErrorUtils.clear()
+            status.setError(null)
+            unblocked()
+            return
+        }
         if (curFragment?.onBackPressed() == false)
             return
         when {
@@ -588,6 +606,8 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
 
     fun setAction(icon: Int) {
         helper.setActionIcon(icon)
+        if (isBlocked)
+            helper.fabAction.isVisible = false
     }
 
     fun setFloatProm(isFloat: Boolean) {
