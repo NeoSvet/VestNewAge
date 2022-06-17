@@ -109,10 +109,10 @@ class SiteFragment : NeoFragment() {
                 toiler.selectedTab = it.getInt(Const.TAB)
                 binding?.tabLayout?.select(toiler.selectedTab)
             }
-            when (toiler.selectedTab) {
-                SiteToiler.TAB_DEV -> toiler.openAds()
-                else -> toiler.openList(true)
-            }
+        }
+        when (toiler.selectedTab) {
+            SiteToiler.TAB_DEV -> toiler.openAds()
+            else -> toiler.openList(true)
         }
     }
 
