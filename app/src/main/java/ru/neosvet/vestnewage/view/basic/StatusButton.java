@@ -101,6 +101,7 @@ public class StatusButton {
     public void setError(String error) {
         stop = true;
         if (error != null) {
+            if (prog) progBar.setVisibility(View.GONE);
             error = parseError(error);
             time = false;
             tv.setText(context.getString(R.string.crash));
