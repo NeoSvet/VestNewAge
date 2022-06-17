@@ -1,6 +1,10 @@
 package ru.neosvet.vestnewage.network;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -11,6 +15,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.MyException;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.ErrorUtils;
+import ru.neosvet.vestnewage.utils.Lib;
 
 public class NeoClient {
     public static final String SITE = "https://blagayavest.info/", SITE2 = "https://chenneling.info/",
@@ -65,6 +70,18 @@ public class NeoClient {
 
         if (response.body() == null)
             throw new MyException(App.context.getString(R.string.error_site));
-        return new BufferedInputStream(response.body().byteStream());
+        InputStream inStream = response.body().byteStream();
+        File file = Lib.getFileP("/cache/file");
+        if(file.exists()) file.delete();
+        FileOutputStream outStream = new FileOutputStream(file);
+        byte[] buffer = new byte[1024];
+        int length = inStream.read(buffer);
+        while (length > 0) {
+            outStream.write(buffer, 0, length);
+            length = inStream.read(buffer);
+        }
+        inStream.close();
+        outStream.close();
+        return new BufferedInputStream(new FileInputStream(file));
     }
 }
