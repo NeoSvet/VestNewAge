@@ -119,10 +119,13 @@ class BrowserToiler : NeoToiler() {
             mstate.postValue(
                 SuccessPage(
                     url = FILE + s,
-                    timeInSeconds = p.first,
                     isOtkr = p.second
                 )
             )
+            if (p.first == 0L || DateUnit.initNow().timeInSeconds - p.first < DateUnit.DAY_IN_SEC * 30)
+                return@launch
+            waitPost()
+            reLoad()
         }
     }
 
@@ -158,7 +161,7 @@ class BrowserToiler : NeoToiler() {
             val s = storage.getPageTitle(cursor.getString(iTitle), link)
             val iTime = cursor.getColumnIndex(Const.TIME)
             d = DateUnit.putMills(cursor.getLong(iTime))
-            if (storage.isArticle()) //раз в неделю предлагать обновить статьи
+            if (storage.isArticle()) //обновлять только статьи
                 time = d.timeInSeconds
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n")
             bw.write("<title>")

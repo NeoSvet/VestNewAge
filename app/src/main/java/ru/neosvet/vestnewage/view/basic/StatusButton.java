@@ -11,7 +11,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.ErrorUtils;
 import ru.neosvet.vestnewage.utils.Lib;
@@ -24,16 +23,15 @@ public class StatusButton {
     private TextView tv;
     private ImageView iv;
     private ProgressBar progBar;
-    private ResizeAnim resizeMax = null;
     private String error = null;
-    private boolean stop = true, time = false, visible, prog = false;
+    private boolean stop = true, visible, prog = false;
 
     public void init(Context context, View p) {
         this.context = context;
         this.panel = p;
-        tv = (TextView) panel.findViewById(R.id.tvStatus);
-        iv = (ImageView) panel.findViewById(R.id.ivStatus);
-        progBar = (ProgressBar) panel.findViewById(R.id.progStatus);
+        tv = panel.findViewById(R.id.tvStatus);
+        iv = panel.findViewById(R.id.ivStatus);
+        progBar = panel.findViewById(R.id.progStatus);
 
         anRotate = AnimationUtils.loadAnimation(context, R.anim.rotate);
         anRotate.setAnimationListener(new Animation.AnimationListener() {
@@ -86,7 +84,6 @@ public class StatusButton {
         }
         if (start) {
             loadText();
-            time = false;
             panel.setVisibility(View.VISIBLE);
             visible = true;
             iv.startAnimation(anRotate);
@@ -103,7 +100,6 @@ public class StatusButton {
         if (error != null) {
             if (prog) progBar.setVisibility(View.GONE);
             error = parseError(error);
-            time = false;
             tv.setText(context.getString(R.string.crash));
             panel.setBackgroundResource(R.drawable.shape_red);
             iv.setImageResource(R.drawable.ic_close);
@@ -128,34 +124,6 @@ public class StatusButton {
             return String.format(context.getString(R.string.format_timeout), site, sec);
         }
         return error;
-    }
-
-    public boolean checkTime(long time) {
-        if (!stop || isCrash())
-            return true;
-        if (DateUnit.initNow().getTimeInSeconds() - time > DateUnit.DAY_IN_SEC * 7) {
-            this.time = true;
-            initResizeMax();
-            visible = true;
-            tv.setText(context.getString(R.string.refresh) + "?");
-            return true;
-        } else {
-            this.time = false;
-            visible = false;
-            panel.setVisibility(View.GONE);
-        }
-        return false;
-    }
-
-    private void initResizeMax() {
-        panel.setVisibility(View.VISIBLE);
-        if (resizeMax == null) {
-            resizeMax = new ResizeAnim(panel, true, (int) (210f * context.getResources().getDisplayMetrics().density));
-            resizeMax.setStart(50);
-            resizeMax.setDuration(800);
-        }
-        panel.clearAnimation();
-        panel.startAnimation(resizeMax);
     }
 
     public boolean isCrash() {
@@ -191,10 +159,6 @@ public class StatusButton {
     private void sendError() {
         Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
         ErrorUtils.clear();
-    }
-
-    public boolean isTime() {
-        return time;
     }
 
     public void setProgress(int p) {

@@ -48,7 +48,6 @@ data class SuccessBook(
 
 data class SuccessPage(
     val url: String,
-    val timeInSeconds: Long,
     val isOtkr: Boolean = false
 ) : NeoState()
 

@@ -249,8 +249,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         else
             fabNav.isVisible = false
         status.setClick {
-            if (status.isTime)
-                toiler.load()
+            if (toiler.isRun)
+                toiler.cancel()
             else {
                 unblocked()
                 status.onClick()
@@ -444,8 +444,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
             is SuccessPage -> {
                 finishLoading()
-                if (state.timeInSeconds > 0 && status.checkTime(state.timeInSeconds))
-                    blocked()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
                 menu.share.isVisible = state.isOtkr.not()

@@ -134,11 +134,6 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         if (neotoiler.isRun) {
             neotoiler.cancel()
             setStatus(false)
-            return
-        }
-        act?.run {
-            if (status.isTime)
-                startLoad()
         }
     }
 
