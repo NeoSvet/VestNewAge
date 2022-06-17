@@ -8,10 +8,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
-import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.TouchHelper
@@ -105,7 +103,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     private fun noConnected() {
         ConnectWatcher.subscribe(this)
-        Lib.showToast(getString(R.string.no_connected))
+        ConnectWatcher.showMessage()
         setStatus(false)
     }
 

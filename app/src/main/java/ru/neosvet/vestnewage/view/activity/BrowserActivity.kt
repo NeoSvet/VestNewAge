@@ -429,7 +429,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             NeoState.NoConnected -> {
                 finishLoading()
                 ConnectWatcher.subscribe(this)
-                Lib.showToast(getString(R.string.no_connected))
+                ConnectWatcher.showMessage()
             }
             is SuccessPage -> {
                 finishLoading()
