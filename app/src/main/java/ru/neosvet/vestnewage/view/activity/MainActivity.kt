@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         setFloatProm(helper.isFloatPromTime)
 
         restoreState(savedInstanceState)
-        if (withSplash.not())
+        if (savedInstanceState == null && withSplash.not())
             finishFlashStar()
     }
 
