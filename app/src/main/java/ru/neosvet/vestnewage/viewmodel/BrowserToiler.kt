@@ -18,10 +18,7 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
-import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
+import ru.neosvet.vestnewage.viewmodel.basic.*
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
@@ -35,12 +32,14 @@ class BrowserToiler : NeoToiler() {
         private const val FONT = "/style/myriad.ttf"
         private const val PAGE = "/page.html"
         private const val script = "<a href='javascript:NeoInterface."
+        private const val PERIOD_FOR_REFRESH = DateUnit.DAY_IN_SEC * 30
     }
 
     private lateinit var strings: BrowserStrings
     private val storage = PageStorage()
     var lightTheme: Boolean = true
     private val history = Stack<String>()
+    private var isRefresh = false
     var helper: BrowserHelper? = null
     private var link: String
         get() = helper!!.link
@@ -59,15 +58,23 @@ class BrowserToiler : NeoToiler() {
             page = context.getString(R.string.format_page),
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
-            endList = context.getString(R.string.tip_end_list),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next)
         )
         helper = BrowserHelper(context)
     }
 
+    fun refresh() {
+        isRefresh = true
+        load()
+    }
+
     override suspend fun doLoad() {
-        downloadPage(true)
+        storage.close()
+        restoreStyle()
+        styleLoader.download(isRefresh)
+        pageLoader.download(link, true)
+        openPage(true)
     }
 
     override fun onDestroy() {
@@ -102,17 +109,21 @@ class BrowserToiler : NeoToiler() {
             loadIfNeed = true
             if (storage.name.contains(".")) {
                 val year = storage.name.substring(3).toInt()
-                if (year < 16) loadIfNeed = false
+                if (year < 16 && year != 0) loadIfNeed = false //0 - article
             }
             if (storage.existsPage(link).not()) {
-                reLoad()
+                if (loadIfNeed) {
+                    isRefresh = false
+                    reLoad()
+                } else
+                    mstate.postValue(Ready)
                 return@launch
             }
             if (!preparingStyle()) return@launch
             val file = Lib.getFile(PAGE)
             val p = if (newPage || !file.exists())
                 generatePage(file)
-            else Pair(0L, false)
+            else Pair(false, false) //isNeedUpdate, isOtrk
             var s = file.toString()
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
@@ -122,21 +133,14 @@ class BrowserToiler : NeoToiler() {
                     isOtkr = p.second
                 )
             )
-            if (p.first == 0L || DateUnit.initNow().timeInSeconds - p.first < DateUnit.DAY_IN_SEC * 30)
+            if (p.first.not()) { //not isNeedUpdate
+                if (isRefresh.not()) addJournal()
                 return@launch
+            }
             waitPost()
+            isRefresh = true
             reLoad()
         }
-    }
-
-    private suspend fun downloadPage(update: Boolean) {
-        if (update)
-            storage.deleteParagraphs(storage.getPageId(link))
-        storage.close()
-        restoreStyle()
-        styleLoader.download(false)
-        pageLoader.download(link, true)
-        openPage(true)
     }
 
     fun onBackBrowser(): Boolean {
@@ -146,12 +150,12 @@ class BrowserToiler : NeoToiler() {
         return true
     }
 
-    private fun generatePage(file: File): Pair<Long, Boolean> { //time, isOtrk
+    private fun generatePage(file: File): Pair<Boolean, Boolean> { //isNeedUpdate, isOtrk
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)
         val id: Int
-        var time = 0L
+        var isNeedUpdate = false
         var isOtkr = false
         val d: DateUnit
         if (cursor.moveToFirst()) {
@@ -162,7 +166,8 @@ class BrowserToiler : NeoToiler() {
             val iTime = cursor.getColumnIndex(Const.TIME)
             d = DateUnit.putMills(cursor.getLong(iTime))
             if (storage.isArticle()) //обновлять только статьи
-                time = d.timeInSeconds
+                isNeedUpdate =
+                    DateUnit.initNow().timeInSeconds - d.timeInSeconds > PERIOD_FOR_REFRESH
             bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n")
             bw.write("<title>")
             bw.write(s)
@@ -178,7 +183,7 @@ class BrowserToiler : NeoToiler() {
             //заголовка нет - значит нет и страницы
             //сюда никогдане попадет, т.к. выше есть проверка existsPage
             cursor.close()
-            return Pair(time, isOtkr)
+            return Pair(isNeedUpdate, isOtkr)
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
@@ -216,7 +221,7 @@ class BrowserToiler : NeoToiler() {
         }
         bw.write("\n</div></body></html>")
         bw.close()
-        return Pair(time, isOtkr)
+        return Pair(isNeedUpdate, isOtkr)
     }
 
     private fun preparingStyle(): Boolean {
@@ -264,24 +269,22 @@ class BrowserToiler : NeoToiler() {
         }
     }
 
-    fun addJournal() {
-        scope.launch {
-            val row = ContentValues()
-            row.put(Const.TIME, System.currentTimeMillis())
-            val id = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)
-            val dbJournal = JournalStorage()
-            try {
-                if (!dbJournal.update(id, row)) {
-                    row.put(DataBase.ID, id)
-                    dbJournal.insert(row)
-                }
-                dbJournal.checkLimit()
-                dbJournal.close()
-            } catch (e: Exception) {
-                dbJournal.close()
-                val file = Lib.getFileDB(DataBase.JOURNAL)
-                file.delete()
+    private suspend fun addJournal() {
+        val row = ContentValues()
+        row.put(Const.TIME, System.currentTimeMillis())
+        val id = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)
+        val dbJournal = JournalStorage()
+        try {
+            if (!dbJournal.update(id, row)) {
+                row.put(DataBase.ID, id)
+                dbJournal.insert(row)
             }
+            dbJournal.checkLimit()
+            dbJournal.close()
+        } catch (e: Exception) {
+            dbJournal.close()
+            val file = Lib.getFileDB(DataBase.JOURNAL)
+            file.delete()
         }
     }
 
@@ -311,7 +314,7 @@ class BrowserToiler : NeoToiler() {
         val today = DateUnit.initToday().my
         val d: DateUnit = getDateFromLink()
         if (d.my == today) {
-            mstate.postValue(MessageState(strings.endList))
+            mstate.postValue(Success)
             return
         }
         d.changeMonth(1)
@@ -332,7 +335,7 @@ class BrowserToiler : NeoToiler() {
         val min: String = getMinMY()
         val d = getDateFromLink()
         if (d.my == min) {
-            mstate.postValue(MessageState(strings.endList))
+            mstate.postValue(Success)
             return
         }
         d.changeMonth(-1)

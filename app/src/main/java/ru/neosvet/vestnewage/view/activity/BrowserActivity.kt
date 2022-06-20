@@ -28,8 +28,9 @@ import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.Ready
+import ru.neosvet.vestnewage.viewmodel.basic.Success
 import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.util.*
 
@@ -59,7 +60,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
     private var navIsTop = false
-    private lateinit var tip: Tip
+    private lateinit var tipFinish: Tip
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
     }
@@ -173,7 +174,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     private fun closeSearch() {
-        tip.hide()
+        tipFinish.hide()
         with(binding.content) {
             softKeyboard.hide()
             if (helper.searchIndex > -1) {
@@ -195,7 +196,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     private fun initViews() {
-        tip = Tip(this, binding.tvFinish)
+        tipFinish = Tip(this, binding.tvFinish)
         status.init(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
@@ -355,7 +356,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         bottomBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.nav_refresh ->
-                    toiler.load()
+                    toiler.refresh()
                 R.id.nav_share ->
                     helper.sharePage(this@BrowserActivity, getPageTitle())
                 R.id.nav_buttons -> {
@@ -412,7 +413,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     fun onPageFinished() {
         val unread = UnreadUtils()
         unread.deleteLink(helper.link)
-        toiler.addJournal()
     }
 
     fun initSearch() {
@@ -449,8 +449,10 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 menu.share.isVisible = state.isOtkr.not()
                 restoreSearch()
             }
-            is MessageState ->
-                Lib.showToast(state.message)
+            Ready ->
+                binding.tvNotFound.isVisible = true
+            Success ->
+                tipFinish.show()
             is NeoState.Error ->
                 status.setError(state.throwable.localizedMessage)
             else -> {}
@@ -458,6 +460,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     private fun finishLoading() {
+        binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
         unblocked()

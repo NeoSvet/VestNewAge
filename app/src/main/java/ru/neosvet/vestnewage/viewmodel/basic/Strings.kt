@@ -16,7 +16,6 @@ data class BrowserStrings(
     val page: String,
     val copyright: String,
     val downloaded: String,
-    val endList: String,
     val toPrev: String,
     val toNext: String
 )
