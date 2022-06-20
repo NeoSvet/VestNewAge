@@ -37,10 +37,11 @@ public class PageLoader {
             page.load(NeoClient.SITE + Const.PRINT + s, "page-title");
         else
             page.load(NeoClient.SITE2 + Const.PRINT + s, "<h2>");
+        if (singlePage)
+            storage.deleteParagraphs(storage.getPageId(link));
 
         ContentValues row;
         int id = 0, bid = 0;
-
         s = page.getCurrentElem();
         do {
             if (page.isHead()) {
