@@ -29,7 +29,9 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
@@ -288,13 +290,13 @@ class MarkersFragment : NeoFragment() {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            is MessageState -> if (toiler.workOnFile)
+            is NeoState.Message -> if (toiler.workOnFile)
                 doneExport(state.message)
             else
                 Lib.showToast(state.message)
-            is UpdateList ->
+            is NeoState.ListState ->
                 updateList(state)
-            Ready -> {//import toiler.task==MarkersModel.Type.FILE
+            NeoState.Ready -> {//import toiler.task==MarkersModel.Type.FILE
                 setStatus(false)
                 toiler.openColList()
                 Lib.showToast(getString(R.string.completed))
@@ -322,7 +324,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun updateList(state: UpdateList) = binding?.run {
+    private fun updateList(state: NeoState.ListState) = binding?.run {
         if (toiler.iSel == -1)
             setStatus(false)
         if (toiler.isCollections) {

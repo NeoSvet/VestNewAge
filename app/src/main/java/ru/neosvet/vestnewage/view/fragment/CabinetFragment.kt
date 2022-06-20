@@ -22,10 +22,8 @@ import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.CabinetToiler
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class CabinetFragment : NeoFragment() {
     private var binding: CabinetFragmentBinding? = null
@@ -61,14 +59,14 @@ class CabinetFragment : NeoFragment() {
     override fun onChangedState(state: NeoState) {
         setStatus(false)
         when (state) {
-            is MessageState -> {
+            is NeoState.Message -> {
                 val alert = CustomDialog(act)
                 alert.setTitle(getString(R.string.error))
                 alert.setMessage(state.message)
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
                 alert.show(null)
             }
-            is SuccessList -> {
+            is NeoState.ListValue -> {
                 binding?.run {
                     if (toiler.screen == CabinetToiler.Screen.LOGIN) {
                         login.root.isVisible = true
@@ -145,7 +143,7 @@ class CabinetFragment : NeoFragment() {
         }
         bClearEmail.setOnClickListener { etEmail.setText("") }
         bClearPassword.setOnClickListener { etPassword.setText("") }
-        root.setOnTouchListener{_, event: MotionEvent ->
+        root.setOnTouchListener { _, event: MotionEvent ->
             act?.hideBottomArea()
             return@setOnTouchListener false
         }

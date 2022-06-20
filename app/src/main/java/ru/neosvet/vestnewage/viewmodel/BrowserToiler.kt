@@ -18,7 +18,9 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
@@ -116,7 +118,7 @@ class BrowserToiler : NeoToiler() {
                     isRefresh = false
                     reLoad()
                 } else
-                    mstate.postValue(Ready)
+                    mstate.postValue(NeoState.Ready)
                 return@launch
             }
             if (!preparingStyle()) return@launch
@@ -128,7 +130,7 @@ class BrowserToiler : NeoToiler() {
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
             mstate.postValue(
-                SuccessPage(
+                NeoState.Page(
                     url = FILE + s,
                     isOtkr = p.second
                 )
@@ -314,7 +316,7 @@ class BrowserToiler : NeoToiler() {
         val today = DateUnit.initToday().my
         val d: DateUnit = getDateFromLink()
         if (d.my == today) {
-            mstate.postValue(Success)
+            mstate.postValue(NeoState.Success)
             return
         }
         d.changeMonth(1)
@@ -335,7 +337,7 @@ class BrowserToiler : NeoToiler() {
         val min: String = getMinMY()
         val d = getDateFromLink()
         if (d.my == min) {
-            mstate.postValue(Success)
+            mstate.postValue(NeoState.Success)
             return
         }
         d.changeMonth(-1)

@@ -28,8 +28,6 @@ import ru.neosvet.vestnewage.view.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessCalendar
 
 class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     private val toiler: CalendarToiler
@@ -174,13 +172,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     override fun onChangedState(state: NeoState) {
         if (toiler.isRun.not())
             setStatus(false)
-        if (state is SuccessCalendar) binding?.run {
+        if (state is NeoState.Calendar) binding?.run {
             act?.updateNew()
             tvDate.text = state.date
             bPrev.isEnabled = state.prev
             bNext.isEnabled = state.next
             adCalendar.setItems(state.list)
-        } else if (state == Ready)
+        } else if (state == NeoState.Ready)
             Lib.showToast(getString(R.string.load_unavailable))
     }
 

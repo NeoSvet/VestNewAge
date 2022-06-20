@@ -6,9 +6,8 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
 import java.io.File
 
 class SettingsToiler : NeoToiler() {
@@ -66,7 +65,7 @@ class SettingsToiler : NeoToiler() {
                     }
                 }
             }
-            mstate.postValue(LongState(size))
+            mstate.postValue(NeoState.LongState(size))
             isRun = false
         }
     }
@@ -82,6 +81,6 @@ class SettingsToiler : NeoToiler() {
     }
 
     fun clearState() {
-        mstate.postValue(Ready)
+        mstate.postValue(NeoState.Ready)
     }
 }

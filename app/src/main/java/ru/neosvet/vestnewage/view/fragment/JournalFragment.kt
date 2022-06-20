@@ -25,8 +25,6 @@ import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 class JournalFragment : NeoFragment() {
     private val toiler: JournalToiler
@@ -119,9 +117,9 @@ class JournalFragment : NeoFragment() {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            Success ->
+            NeoState.Success ->
                 tip.hideAnimated()
-            Ready -> binding?.run {
+            NeoState.Ready -> binding?.run {
                 tvEmptyJournal.isVisible = true
                 act?.setAction(0)
             }

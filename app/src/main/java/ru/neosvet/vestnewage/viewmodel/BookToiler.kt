@@ -18,7 +18,9 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.util.*
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
@@ -164,12 +166,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             cursor.close()
             storage.close()
             if (list.isNotEmpty()) {
-                mstate.postValue(SuccessBook(calendar, prev, next, list))
+                mstate.postValue(NeoState.Book(calendar, prev, next, list))
                 return@launch
             }
             val today = DateUnit.initToday()
             if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year)
-                mstate.postValue(MessageState(strings.month_is_empty))
+                mstate.postValue(NeoState.Message(strings.month_is_empty))
             else reLoad()
         }
     }
@@ -263,7 +265,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (!curTitle.moveToPosition(n)) {
             curTitle.close()
             storage.close()
-            mstate.postValue(MessageState(strings.alert_rnd))
+            mstate.postValue(NeoState.Message(strings.alert_rnd))
             return
         }
         //если случайный текст найден
@@ -302,7 +304,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             msg = s
         }
         mstate.postValue(
-            SuccessRnd(
+            NeoState.Rnd(
                 title = title,
                 link = link ?: "",
                 msg = msg,
@@ -328,6 +330,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
-        mstate.postValue(ProgressState(value))
+        mstate.postValue(NeoState.Progress(value))
     }
 }

@@ -14,9 +14,8 @@ import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 class MarkerToiler : NeoToiler() {
     enum class Type {
@@ -65,7 +64,7 @@ class MarkerToiler : NeoToiler() {
         scope.launch {
             helper.title = openPage(link)
             if (helper.title.isEmpty()) {
-                mstate.postValue(Ready)
+                mstate.postValue(NeoState.Ready)
                 return@launch
             }
             openCols()
@@ -73,7 +72,7 @@ class MarkerToiler : NeoToiler() {
                 newMarker(intent)
             else
                 openMarker(id)
-            mstate.postValue(Success)
+            mstate.postValue(NeoState.Success)
         }
     }
 
@@ -125,7 +124,7 @@ class MarkerToiler : NeoToiler() {
                 updateMarker(id, row)
             else
                 addMarker(row)
-            mstate.postValue(Ready)
+            mstate.postValue(NeoState.Ready)
         }
     }
 

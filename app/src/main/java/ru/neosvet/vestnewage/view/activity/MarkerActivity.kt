@@ -31,8 +31,6 @@ import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkerToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 @SuppressLint("DefaultLocale")
 class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
@@ -121,9 +119,9 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
 
     override fun onChanged(state: NeoState) {
         when (state) {
-            Success ->
+            NeoState.Success ->
                 showData()
-            Ready -> {
+            NeoState.Ready -> {
                 if (helper.title.isEmpty())
                     Lib.showToast(getString(R.string.not_load_page))
                 onBackPressed()

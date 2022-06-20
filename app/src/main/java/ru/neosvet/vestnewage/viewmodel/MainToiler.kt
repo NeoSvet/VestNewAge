@@ -15,9 +15,8 @@ import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.viewmodel.basic.AdsState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -39,7 +38,7 @@ class MainToiler : NeoToiler() {
         val ads = AdsUtils(App.context)
         ads.loadAds()
         ads.close()
-        mstate.postValue(AdsState(ads.hasNew(), ads.warnIndex, timeDiff))
+        mstate.postValue(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
     }
 
@@ -109,7 +108,7 @@ class MainToiler : NeoToiler() {
         }
         br.close()
         if (list.isNotEmpty())
-            mstate.postValue(SuccessList(list))
+            mstate.postValue(NeoState.ListValue(list))
     }
 
     private suspend fun synchronizationTime(): Int {

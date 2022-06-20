@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.MainHelper
@@ -31,7 +30,6 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.list.SettingsAdapter
 import ru.neosvet.vestnewage.viewmodel.SettingsToiler
-import ru.neosvet.vestnewage.viewmodel.basic.LongState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
@@ -104,7 +102,7 @@ class SettingsFragment : NeoFragment() {
     }
 
     override fun onChangedState(state: NeoState) {
-        if (state is LongState) {
+        if (state is NeoState.LongState) {
             setStatus(false)
             val size = state.value / 1048576f //to MegaByte
             Lib.showToast(String.format(getString(R.string.format_freed_size), size))

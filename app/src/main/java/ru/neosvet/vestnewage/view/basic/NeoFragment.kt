@@ -15,7 +15,6 @@ import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
 
 abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     @JvmField
@@ -76,7 +75,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     override fun onChanged(state: NeoState) {
         when (state) {
-            is ProgressState ->
+            is NeoState.Progress ->
                 act?.status?.setProgress(state.percent)
             NeoState.Loading ->
                 setStatus(true)

@@ -29,9 +29,6 @@ import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessPage
 import java.util.*
 
 class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver {
@@ -442,16 +439,16 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 ConnectWatcher.subscribe(this)
                 ConnectWatcher.showMessage()
             }
-            is SuccessPage -> {
+            is NeoState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
                 menu.share.isVisible = state.isOtkr.not()
                 restoreSearch()
             }
-            Ready ->
+            NeoState.Ready ->
                 binding.tvNotFound.isVisible = true
-            Success ->
+            NeoState.Success ->
                 tipFinish.show()
             is NeoState.Error ->
                 status.setError(state.throwable.localizedMessage)

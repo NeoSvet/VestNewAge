@@ -9,9 +9,8 @@ import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.File
 
 class NewToiler : NeoToiler() {
@@ -73,7 +72,7 @@ class NewToiler : NeoToiler() {
                 }
                 links.clear()
             }
-            mstate.postValue(SuccessList(list))
+            mstate.postValue(NeoState.ListValue(list))
             needOpen = false
             if (ads.index > -1)
                 showAd(list[ads.index])
@@ -95,7 +94,7 @@ class NewToiler : NeoToiler() {
             val unread = UnreadUtils()
             unread.clearList()
             unread.setBadge(ads.unreadCount)
-            mstate.postValue(Ready)
+            mstate.postValue(NeoState.Ready)
         }
     }
 

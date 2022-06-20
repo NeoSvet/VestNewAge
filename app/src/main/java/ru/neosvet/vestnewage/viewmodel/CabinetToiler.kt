@@ -15,9 +15,8 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.UnsafeClient
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
-import ru.neosvet.vestnewage.viewmodel.basic.MessageState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -118,12 +117,12 @@ class CabinetToiler : NeoToiler() {
 
     fun loginScreen() {
         screen = Screen.LOGIN
-        mstate.postValue(SuccessList(loginList))
+        mstate.postValue(NeoState.ListValue(loginList))
     }
 
     private fun cabinetScreen() {
         screen = Screen.CABINET
-        mstate.postValue(SuccessList(cabinetList))
+        mstate.postValue(NeoState.ListValue(cabinetList))
     }
 
     private fun doLogin(email: String, password: String) {
@@ -160,7 +159,7 @@ class CabinetToiler : NeoToiler() {
     }
 
     private fun postError(msg: String) {
-        mstate.postValue(MessageState(msg))
+        mstate.postValue(NeoState.Message(msg))
     }
 
     private fun loadCabinet() {
@@ -234,7 +233,7 @@ class CabinetToiler : NeoToiler() {
         for (i in m)
             wordList.add(ListItem(i))
         screen = Screen.WORDS
-        mstate.postValue(SuccessList(wordList))
+        mstate.postValue(NeoState.ListValue(wordList))
     }
 
     private fun sendWord(index: Int, word: String) {
@@ -288,11 +287,11 @@ class CabinetToiler : NeoToiler() {
     fun restoreScreen() {
         when (screen) {
             Screen.LOGIN ->
-                mstate.postValue(SuccessList(loginList))
+                mstate.postValue(NeoState.ListValue(loginList))
             Screen.CABINET ->
-                mstate.postValue(SuccessList(cabinetList))
+                mstate.postValue(NeoState.ListValue(cabinetList))
             Screen.WORDS ->
-                mstate.postValue(SuccessList(wordList))
+                mstate.postValue(NeoState.ListValue(wordList))
         }
     }
 

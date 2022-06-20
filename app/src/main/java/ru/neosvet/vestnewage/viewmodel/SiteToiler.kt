@@ -11,9 +11,9 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -70,14 +70,14 @@ class SiteToiler : NeoToiler() {
         val loader = SiteLoader(file.toString())
         val list = loader.load(url) as MutableList
         list.add(0, getFirstItem())
-        mstate.postValue(SuccessList(list))
+        mstate.postValue(NeoState.ListValue(list))
     }
 
     private suspend fun loadAds() {
         ads.loadAds()
         val list = ads.loadList(false)
         list.add(0, getFirstItem())
-        mstate.postValue(SuccessList(list))
+        mstate.postValue(NeoState.ListValue(list))
     }
 
     fun openList(loadIfNeed: Boolean) {
@@ -119,7 +119,7 @@ class SiteToiler : NeoToiler() {
                 t = br.readLine()
             }
             br.close()
-            mstate.postValue(SuccessList(list))
+            mstate.postValue(NeoState.ListValue(list))
 
             if (loadIfNeed && DateUnit.isLongAgo(f.lastModified())) {
                 waitPost()
@@ -140,7 +140,7 @@ class SiteToiler : NeoToiler() {
         scope.launch {
             val list = ads.loadList(false)
             list.add(0, getFirstItem())
-            mstate.postValue(SuccessList(list))
+            mstate.postValue(NeoState.ListValue(list))
         }
     }
 

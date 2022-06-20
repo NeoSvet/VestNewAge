@@ -29,7 +29,6 @@ import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class SiteFragment : NeoFragment() {
     companion object {
@@ -221,7 +220,7 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun onChangedState(state: NeoState) {
-        if (state is SuccessList) {
+        if (state is NeoState.ListValue) {
             setStatus(false)
             binding?.run {
                 rvSite.layoutManager = if (toiler.isNewsTab)

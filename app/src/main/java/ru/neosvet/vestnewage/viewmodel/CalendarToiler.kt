@@ -14,7 +14,8 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class CalendarToiler : NeoToiler() {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
@@ -45,12 +46,12 @@ class CalendarToiler : NeoToiler() {
     override suspend fun doLoad() { //loadFromSite
         loadIfNeed = false
         if (date.year < 2016) {
-            mstate.postValue(Ready)
+            mstate.postValue(NeoState.Ready)
             return
         }
         val list = loadMonth()
         if (loadFromStorage()) {
-            mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
+            mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
             if (isRun) loadPages(list)
         }
     }
@@ -63,11 +64,11 @@ class CalendarToiler : NeoToiler() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(ProgressState(cur.percent(pages.size)))
+            mstate.postValue(NeoState.Progress(cur.percent(pages.size)))
         }
         loader.finish()
         isRun = false
-        mstate.postValue(Success)
+        mstate.postValue(NeoState.Success)
     }
 
     private fun loadMonth(): List<String> {
@@ -101,10 +102,10 @@ class CalendarToiler : NeoToiler() {
                 date.changeMonth(offsetMonth)
             if (calendar.isEmpty() || offsetMonth != 0) {
                 createField()
-                mstate.postValue(SuccessCalendar(date.calendarString, false, false, calendar))
+                mstate.postValue(NeoState.Calendar(date.calendarString, false, false, calendar))
             }
             if (loadFromStorage())
-                mstate.postValue(SuccessCalendar(date.calendarString, prev, next, calendar))
+                mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
             else {
                 waitPost()
                 isRun = true

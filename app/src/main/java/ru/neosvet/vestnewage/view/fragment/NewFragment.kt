@@ -17,8 +17,6 @@ import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.NewToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class NewFragment : NeoFragment() {
     private var binding: NewFragmentBinding? = null
@@ -61,9 +59,9 @@ class NewFragment : NeoFragment() {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            is Ready ->
+            is NeoState.Ready ->
                 emptyList()
-            is SuccessList -> {
+            is NeoState.ListValue -> {
                 if (state.list.isEmpty())
                     emptyList()
                 else

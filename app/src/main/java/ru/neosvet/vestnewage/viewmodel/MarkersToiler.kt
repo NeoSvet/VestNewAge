@@ -17,7 +17,10 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
+import ru.neosvet.vestnewage.viewmodel.basic.MarkersStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.*
 
 class MarkersToiler : NeoToiler() {
@@ -116,7 +119,7 @@ class MarkersToiler : NeoToiler() {
         isRun = true
         scope.launch {
             doExport(Uri.parse(file))
-            mstate.postValue(MessageState(file))
+            mstate.postValue(NeoState.Message(file))
             isRun = false
         }
     }
@@ -126,7 +129,7 @@ class MarkersToiler : NeoToiler() {
         isRun = true
         scope.launch {
             doImport(Uri.parse(file))
-            mstate.postValue(Ready)
+            mstate.postValue(NeoState.Ready)
             isRun = false
         }
     }
@@ -165,7 +168,7 @@ class MarkersToiler : NeoToiler() {
                 list.clear()
                 iSel = -1
             }
-            mstate.postValue(UpdateList(ListEvent.RELOAD))
+            mstate.postValue(NeoState.ListState(ListEvent.RELOAD))
         }
     }
 
@@ -209,7 +212,7 @@ class MarkersToiler : NeoToiler() {
                 }
                 cursor.close()
             }
-            mstate.postValue(UpdateList(ListEvent.RELOAD))
+            mstate.postValue(NeoState.ListState(ListEvent.RELOAD))
         }
     }
 
@@ -345,7 +348,7 @@ class MarkersToiler : NeoToiler() {
             list.removeAt(index)
             if (list.size == n) iSel = -1
             else if (list.size == iSel) iSel--
-            mstate.postValue(UpdateList(ListEvent.REMOTE, index))
+            mstate.postValue(NeoState.ListState(ListEvent.REMOTE, index))
         }
     }
 
@@ -371,7 +374,7 @@ class MarkersToiler : NeoToiler() {
         list.removeAt(n)
         list.add(iSel, item)
         iSel = n
-        mstate.postValue(UpdateList(ListEvent.MOVE, n + 1))
+        mstate.postValue(NeoState.ListState(ListEvent.MOVE, n + 1))
     }
 
     fun moveToBottom() {
@@ -384,14 +387,14 @@ class MarkersToiler : NeoToiler() {
         list.removeAt(n)
         list.add(iSel, item)
         iSel = n
-        mstate.postValue(UpdateList(ListEvent.MOVE, n - 1))
+        mstate.postValue(NeoState.ListState(ListEvent.MOVE, n - 1))
     }
 
     fun renameSelected(name: String) {
         var bCancel = name.isEmpty()
         if (!bCancel) {
             if (name.contains(Const.COMMA)) {
-                mstate.postValue(MessageState(strings.unuse_dot))
+                mstate.postValue(NeoState.Message(strings.unuse_dot))
                 return
             }
             for (i in 0 until list.size) {
@@ -402,16 +405,16 @@ class MarkersToiler : NeoToiler() {
             }
         }
         if (bCancel) {
-            mstate.postValue(MessageState(strings.cancel_rename))
+            mstate.postValue(NeoState.Message(strings.cancel_rename))
             return
         }
         val row = ContentValues()
         row.put(Const.TITLE, name)
         if (storage.updateCollection(list[iSel].id, row)) {
             list[iSel].title = name
-            mstate.postValue(UpdateList(ListEvent.CHANGE))
+            mstate.postValue(NeoState.ListState(ListEvent.CHANGE))
         } else
-            mstate.postValue(MessageState(strings.cancel_rename))
+            mstate.postValue(NeoState.Message(strings.cancel_rename))
     }
 
     private fun doExport(file: Uri) {

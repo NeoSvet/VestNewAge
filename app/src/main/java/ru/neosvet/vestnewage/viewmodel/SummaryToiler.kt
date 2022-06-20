@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import androidx.work.Data
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -13,10 +12,8 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ProgressState
-import ru.neosvet.vestnewage.viewmodel.basic.Success
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import java.io.BufferedReader
 import java.io.FileReader
 
@@ -34,7 +31,7 @@ class SummaryToiler : NeoToiler() {
         val summaryHelper = SummaryHelper()
         summaryHelper.updateBook()
         val list = openList()
-        mstate.postValue(SuccessList(list))
+        mstate.postValue(NeoState.ListValue(list))
         loadPages(list)
     }
 
@@ -51,10 +48,10 @@ class SummaryToiler : NeoToiler() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(ProgressState(cur.percent(pages.size)))
+            mstate.postValue(NeoState.Progress(cur.percent(pages.size)))
         }
         loader.finish()
-        mstate.postValue(Success)
+        mstate.postValue(NeoState.Success)
     }
 
     override fun getInputData(): Data = Data.Builder()
@@ -65,7 +62,7 @@ class SummaryToiler : NeoToiler() {
         this.loadIfNeed = loadIfNeed
         scope.launch {
             val list = openList()
-            mstate.postValue(SuccessList(list))
+            mstate.postValue(NeoState.ListValue(list))
             if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
                 waitPost()
                 reLoad()

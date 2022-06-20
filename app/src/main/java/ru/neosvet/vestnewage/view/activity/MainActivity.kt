@@ -37,9 +37,7 @@ import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.viewmodel.MainToiler
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.AdsState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
@@ -533,14 +531,14 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
 
     override fun onChanged(state: NeoState) {
         when (state) {
-            is AdsState -> {
+            is NeoState.Ads -> {
                 utils.reInitProm(state.timediff)
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
                     frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1)
                     showWarnAds(state.warnIndex)
             }
-            is SuccessList -> {
+            is NeoState.ListValue -> {
                 if (frWelcome == null)
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)

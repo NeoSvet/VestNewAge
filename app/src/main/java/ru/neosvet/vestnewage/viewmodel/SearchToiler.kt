@@ -78,7 +78,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         loadDate?.let { date ->
             val d = dateFromString(date)
             mstate.postValue(
-                MessageState(
+                NeoState.Message(
                     String.format(strings.format_load, d.monthString + " " + d.year)
                 )
             )
@@ -98,14 +98,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             loadDate = null
         }
         loadLink?.let { link ->
-            mstate.postValue(MessageState(String.format(strings.format_load, link)))
+            mstate.postValue(NeoState.Message(String.format(strings.format_load, link)))
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
             val pageLoader = PageLoader()
             pageLoader.download(link, true)
             pageLoader.finish()
             val item = findInPage(link, id)
-            mstate.postValue(SuccessList(listOf(item)))
+            mstate.postValue(NeoState.ListValue(listOf(item)))
             loadLink = null
         }
     }
@@ -197,7 +197,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             )
         }
         factory.total = helper.countMaterials
-        mstate.postValue(Success)
+        mstate.postValue(NeoState.Success)
     }
 
     fun showLastResult() {
@@ -210,13 +210,13 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 cursor.close()
             }
             factory.total = helper.countMaterials
-            mstate.postValue(Success)
+            mstate.postValue(NeoState.Success)
         }
     }
 
     private fun publishProgress(d: DateUnit) {
         mstate.postValue(
-            MessageState(
+            NeoState.Message(
                 String.format(
                     strings.format_search_date,
                     d.monthString, d.year
@@ -268,7 +268,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             p2 = i.percent(title.size)
             if (p1 < p2) {
                 p1 = p2
-                mstate.postValue(MessageState(String.format(strings.format_search_proc, p1)))
+                mstate.postValue(NeoState.Message(String.format(strings.format_search_proc, p1)))
             } else {
                 val now = System.currentTimeMillis()
                 if (helper.countMaterials - prev > Const.MAX_ON_PAGE &&
@@ -499,6 +499,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         get() = scope
 
     override fun postFinish() {
-        mstate.postValue(Ready)
+        mstate.postValue(NeoState.Ready)
     }
 }

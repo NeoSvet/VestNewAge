@@ -18,7 +18,6 @@ import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SuccessList
 
 class SummaryFragment : NeoFragment() {
     private var binding: SummaryFragmentBinding? = null
@@ -67,7 +66,7 @@ class SummaryFragment : NeoFragment() {
 
     override fun onChangedState(state: NeoState) {
         setStatus(false)
-        if (state is SuccessList) {
+        if (state is NeoState.ListValue) {
             val scroll = adapter.itemCount > 0
             adapter.setItems(state.list)
             if (scroll)

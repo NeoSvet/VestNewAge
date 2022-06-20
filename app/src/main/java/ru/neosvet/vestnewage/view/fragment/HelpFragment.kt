@@ -21,7 +21,6 @@ import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import ru.neosvet.vestnewage.viewmodel.basic.UpdateList
 
 class HelpFragment : Fragment(), Observer<NeoState> {
     companion object {
@@ -105,7 +104,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onChanged(state: NeoState) = with(state) {
-        if (this is UpdateList) {
+        if (this is NeoState.ListState) {
             when (event) {
                 ListEvent.RELOAD ->
                     adapter.notifyDataSetChanged()

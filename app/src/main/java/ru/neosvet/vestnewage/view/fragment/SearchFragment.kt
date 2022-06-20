@@ -32,7 +32,8 @@ import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.SearchToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class SearchFragment : NeoFragment(), SearchDialog.Parent {
     companion object {
@@ -266,19 +267,19 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            is MessageState ->
+            is NeoState.Message ->
                 binding?.tvStatus?.text = state.message
-            is SuccessList -> { //finish load page
+            is NeoState.ListValue -> { //finish load page
                 setStatus(false)
                 adResult.update(state.list[0])
             }
-            Success -> {
+            NeoState.Success -> {
                 if (toiler.isRun)
                     showResult()
                 else
                     finishSearch()
             }
-            Ready ->
+            NeoState.Ready ->
                 tip.hideAnimated()
             else -> {}
         }

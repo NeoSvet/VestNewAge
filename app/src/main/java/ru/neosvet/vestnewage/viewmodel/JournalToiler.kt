@@ -11,9 +11,8 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.Ready
-import ru.neosvet.vestnewage.viewmodel.basic.Success
 
 class JournalToiler : NeoToiler(), NeoPaging.Parent {
     private val journal = JournalStorage()
@@ -54,7 +53,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
             if (cursor.moveToFirst())
                 factory.total = cursor.count
             if (factory.total == 0)
-                mstate.postValue(Ready)
+                mstate.postValue(NeoState.Ready)
             cursor.close()
         }
     }
@@ -62,7 +61,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     fun clear() {
         journal.clear()
         journal.close()
-        mstate.postValue(Ready)
+        mstate.postValue(NeoState.Ready)
     }
 
     fun paging() = paging.run()
@@ -71,6 +70,6 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         get() = viewModelScope
 
     override fun postFinish() {
-        mstate.postValue(Success)
+        mstate.postValue(NeoState.Success)
     }
 }

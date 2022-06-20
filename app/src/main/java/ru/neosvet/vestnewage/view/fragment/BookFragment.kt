@@ -32,7 +32,8 @@ import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class BookFragment : NeoFragment(), DateDialog.Result {
     companion object {
@@ -153,11 +154,11 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     override fun onChangedState(state: NeoState) {
         when (state) {
-            is SuccessBook ->
+            is NeoState.Book ->
                 setBook(state)
-            is MessageState ->
+            is NeoState.Message ->
                 Lib.showToast(state.message)
-            is SuccessRnd -> with(state) {
+            is NeoState.Rnd -> with(state) {
                 dialog = title + Const.AND + link + Const.AND + msg +
                         Const.AND + place + Const.AND + par
                 showRndAlert(title, link, msg, place, par)
@@ -166,7 +167,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
-    private fun setBook(state: SuccessBook) = binding?.run {
+    private fun setBook(state: NeoState.Book) = binding?.run {
         act?.run {
             if (status.isVisible) {
                 setStatus(false)
