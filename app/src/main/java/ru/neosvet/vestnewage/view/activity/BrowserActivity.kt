@@ -14,7 +14,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
@@ -29,7 +28,6 @@ import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
-import java.util.*
 
 class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver {
     companion object {
@@ -65,8 +63,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         get() = toiler.helper!!
     private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
-        get() = binding.content.wvBrowser.run {
-            scrollY.toFloat() / scale / contentHeight.toFloat()
+        get() = binding.svBrowser.run {
+            scrollY.toFloat() / computeVerticalScrollRange() * 100f
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,12 +108,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat(DataBase.PARAGRAPH, positionOnPage)
+        outState.putInt(Const.PLACE, binding.svBrowser.scrollY)
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
-        var pos = 0f
+        var pos = 0
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
@@ -124,7 +122,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
         } else {
             toiler.openLink(helper.link, true)
-            pos = state.getFloat(DataBase.PARAGRAPH, pos)
+            pos = state.getInt(Const.PLACE, pos)
         }
 
         if (helper.isSearch) {
@@ -158,16 +156,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         }
     }
 
-    private fun restorePosition(pos: Float) {
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                with(binding.content.wvBrowser) {
-                    post {
-                        scrollTo(0, (pos * scale * contentHeight.toFloat()).toInt())
-                    }
-                }
-            }
-        }, 500)
+    private fun restorePosition(pos: Int) = binding.run {
+        svBrowser.post {
+            topBar.setExpanded(false)
+            svBrowser.scrollTo(0, pos)
+        }
     }
 
     private fun closeSearch() {
@@ -375,7 +368,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                     MarkerActivity.addByPos(
                         this@BrowserActivity,
                         helper.link,
-                        positionOnPage * 100f,
+                        positionOnPage,
                         des
                     )
                 }
