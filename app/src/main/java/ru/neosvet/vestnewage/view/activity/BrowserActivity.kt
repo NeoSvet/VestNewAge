@@ -8,7 +8,6 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +23,7 @@ import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
@@ -52,10 +52,14 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         SoftKeyboard(binding.content.etSearch)
     }
     private val status = StatusButton()
+    private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
     private var navIsTop = false
     private lateinit var tipFinish: Tip
+    private var isTouch = true
+    private var isScrollTop = false
+    private var isSearch = false
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
     }
@@ -63,8 +67,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         get() = toiler.helper!!
     private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
-        get() = binding.svBrowser.run {
-            scrollY.toFloat() / computeVerticalScrollRange() * 100f
+        get() = binding.content.wvBrowser.run {
+            scrollY.toFloat() / scale / contentHeight.toFloat()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +86,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         initViews()
         if (savedInstanceState != null) // for logo in topBar
             ScreenUtils.init(this)
-        setBars()
+        setHeadBar()
+        setBottomBar()
         setViews()
         setContent()
         initTheme()
@@ -102,41 +107,50 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
 
     override fun onDestroy() {
         ConnectWatcher.unSubscribe()
-        helper.zoom = (binding.content.wvBrowser.scale * 100.0).toInt()
+        helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
         helper.save()
         super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(Const.PLACE, binding.svBrowser.scrollY)
+        outState.putFloat(Const.PLACE, positionOnPage)
+        if (isSearch)
+            outState.putString(Const.SEARCH, binding.content.etSearch.text.toString())
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
-        var pos = 0
+        var pos = 0f
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
             intent.getStringExtra(Const.SEARCH)?.let {
                 helper.setSearchString(it)
+                isSearch = true
             }
         } else {
             toiler.openLink(helper.link, true)
-            pos = state.getInt(Const.PLACE, pos)
+            pos = state.getFloat(Const.PLACE, pos)
+            state.getString(Const.SEARCH)?.let {
+                isSearch = true
+                binding.content.etSearch.setText(it)
+            }
         }
 
+        if (isSearch) {
+            binding.content.pSearch.isVisible = true
+            headBar.hide()
+        }
         if (helper.isSearch) {
-            with(binding.content) {
-                etSearch.setText(helper.request)
-                if (helper.searchIndex > -1)
-                    etSearch.isEnabled = false
-                pSearch.isVisible = true
+            if (helper.searchIndex > -1) {
+                binding.content.etSearch.setText(helper.request)
+                binding.content.etSearch.isEnabled = false
             }
         } else if (pos > 0f)
             restorePosition(pos)
 
         if (ErrorUtils.isNotEmpty()) {
-            blocked()
+            bottomBlocked()
             status.setError(ErrorUtils.getMessage())
         }
     }
@@ -156,25 +170,26 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         }
     }
 
-    private fun restorePosition(pos: Int) = binding.run {
-        svBrowser.post {
-            topBar.setExpanded(false)
-            svBrowser.scrollTo(0, pos)
+    private fun restorePosition(pos: Float) = binding.content.wvBrowser.run {
+        this.post {
+            scrollTo(0, (pos * scale * contentHeight.toFloat()).toInt())
         }
     }
 
     private fun closeSearch() {
         tipFinish.hide()
         with(binding.content) {
-            softKeyboard.hide()
             if (helper.searchIndex > -1) {
                 etSearch.setText("")
                 etSearch.isEnabled = true
             }
-            helper.clearSearch()
             pSearch.isVisible = false
             wvBrowser.clearMatches()
         }
+        isSearch = false
+        softKeyboard.hide()
+        helper.clearSearch()
+        headBar.show()
     }
 
     private fun findRequest() {
@@ -201,11 +216,14 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             status.isVisible -> {
                 ErrorUtils.clear()
                 status.setError(null)
-                unblocked()
+                bottomUnblocked()
             }
-            binding.bottomBar.isScrolledDown ->
+            binding.bottomBar.isScrolledDown -> {
+                if (isSearch.not())
+                    headBar.show()
                 binding.bottomBar.performShow()
-            binding.content.pSearch.isVisible ->
+            }
+            isSearch ->
                 closeSearch()
             toiler.onBackBrowser().not() ->
                 super.onBackPressed()
@@ -214,25 +232,25 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
 
     private fun setViews() = binding.run {
         bBack.setOnClickListener { finish() }
-        svBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, _ ->
-            if (!helper.isNavButton) return@setOnScrollChangeListener
-            if (scrollY > 300) {
-                fabNav.setImageResource(R.drawable.ic_top)
-                navIsTop = true
-            } else {
-                fabNav.setImageResource(R.drawable.ic_bottom)
-                navIsTop = false
-            }
-        }
         fabNav.setOnClickListener {
+            headBar.blocked()
             if (navIsTop) {
-                svBrowser.scrollTo(0, 0)
-                topBar.setExpanded(true)
+                content.wvBrowser.scrollTo(0, 0)
+                if (isSearch.not()) {
+                    headBar.unblocked()
+                    headBar.expanded()
+                }
                 bottomBar.performShow()
             } else {
+                with(content.wvBrowser) {
+                    scrollTo(0, (contentHeight * scale).toInt())
+                }
+                isTouch = false
+                if (isSearch.not()) {
+                    headBar.hide()
+                    headBar.unblocked()
+                }
                 bottomBar.performHide()
-                topBar.setExpanded(false)
-                svBrowser.scrollTo(0, content.wvBrowser.height)
             }
         }
         if (helper.isNavButton)
@@ -243,7 +261,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             if (toiler.isRun)
                 toiler.cancel()
             else {
-                unblocked()
+                bottomUnblocked()
                 status.onClick()
             }
         }
@@ -252,7 +270,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     @SuppressLint("ClickableViewAccessibility")
     private fun setContent() = binding.content.run {
         etSearch.requestLayout()
-        root.requestLayout()
         wvBrowser.settings.builtInZoomControls = true
         wvBrowser.settings.displayZoomControls = false
         wvBrowser.settings.javaScriptEnabled = true
@@ -262,6 +279,38 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         if (helper.zoom > 0)
             wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
+        wvBrowser.setOnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                isTouch = true
+                if (isSearch.not() && wvBrowser.scrollY == 0)
+                    headBar.expanded()
+            }
+
+            return@setOnTouchListener false
+        }
+
+        wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, oldScrollY: Int ->
+            if (isTouch) {
+                isScrollTop = scrollY >= oldScrollY
+                if (isSearch || headBar.onScrollHost(scrollY, oldScrollY))
+                    isTouch = false
+                if (isScrollTop)
+                    binding.bottomBar.performHide()
+                else
+                    binding.bottomBar.performShow()
+            } else if (isScrollTop != scrollY >= oldScrollY) {
+                isTouch = true
+            }
+
+            if (!helper.isNavButton) return@setOnScrollChangeListener
+            if (scrollY > 300) {
+                binding.fabNav.setImageResource(R.drawable.ic_top)
+                navIsTop = true
+            } else {
+                binding.fabNav.setImageResource(R.drawable.ic_bottom)
+                navIsTop = false
+            }
+        }
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
@@ -318,7 +367,23 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         }
     }
 
-    private fun setBars() = binding.run {
+    private fun setHeadBar() = binding.run {
+        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND)
+            ivHead.setImageResource(R.drawable.headland)
+        else if (ScreenUtils.isTablet)
+            ivHead.setImageResource(R.drawable.headtablet)
+        headBar = HeadBar(
+            mainView = ivHead,
+            additionViews = listOf(bBack, tvPromTimeHead)
+        ) {
+            if (menu.refresh.isVisible)
+                Lib.openInApps(NeoClient.SITE + helper.link, null)
+            else
+                Lib.openInApps(NeoClient.SITE, null)
+        }
+    }
+
+    private fun setBottomBar() = binding.run {
         bottomBar.menu.let {
             menu = NeoMenu(
                 refresh = it.getItem(4),
@@ -326,21 +391,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 buttons = it.getItem(0).subMenu.getItem(0),
                 theme = it.getItem(0).subMenu.getItem(1),
             )
-        }
-        ivHead.setOnClickListener {
-            if (menu.refresh.isVisible)
-                Lib.openInApps(NeoClient.SITE + helper.link, null)
-            else
-                Lib.openInApps(NeoClient.SITE, null)
-        }
-        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND)
-            ivHead.setImageResource(R.drawable.headland)
-        else if (ScreenUtils.isTablet)
-            ivHead.setImageResource(R.drawable.headtablet)
-        svBrowser.post {
-            content.root.updateLayoutParams<ViewGroup.LayoutParams> {
-                height = svBrowser.height
-            }
         }
         bottomBar.setBackgroundResource(R.drawable.panel_bg)
         bottomBar.setOnMenuItemClickListener {
@@ -355,9 +405,9 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                     fabNav.isVisible = helper.isNavButton
                 }
                 R.id.nav_search -> with(content) {
-                    topBar.setExpanded(false)
-                    if (pSearch.isVisible) closeSearch()
+                    headBar.hide()
                     pSearch.isVisible = true
+                    isSearch = true
                     etSearch.post { etSearch.requestFocus() }
                     softKeyboard.show()
                 }
@@ -422,7 +472,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     override fun onChanged(state: NeoState) {
         when (state) {
             NeoState.Loading -> {
-                blocked()
+                bottomBlocked()
                 binding.content.wvBrowser.clearCache(true)
                 status.setLoad(true)
                 status.loadText()
@@ -453,7 +503,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
-        unblocked()
+        bottomUnblocked()
     }
 
     override fun connectChanged(connected: Boolean) {
@@ -466,12 +516,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         }
     }
 
-    fun blocked() {
+    private fun bottomBlocked() {
         binding.bottomBar.isVisible = false
         binding.fabNav.isVisible = false
     }
 
-    fun unblocked() {
+    private fun bottomUnblocked() {
         binding.bottomBar.isVisible = true
         binding.fabNav.isVisible = helper.isNavButton
     }
