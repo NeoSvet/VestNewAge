@@ -11,6 +11,10 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
@@ -106,6 +110,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     override fun onDestroy() {
+        helper.position = positionOnPage
         ConnectWatcher.unSubscribe()
         helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
         helper.save()
@@ -113,14 +118,12 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat(Const.PLACE, positionOnPage)
         if (isSearch)
             outState.putString(Const.SEARCH, binding.content.etSearch.text.toString())
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
-        var pos = 0f
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
@@ -130,7 +133,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
             }
         } else {
             toiler.openLink(helper.link, true)
-            pos = state.getFloat(Const.PLACE, pos)
             state.getString(Const.SEARCH)?.let {
                 isSearch = true
                 binding.content.etSearch.setText(it)
@@ -146,8 +148,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 binding.content.etSearch.setText(helper.request)
                 binding.content.etSearch.isEnabled = false
             }
-        } else if (pos > 0f)
-            restorePosition(pos)
+        }
 
         if (ErrorUtils.isNotEmpty()) {
             bottomBlocked()
@@ -170,9 +171,16 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         }
     }
 
-    private fun restorePosition(pos: Float) = binding.content.wvBrowser.run {
-        this.post {
-            scrollTo(0, (pos * scale * contentHeight.toFloat()).toInt())
+    private fun restorePosition() {
+        Lib.LOG("res pos: ${helper.position}")
+        if (helper.position == 0f) return
+        binding.content.wvBrowser.run {
+            Lib.LOG("scale: $scale")
+            Lib.LOG("content: $contentHeight")
+            val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
+            Lib.LOG("pos: $pos")
+            scrollTo(0, pos)
+            helper.position = 0f
         }
     }
 
@@ -450,12 +458,24 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         item.setIcon(if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple)
     }
 
-    fun onPageFinished() {
-        val unread = UnreadUtils()
-        unread.deleteLink(helper.link)
+    fun onPageFinished(isLocal: Boolean) {
+        if (isLocal) {
+            val unread = UnreadUtils()
+            unread.deleteLink(helper.link)
+        }
+
+        lifecycleScope.launch {
+            delay(250)
+            binding.content.wvBrowser.post {
+                if (helper.isSearch)
+                    restoreSearch()
+                else
+                    restorePosition()
+            }
+        }
     }
 
-    fun initSearch() {
+    private fun initSearch() {
         if (helper.isSearch)
             findRequest()
     }
@@ -487,7 +507,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
                 menu.share.isVisible = state.isOtkr.not()
-                restoreSearch()
             }
             NeoState.Ready ->
                 binding.tvNotFound.isVisible = true

@@ -44,13 +44,6 @@ public class WebClient extends WebViewClient {
 
     public void onPageFinished(WebView view, String url) {
         view.setVisibility(View.VISIBLE);
-        if (url.contains(files))
-            act.onPageFinished();
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                view.post(act::initSearch);
-            }
-        }, 500);
+        act.onPageFinished(url.contains(files));
     }
 }

@@ -31,6 +31,7 @@ class BrowserHelper(context: Context) {
         private set
     val request: String
         get() = place[searchIndex]
+    var position: Float = 0f
 
     fun save() {
         editor.putInt(THEME, if (isLightTheme) 0 else 1)
