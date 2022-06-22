@@ -193,7 +193,7 @@ public class PromUtils {
 
     private String getPromText() {
         DateUnit prom = getPromDate(false);
-        String t = prom.getDiffDate(System.currentTimeMillis());
+        String t = DateUnit.getDiffDate(prom.getTimeInMills(), System.currentTimeMillis());
         if (t.contains("-") || // prom was been
                 t.equals(App.context.getResources().getStringArray(R.array.time)[0])) //second
             return null;

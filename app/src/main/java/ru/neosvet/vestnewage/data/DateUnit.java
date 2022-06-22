@@ -134,12 +134,12 @@ public class DateUnit {
         return formatter.format(date);
     }
 
-    public String getDiffDate(long mills) {
-        float time = getTimeInSeconds() - mills / (float) SEC_IN_MILLS;
+    public static String getDiffDate(long mills1, long mills2) {
+        float time = (mills1 - mills2) / (float) SEC_IN_MILLS;
         int k;
         if (time < 59.95f) {
-            if (time == 0)
-                time = 1;
+            if (time < 1) time = 1;
+            else time = (int) time;
             k = 0;
         } else {
             time = time / 60f;
@@ -177,7 +177,7 @@ public class DateUnit {
         return result;
     }
 
-    private String formatFloat(float f) {
+    private static String formatFloat(float f) {
         String s = String.format(Locale.FRANCE, "%.1f", f);
         if (s.contains(",0"))
             return s.substring(0, s.length() - 2);

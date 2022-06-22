@@ -70,9 +70,9 @@ class SummaryToiler : NeoToiler() {
         }
     }
 
-    private fun openList(): List<ListItem> {
+    private suspend fun openList(): List<ListItem> {
         val list = mutableListOf<ListItem>()
-        val dateNow = DateUnit.initNow()
+        val now = System.currentTimeMillis()
         val br = BufferedReader(FileReader(Lib.getFile(Const.RSS)))
         var title: String? = br.readLine()
         var des: String
@@ -80,7 +80,7 @@ class SummaryToiler : NeoToiler() {
             val link = br.readLine()
             des = br.readLine()
             val time = br.readLine()
-            des = dateNow.getDiffDate(time.toLong()) +
+            des = DateUnit.getDiffDate(now, time.toLong()) +
                     sBack + Const.N + des
             list.add(ListItem(title, link).apply {
                 setDes(des)

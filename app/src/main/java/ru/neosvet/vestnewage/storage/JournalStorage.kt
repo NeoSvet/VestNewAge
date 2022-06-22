@@ -63,7 +63,7 @@ class JournalStorage {
         val iID = curJ.getColumnIndex(DataBase.ID)
         var i = 0
         var s: String
-        val now = DateUnit.initNow()
+        val now = System.currentTimeMillis()
         do {
             val id = curJ.getString(iID).split(Const.AND)
             storage.open(id[0])
@@ -77,7 +77,7 @@ class JournalStorage {
                 val d = DateUnit.putMills(t)
                 item.des = String.format(
                     strings.format_time_back,
-                    now.getDiffDate(t), d
+                    DateUnit.getDiffDate(now, t), d
                 )
                 if (id.size == 3) { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
