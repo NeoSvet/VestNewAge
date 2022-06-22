@@ -12,7 +12,6 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -172,13 +171,9 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     private fun restorePosition() {
-        Lib.LOG("res pos: ${helper.position}")
         if (helper.position == 0f) return
         binding.content.wvBrowser.run {
-            Lib.LOG("scale: $scale")
-            Lib.LOG("content: $contentHeight")
             val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
-            Lib.LOG("pos: $pos")
             scrollTo(0, pos)
             helper.position = 0f
         }
@@ -250,6 +245,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 }
                 bottomBar.performShow()
             } else {
+                isTouch = false
                 with(content.wvBrowser) {
                     scrollTo(0, (contentHeight * scale).toInt())
                 }
