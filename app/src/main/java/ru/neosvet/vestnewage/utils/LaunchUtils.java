@@ -32,7 +32,8 @@ public class LaunchUtils {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-    private final String SETTINGS = "main";
+    public static final String PREF_NAME = "main";
+    private SharedPreferences pref = App.context.getSharedPreferences(PREF_NAME, MODE_PRIVATE);
     private final int START_ID = 900;
     private int notif_id = START_ID;
     private static int ver = -1;
@@ -74,13 +75,13 @@ public class LaunchUtils {
 
     private void deleteBrowserFiles() {
         File f = Lib.getFile(Const.DARK);
-        if(f.exists()) f.delete();
+        if (f.exists()) f.delete();
         f = Lib.getFile(Const.LIGHT);
-        if(f.exists()) f.delete();
+        if (f.exists()) f.delete();
         f = Lib.getFile("/style/style.css");
-        if(f.exists()) f.delete();
+        if (f.exists()) f.delete();
         f = Lib.getFile("/page.html");
-        if(f.exists()) f.delete();
+        if (f.exists()) f.delete();
     }
 
     private void renamePrefs() {
@@ -121,19 +122,10 @@ public class LaunchUtils {
     }
 
     public boolean isNeedLoad() {
-        SharedPreferences pref = App.context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
-        long time = pref.getLong(Const.TIME, 0);
-        if (DateUnit.isLongAgo(time)) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putLong(Const.TIME, System.currentTimeMillis());
-            editor.apply();
-            return true;
-        }
-        return false;
+        return DateUnit.isLongAgo(pref.getLong(Const.TIME, 0));
     }
 
     private int getPreviosVer() {
-        SharedPreferences pref = App.context.getSharedPreferences(SETTINGS, MODE_PRIVATE);
         int prev = pref.getInt("ver", 0);
         try {
             int cur = App.context.getPackageManager().getPackageInfo(App.context.getPackageName(), 0).versionCode;
@@ -246,5 +238,11 @@ public class LaunchUtils {
             main.putExtra(Const.TAB, 1);
         }
         return true;
+    }
+
+    public void updateTime() {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putLong(Const.TIME, System.currentTimeMillis());
+        editor.apply();
     }
 }
