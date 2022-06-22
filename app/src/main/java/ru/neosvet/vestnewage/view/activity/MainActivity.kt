@@ -277,6 +277,8 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             state.getString(Const.CUR_ID)?.let {
                 curSection = Section.valueOf(it)
             }
+            if (supportFragmentManager.fragments.isEmpty())
+                setSection(firstSection, false)
             if (isSideMenu) setMenuFragment()
             else if (curSection != Section.MENU)
                 statusBack = StatusBack.PAGE
