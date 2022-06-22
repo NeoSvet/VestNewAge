@@ -55,6 +55,7 @@ class CalendarToiler : NeoToiler() {
             mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
             waitPost()
             mstate.postValue(NeoState.LongState(time))
+            waitPost()
             if (isRun) loadPages(list)
         }
     }
@@ -84,7 +85,7 @@ class CalendarToiler : NeoToiler() {
     fun changeDate(newDate: DateUnit) {
         if (isRun) return
         date = newDate
-        createField()
+        calendar.clear()
         openCalendar(0)
     }
 
@@ -101,9 +102,11 @@ class CalendarToiler : NeoToiler() {
     fun openCalendar(offsetMonth: Int) {
         loadIfNeed = true
         scope.launch {
-            if (offsetMonth != 0)
+            if (offsetMonth != 0) {
                 date.changeMonth(offsetMonth)
-            if (calendar.isEmpty() || offsetMonth != 0)
+                calendar.clear()
+            }
+            if (calendar.isEmpty())
                 createField()
             if (loadFromStorage()) {
                 mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
@@ -120,7 +123,6 @@ class CalendarToiler : NeoToiler() {
 
     private fun createField() {
         val d = DateUnit.putDays(date.timeInDays)
-        calendar.clear()
         for (i in -1 downTo -6)  //add label monday-saturday
             calendar.add(CalendarItem(i, R.color.light_gray))
         calendar.add(CalendarItem(0, R.color.light_gray)) //sunday

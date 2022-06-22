@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="top|center"
     android:orientation="vertical"
-    android:padding="@dimen/calendar_margin_top">
+    android:padding="@dimen/calendar_margin_top"
+    android:visibility="gone">
 
     <LinearLayout
         android:id="@+id/pDate"

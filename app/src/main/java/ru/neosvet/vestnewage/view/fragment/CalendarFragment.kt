@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -51,6 +52,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         ViewModelProvider(this).get(CalendarToiler::class.java)
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        disableUpdateRoot()
         initCalendar()
         restoreState(savedInstanceState)
     }
@@ -179,6 +181,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 bPrev.isEnabled = state.prev
                 bNext.isEnabled = state.next
                 adCalendar.setItems(state.list)
+                if (root.isVisible.not())
+                    showView(root)
             }
             is NeoState.LongState ->
                 setUpdateTime(state.value)
@@ -186,6 +190,15 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 Lib.showToast(getString(R.string.load_unavailable))
             else -> {}
         }
+    }
+
+    private fun showView(view: View) {
+        view.isVisible = true
+        view.alpha = 0f
+        view.animate()
+            .alpha(1f)
+            .setDuration(225)
+            .start()
     }
 
     private fun setUpdateTime(time: Long) = binding?.run {

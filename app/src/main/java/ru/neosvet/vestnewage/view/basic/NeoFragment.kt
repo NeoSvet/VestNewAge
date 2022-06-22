@@ -41,6 +41,10 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
         if (neotoiler.isRun) setStatus(true)
     }
 
+    fun disableUpdateRoot() {
+        root = null
+    }
+
     fun updateRoot(newHeight: Int) {
         root?.updateLayoutParams<ViewGroup.LayoutParams> {
             height = newHeight
