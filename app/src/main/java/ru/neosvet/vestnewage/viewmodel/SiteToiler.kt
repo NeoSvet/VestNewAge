@@ -69,12 +69,16 @@ class SiteToiler : NeoToiler() {
     private suspend fun loadList() {
         val loader = SiteLoader(file.toString())
         val list = loader.load(url) as MutableList
+        mstate.postValue(NeoState.LongState(file.lastModified()))
+        waitPost()
         list.add(0, getFirstItem())
         mstate.postValue(NeoState.ListValue(list))
     }
 
     private suspend fun loadAds() {
         ads.loadAds()
+        mstate.postValue(NeoState.LongState(ads.time))
+        waitPost()
         val list = ads.loadList(false)
         list.add(0, getFirstItem())
         mstate.postValue(NeoState.ListValue(list))
@@ -88,6 +92,8 @@ class SiteToiler : NeoToiler() {
                 reLoad()
                 return@launch
             }
+            mstate.postValue(NeoState.LongState(f.lastModified()))
+            waitPost()
             val list = mutableListOf<ListItem>()
             list.add(getFirstItem())
             var i = 1
@@ -138,6 +144,8 @@ class SiteToiler : NeoToiler() {
     fun openAds() {
         loadIfNeed = false
         scope.launch {
+            mstate.postValue(NeoState.LongState(ads.checkTime))
+            waitPost()
             val list = ads.loadList(false)
             list.add(0, getFirstItem())
             mstate.postValue(NeoState.ListValue(list))

@@ -156,6 +156,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         when (state) {
             is NeoState.Book ->
                 setBook(state)
+            is NeoState.LongState ->
+                setUpdateTime(state.value)
             is NeoState.Message ->
                 Lib.showToast(state.message)
             is NeoState.Rnd -> with(state) {
@@ -167,6 +169,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
+    private fun setUpdateTime(time: Long) = binding?.run {
+        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
+        val s = getString(R.string.loaded) + diff + getString(R.string.back)
+        tvUpdate.text = s
+    }
+
     private fun setBook(state: NeoState.Book) = binding?.run {
         act?.run {
             if (status.isVisible) {
@@ -174,7 +182,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 updateNew()
             }
         }
-        tvDate.text = state.date
+        if (ScreenUtils.isWide)
+            tvDate.text = state.date.replace(Const.N, " ")
+        else
+            tvDate.text = state.date
         bPrev.isEnabled = state.prev
         bNext.isEnabled = state.next
         adapter.setItems(state.list)

@@ -11,12 +11,19 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvUpdate"
+        style="@style/UpdateLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSite"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
+        app:layout_constraintTop_toBottomOf="@id/tvUpdate" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvEmptySite"

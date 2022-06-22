@@ -73,7 +73,10 @@ class SummaryToiler : NeoToiler() {
     private suspend fun openList(): List<ListItem> {
         val list = mutableListOf<ListItem>()
         val now = System.currentTimeMillis()
-        val br = BufferedReader(FileReader(Lib.getFile(Const.RSS)))
+        val file = Lib.getFile(Const.RSS)
+        mstate.postValue(NeoState.LongState(file.lastModified()))
+        waitPost()
+        val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
         var des: String
         while (title != null) {

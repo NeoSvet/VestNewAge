@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
@@ -234,7 +235,14 @@ class SiteFragment : NeoFragment() {
                 val item = state.list[ads.index]
                 ads.showAd(item.title, item.link, item.head)
             }
-        }
+        } else if (state is NeoState.LongState)
+            setUpdateTime(state.value)
+    }
+
+    private fun setUpdateTime(time: Long) = binding?.run {
+        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
+        val s = getString(R.string.loaded) + diff + getString(R.string.back)
+        tvUpdate.text = s
     }
 
     private fun onItemClick(index: Int, item: ListItem) {

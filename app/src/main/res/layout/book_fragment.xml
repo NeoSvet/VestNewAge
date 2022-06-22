@@ -53,6 +53,13 @@
             android:src="@drawable/right" />
     </LinearLayout>
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvUpdate"
+        style="@style/UpdateLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/pDate" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvBook"
         android:layout_width="match_parent"
@@ -60,6 +67,6 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pDate" />
+        app:layout_constraintTop_toBottomOf="@id/tvUpdate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

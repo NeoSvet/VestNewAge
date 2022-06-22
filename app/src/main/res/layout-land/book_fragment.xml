@@ -9,61 +9,66 @@
         style="@style/TabLayoutTheme"
         android:layout_width="300dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@id/pDate"
+        app:layout_constraintBottom_toBottomOf="@id/bPrev"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/pDate" />
+        app:layout_constraintTop_toTopOf="@id/bPrev" />
 
-    <LinearLayout
-        android:id="@+id/pDate"
+    <ImageButton
+        android:id="@+id/bPrev"
+        android:layout_width="@dimen/calendar_button"
+        android:layout_height="@dimen/calendar_button"
+        android:background="@drawable/button"
+        android:contentDescription="@string/to_prev_month"
+        android:scaleType="fitXY"
+        android:src="@drawable/left"
+        app:layout_constraintStart_toEndOf="@id/tab_layout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvDate"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/card_bg"
+        android:gravity="center"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvUpdate"
+        app:layout_constraintEnd_toStartOf="@id/bNext"
+        app:layout_constraintStart_toEndOf="@id/bPrev"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvUpdate"
+        style="@style/UpdateLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="0dp"
         android:layout_marginEnd="5dp"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal"
+        android:layout_marginBottom="0dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        app:layout_constraintBottom_toBottomOf="@id/bPrev"
+        app:layout_constraintEnd_toStartOf="@id/bNext"
+        app:layout_constraintStart_toEndOf="@id/bPrev" />
+
+    <ImageButton
+        android:id="@+id/bNext"
+        android:layout_width="@dimen/calendar_button"
+        android:layout_height="@dimen/calendar_button"
+        android:background="@drawable/button"
+        android:contentDescription="@string/to_next_month"
+        android:scaleType="fitXY"
+        android:src="@drawable/right"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/tab_layout"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/bPrev"
-            android:layout_width="@dimen/calendar_button"
-            android:layout_height="@dimen/calendar_button"
-            android:background="@drawable/button"
-            android:contentDescription="@string/to_prev_month"
-            android:scaleType="fitXY"
-            android:src="@drawable/left" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvDate"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/card_bg"
-            android:gravity="center"
-            android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/bNext"
-            android:layout_width="@dimen/calendar_button"
-            android:layout_height="@dimen/calendar_button"
-            android:background="@drawable/button"
-            android:contentDescription="@string/to_next_month"
-            android:scaleType="fitXY"
-            android:src="@drawable/right" />
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvBook"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pDate" />
+        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

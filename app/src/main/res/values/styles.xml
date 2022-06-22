@@ -99,6 +99,17 @@
         <item name="android:paddingBottom">5dp</item>
     </style>
 
+    <style name="UpdateLabel" parent="ItemBG">
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/item_bg</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
     <style name="TextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:layout_marginTop">5dp</item>

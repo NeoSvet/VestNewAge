@@ -35,6 +35,7 @@ class CalendarToiler : NeoToiler() {
         }
     private val next: Boolean
         get() = if (date.year == todayY) date.month != todayM else true
+    private var time: Long = 0
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
@@ -52,6 +53,8 @@ class CalendarToiler : NeoToiler() {
         val list = loadMonth()
         if (loadFromStorage()) {
             mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
+            waitPost()
+            mstate.postValue(NeoState.LongState(time))
             if (isRun) loadPages(list)
         }
     }
@@ -100,13 +103,14 @@ class CalendarToiler : NeoToiler() {
         scope.launch {
             if (offsetMonth != 0)
                 date.changeMonth(offsetMonth)
-            if (calendar.isEmpty() || offsetMonth != 0) {
+            if (calendar.isEmpty() || offsetMonth != 0)
                 createField()
-                mstate.postValue(NeoState.Calendar(date.calendarString, false, false, calendar))
-            }
-            if (loadFromStorage())
+            if (loadFromStorage()) {
                 mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
-            else {
+                waitPost()
+                mstate.postValue(NeoState.LongState(time))
+            } else {
+                mstate.postValue(NeoState.Calendar(date.calendarString, false, false, calendar))
                 waitPost()
                 isRun = true
                 reLoad()
@@ -153,13 +157,11 @@ class CalendarToiler : NeoToiler() {
         val cursor = storage.getListAll()
         var empty = true
         if (cursor.moveToFirst()) {
-            if (loadIfNeed) {
-                val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                if (checkTime((time / DateUnit.SEC_IN_MILLS))) {
-                    cursor.close()
-                    storage.close()
-                    return false
-                }
+            time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
+            if (loadIfNeed && checkTime((time / DateUnit.SEC_IN_MILLS))) {
+                cursor.close()
+                storage.close()
+                return false
             }
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)

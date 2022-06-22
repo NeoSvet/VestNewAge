@@ -42,12 +42,21 @@
             android:src="@drawable/right" />
     </LinearLayout>
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvUpdate"
+        style="@style/UpdateLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="@dimen/calendar_margin_top"
+        android:layout_marginEnd="0dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCalendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/calendar_margin_top"
+        android:layout_marginBottom="@dimen/bottom_bar_height"
         android:background="@drawable/field_trans"
-        android:padding="3dp"
-        android:layout_marginBottom="@dimen/bottom_bar_height" />
+        android:padding="3dp" />
 </LinearLayout>

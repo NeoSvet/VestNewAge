@@ -172,14 +172,26 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     override fun onChangedState(state: NeoState) {
         if (toiler.isRun.not())
             setStatus(false)
-        if (state is NeoState.Calendar) binding?.run {
-            act?.updateNew()
-            tvDate.text = state.date
-            bPrev.isEnabled = state.prev
-            bNext.isEnabled = state.next
-            adCalendar.setItems(state.list)
-        } else if (state == NeoState.Ready)
-            Lib.showToast(getString(R.string.load_unavailable))
+        when (state) {
+            is NeoState.Calendar -> binding?.run {
+                act?.updateNew()
+                tvDate.text = state.date
+                bPrev.isEnabled = state.prev
+                bNext.isEnabled = state.next
+                adCalendar.setItems(state.list)
+            }
+            is NeoState.LongState ->
+                setUpdateTime(state.value)
+            NeoState.Ready ->
+                Lib.showToast(getString(R.string.load_unavailable))
+            else -> {}
+        }
+    }
+
+    private fun setUpdateTime(time: Long) = binding?.run {
+        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
+        val s = getString(R.string.loaded) + diff + getString(R.string.back)
+        tvUpdate.text = s
     }
 
     override fun onAction(title: String) {

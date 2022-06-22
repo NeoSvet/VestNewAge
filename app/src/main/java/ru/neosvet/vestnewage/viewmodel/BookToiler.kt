@@ -141,7 +141,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             cursor = storage.getListAll()
             val dModList: DateUnit
             if (cursor.moveToFirst()) {
-                dModList = DateUnit.putMills(cursor.getLong(cursor.getColumnIndex(Const.TIME)))
+                val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
+                mstate.postValue(NeoState.LongState(time))
+                waitPost()
+                dModList = DateUnit.putMills(time)
                 if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isKatrenTab)
