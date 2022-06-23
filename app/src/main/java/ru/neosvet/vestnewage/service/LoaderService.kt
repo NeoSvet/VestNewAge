@@ -223,7 +223,7 @@ class LoaderService : LifecycleService(), LoadHandler {
             }
             DOWNLOAD_OTKR -> { //загрузка Посланий за 2004-2015
                 curLoader = loaderBook
-                loaderBook.loadOldPoslaniya()
+                loaderBook.loadOldEpistles()
             }
             DOWNLOAD_YEAR -> {
                 val loader = ListLoader(this)
@@ -287,7 +287,7 @@ class LoaderService : LifecycleService(), LoadHandler {
                 loadAllCalendar()
             if (section == Section.MENU || section == Section.BOOK) {
                 curLoader = loaderBook
-                loaderBook.loadNewPoslaniya()
+                loaderBook.loadNewEpistles()
                 upProg()
                 loaderBook.loadPoemsList(curYear - 1)
             }

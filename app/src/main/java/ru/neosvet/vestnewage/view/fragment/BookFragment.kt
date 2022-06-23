@@ -132,9 +132,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun initTabs() = binding?.run {
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.katreny))
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.poslaniya))
-        if (toiler.isKatrenTab.not())
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.poems))
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.epistles))
+        if (toiler.isPoemsTab.not())
             tabLayout.select(toiler.selectedTab)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -216,7 +216,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private fun openMonth(plus: Boolean) {
         val d = toiler.date
-        if (!plus && toiler.isKatrenTab.not()) {
+        if (!plus && toiler.isPoemsTab.not()) {
             if (d.month == 1 && d.year == 2016 && helper.isLoadedOtkr().not()) {
                 showAlertDownloadOtkr()
                 return
@@ -275,9 +275,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         dialog = DIALOG_DATE
         dateDialog = DateDialog(act, d).apply {
             setResult(this@BookFragment)
-            if (toiler.isKatrenTab) {
+            if (toiler.isPoemsTab) {
                 setMinMonth(2) //feb
-            } else { //poslyania
+            } else { //epistles
                 if (helper.isLoadedOtkr()) {
                     setMinMonth(8) //aug
                     setMinYear(2004)
@@ -334,10 +334,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 startLoad()
             getString(R.string.rnd_stih) ->
                 toiler.getRnd(BookToiler.RndType.STIH)
-            getString(R.string.rnd_pos) ->
-                toiler.getRnd(BookToiler.RndType.POS)
-            getString(R.string.rnd_kat) ->
-                toiler.getRnd(BookToiler.RndType.KAT)
+            getString(R.string.rnd_epistle) ->
+                toiler.getRnd(BookToiler.RndType.EPISTLE)
+            getString(R.string.rnd_poem) ->
+                toiler.getRnd(BookToiler.RndType.POEM)
         }
     }
 

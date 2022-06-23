@@ -28,8 +28,8 @@ data class SiteStrings(
 )
 
 data class BookStrings(
-    val rnd_pos: String,
-    val rnd_kat: String,
+    val rnd_epistle: String,
+    val rnd_poem: String,
     val rnd_stih: String,
     val alert_rnd: String,
     val try_again: String,
@@ -79,7 +79,7 @@ data class HelpStrings(
 
 data class JournalStrings(
     val format_time_back: String,
-    val rnd_kat: String,
-    val rnd_pos: String,
+    val rnd_poem: String,
+    val rnd_epistle: String,
     val rnd_stih: String
 )

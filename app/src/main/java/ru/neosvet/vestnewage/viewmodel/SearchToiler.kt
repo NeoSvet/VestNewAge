@@ -27,8 +27,8 @@ import java.util.*
 
 class SearchToiler : NeoToiler(), NeoPaging.Parent {
     companion object {
-        private const val MODE_POSLANIYA = 0
-        private const val MODE_KATRENY = 1
+        private const val MODE_EPISTLES = 0
+        private const val MODE_POEMS = 1
         private const val MODE_TITLES = 2
         private const val MODE_ALL = 3
         private const val MODE_LINKS = 4
@@ -350,9 +350,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 if (curTitle.moveToFirst()) {
                     val link = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
                     val iTitle = curTitle.getColumnIndex(Const.TITLE)
-                    if (mode == MODE_POSLANIYA)
+                    if (mode == MODE_EPISTLES)
                         add = !link.isPoem
-                    else if (mode == MODE_KATRENY)
+                    else if (mode == MODE_POEMS)
                         add = link.isPoem
                     if (add) {
                         val title = pages.getPageTitle(curTitle.getString(iTitle), link)
@@ -440,9 +440,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
 
     private fun findInPage(link: String, id: Int): ListItem {
         var item = ListItem(link, link)
-        if (mode == MODE_POSLANIYA && link.isPoem)
+        if (mode == MODE_EPISTLES && link.isPoem)
             return item
-        if (mode == MODE_KATRENY && !link.isPoem)
+        if (mode == MODE_POEMS && !link.isPoem)
             return item
         pages.open(link)
         val pageId = pages.getPageId(link)

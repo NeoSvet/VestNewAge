@@ -83,9 +83,9 @@ class JournalStorage {
                 if (id.size == 3) { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
                         s = if (s.isPoem)
-                            strings.rnd_kat
+                            strings.rnd_poem
                         else
-                            strings.rnd_pos
+                            strings.rnd_epistle
                     } else { //случаный стих
                         cursor.close()
                         cursor = storage.getParagraphs(id[1])

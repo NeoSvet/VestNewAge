@@ -18,6 +18,6 @@ public interface Const {
     String START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email";
     String PASSWORD = "password", PANEL = "panel";
     String SELECT = "select", TIME = "time", TIMEDIFF = "timediff";
-    String POSLANIYA = "pos", KATRENY = "kat", OTKR = "otkr", ADS = "ads", FILE = "file";
+    String EPISTLES = "epistles", OTKR = "otkr", ADS = "ads", FILE = "file";
     String TITLE = "title", LINK = "link", PLACE = "place", DESCTRIPTION = "des";
 }

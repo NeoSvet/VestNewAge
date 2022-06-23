@@ -79,7 +79,7 @@ class PageStorage {
             if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
             if (s.contains("#")) s = s.substring(0, s.indexOf("#"))
             if (link.isPoem) {
-                s + (" " + App.context.getString(R.string.katren) + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
+                s + (" " + App.context.getString(R.string.poem) + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
             } else "$s $title"
         }
     }

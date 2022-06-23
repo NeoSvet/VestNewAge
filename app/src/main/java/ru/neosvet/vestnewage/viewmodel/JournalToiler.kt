@@ -32,8 +32,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         isInit = true
         strings = JournalStrings(
             format_time_back = context.getString(R.string.format_time_back),
-            rnd_kat = context.getString(R.string.rnd_kat),
-            rnd_pos = context.getString(R.string.rnd_pos),
+            rnd_poem = context.getString(R.string.rnd_poem),
+            rnd_epistle = context.getString(R.string.rnd_epistle),
             rnd_stih = context.getString(R.string.rnd_stih)
         )
     }

@@ -48,7 +48,7 @@ class BookLoader : Loader {
         isRun = false
     }
 
-    fun loadOldPoslaniya() { //загрузка Посланий за 2004-2015
+    fun loadOldEpistles() { //загрузка Посланий за 2004-2015
         isRun = true
         handler?.setMax(137) //август 2004 - декабрь 2015
         loadListUcoz(UcozType.OLD)?.let {
@@ -76,15 +76,15 @@ class BookLoader : Loader {
         return s
     }
 
-    fun loadAllPoslaniya(): String? {
+    fun loadAllEpistles(): String? {
         isRun = true
         cur = 0
         max = 146 //август 2004 - сентябрь 2016
         loadListUcoz(UcozType.OLD) //до 2016 года
-        return loadNewPoslaniya() //за 2016 год
+        return loadNewEpistles() //за 2016 год
     }
 
-    fun loadNewPoslaniya(): String? {
+    fun loadNewEpistles(): String? {
         isRun = true
         if (NeoClient.isMainSite())
             return loadList(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)

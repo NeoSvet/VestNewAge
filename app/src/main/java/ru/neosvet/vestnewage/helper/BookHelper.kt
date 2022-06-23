@@ -15,9 +15,9 @@ class BookHelper {
     private val pref: SharedPreferences by lazy {
         App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     }
-    var katrenDays: Int = 16801 //Январь 2016
+    var poemsDays: Int = 16801 //Январь 2016
         private set
-    var poslaniyaDays: Int = 12631 //Август 2004
+    var epistlesDays: Int = 12631 //Август 2004
         private set
 
     fun isLoadedOtkr(): Boolean {
@@ -33,10 +33,10 @@ class BookHelper {
         editor.apply()
     }
 
-    fun saveDates(katrenDays: Int, poslaniyaDays: Int) {
+    fun saveDates(poemsDays: Int, epistlesDays: Int) {
         val editor = pref.edit()
-        editor.putInt(Const.KATRENY, katrenDays)
-        editor.putInt(Const.POSLANIYA, poslaniyaDays)
+        editor.putInt(Const.POEMS, poemsDays)
+        editor.putInt(Const.EPISTLES, epistlesDays)
         editor.apply()
     }
 
@@ -44,14 +44,14 @@ class BookHelper {
         val d = DateUnit.initToday()
         d.day = 1
         try {
-            katrenDays = pref.getInt(Const.KATRENY, d.timeInDays)
+            poemsDays = pref.getInt(Const.POEMS, d.timeInDays)
             d.month = 9
             d.year = 2016
-            poslaniyaDays = pref.getInt(Const.POSLANIYA, d.timeInDays)
+            epistlesDays = pref.getInt(Const.EPISTLES, d.timeInDays)
         } catch (e: Exception) { //if old version
-            katrenDays = (pref.getLong(Const.KATRENY, 0) /
+            poemsDays = (pref.getLong(Const.POEMS, 0) /
                     DateUnit.SEC_IN_MILLS / DateUnit.DAY_IN_SEC).toInt()
-            poslaniyaDays = (pref.getLong(Const.POSLANIYA, 0) /
+            epistlesDays = (pref.getLong(Const.EPISTLES, 0) /
                     DateUnit.SEC_IN_MILLS / DateUnit.DAY_IN_SEC).toInt()
         }
     }

@@ -16,7 +16,7 @@ public class CalendarItem {
     private int color;
     private final List<String> titles = new ArrayList<>();
     private final List<String> links = new ArrayList<>();
-    private boolean bold = false, katren = false, poslanie = false;
+    private boolean bold = false, poem = false, epistle = false;
 
     public CalendarItem(int num, int id_color) {
         this.num = num;
@@ -33,8 +33,8 @@ public class CalendarItem {
         if (titles.size() > 0) {
             titles.clear();
             links.clear();
-            katren = false;
-            poslanie = false;
+            poem = false;
+            epistle = false;
         }
     }
 
@@ -56,22 +56,22 @@ public class CalendarItem {
 
     public void addLink(String link) {
         if (link.contains(Const.POEMS))
-            katren = true;
+            poem = true;
         else
-            poslanie = true;
+            epistle = true;
         links.add(link);
     }
 
     public Drawable getBG() {
         int bg;
-        if (katren && poslanie)
-            bg = R.drawable.cell_bg_kp;
-        else if (katren)
-            bg = R.drawable.cell_bg_k;
-        else if (poslanie)
-            bg = R.drawable.cell_bg_p;
+        if (poem && epistle)
+            bg = R.drawable.cell_bg_all;
+        else if (poem)
+            bg = R.drawable.cell_bg_poe;
+        else if (epistle)
+            bg = R.drawable.cell_bg_epi;
         else
-            bg = R.drawable.cell_bg_n;
+            bg = R.drawable.cell_bg_none;
         return ContextCompat.getDrawable(App.context, bg);
     }
 

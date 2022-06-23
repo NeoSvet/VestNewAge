@@ -26,28 +26,28 @@ import java.util.*
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
     companion object {
-        const val TAB_KATREN = 0
-        //const val TAB_POSLANYA = 1
+        const val TAB_POEMS = 0
+        //const val TAB_EPISTLES = 1
     }
 
     enum class RndType {
-        KAT, POS, STIH
+        POEM, EPISTLE, STIH
     }
 
-    var selectedTab: Int = TAB_KATREN
-    val isKatrenTab: Boolean
-        get() = selectedTab == TAB_KATREN
-    private lateinit var dKatren: DateUnit
-    private lateinit var dPoslanie: DateUnit
+    var selectedTab: Int = TAB_POEMS
+    val isPoemsTab: Boolean
+        get() = selectedTab == TAB_POEMS
+    private lateinit var dPoems: DateUnit
+    private lateinit var dEpistles: DateUnit
     private lateinit var strings: BookStrings
     var helper: BookHelper? = null
         private set
     var isLoadedOtkr: Boolean = false
     var date: DateUnit
-        get() = if (isKatrenTab) dKatren else dPoslanie
+        get() = if (isPoemsTab) dPoems else dEpistles
         set(value) {
-            if (isKatrenTab) dKatren = value
-            else dPoslanie = value
+            if (isPoemsTab) dPoems = value
+            else dEpistles = value
         }
     private var loader: BookLoader? = null
 
@@ -55,14 +55,14 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         helper = BookHelper().also {
             isLoadedOtkr = it.isLoadedOtkr()
             it.loadDates()
-            dKatren = DateUnit.putDays(it.katrenDays)
-            dPoslanie = DateUnit.putDays(it.poslaniyaDays)
+            dPoems = DateUnit.putDays(it.poemsDays)
+            dEpistles = DateUnit.putDays(it.epistlesDays)
         }
-        if (isLoadedOtkr.not() && dPoslanie.year < 2016)
-            dPoslanie = DateUnit.putYearMonth(2016, 1)
+        if (isLoadedOtkr.not() && dEpistles.year < 2016)
+            dEpistles = DateUnit.putYearMonth(2016, 1)
         strings = BookStrings(
-            rnd_pos = context.getString(R.string.rnd_pos),
-            rnd_kat = context.getString(R.string.rnd_kat),
+            rnd_epistle = context.getString(R.string.rnd_epistle),
+            rnd_poem = context.getString(R.string.rnd_poem),
             rnd_stih = context.getString(R.string.rnd_stih),
             alert_rnd = context.getString(R.string.alert_rnd),
             try_again = context.getString(R.string.try_again),
@@ -74,12 +74,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     override suspend fun doLoad() {
         loader = BookLoader(this)
-        if (isKatrenTab) loader?.loadPoemsList(2016)?.let {
-            dKatren = DateUnit.parse(it)
-        } else if (isLoadedOtkr) loader?.loadAllPoslaniya()?.let {
-            dPoslanie = DateUnit.parse(it)
-        } else loader?.loadNewPoslaniya()?.let {
-            dPoslanie = DateUnit.parse(it)
+        if (isPoemsTab) loader?.loadPoemsList(2016)?.let {
+            dPoems = DateUnit.parse(it)
+        } else if (isLoadedOtkr) loader?.loadAllEpistles()?.let {
+            dEpistles = DateUnit.parse(it)
+        } else loader?.loadNewEpistles()?.let {
+            dEpistles = DateUnit.parse(it)
         }
         openList(false)
     }
@@ -90,13 +90,13 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun onDestroy() {
-        helper?.saveDates(dKatren.timeInDays, dPoslanie.timeInDays)
+        helper?.saveDates(dPoems.timeInDays, dEpistles.timeInDays)
     }
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, BookHelper.TAG)
         .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
-        .putBoolean(Const.KATRENY, isKatrenTab)
+        .putBoolean(Const.POEMS, isPoemsTab)
         .build()
 
     @SuppressLint("Range")
@@ -148,7 +148,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 dModList = DateUnit.putMills(time)
                 if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
-                    cursor = storage.getList(isKatrenTab)
+                    cursor = storage.getList(isPoemsTab)
                     cursor.moveToFirst()
                 } else  // в случае списков с сайта Откровений надо просто перейти к следующей записи
                     cursor.moveToNext()
@@ -189,7 +189,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0)
-                if (s.isPoem == isKatrenTab) {
+                if (s.isPoem == isPoemsTab) {
                     cursor.close()
                     storage.close()
                     return true
@@ -209,7 +209,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         var y: Int
         var maxM = d.month
         var maxY = d.year - 2000
-        if (type == RndType.KAT) {
+        if (type == RndType.POEM) {
             m = 2
             y = 16
         } else {
@@ -220,7 +220,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 m = 1
                 y = 16
             }
-            if (type == RndType.POS) {
+            if (type == RndType.EPISTLE) {
                 maxM = 9
                 maxY = 16
             }
@@ -248,12 +248,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         var title: String? = null
         //определяем условие отбора в соотвтствии с выбранным пунктом:
         when (type) {
-            RndType.KAT -> {
-                title = strings.rnd_kat
+            RndType.POEM -> {
+                title = strings.rnd_poem
                 curTitle = storage.getList(true)
             }
-            RndType.POS -> {
-                title = strings.rnd_pos
+            RndType.EPISTLE -> {
+                title = strings.rnd_epistle
                 curTitle = storage.getList(false)
             }
             RndType.STIH ->

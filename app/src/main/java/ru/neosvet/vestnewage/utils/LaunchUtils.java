@@ -62,6 +62,7 @@ public class LaunchUtils {
         }
         if (ver < 59) {
             renamePrefs();
+            renameBookPref();
             deleteBrowserFiles();
         }
         if (ver > 44 && ver < 47) {
@@ -71,6 +72,18 @@ public class LaunchUtils {
         }
         if (ver == 0)
             showSummaryNotif();
+    }
+
+    private void renameBookPref() {
+        SharedPreferences pref = App.context.getSharedPreferences(BookHelper.TAG, MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        int i = pref.getInt("kat", 0);
+        editor.remove("kat");
+        editor.putInt(Const.POEMS, i);
+        i = pref.getInt("pos", 0);
+        editor.remove("pos");
+        editor.putInt(Const.EPISTLES, i);
+        editor.apply();
     }
 
     private void deleteBrowserFiles() {

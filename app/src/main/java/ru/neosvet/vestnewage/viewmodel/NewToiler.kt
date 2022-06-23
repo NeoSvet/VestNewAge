@@ -18,13 +18,13 @@ class NewToiler : NeoToiler() {
     var needOpen: Boolean = true
     private var isInit = false
     private lateinit var ads: AdsUtils
-    private lateinit var katren_from: String
+    private lateinit var poem_from: String
     private var task: Task = Task.NONE
 
     fun init(act: Activity) {
         if (isInit) return
         ads = AdsUtils(act)
-        katren_from = act.getString(R.string.katren) +
+        poem_from = act.getString(R.string.poem) +
                 " " + act.getString(R.string.from) + " "
         isInit = true
     }
@@ -60,7 +60,7 @@ class NewToiler : NeoToiler() {
                         t = t.substring(0, n) + " (" + t.substring(n + 1) + ")"
                     }
                     if (s.isPoem)
-                        t = katren_from + t
+                        t = poem_from + t
                     if (s.contains("#")) {
                         t = t.replace("#", " (") + ")"
                         list.add(ListItem(t, s.replace("#", Const.HTML + "#")))
