@@ -30,7 +30,7 @@ data class SiteStrings(
 data class BookStrings(
     val rnd_epistle: String,
     val rnd_poem: String,
-    val rnd_stih: String,
+    val rnd_verse: String,
     val alert_rnd: String,
     val try_again: String,
     val from: String,
@@ -81,5 +81,5 @@ data class JournalStrings(
     val format_time_back: String,
     val rnd_poem: String,
     val rnd_epistle: String,
-    val rnd_stih: String
+    val rnd_verse: String
 )

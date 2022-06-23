@@ -332,8 +332,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 )
             getString(R.string.refresh) ->
                 startLoad()
-            getString(R.string.rnd_stih) ->
-                toiler.getRnd(BookToiler.RndType.STIH)
+            getString(R.string.rnd_verse) ->
+                toiler.getRnd(BookToiler.RndType.VERSE)
             getString(R.string.rnd_epistle) ->
                 toiler.getRnd(BookToiler.RndType.EPISTLE)
             getString(R.string.rnd_poem) ->

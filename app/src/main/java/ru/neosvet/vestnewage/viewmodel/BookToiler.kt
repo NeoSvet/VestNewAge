@@ -31,7 +31,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     enum class RndType {
-        POEM, EPISTLE, STIH
+        POEM, EPISTLE, VERSE
     }
 
     var selectedTab: Int = TAB_POEMS
@@ -63,7 +63,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         strings = BookStrings(
             rnd_epistle = context.getString(R.string.rnd_epistle),
             rnd_poem = context.getString(R.string.rnd_poem),
-            rnd_stih = context.getString(R.string.rnd_stih),
+            rnd_verse = context.getString(R.string.rnd_verse),
             alert_rnd = context.getString(R.string.alert_rnd),
             try_again = context.getString(R.string.try_again),
             from = context.getString(R.string.from),
@@ -256,7 +256,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 title = strings.rnd_epistle
                 curTitle = storage.getList(false)
             }
-            RndType.STIH ->
+            RndType.VERSE ->
                 curTitle = storage.getListAll()
         }
         //определяем случайных текст:
@@ -272,7 +272,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         }
         //если случайный текст найден
         var s = ""
-        if (type == RndType.STIH) { //случайных стих
+        if (type == RndType.VERSE) { //случайных стих
             val curPar = storage.getParagraphs(curTitle)
             if (curPar.count > 1) { //если текст скачен
                 g = Random()
@@ -289,7 +289,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             curPar.close()
             if (s == "") { //случайный стих не найден
                 Lib.showToast(strings.alert_rnd)
-                title = strings.rnd_stih
+                title = strings.rnd_verse
             }
         } else  // случайный катрен или послание
             n = -1

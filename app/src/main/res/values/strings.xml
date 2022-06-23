@@ -82,7 +82,7 @@
     <string name="poems">Катрены</string>
     <string name="month_is_empty">Список за этот месяц пуст!</string>
     <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,6 МБ.\nНа устройстве займёт 16,3 МБ памяти.</string>
-    <string name="rnd_stih">«Случайный» стих</string>
+    <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
     <string name="rnd_poem">«Случайный» Катрен</string>
     <string name="try_again">Попробуйте ещё раз</string>

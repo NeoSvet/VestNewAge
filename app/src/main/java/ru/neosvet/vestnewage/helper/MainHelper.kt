@@ -254,7 +254,7 @@ class MainHelper(private val act: MainActivity) {
             }
             Section.BOOK -> {
                 adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_book))
-                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_stih))
+                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_verse))
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_epistle))
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_poem))
                 adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))

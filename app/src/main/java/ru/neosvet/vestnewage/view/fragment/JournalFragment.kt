@@ -82,8 +82,8 @@ class JournalFragment : NeoFragment() {
 
     private fun onItemClick(index: Int, item: ListItem) {
         var s = item.des
-        if (s.contains(getString(R.string.rnd_stih))) {
-            val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_stih))) + 1
+        if (s.contains(getString(R.string.rnd_verse))) {
+            val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
             s = s.substring(i)
             Lib.showToast(getString(R.string.long_press_for_mark))
         } else s = null
@@ -93,7 +93,7 @@ class JournalFragment : NeoFragment() {
     private fun onItemLongClick(index: Int, item: ListItem): Boolean {
         var des = item.des
         var par = ""
-        var i = des.indexOf(getString(R.string.rnd_stih))
+        var i = des.indexOf(getString(R.string.rnd_verse))
         if (i > -1 && i < des.lastIndexOf(Const.N)) {
             par = des.substring(des.indexOf(Const.N, i) + 1)
             i = des.indexOf("«")

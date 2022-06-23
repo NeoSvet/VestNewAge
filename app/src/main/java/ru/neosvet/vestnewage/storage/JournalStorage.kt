@@ -89,7 +89,7 @@ class JournalStorage {
                     } else { //случаный стих
                         cursor.close()
                         cursor = storage.getParagraphs(id[1])
-                        s = strings.rnd_stih
+                        s = strings.rnd_verse
                         if (cursor.moveToPosition(id[2].toInt()))
                             s += ":" + Const.N + Lib.withOutTags(
                                 cursor.getString(0)
