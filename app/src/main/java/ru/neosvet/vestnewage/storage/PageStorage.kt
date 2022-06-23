@@ -130,8 +130,8 @@ class PageStorage {
         return !isArticle() && patternBook.matcher(name).matches()
     }
 
-    fun getList(poems: Boolean): Cursor {
-        val selection = if (poems) Const.LINK + DataBase.LIKE
+    fun getList(isPoems: Boolean): Cursor {
+        val selection = if (isPoems) Const.LINK + DataBase.LIKE
         else Const.LINK + " NOT" + DataBase.LIKE
         return db.query(
             Const.TITLE, null,
@@ -141,11 +141,7 @@ class PageStorage {
     }
 
     fun getNextPage(link: String): String? {
-        val cursor = getList(link.contains(Const.POEMS))
-        if (!cursor.moveToFirst()) {
-            cursor.close()
-            return null
-        }
+        val cursor = getCursor(link.contains(Const.POEMS)) ?: return null
         val iLink = cursor.getColumnIndex(Const.LINK)
         var s: String
         do {
@@ -161,12 +157,23 @@ class PageStorage {
         return null
     }
 
-    fun getPrevPage(link: String): String? {
-        val cursor = getList(link.contains(Const.POEMS))
+    private fun getCursor(isPoems: Boolean): Cursor? {
+        val y = name.substring(3).toInt()
+        val cursor = if (y > 15) getList(isPoems)
+        else getListAll()
         if (!cursor.moveToFirst()) {
             cursor.close()
             return null
         }
+        if (y < 16 && !cursor.moveToNext()) {
+            cursor.close()
+            return null
+        }
+        return cursor
+    }
+
+    fun getPrevPage(link: String): String? {
+        val cursor = getCursor(link.contains(Const.POEMS)) ?: return null
         val iLink = cursor.getColumnIndex(Const.LINK)
         var s: String
         var p: String? = null
