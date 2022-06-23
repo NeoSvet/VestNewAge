@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -188,9 +189,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             // первую запись пропускаем, т.к. там дата изменения списка
             while (cursor.moveToNext()) {
                 s = cursor.getString(0)
-                if (s.contains(Const.POEMS) && isKatrenTab ||
-                    !s.contains(Const.POEMS) && !isKatrenTab
-                ) {
+                if (s.isPoem == isKatrenTab) {
                     cursor.close()
                     storage.close()
                     return true

@@ -7,6 +7,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import java.util.*
 
@@ -81,7 +82,7 @@ class JournalStorage {
                 )
                 if (id.size == 3) { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
-                        s = if (s.contains(Const.POEMS))
+                        s = if (s.isPoem)
                             strings.rnd_kat
                         else
                             strings.rnd_pos

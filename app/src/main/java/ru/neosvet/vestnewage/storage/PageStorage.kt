@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.isPoem
 import java.util.regex.Pattern
 
 /**
@@ -77,7 +78,7 @@ class PageStorage {
             var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
             if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
             if (s.contains("#")) s = s.substring(0, s.indexOf("#"))
-            if (link.contains(Const.POEMS)) {
+            if (link.isPoem) {
                 s + (" " + App.context.getString(R.string.katren) + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
             } else "$s $title"
         }
@@ -141,7 +142,7 @@ class PageStorage {
     }
 
     fun getNextPage(link: String): String? {
-        val cursor = getCursor(link.contains(Const.POEMS)) ?: return null
+        val cursor = getCursor(link.isPoem) ?: return null
         val iLink = cursor.getColumnIndex(Const.LINK)
         var s: String
         do {
@@ -173,7 +174,7 @@ class PageStorage {
     }
 
     fun getPrevPage(link: String): String? {
-        val cursor = getCursor(link.contains(Const.POEMS)) ?: return null
+        val cursor = getCursor(link.isPoem) ?: return null
         val iLink = cursor.getColumnIndex(Const.LINK)
         var s: String
         var p: String? = null

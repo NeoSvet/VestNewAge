@@ -9,6 +9,7 @@ import java.util.List;
 
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
+import ru.neosvet.vestnewage.utils.Const;
 
 public class CalendarItem {
     private final int num;
@@ -54,7 +55,7 @@ public class CalendarItem {
     }
 
     public void addLink(String link) {
-        if (link.contains("poems"))
+        if (link.contains(Const.POEMS))
             katren = true;
         else
             poslanie = true;

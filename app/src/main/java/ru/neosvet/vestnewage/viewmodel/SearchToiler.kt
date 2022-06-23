@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
@@ -350,9 +351,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                     val link = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
                     val iTitle = curTitle.getColumnIndex(Const.TITLE)
                     if (mode == MODE_POSLANIYA)
-                        add = !link.contains(Const.POEMS)
+                        add = !link.isPoem
                     else if (mode == MODE_KATRENY)
-                        add = link.contains(Const.POEMS)
+                        add = link.isPoem
                     if (add) {
                         val title = pages.getPageTitle(curTitle.getString(iTitle), link)
                         if (row != null) {
@@ -439,9 +440,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
 
     private fun findInPage(link: String, id: Int): ListItem {
         var item = ListItem(link, link)
-        if (mode == MODE_POSLANIYA && link.contains(Const.POEMS))
+        if (mode == MODE_POSLANIYA && link.isPoem)
             return item
-        if (mode == MODE_KATRENY && !link.contains(Const.POEMS))
+        if (mode == MODE_KATRENY && !link.isPoem)
             return item
         pages.open(link)
         val pageId = pages.getPageId(link)

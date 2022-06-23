@@ -19,10 +19,7 @@ import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.utils.AdsUtils
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.select
@@ -177,7 +174,7 @@ class SiteFragment : NeoFragment() {
         if (toiler.isSiteTab) {
             if (link.contains("rss"))
                 act?.setSection(Section.SUMMARY, true)
-            else if (link.contains("poems"))
+            else if (link.isPoem)
                 act?.openBook(link, true)
             else if (link.contains("tolkovaniya") || link.contains("2016"))
                 act?.openBook(link, false)

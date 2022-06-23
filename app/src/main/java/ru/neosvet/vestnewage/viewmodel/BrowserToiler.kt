@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -321,7 +322,7 @@ class BrowserToiler : NeoToiler() {
         }
         d.changeMonth(1)
         storage.open(d.my)
-        val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
+        val cursor = storage.getList(link.isPoem)
         if (cursor.moveToFirst()) {
             val iLink = cursor.getColumnIndex(Const.LINK)
             openLink(cursor.getString(iLink), false)
@@ -342,7 +343,7 @@ class BrowserToiler : NeoToiler() {
         }
         d.changeMonth(-1)
         storage.open(d.my)
-        val cursor: Cursor = storage.getList(link.contains(Const.POEMS))
+        val cursor = storage.getList(link.isPoem)
         if (cursor.moveToLast()) {
             val iLink = cursor.getColumnIndex(Const.LINK)
             openLink(cursor.getString(iLink), false)
@@ -350,7 +351,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun getMinMY(): String {
-        if (link.contains(Const.POEMS)) {
+        if (link.isPoem) {
             val d = DateUnit.putYearMonth(2016, 2)
             return d.my
         }

@@ -5,10 +5,7 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.utils.AdsUtils
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.NotificationUtils
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.File
@@ -62,7 +59,7 @@ class NewToiler : NeoToiler() {
                         n = t.indexOf("_")
                         t = t.substring(0, n) + " (" + t.substring(n + 1) + ")"
                     }
-                    if (s.contains(Const.POEMS))
+                    if (s.isPoem)
                         t = katren_from + t
                     if (s.contains("#")) {
                         t = t.replace("#", " (") + ")"
