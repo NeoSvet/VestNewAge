@@ -63,7 +63,8 @@ class CalendarLoader : LinksProvider, Loader {
         var json: JSONObject? = JSONObject(s)
         json = json!!.getJSONObject("calendarData")
         if (json?.names() == null) return
-        initDatabase(date.my)
+        storage.open(date.my)
+        storage.updateTime()
         var jsonI: JSONObject?
         var jsonA: JSONArray?
         var link: String
@@ -117,14 +118,6 @@ class CalendarLoader : LinksProvider, Loader {
             unread.setBadge()
         }
         list.clear()
-    }
-
-    private fun initDatabase(name: String) {
-        storage.open(name)
-        val row = ContentValues()
-        row.put(Const.TIME, System.currentTimeMillis())
-        if (!storage.updateTitle(1, row))
-            storage.insertTitle(row)
     }
 
     fun loadListYear(year: Int, max_m: Int) {

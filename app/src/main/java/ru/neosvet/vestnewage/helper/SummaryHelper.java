@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -58,24 +57,21 @@ public class SummaryHelper {
         String title, link;
         PageStorage storage = new PageStorage();
         ContentValues row;
-        Cursor cursor;
         while ((title = br.readLine()) != null) {
             link = br.readLine();
             br.readLine(); //des
             br.readLine(); //time
             storage.open(link);
-            cursor = storage.getPage(link);
-            if (!cursor.moveToFirst()) {
+            if (!storage.existsPage(link)) {
                 row = new ContentValues();
                 row.put(Const.TITLE, title);
                 row.put(Const.LINK, link);
                 storage.insertTitle(row);
+                storage.updateTime();
             }
-            cursor.close();
         }
         br.close();
-        if (storage != null)
-            storage.close();
+        storage.close();
     }
 
     public void createNotification(String text, String link) {

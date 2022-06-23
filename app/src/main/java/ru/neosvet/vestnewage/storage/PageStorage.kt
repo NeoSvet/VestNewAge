@@ -63,6 +63,13 @@ class PageStorage {
         db = DataBase(n)
     }
 
+    fun updateTime() {
+        val row = ContentValues()
+        row.put(Const.TIME, System.currentTimeMillis())
+        if (!updateTitle(1, row))
+            insertTitle(row)
+    }
+
     fun getPageTitle(title: String, link: String): String {
         return if (isArticle() || link.contains("2004") || link.contains("pred")) {
             title
