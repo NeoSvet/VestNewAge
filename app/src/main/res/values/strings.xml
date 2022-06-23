@@ -1,8 +1,6 @@
 <resources>
     <!--MainActivity-->
     <string name="app_name">Весть Века</string>
-    <string name="navigation_drawer_open">Открытие меню</string>
-    <string name="navigation_drawer_close">Закрытие меню</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
     <string name="download_all">Скачать все материалы</string>
     <string name="download_articles">Скачать все статьи</string>
@@ -103,7 +101,6 @@
     <string name="in_markers">В закладки</string>
     <string name="opt_scale">Оптимальный масштаб</string>
     <string name="src_scale">Исходный масштаб</string>
-    <string name="hide_menu">Скрыть кнопку меню</string>
     <string name="nav_button">Кнопка вверх/вниз</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
@@ -151,8 +148,6 @@
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
-    <string name="enter">Войти</string>
-    <string name="exit">Выйти</string>
     <!--Страница-->
     <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
@@ -203,7 +198,6 @@
     <!--JournalFragment-->
     <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
     <string name="finish_list">Список закончился</string>
-    <string name="clear">Очистить</string>
     <string name="clearing">Очистка</string>
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
@@ -221,7 +215,6 @@
     <string name="load_already_run">Загрузка уже запущена (см. уведомления)</string>
     <string name="stop">Остановить</string>
     <string name="download_list">Загрузка списков</string>
-    <string name="download_materials">Загрузка материалов</string>
     <string name="load_suc_finish">Загрузка успешно завершена</string>
     <string name="cab_fail">Отсутствует доступ к интернету или требуется VPN</string>
     <string name="error_load">Ошибка при загрузке</string>

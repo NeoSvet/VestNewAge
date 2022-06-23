@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="cell_size">40dp</dimen>
-    <dimen name="menu_width">260dp</dimen>
     <dimen name="string_size">29dp</dimen>
-    <dimen name="panel_height">39dp</dimen>
-    <dimen name="fab_size">40dp</dimen>
     <dimen name="date_table_width">265dp</dimen>
     <dimen name="date_cell_width">85dp</dimen>
 </resources>
