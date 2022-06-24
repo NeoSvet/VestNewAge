@@ -69,19 +69,17 @@ class SiteToiler : NeoToiler() {
     private suspend fun loadList() {
         val loader = SiteLoader(file.toString())
         val list = loader.load(url) as MutableList
-        mstate.postValue(NeoState.LongState(file.lastModified()))
-        waitPost()
+        postState(NeoState.LongValue(file.lastModified()))
         list.add(0, getFirstItem())
-        mstate.postValue(NeoState.ListValue(list))
+        postState(NeoState.ListValue(list))
     }
 
     private suspend fun loadAds() {
         ads.loadAds()
-        mstate.postValue(NeoState.LongState(ads.time))
-        waitPost()
+        postState(NeoState.LongValue(ads.time))
         val list = ads.loadList(false)
         list.add(0, getFirstItem())
-        mstate.postValue(NeoState.ListValue(list))
+        postState(NeoState.ListValue(list))
     }
 
     fun openList(loadIfNeed: Boolean) {
@@ -92,8 +90,7 @@ class SiteToiler : NeoToiler() {
                 reLoad()
                 return@launch
             }
-            mstate.postValue(NeoState.LongState(f.lastModified()))
-            waitPost()
+            postState(NeoState.LongValue(f.lastModified()))
             val list = mutableListOf<ListItem>()
             list.add(getFirstItem())
             var i = 1
@@ -125,10 +122,9 @@ class SiteToiler : NeoToiler() {
                 t = br.readLine()
             }
             br.close()
-            mstate.postValue(NeoState.ListValue(list))
+            postState(NeoState.ListValue(list))
 
             if (loadIfNeed && DateUnit.isLongAgo(f.lastModified())) {
-                waitPost()
                 reLoad()
             }
         }
@@ -144,11 +140,10 @@ class SiteToiler : NeoToiler() {
     fun openAds() {
         loadIfNeed = false
         scope.launch {
-            mstate.postValue(NeoState.LongState(ads.checkTime))
-            waitPost()
+            postState(NeoState.LongValue(ads.checkTime))
             val list = ads.loadList(false)
             list.add(0, getFirstItem())
-            mstate.postValue(NeoState.ListValue(list))
+            postState(NeoState.ListValue(list))
         }
     }
 

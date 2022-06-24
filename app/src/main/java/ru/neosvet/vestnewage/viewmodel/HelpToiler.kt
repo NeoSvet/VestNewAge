@@ -56,7 +56,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     }
 
     fun restore() {
-        mstate.postValue(NeoState.ListState(ListEvent.RELOAD))
+        mstate.value = NeoState.ListState(ListEvent.RELOAD)
     }
 
     override fun onItemClick(index: Int) {
@@ -71,7 +71,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
             return
         }
         list[index].opened = list[index].opened.not()
-        mstate.postValue(NeoState.ListState(ListEvent.CHANGE, index))
+        mstate.value = NeoState.ListState(ListEvent.CHANGE, index)
     }
 
     private fun clickFeedback(index: Int) {
@@ -81,7 +81,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                 Lib.openInApps(Const.mailto + msg, null)
             }
             LINK_ON_APP ->
-                mstate.postValue(NeoState.ListState(ListEvent.REMOTE))
+                mstate.value = NeoState.ListState(ListEvent.REMOTE)
             LINK_ON_SITE ->
                 Lib.openInApps("http://neosvet.ucoz.ru/vna/", null)
             CHANGELOG ->

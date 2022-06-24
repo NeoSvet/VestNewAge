@@ -18,7 +18,7 @@ class NeoPaging(
         val factory: PagingSource<*, ListItem>
         val isRun: Boolean
         val pagingScope: CoroutineScope
-        fun postFinish()
+        suspend fun postFinish()
     }
 
     var isPaging = false

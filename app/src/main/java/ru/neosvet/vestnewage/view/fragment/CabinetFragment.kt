@@ -56,7 +56,7 @@ class CabinetFragment : NeoFragment() {
         restoreState(savedInstanceState)
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         setStatus(false)
         when (state) {
             is NeoState.Message -> {
@@ -95,9 +95,7 @@ class CabinetFragment : NeoFragment() {
     override fun onBackPressed(): Boolean = toiler.onBack()
 
     private fun restoreState(state: Bundle?) {
-        if (state != null) {
-            toiler.restoreScreen()
-        } else {
+        if (state == null) {
             val p = helper.getAuthPair()
             binding?.login?.run {
                 if (p.first.isNotEmpty()) {

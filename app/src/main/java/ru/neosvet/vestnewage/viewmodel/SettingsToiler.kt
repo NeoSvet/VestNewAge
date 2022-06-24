@@ -65,7 +65,7 @@ class SettingsToiler : NeoToiler() {
                     }
                 }
             }
-            mstate.postValue(NeoState.LongState(size))
+            postState(NeoState.LongValue(size))
             isRun = false
         }
     }
@@ -78,9 +78,5 @@ class SettingsToiler : NeoToiler() {
                 clearFolder(f)
             f.delete()
         }
-    }
-
-    fun clearState() {
-        mstate.postValue(NeoState.Ready)
     }
 }

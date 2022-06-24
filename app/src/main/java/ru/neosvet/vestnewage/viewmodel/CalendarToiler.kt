@@ -47,20 +47,18 @@ class CalendarToiler : NeoToiler() {
     override suspend fun doLoad() { //loadFromSite
         loadIfNeed = false
         if (date.year < 2016) {
-            mstate.postValue(NeoState.Ready)
+            postState(NeoState.Ready)
             return
         }
         val list = loadMonth()
         if (loadFromStorage()) {
-            mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
-            waitPost()
-            mstate.postValue(NeoState.LongState(time))
-            waitPost()
+            postState(NeoState.Calendar(date.calendarString, prev, next, calendar))
+            postState(NeoState.LongValue(time))
             if (isRun) loadPages(list)
         }
     }
 
-    private fun loadPages(pages: List<String>) {
+    private suspend fun loadPages(pages: List<String>) {
         val loader = PageLoader()
         var cur = 0
         pages.forEach { link ->
@@ -68,11 +66,11 @@ class CalendarToiler : NeoToiler() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(NeoState.Progress(cur.percent(pages.size)))
+            postState(NeoState.Progress(cur.percent(pages.size)))
         }
         loader.finish()
         isRun = false
-        mstate.postValue(NeoState.Success)
+        postState(NeoState.Success)
     }
 
     private fun loadMonth(): List<String> {
@@ -109,12 +107,10 @@ class CalendarToiler : NeoToiler() {
             if (calendar.isEmpty())
                 createField()
             if (loadFromStorage()) {
-                mstate.postValue(NeoState.Calendar(date.calendarString, prev, next, calendar))
-                waitPost()
-                mstate.postValue(NeoState.LongState(time))
+                postState(NeoState.Calendar(date.calendarString, prev, next, calendar))
+                postState(NeoState.LongValue(time))
             } else {
-                mstate.postValue(NeoState.Calendar(date.calendarString, false, false, calendar))
-                waitPost()
+                postState(NeoState.Calendar(date.calendarString, false, false, calendar))
                 isRun = true
                 reLoad()
             }

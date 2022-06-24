@@ -31,7 +31,7 @@ class SummaryToiler : NeoToiler() {
         val summaryHelper = SummaryHelper()
         summaryHelper.updateBook()
         val list = openList()
-        mstate.postValue(NeoState.ListValue(list))
+        postState(NeoState.ListValue(list))
         loadPages(list)
     }
 
@@ -40,7 +40,7 @@ class SummaryToiler : NeoToiler() {
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
-    private fun loadPages(pages: List<ListItem>) {
+    private suspend fun loadPages(pages: List<ListItem>) {
         val loader = PageLoader()
         var cur = 0
         pages.forEach { item ->
@@ -48,10 +48,10 @@ class SummaryToiler : NeoToiler() {
             if (isRun.not())
                 return@forEach
             cur++
-            mstate.postValue(NeoState.Progress(cur.percent(pages.size)))
+            postState(NeoState.Progress(cur.percent(pages.size)))
         }
         loader.finish()
-        mstate.postValue(NeoState.Success)
+        postState(NeoState.Success)
     }
 
     override fun getInputData(): Data = Data.Builder()
@@ -62,9 +62,8 @@ class SummaryToiler : NeoToiler() {
         this.loadIfNeed = loadIfNeed
         scope.launch {
             val list = openList()
-            mstate.postValue(NeoState.ListValue(list))
+            postState(NeoState.ListValue(list))
             if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
-                waitPost()
                 reLoad()
             }
         }
@@ -74,8 +73,7 @@ class SummaryToiler : NeoToiler() {
         val list = mutableListOf<ListItem>()
         val now = System.currentTimeMillis()
         val file = Lib.getFile(Const.RSS)
-        mstate.postValue(NeoState.LongState(file.lastModified()))
-        waitPost()
+        postState(NeoState.LongValue(file.lastModified()))
         val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
         var des: String

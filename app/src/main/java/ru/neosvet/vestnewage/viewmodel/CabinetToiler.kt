@@ -117,15 +117,15 @@ class CabinetToiler : NeoToiler() {
 
     fun loginScreen() {
         screen = Screen.LOGIN
-        mstate.postValue(NeoState.ListValue(loginList))
+        setState(NeoState.ListValue(loginList))
     }
 
     private fun cabinetScreen() {
         screen = Screen.CABINET
-        mstate.postValue(NeoState.ListValue(cabinetList))
+        setState(NeoState.ListValue(cabinetList))
     }
 
-    private fun doLogin(email: String, password: String) {
+    private suspend fun doLogin(email: String, password: String) {
         helper.email = email
         var request: Request = Request.Builder()
             .url(NeoClient.CAB_SITE)
@@ -158,11 +158,11 @@ class CabinetToiler : NeoToiler() {
             postError(s)
     }
 
-    private fun postError(msg: String) {
-        mstate.postValue(NeoState.Message(msg))
+    private suspend fun postError(msg: String) {
+        postState(NeoState.Message(msg))
     }
 
-    private fun loadCabinet() {
+    private suspend fun loadCabinet() {
         val s = loadAnketa(false)
         if (s.isEmpty()) {
             cabinetItem.title = strings.send_status
@@ -177,7 +177,7 @@ class CabinetToiler : NeoToiler() {
         cabinetScreen()
     }
 
-    private fun loadAnketa(loadWordList: Boolean): String {
+    private suspend fun loadAnketa(loadWordList: Boolean): String {
         val builderRequest = Request.Builder()
         builderRequest.url(NeoClient.CAB_SITE + "edinenie/anketa.html")
         builderRequest.header(NeoClient.USER_AGENT, App.context.packageName)
@@ -225,7 +225,7 @@ class CabinetToiler : NeoToiler() {
         return s
     }
 
-    private fun parseListWord(words: String) {
+    private suspend fun parseListWord(words: String) {
         var s = words.substring(words.indexOf("-<") + 10, words.indexOf("</select>") - 9)
         s = s.replace("<option>", "")
         val m = s.split("</option>")
@@ -233,10 +233,10 @@ class CabinetToiler : NeoToiler() {
         for (i in m)
             wordList.add(ListItem(i))
         screen = Screen.WORDS
-        mstate.postValue(NeoState.ListValue(wordList))
+        postState(NeoState.ListValue(wordList))
     }
 
-    private fun sendWord(index: Int, word: String) {
+    private suspend fun sendWord(index: Int, word: String) {
         val builderRequest = Request.Builder()
         builderRequest.url(NeoClient.CAB_SITE + "savedata.php")
         builderRequest.header(NeoClient.USER_AGENT, App.context.packageName)
@@ -284,16 +284,16 @@ class CabinetToiler : NeoToiler() {
         return false
     }
 
-    fun restoreScreen() {
-        when (screen) {
-            Screen.LOGIN ->
-                mstate.postValue(NeoState.ListValue(loginList))
-            Screen.CABINET ->
-                mstate.postValue(NeoState.ListValue(cabinetList))
-            Screen.WORDS ->
-                mstate.postValue(NeoState.ListValue(wordList))
-        }
-    }
+//    fun restoreScreen() {
+//        when (screen) {
+//            Screen.LOGIN ->
+//                setState( NeoState.ListValue(loginList))
+//            Screen.CABINET ->
+//                setState( NeoState.ListValue(cabinetList))
+//            Screen.WORDS ->
+//                setState( NeoState.ListValue(wordList))
+//        }
+//    }
 
     private fun createHttpClient(): OkHttpClient =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)

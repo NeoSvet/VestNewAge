@@ -45,8 +45,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
             return fragment
         }
-
-        private const val DIALOG_DATE = "date"
     }
 
     private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
@@ -55,7 +53,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
-    private var dialog = ""
     private val helper: BookHelper
         get() = toiler.helper!!
     override val title: String
@@ -105,27 +102,19 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (dialog == DIALOG_DATE) dateDialog?.let { d ->
-            outState.putString(Const.DIALOG, dialog + d.date)
+        dateDialog?.let { d ->
+            outState.putInt(Const.DIALOG, d.date.timeInDays)
             d.dismiss()
-        } else if (dialog.length > 1) {
-            outState.putString(Const.DIALOG, dialog)
-            alertRnd!!.dismiss()
         }
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
         if (state != null && toiler.isRun.not()) {
-            state.getString(Const.DIALOG)?.let {
-                if (it.contains(DIALOG_DATE)) {
-                    val d = DateUnit.parse(it.substring(DIALOG_DATE.length))
-                    showDatePicker(d)
-                } else if (it.length > 1) {
-                    dialog = it
-                    val m = it.split(Const.AND).toTypedArray()
-                    showRndAlert(m[0], m[1], m[2], m[3], m[4].toInt())
-                }
+            val t = state.getInt(Const.DIALOG, 0)
+            if (t > 0) {
+                val d = DateUnit.putDays(t)
+                showDatePicker(d)
             }
         }
         binding?.tabLayout?.select(toiler.selectedTab)
@@ -152,17 +141,15 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         })
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is NeoState.Book ->
                 setBook(state)
-            is NeoState.LongState ->
+            is NeoState.LongValue ->
                 setUpdateTime(state.value)
             is NeoState.Message ->
                 Lib.showToast(state.message)
             is NeoState.Rnd -> with(state) {
-                dialog = title + Const.AND + link + Const.AND + msg +
-                        Const.AND + place + Const.AND + par
                 showRndAlert(title, link, msg, place, par)
             }
             else -> {}
@@ -272,7 +259,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun showDatePicker(d: DateUnit) {
-        dialog = DIALOG_DATE
         dateDialog = DateDialog(act, d).apply {
             setResult(this@BookFragment)
             if (toiler.isPoemsTab) {
@@ -291,7 +277,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun putDate(date: DateUnit?) {
-        dialog = ""
         if (date == null) //cancel
             return
         toiler.date = date
@@ -315,7 +300,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 alertRnd?.dismiss()
             }
         }
-        alertRnd?.show { dialog = "" }
+        alertRnd?.show { neotoiler.clearSecondaryStates() }
     }
 
     private fun onItemClick(index: Int, item: ListItem) {

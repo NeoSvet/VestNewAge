@@ -69,7 +69,7 @@ class NewToiler : NeoToiler() {
                 }
                 links.clear()
             }
-            mstate.postValue(NeoState.ListValue(list))
+            postState(NeoState.ListValue(list))
             needOpen = false
             if (ads.index > -1)
                 showAd(list[ads.index])
@@ -91,7 +91,7 @@ class NewToiler : NeoToiler() {
             val unread = UnreadUtils()
             unread.clearList()
             unread.setBadge(ads.unreadCount)
-            mstate.postValue(NeoState.Ready)
+            postState(NeoState.Ready)
         }
     }
 

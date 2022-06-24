@@ -4,6 +4,7 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem
 
 sealed class NeoState {
+    object None : NeoState()
     object Loading : NeoState()
     object NoConnected : NeoState()
     data class Progress(val percent: Int) : NeoState()
@@ -11,7 +12,7 @@ sealed class NeoState {
     object Ready : NeoState()
     object Success : NeoState()
     data class Error(val throwable: Throwable) : NeoState()
-    data class LongState(val value: Long) : NeoState()
+    data class LongValue(val value: Long) : NeoState()
 
     data class ListValue(
         val list: List<ListItem>

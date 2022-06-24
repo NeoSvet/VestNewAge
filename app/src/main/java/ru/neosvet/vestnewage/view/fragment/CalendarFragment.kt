@@ -71,20 +71,22 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(Const.DIALOG, dateDialog?.date?.timeInDays ?: 0)
-        dateDialog?.dismiss()
+        dateDialog?.let { d ->
+            outState.putInt(Const.DIALOG, d.date.timeInDays)
+            d.dismiss()
+        }
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) {
-        toiler.openCalendar(0)
-        state?.let {
-            val d = it.getInt(Const.DIALOG)
+        if (state == null) {
+            toiler.openCalendar(0)
+            if (toiler.isNeedReload())
+                startLoad()
+        } else {
+            val d = state.getInt(Const.DIALOG)
             if (d > 0)
                 showDatePicker(DateUnit.putDays(d))
-        }
-        if (state == null && toiler.isNeedReload()) {
-            startLoad()
         }
     }
 
@@ -171,7 +173,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         pMenu.show()
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         if (toiler.isRun.not())
             setStatus(false)
         when (state) {
@@ -184,7 +186,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 if (root.isVisible.not())
                     showView(root)
             }
-            is NeoState.LongState ->
+            is NeoState.LongValue ->
                 setUpdateTime(state.value)
             NeoState.Ready ->
                 Lib.showToast(getString(R.string.load_unavailable))

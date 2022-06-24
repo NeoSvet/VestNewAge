@@ -14,11 +14,11 @@ import androidx.appcompat.widget.ActionMenuView
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -40,7 +40,7 @@ import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import kotlin.math.absoluteValue
 
-class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
+class MainActivity : AppCompatActivity(), ItemClicker {
     companion object {
         private const val LIMIT_DIFF_SEC = 4
     }
@@ -210,11 +210,19 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
                 firstSection = Section.valueOf(it)
             }
         } else if (utils.isNeedLoad) {
-            val toiler = ViewModelProvider(this).get(MainToiler::class.java)
-            toiler.init(this)
-            toiler.state.observe(this, this)
-            toiler.load()
+            starLoad()
         }
+    }
+
+    private fun starLoad() {
+        val toiler = ViewModelProvider(this).get(MainToiler::class.java)
+        lifecycleScope.launch {
+            toiler.state.collect {
+                onChangedState(it)
+                toiler.notifyReady()
+            }
+        }
+        toiler.load()
     }
 
     fun setFragment(fragment: NeoFragment) {
@@ -530,7 +538,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
         } else openReader(link, null)
     }
 
-    override fun onChanged(state: NeoState) {
+    private fun onChangedState(state: NeoState) {
         when (state) {
             is NeoState.Ads -> {
                 utils.updateTime()

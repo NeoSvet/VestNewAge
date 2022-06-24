@@ -53,7 +53,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
             if (cursor.moveToFirst())
                 factory.total = cursor.count
             if (factory.total == 0)
-                mstate.postValue(NeoState.Ready)
+                postState(NeoState.Ready)
             cursor.close()
         }
     }
@@ -61,7 +61,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     fun clear() {
         journal.clear()
         journal.close()
-        mstate.postValue(NeoState.Ready)
+        setState( NeoState.Ready)
     }
 
     fun paging() = paging.run()
@@ -69,7 +69,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     override val pagingScope: CoroutineScope
         get() = viewModelScope
 
-    override fun postFinish() {
-        mstate.postValue(NeoState.Success)
+    override suspend fun postFinish() {
+        postState(NeoState.Success)
     }
 }

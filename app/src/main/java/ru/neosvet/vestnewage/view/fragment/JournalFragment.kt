@@ -55,14 +55,9 @@ class JournalFragment : NeoFragment() {
         binding = it
     }.root
 
-
     override fun onViewCreated(savedInstanceState: Bundle?) {
         toiler.preparing()
         setViews()
-        activity?.let {
-            it.title = getString(R.string.journal)
-            toiler.state.observe(it, this)
-        }
         if (toiler.offset > 0)
             binding?.rvJournal?.smoothScrollToPosition(toiler.offset)
     }
@@ -115,7 +110,7 @@ class JournalFragment : NeoFragment() {
         tip.show()
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         when (state) {
             NeoState.Success ->
                 tip.hideAnimated()

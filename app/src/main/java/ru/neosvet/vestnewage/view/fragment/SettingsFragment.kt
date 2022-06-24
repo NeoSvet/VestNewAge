@@ -101,12 +101,12 @@ class SettingsFragment : NeoFragment() {
         super.onDestroyView()
     }
 
-    override fun onChangedState(state: NeoState) {
-        if (state is NeoState.LongState) {
+    override fun onChangedOtherState(state: NeoState) {
+        if (state is NeoState.LongValue) {
             setStatus(false)
             val size = state.value / 1048576f //to MegaByte
             Lib.showToast(String.format(getString(R.string.format_freed_size), size))
-            toiler.clearState()
+            neotoiler.clearAllStates()
         }
     }
 

@@ -78,7 +78,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     override suspend fun doLoad() {
         loadDate?.let { date ->
             val d = dateFromString(date)
-            mstate.postValue(
+            postState(
                 NeoState.Message(
                     String.format(strings.format_load, d.monthString + " " + d.year)
                 )
@@ -99,14 +99,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             loadDate = null
         }
         loadLink?.let { link ->
-            mstate.postValue(NeoState.Message(String.format(strings.format_load, link)))
+            postState(NeoState.Message(String.format(strings.format_load, link)))
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
             val pageLoader = PageLoader()
             pageLoader.download(link, true)
             pageLoader.finish()
             val item = findInPage(link, id)
-            mstate.postValue(NeoState.ListValue(listOf(item)))
+            postState(NeoState.ListValue(listOf(item)))
             loadLink = null
         }
     }
@@ -161,7 +161,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         }
     }
 
-    private fun searchInPages() = helper.run {
+    private suspend fun searchInPages() = helper.run {
         storage.clear()
         storage.isDesc = isDesc
         if (mode == MODE_ALL)
@@ -187,7 +187,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         pages.close()
     }
 
-    private fun notifyResult() {
+    private suspend fun notifyResult() {
         helper.run {
             label = String.format(
                 strings.format_found,
@@ -198,7 +198,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             )
         }
         factory.total = helper.countMaterials
-        mstate.postValue(NeoState.Success)
+        postState(NeoState.Success)
     }
 
     fun showLastResult() {
@@ -211,12 +211,12 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 cursor.close()
             }
             factory.total = helper.countMaterials
-            mstate.postValue(NeoState.Success)
+            postState(NeoState.Success)
         }
     }
 
-    private fun publishProgress(d: DateUnit) {
-        mstate.postValue(
+    private suspend fun publishProgress(d: DateUnit) {
+        postState(
             NeoState.Message(
                 String.format(
                     strings.format_search_date,
@@ -226,7 +226,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         )
     }
 
-    private fun searchInResults(reverseOrder: Boolean) {
+    private suspend fun searchInResults(reverseOrder: Boolean) {
         val title: MutableList<String> = ArrayList()
         val link: MutableList<String> = ArrayList()
         val id: MutableList<String> = ArrayList()
@@ -269,7 +269,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             p2 = i.percent(title.size)
             if (p1 < p2) {
                 p1 = p2
-                mstate.postValue(NeoState.Message(String.format(strings.format_search_proc, p1)))
+                postState(NeoState.Message(String.format(strings.format_search_proc, p1)))
             } else {
                 val now = System.currentTimeMillis()
                 if (helper.countMaterials - prev > Const.MAX_ON_PAGE &&
@@ -499,7 +499,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     override val pagingScope: CoroutineScope
         get() = scope
 
-    override fun postFinish() {
-        mstate.postValue(NeoState.Ready)
+    override suspend fun postFinish() {
+        postState(NeoState.Ready)
     }
 }

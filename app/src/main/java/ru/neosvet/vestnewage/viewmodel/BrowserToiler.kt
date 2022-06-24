@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -119,7 +118,7 @@ class BrowserToiler : NeoToiler() {
                     isRefresh = false
                     reLoad()
                 } else
-                    mstate.postValue(NeoState.Ready)
+                    postState(NeoState.Ready)
                 return@launch
             }
             if (!preparingStyle()) return@launch
@@ -130,7 +129,7 @@ class BrowserToiler : NeoToiler() {
             var s = file.toString()
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
-            mstate.postValue(
+            postState(
                 NeoState.Page(
                     url = FILE + s,
                     isOtkr = p.second
@@ -140,7 +139,6 @@ class BrowserToiler : NeoToiler() {
                 if (isRefresh.not()) addJournal()
                 return@launch
             }
-            waitPost()
             isRefresh = true
             reLoad()
         }
@@ -317,7 +315,7 @@ class BrowserToiler : NeoToiler() {
         val today = DateUnit.initToday().my
         val d: DateUnit = getDateFromLink()
         if (d.my == today) {
-            mstate.postValue(NeoState.Success)
+            setState(NeoState.Success)
             return
         }
         d.changeMonth(1)
@@ -338,7 +336,7 @@ class BrowserToiler : NeoToiler() {
         val min: String = getMinMY()
         val d = getDateFromLink()
         if (d.my == min) {
-            mstate.postValue(NeoState.Success)
+            setState(NeoState.Success)
             return
         }
         d.changeMonth(-1)

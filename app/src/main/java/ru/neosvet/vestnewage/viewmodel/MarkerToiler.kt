@@ -64,7 +64,7 @@ class MarkerToiler : NeoToiler() {
         scope.launch {
             helper.title = openPage(link)
             if (helper.title.isEmpty()) {
-                mstate.postValue(NeoState.Ready)
+                postState(NeoState.Ready)
                 return@launch
             }
             openCols()
@@ -72,7 +72,7 @@ class MarkerToiler : NeoToiler() {
                 newMarker(intent)
             else
                 openMarker(id)
-            mstate.postValue(NeoState.Success)
+            postState(NeoState.Success)
         }
     }
 
@@ -124,7 +124,7 @@ class MarkerToiler : NeoToiler() {
                 updateMarker(id, row)
             else
                 addMarker(row)
-            mstate.postValue(NeoState.Ready)
+            postState(NeoState.Ready)
         }
     }
 

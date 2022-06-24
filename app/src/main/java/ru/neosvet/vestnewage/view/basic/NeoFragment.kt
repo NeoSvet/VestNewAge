@@ -6,17 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
+import ru.neosvet.vestnewage.utils.StateUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
+abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     @JvmField
     protected var act: MainActivity? = null
     protected val neotoiler: NeoToiler by lazy {
@@ -24,6 +26,12 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     }
     private var scroll: ScrollHelper? = null
     private var root: View? = null
+    private val stateUtils: StateUtils by lazy {
+        StateUtils(this, neotoiler)
+    }
+
+    override val scope: LifecycleCoroutineScope
+        get() = lifecycleScope
 
     abstract val title: String
 
@@ -34,11 +42,10 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         root = view
+        stateUtils.runObserve()
         onViewCreated(savedInstanceState)
-        act?.let {
-            neotoiler.state.observe(it, this)
-        }
         if (neotoiler.isRun) setStatus(true)
+        stateUtils.restore()
     }
 
     fun disableUpdateRoot() {
@@ -75,9 +82,9 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     open fun onAction(title: String) {}
 
-    abstract fun onChangedState(state: NeoState)
+    abstract fun onChangedOtherState(state: NeoState)
 
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
             is NeoState.None ->
                 return
@@ -92,7 +99,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
                 setStatus(false)
             }
             else ->
-                onChangedState(state)
+                onChangedOtherState(state)
         }
     }
 

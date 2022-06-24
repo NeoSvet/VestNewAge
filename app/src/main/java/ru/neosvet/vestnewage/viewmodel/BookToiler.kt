@@ -143,8 +143,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             val dModList: DateUnit
             if (cursor.moveToFirst()) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                mstate.postValue(NeoState.LongState(time))
-                waitPost()
+                postState(NeoState.LongValue(time))
                 dModList = DateUnit.putMills(time)
                 if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
@@ -170,12 +169,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             cursor.close()
             storage.close()
             if (list.isNotEmpty()) {
-                mstate.postValue(NeoState.Book(calendar, prev, next, list))
+                postState(NeoState.Book(calendar, prev, next, list))
                 return@launch
             }
             val today = DateUnit.initToday()
             if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year)
-                mstate.postValue(NeoState.Message(strings.month_is_empty))
+                postState(NeoState.Message(strings.month_is_empty))
             else reLoad()
         }
     }
@@ -203,135 +202,137 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     @SuppressLint("Range")
     fun getRnd(type: RndType) {
-        //Определяем диапозон дат:
-        val d = DateUnit.initToday()
-        var m: Int
-        var y: Int
-        var maxM = d.month
-        var maxY = d.year - 2000
-        if (type == RndType.POEM) {
-            m = 2
-            y = 16
-        } else {
-            if (isLoadedOtkr) {
-                m = 8
-                y = 4
-            } else {
-                m = 1
+        scope.launch {
+            //Определяем диапозон дат:
+            val d = DateUnit.initToday()
+            var m: Int
+            var y: Int
+            var maxM = d.month
+            var maxY = d.year - 2000
+            if (type == RndType.POEM) {
+                m = 2
                 y = 16
-            }
-            if (type == RndType.EPISTLE) {
-                maxM = 9
-                maxY = 16
-            }
-        }
-        var n = (maxY - y) * 12 + maxM - m
-        if (maxY > 16) { //проверка на существование текущего месяца
-            val f = Lib.getFileDB(d.my)
-            if (!f.exists()) n--
-        }
-        //определяем случайный месяц:
-        var g = Random()
-        n = g.nextInt(n)
-        while (n > 0) { //определяем случайную дату
-            if (m == 12) {
-                m = 1
-                y++
-            } else m++
-            n--
-        }
-        //открываем базу по случайной дате:
-        val name = (if (m < 10) "0" else "") + m + "." + (if (y < 10) "0" else "") + y
-        val storage = PageStorage()
-        storage.open(name)
-        val curTitle: Cursor
-        var title: String? = null
-        //определяем условие отбора в соотвтствии с выбранным пунктом:
-        when (type) {
-            RndType.POEM -> {
-                title = strings.rnd_poem
-                curTitle = storage.getList(true)
-            }
-            RndType.EPISTLE -> {
-                title = strings.rnd_epistle
-                curTitle = storage.getList(false)
-            }
-            RndType.VERSE ->
-                curTitle = storage.getListAll()
-        }
-        //определяем случайных текст:
-        if (curTitle.count < 2) n = 0 else {
-            g = Random()
-            n = g.nextInt(curTitle.count - 2) + 2 //0 - отсуствует, 1 - дата изменения списка
-        }
-        if (!curTitle.moveToPosition(n)) {
-            curTitle.close()
-            storage.close()
-            mstate.postValue(NeoState.Message(strings.alert_rnd))
-            return
-        }
-        //если случайный текст найден
-        var s = ""
-        if (type == RndType.VERSE) { //случайных стих
-            val curPar = storage.getParagraphs(curTitle)
-            if (curPar.count > 1) { //если текст скачен
-                g = Random()
-                n = curPar.count //номер случайного стиха
-                if (y > 13 || y == 13 && m > 7) n-- //исключаем подпись
-                n = g.nextInt(n)
-                if (curPar.moveToPosition(n)) { //если случайный стих найден
-                    s = Lib.withOutTags(curPar.getString(0))
+            } else {
+                if (isLoadedOtkr) {
+                    m = 8
+                    y = 4
                 } else {
-                    s = ""
-                    n = -1
+                    m = 1
+                    y = 16
                 }
-            } else s = ""
-            curPar.close()
-            if (s == "") { //случайный стих не найден
-                Lib.showToast(strings.alert_rnd)
-                title = strings.rnd_verse
+                if (type == RndType.EPISTLE) {
+                    maxM = 9
+                    maxY = 16
+                }
             }
-        } else  // случайный катрен или послание
-            n = -1
-        //выводим на экран:
-        val link: String? = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
-        var msg: String
-        msg = if (link == null) strings.try_again
-        else storage.getPageTitle(
-            curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link
-        )
-        curTitle.close()
-        if (title == null) {
-            title = msg
-            msg = s
-        }
-        mstate.postValue(
-            NeoState.Rnd(
-                title = title,
-                link = link ?: "",
-                msg = msg,
-                place = s,
-                par = n
+            var n = (maxY - y) * 12 + maxM - m
+            if (maxY > 16) { //проверка на существование текущего месяца
+                val f = Lib.getFileDB(d.my)
+                if (!f.exists()) n--
+            }
+            //определяем случайный месяц:
+            var g = Random()
+            n = g.nextInt(n)
+            while (n > 0) { //определяем случайную дату
+                if (m == 12) {
+                    m = 1
+                    y++
+                } else m++
+                n--
+            }
+            //открываем базу по случайной дате:
+            val name = (if (m < 10) "0" else "") + m + "." + (if (y < 10) "0" else "") + y
+            val storage = PageStorage()
+            storage.open(name)
+            val curTitle: Cursor
+            var title: String? = null
+            //определяем условие отбора в соотвтствии с выбранным пунктом:
+            when (type) {
+                RndType.POEM -> {
+                    title = strings.rnd_poem
+                    curTitle = storage.getList(true)
+                }
+                RndType.EPISTLE -> {
+                    title = strings.rnd_epistle
+                    curTitle = storage.getList(false)
+                }
+                RndType.VERSE ->
+                    curTitle = storage.getListAll()
+            }
+            //определяем случайных текст:
+            if (curTitle.count < 2) n = 0 else {
+                g = Random()
+                n = g.nextInt(curTitle.count - 2) + 2 //0 - отсуствует, 1 - дата изменения списка
+            }
+            if (!curTitle.moveToPosition(n)) {
+                curTitle.close()
+                storage.close()
+                postState(NeoState.Message(strings.alert_rnd))
+                return@launch
+            }
+            //если случайный текст найден
+            var s = ""
+            if (type == RndType.VERSE) { //случайных стих
+                val curPar = storage.getParagraphs(curTitle)
+                if (curPar.count > 1) { //если текст скачен
+                    g = Random()
+                    n = curPar.count //номер случайного стиха
+                    if (y > 13 || y == 13 && m > 7) n-- //исключаем подпись
+                    n = g.nextInt(n)
+                    if (curPar.moveToPosition(n)) { //если случайный стих найден
+                        s = Lib.withOutTags(curPar.getString(0))
+                    } else {
+                        s = ""
+                        n = -1
+                    }
+                } else s = ""
+                curPar.close()
+                if (s == "") { //случайный стих не найден
+                    Lib.showToast(strings.alert_rnd)
+                    title = strings.rnd_verse
+                }
+            } else  // случайный катрен или послание
+                n = -1
+            //выводим на экран:
+            val link: String? = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
+            var msg: String
+            msg = if (link == null) strings.try_again
+            else storage.getPageTitle(
+                curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link
             )
-        )
-        if (link == null) {
+            curTitle.close()
+            if (title == null) {
+                title = msg
+                msg = s
+            }
+            postState(
+                NeoState.Rnd(
+                    title = title,
+                    link = link ?: "",
+                    msg = msg,
+                    place = s,
+                    par = n
+                )
+            )
+            if (link == null) {
+                storage.close()
+                return@launch
+            }
+            //добавляем в журнал:
+            val row = ContentValues()
+            row.put(Const.TIME, System.currentTimeMillis())
+            val dbJournal = JournalStorage()
+            row.put(
+                DataBase.ID,
+                PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link) + Const.AND + n
+            )
             storage.close()
-            return
+            dbJournal.insert(row)
+            dbJournal.close()
         }
-        //добавляем в журнал:
-        val row = ContentValues()
-        row.put(Const.TIME, System.currentTimeMillis())
-        val dbJournal = JournalStorage()
-        row.put(
-            DataBase.ID,
-            PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link) + Const.AND + n
-        )
-        storage.close()
-        dbJournal.insert(row)
-        dbJournal.close()
     }
 
     override fun postPercent(value: Int) {
-        mstate.postValue(NeoState.Progress(value))
+        setState(NeoState.Progress(value))
     }
 }

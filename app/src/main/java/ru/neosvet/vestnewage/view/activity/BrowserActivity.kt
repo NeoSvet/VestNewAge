@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.Observer
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -32,7 +32,7 @@ import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
-class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver {
+class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -66,6 +66,11 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
     }
+    private val stateUtils: StateUtils by lazy {
+        StateUtils(this, toiler)
+    }
+    override val scope: LifecycleCoroutineScope
+        get() = lifecycleScope
     private val helper: BrowserHelper
         get() = toiler.helper!!
     private lateinit var binding: BrowserActivityBinding
@@ -94,8 +99,8 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         setViews()
         setContent()
         initTheme()
-        toiler.state.observe(this, this)
         restoreState(savedInstanceState)
+        stateUtils.runObserve()
     }
 
     override fun onPause() {
@@ -123,6 +128,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
     }
 
     private fun restoreState(state: Bundle?) {
+        stateUtils.restore()
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
@@ -480,7 +486,7 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
         toiler.openPage(false)
     }
 
-    override fun onChanged(state: NeoState) {
+    override fun onChangedState(state: NeoState) {
         when (state) {
             NeoState.Loading -> {
                 bottomBlocked()

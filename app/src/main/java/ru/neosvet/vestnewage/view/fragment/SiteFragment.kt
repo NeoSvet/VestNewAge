@@ -106,10 +106,10 @@ class SiteFragment : NeoFragment() {
                 toiler.selectedTab = it.getInt(Const.TAB)
                 binding?.tabLayout?.select(toiler.selectedTab)
             }
-        }
-        when (toiler.selectedTab) {
-            SiteToiler.TAB_DEV -> toiler.openAds()
-            else -> toiler.openList(true)
+            when (toiler.selectedTab) {
+                SiteToiler.TAB_DEV -> toiler.openAds()
+                else -> toiler.openList(true)
+            }
         }
     }
 
@@ -217,7 +217,7 @@ class SiteFragment : NeoFragment() {
             openReader(url, null)
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         if (state is NeoState.ListValue) {
             setStatus(false)
             binding?.run {
@@ -232,7 +232,7 @@ class SiteFragment : NeoFragment() {
                 val item = state.list[ads.index]
                 ads.showAd(item.title, item.link, item.head)
             }
-        } else if (state is NeoState.LongState)
+        } else if (state is NeoState.LongValue)
             setUpdateTime(state.value)
     }
 

@@ -57,7 +57,7 @@ class NewFragment : NeoFragment() {
         }
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is NeoState.Ready ->
                 emptyList()

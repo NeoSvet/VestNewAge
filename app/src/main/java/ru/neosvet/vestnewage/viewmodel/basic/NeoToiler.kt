@@ -1,17 +1,11 @@
 package ru.neosvet.vestnewage.viewmodel.basic
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.work.Data
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.ErrorUtils
 
-abstract class NeoToiler : ViewModel() {
-    protected val mstate = MutableLiveData<NeoState>()
-    val state: LiveData<NeoState>
-        get() = mstate
+abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
     protected var loadIfNeed = false
     var isRun: Boolean = false
@@ -21,6 +15,12 @@ abstract class NeoToiler : ViewModel() {
             + CoroutineExceptionHandler { _, throwable ->
         errorHandler(throwable)
     })
+
+    protected fun setState(state: NeoState) {
+        scope.launch {
+            postState(state)
+        }
+    }
 
     override fun onCleared() {
         cancel()
@@ -39,12 +39,8 @@ abstract class NeoToiler : ViewModel() {
             ErrorUtils.setData(getInputData())
             if (throwable is Exception)
                 ErrorUtils.setError(throwable)
-            mstate.postValue(NeoState.Error(throwable))
+            setState(NeoState.Error(throwable))
         }
-    }
-
-    protected suspend fun waitPost() {
-        delay(200)
     }
 
     open fun cancel() {
@@ -57,7 +53,7 @@ abstract class NeoToiler : ViewModel() {
         isRun = true
         scope.launch {
             loadIfNeed = false
-            mstate.postValue(NeoState.Loading)
+            postState(NeoState.Loading)
             doLoad()
             isRun = false
         }
@@ -66,7 +62,7 @@ abstract class NeoToiler : ViewModel() {
     protected fun checkConnect(): Boolean {
         if (ConnectWatcher.connected)
             return true
-        mstate.postValue(NeoState.NoConnected)
+        setState(NeoState.NoConnected)
         return false
     }
 
@@ -74,7 +70,7 @@ abstract class NeoToiler : ViewModel() {
 
     protected suspend fun reLoad() {
         if (loadIfNeed && checkConnect()) {
-            mstate.postValue(NeoState.Loading)
+            postState(NeoState.Loading)
             loadIfNeed = false
             doLoad()
         }

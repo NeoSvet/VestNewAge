@@ -15,9 +15,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
@@ -33,7 +35,7 @@ import ru.neosvet.vestnewage.viewmodel.MarkerToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
 @SuppressLint("DefaultLocale")
-class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
+class MarkerActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         fun addByPos(context: Context, link: String, pos: Float, des: String) {
@@ -114,10 +116,14 @@ class MarkerActivity : AppCompatActivity(), Observer<NeoState> {
         initActivity()
         initContent()
         restoreState(savedInstanceState)
-        toiler.state.observe(this, this)
+        lifecycleScope.launch {
+            toiler.state.collect {
+                onChangedState(it)
+            }
+        }
     }
 
-    override fun onChanged(state: NeoState) {
+    private fun onChangedState(state: NeoState) {
         when (state) {
             NeoState.Success ->
                 showData()

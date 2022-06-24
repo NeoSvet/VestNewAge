@@ -47,7 +47,8 @@ class SummaryFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
-        toiler.openList(savedInstanceState == null)
+        if (savedInstanceState == null)
+            toiler.openList(true)
     }
 
     override fun onResume() {
@@ -65,7 +66,7 @@ class SummaryFragment : NeoFragment() {
         setListEvents(rvSummary)
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         setStatus(false)
         if (state is NeoState.ListValue) {
             val scroll = adapter.itemCount > 0
@@ -73,7 +74,7 @@ class SummaryFragment : NeoFragment() {
             if (scroll)
                 binding?.rvSummary?.smoothScrollToPosition(0)
             act?.updateNew()
-        } else if (state is NeoState.LongState)
+        } else if (state is NeoState.LongValue)
             setUpdateTime(state.value)
     }
 

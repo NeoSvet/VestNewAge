@@ -265,7 +265,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         helper.saveRequest(request)
     }
 
-    override fun onChangedState(state: NeoState) {
+    override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is NeoState.Message ->
                 binding?.tvStatus?.text = state.message

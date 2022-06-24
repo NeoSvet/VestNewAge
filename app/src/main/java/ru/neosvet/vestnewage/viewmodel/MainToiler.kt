@@ -38,7 +38,7 @@ class MainToiler : NeoToiler() {
         val ads = AdsUtils(App.context)
         ads.loadAds()
         ads.close()
-        mstate.postValue(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
+        postState(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
     }
 
@@ -108,7 +108,7 @@ class MainToiler : NeoToiler() {
         }
         br.close()
         if (list.isNotEmpty())
-            mstate.postValue(NeoState.ListValue(list))
+            postState(NeoState.ListValue(list))
     }
 
     private suspend fun synchronizationTime(): Int {
