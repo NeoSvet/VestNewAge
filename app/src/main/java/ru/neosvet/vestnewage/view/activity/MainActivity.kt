@@ -219,7 +219,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         lifecycleScope.launch {
             toiler.state.collect {
                 onChangedState(it)
-                toiler.notifyReady()
             }
         }
         toiler.load()

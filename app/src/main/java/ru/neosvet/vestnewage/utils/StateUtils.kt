@@ -17,10 +17,8 @@ class StateUtils(
 
     fun runObserve() {
         host.scope.launch {
-            toiler.notifyReady()
             toiler.state.collect {
                 host.onChangedState(it)
-                toiler.notifyReady()
             }
         }
     }

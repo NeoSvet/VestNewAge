@@ -1,28 +1,20 @@
 package ru.neosvet.vestnewage.viewmodel.basic
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 
 abstract class StateToiler : ViewModel() {
     private val cache = mutableListOf<NeoState>()
-    private val mstate = MutableSharedFlow<NeoState>()
-    val state = mstate.asSharedFlow()
-    private var isReady = false
-
-    fun notifyReady() {
-        isReady = true
-    }
+    private val mstate = Channel<NeoState>()
+    val state = mstate.receiveAsFlow()
 
     fun cacheState() = flow {
-        isReady = false
         cache.forEach {
             if (it != NeoState.None)
                 emit(it)
         }
-        isReady = true
     }
 
     fun clearAllStates() {
@@ -36,10 +28,7 @@ abstract class StateToiler : ViewModel() {
 
     protected suspend fun postState(state: NeoState) {
         addToCache(state)
-        while (isReady.not())
-            delay(25)
-        isReady = false
-        mstate.emit(state)
+        mstate.send(state)
     }
 
     private fun addToCache(state: NeoState) {
