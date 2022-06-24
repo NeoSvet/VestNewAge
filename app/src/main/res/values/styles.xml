@@ -24,6 +24,7 @@
         <item name="popupMenuBackground">@color/colorPrimary</item>
         <item name="android:itemBackground">@drawable/menu_selector</item>
         <item name="android:dropDownListViewStyle">@style/DropListStyle</item>
+        <item name="recyclerViewStyle">@style/RecyclerViewStyle</item>
     </style>
 
     <style name="TabLayoutTheme">
@@ -151,6 +152,12 @@
     <style name="DropListStyle" parent="AppTheme.PopupOverlay">
         <item name="android:divider">@color/colorAccent</item>
         <item name="android:dividerHeight">2dp</item>
+    </style>
+
+    <style name="RecyclerViewStyle">
+        <item name="android:clipToPadding">false</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
     </style>
 
 </resources>

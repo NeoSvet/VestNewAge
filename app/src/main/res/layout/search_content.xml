@@ -1,10 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:orientation="vertical"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/pSearch">
+    app:layout_constraintTop_toBottomOf="@id/pSearch"
+    tools:showIn="@layout/search_fragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pAdditionSet"
