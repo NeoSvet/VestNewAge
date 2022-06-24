@@ -53,6 +53,12 @@ public class CabinetActivity extends AppCompatActivity {
         wvBrowser.loadUrl(NeoClient.CAB_SITE + getIntent().getStringExtra(Const.LINK));
     }
 
+    @Override
+    protected void onDestroy() {
+        wvBrowser.stopLoading();
+        super.onDestroy();
+    }
+
     @SuppressLint({"ClickableViewAccessibility", "SetJavaScriptEnabled"})
     private void initView() {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -120,7 +126,7 @@ public class CabinetActivity extends AppCompatActivity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if (url.contains("#")) return;
+            if (url.contains("#") || CabinetActivity.this.isDestroyed()) return;
             wvBrowser.evaluateJavascript(SCRIPT, s -> status.setLoad(false));
             String s = wvBrowser.getTitle();
             fabClose.setVisibility(View.VISIBLE);
