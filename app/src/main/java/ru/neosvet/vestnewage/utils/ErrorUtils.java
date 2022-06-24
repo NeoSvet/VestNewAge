@@ -14,15 +14,6 @@ public class ErrorUtils {
     private static Exception error;
     private static Data data;
 
-    public static boolean isNotEmpty() {
-        return data != null || error != null;
-    }
-
-    public static String getMessage() {
-        if (error == null) return "";
-        return error.getLocalizedMessage();
-    }
-
     public static void clear() {
         data = null;
         error = null;

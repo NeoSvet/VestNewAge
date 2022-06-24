@@ -9,6 +9,7 @@
     <string name="god_words">Слова Создателя</string>
     <string name="yet_load">Ещё не загружены. Откройте позже.</string>
     <string name="find">Найти</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>

@@ -148,11 +148,6 @@ class BrowserActivity : AppCompatActivity(), Observer<NeoState>, ConnectObserver
                 binding.content.etSearch.isEnabled = false
             }
         }
-
-        if (ErrorUtils.isNotEmpty()) {
-            bottomBlocked()
-            status.setError(ErrorUtils.getMessage())
-        }
     }
 
     private fun restoreSearch() = helper.run {

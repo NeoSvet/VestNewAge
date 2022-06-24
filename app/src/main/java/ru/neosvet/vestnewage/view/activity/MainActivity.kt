@@ -97,8 +97,10 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
     private fun initStatusButton() {
         status.init(this, helper.pStatus)
         status.setClick {
-            if (status.onClick()) unblocked()
-            else curFragment?.onStatusClick()
+            if (status.onClick()) {
+                unblocked()
+                curFragment?.resetError()
+            } else curFragment?.onStatusClick()
         }
     }
 
@@ -283,10 +285,6 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             else if (curSection != Section.MENU)
                 statusBack = StatusBack.PAGE
             updateNew()
-            if (ErrorUtils.isNotEmpty()) {
-                status.setError(ErrorUtils.getMessage())
-                if (isBlocked.not()) status.onClick()
-            }
         }
     }
 
@@ -447,6 +445,7 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
             ErrorUtils.clear()
             status.setError(null)
             unblocked()
+            curFragment?.resetError()
             return
         }
         if (curFragment?.onBackPressed() == false)
@@ -622,5 +621,10 @@ class MainActivity : AppCompatActivity(), Observer<NeoState>, ItemClicker {
 
     fun hideHead() {
         helper.topBar?.setExpanded(false)
+    }
+
+    fun setError(msg: String?) {
+        blocked()
+        status.setError(msg ?: getString(R.string.unknown_error))
     }
 }

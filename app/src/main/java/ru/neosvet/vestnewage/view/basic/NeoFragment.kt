@@ -79,6 +79,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
 
     override fun onChanged(state: NeoState) {
         when (state) {
+            is NeoState.None ->
+                return
             is NeoState.Progress ->
                 act?.status?.setProgress(state.percent)
             NeoState.Loading ->
@@ -86,7 +88,7 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
             NeoState.NoConnected ->
                 noConnected()
             is NeoState.Error -> {
-                act?.status?.setError(state.throwable.localizedMessage)
+                act?.setError(state.throwable.localizedMessage)
                 setStatus(false)
             }
             else ->
@@ -125,8 +127,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
                 act?.blocked()
                 status.loadText()
                 status.setLoad(true)
-            } else {
-                if (status.isVisible && status.isCrash.not())
+            } else if (status.isCrash.not()) {
+                if (status.isVisible)
                     status.setLoad(false)
                 act?.unblocked()
             }
@@ -165,4 +167,8 @@ abstract class NeoFragment : Fragment(), Observer<NeoState>, ConnectObserver {
     open fun swipeLeft() {}
 
     open fun swipeRight() {}
+
+    fun resetError() {
+        neotoiler.clearSecondaryStates()
+    }
 }
