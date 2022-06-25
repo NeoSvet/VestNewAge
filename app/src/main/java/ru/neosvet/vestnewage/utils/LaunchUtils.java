@@ -32,7 +32,7 @@ public class LaunchUtils {
     private static final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
             PendingIntent.FLAG_UPDATE_CURRENT :
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-    public static final String PREF_NAME = "main";
+    private static final String PREF_NAME = "main";
     private SharedPreferences pref = App.context.getSharedPreferences(PREF_NAME, MODE_PRIVATE);
     private final int START_ID = 900;
     private int notif_id = START_ID;

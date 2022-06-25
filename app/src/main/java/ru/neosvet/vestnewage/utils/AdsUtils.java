@@ -1,11 +1,8 @@
 package ru.neosvet.vestnewage.utils;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 
 import java.io.BufferedInputStream;
@@ -14,7 +11,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.ListItem;
 import ru.neosvet.vestnewage.network.NeoClient;
@@ -32,11 +28,6 @@ public class AdsUtils {
 
     public AdsUtils(Context context) {
         this.context = context;
-    }
-
-    public long getCheckTime() {
-        SharedPreferences pref = App.context.getSharedPreferences(LaunchUtils.PREF_NAME, MODE_PRIVATE);
-        return pref.getLong(Const.TIME, 0);
     }
 
     public boolean hasNew() {
@@ -226,13 +217,7 @@ public class AdsUtils {
                 m[TITLE] = s;
         }
         storage.deleteItems(titles);
-        ContentValues row = new ContentValues();
-        row.put(Const.MODE, AdsStorage.MODE_T);
-        row.put(Const.UNREAD, 0);
-        time = System.currentTimeMillis();
-        row.put(Const.TITLE, time);
-        if (!storage.updateTime(row))
-            storage.insert(row);
+        time = storage.newTime();
         return isNew;
     }
 
@@ -279,7 +264,8 @@ public class AdsUtils {
                 UnreadUtils unread = new UnreadUtils();
                 unread.setBadge(getUnreadCount());
             }
-        }
+        } else
+            time = storage.newTime();
         br.close();
         in.close();
     }

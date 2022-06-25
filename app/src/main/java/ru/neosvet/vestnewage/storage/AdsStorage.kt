@@ -39,8 +39,16 @@ class AdsStorage {
     fun updateByDes(des: String, row: ContentValues): Boolean =
         db.update(NAME, row, Const.DESCTRIPTION + DataBase.Q, des) > 0
 
-    fun updateTime(row: ContentValues): Boolean =
-        db.update(NAME, row, Const.MODE + DataBase.Q, MODE_T.toString()) > 0
+    fun newTime(): Long {
+        val row = ContentValues()
+        row.put(Const.MODE, MODE_T)
+        row.put(Const.UNREAD, 0)
+        val time = System.currentTimeMillis()
+        row.put(Const.TITLE, time.toString())
+        if (db.update(NAME, row, Const.MODE + DataBase.Q, MODE_T.toString()) < 1)
+            insert(row)
+        return time
+    }
 
     fun delete() =
         db.delete(NAME)

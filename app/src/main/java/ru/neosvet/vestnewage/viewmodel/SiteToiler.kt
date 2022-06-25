@@ -140,7 +140,7 @@ class SiteToiler : NeoToiler() {
     fun openAds() {
         loadIfNeed = false
         scope.launch {
-            postState(NeoState.LongValue(ads.checkTime))
+            postState(NeoState.LongValue(ads.time))
             val list = ads.loadList(false)
             list.add(0, getFirstItem())
             postState(NeoState.ListValue(list))
