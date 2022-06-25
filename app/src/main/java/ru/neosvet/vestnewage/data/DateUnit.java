@@ -56,8 +56,7 @@ public class DateUnit {
     }
 
     public static DateUnit initNow() {
-        Clock clock = Clock.system(ZoneId.of("UTC"));
-        return new DateUnit(LocalDate.now(clock), LocalTime.now(clock));
+        return putMills(System.currentTimeMillis());
     }
 
     public static DateUnit parse(String s) {
