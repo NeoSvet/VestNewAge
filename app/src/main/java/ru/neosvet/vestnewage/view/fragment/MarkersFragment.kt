@@ -16,7 +16,10 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
@@ -114,6 +117,12 @@ class MarkersFragment : NeoFragment() {
         toiler.run {
             if (iSel > -1) {
                 goToEdit()
+                lifecycleScope.launch {
+                    delay(150)
+                    binding?.content?.rvMarker?.run {
+                        post { smoothScrollToPosition(iSel) }
+                    }
+                }
                 if (diName != null) renameDialog(diName!!)
                 else if (diDelete) deleteDialog()
             }
