@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private lateinit var utils: LaunchUtils
     private var jobBottomArea: Job? = null
-    private var isShowBottomArea = false
+    private var isShowBottomArea = true
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
     private val toast: NeoToast by lazy {
