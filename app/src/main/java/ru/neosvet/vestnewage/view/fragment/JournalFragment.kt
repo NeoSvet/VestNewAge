@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
@@ -15,12 +14,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.JournalFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -39,8 +36,6 @@ class JournalFragment : NeoFragment() {
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
-
-    private lateinit var tip: Tip
 
     override fun onDestroyView() {
         binding = null
@@ -64,7 +59,6 @@ class JournalFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        tip = Tip(act, tvFinish)
         rvJournal.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvJournal.adapter = adapter
         setListEvents(rvJournal)
@@ -80,7 +74,6 @@ class JournalFragment : NeoFragment() {
         if (s.contains(getString(R.string.rnd_verse))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
             s = s.substring(i)
-            Lib.showToast(getString(R.string.long_press_for_mark))
         } else s = null
         openReader(item.link, s)
     }
@@ -104,18 +97,18 @@ class JournalFragment : NeoFragment() {
     }
 
     private fun finishedList() {
-        binding?.tvFinish?.text = if (toiler.isLoading)
+        val msg = if (toiler.isLoading)
             getString(R.string.load)
         else getString(R.string.finish_list)
-        tip.show()
+        act?.showToast(msg)
     }
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
             NeoState.Success ->
-                tip.hideAnimated()
+                act?.hideToast()
             NeoState.Ready -> binding?.run {
-                tvEmptyJournal.isVisible = true
+                act?.showStaticToast(getString(R.string.empty_journal))
                 act?.setAction(0)
             }
             else -> {}

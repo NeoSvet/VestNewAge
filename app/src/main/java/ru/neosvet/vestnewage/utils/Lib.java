@@ -18,10 +18,6 @@ public class Lib {
 //        Log.d("neotag", msg);
 //    }
 
-    public static void showToast(String msg) {
-        Toast.makeText(App.context, msg, Toast.LENGTH_LONG).show();
-    }
-
     public static File getFile(String name) {
         return new File(App.context.getFilesDir() + name);
     }

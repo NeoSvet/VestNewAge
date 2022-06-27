@@ -24,7 +24,10 @@ import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.service.CheckStarter
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.NotificationUtils
+import ru.neosvet.vestnewage.utils.PromUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
@@ -105,7 +108,7 @@ class SettingsFragment : NeoFragment() {
         if (state is NeoState.LongValue) {
             setStatus(false)
             val size = state.value / 1048576f //to MegaByte
-            Lib.showToast(String.format(getString(R.string.format_freed_size), size))
+            act?.showToast(String.format(getString(R.string.format_freed_size), size))
             neotoiler.clearAllStates()
         }
     }

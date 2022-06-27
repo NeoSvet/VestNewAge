@@ -23,6 +23,7 @@ import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Tip
@@ -68,6 +69,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     }
     private val stateUtils: StateUtils by lazy {
         StateUtils(this, toiler)
+    }
+    private val toast: NeoToast by lazy {
+        NeoToast(binding.tvToast, null)
     }
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
@@ -497,7 +501,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             NeoState.NoConnected -> {
                 finishLoading()
                 ConnectWatcher.subscribe(this)
-                ConnectWatcher.showMessage()
+                if (ConnectWatcher.needShowMessage())
+                    toast.show(getString(R.string.no_connected))
             }
             is NeoState.Page -> {
                 finishLoading()

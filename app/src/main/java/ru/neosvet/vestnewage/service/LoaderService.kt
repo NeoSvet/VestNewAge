@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 
 /**
@@ -43,10 +44,13 @@ class LoaderService : LifecycleService(), LoadHandler {
         const val DOWNLOAD_OTKR = 4
 
         @JvmStatic
-        fun postCommand(mode: Int, request: String?) {
-            if (isRun && mode != STOP) {
-                Lib.showToast(App.context.getString(R.string.load_already_run))
-                return
+        fun postCommand(mode: Int, request: String?, toast: NeoToast?) {
+            if (mode != STOP) {
+                toast?.autoHide = true
+                if (isRun) {
+                    toast?.show(App.context.getString(R.string.load_already_run))
+                    return
+                } else toast?.show(App.context.getString(R.string.load_background))
             }
             val intent = Intent(App.context, LoaderService::class.java)
             intent.putExtra(Const.MODE, mode)
@@ -126,7 +130,6 @@ class LoaderService : LifecycleService(), LoadHandler {
         progress.text = getString(R.string.start)
         progress.task = 1
         initNotif()
-        Lib.showToast(getString(R.string.load_background))
         request = intent.getStringExtra(Const.TASK)
         scope.launch {
             startLoad()

@@ -133,7 +133,6 @@
     <string name="sel_col">Выбраны подборки:&#160;</string>
     <string name="sel_par">Выбраны абзацы №№:&#160;</string>
     <string name="par_n">Абзацы №№&#160;</string>
-    <string name="long_press_for_mark">Долгое нажатие - чтобы добавить в закладки</string>
     <!--SiteFragment-->
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>

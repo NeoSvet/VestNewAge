@@ -288,7 +288,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 } else s = ""
                 curPar.close()
                 if (s == "") { //случайный стих не найден
-                    Lib.showToast(strings.alert_rnd)
+                    postState(NeoState.Message(strings.alert_rnd))
                     title = strings.rnd_verse
                 }
             } else  // случайный катрен или послание

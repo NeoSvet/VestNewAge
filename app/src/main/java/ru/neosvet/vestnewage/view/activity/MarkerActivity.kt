@@ -28,6 +28,7 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.list.CheckAdapter
@@ -107,6 +108,9 @@ class MarkerActivity : AppCompatActivity() {
         get() = toiler.helper
 
     private var heightDialog = 0
+    private val toast: NeoToast by lazy {
+        NeoToast(binding.tvToast, null)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,7 +133,7 @@ class MarkerActivity : AppCompatActivity() {
                 showData()
             NeoState.Ready -> {
                 if (helper.title.isEmpty())
-                    Lib.showToast(getString(R.string.not_load_page))
+                    toast.show(getString(R.string.not_load_page))
                 onBackPressed()
             }
             is NeoState.Error -> {
@@ -304,7 +308,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun createCol(title: String) {
         if (title.isEmpty()) return
         helper.checkTitleCol(title)?.let {
-            Lib.showToast(it)
+            toast.show(it)
             return@createCol
         }
         toiler.addCol(title)
@@ -331,7 +335,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun saveSelectedCol() {
         val s = helper.getColList()
         if (s == null) {
-            Lib.showToast(getString(R.string.need_set_check))
+            toast.show(getString(R.string.need_set_check))
             return
         }
         helper.cols = s
@@ -350,7 +354,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun saveSelectedPar() {
         val s = helper.getParList()
         if (s == null) {
-            Lib.showToast(getString(R.string.need_set_check))
+            toast.show(getString(R.string.need_set_check))
             return
         }
         helper.sel = s

@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -140,7 +141,9 @@ public class SummaryHelper {
     }
 
     public static void postpone(String des, String link) {
-        Lib.showToast(App.context.getString(R.string.postpone_alert));
+        Toast.makeText(App.context,
+                App.context.getString(R.string.postpone_alert),
+                Toast.LENGTH_LONG).show();
         Intent intent = new Intent(App.context, Rec.class);
         intent.putExtra(Const.DESCTRIPTION, des);
         intent.putExtra(Const.LINK, link);

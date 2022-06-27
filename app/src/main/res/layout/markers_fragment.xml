@@ -24,19 +24,6 @@
         android:id="@+id/content"
         layout="@layout/markers_content" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/field"
-        android:padding="15dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <LinearLayout
         android:id="@+id/pFileOperation"
         style="@style/ItemBG"

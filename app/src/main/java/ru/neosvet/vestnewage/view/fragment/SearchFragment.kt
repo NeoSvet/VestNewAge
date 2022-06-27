@@ -21,12 +21,10 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
-import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
@@ -68,7 +66,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     override lateinit var modes: ArrayAdapter<String>
         private set
 
-    private lateinit var tip: Tip
     private var settings: SearchDialog? = null
     private var jobResult: Job? = null
     private val softKeyboard: SoftKeyboard by lazy {
@@ -92,9 +89,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         ViewModelProvider(this).get(SearchToiler::class.java).apply { init(requireContext()) }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        binding?.run {
-            tip = Tip(act, tvFinish)
-        }
         initSearchBox()
         setViews()
         initSearchList()
@@ -236,7 +230,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private fun enterSearch() = binding?.run {
         etSearch.dismissDropDown()
         if (etSearch.length() < 3)
-            Lib.showToast(getString(R.string.low_sym_for_search))
+            act?.showToast(getString(R.string.low_sym_for_search))
         else
             startSearch()
     }
@@ -280,7 +274,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
                     finishSearch()
             }
             NeoState.Ready ->
-                tip.hideAnimated()
+                act?.hideToast()
             else -> {}
         }
     }
@@ -342,7 +336,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private fun resultClick(index: Int, item: ListItem) {
         when (helper.getType(item)) {
             SearchHelper.Type.NORMAL -> {
-                Lib.showToast(getString(R.string.long_press_for_mark))
                 BrowserActivity.openReader(
                     item.link,
                     helper.request
@@ -370,10 +363,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     private fun finishedList() {
         if (toiler.isRun) return
-        binding?.tvFinish?.text = if (toiler.isLoading)
+        val msg = if (toiler.isLoading)
             getString(R.string.load)
         else getString(R.string.finish_list)
-        tip.show()
+        act?.showToast(msg)
     }
 
     override fun onAction(title: String) {

@@ -69,6 +69,8 @@ class MainHelper(private val act: MainActivity) {
         private set
     lateinit var tvPromTimeFloat: TextView
         private set
+    lateinit var tvToast: TextView
+        private set
     private var godWords: String = ""
 
     val unread = UnreadUtils()
@@ -85,6 +87,7 @@ class MainHelper(private val act: MainActivity) {
 
     fun initViews() {
         pStatus = act.findViewById(R.id.pStatus)
+        tvToast = act.findViewById(R.id.tvToast)
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
         fabAction = act.findViewById(R.id.fabAction)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
@@ -226,9 +229,7 @@ class MainHelper(private val act: MainActivity) {
     private fun onActionClick(index: Int, item: MenuItem) {
         hideActionMenu()
         if (index == 0) {
-            LoaderService.postCommand(
-                LoaderService.DOWNLOAD_ALL, ""
-            )
+            act.download(LoaderService.DOWNLOAD_ALL, "")
             return
         }
         if (index == adAction.itemCount - 1)

@@ -1,9 +1,9 @@
 package ru.neosvet.vestnewage.view.fragment
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
@@ -117,6 +117,7 @@ class CabinetFragment : NeoFragment() {
         setListEvents(rvList)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initLogin() = binding?.login?.run {
         etEmail.doAfterTextChanged {
             checkReadyEnter()
@@ -141,7 +142,7 @@ class CabinetFragment : NeoFragment() {
         }
         bClearEmail.setOnClickListener { etEmail.setText("") }
         bClearPassword.setOnClickListener { etPassword.setText("") }
-        root.setOnTouchListener { _, event: MotionEvent ->
+        root.setOnTouchListener { _, _ ->
             act?.hideBottomArea()
             return@setOnTouchListener false
         }
@@ -200,7 +201,7 @@ class CabinetFragment : NeoFragment() {
                     0 -> if (item.des == getString(R.string.select_status)) {
                         setStatus(true)
                         toiler.getListWord()
-                    } else Lib.showToast(getString(R.string.send_unlivable))
+                    } else act?.showToast(getString(R.string.send_unlivable))
                     1 -> CabinetActivity.openPage("edinenie/anketa.html")
                     2 -> CabinetActivity.openPage("edinenie/edinomyshlenniki.html")
                 }

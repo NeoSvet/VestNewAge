@@ -22,7 +22,6 @@ import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
@@ -148,7 +147,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             is NeoState.LongValue ->
                 setUpdateTime(state.value)
             is NeoState.Message ->
-                Lib.showToast(state.message)
+                act?.showToast(state.message)
             is NeoState.Rnd -> with(state) {
                 showRndAlert(title, link, msg, place, par)
             }
@@ -233,9 +232,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             getString(R.string.yes)
         ) { _, _ ->
             binding?.bPrev?.isEnabled = false
-            LoaderService.postCommand(
-                LoaderService.DOWNLOAD_OTKR, ""
-            )
+            act?.download(LoaderService.DOWNLOAD_OTKR, "")
         }
         builder.create().show()
     }
@@ -312,9 +309,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     override fun onAction(title: String) {
         when (title) {
             getString(R.string.download_book) ->
-                LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_IT, Section.BOOK.toString()
-                )
+                act?.download(LoaderService.DOWNLOAD_IT, Section.BOOK.toString())
             getString(R.string.refresh) ->
                 startLoad()
             getString(R.string.rnd_verse) ->

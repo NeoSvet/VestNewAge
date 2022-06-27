@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.StateUtils
@@ -114,7 +115,8 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
 
     private fun noConnected() {
         ConnectWatcher.subscribe(this)
-        ConnectWatcher.showMessage()
+        if (ConnectWatcher.needShowMessage())
+            act?.showToast(getString(R.string.no_connected))
         setStatus(false)
     }
 

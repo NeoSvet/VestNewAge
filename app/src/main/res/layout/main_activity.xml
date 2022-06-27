@@ -143,6 +143,17 @@
         android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvToast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="@dimen/content_margin_bottom"
+        android:background="@drawable/field"
+        android:gravity="center"
+        android:padding="10dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -95,7 +95,7 @@ class MainToiler : NeoToiler() {
                 val iTime = cursor.getColumnIndex(Const.TIME)
                 if (time > cursor.getLong(iTime)) {
                     LoaderService.postCommand(
-                        LoaderService.DOWNLOAD_PAGE, s
+                        LoaderService.DOWNLOAD_PAGE, s, null
                     )
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
                     list.add(ListItem(cursor.getString(iTitle), s).apply {

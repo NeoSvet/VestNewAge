@@ -20,7 +20,6 @@ import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
@@ -189,7 +188,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             is NeoState.LongValue ->
                 setUpdateTime(state.value)
             NeoState.Ready ->
-                Lib.showToast(getString(R.string.load_unavailable))
+                act?.showToast(getString(R.string.load_unavailable))
             else -> {}
         }
     }
@@ -212,9 +211,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     override fun onAction(title: String) {
         when (title) {
             getString(R.string.download_calendar) ->
-                LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_YEAR, toiler.date.year.toString()
-                )
+                act?.download(LoaderService.DOWNLOAD_YEAR, toiler.date.year.toString())
             getString(R.string.refresh) ->
                 startLoad()
         }

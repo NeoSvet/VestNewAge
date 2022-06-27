@@ -26,10 +26,12 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.ConnectWatcher
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
@@ -66,6 +68,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var isShowBottomArea = false
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
+    private val toast: NeoToast by lazy {
+        NeoToast(helper.tvToast) {
+            statusBack = StatusBack.PAGE
+        }
+    }
 
     val newId: Int
         get() = helper.newId
@@ -296,6 +303,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onDestroy() {
+        toast.destroy()
         ConnectWatcher.stop(this)
         super.onDestroy()
     }
@@ -329,6 +337,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     @SuppressLint("NonConstantResourceId")
     fun setSection(section: Section, savePrev: Boolean) {
         if (section == helper.curSection) return
+        toast.hide()
         statusBack = StatusBack.PAGE
         setMenu(section, savePrev)
         status.setError(null)
@@ -484,7 +493,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 setSection(firstSection, false)
             else -> {
                 statusBack = StatusBack.EXIT
-                Lib.showToast(getString(R.string.click_for_exit))
+                showToast(getString(R.string.click_for_exit))
                 lifecycleScope.launch {
                     delay(3000)
                     if (statusBack == StatusBack.EXIT)
@@ -633,5 +642,25 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     fun setError(msg: String?) {
         blocked()
         status.setError(msg ?: getString(R.string.unknown_error))
+    }
+
+    fun showStaticToast(msg: String) {
+        toast.autoHide = false
+        toast.show(msg)
+    }
+
+    fun showToast(msg: String) {
+        toast.autoHide = true
+        toast.show(msg)
+    }
+
+    fun hideToast() {
+        toast.hideAnimated()
+    }
+
+    fun download(mode: Int, request: String?) {
+        LoaderService.postCommand(
+            mode, request, toast
+        )
     }
 }

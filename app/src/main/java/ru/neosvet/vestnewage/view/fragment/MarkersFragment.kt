@@ -22,7 +22,6 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -293,13 +292,13 @@ class MarkersFragment : NeoFragment() {
             is NeoState.Message -> if (toiler.workOnFile)
                 doneExport(state.message)
             else
-                Lib.showToast(state.message)
+                act?.showToast(state.message)
             is NeoState.ListState ->
                 updateList(state)
             NeoState.Ready -> {//import toiler.task==MarkersModel.Type.FILE
                 setStatus(false)
                 toiler.openColList()
-                Lib.showToast(getString(R.string.completed))
+                act?.showToast(getString(R.string.completed))
             }
             else -> {}
         }
@@ -336,11 +335,11 @@ class MarkersFragment : NeoFragment() {
         }
         if (toiler.list.isEmpty()) {
             adapter.notifyDataSetChanged()
-            tvEmpty.text = if (toiler.isCollections)
+            val msg = if (toiler.isCollections)
                 getString(R.string.no_markers)
             else
                 getString(R.string.collection_is_empty)
-            tvEmpty.isVisible = true
+            act?.showStaticToast(msg)
             unSelected()
         } else {
             when (state.event) {
@@ -358,7 +357,7 @@ class MarkersFragment : NeoFragment() {
                     adapter.notifyDataSetChanged()
                 }
             }
-            tvEmpty.isVisible = false
+            act?.hideToast()
             if (toiler.iSel == -1)
                 unSelected()
             else
@@ -372,7 +371,7 @@ class MarkersFragment : NeoFragment() {
                 if (toiler.canEdit())
                     goToEdit()
                 else
-                    Lib.showToast(getString(R.string.nothing_edit))
+                    act?.showToast(getString(R.string.nothing_edit))
             }
             getString(R.string.import_) -> if (toiler.isRun.not())
                 selectFile(false)

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
@@ -74,7 +73,7 @@ class NewFragment : NeoFragment() {
 
     private fun emptyList() {
         adapter.clear()
-        binding?.tvEmptyNew?.isVisible = true
+        act?.showStaticToast(getString(R.string.empty_list))
         act?.setAction(0)
     }
 

@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
@@ -225,7 +224,10 @@ class SiteFragment : NeoFragment() {
                     GridLayoutManager(requireContext(), 1)
                 else
                     GridLayoutManager(requireContext(), ScreenUtils.span)
-                tvEmptySite.isVisible = state.list.isEmpty()
+                if (state.list.isEmpty())
+                    act?.showStaticToast(getString(R.string.empty_site))
+                else
+                    act?.hideToast()
             }
             adapter.setItems(state.list)
             if (toiler.isDevTab && ads.index > -1) {
@@ -254,9 +256,7 @@ class SiteFragment : NeoFragment() {
     override fun onAction(title: String) {
         when (title) {
             getString(R.string.download_articles) ->
-                LoaderService.postCommand(
-                    LoaderService.DOWNLOAD_IT, Section.SITE.toString()
-                )
+                act?.download(LoaderService.DOWNLOAD_IT, Section.SITE.toString())
             getString(R.string.refresh) ->
                 startLoad()
         }
