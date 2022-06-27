@@ -276,6 +276,9 @@ class PageStorage {
     fun updateTitle(link: String, cv: ContentValues): Boolean =
         db.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) > 0
 
+    fun deleteTitle(pageId: Int) =
+        db.delete(Const.TITLE, DataBase.ID + DataBase.Q, pageId.toString())
+
     fun deleteParagraphs(pageId: Int) =
         db.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, pageId.toString())
 
@@ -324,5 +327,14 @@ class PageStorage {
         if (isClosed) return
         db.close()
         isClosed = true
+    }
+
+    fun deletePages(list: MutableList<String>) {
+        list.forEach {
+            val id = getPageId(it)
+            deleteTitle(id)
+            deleteParagraphs(id)
+        }
+        list.clear()
     }
 }
