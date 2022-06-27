@@ -46,12 +46,12 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.help_fragment, container, false)
+        return inflater.inflate(R.layout.list_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initList(view)
+        initView(view)
         activity?.let {
             it.title = getString(R.string.help)
             toiler.state.observe(it, this)
@@ -75,10 +75,10 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         super.onDetach()
     }
 
-    private fun initList(container: View) {
-        val rvHelp = container.findViewById(R.id.rvHelp) as RecyclerView
-        rvHelp.layoutManager = GridLayoutManager(requireContext(), 1)
-        rvHelp.adapter = adapter
+    private fun initView(container: View) {
+        val rv = container.findViewById(R.id.rvList) as RecyclerView
+        rv.layoutManager = GridLayoutManager(requireContext(), 1)
+        rv.adapter = adapter
         scroll = ScrollHelper {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
@@ -86,11 +86,11 @@ class HelpFragment : Fragment(), Observer<NeoState> {
                 ScrollHelper.Events.SCROLL_START ->
                     act?.showBottomArea()
             }
-        }.apply { attach(rvHelp) }
+        }.apply { attach(rv) }
         val touch = TouchHelper(true) {
             act?.hideBottomArea()
         }
-        touch.attach(rvHelp)
+        touch.attach(rv)
     }
 
     private fun restoreState(state: Bundle?) {

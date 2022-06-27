@@ -52,7 +52,7 @@ class MenuFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.menu_fragment, container, false)
+        return inflater.inflate(R.layout.list_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -69,7 +69,7 @@ class MenuFragment : Fragment() {
     }
 
     private fun initView(container: View) {
-        rvMenu = container.findViewById(R.id.rvMenu)
+        rvMenu = container.findViewById(R.id.rvList)
         if (isTabletLand.not()) {
             isFullScreen = true
             act!!.title = getString(R.string.app_name)

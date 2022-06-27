@@ -3,16 +3,17 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.databinding.JournalFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -26,7 +27,6 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 class JournalFragment : NeoFragment() {
     private val toiler: JournalToiler
         get() = neotoiler as JournalToiler
-    private var binding: JournalFragmentBinding? = null
     private val adapter: PagingAdapter by lazy {
         PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
     }
@@ -37,36 +37,33 @@ class JournalFragment : NeoFragment() {
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
 
-    override fun onDestroyView() {
-        binding = null
-        super.onDestroyView()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = JournalFragmentBinding.inflate(inflater, container, false).also {
-        binding = it
-    }.root
+    ): View? {
+        val view = inflater.inflate(R.layout.list_fragment, container, false)
+        initView(view)
+        return view
+    }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         toiler.preparing()
-        setViews()
-        if (toiler.offset > 0)
-            binding?.rvJournal?.smoothScrollToPosition(toiler.offset)
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setViews() = binding?.run {
-        rvJournal.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rvJournal.adapter = adapter
-        setListEvents(rvJournal)
+    private fun initView(container: View) {
+        val rv = container.findViewById(R.id.rvList) as RecyclerView
+        rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rv.adapter = adapter
+        setListEvents(rv)
         lifecycleScope.launch {
             toiler.paging().collect {
                 adapter.submitData(lifecycle, it)
             }
         }
+        if (toiler.offset > 0)
+            rv.smoothScrollToPosition(toiler.offset)
     }
 
     private fun onItemClick(index: Int, item: ListItem) {
@@ -107,9 +104,9 @@ class JournalFragment : NeoFragment() {
         when (state) {
             NeoState.Success ->
                 act?.hideToast()
-            NeoState.Ready -> binding?.run {
-                act?.showStaticToast(getString(R.string.empty_journal))
-                act?.setAction(0)
+            NeoState.Ready -> act?.run {
+                showStaticToast(getString(R.string.empty_journal))
+                setAction(0)
             }
             else -> {}
         }
