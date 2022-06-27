@@ -5,14 +5,10 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.work.Data
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -139,24 +135,20 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun runUpdateNotifTimer() {
-        val handler = Handler {
-            notif.setContentText(progress.message)
-            notif.setProgress(progress.max, progress.prog, false)
-            manager.notify(PROGRESS_ID, notif.build())
-            false
-        }
-        Thread {
-            try {
-                val delay = DateUnit.SEC_IN_MILLS.toLong()
-                while (isRun) {
-                    Thread.sleep(delay)
-                    if (isRun) handler.sendEmptyMessage(0)
+        val scope = CoroutineScope(Dispatchers.Default)
+        val scopeMain = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            val delay = DateUnit.SEC_IN_MILLS.toLong()
+            while (isRun) {
+                delay(delay)
+                if (isRun) scopeMain.launch {
+                    notif.setContentText(progress.message)
+                    notif.setProgress(progress.max, progress.prog, false)
+                    manager.notify(PROGRESS_ID, notif.build())
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
             stopForeground(true)
-        }.start()
+        }
     }
 
     private fun finishService(error: String?) {
