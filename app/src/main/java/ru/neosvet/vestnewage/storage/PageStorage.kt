@@ -282,6 +282,20 @@ class PageStorage {
     fun getLinks(): Cursor =
         db.query(Const.TITLE, arrayOf(Const.LINK))
 
+    fun getLinksList(): MutableList<String> {
+        val list = mutableListOf<String>()
+        val cursor = getLinks()
+        if (cursor.moveToFirst()) {
+            // пропускаем первую запись - там только дата изменения списка
+            while (cursor.moveToNext()) {
+                val link = cursor.getString(0)
+                list.add(link)
+            }
+        }
+        cursor.close()
+        return list
+    }
+
     fun getTime(): Cursor =
         db.query(Const.TITLE, arrayOf(Const.TIME))
 

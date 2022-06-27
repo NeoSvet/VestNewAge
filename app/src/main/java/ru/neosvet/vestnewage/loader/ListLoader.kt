@@ -120,16 +120,11 @@ class ListLoader(private val handler: LoadHandler) : Loader {
     private fun loadBookList(name: String) {
         val storage = PageStorage()
         storage.open(name)
-        val curTitle = storage.getLinks()
-        if (curTitle.moveToFirst()) {
-            // пропускаем первую запись - там только дата изменения списка
-            while (curTitle.moveToNext()) {
-                loader.download(curTitle.getString(0), false)
-                handler.upProg()
-            }
+        storage.getLinksList().forEach {
+            loader.download(it, false)
+            handler.upProg()
         }
         loader.finish()
-        curTitle.close()
         storage.close()
     }
 }

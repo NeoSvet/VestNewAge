@@ -385,13 +385,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun checkPages(startId: Int): Int {
-        val cursor = pages.getLinks()
-        val links = mutableListOf<String>()
-        if (cursor.moveToFirst()) {  // первую запись пропускаем, т.к. там дата изменения списка
-            while (cursor.moveToNext())
-                links.add(cursor.getString(0))
-        }
-        cursor.close()
+        val links = pages.getLinksList()
         if (links.isEmpty())
             return startId
         var i = 0

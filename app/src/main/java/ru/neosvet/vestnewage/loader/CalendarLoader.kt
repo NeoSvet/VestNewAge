@@ -35,16 +35,7 @@ class CalendarLoader : LinksProvider, Loader {
 
     override fun getLinkList(): List<String> {
         storage.open(date.my)
-        val list = mutableListOf<String>()
-        val cursor = storage.getLinks()
-        if (cursor.moveToFirst()) {
-            // пропускаем первую запись - там только дата изменения списка
-            while (cursor.moveToNext()) {
-                val link = cursor.getString(0)
-                list.add(link)
-            }
-        }
-        cursor.close()
+        val list = storage.getLinksList()
         storage.close()
         return list
     }
