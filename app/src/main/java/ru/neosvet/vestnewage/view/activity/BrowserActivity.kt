@@ -64,6 +64,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     private var isTouch = true
     private var isScrollTop = false
     private var isSearch = false
+    private var twoPointers = false
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
     }
@@ -289,12 +290,18 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
+            if (event.pointerCount == 2) {
+                isTouch = false
+                if (twoPointers)
+                    wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
+                twoPointers = twoPointers.not()
+                return@setOnTouchListener false
+            }
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                 isTouch = true
                 if (isSearch.not() && wvBrowser.scrollY == 0)
                     headBar.expanded()
             }
-
             return@setOnTouchListener false
         }
 
