@@ -16,12 +16,6 @@ abstract class NeoToiler : StateToiler() {
         errorHandler(throwable)
     })
 
-    protected fun setState(state: NeoState) {
-        scope.launch {
-            postState(state)
-        }
-    }
-
     override fun onCleared() {
         cancel()
         scope.cancel()

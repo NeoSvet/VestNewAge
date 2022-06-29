@@ -109,7 +109,7 @@ class SettingsFragment : NeoFragment() {
             setStatus(false)
             val size = state.value / 1048576f //to MegaByte
             act?.showToast(String.format(getString(R.string.format_freed_size), size))
-            neotoiler.clearAllStates()
+            neotoiler.clearLongValue()
         }
     }
 

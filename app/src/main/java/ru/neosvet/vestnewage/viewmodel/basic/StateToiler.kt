@@ -2,28 +2,42 @@ package ru.neosvet.vestnewage.viewmodel.basic
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 abstract class StateToiler : ViewModel() {
-    private val cache = mutableListOf<NeoState>()
+    private var primaryState: NeoState? = null
+    private var longValue: NeoState.LongValue? = null
+    private var oneState: NeoState? = null
+    private var twoState: NeoState? = null
     private val mstate = Channel<NeoState>()
     val state = mstate.receiveAsFlow()
 
-    fun cacheState() = flow {
-        cache.forEach {
-            if (it != NeoState.None)
-                emit(it)
+    fun resume() {
+        longValue?.let {
+            mstate.trySend(it)
         }
     }
 
-    fun clearAllStates() {
-        cache.clear()
+    fun cacheState() = flow {
+        primaryState?.let { emit(it) }
+        oneState?.let { emit(it) }
+        twoState?.let { emit(it) }
     }
 
-    fun clearSecondaryStates() {
-        while (cache.size > 2)
-            cache.removeAt(2)
+    fun clearLongValue() {
+        longValue = null
+    }
+
+    fun clearStates() {
+        oneState = null
+        twoState = null
+    }
+
+    protected fun setState(state: NeoState) {
+        addToCache(state)
+        mstate.trySend(state)
     }
 
     protected suspend fun postState(state: NeoState) {
@@ -35,24 +49,15 @@ abstract class StateToiler : ViewModel() {
         when (state) {
             //Primary states:
             is NeoState.ListValue, is NeoState.Calendar, is NeoState.Book, is NeoState.ListState ->
-                setCache(0, state)
+                primaryState = state
             is NeoState.LongValue ->
-                setCache(1, state)
+                longValue = state
             //Secondary states:
             NeoState.Ready, NeoState.Success, NeoState.NoConnected ->
-                setCache(2, state)
+                oneState = state
             is NeoState.Message, is NeoState.Error, is NeoState.Rnd ->
-                setCache(3, state)
+                twoState = state
             else -> {}
         }
-    }
-
-    private fun setCache(i: Int, state: NeoState) {
-        while (i > cache.size)
-            cache.add(NeoState.None)
-        if (i == cache.size)
-            cache.add(state)
-        else
-            cache[i] = state
     }
 }

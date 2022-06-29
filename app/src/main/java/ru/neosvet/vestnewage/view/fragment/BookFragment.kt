@@ -297,7 +297,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 alertRnd?.dismiss()
             }
         }
-        alertRnd?.show { neotoiler.clearSecondaryStates() }
+        alertRnd?.show { neotoiler.clearStates() }
     }
 
     private fun onItemClick(index: Int, item: ListItem) {

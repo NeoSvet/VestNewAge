@@ -73,6 +73,11 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
         super.onDestroyView()
     }
 
+    override fun onResume() {
+        super.onResume()
+        neotoiler.resume()
+    }
+
     open fun onBackPressed(): Boolean {
         if (neotoiler.isRun) {
             onStatusClick()
@@ -178,6 +183,6 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     open fun swipeRight() {}
 
     fun resetError() {
-        neotoiler.clearSecondaryStates()
+        neotoiler.clearStates()
     }
 }
