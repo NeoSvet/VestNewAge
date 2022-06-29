@@ -12,6 +12,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -65,6 +66,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     private var isScrollTop = false
     private var isSearch = false
     private var twoPointers = false
+    private var scroll: Job? = null
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this).get(BrowserToiler::class.java)
     }
@@ -119,6 +121,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     }
 
     override fun onDestroy() {
+        scroll?.cancel()
         helper.position = positionOnPage
         ConnectWatcher.unSubscribe()
         helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
@@ -298,9 +301,17 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 return@setOnTouchListener false
             }
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                isTouch = true
-                if (isSearch.not() && wvBrowser.scrollY == 0)
-                    headBar.expanded()
+                scroll?.cancel()
+                if (isSearch.not() && wvBrowser.scrollY == 0) {
+                    isTouch = false
+                    if (headBar.isExpanded.not()) {
+                        headBar.expanded()
+                        scroll = lifecycleScope.launch {
+                            delay(300)
+                            wvBrowser.post { wvBrowser.scrollTo(0, 0) }
+                        }
+                    }
+                } else isTouch = true
             }
             return@setOnTouchListener false
         }
@@ -308,8 +319,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, oldScrollY: Int ->
             if (isTouch) {
                 isScrollTop = scrollY >= oldScrollY
-                if (isSearch || headBar.onScrollHost(scrollY, oldScrollY))
+                if (isSearch || headBar.onScrollHost(scrollY, oldScrollY)) {
                     isTouch = false
+                }
                 if (isScrollTop)
                     binding.bottomBar.performHide()
                 else

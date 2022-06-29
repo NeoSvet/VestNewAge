@@ -19,12 +19,16 @@ class HeadBar(
         EXPANDED, COLLAPSED, GONE
     }
 
+    private var time: Long = 0
     private val goneH = 1
     private var collapsedH = 0
     private var expandedH = 0
     private var state = State.EXPANDED
     private var isTop = true
     private var isBlocked = false
+
+    val isExpanded: Boolean
+        get() = state == State.EXPANDED && isBlocked.not()
 
     init {
         mainView.setOnClickListener {
@@ -44,6 +48,7 @@ class HeadBar(
     }
 
     private fun changeEnd() {
+        time = System.currentTimeMillis()
         state = when (mainView.height) {
             goneH -> {
                 hideViews()
@@ -64,6 +69,7 @@ class HeadBar(
     }
 
     private fun changeHeight(h: Int) {
+        if (System.currentTimeMillis() - time < 500) return
         blocked()
         val i = mainView.height
         val v = h - i
@@ -89,13 +95,13 @@ class HeadBar(
 
     fun onScrollHost(y: Int, oldY: Int): Boolean {
         if (isBlocked) return false
-        if ((y - oldY).absoluteValue < 50) return false
+        if ((y - oldY).absoluteValue < 10) return false
         isTop = y > oldY
         when (state) {
             State.EXPANDED ->
-                if (isTop) changeHeight(collapsedH)
+                if (isTop && y > 100) changeHeight(collapsedH)
             State.COLLAPSED ->
-                if (isTop) changeHeight(goneH)
+                if (isTop && y > 200) changeHeight(goneH)
             State.GONE -> if (isTop.not()) {
                 showViews()
                 changeHeight(collapsedH)
@@ -120,6 +126,7 @@ class HeadBar(
         if (isBlocked) return
         showViews()
         changeHeight(expandedH)
+        time = System.currentTimeMillis()
     }
 
     fun hide() {
