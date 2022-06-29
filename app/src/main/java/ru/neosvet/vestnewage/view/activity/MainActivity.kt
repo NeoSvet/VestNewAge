@@ -578,8 +578,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             bottomBar?.performHide()
             isShowBottomArea = false
             animTitle?.hide()
-            if (type != MainHelper.ActionType.INVISIBLE)
-                animButton?.hide()
+            animButton?.hide()
         }
         jobBottomArea = lifecycleScope.launch {
             delay(1500)
@@ -595,8 +594,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.run {
             bottomBar?.performShow()
             animTitle?.show()
-            if (type != MainHelper.ActionType.INVISIBLE)
-                animButton?.show()
+            animButton?.show()
         }
     }
 
@@ -612,8 +610,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         if (status.isVisible) return@run
         isBlocked = false
         tvTitle?.isVisible = true
-        if (type != MainHelper.ActionType.INVISIBLE)
-            fabAction.isVisible = true
+        fabAction.isVisible = true
         bottomBar?.run {
             isVisible = true
             performShow()

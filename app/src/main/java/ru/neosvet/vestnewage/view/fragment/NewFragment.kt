@@ -69,8 +69,10 @@ class NewFragment : NeoFragment() {
 
     private fun emptyList() {
         adapter.clear()
-        act?.showStaticToast(getString(R.string.empty_list))
-        act?.setAction(0)
+        act?.run {
+            showStaticToast(getString(R.string.empty_list))
+            setAction(0)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

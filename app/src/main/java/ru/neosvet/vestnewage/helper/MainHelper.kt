@@ -43,7 +43,7 @@ class MainHelper(private val act: MainActivity) {
     }
 
     enum class ActionType {
-        MENU, ACTION, INVISIBLE
+        MENU, ACTION
     }
 
     var type = ActionType.MENU
@@ -62,7 +62,7 @@ class MainHelper(private val act: MainActivity) {
     var topBar: AppBarLayout? = null
     var svMain: NestedScrollView? = null
     val bottomAreaIsHide: Boolean
-        get() = fabAction.isVisible.not() && type != ActionType.INVISIBLE || bottomBar?.isVisible == false
+        get() = fabAction.isVisible.not() && bottomBar?.isVisible == false
     var frMenu: MenuFragment? = null
     var tvNew: TextView? = null
     lateinit var pStatus: View
@@ -213,14 +213,8 @@ class MainHelper(private val act: MainActivity) {
                 setActionIcon(R.drawable.ic_clear)
             Section.SUMMARY ->
                 setActionIcon(R.drawable.ic_refresh)
-            Section.CABINET ->
-                setActionIcon(0)
             Section.SEARCH ->
                 setActionIcon(R.drawable.ic_settings)
-            Section.SETTINGS ->
-                setActionIcon(0)
-            Section.HELP ->
-                setActionIcon(0)
             else ->
                 setActionIcon(R.drawable.star)
         }
@@ -282,15 +276,9 @@ class MainHelper(private val act: MainActivity) {
     }
 
     fun setActionIcon(icon: Int) {
-        actionIcon = icon
-        if (icon == 0) {
-            type = ActionType.INVISIBLE
-            fabAction.isVisible = false
-        } else {
-            fabAction.isVisible = true
-            type = if (icon == R.drawable.star) ActionType.MENU else ActionType.ACTION
-            fabAction.setImageDrawable(ContextCompat.getDrawable(act, icon))
-        }
+        actionIcon = if (icon == 0) R.drawable.star else icon
+        type = if (actionIcon == R.drawable.star) ActionType.MENU else ActionType.ACTION
+        fabAction.setImageDrawable(ContextCompat.getDrawable(act, actionIcon))
         bottomBar?.requestLayout()
     }
 

@@ -131,17 +131,6 @@
         android:padding="10dp"
         android:visibility="gone" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        android:background="@drawable/field"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:visibility="gone" />
-
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvToast"
         android:layout_width="wrap_content"
@@ -151,6 +140,17 @@
         android:background="@drawable/field"
         android:gravity="center"
         android:padding="10dp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/field"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
