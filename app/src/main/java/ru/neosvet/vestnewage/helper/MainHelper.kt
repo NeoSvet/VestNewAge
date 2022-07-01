@@ -223,7 +223,7 @@ class MainHelper(private val act: MainActivity) {
     private fun onActionClick(index: Int, item: MenuItem) {
         hideActionMenu()
         if (index == 0) {
-            act.download(LoaderService.DOWNLOAD_ALL, "")
+            act.download(LoaderService.DOWNLOAD_ALL, null)
             return
         }
         if (index == adAction.itemCount - 1)

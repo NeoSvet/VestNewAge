@@ -232,7 +232,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             getString(R.string.yes)
         ) { _, _ ->
             binding?.bPrev?.isEnabled = false
-            act?.download(LoaderService.DOWNLOAD_OTKR, "")
+            act?.download(LoaderService.DOWNLOAD_OTKR, null)
         }
         builder.create().show()
     }
