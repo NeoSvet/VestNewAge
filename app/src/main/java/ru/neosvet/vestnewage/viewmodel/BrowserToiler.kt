@@ -110,8 +110,7 @@ class BrowserToiler : NeoToiler() {
             storage.open(link)
             loadIfNeed = true
             if (storage.name.contains(".")) {
-                val year = storage.name.substring(3).toInt()
-                if (year < 16 && year != 0) loadIfNeed = false //0 - article
+                if (storage.isOldBook) loadIfNeed = false
             }
             if (storage.existsPage(link).not()) {
                 if (loadIfNeed) {

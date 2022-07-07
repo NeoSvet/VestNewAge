@@ -22,7 +22,9 @@ import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
-import ru.neosvet.vestnewage.viewmodel.basic.*
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
 import java.util.*
 
 class SearchToiler : NeoToiler(), NeoPaging.Parent {
@@ -307,8 +309,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     private fun searchList(name: String) {
         pages.open(name)
         storage.open()
-        var n = name.substring(3).toInt() * 650 +
-                name.substring(0, 2).toInt() * 50
+        var n = pages.year * 650 + pages.month * 50
         val cursor: Cursor = when (mode) {
             MODE_TITLES ->
                 pages.searchTitle(helper.request)
@@ -323,7 +324,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         if (!cursor.moveToFirst()) {
             cursor.close()
             if (Lib.getFileDB(name).exists()) return
-            val d = dateFromString(name)
+            val d = DateUnit.putYearMonth(pages.year, pages.month)
             val row = ContentValues()
             row.put(
                 Const.TITLE,
@@ -396,7 +397,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             else i++
         }
         if (links.size == all) {
-            val d = dateFromString(pages.name)
+            val d = DateUnit.putYearMonth(pages.year, pages.month)
             val row = ContentValues()
             row.put(
                 Const.TITLE,

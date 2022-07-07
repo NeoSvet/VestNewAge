@@ -50,6 +50,12 @@ class PageStorage {
         get() = db.databaseName
     private val patternBook = Pattern.compile("\\d{2}\\.\\d{2}")
     private var isClosed = true
+    var month = 0
+        private set
+    var year = 0
+        private set
+    val isOldBook: Boolean
+        get() = year in 2004..2015
 
     fun open(name: String) {
         val n = if (name.contains(Const.HTML))
@@ -62,6 +68,8 @@ class PageStorage {
         }
         isClosed = false
         db = DataBase(n)
+        month = n.substring(0, 2).toInt()
+        year = n.substring(3).toInt() + 2000
     }
 
     fun updateTime() {
@@ -159,14 +167,13 @@ class PageStorage {
     }
 
     private fun getCursor(isPoems: Boolean): Cursor? {
-        val y = name.substring(3).toInt()
-        val cursor = if (y > 15) getList(isPoems)
-        else getListAll()
+        val cursor = if (isOldBook) getListAll()
+        else getList(isPoems)
         if (!cursor.moveToFirst()) {
             cursor.close()
             return null
         }
-        if (y < 16 && !cursor.moveToNext()) {
+        if (isOldBook && !cursor.moveToNext()) {
             cursor.close()
             return null
         }
