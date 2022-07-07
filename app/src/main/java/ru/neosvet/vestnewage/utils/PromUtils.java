@@ -25,6 +25,7 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.view.activity.BrowserActivity;
 import ru.neosvet.vestnewage.view.activity.MainActivity;
 import ru.neosvet.vestnewage.view.basic.BottomAnim;
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog;
@@ -93,6 +94,9 @@ public class PromUtils {
                 return false;
             });
         } else { //R.id.tvPromTimeInMenu
+            tvPromTime.setOnClickListener(view -> {
+                BrowserActivity.openReader("Vremya-Posyla.html", null);
+            });
             hTime = new Handler(message -> {
                 setPromTime();
                 return false;
