@@ -22,6 +22,7 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
@@ -117,7 +118,12 @@ class MainHelper(private val act: MainActivity) {
         }
 
         isSideMenu = ScreenUtils.isTabletLand
-        if (isSideMenu) return
+        if (isSideMenu) {
+            act.findViewById<View>(R.id.btnProm).setOnClickListener {
+                BrowserActivity.openReader(Const.PROM_LINK, null)
+            }
+            return
+        }
         tvTitle = act.findViewById(R.id.tvTitle)
         bottomBar = act.findViewById(R.id.bottomBar)
         bottomBar?.setBackgroundResource(R.drawable.panel_bg)
