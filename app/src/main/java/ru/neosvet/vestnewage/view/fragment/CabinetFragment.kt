@@ -155,7 +155,7 @@ class CabinetFragment : NeoFragment() {
 
     override fun onDestroyView() {
         binding?.login?.run {
-            helper.forget(cbRemPassword.isChecked.not(), cbRemEmail.isChecked.not())
+            helper.forget(cbRemEmail.isChecked.not(), cbRemPassword.isChecked.not())
         }
         binding = null
         super.onDestroyView()
