@@ -12,6 +12,7 @@ import kotlin.math.absoluteValue
 
 class HeadBar(
     private val mainView: View,
+    distanceForHide: Int,
     private val additionViews: List<View>,
     private val onClick: () -> Unit
 ) {
@@ -19,6 +20,8 @@ class HeadBar(
         EXPANDED, COLLAPSED, GONE
     }
 
+    private val collapseDistance = distanceForHide
+    private val goneDistance = distanceForHide * 2
     private var time: Long = 0
     private val goneH = 1
     private var collapsedH = 0
@@ -99,9 +102,9 @@ class HeadBar(
         isTop = y > oldY
         when (state) {
             State.EXPANDED ->
-                if (isTop && y > 100) changeHeight(collapsedH)
+                if (isTop && y > collapseDistance) changeHeight(collapsedH)
             State.COLLAPSED ->
-                if (isTop && y > 200) changeHeight(goneH)
+                if (isTop && y > goneDistance) changeHeight(goneH)
             State.GONE -> if (isTop.not()) {
                 showViews()
                 changeHeight(collapsedH)

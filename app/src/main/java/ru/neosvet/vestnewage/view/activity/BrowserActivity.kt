@@ -402,6 +402,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             ivHead.setImageResource(R.drawable.headland)
         headBar = HeadBar(
             mainView = ivHead,
+            distanceForHide = if (ScreenUtils.isLand) 50 else 100,
             additionViews = listOf(bBack, tvPromTimeHead)
         ) {
             if (menu.refresh.isVisible)
