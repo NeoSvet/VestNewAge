@@ -131,7 +131,7 @@ class MainHelper(private val act: MainActivity) {
         svMain = act.findViewById(R.id.svMain)
         topBar = act.findViewById(R.id.topBar)
 
-        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND) {
+        if (ScreenUtils.isLand) {
             ivHead.setImageResource(R.drawable.headland)
             val p = tvGodWords.paddingBottom
             tvGodWords.setPadding(p, p, tvGodWords.paddingEnd, p)

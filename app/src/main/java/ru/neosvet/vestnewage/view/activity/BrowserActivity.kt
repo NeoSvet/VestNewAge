@@ -396,10 +396,10 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     }
 
     private fun setHeadBar() = binding.run {
-        if (ScreenUtils.type == ScreenUtils.Type.PHONE_LAND)
-            ivHead.setImageResource(R.drawable.headland)
-        else if (ScreenUtils.isTablet)
+        if (ScreenUtils.isTablet)
             ivHead.setImageResource(R.drawable.headtablet)
+        else if (ScreenUtils.isLand)
+            ivHead.setImageResource(R.drawable.headland)
         headBar = HeadBar(
             mainView = ivHead,
             additionViews = listOf(bBack, tvPromTimeHead)

@@ -25,6 +25,10 @@ object ScreenUtils {
         private set
 
     @JvmStatic
+    val isLand: Boolean
+        get() = type == Type.PHONE_LAND || isTabletLand
+
+    @JvmStatic
     val isTabletLand: Boolean
         get() = type == Type.TABLET_LAND
 
