@@ -226,7 +226,7 @@ public class PromUtils {
         boolean sound = pref.getBoolean(SetNotifDialog.SOUND, false);
         boolean vibration = pref.getBoolean(SetNotifDialog.VIBR, true);
         Intent intent = new Intent(App.context, MainActivity.class);
-        intent.setData(Uri.parse(NeoClient.SITE + "Posyl-na-Edinenie.html"));
+        intent.setData(Uri.parse(NeoClient.SITE + Const.PROM_LINK));
         PendingIntent piEmpty = PendingIntent.getActivity(App.context, 0, new Intent(), FLAGS);
         PendingIntent piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         NotificationUtils notifHelper = new NotificationUtils();

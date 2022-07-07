@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 R.id.app_bar_cabinet ->
                     setSection(Section.CABINET, false)
                 R.id.app_bar_prom ->
-                    openReader("Posyl-na-Edinenie.html", null)
+                    openReader(Const.PROM_LINK, null)
             }
             return@setOnMenuItemClickListener true
         }
