@@ -21,10 +21,6 @@ import java.io.File
 import java.io.InputStreamReader
 
 class BookLoader : Loader {
-    companion object {
-        private const val SIZE_EMPTY_BASE = 24576L
-    }
-
     private val handler: LoadHandler?
     private val handlerLite: LoadHandlerLite?
 
@@ -129,7 +125,7 @@ class BookLoader : Loader {
                     }
                 } else if (l != f.length()) {
                     list.add(name)
-                    if (f.length() != SIZE_EMPTY_BASE) f.delete()
+                    f.delete()
                 }
             } else {
                 list.add(name)
@@ -146,7 +142,6 @@ class BookLoader : Loader {
         var v: String
         val time = System.currentTimeMillis()
         var d: DateUnit
-        var links: MutableList<String>
         for (item: String in list) {
             handlerLite?.let {
                 it.postPercent(cur.percent(max))
@@ -156,7 +151,6 @@ class BookLoader : Loader {
                 it.postMessage(d.monthString + " " + d.year)
             }
             storage.open(item)
-            links = storage.getLinksList()
             isTitle = true
             br = BufferedReader(
                 InputStreamReader(NeoClient.getStream(url + item), Const.ENCODING),
@@ -175,10 +169,8 @@ class BookLoader : Loader {
                         id = storage.getPageId(it)
                         if (id == -1)
                             id = storage.insertTitle(getRow(it, v, time)).toInt()
-                        else {
-                            links.remove(it)
+                        else
                             storage.updateTitle(it, getRow(it, v, time))
-                        }
                         ids[n.toString()] = id
                         n++
                     } else ids[it]?.let { id ->
@@ -188,7 +180,6 @@ class BookLoader : Loader {
                 s = br.readLine()
             }
             br.close()
-            storage.deletePages(links)
             storage.close()
             name = item
             handler?.upProg()
@@ -255,24 +246,24 @@ class BookLoader : Loader {
         if (title.size > 0) {
             val storage = PageStorage()
             storage.open(date)
-            val list = storage.getLinksList()
+            val list = if (storage.isOldBook) null
+            else storage.getLinksList()
             var row = ContentValues()
             row.put(Const.TIME, System.currentTimeMillis())
             if (!storage.updateTitle(1, row))
                 storage.insertTitle(row)
             for (i in 0 until title.size) {
+                list?.remove(links[i])
                 row = ContentValues()
                 row.put(Const.TITLE, title[i])
                 // пытаемся обновить запись:
-                if (storage.updateTitle(links[i], row)) {
+                if (!storage.updateTitle(links[i], row)) {
                     // обновить не получилось, добавляем:
                     row.put(Const.LINK, links[i])
                     storage.insertTitle(row)
-                } else {
-                    list.remove(links[i])
                 }
             }
-            storage.deletePages(list)
+            list?.let { storage.deletePages(it) }
             storage.close()
             title.clear()
             links.clear()
