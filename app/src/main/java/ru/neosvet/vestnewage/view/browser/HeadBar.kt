@@ -54,7 +54,7 @@ class HeadBar(
         time = System.currentTimeMillis()
         state = when (mainView.height) {
             goneH -> {
-                hideViews()
+                mainView.isVisible = false
                 State.GONE
             }
             expandedH ->
@@ -63,10 +63,15 @@ class HeadBar(
                 State.COLLAPSED
         }
         if (mainView is ImageView) {
-            if (state == State.EXPANDED)
+            if (state == State.EXPANDED) {
                 mainView.scaleType = ImageView.ScaleType.FIT_XY
-            else if (state == State.COLLAPSED)
+                for (v in additionViews)
+                    v.isVisible = true
+            } else if (state == State.COLLAPSED) {
                 mainView.scaleType = ImageView.ScaleType.CENTER_CROP
+                for (v in additionViews)
+                    v.isVisible = false
+            }
         }
         unblocked()
     }
@@ -106,28 +111,16 @@ class HeadBar(
             State.COLLAPSED ->
                 if (isTop && y > goneDistance) changeHeight(goneH)
             State.GONE -> if (isTop.not()) {
-                showViews()
+                mainView.isVisible = true
                 changeHeight(collapsedH)
             }
         }
         return true
     }
 
-    private fun showViews() {
-        mainView.isVisible = true
-        for (v in additionViews)
-            v.isVisible = true
-    }
-
-    private fun hideViews() {
-        mainView.isVisible = false
-        for (v in additionViews)
-            v.isVisible = false
-    }
-
     fun expanded() {
         if (isBlocked) return
-        showViews()
+        mainView.isVisible = true
         changeHeight(expandedH)
         time = System.currentTimeMillis()
     }
@@ -138,7 +131,7 @@ class HeadBar(
     }
 
     fun show() {
-        showViews()
+        mainView.isVisible = true
         changeHeight(collapsedH)
     }
 

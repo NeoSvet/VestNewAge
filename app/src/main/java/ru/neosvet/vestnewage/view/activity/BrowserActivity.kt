@@ -427,7 +427,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         headBar = HeadBar(
             mainView = ivHead,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
-            additionViews = listOf(bBack, tvPromTimeHead)
+            additionViews = listOf(btnGodWords, tvGodWords)
         ) {
             if (menu.refresh.isVisible)
                 Lib.openInApps(NeoClient.SITE + helper.link, null)
