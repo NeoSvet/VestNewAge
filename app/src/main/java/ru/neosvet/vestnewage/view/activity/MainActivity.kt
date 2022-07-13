@@ -33,7 +33,6 @@ import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.StatusButton
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
@@ -73,6 +72,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.PAGE
         }
     }
+    private val wordsUtils: WordsUtils by lazy {
+        WordsUtils()
+    }
 
     val newId: Int
         get() = helper.newId
@@ -94,11 +96,26 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         setBottomPanel()
         initStatusButton()
         initAnim()
+        initWords()
         setFloatProm(helper.isFloatPromTime)
 
         restoreState(savedInstanceState)
         if (savedInstanceState == null && withSplash.not())
             finishFlashStar()
+    }
+
+    private fun initWords() {
+        val funClick = { v: View ->
+            wordsUtils.showAlert(this) {
+                helper.changeSection(Section.SEARCH, true)
+                curFragment = SearchFragment.newInstance(it, 5)
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
+                fragmentTransaction.commit()
+            }
+        }
+        findViewById<View>(R.id.btnGodWords).setOnClickListener(funClick)
+        findViewById<View>(R.id.tvGodWords).setOnClickListener(funClick)
     }
 
     private fun initStatusButton() {
@@ -109,27 +126,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 curFragment?.resetError()
             } else curFragment?.onStatusClick()
         }
-    }
-
-    fun showGodWords() {
-        val msg = helper.getGodWords()
-        val dialog = CustomDialog(this)
-        dialog.setTitle(getString(R.string.god_words))
-        dialog.setRightButton(getString(R.string.close)) { dialog.dismiss() }
-        if (msg.isEmpty()) {
-            dialog.setMessage(getString(R.string.yet_load))
-        } else {
-            dialog.setMessage(msg)
-            dialog.setLeftButton(getString(R.string.find)) {
-                helper.changeSection(Section.SEARCH, true)
-                curFragment = SearchFragment.newInstance(msg.trim('.'), 5)
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
-                fragmentTransaction.commit()
-                dialog.dismiss()
-            }
-        }
-        dialog.show(null)
     }
 
     override fun setTitle(title: CharSequence?) {

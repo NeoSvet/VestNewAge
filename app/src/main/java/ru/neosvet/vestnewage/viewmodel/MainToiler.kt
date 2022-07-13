@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.BufferedReader
@@ -75,7 +76,7 @@ class MainToiler : NeoToiler() {
             }
         }
         s = String(bytes.toByteArray(), Charsets.UTF_16).substring(1)
-        MainHelper.saveGodWords(s)
+        WordsUtils.saveGodWords(s)
     }
 
     private suspend fun loadNew() {
