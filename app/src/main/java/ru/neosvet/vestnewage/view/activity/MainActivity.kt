@@ -100,22 +100,29 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         setFloatProm(helper.isFloatPromTime)
 
         restoreState(savedInstanceState)
-        if (savedInstanceState == null && withSplash.not())
+        if (savedInstanceState == null && withSplash.not()) {
             finishFlashStar()
+            intent.getStringExtra(Const.SEARCH)?.let {
+                openSearch(it)
+                statusBack = StatusBack.EXIT
+            }
+        }
     }
 
     private fun initWords() {
         val funClick = { v: View ->
-            wordsUtils.showAlert(this) {
-                helper.changeSection(Section.SEARCH, true)
-                curFragment = SearchFragment.newInstance(it, 5)
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
-                fragmentTransaction.commit()
-            }
+            wordsUtils.showAlert(this, this::openSearch)
         }
         findViewById<View>(R.id.btnGodWords).setOnClickListener(funClick)
         findViewById<View>(R.id.tvGodWords).setOnClickListener(funClick)
+    }
+
+    private fun openSearch(s: String) {
+        helper.changeSection(Section.SEARCH, true)
+        curFragment = SearchFragment.newInstance(s, 5)
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.my_fragment, curFragment!!)
+        fragmentTransaction.commit()
     }
 
     private fun initStatusButton() {

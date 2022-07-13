@@ -76,6 +76,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
+    private val wordsUtils: WordsUtils by lazy {
+        WordsUtils()
+    }
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
     private val helper: BrowserHelper
@@ -105,6 +108,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         setBottomBar()
         setViews()
         setContent()
+        initWords()
         initTheme()
         restoreState(savedInstanceState)
         stateUtils.runObserve()
@@ -276,6 +280,26 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             else {
                 bottomUnblocked()
                 status.onClick()
+            }
+        }
+    }
+
+    private fun initWords() {
+        val funClick = { v: View ->
+            wordsUtils.showAlert(this) {
+                val main = Intent(this, MainActivity::class.java)
+                main.putExtra(Const.START_SCEEN, false)
+                main.putExtra(Const.SEARCH, it)
+                startActivity(main)
+            }
+        }
+        binding.run {
+            btnGodWords.setOnClickListener(funClick)
+            tvGodWords.setOnClickListener(funClick)
+            if (ScreenUtils.isLand) {
+                ivHead.setImageResource(R.drawable.headland)
+                val p = tvGodWords.paddingBottom
+                tvGodWords.setPadding(p, p, tvGodWords.paddingEnd, p)
             }
         }
     }
