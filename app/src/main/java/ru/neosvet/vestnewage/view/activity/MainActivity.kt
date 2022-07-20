@@ -296,8 +296,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             state.getString(Const.CUR_ID)?.let {
                 curSection = Section.valueOf(it)
             }
-            if (supportFragmentManager.fragments.isEmpty())
-                setSection(firstSection, false)
+            if (supportFragmentManager.fragments.isEmpty() ||
+                (helper.isSideMenu && curSection == Section.MENU)
+            ) setSection(firstSection, false)
             if (isSideMenu) setMenuFragment()
             else if (curSection != Section.MENU)
                 statusBack = StatusBack.PAGE
