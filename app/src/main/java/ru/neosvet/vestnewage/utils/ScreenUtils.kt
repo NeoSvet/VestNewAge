@@ -6,7 +6,6 @@ import android.graphics.Point
 import android.os.Build
 import ru.neosvet.vestnewage.R
 
-
 object ScreenUtils {
     enum class Type {
         PHONE_PORT, PHONE_LAND, TABLET_PORT, TABLET_LAND
@@ -14,10 +13,6 @@ object ScreenUtils {
 
     @JvmStatic
     var type: Type = Type.PHONE_PORT
-        private set
-
-    @JvmStatic
-    var isTablet7: Boolean = false
         private set
 
     @JvmStatic
@@ -36,12 +31,8 @@ object ScreenUtils {
     val isTablet: Boolean
         get() = type >= Type.TABLET_PORT
     val span: Int
-        get() = when (type) {
-            Type.PHONE_PORT -> 1
-            Type.PHONE_LAND -> 2
-            Type.TABLET_PORT -> 2
-            Type.TABLET_LAND -> 2
-        }
+        get() = if (type == Type.PHONE_PORT)
+            1 else 2
 
     fun init(activity: Activity) {
         type = when (activity.resources.getInteger(R.integer.screen_mode)) {
@@ -57,9 +48,8 @@ object ScreenUtils {
             else ->
                 Type.PHONE_PORT
         }
-        isTablet7 = activity.resources.getInteger(R.integer.tablet_7) == 1
         if (type != Type.PHONE_LAND) {
-            isWide = isTablet && (isTabletLand || !isTablet7)
+            isWide = isTabletLand
             return
         }
         val width: Int

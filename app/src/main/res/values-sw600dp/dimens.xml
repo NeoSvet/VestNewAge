@@ -1,6 +1,0 @@
-<resources>
-<!-- for Tablet 7" -->
-    <dimen name="cell_size">50dp</dimen>
-    <dimen name="cell_font">30dp</dimen>
-    <integer name="tablet_7">1</integer>
-</resources>

@@ -85,9 +85,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             launchSplashScreen()
         else
             setTheme(R.style.Theme_MainTheme)
-        setContentView(R.layout.main_activity)
-        ConnectWatcher.start(this)
         ScreenUtils.init(this)
+        if (ScreenUtils.isTabletLand)
+            setContentView(R.layout.main_activity_tablet)
+        else
+            setContentView(R.layout.main_activity)
+        ConnectWatcher.start(this)
         App.context = this
         initLaunch()
         helper = MainHelper(this)
