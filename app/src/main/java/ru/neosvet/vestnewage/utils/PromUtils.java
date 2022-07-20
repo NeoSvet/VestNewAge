@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,9 +31,8 @@ import ru.neosvet.vestnewage.view.dialog.SetNotifDialog;
 
 public class PromUtils {
     public static final String TAG = "Prom";
-    private static final byte SET_PROM_TEXT = 0, START_ANIM = 1;
     private TextView tvPromTime = null;
-    private Handler hTime = null;
+    private int delay = 0;
     private Timer timer = null;
     private final SharedPreferences pref;
     private final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
@@ -79,27 +77,17 @@ public class PromUtils {
             final BottomAnim anim = new BottomAnim(tvPromTime);
             tvPromTime.setOnClickListener(view -> {
                 anim.hide();
-                timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        hTime.sendEmptyMessage(START_ANIM);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2 * DateUnit.SEC_IN_MILLS);
+                    } catch (InterruptedException ignored) {
                     }
-                }, 2 * DateUnit.SEC_IN_MILLS);
-            });
-            hTime = new Handler(message -> {
-                if (message.what == SET_PROM_TEXT) {
-                    setPromTime();
-                } else anim.show();
-                return false;
+                    tvPromTime.post(anim::show);
+                }).start();
             });
         } else { //R.id.tvPromTimeInMenu
             tvPromTime.setOnClickListener(view -> {
                 BrowserActivity.openReader("Vremya-Posyla.html", null);
-            });
-            hTime = new Handler(message -> {
-                setPromTime();
-                return false;
             });
         }
     }
@@ -184,13 +172,14 @@ public class PromUtils {
             tvPromTime.setVisibility(View.VISIBLE);
         }
         if (t.equals(App.context.getString(R.string.prom))) {
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    hTime.sendEmptyMessage(SET_PROM_TEXT);
+            stop();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5 * DateUnit.SEC_IN_MILLS);
+                } catch (InterruptedException ignored) {
                 }
-            }, 3 * DateUnit.SEC_IN_MILLS);
+                tvPromTime.post(this::setPromTime);
+            }).start();
             tvPromTime.startAnimation(AnimationUtils.loadAnimation(App.context, R.anim.blink));
         }
     }
@@ -202,23 +191,27 @@ public class PromUtils {
                 t.equals(App.context.getResources().getStringArray(R.array.time)[0])) //second
             return null;
         t = App.context.getString(R.string.to_prom) + " " + t;
-        int delay;
+        if (tvPromTime == null)
+            return t;
+        int d;
         if (t.contains(App.context.getString(R.string.sec)))
-            delay = DateUnit.SEC_IN_MILLS; // 1 sec
+            d = DateUnit.SEC_IN_MILLS; // 1 sec
         else if (t.contains(App.context.getString(R.string.min))) {
             t = t.replace(App.context.getResources().getStringArray(R.array.time)[3],
                     App.context.getString(R.string.minute));
-            delay = 6 * DateUnit.SEC_IN_MILLS; // 1/10 of min in sec
+            d = 6 * DateUnit.SEC_IN_MILLS; // 1/10 of min in sec
         } else
-            delay = 360 * DateUnit.SEC_IN_MILLS; // 1/10 of hour in sec
-        if (hTime != null) {
+            d = 360 * DateUnit.SEC_IN_MILLS; // 1/10 of hour in sec
+        if (d != delay) {
+            stop();
+            delay = d;
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    hTime.sendEmptyMessage(SET_PROM_TEXT);
+                    tvPromTime.post(PromUtils.this::setPromTime);
                 }
-            }, delay);
+            }, d, d);
         }
         return t;
     }
