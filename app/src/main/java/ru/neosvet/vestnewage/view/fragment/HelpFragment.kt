@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +18,6 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.view.list.ScrollHelper
-import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -46,12 +46,13 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.list_fragment, container, false)
+        val view = inflater.inflate(R.layout.list_fragment, container, false)
+        initView(view)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView(view)
         activity?.let {
             it.title = getString(R.string.help)
             toiler.state.observe(it, this)
@@ -79,18 +80,9 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         val rv = container.findViewById(R.id.rvList) as RecyclerView
         rv.layoutManager = GridLayoutManager(requireContext(), 1)
         rv.adapter = adapter
-        scroll = ScrollHelper {
-            when (it) {
-                ScrollHelper.Events.SCROLL_END ->
-                    act?.hideBottomArea()
-                ScrollHelper.Events.SCROLL_START ->
-                    act?.showBottomArea()
-            }
-        }.apply { attach(rv) }
-        val touch = TouchHelper(true) {
-            act?.hideBottomArea()
+        rv.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
         }
-        touch.attach(rv)
     }
 
     private fun restoreState(state: Bundle?) {
