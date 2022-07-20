@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +18,6 @@ import ru.neosvet.vestnewage.utils.ScreenUtils.isTabletLand
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.MenuAdapter
 import ru.neosvet.vestnewage.view.list.ScrollHelper
-import ru.neosvet.vestnewage.view.list.TouchHelper
 
 class MenuFragment : Fragment() {
     companion object {
@@ -58,7 +59,7 @@ class MenuFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
-        if (iSelect > -1)
+        if (iSelect > -1 && isFullScreen.not())
             adapter.select(iSelect)
     }
 
@@ -70,6 +71,14 @@ class MenuFragment : Fragment() {
 
     private fun initView(container: View) {
         rvMenu = container.findViewById(R.id.rvList)
+        if (rvMenu.layoutParams == null)
+            rvMenu.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
+        }
         if (isTabletLand.not()) {
             isFullScreen = true
             act!!.title = getString(R.string.app_name)
@@ -98,21 +107,6 @@ class MenuFragment : Fragment() {
             adapter.addItem(mImage[i], getString(mTitle[i]))
             i++
         }
-        if (iSelect > -1)
-            adapter.select(iSelect)
-        if (isFullScreen.not()) return
-        scroll = ScrollHelper {
-            when (it) {
-                ScrollHelper.Events.SCROLL_END ->
-                    act?.hideBottomArea()
-                ScrollHelper.Events.SCROLL_START ->
-                    act?.showBottomArea()
-            }
-        }.apply { attach(rvMenu) }
-        val touch = TouchHelper(true) {
-            act?.hideBottomArea()
-        }
-        touch.attach(rvMenu)
     }
 
     fun setSelect(section: Section) {
