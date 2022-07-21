@@ -32,7 +32,8 @@ import ru.neosvet.vestnewage.view.dialog.SetNotifDialog;
 public class PromUtils {
     public static final String TAG = "Prom";
     private TextView tvPromTime = null;
-    private int delay = 0;
+    private int period = 0;
+    private boolean isStart = false;
     private Timer timer = null;
     private final SharedPreferences pref;
     private final int FLAGS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ?
@@ -49,26 +50,30 @@ public class PromUtils {
     }
 
     public void stop() {
-        if (timer != null)
+        isStart = false;
+        if (timer != null) {
             timer.cancel();
+            timer = null;
+        }
     }
 
     public void resume() {
-        if (isProm())
-            setPromTime();
+        if (isPromField() && !isStart)
+            startPromTime();
     }
 
     public void hide() {
         stop();
-        if (tvPromTime != null)
+        if (isPromField()) {
+            tvPromTime.setText("");
             tvPromTime.setVisibility(View.GONE);
+        }
     }
 
     public void show() {
-        if (isProm()) {
-            setPromTime();
-            if (tvPromTime != null)
-                tvPromTime.setVisibility(View.VISIBLE);
+        if (isPromField() && !isStart) {
+            startPromTime();
+            tvPromTime.setVisibility(View.VISIBLE);
         }
     }
 
@@ -92,7 +97,7 @@ public class PromUtils {
         }
     }
 
-    public boolean isProm() {
+    private boolean isPromField() {
         return tvPromTime != null;
     }
 
@@ -123,76 +128,86 @@ public class PromUtils {
         return prom;
     }
 
+    private void startPromTime() {
+        new Thread(this::setPromTime).start();
+    }
+
     private void setPromTime() {
+        isStart = true;
         String t = getPromText();
         if (t == null) { //t.contains("-")
-            tvPromTime.setText(App.context.getString(R.string.prom));
+            setTimeText(App.context.getString(R.string.prom));
+            hideTimeText();
+            restartPromTime();
+            return;
+        }
+        setTimeText(t);
+        if (tvPromTime.getId() == R.id.tvPromTimeFloat &&
+                t.contains(App.context.getResources().getStringArray(R.array.time)[6])) {
+            int n = App.context.getString(R.string.to_prom).length() + 1;
+            n = Integer.parseInt(t.substring(n, n + 1));
+            setTimeVisible(n < 3);
+        }
+    }
+
+    private void restartPromTime() {
+        new Thread(() -> {
+            try {
+                Thread.sleep(5 * DateUnit.SEC_IN_MILLS);
+            } catch (InterruptedException ignored) {
+            }
+            setPromTime();
+        }).start();
+    }
+
+    private void setTimeVisible(boolean isVisible) {
+        tvPromTime.post(() -> {
+            if (isVisible)
+                tvPromTime.setVisibility(View.VISIBLE);
+            else
+                tvPromTime.setVisibility(View.GONE);
+        });
+    }
+
+    private void hideTimeText() {
+        stop();
+        tvPromTime.post(() -> {
             Animation an = AnimationUtils.loadAnimation(App.context, R.anim.hide);
             an.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-
                 }
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     tvPromTime.setVisibility(View.GONE);
-                    tvPromTime = null;
                 }
 
                 @Override
                 public void onAnimationRepeat(Animation animation) {
-
                 }
             });
-            an.setDuration(DateUnit.SEC_IN_MILLS);
+            an.setDuration(2 * DateUnit.SEC_IN_MILLS);
             tvPromTime.startAnimation(an);
-            return;
-        }
-        tvPromTime.setText(t);
-        if (tvPromTime.getId() == R.id.tvPromTimeFloat &&
-                t.contains(App.context.getResources().getStringArray(R.array.time)[6])) {
-            t = t.substring(App.context.getString(R.string.to_prom).length() + 1);
-            int h = 0;
-            if (t.contains(","))
-                t = t.substring(0, t.indexOf(","));
-            else if (t.contains("."))
-                t = t.substring(0, t.indexOf("."));
-            else if (t.contains(" "))
-                t = t.substring(0, t.indexOf(" "));
-            else
-                h = 1;
-            if (h == 0)
-                h = Integer.parseInt(t);
+        });
+    }
 
-            if (h > 2) {
-                tvPromTime.setVisibility(View.GONE);
-                return;
-            }
-            tvPromTime.setVisibility(View.VISIBLE);
-        }
-        if (t.equals(App.context.getString(R.string.prom))) {
-            stop();
-            new Thread(() -> {
-                try {
-                    Thread.sleep(5 * DateUnit.SEC_IN_MILLS);
-                } catch (InterruptedException ignored) {
-                }
-                tvPromTime.post(this::setPromTime);
-            }).start();
-            tvPromTime.startAnimation(AnimationUtils.loadAnimation(App.context, R.anim.blink));
-        }
+    private void setTimeText(String t) {
+        tvPromTime.post(() -> tvPromTime.setText(t));
     }
 
     private String getPromText() {
         DateUnit prom = getPromDate(false);
-        String t = DateUnit.getDiffDate(prom.getTimeInMills(), System.currentTimeMillis());
-        if (t.contains("-") || // prom was been
-                t.equals(App.context.getResources().getStringArray(R.array.time)[0])) //second
+        long p = prom.getTimeInMills();
+        long now = System.currentTimeMillis();
+        int n = (int) (p - now);
+        if (n < DateUnit.SEC_IN_MILLS)
             return null;
+        String t = DateUnit.getDiffDate(p, System.currentTimeMillis());
         t = App.context.getString(R.string.to_prom) + " " + t;
-        if (tvPromTime == null)
+        if (!isPromField())
             return t;
+        //period for timer:
         int d;
         if (t.contains(App.context.getString(R.string.sec)))
             d = DateUnit.SEC_IN_MILLS; // 1 sec
@@ -202,16 +217,19 @@ public class PromUtils {
             d = 6 * DateUnit.SEC_IN_MILLS; // 1/10 of min in sec
         } else
             d = 360 * DateUnit.SEC_IN_MILLS; // 1/10 of hour in sec
-        if (d != delay) {
+
+        if (d != period) {
+            n = n % d; //delay for timer
+            //restart timer:
             stop();
-            delay = d;
+            period = d;
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    tvPromTime.post(PromUtils.this::setPromTime);
+                    setPromTime();
                 }
-            }, d, d);
+            }, n, d);
         }
         return t;
     }

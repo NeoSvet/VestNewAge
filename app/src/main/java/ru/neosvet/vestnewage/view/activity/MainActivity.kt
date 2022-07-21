@@ -351,7 +351,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
-        prom?.show()
         when (section) {
             Section.MENU -> {
                 unblocked()
