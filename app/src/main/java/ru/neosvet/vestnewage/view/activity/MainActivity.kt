@@ -246,13 +246,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun finishFlashStar() {
         showHead()
+        unblocked()
         helper.setNewValue()
         if (helper.isFirstRun) {
             setSection(Section.HELP, false)
             statusBack = StatusBack.FIRST
             return
         }
-        unblocked()
         firstSection = helper.getFirstSection()
         if (helper.startWithNew()) {
             setSection(Section.NEW, false)
