@@ -51,14 +51,9 @@ public class LaunchUtils {
             notifHelper = new NotificationUtils();
             showNotifTip(App.context.getString(R.string.check_out_settings),
                     App.context.getString(R.string.example_periodic_check), getSettingsIntent());
-            new Thread(() -> {
-                try {
-                    Thread.sleep(10000);
-                    showNotifDownloadAll();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            showNotifDownloadAll();
+            showSummaryNotif();
+            return;
         }
         if (ver < 60) {
             resetFirst();
@@ -71,8 +66,6 @@ public class LaunchUtils {
             storage.delete();
             storage.close();
         }
-        if (ver == 0)
-            showSummaryNotif();
     }
 
     private void resetFirst() {
@@ -128,18 +121,18 @@ public class LaunchUtils {
     }
 
     private void showNotifDownloadAll() {
-        Intent intent = new Intent(App.context, LoaderService.class);
-        intent.putExtra(Const.MODE, LoaderService.DOWNLOAD_ALL);
-        intent.putExtra(Const.TASK, "");
-        PendingIntent piStart = PendingIntent.getService(App.context, 0, intent, FLAGS);
-        NotificationCompat.Builder notifBuilder = notifHelper.getNotification(
-                App.context.getString(R.string.downloads_all_title),
-                App.context.getString(R.string.downloads_all_msg),
-                NotificationUtils.CHANNEL_TIPS);
-        notifBuilder.setContentIntent(piStart);
-        notifBuilder.setGroup(NotificationUtils.GROUP_TIPS);
-        notifBuilder.setSound(null);
-        notifHelper.notify(800, notifBuilder);
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000);
+                Intent intent = new Intent(App.context, LoaderService.class);
+                intent.putExtra(Const.MODE, LoaderService.DOWNLOAD_ALL);
+                intent.putExtra(Const.TASK, "");
+                showNotifTip(App.context.getString(R.string.downloads_all_title),
+                        App.context.getString(R.string.downloads_all_msg), intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public boolean isNeedLoad() {
