@@ -60,7 +60,8 @@ public class LaunchUtils {
                 }
             }).start();
         }
-        if (ver < 59) {
+        if (ver < 60) {
+            resetFirst();
             renamePrefs();
             renameBookPref();
             deleteBrowserFiles();
@@ -72,6 +73,13 @@ public class LaunchUtils {
         }
         if (ver == 0)
             showSummaryNotif();
+    }
+
+    private void resetFirst() {
+        SharedPreferences pref = App.context.getSharedPreferences(MainHelper.TAG, MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean(Const.FIRST, true);
+        editor.apply();
     }
 
     private void renameBookPref() {
