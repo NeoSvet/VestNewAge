@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.utils
 
 import android.app.Activity
-import android.content.res.Configuration
 import android.graphics.Point
 import android.os.Build
 import ru.neosvet.vestnewage.R
@@ -41,8 +40,7 @@ object ScreenUtils {
             activity.resources.getInteger(R.integer.screen_phone_land) ->
                 Type.PHONE_LAND
             activity.resources.getInteger(R.integer.screen_tablet_land) ->
-                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    Type.TABLET_LAND else Type.TABLET_PORT
+                Type.TABLET_LAND
             activity.resources.getInteger(R.integer.screen_tablet_port) ->
                 Type.TABLET_PORT
             else ->
