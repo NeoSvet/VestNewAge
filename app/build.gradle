@@ -9,7 +9,7 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdk 23
         targetSdk 31
-        versionCode 59
+        versionCode 60
         versionName "4.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
