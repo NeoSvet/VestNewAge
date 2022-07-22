@@ -104,6 +104,10 @@ public class DateUnit {
         return System.currentTimeMillis() - time > HOUR_IN_MILLS * 3;
     }
 
+    public void createTime() {
+        time = LocalTime.ofSecondOfDay(0);
+    }
+
     public long getTimeInSeconds() {
         int sec = 0;
         if (time != null)
@@ -274,5 +278,12 @@ public class DateUnit {
         if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0)
             this.changeDay(-1);
         time = time.plusMinutes(offset);
+    }
+
+    public void changeHours(int offset) {
+        if (time == null) return;
+        if (offset < 0 && time.getHour() == 0)
+            this.changeDay(-1);
+        time = time.plusHours(offset);
     }
 }
