@@ -246,44 +246,55 @@ public class DateUnit {
     }
 
     // TIME ~~~~~~~~~~~~~~~~~~~~~~~~
-    public int getHours() {
-        if (time == null) return 0;
-        return time.getHour();
-    }
 
-    public void setSeconds(int seconds) {
-        if (time == null) return;
+    private void setSeconds(int seconds) {
         time = time.withSecond(seconds);
     }
 
-    public void setMinutes(int min) {
-        if (time == null) return;
+    private void setMinutes(int min) {
         time = time.withMinute(min);
     }
 
-    public void setHours(int hours) {
-        if (time == null) return;
+    private void setHours(int hours) {
         time = time.withHour(hours);
     }
 
     public void changeSeconds(int offset) {
         if (time == null) return;
-        if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0 && time.getSecond() == 0)
-            this.changeDay(-1);
-        time = time.plusSeconds(offset);
+        int i = time.getSecond() + offset;
+        if (i < 0) {
+            changeMinutes(-1);
+            setSeconds(i + 60);
+        } else if (i > 59) {
+            changeMinutes(1);
+            setSeconds(i - 60);
+        } else
+            time = time.plusSeconds(offset);
     }
 
     public void changeMinutes(int offset) {
         if (time == null) return;
-        if (offset < 0 && time.getHour() == 0 && time.getMinute() == 0)
-            this.changeDay(-1);
-        time = time.plusMinutes(offset);
+        int i = time.getMinute() + offset;
+        if (i < 0) {
+            changeHours(-1);
+            setMinutes(i + 60);
+        } else if (i > 59) {
+            changeHours(1);
+            setMinutes(i - 60);
+        } else
+            time = time.plusMinutes(offset);
     }
 
     public void changeHours(int offset) {
         if (time == null) return;
-        if (offset < 0 && time.getHour() == 0)
-            this.changeDay(-1);
-        time = time.plusHours(offset);
+        int i = time.getHour() + offset;
+        if (i < 0) {
+            changeDay(-1);
+            setHours(i + 24);
+        } else if (i > 23) {
+            changeDay(1);
+            setHours(i - 24);
+        } else
+            time = time.plusHours(offset);
     }
 }
