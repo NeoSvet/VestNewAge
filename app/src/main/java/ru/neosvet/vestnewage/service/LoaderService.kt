@@ -89,8 +89,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         isRun = false
         curLoader?.cancel()
         ErrorUtils.setData(getInputData())
-        if (throwable is Exception)
-            ErrorUtils.setError(throwable)
+        ErrorUtils.setError(throwable)
         finishService(throwable.localizedMessage)
     }
 

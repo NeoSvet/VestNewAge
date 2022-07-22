@@ -11,7 +11,7 @@ import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.MyException;
 
 public class ErrorUtils {
-    private static Exception error;
+    private static Throwable error;
     private static Data data;
 
     public static void clear() {
@@ -23,7 +23,7 @@ public class ErrorUtils {
         ErrorUtils.data = data;
     }
 
-    public static void setError(Exception error) {
+    public static void setError(Throwable error) {
         if (!(error instanceof MyException))
             ErrorUtils.error = error;
     }
