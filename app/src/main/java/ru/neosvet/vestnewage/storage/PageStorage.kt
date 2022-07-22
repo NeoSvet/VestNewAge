@@ -66,8 +66,8 @@ class PageStorage {
                 return
             db.close()
         }
-        isClosed = false
         db = DataBase(n)
+        isClosed = false
         month = n.substring(0, 2).toInt()
         year = n.substring(3).toInt() + 2000
     }
