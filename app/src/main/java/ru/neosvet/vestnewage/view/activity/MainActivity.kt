@@ -306,6 +306,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             else if (curSection != Section.MENU)
                 statusBack = StatusBack.PAGE
             updateNew()
+            if (curSection == Section.HELP && helper.isSideMenu)
+                helper.fabAction.isVisible = false
         }
     }
 
@@ -351,6 +353,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
+        helper.fabAction.isVisible = true
         when (section) {
             Section.MENU -> {
                 unblocked()
@@ -418,11 +421,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
-            Section.HELP -> if (tab == -1) { //first isRun
-                val frHelp = HelpFragment.newInstance(0)
-                fragmentTransaction.replace(R.id.my_fragment, frHelp)
-            } else {
-                fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
+            Section.HELP -> {
+                if (helper.isSideMenu)
+                    helper.fabAction.isVisible = false
+                if (tab == -1) { //first isRun
+                    val frHelp = HelpFragment.newInstance(0)
+                    fragmentTransaction.replace(R.id.my_fragment, frHelp)
+                } else
+                    fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
         }
         tab = 0
