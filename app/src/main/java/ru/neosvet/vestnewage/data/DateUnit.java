@@ -22,7 +22,8 @@ import ru.neosvet.vestnewage.utils.Const;
 public class DateUnit {
     public static final byte MONDAY = 1, SUNDAY = 0;
     public static final int DAY_IN_SEC = 86400, //MONTH_IN_SEC = 2592000,
-            HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000;
+            HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000,
+            GRAD = 60, DAY_IN_HOUR = 24;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
     private LocalTime time;
@@ -263,11 +264,11 @@ public class DateUnit {
         if (time == null) return;
         int i = time.getSecond() + offset;
         if (i < 0) {
-            changeMinutes(-1);
-            setSeconds(i + 60);
-        } else if (i > 59) {
-            changeMinutes(1);
-            setSeconds(i - 60);
+            changeMinutes(-(i / GRAD));
+            setSeconds(i % GRAD + GRAD);
+        } else if (i >= GRAD) {
+            changeMinutes(i / GRAD);
+            setSeconds(i % GRAD);
         } else
             time = time.plusSeconds(offset);
     }
@@ -276,11 +277,11 @@ public class DateUnit {
         if (time == null) return;
         int i = time.getMinute() + offset;
         if (i < 0) {
-            changeHours(-1);
-            setMinutes(i + 60);
-        } else if (i > 59) {
-            changeHours(1);
-            setMinutes(i - 60);
+            changeHours(-(i / GRAD));
+            setMinutes(i % GRAD + GRAD);
+        } else if (i >= GRAD) {
+            changeHours(i / GRAD);
+            setMinutes(i % GRAD);
         } else
             time = time.plusMinutes(offset);
     }
@@ -289,11 +290,11 @@ public class DateUnit {
         if (time == null) return;
         int i = time.getHour() + offset;
         if (i < 0) {
-            changeDay(-1);
-            setHours(i + 24);
-        } else if (i > 23) {
-            changeDay(1);
-            setHours(i - 24);
+            changeDay(-(i / DAY_IN_HOUR));
+            setHours(i % DAY_IN_HOUR + DAY_IN_HOUR);
+        } else if (i >= DAY_IN_HOUR) {
+            changeDay(i / DAY_IN_HOUR);
+            setHours(i % DAY_IN_HOUR);
         } else
             time = time.plusHours(offset);
     }
