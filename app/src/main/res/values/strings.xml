@@ -237,6 +237,7 @@
     <!--HelpFragment-->
     <string name="link_on_app">Ссылка на приложение</string>
     <string name="page_app">Страница приложения</string>
+    <string name="tg_channel">Канал в Телеграме</string>
     <string name="title_app">Приложение «Весть Века»</string>
     <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="changelog">Список изменений</string>

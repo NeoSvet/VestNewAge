@@ -17,11 +17,12 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     companion object {
         private const val FEEDBACK = 1
-        private const val FEEDBACK_COUNT = 4
+        private const val FEEDBACK_COUNT = 5
         private const val WRITE_TO_DEV = 1
         private const val LINK_ON_APP = 2
-        private const val LINK_ON_SITE = 3
-        private const val CHANGELOG = 4
+        private const val TG_CHANNEL = 3
+        private const val LINK_ON_SITE = 4
+        private const val CHANGELOG = 5
     }
 
     private val mstate = MutableLiveData<NeoState>()
@@ -51,6 +52,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
             srv_info = act.getString(R.string.srv_info),
             write_to_dev = act.getString(R.string.write_to_dev),
             link_on_app = act.getString(R.string.link_on_app),
+            tg_channel = act.getString(R.string.tg_channel),
             page_app = act.getString(R.string.page_app),
             changelog = act.getString(R.string.changelog),
             format_info = act.getString(R.string.format_info)
@@ -72,7 +74,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
             switchFeedback()
             return
         }
-        if(index == policyIndex) {
+        if (index == policyIndex) {
             mstate.value = NeoState.ListState(ListEvent.MOVE, index)
             return
         }
@@ -88,6 +90,8 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
             }
             LINK_ON_APP ->
                 mstate.value = NeoState.ListState(ListEvent.REMOTE)
+            TG_CHANNEL ->
+                Lib.openInApps("https://t.me/+nUS5nlrZsvM3MTEy", null)
             LINK_ON_SITE ->
                 Lib.openInApps("http://neosvet.ucoz.ru/vna/", null)
             CHANGELOG ->
@@ -111,6 +115,13 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                 HelpItem(
                     title = strings.link_on_app,
                     icon = R.drawable.play_store
+                )
+            )
+            list.add(
+                FEEDBACK + TG_CHANNEL,
+                HelpItem(
+                    title = strings.tg_channel,
+                    icon = R.drawable.tg
                 )
             )
             list.add(
