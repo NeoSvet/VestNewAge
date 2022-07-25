@@ -32,6 +32,8 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     private var verCode = 0
     private var verName = ""
     val list = mutableListOf<HelpItem>()
+    private val policyIndex: Int
+        get() = FEEDBACK + if (feedback) FEEDBACK_COUNT + 1 else 1
 
     fun init(act: Activity, section: Int) {
         val titles = act.resources.getStringArray(R.array.help_title)
@@ -68,6 +70,10 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         }
         if (index == FEEDBACK) {
             switchFeedback()
+            return
+        }
+        if(index == policyIndex) {
+            mstate.value = NeoState.ListState(ListEvent.MOVE, index)
             return
         }
         list[index].opened = list[index].opened.not()

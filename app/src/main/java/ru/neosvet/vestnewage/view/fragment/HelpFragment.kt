@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.view.list.ScrollHelper
@@ -111,7 +112,8 @@ class HelpFragment : Fragment(), Observer<NeoState> {
                     )
                     startActivity(sendIntent)
                 }
-                else -> {}
+                ListEvent.MOVE ->
+                    Lib.openInApps("http://neosvet.ucoz.ru/vna/privacy.html", null)
             }
         }
     }
