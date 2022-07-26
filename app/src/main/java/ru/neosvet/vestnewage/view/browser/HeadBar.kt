@@ -28,6 +28,7 @@ class HeadBar(
     private var expandedH = 0
     private var state = State.EXPANDED
     private var isTop = true
+    private var isNotExpandable = false
     private var isBlocked = false
 
     val isExpanded: Boolean
@@ -121,7 +122,10 @@ class HeadBar(
     fun expanded() {
         if (isBlocked) return
         mainView.isVisible = true
-        changeHeight(expandedH)
+        if (isNotExpandable)
+            changeHeight(collapsedH)
+        else
+            changeHeight(expandedH)
         time = System.currentTimeMillis()
     }
 
@@ -141,5 +145,11 @@ class HeadBar(
 
     fun unblocked() {
         isBlocked = false
+    }
+
+    fun setExpandable(isNot: Boolean) {
+        if (isNot && state == State.EXPANDED)
+            changeHeight(collapsedH)
+        isNotExpandable = isNot
     }
 }

@@ -103,6 +103,7 @@
     <string name="opt_scale">Оптимальный масштаб</string>
     <string name="src_scale">Исходный масштаб</string>
     <string name="nav_button">Кнопка вверх/вниз</string>
+    <string name="collapsing_top">Верх не разворачивать</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <!--MarkersFragment-->

@@ -12,6 +12,7 @@ class BrowserHelper(context: Context) {
         const val TAG = "Browser"
         private const val THEME = "theme"
         private const val NAVBUTTONS = "navb"
+        private const val MITITOP = "minitop"
         private const val SCALE = "scale"
     }
 
@@ -20,6 +21,7 @@ class BrowserHelper(context: Context) {
     var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
     var zoom: Int = pref.getInt(SCALE, 0)
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
+    var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
     var link: String = ""
     var search: String = ""
         private set
@@ -37,6 +39,7 @@ class BrowserHelper(context: Context) {
         editor.putInt(THEME, if (isLightTheme) 0 else 1)
         editor.putInt(SCALE, zoom)
         editor.putBoolean(NAVBUTTONS, isNavButton)
+        editor.putBoolean(MITITOP, isMiniTop)
         editor.apply()
     }
 

@@ -49,6 +49,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     data class NeoMenu(
         val theme: MenuItem,
         val buttons: MenuItem,
+        val top: MenuItem,
         val refresh: MenuItem,
         val share: MenuItem
     )
@@ -141,6 +142,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
     private fun restoreState(state: Bundle?) {
         stateUtils.restore()
+        binding.ivHead.post {
+            headBar.setExpandable(helper.isMiniTop)
+        }
         if (state == null) {
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
@@ -274,6 +278,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             setCheckItem(menu.buttons, true)
         else
             fabNav.isVisible = false
+        if (helper.isMiniTop)
+        setCheckItem(menu.top, true)
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
@@ -442,7 +448,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 refresh = it.getItem(4),
                 share = it.getItem(1),
                 buttons = it.getItem(0).subMenu.getItem(0),
-                theme = it.getItem(0).subMenu.getItem(1),
+                top = it.getItem(0).subMenu.getItem(1),
+                theme = it.getItem(0).subMenu.getItem(2),
             )
         }
         bottomBar.setBackgroundResource(R.drawable.panel_bg)
@@ -456,6 +463,11 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
                     fabNav.isVisible = helper.isNavButton
+                }
+                R.id.nav_minitop -> {
+                    helper.isMiniTop = helper.isMiniTop.not()
+                    setCheckItem(it, helper.isMiniTop)
+                    headBar.setExpandable(helper.isMiniTop)
                 }
                 R.id.nav_search -> with(content) {
                     headBar.hide()
