@@ -432,7 +432,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
         }
         tab = 0
-        fragmentTransaction.commit()
+        if (supportFragmentManager.isDestroyed.not())
+            fragmentTransaction.commit()
     }
 
     private fun setMenu(section: Section, savePrev: Boolean) {
