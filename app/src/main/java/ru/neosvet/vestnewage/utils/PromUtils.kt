@@ -199,7 +199,8 @@ class PromUtils(textView: View?) {
         if (period > p) {
             stop()
             period = p.toLong()
-            val d = timeDiff % p - 100
+            var d = timeDiff % p - 100
+            if (d < 10) d = 0
             timer = timer(initialDelay = d.toLong(), period = period) {
                 runPromTime()
             }
