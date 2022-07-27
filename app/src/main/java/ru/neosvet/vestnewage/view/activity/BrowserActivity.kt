@@ -34,6 +34,7 @@ import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
+
 class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     companion object {
         @JvmStatic
@@ -187,13 +188,14 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
     }
 
-    private fun restorePosition() {
-        if (helper.position == 0f) return
-        binding.content.wvBrowser.run {
-            val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
-            scrollTo(0, pos)
-            helper.position = 0f
+    private fun restorePosition() = binding.content.wvBrowser.run {
+        if (helper.position == 0f) {
+            scrollTo(0, 0)
+            return
         }
+        val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
+        scrollTo(0, pos)
+        helper.position = 0f
     }
 
     private fun closeSearch() {
@@ -279,7 +281,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         else
             fabNav.isVisible = false
         if (helper.isMiniTop)
-        setCheckItem(menu.top, true)
+            setCheckItem(menu.top, true)
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
@@ -520,7 +522,6 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             val unread = UnreadUtils()
             unread.deleteLink(helper.link)
         }
-
         lifecycleScope.launch {
             delay(250)
             binding.content.wvBrowser.post {
