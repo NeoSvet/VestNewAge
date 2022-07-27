@@ -33,7 +33,7 @@ class BrowserToiler : NeoToiler() {
         private const val STYLE = "/style/style.css"
         private const val FONT = "/style/myriad.ttf"
         private const val PAGE = "/page.html"
-        private const val script = "<a href='javascript:NeoInterface."
+        private const val SCRIPT = "<input type='button' onclick='NeoInterface."
         private const val PERIOD_FOR_REFRESH = DateUnit.DAY_IN_SEC * 30
     }
 
@@ -168,14 +168,14 @@ class BrowserToiler : NeoToiler() {
             if (storage.isArticle()) //обновлять только статьи
                 isNeedUpdate =
                     DateUnit.initNow().timeInSeconds - d.timeInSeconds > PERIOD_FOR_REFRESH
-            bw.write("<html><head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n")
+            bw.write("<html><head>\n<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n")
             bw.write("<title>")
             bw.write(s)
             bw.write("</title>\n")
-            bw.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"")
+            bw.write("<link rel='stylesheet' type='text/css' href='")
             bw.flush()
             bw.write(STYLE.substring(1))
-            bw.write("\">\n</head><body>\n<h1 class=\"page-title\">")
+            bw.write("'>\n</head><body>\n<h1 class='page-title' id='title'>")
             bw.write(s)
             bw.write("</h1>\n")
             bw.flush()
@@ -201,10 +201,11 @@ class BrowserToiler : NeoToiler() {
         cursor.close()
         bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n")
         if (storage.isBook()) {
-            bw.write(script)
-            bw.write("PrevPage();'>" + strings.toPrev + "</a> | ")
-            bw.write(script)
-            bw.write("NextPage();'>" + strings.toNext + "</a>")
+            bw.write(SCRIPT)
+            bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
+            bw.write(SCRIPT)
+            bw.write("NextPage();' value='" + strings.toNext + "'/>")
+            bw.write(Const.BR)
             bw.write(Const.BR)
             bw.flush()
         }
