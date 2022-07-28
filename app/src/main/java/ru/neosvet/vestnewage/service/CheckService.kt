@@ -10,6 +10,7 @@ import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -72,15 +73,15 @@ class CheckService : LifecycleService() {
 
     private fun checkSummary(): Boolean {
         val stream = NeoClient.getStream(
-            NeoClient.SITE + "rss/?" + System.currentTimeMillis()
+            NetConst.SITE + "rss/?" + System.currentTimeMillis()
         )
         val site = if (NeoClient.isMainSite())
-            NeoClient.SITE.substring(
-                NeoClient.SITE.indexOf("/") + 2
+            NetConst.SITE.substring(
+                NetConst.SITE.indexOf("/") + 2
             )
         else
-            NeoClient.SITE2.substring(
-                NeoClient.SITE2.indexOf("/") + 2
+            NetConst.SITE2.substring(
+                NetConst.SITE2.indexOf("/") + 2
             )
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()

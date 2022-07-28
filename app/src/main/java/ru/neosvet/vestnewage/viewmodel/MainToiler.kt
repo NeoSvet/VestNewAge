@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
@@ -44,7 +45,7 @@ class MainToiler : NeoToiler() {
     }
 
     private suspend fun loadQuote() {
-        var s = NeoClient.SITE + "AjaxData/Calendar"
+        var s = NetConst.SITE + "AjaxData/Calendar"
         val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
         s = br.readLine()
         br.close()
@@ -114,8 +115,8 @@ class MainToiler : NeoToiler() {
 
     private suspend fun synchronizationTime(): Int {
         val builderRequest = Request.Builder()
-        builderRequest.url(NeoClient.SITE)
-        builderRequest.header(NeoClient.USER_AGENT, App.context.packageName)
+        builderRequest.url(NetConst.SITE)
+        builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         val client = NeoClient.createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
         val s = response.headers.value(1)

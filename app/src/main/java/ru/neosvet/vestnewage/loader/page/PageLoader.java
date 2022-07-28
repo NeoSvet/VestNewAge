@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import ru.neosvet.vestnewage.data.DataBase;
 import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.storage.PageStorage;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.Lib;
@@ -34,9 +35,9 @@ public class PageLoader {
         boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser();
         if (NeoClient.isMainSite())
-            page.load(NeoClient.SITE + Const.PRINT + s, "page-title");
+            page.load(NetConst.SITE + Const.PRINT + s, "page-title");
         else
-            page.load(NeoClient.SITE2 + Const.PRINT + s, "<h2>");
+            page.load(NetConst.SITE2 + Const.PRINT + s, "<h2>");
         if (singlePage)
             storage.deleteParagraphs(storage.getPageId(link));
 

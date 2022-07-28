@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoToast
@@ -305,8 +306,8 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun loadSiteSection() {
         val url = arrayOf(
-            NeoClient.SITE,
-            NeoClient.SITE + SiteToiler.NOVOSTI
+            NetConst.SITE,
+            NetConst.SITE + SiteToiler.NOVOSTI
         )
         val file = arrayOf(
             Lib.getFile(SiteToiler.MAIN).toString(),

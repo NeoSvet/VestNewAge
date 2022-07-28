@@ -7,7 +7,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -42,9 +42,9 @@ class SiteToiler : NeoToiler() {
         get() = Lib.getFile(nameFiles[selectedTab])
     private val url: String
         get() = if (selectedTab == TAB_SITE)
-            NeoClient.SITE
+            NetConst.SITE
         else
-            NeoClient.SITE + NOVOSTI
+            NetConst.SITE + NOVOSTI
     private val ads: AdsUtils by lazy {
         AdsUtils(App.context)
     }

@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DataBase;
 import ru.neosvet.vestnewage.data.DateUnit;
-import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.storage.PageStorage;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.Lib;
@@ -77,7 +77,7 @@ public class SummaryHelper {
 
     public void createNotification(String text, String link) {
         if (!link.contains("://"))
-            link = NeoClient.SITE + link;
+            link = NetConst.SITE + link;
         intent.setData(Uri.parse(link));
         PendingIntent piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         PendingIntent piPostpone = notifHelper.getPostponeSummaryNotif(notif_id, text, link);
@@ -108,7 +108,7 @@ public class SummaryHelper {
         notifBuilder = notifHelper.getSummaryNotif(
                 App.context.getString(R.string.appeared_new_some),
                 NotificationUtils.CHANNEL_SUMMARY);
-        intent.setData(Uri.parse(NeoClient.SITE + Const.RSS));
+        intent.setData(Uri.parse(NetConst.SITE + Const.RSS));
         intent.putExtra(DataBase.ID, notif_id);
         PendingIntent piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         notifBuilder.setContentIntent(piSummary)

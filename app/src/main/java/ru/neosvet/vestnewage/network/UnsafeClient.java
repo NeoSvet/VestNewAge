@@ -12,7 +12,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
-import ru.neosvet.vestnewage.utils.Const;
 
 //from https://stackoverflow.com/a/49063199/2956830
 
@@ -53,9 +52,9 @@ public class UnsafeClient {
                 }
             });
 
-            builder.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-            builder.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-            builder.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+            builder.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
+            builder.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
+            builder.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
             return builder.build();
         } catch (Exception e) {
             throw new RuntimeException(e);

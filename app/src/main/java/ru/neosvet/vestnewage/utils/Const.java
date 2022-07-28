@@ -5,7 +5,7 @@ package ru.neosvet.vestnewage.utils;
  */
 
 public interface Const {
-    int MAX_ON_PAGE = 15, TIMEOUT = 20;
+    int MAX_ON_PAGE = 15;
     int TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
     String mailto = "mailto:neosvet333@gmail.com?subject=Приложение «Весть Века»&body=";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", ENCODING = "cp1251";

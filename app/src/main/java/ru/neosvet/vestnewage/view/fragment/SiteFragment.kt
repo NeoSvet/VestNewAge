@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -208,7 +208,7 @@ class SiteFragment : NeoFragment() {
 
     private fun openPage(url: String) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(NeoClient.SITE))
+            if (url.contains(NetConst.SITE))
                 Lib.openInApps(url, getString(R.string.to_load))
             else
                 Lib.openInApps(url, null)

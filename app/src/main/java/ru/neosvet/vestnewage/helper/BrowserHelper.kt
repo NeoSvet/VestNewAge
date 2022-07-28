@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 
 class BrowserHelper(context: Context) {
@@ -94,7 +94,7 @@ class BrowserHelper(context: Context) {
             s = s.substring(9) + " (" +
                     context.getString(R.string.from) +
                     " " + s.substring(0, 8) + ")"
-        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NeoClient.SITE + link)
+        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NetConst.SITE + link)
         val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
         context.startActivity(intent)
     }

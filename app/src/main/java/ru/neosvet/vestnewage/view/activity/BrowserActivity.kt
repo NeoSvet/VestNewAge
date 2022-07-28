@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
@@ -438,9 +438,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             additionViews = listOf(btnGodWords, tvGodWords)
         ) {
             if (menu.refresh.isVisible)
-                Lib.openInApps(NeoClient.SITE + helper.link, null)
+                Lib.openInApps(NetConst.SITE + helper.link, null)
             else
-                Lib.openInApps(NeoClient.SITE, null)
+                Lib.openInApps(NetConst.SITE, null)
         }
     }
 

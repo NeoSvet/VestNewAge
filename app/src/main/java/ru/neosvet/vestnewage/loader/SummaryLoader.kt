@@ -4,6 +4,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
@@ -25,14 +26,14 @@ class SummaryLoader : LinksProvider {
 
     fun loadList(addUnread: Boolean) {
         val stream: InputStream =
-            NeoClient.getStream(NeoClient.SITE + "rss/?" + System.currentTimeMillis())
+            NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
         val site = if (NeoClient.isMainSite())
-            NeoClient.SITE.substring(
-                NeoClient.SITE.indexOf("/") + 2
+            NetConst.SITE.substring(
+                NetConst.SITE.indexOf("/") + 2
             )
         else
-            NeoClient.SITE2.substring(
-                NeoClient.SITE2.indexOf("/") + 2
+            NetConst.SITE2.substring(
+                NetConst.SITE2.indexOf("/") + 2
             )
 
         val br = BufferedReader(InputStreamReader(stream), 1000)

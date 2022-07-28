@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.BottomAnim
@@ -219,7 +219,7 @@ class PromUtils(textView: View?) {
         val sound = pref.getBoolean(SetNotifDialog.SOUND, false)
         val vibration = pref.getBoolean(SetNotifDialog.VIBR, true)
         val intent = Intent(App.context, MainActivity::class.java)
-        intent.data = Uri.parse(NeoClient.SITE + Const.PROM_LINK)
+        intent.data = Uri.parse(NetConst.SITE + Const.PROM_LINK)
         val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
         val piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         val notifHelper = NotificationUtils()

@@ -13,14 +13,10 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.MyException;
-import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.ErrorUtils;
 import ru.neosvet.vestnewage.utils.Lib;
 
 public class NeoClient {
-    public static final String SITE = "https://blagayavest.info/", SITE2 = "https://chenneling.info/",
-            CAB_SITE = "https://www.otkroveniya.eu/", USER_AGENT = "User-Agent",
-            COOKIE = "Cookie", SET_COOKIE = "Set-Cookie";
     private static boolean first = true;
 
     public static boolean isMainSite() {
@@ -29,40 +25,40 @@ public class NeoClient {
 
     public static OkHttpClient createHttpClient() {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-        client.connectTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        client.readTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
-        client.writeTimeout(Const.TIMEOUT, TimeUnit.SECONDS);
+        client.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
+        client.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
+        client.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
         return client.build();
     }
 
     public static BufferedInputStream getStream(String url) throws Exception {
-        if (!first && url.contains(SITE))
-            url = url.replace(SITE, SITE2);
+        if (!first && url.contains(NetConst.SITE))
+            url = url.replace(NetConst.SITE, NetConst.SITE2);
 
         Response response;
         try {
             Request.Builder builderRequest = new Request.Builder();
             builderRequest.url(url);
-            builderRequest.header(USER_AGENT, App.context.getPackageName());
-            if (url.contains(SITE)) {
-                builderRequest.header("Referer", SITE);
+            builderRequest.header(NetConst.USER_AGENT, App.context.getPackageName());
+            if (url.contains(NetConst.SITE)) {
+                builderRequest.header("Referer", NetConst.SITE);
             }
             OkHttpClient client = createHttpClient();
             response = client.newCall(builderRequest.build()).execute();
         } catch (Exception e) {
             ErrorUtils.setError(e);
             e.printStackTrace();
-            if (url.contains(SITE)) {
+            if (url.contains(NetConst.SITE)) {
                 first = false;
-                return getStream(url.replace(SITE, SITE2));
+                return getStream(url.replace(NetConst.SITE, NetConst.SITE2));
             } else
                 throw new MyException(App.context.getString(R.string.error_site));
         }
 
         if (response.code() != 200) {
-            if (url.contains(SITE)) {
+            if (url.contains(NetConst.SITE)) {
                 first = false;
-                return getStream(url.replace(SITE, SITE2));
+                return getStream(url.replace(NetConst.SITE, NetConst.SITE2));
             } else
                 throw new MyException(App.context.getString(R.string.error_code)
                         + response.code());
@@ -72,7 +68,7 @@ public class NeoClient {
             throw new MyException(App.context.getString(R.string.error_site));
         InputStream inStream = response.body().byteStream();
         File file = Lib.getFileP("/cache/file");
-        if(file.exists()) file.delete();
+        if (file.exists()) file.delete();
         FileOutputStream outStream = new FileOutputStream(file);
         byte[] buffer = new byte[1024];
         int length = inStream.read(buffer);

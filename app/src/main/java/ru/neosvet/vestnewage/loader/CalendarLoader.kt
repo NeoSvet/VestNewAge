@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.UnreadUtils
@@ -43,7 +44,7 @@ class CalendarLoader : LinksProvider, Loader {
     fun loadListMonth(updateUnread: Boolean) {
         isRun = true
         val stream: InputStream = NeoClient.getStream(
-            NeoClient.SITE + "AjaxData/Calendar/"
+            NetConst.SITE + "AjaxData/Calendar/"
                     + date.year + "-" + date.month + ".json"
         )
         val br = BufferedReader(InputStreamReader(stream), 1000)

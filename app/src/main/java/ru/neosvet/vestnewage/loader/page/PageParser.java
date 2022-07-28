@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.NeoList;
 import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.utils.Lib;
 
 public class PageParser {
@@ -116,7 +117,7 @@ public class PageParser {
                     elem.par = s.substring(n, s.indexOf("'", n));
                 elem.par = elem.par.replace("..", "").replace("&#x2B;", "+");
                 if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
-                    elem.par = NeoClient.SITE + elem.par.substring(1);
+                    elem.par = NetConst.SITE + elem.par.substring(1);
             }
             if (elem.tag.equals(Const.IMAGE)) {
                 elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/");

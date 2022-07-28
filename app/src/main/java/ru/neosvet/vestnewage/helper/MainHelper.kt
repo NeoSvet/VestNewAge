@@ -16,7 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -96,7 +96,7 @@ class MainHelper(private val act: MainActivity) {
         if (ScreenUtils.type == ScreenUtils.Type.TABLET_PORT)
             ivHead.setImageResource(R.drawable.headtablet)
         ivHead.setOnClickListener {
-            Lib.openInApps(NeoClient.SITE, null)
+            Lib.openInApps(NetConst.SITE, null)
         }
 
         isSideMenu = ScreenUtils.isTabletLand

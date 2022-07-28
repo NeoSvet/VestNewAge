@@ -3,9 +3,9 @@ package ru.neosvet.vestnewage.loader
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.page.PageParser
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.*
 import java.util.regex.Pattern
 
@@ -48,7 +48,7 @@ class SiteLoader(private val file: String) : LinksProvider {
 
     private fun loadList(link: String): List<ListItem> {
         val page = PageParser()
-        val isSite = link == NeoClient.SITE
+        val isSite = link == NetConst.SITE
         if (isSite) {
             page.load(link, "page-title")
         } else {
@@ -125,7 +125,7 @@ class SiteLoader(private val file: String) : LinksProvider {
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
             || url.lastIndexOf("/") == url.length - 1
         )
-            url = NeoClient.SITE + url.substring(1)
+            url = NetConst.SITE + url.substring(1)
         if (url.indexOf("/") == 0) url = url.substring(1)
         if (item.link == "@")
             item.clear()

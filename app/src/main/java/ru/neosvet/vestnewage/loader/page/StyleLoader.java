@@ -11,6 +11,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.Lib;
 
@@ -20,8 +21,8 @@ public class StyleLoader {
 
     public StyleLoader() {
         builderRequest = new Request.Builder();
-        builderRequest.header(NeoClient.USER_AGENT, App.context.getPackageName());
-        builderRequest.header("Referer", NeoClient.SITE);
+        builderRequest.header(NetConst.USER_AGENT, App.context.getPackageName());
+        builderRequest.header("Referer", NetConst.SITE);
         client = NeoClient.createHttpClient();
     }
 
@@ -60,7 +61,7 @@ public class StyleLoader {
     }
 
     private void downloadStyleFromSite(File fLight, File fDark) throws Exception {
-        builderRequest.url(NeoClient.SITE + "_content/BV/style-print.min.css");
+        builderRequest.url(NetConst.SITE + "_content/BV/style-print.min.css");
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         BufferedWriter bwLight = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));

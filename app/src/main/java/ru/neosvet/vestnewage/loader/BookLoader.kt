@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -63,9 +64,9 @@ class BookLoader : Loader {
         var s: String? = null
         for (i in startYear..finalYear) {
             s = if (NeoClient.isMainSite())
-                loadList(NeoClient.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
+                loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
             else
-                loadList(NeoClient.SITE2 + Const.PRINT + i + Const.HTML)
+                loadList(NetConst.SITE2 + Const.PRINT + i + Const.HTML)
             if (isRun.not()) break
             handler?.upProg()
         }
@@ -83,7 +84,7 @@ class BookLoader : Loader {
     fun loadNewEpistles(): String? {
         isRun = true
         if (NeoClient.isMainSite())
-            return loadList(NeoClient.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
+            return loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
         throw MyException(App.context.getString(R.string.site_unavailable))
     }
 
