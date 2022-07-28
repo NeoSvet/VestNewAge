@@ -87,6 +87,7 @@ class SiteToiler : NeoToiler() {
         scope.launch {
             val f = file
             if (f.exists().not()) {
+                postState(NeoState.LongValue(0))
                 reLoad()
                 return@launch
             }

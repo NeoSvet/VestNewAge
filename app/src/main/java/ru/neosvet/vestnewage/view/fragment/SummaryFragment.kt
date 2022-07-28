@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
@@ -74,14 +73,9 @@ class SummaryFragment : NeoFragment() {
             if (scroll)
                 binding?.rvSummary?.smoothScrollToPosition(0)
             act?.updateNew()
-        } else if (state is NeoState.LongValue)
-            setUpdateTime(state.value)
-    }
-
-    private fun setUpdateTime(time: Long) = binding?.run {
-        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
-        val s = getString(R.string.loaded) + diff + getString(R.string.back)
-        tvUpdate.text = s
+        } else if (state is NeoState.LongValue) binding?.run {
+            setUpdateTime(state.value, tvUpdate)
+        }
     }
 
     private fun onItemClick(index: Int, item: ListItem) {

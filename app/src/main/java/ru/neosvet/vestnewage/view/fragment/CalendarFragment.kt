@@ -185,8 +185,9 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 if (root.isVisible.not())
                     showView(root)
             }
-            is NeoState.LongValue ->
-                setUpdateTime(state.value)
+            is NeoState.LongValue -> binding?.run {
+                setUpdateTime(state.value, tvUpdate)
+            }
             NeoState.Ready ->
                 act?.showToast(getString(R.string.load_unavailable))
             else -> {}
@@ -200,12 +201,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             .alpha(1f)
             .setDuration(225)
             .start()
-    }
-
-    private fun setUpdateTime(time: Long) = binding?.run {
-        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
-        val s = getString(R.string.loaded) + diff + getString(R.string.back)
-        tvUpdate.text = s
     }
 
     override fun onAction(title: String) {

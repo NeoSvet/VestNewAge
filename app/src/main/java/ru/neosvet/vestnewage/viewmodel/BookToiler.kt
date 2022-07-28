@@ -105,6 +105,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         scope.launch {
             val d = date
             if (!existsList(d)) {
+                postState(NeoState.LongValue(0))
                 reLoad()
                 return@launch
             }

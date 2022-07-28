@@ -111,6 +111,7 @@ class CalendarToiler : NeoToiler() {
                 postState(NeoState.LongValue(time))
             } else {
                 postState(NeoState.Calendar(date.calendarString, false, false, calendar))
+                postState(NeoState.LongValue(0))
                 isRun = true
                 reLoad()
             }

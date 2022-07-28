@@ -32,6 +32,7 @@
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <string name="loaded">Загружено&#160;</string>
+    <string name="no_loaded_list">Список не загружен</string>
     <!--NotificationHelper-->
     <string name="mute_notif">Беззвучные</string>
     <string name="tips">Подсказки</string>

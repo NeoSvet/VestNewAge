@@ -4,12 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.ConnectObserver
 import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.utils.StateUtils
@@ -184,5 +186,15 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
 
     fun resetError() {
         neotoiler.clearStates()
+    }
+
+    protected fun setUpdateTime(time: Long, tv: TextView) {
+        if (time == 0L) {
+            tv.text = getString(R.string.no_loaded_list)
+            return
+        }
+        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
+        val s = getString(R.string.loaded) + diff + getString(R.string.back)
+        tv.text = s
     }
 }
