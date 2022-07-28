@@ -152,7 +152,6 @@
     <!--Страница-->
     <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
-    <string name="format_page">Страница: &lt;a href="%s"&gt;%s&lt;/a&gt;</string>
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
     <string name="downloaded">Загружено:</string>
     <string name="to_prev">На предыдущую</string>

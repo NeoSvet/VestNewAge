@@ -30,6 +30,7 @@ import java.util.*
 class BrowserToiler : NeoToiler() {
     companion object {
         private const val FILE = "file://"
+        private const val LINK_FORMAT = "<a href='%s'>%s</a>"
         private const val STYLE = "/style/style.css"
         private const val FONT = "/style/myriad.ttf"
         private const val PAGE = "/page.html"
@@ -57,7 +58,6 @@ class BrowserToiler : NeoToiler() {
 
     fun init(context: Context) {
         strings = BrowserStrings(
-            page = context.getString(R.string.format_page),
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
             toPrev = context.getString(R.string.to_prev),
@@ -215,7 +215,7 @@ class BrowserToiler : NeoToiler() {
             bw.write(d.year.toString() + Const.BR)
         } else {
             val url = NeoClient.SITE + link
-            bw.write(strings.page.format(url, url))
+            bw.write(LINK_FORMAT.format(url, url))
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
             bw.write(strings.downloaded + " " + d.toString())

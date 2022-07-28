@@ -13,7 +13,6 @@ data class SearchStrings(
 )
 
 data class BrowserStrings(
-    val page: String,
     val copyright: String,
     val downloaded: String,
     val toPrev: String,
