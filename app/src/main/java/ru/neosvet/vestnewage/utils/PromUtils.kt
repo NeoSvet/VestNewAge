@@ -49,6 +49,9 @@ class PromUtils(textView: View?) {
     private var period = DEF_PERIOD
     private var isStart = false
     private val scope = CoroutineScope(Dispatchers.Default)
+    private val main: CoroutineScope by lazy {
+        CoroutineScope(Dispatchers.Main)
+    }
     private var timer: Timer? = null
 
     init {
@@ -171,7 +174,10 @@ class PromUtils(textView: View?) {
     }
 
     private fun setTimeText(t: String) {
-        tvPromTime?.post { tvPromTime?.text = t }
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
+            main.launch { tvPromTime?.text = t }
+        else
+            tvPromTime?.post { tvPromTime?.text = t }
     }
 
     private fun getPromText(): String? {
