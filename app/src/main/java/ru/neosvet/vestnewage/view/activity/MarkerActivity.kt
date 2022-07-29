@@ -194,6 +194,10 @@ class MarkerActivity : AppCompatActivity() {
 
     private fun initActivity() = binding.run {
         setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val metrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(metrics)
         heightDialog = metrics.heightPixels -
