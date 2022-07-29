@@ -264,7 +264,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun showHead() {
         if (helper.topBar == null) {
-            findViewById<View>(R.id.ivHead).isVisible = true
+            findViewById<View>(R.id.ivHeadBack).isVisible = true
+            findViewById<View>(R.id.ivHeadFront).isVisible = true
             findViewById<View>(R.id.tvGodWords).isVisible = true
             findViewById<View>(R.id.btnGodWords).isVisible = true
             findViewById<View>(R.id.tvPromTimeHead).isVisible = true

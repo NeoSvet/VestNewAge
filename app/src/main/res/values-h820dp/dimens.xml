@@ -14,4 +14,5 @@
     <dimen name="title_margin_bottom">65dp</dimen>
     <dimen name="content_margin_bottom">88dp</dimen>
     <dimen name="bottom_bar_height">64dp</dimen>
+    <dimen name="head_margin">20dp</dimen>
 </resources>

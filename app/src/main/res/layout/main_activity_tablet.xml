@@ -7,14 +7,25 @@
     android:fitsSystemWindows="true">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivHead"
+        android:id="@+id/ivHeadBack"
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
-        android:src="@drawable/head"
+        android:src="@drawable/head_back"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivHeadFront"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/head_front"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
+        app:layout_constraintStart_toStartOf="@id/ivHeadBack"
+        app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvGodWords"
@@ -30,8 +41,8 @@
         android:shadowRadius="3"
         android:text="@string/god_words"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/ivHead"
-        app:layout_constraintTop_toTopOf="@id/ivHead" />
+        app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
+        app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
 
     <ImageButton
         android:id="@+id/btnGodWords"
@@ -42,8 +53,8 @@
         android:background="@drawable/button"
         android:src="@drawable/more"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/ivHead"
-        app:layout_constraintTop_toTopOf="@id/ivHead" />
+        app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
+        app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvPromTimeHead"
@@ -56,7 +67,7 @@
         android:shadowDy="3"
         android:shadowRadius="3"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/ivHead"
+        app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintEnd_toStartOf="@id/btnProm" />
 
     <ImageButton
@@ -71,8 +82,8 @@
         android:padding="5dp"
         android:scaleType="fitStart"
         android:src="@drawable/little_star"
-        app:layout_constraintBottom_toBottomOf="@id/ivHead"
-        app:layout_constraintEnd_toEndOf="@id/ivHead" />
+        app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
+        app:layout_constraintEnd_toEndOf="@id/ivHeadBack" />
 
     <FrameLayout
         android:id="@+id/menu_fragment"
@@ -80,7 +91,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivHead" />
+        app:layout_constraintTop_toBottomOf="@id/ivHeadBack" />
 
     <FrameLayout
         android:id="@+id/my_fragment"

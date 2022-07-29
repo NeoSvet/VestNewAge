@@ -13,5 +13,4 @@
     <integer name="screen_mode">3</integer>
     <dimen name="content_margin_bottom">16dp</dimen>
     <dimen name="bottom_bar_height">0dp</dimen>
-    <dimen name="head_height">253dp</dimen>
 </resources>

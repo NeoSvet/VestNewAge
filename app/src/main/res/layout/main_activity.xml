@@ -20,11 +20,20 @@
             app:scrimVisibleHeightTrigger="40dp">
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivHead"
+                android:id="@+id/ivHeadBack"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scaleType="fitXY"
-                android:src="@drawable/head"
+                android:scaleType="matrix"
+                android:src="@drawable/head_back"
+                app:layout_collapseMode="none" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHeadFront"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="@dimen/head_margin"
+                android:src="@drawable/head_front"
                 app:layout_collapseMode="parallax" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -53,8 +62,8 @@
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
                 android:src="@drawable/more"
-                app:layout_constraintEnd_toEndOf="@id/ivHead"
-                app:layout_constraintTop_toTopOf="@id/ivHead" />
+                app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
+                app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvPromTimeHead"

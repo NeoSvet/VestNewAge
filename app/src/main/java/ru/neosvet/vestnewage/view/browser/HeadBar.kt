@@ -4,7 +4,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
-import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import ru.neosvet.vestnewage.R
@@ -63,16 +62,12 @@ class HeadBar(
             else ->
                 State.COLLAPSED
         }
-        if (mainView is ImageView) {
-            if (state == State.EXPANDED) {
-                mainView.scaleType = ImageView.ScaleType.FIT_XY
-                for (v in additionViews)
-                    v.isVisible = true
-            } else if (state == State.COLLAPSED) {
-                mainView.scaleType = ImageView.ScaleType.CENTER_CROP
-                for (v in additionViews)
-                    v.isVisible = false
-            }
+        if (state == State.EXPANDED) {
+            for (v in additionViews)
+                v.isVisible = true
+        } else if (state == State.COLLAPSED) {
+            for (v in additionViews)
+                v.isVisible = false
         }
         unblocked()
     }

@@ -6,7 +6,7 @@
     android:layout_height="0dp"
     android:orientation="vertical"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/ivHead"
+    app:layout_constraintTop_toBottomOf="@id/ivHeadBack"
     tools:showIn="@layout/browser_activity">
 
     <androidx.constraintlayout.widget.ConstraintLayout

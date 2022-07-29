@@ -144,7 +144,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
     private fun restoreState(state: Bundle?) {
         stateUtils.restore()
-        binding.ivHead.post {
+        binding.ivHeadBack.post {
             headBar.setExpandable(helper.isMiniTop)
         }
         if (state == null) {
@@ -306,7 +306,6 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             btnGodWords.setOnClickListener(funClick)
             tvGodWords.setOnClickListener(funClick)
             if (ScreenUtils.isLand) {
-                ivHead.setImageResource(R.drawable.headland)
                 val p = tvGodWords.paddingBottom
                 tvGodWords.setPadding(p, p, tvGodWords.paddingEnd, p)
             }
@@ -430,7 +429,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
     private fun initHeadBar() = binding.run {
         headBar = HeadBar(
-            mainView = ivHead,
+            mainView = ivHeadBack,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
             additionViews = listOf(btnGodWords, tvGodWords)
         ) {
@@ -445,17 +444,17 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
     private fun setHeadBar() = binding.run {
         if (helper.isDoctrine) {
-            if (ScreenUtils.isTablet)
-                ivHead.setImageResource(R.drawable.headtabletd)
-            else if (ScreenUtils.isLand)
-                ivHead.setImageResource(R.drawable.headlandd)
-            else ivHead.setImageResource(R.drawable.headd)
-        } else {
-            if (ScreenUtils.isTablet)
-                ivHead.setImageResource(R.drawable.headtablet)
-            else if (ScreenUtils.isLand)
-                ivHead.setImageResource(R.drawable.headland)
-        }
+            if (ScreenUtils.isLand)
+                ivHeadBack.setImageResource(R.drawable.head_back_land_d)
+            else if (ScreenUtils.isTablet)
+                ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
+            else
+                ivHeadBack.setImageResource(R.drawable.head_back_d)
+            ivHeadFront.setImageResource(R.drawable.head_front_d)
+        } else if (ScreenUtils.isLand)
+            ivHeadBack.setImageResource(R.drawable.head_back_land)
+        else if (ScreenUtils.isTablet)
+            ivHeadBack.setImageResource(R.drawable.head_back_tablet)
     }
 
     private fun setBottomBar() = binding.run {

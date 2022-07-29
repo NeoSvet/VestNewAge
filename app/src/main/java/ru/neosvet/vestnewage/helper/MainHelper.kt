@@ -92,10 +92,10 @@ class MainHelper(private val act: MainActivity) {
             else
                 act.onAction(TAG)
         }
-        val ivHead = act.findViewById<ImageView>(R.id.ivHead)
+        val ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
         if (ScreenUtils.type == ScreenUtils.Type.TABLET_PORT)
-            ivHead.setImageResource(R.drawable.headtablet)
-        ivHead.setOnClickListener {
+            ivHeadBack.setImageResource(R.drawable.head_back_tablet)
+        ivHeadBack.setOnClickListener {
             Lib.openInApps(NetConst.SITE, null)
         }
 
@@ -114,7 +114,7 @@ class MainHelper(private val act: MainActivity) {
         topBar = act.findViewById(R.id.topBar)
 
         if (ScreenUtils.isLand) {
-            ivHead.setImageResource(R.drawable.headland)
+            ivHeadBack.setImageResource(R.drawable.head_back_land)
             val tv = act.findViewById<View>(R.id.tvGodWords)
             val p = tv.paddingBottom
             tv.setPadding(p, p, tv.paddingEnd, p)

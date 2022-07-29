@@ -8,5 +8,5 @@
     <dimen name="margin_top">48dp</dimen>
     <integer name="top_minus">90</integer>
     <integer name="screen_mode">1</integer>
-    <dimen name="head_height">110dp</dimen>
+    <dimen name="head_height">100dp</dimen>
 </resources>
