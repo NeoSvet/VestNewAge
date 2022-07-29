@@ -27,7 +27,8 @@ import java.util.*
 class BookToiler : NeoToiler(), LoadHandlerLite {
     companion object {
         const val TAB_POEMS = 0
-        //const val TAB_EPISTLES = 1
+        const val TAB_EPISTLES = 1
+        const val TAB_DOCTRINE = 2
     }
 
     enum class RndType {
@@ -37,6 +38,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     var selectedTab: Int = TAB_POEMS
     val isPoemsTab: Boolean
         get() = selectedTab == TAB_POEMS
+    val isDoctrineTab: Boolean
+        get() = selectedTab == TAB_DOCTRINE
     private lateinit var dPoems: DateUnit
     private lateinit var dEpistles: DateUnit
     private lateinit var strings: BookStrings
@@ -74,12 +77,22 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     override suspend fun doLoad() {
         loader = BookLoader(this)
-        if (isPoemsTab) loader?.loadPoemsList(2016)?.let {
-            dPoems = DateUnit.parse(it)
-        } else if (isLoadedOtkr) loader?.loadAllEpistles()?.let {
-            dEpistles = DateUnit.parse(it)
-        } else loader?.loadNewEpistles()?.let {
-            dEpistles = DateUnit.parse(it)
+        when (selectedTab) {
+            TAB_POEMS -> loader?.loadPoemsList(2016)?.let {
+                dPoems = DateUnit.parse(it)
+            }
+            TAB_EPISTLES -> if (isLoadedOtkr) loader?.loadAllEpistles()?.let {
+                dEpistles = DateUnit.parse(it)
+            } else loader?.loadNewEpistles()?.let {
+                dEpistles = DateUnit.parse(it)
+            }
+            TAB_DOCTRINE -> {
+                loader?.loadDoctrineList()
+                openDoctrine()
+                loader?.loadDoctrinePages()
+                postState(NeoState.Success)
+                return
+            }
         }
         openList(false)
     }
@@ -103,6 +116,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
         scope.launch {
+            if (isDoctrineTab) {
+                openDoctrine()
+                return@launch
+            }
             val d = date
             if (!existsList(d)) {
                 postState(NeoState.LongValue(0))
@@ -178,6 +195,31 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 postState(NeoState.Message(strings.month_is_empty))
             else reLoad()
         }
+    }
+
+    private suspend fun openDoctrine() {
+        val storage = PageStorage()
+        storage.open(DataBase.DOCTRINE)
+        val cursor = storage.getListAll()
+        cursor.moveToFirst()
+        if (cursor.count == 1) {
+            cursor.close()
+            storage.close()
+            postState(NeoState.LongValue(0))
+            reLoad()
+            return
+        }
+        val iTitle = cursor.getColumnIndex(Const.TITLE)
+        val iLink = cursor.getColumnIndex(Const.LINK)
+        val list = mutableListOf<ListItem>()
+        while (cursor.moveToNext()) {
+            val title = cursor.getString(iTitle)
+            val link = cursor.getString(iLink)
+            list.add(ListItem(title, link))
+        }
+        postState(NeoState.ListValue(list))
+        cursor.close()
+        storage.close()
     }
 
     private fun existsList(d: DateUnit): Boolean {

@@ -22,7 +22,14 @@ class BrowserHelper(context: Context) {
     var zoom: Int = pref.getInt(SCALE, 0)
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
     var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
+    var isDoctrine: Boolean = false
+        private set
     var link: String = ""
+        get() = field
+        set(value) {
+            isDoctrine = value.contains(Const.DOCTRINE)
+            field = value
+        }
     var search: String = ""
         private set
     var place: List<String> = listOf()
@@ -89,12 +96,20 @@ class BrowserHelper(context: Context) {
     fun sharePage(context: Context, title: String) {
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "text/plain"
-        var s: String = title
-        if (s.length > 9)
-            s = s.substring(9) + " (" +
-                    context.getString(R.string.from) +
-                    " " + s.substring(0, 8) + ")"
-        shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NetConst.SITE + link)
+        if (isDoctrine) {
+            shareIntent.putExtra(
+                Intent.EXTRA_TEXT,
+                context.getString(R.string.doctrine_pages) +
+                        link.substring(Const.DOCTRINE.length) + Const.N + NetConst.DOCTRINE_SITE
+            )
+        } else {
+            var s: String = title
+            if (s.length > 9)
+                s = s.substring(9) + " (" +
+                        context.getString(R.string.from) +
+                        " " + s.substring(0, 8) + ")"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NetConst.SITE + link)
+        }
         val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
         context.startActivity(intent)
     }

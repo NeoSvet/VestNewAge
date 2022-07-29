@@ -17,7 +17,7 @@ public interface Const {
     String TAB = "tab", MONTH = "Month", YEAR = "Year", UNREAD = "Unread", LIST = "list", PAGE = "page";
     String START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email";
     String PASSWORD = "password", PANEL = "panel", PROM_LINK = "Posyl-na-Edinenie.html";
-    String SELECT = "select", TIME = "time", TIMEDIFF = "timediff";
+    String SELECT = "select", TIME = "time", TIMEDIFF = "timediff", DOCTRINE = "doctrine:";
     String EPISTLES = "epistles", OTKR = "otkr", ADS = "ads", FILE = "file";
     String TITLE = "title", LINK = "link", PLACE = "place", DESCTRIPTION = "des";
 }

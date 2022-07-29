@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -20,8 +21,10 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
@@ -117,11 +120,13 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
         }
         binding?.tabLayout?.select(toiler.selectedTab)
+        checkChangeTab()
     }
 
     private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.poems))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.epistles))
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.doctrine))
         if (toiler.isPoemsTab.not())
             tabLayout.select(toiler.selectedTab)
 
@@ -136,8 +141,29 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 toiler.cancel()
                 toiler.selectedTab = tab.position
                 toiler.openList(true)
+                checkChangeTab()
             }
         })
+    }
+
+    private fun checkChangeTab() = binding?.run {
+        if (toiler.isDoctrineTab) {
+            bPrev.isVisible = false
+            bNext.isVisible = false
+            tvDate.isVisible = false
+            tvLink?.let {
+                it.isVisible = true
+                tvUpdate.isVisible = false
+            }
+        } else {
+            bPrev.isVisible = true
+            bNext.isVisible = true
+            tvDate.isVisible = true
+            tvLink?.let {
+                it.isVisible = false
+                tvUpdate.isVisible = true
+            }
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -145,8 +171,16 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             is NeoState.Book ->
                 setBook(state)
             is NeoState.LongValue -> binding?.run {
-                setUpdateTime(state.value, tvUpdate)
+                if (!toiler.isDoctrineTab)
+                    setUpdateTime(state.value, tvUpdate)
             }
+            is NeoState.ListValue -> binding?.run { //doctrine
+                adapter.setItems(state.list)
+                rvBook.smoothScrollToPosition(0)
+                tvUpdate.text = getString(R.string.link_to_src)
+            }
+            is NeoState.Success ->
+                setStatus(false)
             is NeoState.Message ->
                 act?.showToast(state.message)
             is NeoState.Rnd -> with(state) {
@@ -183,6 +217,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         bPrev.setOnClickListener { openMonth(false) }
         bNext.setOnClickListener { openMonth(true) }
         tvDate.setOnClickListener { showDatePicker(toiler.date) }
+        tvLink?.setOnClickListener {
+            Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+        } ?: tvUpdate.setOnClickListener {
+            if (toiler.isDoctrineTab)
+                Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+        }
     }
 
     override fun swipeLeft() {

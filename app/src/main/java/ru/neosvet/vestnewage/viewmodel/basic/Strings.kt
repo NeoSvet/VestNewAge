@@ -15,6 +15,8 @@ data class SearchStrings(
 data class BrowserStrings(
     val copyright: String,
     val downloaded: String,
+    val doctrine_pages: String,
+    val edition_of: String,
     val toPrev: String,
     val toNext: String
 )

@@ -84,7 +84,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
     private val helper: BrowserHelper
-        get() = toiler.helper!!
+        get() = toiler.helper
     private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
@@ -101,7 +101,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         )
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        if (toiler.helper == null)
+        if (toiler.isInit.not())
             toiler.init(this)
         initViews()
         if (savedInstanceState != null) // for logo in topBar
@@ -437,7 +437,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
             additionViews = listOf(btnGodWords, tvGodWords)
         ) {
-            if (menu.refresh.isVisible)
+            if (helper.link.contains(Const.DOCTRINE))
+                Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+            else if (menu.refresh.isVisible)
                 Lib.openInApps(NetConst.SITE + helper.link, null)
             else
                 Lib.openInApps(NetConst.SITE, null)

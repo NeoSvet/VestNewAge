@@ -15,7 +15,7 @@ public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", JOURNAL = "journal",
             MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
             COLLECTIONS = "collections", ID = "id", DESC = " DESC",
-            ARTICLES = "00.00";
+            ARTICLES = "00.00", DOCTRINE = "00.01";
     private final SQLiteDatabase db;
 
     public DataBase(String name) {

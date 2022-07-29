@@ -80,8 +80,10 @@
     <string name="updated_page">Страница обновлена</string>
     <string name="welcome_back">С возвращением!</string>
     <!--BookFragment-->
+    <string name="doctrine">Доктрина</string>
     <string name="epistles">Послания</string>
     <string name="poems">Катрены</string>
+    <string name="link_to_src">Ссылка на источник</string>
     <string name="month_is_empty">Список за этот месяц пуст!</string>
     <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,6 МБ.\nНа устройстве займёт 16,3 МБ памяти.</string>
     <string name="rnd_verse">«Случайный» стих</string>
@@ -154,7 +156,9 @@
     <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
-    <string name="downloaded">Загружено:</string>
+    <string name="downloaded">Загружено:&#160;</string>
+    <string name="doctrine_pages">Книга «Доктрина Создателя», страницы&#160;</string>
+    <string name="edition_of">Редакция от&#160;</string>
     <string name="to_prev">← назад</string>
     <string name="to_next">далее →</string>
     <!--SettingsFragment-->

@@ -2,6 +2,10 @@ package ru.neosvet.vestnewage.loader.page;
 
 import android.content.ContentValues;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import ru.neosvet.vestnewage.data.DataBase;
 import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.network.NeoClient;
@@ -20,6 +24,12 @@ public class PageLoader {
         storage.open(link);
         if (!singlePage && storage.existsPage(link)) {
             return false;
+        }
+        if (storage.isDoctrine()) {
+            downloadDoctrinePage(link);
+            if (singlePage)
+                storage.close();
+            return true;
         }
         if (!singlePage)
             checkRequests();
@@ -100,6 +110,27 @@ public class PageLoader {
             storage.close();
         page.clear();
         return true;
+    }
+
+    private void downloadDoctrinePage(String link) throws Exception {
+        String s = link.substring(Const.DOCTRINE.length()); //pages
+        BufferedInputStream stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + s + ".p");
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, Const.ENCODING), 1000);
+        long time = Long.parseLong(br.readLine());
+        ContentValues row = new ContentValues();
+        row.put(Const.TIME, time);
+        storage.updateTitle(link, row);
+        int id = storage.getPageId(link);
+        storage.deleteParagraphs(id);
+        s = br.readLine();
+        while (s != null) {
+            row = new ContentValues();
+            row.put(DataBase.ID, id);
+            row.put(DataBase.PARAGRAPH, s);
+            storage.insertParagraph(row);
+            s = br.readLine();
+        }
+        br.close();
     }
 
     private boolean isEmpty(String s) {

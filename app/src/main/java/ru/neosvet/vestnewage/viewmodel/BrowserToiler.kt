@@ -43,11 +43,14 @@ class BrowserToiler : NeoToiler() {
     var lightTheme: Boolean = true
     private val history = Stack<String>()
     private var isRefresh = false
-    var helper: BrowserHelper? = null
+    var isInit = false
+        private set
+    lateinit var helper: BrowserHelper
+        private set
     private var link: String
-        get() = helper!!.link
+        get() = helper.link
         set(value) {
-            helper!!.link = value
+            helper.link = value
         }
     private val pageLoader: PageLoader by lazy {
         PageLoader()
@@ -60,10 +63,13 @@ class BrowserToiler : NeoToiler() {
         strings = BrowserStrings(
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
+            doctrine_pages = context.getString(R.string.doctrine_pages),
+            edition_of = context.getString(R.string.edition_of),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next)
         )
         helper = BrowserHelper(context)
+        isInit = true
     }
 
     fun refresh() {
@@ -90,7 +96,9 @@ class BrowserToiler : NeoToiler() {
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
-        if (!url.contains(Const.HTML) && !url.contains("http:")) {
+        if (!url.contains(Const.HTML) && !url.contains("http:")
+            && !url.contains(Const.DOCTRINE)
+        ) {
             Lib.openInApps(url, null)
             return
         }
@@ -199,8 +207,8 @@ class BrowserToiler : NeoToiler() {
             } while (cursor.moveToNext())
         }
         cursor.close()
-        bw.write("<div style=\"margin-top:20px\" class=\"print2\">\n")
-        if (storage.isBook()) {
+        bw.write("<div style='margin-top:20px' class='print2'>\n")
+        if (storage.isBook() || helper.isDoctrine) {
             bw.write(SCRIPT)
             bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
             bw.write(SCRIPT)
@@ -209,7 +217,12 @@ class BrowserToiler : NeoToiler() {
             bw.write(Const.BR)
             bw.flush()
         }
-        if (link.contains("print")) { // материалы с сайта Откровений
+        if (helper.isDoctrine) {
+            bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
+            bw.write(strings.copyright)
+            bw.write(DateUnit.initToday().year.toString() + Const.BR)
+            bw.write(strings.edition_of + d.toString())
+        } else if (link.contains("print")) { // материалы с сайта Откровений
             isOtkr = true
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
@@ -218,7 +231,7 @@ class BrowserToiler : NeoToiler() {
             bw.write(LINK_FORMAT.format(url, url))
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
-            bw.write(strings.downloaded + " " + d.toString())
+            bw.write(strings.downloaded + d.toString())
         }
         bw.write("\n</div></body></html>")
         bw.close()

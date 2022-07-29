@@ -7,11 +7,25 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         style="@style/TabLayoutTheme"
-        android:layout_width="300dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@id/bPrev"
+        android:layout_width="350dp"
+        android:layout_height="@dimen/calendar_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/bPrev" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvLink"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/calendar_button"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/card_bg"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/link_to_src"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tab_layout"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/bPrev"

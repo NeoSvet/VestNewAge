@@ -19,7 +19,9 @@ class PageStorage {
     companion object {
         @JvmStatic
         fun getDatePage(link: String): String {
-            return if (!link.contains("/") || link.contains("press"))
+            return if (link.contains(Const.DOCTRINE))
+                DataBase.DOCTRINE
+            else if (!link.contains("/") || link.contains("press"))
                 DataBase.ARTICLES
             else if (link.contains("pred")) {
                 when {
@@ -60,6 +62,8 @@ class PageStorage {
     fun open(name: String) {
         val n = if (name.contains(Const.HTML))
             getDatePage(name)
+        else if (name.contains(Const.DOCTRINE))
+            DataBase.DOCTRINE
         else name
         if (isClosed.not()) {
             if (n == this.name)
@@ -80,7 +84,7 @@ class PageStorage {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle() || link.contains("2004") || link.contains("pred")) {
+        return if (isArticle() || isDoctrine() || link.contains("2004") || link.contains("pred")) {
             title
         } else {
             var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
@@ -131,13 +135,14 @@ class PageStorage {
         return exists
     }
 
-    fun isArticle(): Boolean {
-        return name == DataBase.ARTICLES
-    }
+    fun isArticle(): Boolean =
+        name == DataBase.ARTICLES
 
-    fun isBook(): Boolean {
-        return !isArticle() && patternBook.matcher(name).matches()
-    }
+    fun isDoctrine(): Boolean =
+        name == DataBase.DOCTRINE
+
+    fun isBook(): Boolean =
+        !isArticle() && patternBook.matcher(name).matches()
 
     fun getList(isPoems: Boolean): Cursor {
         val selection = if (isPoems) Const.LINK + DataBase.LIKE
@@ -167,7 +172,10 @@ class PageStorage {
     }
 
     private fun getCursor(isPoems: Boolean): Cursor? {
-        val cursor = if (isOldBook) getListAll()
+        val cursor = if (isDoctrine()) db.query(
+            Const.TITLE, null, null,
+            null, null, null, DataBase.ID
+        ) else if (isOldBook) getListAll()
         else getList(isPoems)
         if (!cursor.moveToFirst()) {
             cursor.close()
@@ -177,6 +185,8 @@ class PageStorage {
             cursor.close()
             return null
         }
+        if (isDoctrine())
+            cursor.moveToNext()
         return cursor
     }
 

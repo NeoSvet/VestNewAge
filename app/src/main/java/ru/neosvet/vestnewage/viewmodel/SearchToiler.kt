@@ -29,14 +29,15 @@ import java.util.*
 
 class SearchToiler : NeoToiler(), NeoPaging.Parent {
     companion object {
+        private const val DELAY_UPDATE = 1500
         private const val MODE_EPISTLES = 0
         private const val MODE_POEMS = 1
         private const val MODE_TITLES = 2
         private const val MODE_ALL = 3
         private const val MODE_LINKS = 4
-        private const val DELAY_UPDATE = 1500
         const val MODE_BOOK = 5
-        const val MODE_RESULTS = 6
+        private const val MODE_DOCTRINE = 6
+        const val MODE_RESULTS = 7
     }
 
     private val paging = NeoPaging(this)
@@ -166,6 +167,11 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     private suspend fun searchInPages() = helper.run {
         storage.clear()
         storage.isDesc = isDesc
+        if (mode == MODE_DOCTRINE) {
+            searchList(DataBase.DOCTRINE)
+            pages.close()
+            return@run
+        }
         if (mode == MODE_ALL)
             searchList(DataBase.ARTICLES)
         val d = DateUnit.putYearMonth(start.year, start.month)

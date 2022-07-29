@@ -25,6 +25,11 @@ class BookLoader : Loader {
     private val handler: LoadHandler?
     private val handlerLite: LoadHandlerLite?
 
+    constructor() {
+        handler = null
+        handlerLite = null
+    }
+
     constructor(handler: LoadHandler) {
         this.handler = handler
         handlerLite = null
@@ -275,5 +280,73 @@ class BookLoader : Loader {
         isRun = true
         loadListUcoz(UcozType.PART1)
         loadListUcoz(UcozType.PART2)
+    }
+
+    fun loadDoctrineList() {
+        isRun = true
+        //list format:
+        //line 1: pages
+        //line 2: title
+        val url = NetConst.DOCTRINE_BASE + "list.txt"
+        val br = BufferedReader(InputStreamReader(NeoClient.getStream(url), Const.ENCODING), 1000)
+        val storage = PageStorage()
+        storage.open(DataBase.DOCTRINE)
+        var link: String? = br.readLine()
+        while (link != null) {
+            val title = br.readLine()
+            link = Const.DOCTRINE + link
+            if (storage.getPageId(link) == -1)
+                storage.insertTitle(getRow(link, title, 0)).toInt()
+            else
+                storage.updateTitle(link, getRow(link, title, 0))
+            if (isRun.not())
+                break
+            link = br.readLine()
+        }
+        br.close()
+        storage.close()
+    }
+
+    fun loadDoctrinePages() {
+        isRun = true
+        val storage = PageStorage()
+        storage.open(DataBase.DOCTRINE)
+        var s: String?
+        var time: Long
+        val cursor = storage.getListAll()
+        max = cursor.count - 1
+        cur = 0
+        cursor.moveToFirst()
+        val iId = cursor.getColumnIndex(DataBase.ID)
+        val iLink = cursor.getColumnIndex(Const.LINK)
+        val iTime = cursor.getColumnIndex(Const.TIME)
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(iId)
+            val link = cursor.getString(iLink)
+            time = cursor.getLong(iTime)
+            s = link.substring(Const.DOCTRINE.length) //pages
+            val stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + "$s.p")
+            val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+            s = br.readLine() //time
+            if (s != null && s.toLong() != time) {
+                time = s.toLong()
+                storage.deleteParagraphs(id)
+                s = br.readLine()
+                while (s != null) {
+                    storage.insertParagraph(getRow(id, s))
+                    s = br.readLine()
+                }
+                val row = ContentValues()
+                row.put(Const.TIME, time)
+                storage.updateTitle(link, row)
+            }
+            br.close()
+            handlerLite?.let {
+                cur++
+                it.postPercent(cur.percent(max))
+            }
+        }
+        cursor.close()
+        storage.close()
     }
 }
