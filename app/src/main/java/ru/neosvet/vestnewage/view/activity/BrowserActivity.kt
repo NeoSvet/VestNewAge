@@ -106,13 +106,14 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         initViews()
         if (savedInstanceState != null) // for logo in topBar
             ScreenUtils.init(this)
-        setHeadBar()
+        initHeadBar()
         setBottomBar()
         setViews()
         setContent()
         initWords()
         initTheme()
         restoreState(savedInstanceState)
+        setHeadBar()
         stateUtils.runObserve()
     }
 
@@ -427,11 +428,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
     }
 
-    private fun setHeadBar() = binding.run {
-        if (ScreenUtils.isTablet)
-            ivHead.setImageResource(R.drawable.headtablet)
-        else if (ScreenUtils.isLand)
-            ivHead.setImageResource(R.drawable.headland)
+    private fun initHeadBar() = binding.run {
         headBar = HeadBar(
             mainView = ivHead,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
@@ -443,6 +440,21 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 Lib.openInApps(NetConst.SITE + helper.link, null)
             else
                 Lib.openInApps(NetConst.SITE, null)
+        }
+    }
+
+    private fun setHeadBar() = binding.run {
+        if (helper.isDoctrine) {
+            if (ScreenUtils.isTablet)
+                ivHead.setImageResource(R.drawable.headtabletd)
+            else if (ScreenUtils.isLand)
+                ivHead.setImageResource(R.drawable.headlandd)
+            else ivHead.setImageResource(R.drawable.headd)
+        } else {
+            if (ScreenUtils.isTablet)
+                ivHead.setImageResource(R.drawable.headtablet)
+            else if (ScreenUtils.isLand)
+                ivHead.setImageResource(R.drawable.headland)
         }
     }
 
