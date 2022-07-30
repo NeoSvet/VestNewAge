@@ -29,6 +29,8 @@ class HeadBar(
     private var isTop = true
     private var isNotExpandable = false
     private var isBlocked = false
+    val isHided: Boolean
+        get() = state == State.GONE
 
     val isExpanded: Boolean
         get() = state == State.EXPANDED && isBlocked.not()

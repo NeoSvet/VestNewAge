@@ -107,8 +107,10 @@
     <string name="src_scale">Исходный масштаб</string>
     <string name="nav_button">Кнопка вверх/вниз</string>
     <string name="collapsing_top">Верх не разворачивать</string>
+    <string name="auto_return_panels">Автовозврат панелей</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
+    <string name="alert_return_panels">Чтобы вернуть панели, нажмите «Назад» или включите их возврат при прокрутке наверх в опциях («Автовозврат панелей»).</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>

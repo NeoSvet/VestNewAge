@@ -51,6 +51,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         val theme: MenuItem,
         val buttons: MenuItem,
         val top: MenuItem,
+        val autoreturn: MenuItem,
         val refresh: MenuItem,
         val share: MenuItem
     )
@@ -115,6 +116,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         restoreState(savedInstanceState)
         setHeadBar()
         stateUtils.runObserve()
+        helper.checkAlertReturn(this)
     }
 
     override fun onPause() {
@@ -283,6 +285,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             fabNav.isVisible = false
         if (helper.isMiniTop)
             setCheckItem(menu.top, true)
+        if (helper.isAutoReturn)
+            setCheckItem(menu.autoreturn, true)
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
@@ -336,10 +340,10 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 scroll?.cancel()
                 if (isSearch.not() && wvBrowser.scrollY == 0) {
                     isTouch = false
-                    if (headBar.isExpanded.not()) {
+                    if (helper.isAutoReturn && headBar.isExpanded.not()) {
                         headBar.expanded()
                         scroll = lifecycleScope.launch {
-                            delay(300)
+                            delay(250)
                             wvBrowser.post { wvBrowser.scrollTo(0, 0) }
                         }
                     }
@@ -349,26 +353,29 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
 
         wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, oldScrollY: Int ->
+            if (helper.isNavButton) {
+                if (scrollY > 300) {
+                    binding.fabNav.setImageResource(R.drawable.ic_top)
+                    navIsTop = true
+                } else {
+                    binding.fabNav.setImageResource(R.drawable.ic_bottom)
+                    navIsTop = false
+                }
+            }
+
             if (isTouch) {
                 isScrollTop = scrollY >= oldScrollY
+                if (isScrollTop.not()) if(helper.isAutoReturn.not())
+                    return@setOnScrollChangeListener
                 if (isSearch || headBar.onScrollHost(scrollY, oldScrollY)) {
                     isTouch = false
                 }
-                if (isScrollTop)
-                    binding.bottomBar.performHide()
-                else
+                if (isScrollTop) {
+                    if (headBar.isHided) binding.bottomBar.performHide()
+                } else
                     binding.bottomBar.performShow()
             } else if (isScrollTop != scrollY >= oldScrollY) {
                 isTouch = true
-            }
-
-            if (!helper.isNavButton) return@setOnScrollChangeListener
-            if (scrollY > 300) {
-                binding.fabNav.setImageResource(R.drawable.ic_top)
-                navIsTop = true
-            } else {
-                binding.fabNav.setImageResource(R.drawable.ic_bottom)
-                navIsTop = false
             }
         }
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
@@ -464,7 +471,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 share = it.getItem(1),
                 buttons = it.getItem(0).subMenu.getItem(0),
                 top = it.getItem(0).subMenu.getItem(1),
-                theme = it.getItem(0).subMenu.getItem(2),
+                autoreturn = it.getItem(0).subMenu.getItem(2),
+                theme = it.getItem(0).subMenu.getItem(3),
             )
         }
         bottomBar.setBackgroundResource(R.drawable.panel_bg)
@@ -483,6 +491,10 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                     helper.isMiniTop = helper.isMiniTop.not()
                     setCheckItem(it, helper.isMiniTop)
                     headBar.setExpandable(helper.isMiniTop)
+                }
+                R.id.nav_autoreturn -> {
+                    helper.isAutoReturn = helper.isAutoReturn.not()
+                    setCheckItem(it, helper.isAutoReturn)
                 }
                 R.id.nav_search -> with(content) {
                     headBar.hide()

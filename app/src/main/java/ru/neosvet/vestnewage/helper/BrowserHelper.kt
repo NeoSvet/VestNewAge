@@ -1,8 +1,10 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.appcompat.app.AlertDialog
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
@@ -13,6 +15,8 @@ class BrowserHelper(context: Context) {
         private const val THEME = "theme"
         private const val NAVBUTTONS = "navb"
         private const val MITITOP = "minitop"
+        private const val AUTORETURN = "autoreturn"
+        private const val ALERTRETURN = "alertreturn"
         private const val SCALE = "scale"
     }
 
@@ -22,6 +26,7 @@ class BrowserHelper(context: Context) {
     var zoom: Int = pref.getInt(SCALE, 0)
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
     var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
+    var isAutoReturn: Boolean = pref.getBoolean(AUTORETURN, false)
     var isDoctrine: Boolean = false
         private set
     var link: String = ""
@@ -47,6 +52,7 @@ class BrowserHelper(context: Context) {
         editor.putInt(SCALE, zoom)
         editor.putBoolean(NAVBUTTONS, isNavButton)
         editor.putBoolean(MITITOP, isMiniTop)
+        editor.putBoolean(AUTORETURN, isAutoReturn)
         editor.apply()
     }
 
@@ -112,5 +118,17 @@ class BrowserHelper(context: Context) {
         }
         val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
         context.startActivity(intent)
+    }
+
+    fun checkAlertReturn(context: Context) {
+        if (pref.getBoolean(ALERTRETURN, true).not()) return
+        editor.putBoolean(ALERTRETURN, false)
+        editor.apply()
+        val builder = AlertDialog.Builder(context, R.style.NeoDialog)
+        builder.setMessage(context.getString(R.string.alert_return_panels))
+        builder.setPositiveButton(
+            context.getString(android.R.string.ok)
+        ) { dialog: DialogInterface, _ -> dialog.dismiss() }
+        builder.create().show()
     }
 }
