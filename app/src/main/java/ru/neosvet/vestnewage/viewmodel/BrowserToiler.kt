@@ -325,6 +325,10 @@ class BrowserToiler : NeoToiler() {
             openLink(it, false)
             return
         }
+        if (helper.isDoctrine) {
+            setState(NeoState.Success)
+            return
+        }
         val today = DateUnit.initToday().my
         val d: DateUnit = getDateFromLink()
         if (d.my == today) {
@@ -344,6 +348,10 @@ class BrowserToiler : NeoToiler() {
         storage.open(link)
         storage.getPrevPage(link)?.let {
             openLink(it, false)
+            return
+        }
+        if (helper.isDoctrine) {
+            setState(NeoState.Success)
             return
         }
         val min: String = getMinMY()
