@@ -48,7 +48,7 @@ class HeadBar(
         }
         mainView.post {
             expandedH = mainView.height
-            collapsedH = mainView.context.resources.getDimension(R.dimen.head_bar_height).toInt()
+            collapsedH = mainView.context.resources.getDimension(R.dimen.head_collapsed_height).toInt()
         }
     }
 
