@@ -116,7 +116,6 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         restoreState(savedInstanceState)
         setHeadBar()
         stateUtils.runObserve()
-        helper.checkAlertReturn(this)
     }
 
     override fun onPause() {
@@ -150,6 +149,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             headBar.setExpandable(helper.isMiniTop)
         }
         if (state == null) {
+            helper.checkTip()
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
             intent.getStringExtra(Const.SEARCH)?.let {

@@ -8,6 +8,8 @@ import androidx.appcompat.app.AlertDialog
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 
 class BrowserHelper(context: Context) {
     companion object {
@@ -16,7 +18,6 @@ class BrowserHelper(context: Context) {
         private const val NAVBUTTONS = "navb"
         private const val MITITOP = "minitop"
         private const val AUTORETURN = "autoreturn"
-        private const val ALERTRETURN = "alertreturn"
         private const val SCALE = "scale"
     }
 
@@ -120,15 +121,10 @@ class BrowserHelper(context: Context) {
         context.startActivity(intent)
     }
 
-    fun checkAlertReturn(context: Context) {
-        if (pref.getBoolean(ALERTRETURN, true).not()) return
-        editor.putBoolean(ALERTRETURN, false)
+    fun checkTip() {
+        if (pref.getBoolean(Const.TIP, true).not()) return
+        editor.putBoolean(Const.TIP, false)
         editor.apply()
-        val builder = AlertDialog.Builder(context, R.style.NeoDialog)
-        builder.setMessage(context.getString(R.string.alert_return_panels))
-        builder.setPositiveButton(
-            context.getString(android.R.string.ok)
-        ) { dialog: DialogInterface, _ -> dialog.dismiss() }
-        builder.create().show()
+        TipActivity.showTip(TipName.BROWSER_PANEL)
     }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -18,9 +19,12 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
@@ -79,6 +83,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
 
     private fun restoreState(state: Bundle?) {
         if (state == null) {
+            checkTip()
             toiler.openCalendar(0)
             if (toiler.isNeedReload())
                 startLoad()
@@ -87,6 +92,15 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             if (d > 0)
                 showDatePicker(DateUnit.putDays(d))
         }
+    }
+
+    private fun checkTip() {
+        val pref = requireContext().getSharedPreferences("calendar", AppCompatActivity.MODE_PRIVATE)
+        if (pref.getBoolean(Const.TIP, true).not()) return
+        val editor = pref.edit()
+        editor.putBoolean(Const.TIP, false)
+        editor.apply()
+        TipActivity.showTip(TipName.CALENDAR)
     }
 
     @SuppressLint("ClickableViewAccessibility")

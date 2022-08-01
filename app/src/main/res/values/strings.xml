@@ -92,6 +92,11 @@
     <string name="try_again">Попробуйте ещё раз</string>
     <string name="alert_rnd">Скачайте все материалы, прежде чем пользоваться этой функцией!</string>
     <string name="open">Открыть</string>
+    <!--TipActivity-->
+    <string name="tip_main">Нажмите на звёздочку, чтобы открыть меню действий.\nНа каждом экране набор действий отличается.</string>
+    <string name="tip_browser">Чтобы вернуть панели, нажмите «Назад» или включите их возврат при прокрутке наверх в опциях («Автовозврат панелей»).\n\n
+    Нижняя панель, слева направо: меню опций, поделиться, добавить в закладки, поиск на странице, обновить (перезагрузить).</string>
+    <string name="tip_calendar">Нажмите на месяц, чтобы выбрать месяц и год.</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
     <string name="to_top">Наверх</string>
@@ -110,7 +115,6 @@
     <string name="auto_return_panels">Автовозврат панелей</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
-    <string name="alert_return_panels">Чтобы вернуть панели, нажмите «Назад» или включите их возврат при прокрутке наверх в опциях («Автовозврат панелей»).</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>

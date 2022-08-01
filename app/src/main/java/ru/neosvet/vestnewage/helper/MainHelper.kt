@@ -24,6 +24,8 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
 import ru.neosvet.vestnewage.view.list.MenuAdapter
@@ -266,8 +268,19 @@ class MainHelper(private val act: MainActivity) {
 
     fun setActionIcon(icon: Int) {
         actionIcon = if (icon == 0) R.drawable.star else icon
-        type = if (actionIcon == R.drawable.star) ActionType.MENU else ActionType.ACTION
+        type = if (actionIcon == R.drawable.star) {
+            checkTip()
+            ActionType.MENU
+        } else ActionType.ACTION
         fabAction.setImageDrawable(ContextCompat.getDrawable(act, actionIcon))
         bottomBar?.requestLayout()
+    }
+
+    private fun checkTip() {
+        if (pref.getBoolean(Const.TIP, true).not()) return
+        val editor = pref.edit()
+        editor.putBoolean(Const.TIP, false)
+        editor.apply()
+        TipActivity.showTip(TipName.MAIN_STAR)
     }
 }
