@@ -365,7 +365,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
             if (isTouch) {
                 isScrollTop = scrollY >= oldScrollY
-                if (isScrollTop.not()) if(helper.isAutoReturn.not())
+                if (isScrollTop.not()) if (helper.isAutoReturn.not())
                     return@setOnScrollChangeListener
                 if (isSearch || headBar.onScrollHost(scrollY, oldScrollY)) {
                     isTouch = false
@@ -449,19 +449,25 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
     }
 
+    private val isBigHead: Boolean
+        get() {
+            val h = resources.getDimension(R.dimen.head_height) / resources.displayMetrics.density
+            return h > 110
+        }
+
     private fun setHeadBar() = binding.run {
         if (helper.isDoctrine) {
-            if (ScreenUtils.isLand)
-                ivHeadBack.setImageResource(R.drawable.head_back_land_d)
-            else if (ScreenUtils.isTablet)
+            if (ScreenUtils.isTablet && isBigHead)
                 ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
+            else if (ScreenUtils.isLand)
+                ivHeadBack.setImageResource(R.drawable.head_back_land_d)
             else
                 ivHeadBack.setImageResource(R.drawable.head_back_d)
             ivHeadFront.setImageResource(R.drawable.head_front_d)
-        } else if (ScreenUtils.isLand)
-            ivHeadBack.setImageResource(R.drawable.head_back_land)
-        else if (ScreenUtils.isTablet)
+        } else if (ScreenUtils.isTablet && isBigHead)
             ivHeadBack.setImageResource(R.drawable.head_back_tablet)
+        else if (ScreenUtils.isLand)
+            ivHeadBack.setImageResource(R.drawable.head_back_land)
     }
 
     private fun setBottomBar() = binding.run {
