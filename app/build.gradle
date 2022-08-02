@@ -9,8 +9,8 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdk 23
         targetSdk 31
-        versionCode 62
-        versionName "4.1"
+        versionCode 63
+        versionName "4.2"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
