@@ -260,5 +260,6 @@
     <string name="search_in_results">Искать в результатах</string>
     <string name="results_last_search">Показать результаты предыдущего поиска</string>
     <string name="clear_results_search">Удалить эти результаты</string>
+    <string name="scroll_results">прокрутка результатов</string>
     <!--<string name="vk_link">/away?utf=1&amp;to=http%3A%2F%2Fblagayavest.info</string>-->
 </resources>

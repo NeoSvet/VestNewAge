@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -13,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -63,11 +65,17 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private val adResult: PagingAdapter by lazy {
         PagingAdapter(this::resultClick, this::resultLongClick, this::finishedList)
     }
+    private val manager: GridLayoutManager by lazy {
+        GridLayoutManager(requireContext(), 1)
+    }
+    private val listPosition: Int
+        get() = manager.findFirstVisibleItemPosition() + SearchFactory.min
     override lateinit var modes: ArrayAdapter<String>
         private set
 
     private var settings: SearchDialog? = null
     private var jobResult: Job? = null
+    private var isNotUser = false
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -148,6 +156,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         binding?.run {
             outState.putBoolean(ADDITION, content.pAdditionSet.visibility == View.VISIBLE)
         }
+        outState.putInt(Const.PAGE, listPosition)
         super.onSaveInstanceState(outState)
     }
 
@@ -164,6 +173,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             }
             return@run
         }
+        SearchFactory.reset(state.getInt(Const.PLACE))
         if (toiler.shownResult) {
             toiler.showLastResult()
             etSearch.setText(helper.request)
@@ -183,22 +193,45 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun initSearchList() = binding?.content?.run {
-        rvSearch.layoutManager = GridLayoutManager(requireContext(), 1)
+        rvSearch.layoutManager = manager
         if (toiler.shownResult) {
             rvSearch.adapter = adResult
-            if (SearchFactory.offset > 0)
-                rvSearch.smoothScrollToPosition(SearchFactory.offset)
-            return@run
+        } else {
+            if (helper.existsResults()) {
+                val list = listOf(
+                    ListItem(getString(R.string.results_last_search), true),
+                    ListItem(getString(R.string.clear_results_search), true)
+                )
+                adDefault.setItems(list)
+            }
+            rvSearch.adapter = adDefault
         }
-        if (helper.existsResults()) {
-            val list = listOf(
-                ListItem(getString(R.string.results_last_search), true),
-                ListItem(getString(R.string.clear_results_search), true)
-            )
-            adDefault.setItems(list)
-        }
-        rvSearch.adapter = adDefault
         setListEvents(rvSearch)
+        rvSearch.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(view: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(view, dx, dy)
+                val p = listPosition
+                if (p % Const.MAX_ON_PAGE == 0)
+                    setResultScroll(p / Const.MAX_ON_PAGE)
+            }
+        })
+        sbResults.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                if (isNotUser) return
+                SearchFactory.reset(seekBar.progress * Const.MAX_ON_PAGE)
+                startPaging()
+            }
+        })
+    }
+
+    private fun setResultScroll(value: Int) {
+        isNotUser = true
+        binding?.content?.run {
+            sbResults.progress = value
+        }
+        isNotUser = false
     }
 
     private fun openSettings() {
@@ -282,7 +315,20 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private fun showResult() = binding?.run {
         bShow.isVisible = content.pAdditionSet.isVisible.not()
         content.tvLabel.text = helper.label
+        if (helper.countMaterials <= Const.MAX_ON_PAGE) {
+            setResultScroll(1)
+            content.sbResults.max = 1
+            content.sbResults.isEnabled = false
+        } else {
+            setResultScroll(0)
+            val count = helper.countMaterials / Const.MAX_ON_PAGE - 1
+            content.sbResults.max = count
+            content.sbResults.isEnabled = true
+        }
+        startPaging()
+    }
 
+    private fun startPaging() {
         jobResult?.cancel()
         jobResult = lifecycleScope.launch {
             toiler.paging().collect {

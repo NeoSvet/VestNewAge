@@ -11,7 +11,19 @@ class SearchFactory(
     private val parent: NeoPaging
 ) : PagingSource<Int, ListItem>() {
     companion object {
+        var min = 0
+            private set
         var offset = 0
+            private set(value) {
+                if (value < min)
+                    min = value
+                field = value
+            }
+
+        fun reset(startPosition: Int) {
+            min = startPosition
+            offset = startPosition
+        }
     }
 
     var total = 0

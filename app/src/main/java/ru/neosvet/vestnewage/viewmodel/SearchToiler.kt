@@ -151,7 +151,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 strings.search_mode[mode]
             countMatches = 0
             helper.countMaterials = 0
-            SearchFactory.offset = 0
+            SearchFactory.reset(0)
             notifyResult()
             shownResult = true
             storage.open()
