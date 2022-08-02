@@ -9,6 +9,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.viewmodel.basic.HelpStrings
 import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
@@ -23,6 +25,11 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         private const val TG_CHANNEL = 3
         private const val LINK_ON_SITE = 4
         private const val CHANGELOG = 5
+        private const val TIPS = 3
+        private const val TIPS_COUNT = 3
+        private const val TIP_MAIN = 0
+        private const val TIP_CALENDAR = 1
+        private const val TIP_BROWSER = 2
     }
 
     private val mstate = MutableLiveData<NeoState>()
@@ -30,11 +37,16 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         get() = mstate
     private lateinit var strings: HelpStrings
     private var feedback = false
+    private var tips = false
     private var verCode = 0
     private var verName = ""
     val list = mutableListOf<HelpItem>()
+    private val listFeedback = mutableListOf<HelpItem>()
+    private val listTips = mutableListOf<HelpItem>()
     private val policyIndex: Int
         get() = FEEDBACK + if (feedback) FEEDBACK_COUNT + 1 else 1
+    private val tipIndex: Int
+        get() = if (feedback) FEEDBACK_COUNT + TIPS else TIPS
 
     fun init(act: Activity, section: Int) {
         val titles = act.resources.getStringArray(R.array.help_title)
@@ -50,13 +62,51 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         verCode = act.packageManager.getPackageInfo(act.packageName, 0).versionCode
         strings = HelpStrings(
             srv_info = act.getString(R.string.srv_info),
-            write_to_dev = act.getString(R.string.write_to_dev),
-            link_on_app = act.getString(R.string.link_on_app),
-            tg_channel = act.getString(R.string.tg_channel),
-            page_app = act.getString(R.string.page_app),
-            changelog = act.getString(R.string.changelog),
-            format_info = act.getString(R.string.format_info)
+            format_info = act.getString(R.string.format_info),
+            feedback = act.resources.getStringArray(R.array.feedback),
+            tips = act.resources.getStringArray(R.array.tips_sections)
         )
+    }
+
+    private fun getFeedback(): List<HelpItem> {
+        if (listFeedback.isEmpty()) {
+            val icons =
+                arrayOf(R.drawable.gm, R.drawable.play_store, R.drawable.tg, R.drawable.www, 0)
+
+            for (i in icons.indices) {
+                val item = if (icons[i] == 0) HelpItem(
+                    title = strings.feedback[i],
+                    opened = true,
+                    content = String.format(
+                        strings.format_info, verName, verCode,
+                        Build.VERSION.RELEASE,
+                        Build.VERSION.SDK_INT
+                    )
+                ) else HelpItem(
+                    title = strings.feedback[i],
+                    icon = icons[i]
+                )
+                listFeedback.add(item)
+            }
+        }
+
+        return listFeedback
+    }
+
+    private fun getTips(): List<HelpItem> {
+        if (listTips.isEmpty()) {
+            val icons = arrayOf(R.drawable.little_star, R.drawable.ic_calendar, R.drawable.ic_menu)
+
+            for (i in icons.indices)
+                listTips.add(
+                    HelpItem(
+                        title = strings.tips[i],
+                        icon = icons[i]
+                    )
+                )
+        }
+
+        return listTips
     }
 
     fun restore() {
@@ -72,6 +122,17 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         }
         if (index == FEEDBACK) {
             switchFeedback()
+            return
+        }
+        val i = tipIndex
+        if (tips && index > i) {
+            if (index <= i + TIPS_COUNT) {
+                clickTip(index - i - 1)
+                return
+            }
+        }
+        if (index == i) {
+            switchTips()
             return
         }
         if (index == policyIndex) {
@@ -103,48 +164,44 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         feedback = feedback.not()
         if (feedback) {
             list[FEEDBACK].opened = true
-            list.add(
-                FEEDBACK + WRITE_TO_DEV,
-                HelpItem(
-                    title = strings.write_to_dev,
-                    icon = R.drawable.gm
-                )
-            )
-            list.add(
-                FEEDBACK + LINK_ON_APP,
-                HelpItem(
-                    title = strings.link_on_app,
-                    icon = R.drawable.play_store
-                )
-            )
-            list.add(
-                FEEDBACK + TG_CHANNEL,
-                HelpItem(
-                    title = strings.tg_channel,
-                    icon = R.drawable.tg
-                )
-            )
-            list.add(
-                FEEDBACK + LINK_ON_SITE,
-                HelpItem(
-                    title = strings.page_app,
-                    icon = R.drawable.www
-                )
-            )
-            val item = HelpItem(
-                title = strings.changelog,
-                opened = true,
-                content = String.format(
-                    strings.format_info, verName, verCode,
-                    Build.VERSION.RELEASE,
-                    Build.VERSION.SDK_INT
-                )
-            )
-            list.add(FEEDBACK + CHANGELOG, item)
+            var i = 1
+            getFeedback().forEach {
+                list.add(FEEDBACK + i, it)
+                i++
+            }
         } else {
             list[FEEDBACK].opened = false
             for (i in 0 until FEEDBACK_COUNT)
                 list.removeAt(FEEDBACK + 1)
+        }
+        restore()
+    }
+
+    private fun clickTip(index: Int) {
+        when (index) {
+            TIP_MAIN ->
+                TipActivity.showTip(TipName.MAIN_STAR)
+            TIP_CALENDAR ->
+                TipActivity.showTip(TipName.CALENDAR)
+            TIP_BROWSER ->
+                TipActivity.showTip(TipName.BROWSER_PANEL)
+        }
+    }
+
+    private fun switchTips() {
+        tips = tips.not()
+        val index = tipIndex
+        if (tips) {
+            list[index].opened = true
+            var i = 1
+            getTips().forEach {
+                list.add(index + i, it)
+                i++
+            }
+        } else {
+            list[index].opened = false
+            for (i in 0 until TIPS_COUNT)
+                list.removeAt(index + 1)
         }
         restore()
     }
