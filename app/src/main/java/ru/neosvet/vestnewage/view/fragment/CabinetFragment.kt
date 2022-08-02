@@ -14,6 +14,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helper.CabinetHelper
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
@@ -119,6 +120,9 @@ class CabinetFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initLogin() = binding?.login?.run {
+        tvTip.setOnClickListener {
+            Lib.openInApps(NetConst.CAB_SITE, null)
+        }
         etEmail.doAfterTextChanged {
             checkReadyEnter()
             bClearEmail.isVisible = it?.isNotEmpty() ?: false
@@ -184,14 +188,10 @@ class CabinetFragment : NeoFragment() {
         when (toiler.screen) {
             CabinetToiler.Screen.LOGIN -> {
                 val s = when (index) {
-                    0 -> {
-                        Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
-                        return
-                    }
-                    1 -> "sendpass.html"
-                    2 -> "register.html"
-                    3 -> "reginfo.html"
-                    4 -> "regstat.html"
+                    0 -> "sendpass.html"
+                    1 -> "register.html"
+                    2 -> "reginfo.html"
+                    3 -> "regstat.html"
                     else -> "trans.html"
                 }
                 CabinetActivity.openPage(s)
