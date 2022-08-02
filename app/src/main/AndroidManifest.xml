@@ -82,7 +82,7 @@
         </activity>
         <activity
             android:name=".view.activity.TipActivity"
-            android:theme="@style/Theme.MainTheme" />
+            android:theme="@style/Theme.DialogTheme" />
         <activity
             android:name=".view.activity.BrowserActivity"
             android:theme="@style/Theme.MainTheme" />

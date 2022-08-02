@@ -53,7 +53,7 @@ class TipActivity : AppCompatActivity() {
         if (!intent.hasExtra(Const.MODE))
             onBackPressed()
         initTip(getUnit())
-        binding.fabClose.setOnClickListener {
+        binding.btnOk.setOnClickListener {
             onBackPressed()
         }
     }
@@ -64,8 +64,8 @@ class TipActivity : AppCompatActivity() {
         ivTip.updateLayoutParams<ConstraintLayout.LayoutParams> {
             val parent = ConstraintLayout.LayoutParams.PARENT_ID
             if (tip.alignV == AlignV.BOTTOM) {
-                bottomToBottom = parent
-                topToBottom = -1
+                bottomToTop = btnOk.id
+                topToTop = -1
             }
             if (tip.alignH == AlignH.LEFT || tip.alignH == AlignH.CENTER)
                 startToStart = parent
@@ -90,11 +90,20 @@ class TipActivity : AppCompatActivity() {
             ivArrow.isVisible = true
             tvTip.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topToTop = -1
-                bottomToBottom = -1
-                if (tip.alignV == AlignV.TOP)
-                    topToBottom = ivArrow.id
-                else
+                if (tip.alignV == AlignV.BOTTOM) {
+                    bottomToBottom = -1
                     bottomToTop = ivArrow.id
+                } else
+                    topToBottom = ivArrow.id
+            }
+        } else {
+            tvTip.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topToTop = -1
+                if (tip.alignV == AlignV.BOTTOM) {
+                    bottomToBottom = -1
+                    bottomToTop = ivTip.id
+                } else
+                    topToBottom = ivTip.id
             }
         }
     }
