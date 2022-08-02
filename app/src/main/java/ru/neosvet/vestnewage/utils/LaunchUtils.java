@@ -61,10 +61,25 @@ public class LaunchUtils {
             renameBookPref();
             deleteBrowserFiles();
         }
+        if (ver < 63)
+            checkSearchDates();
         if (ver > 44 && ver < 47) {
             AdsStorage storage = new AdsStorage();
             storage.delete();
             storage.close();
+        }
+    }
+
+    private void checkSearchDates() {
+        SharedPreferences pref = App.context.getSharedPreferences(SearchHelper.TAG, MODE_PRIVATE);
+        int a = pref.getInt(Const.START, 0);
+        int b = pref.getInt(Const.END, 0);
+        if (a > b) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt(Const.START, b);
+            editor.putInt(Const.END, a);
+            editor.putBoolean(SearchHelper.INVERT, true);
+            editor.apply();
         }
     }
 

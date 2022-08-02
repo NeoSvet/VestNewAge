@@ -24,6 +24,12 @@ class CheckAdapter(
         holder.setItem(list[position])
     }
 
+    fun setChecked(index: Int, value: Boolean) {
+        if (list[index].isChecked == value) return
+        list[index].isChecked = value
+        notifyItemChanged(index)
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     inner class ViewHolder(root: View) : RecyclerView.ViewHolder(root) {
         private val checkBox = root.findViewById(R.id.check_box) as CheckedTextView

@@ -91,4 +91,12 @@
         <item>В разделе «Календарь»</item>
         <item>На экране чтения</item>
     </string-array>
+    <string-array name="search_options">
+        <item>Обратное направление&#160;</item>
+        <item>Учитывать регистр</item>
+        <item>Учитывать приставку</item>
+        <item>Учитывать окончание</item>
+        <item>Все слова</item>
+        <item>Строку целиком</item>
+    </string-array>
 </resources>

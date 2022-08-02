@@ -251,11 +251,10 @@
     <string name="srv_info">\nСлужебная информация:\n</string>
     <!--SearchFragment-->
     <string name="not_found">Не найдено</string>
-    <string name="clear_search">Очистить историю поиска</string>
+    <string name="clear_requests">Удалить запросы</string>
     <string name="alert_search">Результатов нет. Вы скачали все материалы прежде, чем приступать к поиску?</string>
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапазон для поиска:</string>
-    <string name="change_range">Поменять местами</string>
     <string name="search_for">Поиск по</string>
     <string name="search_in_results">Искать в результатах</string>
     <string name="results_last_search">Показать результаты предыдущего поиска</string>

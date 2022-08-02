@@ -16,6 +16,18 @@ class SearchHelper(context: Context) {
     companion object {
         const val TAG = "Search"
         const val LABEL = "l"
+        const val INVERT = "inv"
+        const val LETTER_CASE = "reg"
+        const val PREFIX = "pri"
+        const val ENDING = "okon"
+        const val ALL_WORDS = "words"
+        const val ALL_LINE = "line"
+        const val I_INVERT = 0
+        const val I_LETTER_CASE = 1
+        const val I_PREFIX = 2
+        const val I_ENDING = 3
+        const val I_ALL_WORDS = 4
+        const val I_ALL_LINE = 5
     }
 
     enum class Type {
@@ -32,6 +44,7 @@ class SearchHelper(context: Context) {
     val minYear: Int
     var label: String = ""
     var request: String = ""
+    val options = mutableListOf<Boolean>()
     val isDesc: Boolean
         get() = start.timeInMills > end.timeInMills
 
@@ -60,6 +73,12 @@ class SearchHelper(context: Context) {
         end.day = 1
 
         mode = pref.getInt(Const.MODE, SearchToiler.MODE_BOOK)
+        options.add(pref.getBoolean(INVERT, false))
+        options.add(pref.getBoolean(LETTER_CASE, false))
+        options.add(pref.getBoolean(PREFIX, true))
+        options.add(pref.getBoolean(ENDING, true))
+        options.add(pref.getBoolean(ALL_WORDS, true))
+        options.add(pref.getBoolean(ALL_LINE, true))
     }
 
     fun existsResults() = Lib.getFileDB(Const.SEARCH).exists()
@@ -102,6 +121,9 @@ class SearchHelper(context: Context) {
         editor.putInt(Const.MODE, mode)
         editor.putInt(Const.START, start.timeInDays)
         editor.putInt(Const.END, end.timeInDays)
+        val names = listOf(INVERT, LETTER_CASE, PREFIX, ENDING, ALL_WORDS, ALL_LINE)
+        for (i in names.indices)
+            editor.putBoolean(names[i], options[i])
         editor.apply()
     }
 
