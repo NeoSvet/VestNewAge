@@ -3,7 +3,10 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
@@ -154,7 +157,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             outState.putBundle(SETTINGS, it.onSaveInstanceState())
         }
         binding?.run {
-            outState.putBoolean(ADDITION, content.pAdditionSet.visibility == View.VISIBLE)
+            outState.putBoolean(ADDITION, content.pAdditionSet.isVisible)
         }
         outState.putInt(Const.PAGE, listPosition)
         super.onSaveInstanceState(outState)
@@ -180,7 +183,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             etSearch.setSelection(helper.request.length)
             content.tvLabel.text = helper.label
             if (state.getBoolean(ADDITION))
-                content.pAdditionSet.isVisible = true
+                showAdditionPanel()
             else
                 bShow.isVisible = true
         }
@@ -251,12 +254,19 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         )
         modes.setDropDownViewResource(R.layout.spinner_item)
         bShow.setOnClickListener {
-            bShow.isVisible = false
-            content.pAdditionSet.isVisible = true
+            showAdditionPanel()
         }
         content.bHide.setOnClickListener {
             bShow.isVisible = true
             content.pAdditionSet.isVisible = false
+        }
+    }
+
+    private fun showAdditionPanel() {
+        act?.hideHead()
+        binding?.run {
+            bShow.isVisible = false
+            content.pAdditionSet.isVisible = true
         }
     }
 
