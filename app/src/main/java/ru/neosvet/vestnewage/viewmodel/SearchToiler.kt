@@ -262,9 +262,10 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         var prev = 0
         var time: Long = 0
         var n = 1
+        val request = getRequest()
         for (i in title.indices) {
             pages.open(link[i])
-            cursor = pages.searchParagraphs(link[i], helper.request)
+            cursor = pages.searchParagraphs(link[i], request.first, request.second)
             if (cursor.moveToFirst()) {
                 val row = ContentValues()
                 row.put(DataBase.ID, n)
@@ -317,21 +318,29 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         return b.toString().replace(Const.N, Const.BR)
     }
 
+    private fun getRequest(): Pair<String, String> =
+        if (helper.isLetterCase)
+            Pair(DataBase.GLOB, "*${helper.request}*")
+        else
+            Pair(DataBase.LIKE, "%${helper.request}%")
+
+
     @SuppressLint("Range")
     private fun searchList(name: String) {
         pages.open(name)
         storage.open()
         storage.isDesc = helper.isDesc
         var n = pages.year * 650 + pages.month * 50
+        val request = getRequest()
         val cursor: Cursor = when (mode) {
             MODE_TITLES ->
-                pages.searchTitle(helper.request)
+                pages.searchTitle(request.first, request.second)
             MODE_LINKS ->
                 pages.searchLink(helper.request)
             else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
                 //фильтрация по 0 и 1 будет позже
                 n = checkPages(n)
-                pages.searchParagraphs(helper.request)
+                pages.searchParagraphs(request.first, request.second)
             }
         }
         if (!cursor.moveToFirst()) {

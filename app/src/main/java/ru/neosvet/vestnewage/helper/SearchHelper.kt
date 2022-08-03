@@ -47,6 +47,8 @@ class SearchHelper(context: Context) {
     val options = mutableListOf<Boolean>()
     val isDesc: Boolean
         get() = options[I_INVERT]
+    val isLetterCase: Boolean
+        get() = options[I_LETTER_CASE]
 
     init {
         val f = Lib.getFileDB("12.15")

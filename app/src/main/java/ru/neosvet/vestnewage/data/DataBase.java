@@ -13,8 +13,9 @@ import ru.neosvet.vestnewage.utils.UnreadUtils;
 
 public class DataBase extends SQLiteOpenHelper {
     public static final String PARAGRAPH = "par", JOURNAL = "journal",
-            MARKERS = "markers", LIKE = " LIKE ?", Q = " = ?", AND = " AND ",
-            COLLECTIONS = "collections", ID = "id", DESC = " DESC",
+            MARKERS = "markers", LIKE = " LIKE ?", GLOB = " GLOB ?",
+            Q = " = ?", AND = " AND ", ID = "id", DESC = " DESC",
+            COLLECTIONS = "collections",
             ARTICLES = "00.00", DOCTRINE = "00.01";
     private final SQLiteDatabase db;
 

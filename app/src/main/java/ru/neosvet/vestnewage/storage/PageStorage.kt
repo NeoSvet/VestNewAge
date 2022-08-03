@@ -322,18 +322,18 @@ class PageStorage {
     fun getListAll(): Cursor =
         db.query(Const.TITLE, null)
 
-    fun searchParagraphs(link: String, find: String): Cursor = db.query(
+    fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
         DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
-        DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.LIKE,
-        arrayOf(getPageId(link).toString(), "%$find%")
+        DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,
+        arrayOf(getPageId(link).toString(), find)
     )
 
-    fun searchParagraphs(find: String): Cursor = db.query(
-        DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + DataBase.LIKE, "%$find%"
+    fun searchParagraphs(operator: String, find: String): Cursor = db.query(
+        DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + operator, find
     )
 
-    fun searchTitle(find: String): Cursor = db.query(
-        Const.TITLE, null, Const.TITLE + DataBase.LIKE, "%$find%"
+    fun searchTitle(operator: String, find: String): Cursor = db.query(
+        Const.TITLE, null, Const.TITLE + operator, find
     )
 
     fun searchLink(find: String): Cursor = db.query(
