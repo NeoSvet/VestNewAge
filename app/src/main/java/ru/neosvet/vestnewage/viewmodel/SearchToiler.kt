@@ -156,7 +156,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             shownResult = true
             storage.open()
             if (mode == MODE_RESULTS)
-                searchInResults(helper.isDesc)
+                searchInResults()
             else
                 searchInPages()
             isRun = false
@@ -166,7 +166,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
 
     private suspend fun searchInPages() = helper.run {
         storage.clear()
-        storage.isDesc = isDesc
         if (mode == MODE_DOCTRINE) {
             searchList(DataBase.DOCTRINE)
             pages.close()
@@ -174,14 +173,23 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         }
         if (mode == MODE_ALL)
             searchList(DataBase.ARTICLES)
-        val d = DateUnit.putYearMonth(start.year, start.month)
-        val step = if (isDesc) -1 else 1
+        val step: Int
+        val finish: Int
+        val d = if (isDesc) {
+            step = -1
+            finish = start.timeInDays
+            DateUnit.putYearMonth(end.year, end.month)
+        } else {
+            step = 1
+            finish = end.timeInDays
+            DateUnit.putYearMonth(start.year, start.month)
+        }
         var prev = 0
         var time: Long = 0
         while (isRun) {
             publishProgress(d)
             searchList(d.my)
-            if (d.timeInDays == end.timeInDays) break
+            if (d.timeInDays == finish) break
             d.changeMonth(step)
             val now = System.currentTimeMillis()
             if (countMaterials - prev > Const.MAX_ON_PAGE &&
@@ -234,32 +242,33 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         )
     }
 
-    private suspend fun searchInResults(reverseOrder: Boolean) {
-        val title: MutableList<String> = ArrayList()
-        val link: MutableList<String> = ArrayList()
-        val id: MutableList<String> = ArrayList()
-        var cursor = storage.getResults(reverseOrder)
+    private suspend fun searchInResults() {
+        val title = mutableListOf<String>()
+        val link = mutableListOf<String>()
+        var cursor = storage.getResults(helper.isDesc)
         if (cursor.moveToFirst()) {
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)
-            val iID = cursor.getColumnIndex(DataBase.ID)
             do {
                 title.add(cursor.getString(iTitle))
                 link.add(cursor.getString(iLink))
-                id.add(cursor.getInt(iID).toString())
             } while (cursor.moveToNext())
         }
         cursor.close()
+        storage.clear()
         var des: StringBuilder
         var p1 = -1
         var p2: Int
         var prev = 0
         var time: Long = 0
+        var n = 1
         for (i in title.indices) {
             pages.open(link[i])
             cursor = pages.searchParagraphs(link[i], helper.request)
             if (cursor.moveToFirst()) {
                 val row = ContentValues()
+                row.put(DataBase.ID, n)
+                n++
                 row.put(Const.TITLE, title[i])
                 row.put(Const.LINK, link[i])
                 des = StringBuilder(getDes(cursor.getString(0), helper.request))
@@ -269,9 +278,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                     des.append(getDes(cursor.getString(0), helper.request))
                 }
                 row.put(Const.DESCTRIPTION, des.toString())
-                storage.update(id[i], row)
-            } else {
-                storage.delete(id[i])
+                storage.insert(row)
             }
             cursor.close()
             p2 = i.percent(title.size)
@@ -292,7 +299,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         pages.close()
         title.clear()
         link.clear()
-        id.clear()
     }
 
     private fun getDes(des: String, sel: String): String {
@@ -315,6 +321,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     private fun searchList(name: String) {
         pages.open(name)
         storage.open()
+        storage.isDesc = helper.isDesc
         var n = pages.year * 650 + pages.month * 50
         val cursor: Cursor = when (mode) {
             MODE_TITLES ->

@@ -46,7 +46,7 @@ class SearchHelper(context: Context) {
     var request: String = ""
     val options = mutableListOf<Boolean>()
     val isDesc: Boolean
-        get() = start.timeInMills > end.timeInMills
+        get() = options[I_INVERT]
 
     init {
         val f = Lib.getFileDB("12.15")
