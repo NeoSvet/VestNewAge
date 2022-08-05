@@ -16,18 +16,17 @@ object ConnectWatcher : ConnectivityManager.NetworkCallback() {
     fun start(context: Context) {
         if (isRun) return
         isRun = true
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val request = NetworkRequest.Builder().build()
-        connectivityManager.registerNetworkCallback(request, this)
+        manager.registerNetworkCallback(request, this)
+        connected = manager.activeNetwork != null
     }
 
     fun stop(context: Context) {
         if (isRun.not()) return
         isRun = false
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.unregisterNetworkCallback(this)
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        manager.unregisterNetworkCallback(this)
     }
 
     fun subscribe(observer: ConnectObserver) {
