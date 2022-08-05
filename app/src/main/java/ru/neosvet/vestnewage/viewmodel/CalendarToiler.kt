@@ -226,13 +226,9 @@ class CalendarToiler : NeoToiler() {
     }
 
     private fun getTitleByLink(s: String): String {
-        var result = s
         val storage = PageStorage()
         storage.open(DataBase.ARTICLES)
-        val curTitle = storage.getTitle(result)
-        if (curTitle.moveToFirst())
-            result = curTitle.getString(0)
-        curTitle.close()
+        val result = storage.getTitle(s)
         storage.close()
         return result
     }

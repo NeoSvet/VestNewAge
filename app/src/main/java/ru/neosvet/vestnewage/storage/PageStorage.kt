@@ -261,8 +261,14 @@ class PageStorage {
 
     fun getPageById(id: Int): Cursor = getPageById(id.toString())
 
-    fun getTitle(link: String): Cursor =
-        db.query(Const.TITLE, arrayOf(Const.TITLE), Const.LINK + DataBase.Q, link)
+    fun getTitle(link: String): String {
+        val cursor = db.query(Const.TITLE, arrayOf(Const.TITLE), Const.LINK + DataBase.Q, link)
+        val title = if (cursor.moveToFirst())
+            cursor.getString(0) else ""
+        cursor.close()
+        return  if(title.isEmpty()) link
+        else getPageTitle(title, link)
+    }
 
     fun getParagraphs(id: String): Cursor = db.query(
         DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
