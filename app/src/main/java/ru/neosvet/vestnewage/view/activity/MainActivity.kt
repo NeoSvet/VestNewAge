@@ -506,8 +506,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack == StatusBack.FIRST ->
                 setSection(firstSection, false)
             else -> {
-                statusBack = StatusBack.EXIT
                 showToast(getString(R.string.click_for_exit))
+                statusBack = StatusBack.EXIT
                 lifecycleScope.launch {
                     delay(3000)
                     if (statusBack == StatusBack.EXIT)
