@@ -17,6 +17,7 @@ public class DataBase extends SQLiteOpenHelper {
             Q = " = ?", AND = " AND ", ID = "id", DESC = " DESC",
             COLLECTIONS = "collections",
             ARTICLES = "00.00", DOCTRINE = "00.01";
+    public static final long EMPTY_BASE_SIZE = 24576L;
     private final SQLiteDatabase db;
 
     public DataBase(String name) {
