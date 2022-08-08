@@ -328,6 +328,9 @@ class PageStorage {
     fun getListAll(): Cursor =
         db.query(Const.TITLE, null)
 
+    fun rawQuery(from: String, where: String): Cursor =
+        db.rawQuery("SELECT * FROM $from WHERE $where")
+
     fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
         DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
         DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,

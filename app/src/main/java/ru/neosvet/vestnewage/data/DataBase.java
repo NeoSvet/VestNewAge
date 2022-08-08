@@ -129,6 +129,10 @@ public class DataBase extends SQLiteOpenHelper {
         return db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    public Cursor rawQuery(String query) {
+        return db.rawQuery(query, null);
+    }
+
     public int delete(String table) {
         return db.delete(table, null, null);
     }
