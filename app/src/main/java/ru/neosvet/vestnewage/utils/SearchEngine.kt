@@ -1,0 +1,716 @@
+package ru.neosvet.vestnewage.utils
+
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.database.Cursor
+import ru.neosvet.vestnewage.data.*
+import ru.neosvet.vestnewage.helper.SearchHelper
+import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.storage.SearchStorage
+import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
+import java.util.*
+
+class SearchEngine(
+    private val storage: SearchStorage,
+    private val pages: PageStorage,
+    private val parent: Parent
+) {
+    interface Parent {
+        val strings: SearchStrings
+        val helper: SearchHelper
+        suspend fun notifyResult()
+        suspend fun notifyPercent(p: Int)
+        suspend fun notifyDate(d: DateUnit)
+        fun clearLast()
+        suspend fun notifySpecialEvent(m: Long)
+        suspend fun searchFinish()
+    }
+
+    companion object {
+        const val DELAY_UPDATE = 1500
+        private const val MODE_EPISTLES = 0
+        private const val MODE_POEMS = 1
+        const val MODE_TITLES = 2
+        private const val MODE_ALL = 3
+        const val MODE_LINKS = 4
+        const val MODE_BOOK = 5
+        const val MODE_DOCTRINE = 6
+        const val MODE_RESULTS = 7
+        private const val OR = " OR "
+        private const val startSelect = "<font color='#99ccff'><b>"
+        private const val endSelect = "</b></font>"
+        private const val lenSelect = 36
+        private const val startLetter = 65
+        private const val endLetter = 2000
+        const val EVENT_WORDS_NOT_FOUND = 1L
+    }
+
+    private fun String.isNotLetter(position: Int): Boolean {
+        if (position < 0 || position >= length)
+            return true
+        val b = this[position].code
+        return b < startLetter || b > endLetter
+    }
+
+    var countMatches: Int = 0
+        private set
+    private var words = mutableListOf<String>()
+    var endings: Array<String>? = null
+    private var request: SearchRequest? = null
+    var mode: Int = 0
+        private set
+    private val helper: SearchHelper
+        get() = parent.helper
+    private var isRun = true
+
+    fun stop() {
+        isRun = false
+    }
+
+    suspend fun startSearch(mode: Int) {
+        helper.isNeedLoad = false
+        this.mode = mode
+        countMatches = 0
+        storage.open()
+        isRun = true
+        if (mode == MODE_RESULTS)
+            searchInResults()
+        else
+            searchInPages()
+        pages.close()
+        parent.searchFinish()
+    }
+
+    suspend fun startSearch(list: String) {
+        helper.isNeedLoad = false
+        searchList(list)
+        pages.close()
+        parent.searchFinish()
+    }
+
+    private suspend fun searchList(name: String) {
+        pages.open(name)
+        storage.open()
+        storage.isDesc = helper.isDesc
+        val id = pages.year * 650 + pages.month * 50
+        val list = getResultList(id, null)
+        if (list.isEmpty() && checkMonth(id, pages.name))
+            return
+        listToStorage(list)
+    }
+
+    private suspend fun searchInPages() = helper.run {
+        storage.clear()
+        if (mode == MODE_DOCTRINE) {
+            searchList(DataBase.DOCTRINE)
+            pages.close()
+            return@run
+        }
+        if (mode == MODE_ALL)
+            searchList(DataBase.ARTICLES)
+        val step: Int
+        val finish: Int
+        val d = if (isDesc) {
+            step = -1
+            finish = start.timeInDays
+            DateUnit.putYearMonth(end.year, end.month)
+        } else {
+            step = 1
+            finish = end.timeInDays
+            DateUnit.putYearMonth(start.year, start.month)
+        }
+        var prev = 0
+        var time: Long = 0
+        while (isRun) {
+            parent.notifyDate(d)
+            searchList(d.my)
+            if (d.timeInDays == finish) break
+            d.changeMonth(step)
+            val now = System.currentTimeMillis()
+            if (countMaterials - prev > Const.MAX_ON_PAGE &&
+                now - time > DELAY_UPDATE
+            ) {
+                time = now
+                parent.notifyResult()
+                prev = countMaterials
+            }
+        }
+        pages.close()
+    }
+
+    private suspend fun searchInResults() {
+        val links = mutableListOf<String>()
+        val cursor = storage.getResults(helper.isDesc)
+        if (cursor.moveToFirst()) {
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            do {
+                links.add(cursor.getString(iLink))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        storage.clear()
+
+        parent.clearLast()
+        var n = 1
+        for (i in links.indices) {
+            pages.open(links[i])
+            val list = getResultList(n, links[i])
+            if (list.isNotEmpty()) {
+                listToStorage(list)
+                n += list.size
+            }
+            parent.notifyPercent(i.percent(links.size))
+        }
+        pages.close()
+        links.clear()
+    }
+
+    private fun searchInLink(startId: Int, link: String?): List<BaseItem> {
+        val list = when {
+            link == null ->
+                titleToList(pages.searchLink(helper.request), startId, false)
+            link.contains(helper.request) ->
+                listOf(BaseItem(startId, pages.getTitle(link), link))
+            else ->
+                listOf()
+        }
+        helper.countMaterials += list.size
+        list.forEach {
+            it.des = getSelected(it.link, helper.request)
+        }
+        return list
+    }
+
+    private fun simpleSearch(isPar: Boolean, link: String?, startId: Int): List<BaseItem> {
+        request?.let { r ->
+            if (r is SearchRequest.Advanced) {
+                words.clear()
+                request = null
+            } else if (r is SearchRequest.Simple &&
+                !r.equalsS(helper.request, helper.isLetterCase)
+            ) request = null
+        }
+        val r: SearchRequest.Simple
+        if (request == null) {
+            val string = preparingString()
+            val p = if (helper.isLetterCase)
+                Pair(DataBase.GLOB, "*${string}*")
+            else
+                Pair(DataBase.LIKE, "%${string}%")
+            r = SearchRequest.Simple(
+                stringRaw = helper.request,
+                string = string,
+                isLetterCase = helper.isLetterCase,
+                operator = p.first,
+                find = p.second
+            )
+            request = r
+        } else
+            r = request as SearchRequest.Simple
+        val list = if (isPar) {
+            val cursor = link?.let {
+                pages.searchParagraphs(it, r.operator, r.find)
+            } ?: pages.searchParagraphs(r.operator, r.find)
+            parToList(cursor, startId, true)
+        } else {
+            val cursor = link?.let {
+                pages.searchTitle(it, r.operator, r.find)
+            } ?: pages.searchTitle(r.operator, r.find)
+            titleToList(cursor, startId, true)
+        }
+        helper.countMaterials += list.size
+        if (isPar) list.forEach {
+            if (it.link.isEmpty()) helper.countMaterials--
+        }
+        return list
+    }
+
+    private fun preparingString(): String {
+        var s = helper.request
+        var i = 0
+        while (i < s.length) {
+            if (s[i] == '"') {
+                if (i == 0 || s.isNotLetter(i - 1))
+                    s = s.substring(0, i) + "&laquo;" + s.substring(i + 1)
+                else
+                    s = s.substring(0, i) + "&raquo;" + s.substring(i + 1)
+                i += 7
+            } else i++
+        }
+        s = s.replace(" - ", " &ndash; ").replace("–", "&ndash;")
+            .replace("«", "&laquo;").replace("»", "&raquo;")
+        //how/need add support “ and ” ?
+        return s
+    }
+
+    private suspend fun advancedSearch(
+        isPar: Boolean,
+        link: String?,
+        startId: Int
+    ): List<BaseItem> {
+        request?.let { r ->
+            if (r is SearchRequest.Simple || (r is SearchRequest.Advanced && !r.equalsA(helper)))
+                request = null
+        }
+        val name = if (isPar) DataBase.PARAGRAPH else Const.TITLE
+        val r: SearchRequest.Advanced
+        if (request == null) {
+            val s = helper.request
+            words = if (helper.isEnding)
+                getWords(s) else removeEnding(getWords(s))
+            if (words.isEmpty()) {
+                parent.notifySpecialEvent(EVENT_WORDS_NOT_FOUND)
+                return listOf()
+            }
+            removeDuplicateWords()
+            val format = if (helper.isLetterCase)
+                DataBase.GLOB.substring(0, 6) + "'*%s*'"
+            else
+                DataBase.LIKE.substring(0, 6) + "'%%%s%%'"
+            val sb = StringBuilder()
+            words.forEach {
+                sb.append(OR)
+                sb.append(name)
+                sb.append(format.format(it))
+            }
+            sb.delete(0, OR.length)
+
+            r = SearchRequest.Advanced(
+                string = helper.request,
+                isLetterCase = helper.isLetterCase,
+                isEnding = helper.isEnding,
+                whereRaw = sb.toString()
+            )
+            r.where = r.whereRaw
+            request = r
+        } else
+            r = request as SearchRequest.Advanced
+        if (r.link != link) {
+            r.link = link
+            r.where = link?.let {
+                "${DataBase.ID}=${pages.getPageId(it)} AND (" + r.whereRaw + ")"
+            } ?: r.whereRaw
+        }
+
+        val cursor = pages.rawQuery(name, r.where)
+        val list = if (name == Const.TITLE)
+            titleToList(cursor, startId, false)
+        else parToList(cursor, startId, false)
+
+        return filterList(list)
+    }
+
+    private fun filterList(list: MutableList<BaseItem>): List<BaseItem> {
+        var isEnd = true
+        var isPre = true
+        var k: Int
+        var x: Int
+        var i: Int
+        var n = 0
+        var id = -1
+        val con = BooleanArray(if (helper.isAllWords) words.size else 0)
+        while (n < list.size) {
+            val sb = StringBuilder(list[n].string)
+            if (helper.isAllWords && id != list[n].id) {
+                //если в прошлом тексте были не все слова, то удаляем
+                if (n > 0 && con.contains(false)) {
+                    n--
+                    while (n > -1 && list[n].id == id) {
+                        list.removeAt(n)
+                        n--
+                    }
+                    n++
+                }
+                Arrays.fill(con, false) //очищаем для нового текста
+                id = list[n].id
+            }
+            k = 0
+            words.forEach { //перебор слов
+                x = 0
+                val s: String
+                val w = if (helper.isLetterCase) {
+                    s = sb.toString()
+                    it
+                } else {
+                    s = sb.toString().lowercase()
+                    it.lowercase()
+                }
+                i = s.indexOf(w, 0)
+                while (i > -1) { //перебор совпадений
+                    if (helper.isPrefix)
+                        isPre = s.isNotLetter(i - 1)
+                    if (helper.isEnding && isPre)
+                        isEnd = s.isNotLetter(i + w.length)
+                    if (isEnd && isPre) {
+                        sb.insert(i + x + w.length, endSelect)
+                        sb.insert(i + x, startSelect)
+                        x += lenSelect
+                        if (k < con.size) con[k] = true
+                    }
+                    i = s.indexOf(w, i + w.length)
+                }
+                k++
+            }
+            if (sb.contains(endSelect)) {
+                list[n].string = sb.toString()
+                n++
+            } else when {
+                n + 1 < list.size && id == list[n + 1].id -> {
+                    list[n].des = list[n + 1].des
+                    list.removeAt(n + 1)
+                }
+                n > 0 && id == list[n - 1].id ->
+                    list.removeAt(n)
+                else -> {
+                    list.removeAt(n)
+                }
+            }
+        }
+        if (helper.isAllWords && n > 0 && con.contains(false)) {
+            n--
+            while (n > -1 && list[n].id == id) {
+                list.removeAt(n)
+                n--
+            }
+        }
+        helper.countMaterials += list.size
+        when (mode) {
+            MODE_TITLES -> list.forEach {
+                countMatches += calcSelected(it.title)
+            }
+            else -> list.forEach {
+                if (it.link.isEmpty()) helper.countMaterials--
+                countMatches += calcSelected(it.des)
+            }
+        }
+        return list
+    }
+
+    private fun calcSelected(s: String): Int {
+        var k = 0
+        var i = s.indexOf(startSelect)
+        while (i > -1) {
+            k++
+            i = s.indexOf(startSelect, i + lenSelect)
+        }
+        return k
+    }
+
+    private fun getWords(r: String): MutableList<String> {
+        val sb = StringBuilder()
+        val list = mutableListOf<String>()
+        r.replace(" - ", " ").forEach {
+            if (it == ' ') {
+                if (sb.isNotEmpty() && sb.length > 2)
+                    list.add(sb.toString())
+                sb.clear()
+            } else if (it == '-' || it.code in (startLetter until endLetter))
+                sb.append(it)
+        }
+        if (sb.isNotEmpty() && sb.length > 2)
+            list.add(sb.toString())
+        return list
+    }
+
+    private fun removeDuplicateWords() {
+        var i = 0
+        var n: Int
+        while (i < words.size) {
+            n = i + 1
+            while (n < words.size) {
+                if (words[i] == words[n])
+                    words.removeAt(n)
+                else n++
+            }
+            i++
+        }
+    }
+
+    private fun removeEnding(w: MutableList<String>): MutableList<String> {
+        var i: Int
+        for (n in w.indices) {
+            endings?.forEach { e ->
+                i = w[n].length - e.length
+                if (i > 2 && w[n].lastIndexOf(e, ignoreCase = true) == i) {
+                    w[n] = w[n].substring(0, i)
+                    return@forEach
+                }
+            }
+        }
+        return w
+    }
+
+    private fun selectWords(text: String): String {
+        var t = text
+        if (words.isEmpty())
+            t = getSelected(t, (request as SearchRequest.Simple).string)
+        else words.forEach {
+            t = getSelected(t, it)
+        }
+        return t
+    }
+
+    private fun getSelected(text: String, sel: String): String {
+        val sb = StringBuilder(text)
+        val t: String
+        val s: String
+        if (helper.isLetterCase) {
+            t = text
+            s = sel
+        } else {
+            t = text.lowercase()
+            s = sel.lowercase()
+        }
+        var i = t.indexOf(s)
+        var x = 0
+        while (i > -1) {
+            sb.insert(i + x + sel.length, endSelect)
+            sb.insert(i + x, startSelect)
+            x += lenSelect
+            countMatches++
+            i = t.indexOf(s, i + sel.length)
+        }
+        return sb.toString()
+    }
+
+    private fun listToStorage(list: List<BaseItem>) {
+        var id = -1
+        val des = StringBuilder()
+        var row: ContentValues? = null
+        list.forEach { item ->
+            if (id != item.id) {
+                row?.let {
+                    if (des.isNotEmpty())
+                        it.put(Const.DESCTRIPTION, des.toString())
+                    storage.insert(it)
+                }
+                id = item.id
+                des.clear()
+                row = ContentValues().apply {
+                    put(DataBase.ID, item.id)
+                    put(Const.TITLE, item.title)
+                    put(Const.LINK, item.link)
+                }
+            }
+            if (item.des.isNotEmpty())
+                des.append(item.des)
+        }
+        row?.let {
+            if (des.isNotEmpty())
+                it.put(Const.DESCTRIPTION, des.toString())
+            storage.insert(it)
+        }
+    }
+
+    private suspend fun getResultList(startId: Int, link: String?): List<BaseItem> {
+        return when (mode) {
+            MODE_TITLES -> {
+                val n = checkTitles(startId)
+                if (helper.isByWords)
+                    advancedSearch(false, link, n)
+                else
+                    simpleSearch(false, link, n)
+            }
+            MODE_LINKS -> searchInLink(startId, link)
+            else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
+                //фильтрация по 0 и 1 будет позже
+                val n = checkPages(startId)
+                if (helper.isByWords)
+                    advancedSearch(true, link, n)
+                else
+                    simpleSearch(true, link, n)
+            }
+        }
+    }
+
+    @SuppressLint("Range")
+    private fun parToList(
+        cursor: Cursor,
+        startId: Int,
+        isSelect: Boolean
+    ): MutableList<BaseItem> {
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return mutableListOf()
+        }
+        val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
+        val iID = cursor.getColumnIndex(DataBase.ID)
+        var id = -1
+        var n = startId - 1
+        var add = true
+        val list = mutableListOf<BaseItem>()
+        do {
+            if (id == cursor.getInt(iID) && add) {
+                val item = BaseItem(n, "", "")
+                item.des = if (isSelect)
+                    selectWords(cursor.getString(iPar))
+                else
+                    cursor.getString(iPar)
+                list.add(item)
+            } else {
+                id = cursor.getInt(iID)
+                val curTitle = pages.getPageById(id)
+                if (curTitle.moveToFirst()) {
+                    val link = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
+                    val iTitle = curTitle.getColumnIndex(Const.TITLE)
+                    if (mode == MODE_EPISTLES)
+                        add = !link.isPoem
+                    else if (mode == MODE_POEMS)
+                        add = link.isPoem
+                    if (add) {
+                        val title = pages.getPageTitle(curTitle.getString(iTitle), link)
+                        n++
+                        val item = BaseItem(n, title, link)
+                        item.des = if (isSelect)
+                            selectWords(cursor.getString(iPar))
+                        else
+                            cursor.getString(iPar)
+                        list.add(item)
+                    }
+                }
+                curTitle.close()
+            }
+        } while (cursor.moveToNext())
+        cursor.close()
+        return list
+    }
+
+    private fun titleToList(
+        cursor: Cursor,
+        startId: Int,
+        isSelect: Boolean
+    ): MutableList<BaseItem> {
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return mutableListOf()
+        }
+        val iLink = cursor.getColumnIndex(Const.LINK)
+        val iTitle = cursor.getColumnIndex(Const.TITLE)
+        val list = mutableListOf<BaseItem>()
+        var add = true
+        var id = startId
+        do {
+            val link = cursor.getString(iLink)
+            if (mode == MODE_EPISTLES)
+                add = !link.isPoem
+            else if (mode == MODE_POEMS)
+                add = link.isPoem
+            if (add) {
+                val title = pages.getPageTitle(cursor.getString(iTitle), link)
+                val item = BaseItem(id, title, link)
+                if (isSelect)
+                    item.title = selectWords(item.title)
+                list.add(item)
+                id++
+            }
+        } while (cursor.moveToNext())
+        cursor.close()
+        return list
+    }
+
+    private fun checkMonth(id: Int, date: String): Boolean {
+        val f = Lib.getFileDB(date)
+        if (f.exists() && f.length() > DataBase.EMPTY_BASE_SIZE)
+            return false
+        helper.isNeedLoad = true
+        val d = DateUnit.putYearMonth(pages.year, pages.month)
+        val row = ContentValues()
+        row.put(
+            Const.TITLE,
+            String.format(parent.strings.format_month_no_loaded, d.monthString, d.year)
+        )
+        row.put(Const.LINK, date)
+        row.put(DataBase.ID, id)
+        storage.insert(row)
+        return true
+    }
+
+    private fun checkTitles(startId: Int): Int {
+        val cursor = pages.getListAll()
+        if (!cursor.moveToFirst() || !cursor.moveToNext()) {
+            cursor.close()
+            return startId
+        }
+        val iTitle = cursor.getColumnIndex(Const.TITLE)
+        val iLink = cursor.getColumnIndex(Const.LINK)
+        var i = startId
+        do {
+            val link = cursor.getString(iLink)
+            val title = cursor.getString(iTitle)
+            if (title == link) {
+                helper.isNeedLoad = true
+                val row = ContentValues()
+                row.put(Const.TITLE, String.format(parent.strings.format_page_no_loaded, link))
+                row.put(Const.LINK, link)
+                row.put(DataBase.ID, i)
+                storage.insert(row)
+                i++
+            }
+        } while (cursor.moveToNext())
+        cursor.close()
+        return i
+    }
+
+    private fun checkPages(startId: Int): Int {
+        val links = pages.getLinksList()
+        if (links.isEmpty())
+            return startId
+        var i = 0
+        val all = links.size
+        while (i < links.size) {
+            if (pages.existsPage(links[i]))
+                links.removeAt(i)
+            else i++
+        }
+        helper.isNeedLoad = true
+        if (links.size == all) {
+            val d = DateUnit.putYearMonth(pages.year, pages.month)
+            val row = ContentValues()
+            row.put(
+                Const.TITLE,
+                String.format(parent.strings.format_month_no_loaded, d.monthString, d.year)
+            )
+            row.put(Const.LINK, pages.name)
+            row.put(DataBase.ID, startId)
+            storage.insert(row)
+            return startId
+        }
+        i = startId
+        for (link in links) {
+            val row = ContentValues()
+            row.put(Const.TITLE, String.format(parent.strings.format_page_no_loaded, link))
+            row.put(Const.LINK, link)
+            row.put(DataBase.ID, i)
+            i++
+            storage.insert(row)
+        }
+        return i
+    }
+
+    suspend fun findInPage(link: String, id: Int): ListItem {
+        var item = ListItem(link, link)
+        if (mode == MODE_EPISTLES && link.isPoem)
+            return item
+        if (mode == MODE_POEMS && !link.isPoem)
+            return item
+        pages.open(link)
+        val list = getResultList(id, link)
+
+        if (list.isEmpty()) {
+            item = ListItem(pages.getTitle(link), link)
+            item.des = parent.strings.not_found
+        } else {
+            listToStorage(list)
+            val des = StringBuilder()
+            item = ListItem(list[0].title, link)
+            list.forEach {
+                des.append(it.des)
+            }
+            item.des = des.toString()
+        }
+
+        pages.close()
+        parent.searchFinish()
+        return item
+    }
+}

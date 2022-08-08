@@ -264,9 +264,9 @@ class PageStorage {
     fun getTitle(link: String): String {
         val cursor = db.query(Const.TITLE, arrayOf(Const.TITLE), Const.LINK + DataBase.Q, link)
         val title = if (cursor.moveToFirst())
-            cursor.getString(0) else ""
+            cursor.getString(0) else link
         cursor.close()
-        return  if(title.isEmpty()) link
+        return if (title.isEmpty()) link
         else getPageTitle(title, link)
     }
 
@@ -339,6 +339,12 @@ class PageStorage {
 
     fun searchParagraphs(operator: String, find: String): Cursor = db.query(
         DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + operator, find
+    )
+
+    fun searchTitle(link: String, operator: String, find: String): Cursor = db.query(
+        Const.TITLE, null,
+        Const.LINK + DataBase.Q + " AND " + Const.TITLE + operator,
+        arrayOf(link, find)
     )
 
     fun searchTitle(operator: String, find: String): Cursor = db.query(

@@ -1,16 +1,11 @@
 package ru.neosvet.vestnewage.viewmodel
 
-import android.annotation.SuppressLint
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
@@ -18,28 +13,14 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.isPoem
-import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.utils.SearchEngine
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
-import java.util.*
 
-class SearchToiler : NeoToiler(), NeoPaging.Parent {
-    companion object {
-        private const val DELAY_UPDATE = 1500
-        private const val MODE_EPISTLES = 0
-        private const val MODE_POEMS = 1
-        private const val MODE_TITLES = 2
-        private const val MODE_ALL = 3
-        private const val MODE_LINKS = 4
-        const val MODE_BOOK = 5
-        private const val MODE_DOCTRINE = 6
-        const val MODE_RESULTS = 7
-    }
-
+class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
     private val paging = NeoPaging(this)
     override val factory: SearchFactory by lazy {
         SearchFactory(storage, paging)
@@ -47,19 +28,28 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
     val isLoading: Boolean
         get() = paging.isPaging
     private var isInit = false
-    private lateinit var strings: SearchStrings
-    private val storage = SearchStorage()
-    private val pages = PageStorage()
-    private var countMatches: Int = 0
+    override lateinit var strings: SearchStrings
+        private set
     private var labelMode = ""
-    private var mode: Int = -1
-    lateinit var helper: SearchHelper
+    override lateinit var helper: SearchHelper
         private set
     var shownResult = false
         private set
     private var loadDate: String? = null
     private var loadLink: String? = null
-    private val locale = Locale.forLanguageTag("ru")
+
+    private val storage = SearchStorage()
+    private val engine = SearchEngine(
+        storage = storage,
+        pages = PageStorage(),
+        parent = this
+    )
+    private var blockedNotify = false
+
+    //last:
+    private var lastProcent: Int = 0
+    private var lastCount: Int = 0
+    private var lastTime: Long = 0
 
     fun init(context: Context) {
         if (isInit) return
@@ -89,7 +79,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             val loader = CalendarLoader()
             loader.setDate(d.year, d.month)
             loader.loadListMonth(false)
-            val links = loader.getLinkList()
+            val links = loader.getLinkList().sorted()
             val pageLoader = PageLoader()
             storage.deleteByLink(date)
             for (link in links) {
@@ -97,7 +87,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
                 if (isRun.not()) break
             }
             pageLoader.finish()
-            searchList(date)
+            engine.startSearch(date)
             notifyResult()
             loadDate = null
         }
@@ -108,29 +98,37 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             val pageLoader = PageLoader()
             pageLoader.download(link, true)
             pageLoader.finish()
-            val item = findInPage(link, id)
+            val item = engine.findInPage(link, id)
             postState(NeoState.ListValue(listOf(item)))
             loadLink = null
         }
     }
 
     override fun onDestroy() {
-        pages.close()
         storage.close()
+    }
+
+    override fun cancel() {
+        super.cancel()
+        engine.stop()
     }
 
     override fun getInputData(): Data {
         loadDate?.let {
-            return Data.Builder()
+            val d = Data.Builder()
                 .putString(Const.TASK, Const.SEARCH)
                 .putString(Const.TIME, it)
                 .build()
+            loadDate = null
+            return d
         }
         loadLink?.let {
-            return Data.Builder()
+            val d = Data.Builder()
                 .putString(Const.TASK, Const.SEARCH)
                 .putString(Const.LINK, it)
                 .build()
+            loadLink = null
+            return d
         }
         return Data.Builder()
             .putString(Const.TASK, Const.SEARCH)
@@ -140,81 +138,48 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
             .build()
     }
 
+    fun paging() = paging.run()
+
+    override val pagingScope: CoroutineScope
+        get() = scope
+
+    override suspend fun postFinish() {
+        postState(NeoState.Ready)
+    }
+
+    fun setEndings(context: Context) {
+        if (engine.endings == null)
+            engine.endings = context.resources.getStringArray(R.array.endings)
+    }
+
+    fun loadMonth(date: String) { //MM.yy
+        loadDate = date
+        if (checkConnect())
+            load()
+    }
+
+    fun loadPage(link: String) {
+        loadLink = link
+        if (checkConnect())
+            load()
+    }
+
     fun startSearch(request: String, mode: Int) {
-        this.mode = mode
         helper.request = request
         scope.launch {
             isRun = true
-            labelMode = if (mode == MODE_RESULTS)
+            labelMode = if (mode == SearchEngine.MODE_RESULTS)
                 strings.search_in_results
             else
                 strings.search_mode[mode]
-            countMatches = 0
             helper.countMaterials = 0
             SearchFactory.reset(0)
             notifyResult()
             shownResult = true
-            storage.open()
-            if (mode == MODE_RESULTS)
-                searchInResults()
-            else
-                searchInPages()
+            engine.startSearch(mode)
             isRun = false
             notifyResult()
         }
-    }
-
-    private suspend fun searchInPages() = helper.run {
-        storage.clear()
-        if (mode == MODE_DOCTRINE) {
-            searchList(DataBase.DOCTRINE)
-            pages.close()
-            return@run
-        }
-        if (mode == MODE_ALL)
-            searchList(DataBase.ARTICLES)
-        val step: Int
-        val finish: Int
-        val d = if (isDesc) {
-            step = -1
-            finish = start.timeInDays
-            DateUnit.putYearMonth(end.year, end.month)
-        } else {
-            step = 1
-            finish = end.timeInDays
-            DateUnit.putYearMonth(start.year, start.month)
-        }
-        var prev = 0
-        var time: Long = 0
-        while (isRun) {
-            publishProgress(d)
-            searchList(d.my)
-            if (d.timeInDays == finish) break
-            d.changeMonth(step)
-            val now = System.currentTimeMillis()
-            if (countMaterials - prev > Const.MAX_ON_PAGE &&
-                now - time > DELAY_UPDATE
-            ) {
-                time = now
-                notifyResult()
-                prev = countMaterials
-            }
-        }
-        pages.close()
-    }
-
-    private suspend fun notifyResult() {
-        helper.run {
-            label = String.format(
-                strings.format_found,
-                labelMode.substring(labelMode.indexOf(" ") + 1),
-                request,
-                countMatches,
-                countMaterials
-            )
-        }
-        factory.total = helper.countMaterials
-        postState(NeoState.Success)
     }
 
     fun showLastResult() {
@@ -231,7 +196,38 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         }
     }
 
-    private suspend fun publishProgress(d: DateUnit) {
+    private fun dateFromString(date: String): DateUnit {
+        val month = date.substring(0, 2).toInt()
+        val year = date.substring(3).toInt() + 2000
+        return DateUnit.putYearMonth(year, month)
+    }
+
+    override suspend fun notifyResult() {
+        if (blockedNotify) {
+            blockedNotify = false
+            return
+        }
+        setLabel()
+        factory.total = helper.countMaterials
+        postState(NeoState.Success)
+    }
+
+    private fun setLabel() = helper.run {
+        label = String.format(
+            strings.format_found,
+            labelMode.substring(labelMode.indexOf(" ") + 1),
+            request,
+            engine.countMatches,
+            countMaterials,
+            optionsString
+        )
+    }
+
+    override suspend fun notifyDate(d: DateUnit) {
+        if (blockedNotify) {
+            blockedNotify = false
+            return
+        }
         postState(
             NeoState.Message(
                 String.format(
@@ -242,281 +238,47 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent {
         )
     }
 
-    private suspend fun searchInResults() {
-        val title = mutableListOf<String>()
-        val link = mutableListOf<String>()
-        var cursor = storage.getResults(helper.isDesc)
-        if (cursor.moveToFirst()) {
-            val iTitle = cursor.getColumnIndex(Const.TITLE)
-            val iLink = cursor.getColumnIndex(Const.LINK)
-            do {
-                title.add(cursor.getString(iTitle))
-                link.add(cursor.getString(iLink))
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        storage.clear()
-        var des: StringBuilder
-        var p1 = -1
-        var p2: Int
-        var prev = 0
-        var time: Long = 0
-        var n = 1
-        val request = getRequest()
-        for (i in title.indices) {
-            pages.open(link[i])
-            cursor = pages.searchParagraphs(link[i], request.first, request.second)
-            if (cursor.moveToFirst()) {
-                val row = ContentValues()
-                row.put(DataBase.ID, n)
-                n++
-                row.put(Const.TITLE, title[i])
-                row.put(Const.LINK, link[i])
-                des = StringBuilder(getDes(cursor.getString(0), helper.request))
-                helper.countMaterials++
-                while (cursor.moveToNext()) {
-                    des.append(Const.BR + Const.BR)
-                    des.append(getDes(cursor.getString(0), helper.request))
-                }
-                row.put(Const.DESCTRIPTION, des.toString())
-                storage.insert(row)
-            }
-            cursor.close()
-            p2 = i.percent(title.size)
-            if (p1 < p2) {
-                p1 = p2
-                postState(NeoState.Message(String.format(strings.format_search_proc, p1)))
-            } else {
-                val now = System.currentTimeMillis()
-                if (helper.countMaterials - prev > Const.MAX_ON_PAGE &&
-                    now - time > DELAY_UPDATE
-                ) {
-                    time = now
-                    notifyResult()
-                    prev = helper.countMaterials
-                }
-            }
-        }
-        pages.close()
-        title.clear()
-        link.clear()
+    override fun clearLast() {
+        lastProcent = -1
+        lastCount = 0
+        lastTime = 0
     }
 
-    private fun getDes(des: String, sel: String): String {
-        var d = Lib.withOutTags(des)
-        val b = StringBuilder(d)
-        d = d.lowercase(locale)
-        val s = sel.lowercase(locale)
-        var i = -1
-        var x = 0
-        while (d.indexOf(s, i + 1).also { i = it } > -1) {
-            b.insert(i + x + s.length, "</b></font>")
-            b.insert(i + x, "<font color='#99ccff'><b>")
-            x += 36
-            countMatches++
-        }
-        return b.toString().replace(Const.N, Const.BR)
+    override suspend fun notifySpecialEvent(e: Long) {
+        blockedNotify = true
+        postState(NeoState.LongValue(e))
     }
 
-    private fun getRequest(): Pair<String, String> =
-        if (helper.isLetterCase)
-            Pair(DataBase.GLOB, "*${helper.request}*")
-        else
-            Pair(DataBase.LIKE, "%${helper.request}%")
+    override suspend fun searchFinish() {
+        setLabel()
+        helper.saveLastResult()
+    }
 
-
-    @SuppressLint("Range")
-    private fun searchList(name: String) {
-        pages.open(name)
-        storage.open()
-        storage.isDesc = helper.isDesc
-        var n = pages.year * 650 + pages.month * 50
-        val request = getRequest()
-        val cursor: Cursor = when (mode) {
-            MODE_TITLES ->
-                pages.searchTitle(request.first, request.second)
-            MODE_LINKS ->
-                pages.searchLink(helper.request)
-            else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
-                //фильтрация по 0 и 1 будет позже
-                n = checkPages(n)
-                pages.searchParagraphs(request.first, request.second)
-            }
-        }
-        if (!cursor.moveToFirst()) {
-            cursor.close()
-            if (Lib.getFileDB(name).exists()) return
-            val d = DateUnit.putYearMonth(pages.year, pages.month)
-            val row = ContentValues()
-            row.put(
-                Const.TITLE,
-                String.format(strings.format_month_no_loaded, d.monthString, d.year)
-            )
-            row.put(Const.LINK, name)
-            row.put(DataBase.ID, n)
-            storage.insert(row)
+    override suspend fun notifyPercent(p: Int) {
+        if (blockedNotify) {
+            blockedNotify = false
             return
         }
-        val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
-        val iID = cursor.getColumnIndex(DataBase.ID)
-        var row: ContentValues? = null
-        var id = -1
-        var add = true
-        val des = StringBuilder()
-        do {
-            if (id == cursor.getInt(iID) && add) {
-                des.append(Const.BR + Const.BR)
-                des.append(getDes(cursor.getString(iPar), helper.request))
-            } else {
-                id = cursor.getInt(iID)
-                val curTitle = pages.getPageById(id)
-                if (curTitle.moveToFirst()) {
-                    val link = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
-                    val iTitle = curTitle.getColumnIndex(Const.TITLE)
-                    if (mode == MODE_EPISTLES)
-                        add = !link.isPoem
-                    else if (mode == MODE_POEMS)
-                        add = link.isPoem
-                    if (add) {
-                        val title = pages.getPageTitle(curTitle.getString(iTitle), link)
-                        if (row != null) {
-                            if (des.isNotEmpty()) {
-                                row.put(Const.DESCTRIPTION, des.toString())
-                                des.clear()
-                            }
-                            storage.insert(row)
-                        }
-                        row = ContentValues()
-                        row.put(Const.TITLE, title)
-                        row.put(Const.LINK, link)
-                        row.put(DataBase.ID, n)
-                        n++
-                        helper.countMaterials++
-                        if (iPar > -1) //если нужно добавлять абзац (при поиске в заголовках и датах не надо)
-                            des.append(getDes(cursor.getString(iPar), helper.request))
-                    }
-                }
-                curTitle.close()
+        if (lastProcent < p) {
+            lastProcent = p
+            postState(NeoState.Message(String.format(strings.format_search_proc, p)))
+        } else {
+            val now = System.currentTimeMillis()
+            if (helper.countMaterials - lastCount > Const.MAX_ON_PAGE &&
+                now - lastTime > SearchEngine.DELAY_UPDATE
+            ) {
+                lastTime = now
+                notifyResult()
+                lastCount = helper.countMaterials
             }
-        } while (cursor.moveToNext())
-        if (row != null) {
-            if (des.isNotEmpty())
-                row.put(Const.DESCTRIPTION, des.toString())
-            storage.insert(row)
         }
+    }
+
+    fun existsResults(): Boolean {
+        storage.open()
+        val cursor = storage.getResults(false)
+        val result = cursor.moveToFirst()
         cursor.close()
-    }
-
-    private fun checkPages(startId: Int): Int {
-        val links = pages.getLinksList()
-        if (links.isEmpty())
-            return startId
-        var i = 0
-        val all = links.size
-        while (i < links.size) {
-            if (pages.existsPage(links[i]))
-                links.removeAt(i)
-            else i++
-        }
-        if (links.size == all) {
-            val d = DateUnit.putYearMonth(pages.year, pages.month)
-            val row = ContentValues()
-            row.put(
-                Const.TITLE,
-                String.format(strings.format_month_no_loaded, d.monthString, d.year)
-            )
-            row.put(Const.LINK, pages.name)
-            row.put(DataBase.ID, startId)
-            storage.insert(row)
-            return startId
-        }
-        i = startId
-        for (link in links) {
-            val row = ContentValues()
-            row.put(Const.TITLE, String.format(strings.format_page_no_loaded, link))
-            row.put(Const.LINK, link)
-            row.put(DataBase.ID, i)
-            i++
-            storage.insert(row)
-
-        }
-        return i
-    }
-
-    fun loadMonth(date: String) { //MM.yy
-        loadDate = date
-        if (checkConnect())
-            load()
-    }
-
-    fun loadPage(link: String) {
-        loadLink = link
-        if (checkConnect())
-            load()
-    }
-
-    private fun findInPage(link: String, id: Int): ListItem {
-        var item = ListItem(link, link)
-        if (mode == MODE_EPISTLES && link.isPoem)
-            return item
-        if (mode == MODE_POEMS && !link.isPoem)
-            return item
-        pages.open(link)
-        val pageId = pages.getPageId(link)
-
-        val curTitle = pages.getPageById(pageId)
-        if (!curTitle.moveToFirst()) {
-            curTitle.close()
-            return item
-        }
-        val iTitle = curTitle.getColumnIndex(Const.TITLE)
-        val title = pages.getPageTitle(curTitle.getString(iTitle), link)
-        curTitle.close()
-        item = ListItem(title, link)
-        item.des = strings.not_found
-
-        val cursor = pages.getParagraphs(pageId)
-        if (!cursor.moveToFirst()) {
-            cursor.close()
-            return item
-        }
-        val iPar = cursor.getColumnIndex(DataBase.PARAGRAPH)
-        var row: ContentValues? = null
-        val des = StringBuilder()
-        do {
-            val par = cursor.getString(iPar)
-            if (par.contains(helper.request)) {
-                if (row == null) {
-                    row = ContentValues()
-                    row.put(Const.TITLE, title)
-                    row.put(Const.LINK, link)
-                    row.put(DataBase.ID, id)
-                    helper.countMaterials++
-                }
-                des.append(getDes(par, helper.request))
-            }
-        } while (cursor.moveToNext())
-        cursor.close()
-        if (row != null) {
-            item.des = des.toString()
-            row.put(Const.DESCTRIPTION, item.des)
-            storage.insert(row)
-        }
-        return item
-    }
-
-    private fun dateFromString(date: String): DateUnit {
-        val month = date.substring(0, 2).toInt()
-        val year = date.substring(3).toInt() + 2000
-        return DateUnit.putYearMonth(year, month)
-    }
-
-    fun paging() = paging.run()
-
-    override val pagingScope: CoroutineScope
-        get() = scope
-
-    override suspend fun postFinish() {
-        postState(NeoState.Ready)
+        return result
     }
 }

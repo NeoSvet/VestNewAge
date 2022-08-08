@@ -35,7 +35,7 @@
         <item>Искать в Катренах</item>
         <item>Искать в заголовках</item>
         <item>Искать по всем материалам</item>
-        <item>Искать по дате</item>
+        <item>Искать в ссылках / по дате</item>
         <item>Искать в Посланиях и Катренах</item>
         <item>Искать в Книге «Доктрина Создателя»</item>
     </string-array>
@@ -94,9 +94,55 @@
     <string-array name="search_options">
         <item>Обратное направление&#160;</item>
         <item>Учитывать регистр</item>
+        <item>Поиск по словам</item>
         <item>Учитывать приставку</item>
         <item>Учитывать окончание</item>
         <item>Все слова</item>
-        <item>Строку целиком</item>
+    </string-array>
+    <string-array name="endings">
+        <item>его</item>
+        <item>ого</item>
+        <item>ями</item>
+        <item>ьми</item>
+        <item>ось</item>
+        <item>ешь</item>
+        <item>ишь</item>
+        <item>ете</item>
+        <item>ите</item>
+        <item>ся</item>
+        <item>ым</item>
+        <item>ую</item>
+        <item>ей</item>
+        <item>ая</item>
+        <item>ый</item>
+        <item>ий</item>
+        <item>ые</item>
+        <item>ое</item>
+        <item>ем</item>
+        <item>ет</item>
+        <item>ит</item>
+        <item>ем</item>
+        <item>ут</item>
+        <item>ют</item>
+        <item>ат</item>
+        <item>ят</item>
+        <item>ах</item>
+        <item>ев</item>
+        <item>им</item>
+        <item>их</item>
+        <item>ой</item>
+        <item>ом</item>
+        <item>ам</item>
+        <item>ов</item>
+        <item>а</item>
+        <item>ы</item>
+        <item>у</item>
+        <item>е</item>
+        <item>о</item>
+        <item>и</item>
+        <item>я</item>
+        <item>ю</item>
+        <item>ь</item>
+        <item>й</item>
     </string-array>
 </resources>

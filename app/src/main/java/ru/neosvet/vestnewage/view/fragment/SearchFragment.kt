@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +24,8 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.SearchEngine
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -132,7 +132,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     override fun onDestroyView() {
-        helper.saveLastResult()
         binding = null
         super.onDestroyView()
     }
@@ -182,10 +181,9 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             etSearch.setText(helper.request)
             etSearch.setSelection(helper.request.length)
             content.tvLabel.text = helper.label
+            bPanelSwitch.isVisible = true
             if (state.getBoolean(ADDITION))
                 showAdditionPanel()
-            else
-                bShow.isVisible = true
         }
         state.getBundle(SETTINGS)?.let {
             openSettings()
@@ -200,7 +198,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         if (toiler.shownResult) {
             rvSearch.adapter = adResult
         } else {
-            if (helper.existsResults()) {
+            if (toiler.existsResults()) {
                 val list = listOf(
                     ListItem(getString(R.string.results_last_search), true),
                     ListItem(getString(R.string.clear_results_search), true)
@@ -253,19 +251,19 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             resources.getStringArray(R.array.search_mode)
         )
         modes.setDropDownViewResource(R.layout.spinner_item)
-        bShow.setOnClickListener {
-            showAdditionPanel()
-        }
-        content.bHide.setOnClickListener {
-            bShow.isVisible = true
-            content.pAdditionSet.isVisible = false
+        bPanelSwitch.setOnClickListener {
+            if (content.pAdditionSet.isVisible) {
+                bPanelSwitch.setImageResource(R.drawable.ic_bottom)
+                content.pAdditionSet.isVisible = false
+            } else
+                showAdditionPanel()
         }
     }
 
     private fun showAdditionPanel() {
         act?.hideHead()
         binding?.run {
-            bShow.isVisible = false
+            bPanelSwitch.setImageResource(R.drawable.ic_top)
             content.pAdditionSet.isVisible = true
         }
     }
@@ -279,15 +277,18 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun startSearch() = binding?.run {
+        act?.hideToast()
         softKeyboard.hide()
         setStatus(true)
         val mode = if (content.cbSearchInResults.isChecked) {
             tvStatus.text = getString(R.string.search)
-            SearchToiler.MODE_RESULTS
+            SearchEngine.MODE_RESULTS
         } else helper.mode
         val request = etSearch.text.toString()
         adResult.submitData(lifecycle, PagingData.empty())
         content.rvSearch.adapter = adResult
+        if (!helper.isEnding)
+            toiler.setEndings(requireContext())
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -318,12 +319,20 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             }
             NeoState.Ready ->
                 act?.hideToast()
+            is NeoState.LongValue -> { //SpecialEvent
+                if (state.value == SearchEngine.EVENT_WORDS_NOT_FOUND)
+                    act?.showToast(getString(R.string.words_not_found))
+            }
             else -> {}
         }
     }
 
     private fun showResult() = binding?.run {
-        bShow.isVisible = content.pAdditionSet.isVisible.not()
+        bPanelSwitch.isVisible = true
+        if (content.pAdditionSet.isVisible)
+            bPanelSwitch.setImageResource(R.drawable.ic_top)
+        else
+            bPanelSwitch.setImageResource(R.drawable.ic_bottom)
         content.tvLabel.text = helper.label
         if (helper.countMaterials <= Const.MAX_ON_PAGE) {
             setResultScroll(1)
@@ -349,7 +358,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     private fun finishSearch() {
         setStatus(false)
-        if (helper.countMaterials == 0)
+        if (helper.countMaterials == 0 && helper.isNeedLoad.not())
             noResults()
         else
             showResult()
@@ -358,15 +367,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private fun noResults() {
         adDefault.clear()
         binding?.run {
-            bShow.isVisible = false
+            bPanelSwitch.isVisible = false
             content.pAdditionSet.isVisible = false
             content.cbSearchInResults.isChecked = false
         }
-        AlertDialog.Builder(requireContext(), R.style.NeoDialog).apply {
-            setMessage(getString(R.string.alert_search))
-            setPositiveButton(getString(android.R.string.ok))
-            { dialog: DialogInterface, _ -> dialog.dismiss() }
-        }.create().show()
+        act?.showStaticToast(getString(R.string.search_no_results))
     }
 
     private fun defaultClick(index: Int, item: ListItem) {
@@ -377,7 +382,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
                 binding?.run {
                     content.rvSearch.adapter = adResult
                     content.tvLabel.text = helper.label
-                    bShow.isVisible = true
+                    bPanelSwitch.isVisible = true
                     etSearch.setText(helper.request)
                     etSearch.setSelection(helper.request.length)
                 }
@@ -392,10 +397,15 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private fun resultClick(index: Int, item: ListItem) {
         when (helper.getType(item)) {
             SearchHelper.Type.NORMAL -> {
-                BrowserActivity.openReader(
-                    item.link,
-                    helper.request
-                )
+                val s = when {
+                    helper.mode == SearchEngine.MODE_TITLES -> null
+                    helper.mode == SearchEngine.MODE_LINKS -> null
+                    helper.isByWords -> Lib.withOutTags(
+                        item.des.substring(0, item.des.length - 4).replace("</p>", Const.NN)
+                    )
+                    else -> helper.request
+                }
+                BrowserActivity.openReader(item.link, s)
             }
             SearchHelper.Type.LOAD_MONTH ->
                 toiler.loadMonth(item.link)

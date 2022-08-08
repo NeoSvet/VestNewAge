@@ -1,9 +1,13 @@
 package ru.neosvet.vestnewage.view.dialog
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
@@ -13,6 +17,7 @@ import ru.neosvet.vestnewage.databinding.SearchDialogBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.SearchEngine
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class SearchDialog(
@@ -49,10 +54,33 @@ class SearchDialog(
     }
 
     private fun setViews() = binding.run {
-        sMode.adapter = parent.modes
-        sMode.setSelection(parent.helper.mode)
         bStartRange.text = formatDate(start)
         bEndRange.text = formatDate(end)
+        sMode.adapter = parent.modes
+        sMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                switchDatePickers()
+                val b: Byte = when {
+                    position == SearchEngine.MODE_LINKS -> 5
+                    options[SearchHelper.I_BY_WORDS] -> 0
+                    else -> 3
+                }
+                if (b != adapter.sizeCorrector) {
+                    adapter.sizeCorrector = b
+                    adapter.notifyDataSetChanged()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+        }
+        sMode.setSelection(parent.helper.mode)
 
         bStartRange.setOnClickListener {
             showStartDatePicker(start)
@@ -73,6 +101,20 @@ class SearchDialog(
         }
     }
 
+    private fun switchDatePickers() = binding.run {
+        if (sMode.selectedItemPosition == SearchEngine.MODE_DOCTRINE) {
+            label.isVisible = false
+            bStartRange.isVisible = false
+            bEndRange.isVisible = false
+            div.isVisible = false
+        } else if (label.isVisible.not()) {
+            label.isVisible = true
+            bStartRange.isVisible = true
+            bEndRange.isVisible = true
+            div.isVisible = true
+        }
+    }
+
     private fun initOptions() {
         val list = mutableListOf<CheckItem>()
         var i = 0
@@ -81,22 +123,20 @@ class SearchDialog(
             i++
         }
         adapter = CheckAdapter(list, false, this::checkOption)
+        if (parent.helper.isByWords.not())
+            adapter.sizeCorrector = 3
         val rv = findViewById<RecyclerView>(R.id.rvOptions)
         rv.layoutManager = GridLayoutManager(context, ScreenUtils.span)
         rv.adapter = adapter
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun checkOption(index: Int, checked: Boolean): Int {
-        when (index) {
-            SearchHelper.I_ALL_LINE -> if (checked) {
-                adapter.setChecked(SearchHelper.I_PREFIX, true)
-                adapter.setChecked(SearchHelper.I_ENDING, true)
-                adapter.setChecked(SearchHelper.I_ALL_WORDS, true)
-            }
-            SearchHelper.I_PREFIX, SearchHelper.I_ENDING, SearchHelper.I_ALL_WORDS -> {
-                if (!checked) adapter.setChecked(SearchHelper.I_ALL_LINE, false)
-            }
-        }
+        if (index == SearchHelper.I_BY_WORDS) if (checked)
+            adapter.sizeCorrector = 0
+        else
+            adapter.sizeCorrector = 3
+        adapter.notifyDataSetChanged()
         options[index] = checked
         return index
     }
@@ -121,6 +161,8 @@ class SearchDialog(
             options.addAll(it.toMutableList())
             initOptions()
         }
+        if (options[SearchHelper.I_BY_WORDS].not())
+            adapter.sizeCorrector = 3
     }
 
     override fun onSaveInstanceState(): Bundle {
