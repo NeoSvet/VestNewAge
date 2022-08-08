@@ -14,8 +14,9 @@ class CheckAdapter(
     private val checkByBg: Boolean = true,
     private val onChecked: (Int, Boolean) -> Int
 ) : RecyclerView.Adapter<CheckAdapter.ViewHolder>() {
+    var sizeCorrector: Byte = 0
 
-    override fun getItemCount(): Int = list.size
+    override fun getItemCount(): Int = list.size - sizeCorrector
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_check, null))
