@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
@@ -170,8 +171,11 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
         if (helper.isSearch) {
             if (helper.searchIndex > -1) {
-                binding.content.etSearch.setText(helper.request)
                 binding.content.etSearch.isEnabled = false
+                binding.content.etSearch.updatePadding(
+                    right = resources.getDimension(R.dimen.def_indent).toInt()
+                )
+                binding.content.etSearch.setText(helper.request)
             }
         }
     }
@@ -207,6 +211,9 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
             if (helper.searchIndex > -1) {
                 etSearch.setText("")
                 etSearch.isEnabled = true
+                etSearch.updatePadding(
+                    right = resources.getDimension(R.dimen.padding_for_clear).toInt()
+                )
             }
             pSearch.isVisible = false
             wvBrowser.clearMatches()
@@ -415,7 +422,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
         bClose.setOnClickListener { closeSearch() }
         etSearch.doAfterTextChanged {
-            bClear.isVisible = it?.isNotEmpty() ?: false
+            if (etSearch.isEnabled)
+                bClear.isVisible = it?.isNotEmpty() ?: false
         }
         bClear.setOnClickListener { etSearch.setText("") }
     }
