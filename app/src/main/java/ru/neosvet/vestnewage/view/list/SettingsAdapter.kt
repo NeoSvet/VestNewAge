@@ -183,6 +183,8 @@ class SettingsAdapter(
             labelOff.text = item.offLabel
             labelOn.text = item.onLabel
             seekBar.max = item.maxSeek
+            if (item.valueSeek == 0)
+                seekBar.progress = 1
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                     if (progress == seekBar.max) {
