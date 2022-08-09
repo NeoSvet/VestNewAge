@@ -1,10 +1,8 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AlertDialog
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
@@ -45,7 +43,7 @@ class BrowserHelper(context: Context) {
     var isSearch: Boolean = false
         private set
     val request: String
-        get() = place[searchIndex]
+        get() = place[searchIndex].trimEnd()
     var position: Float = 0f
 
     fun save() {
