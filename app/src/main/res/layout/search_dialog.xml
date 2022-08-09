@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/field"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="@dimen/def_indent">
 
     <Spinner
         android:id="@+id/sMode"
@@ -22,8 +22,8 @@
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
+        android:paddingTop="@dimen/half_indent"
+        android:paddingBottom="@dimen/half_indent"
         android:text="@string/range_for_search"
         android:textColor="@android:color/white"
         android:textSize="16sp"
@@ -35,8 +35,8 @@
         android:id="@+id/bStartRange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="@dimen/def_indent"
+        android:paddingEnd="@dimen/def_indent"
         app:layout_constraintEnd_toStartOf="@id/div"
         app:layout_constraintTop_toBottomOf="@id/label" />
 
@@ -44,7 +44,7 @@
         android:id="@+id/div"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dp"
+        android:padding="@dimen/half_indent"
         android:text="–"
         android:textColor="@android:color/white"
         android:textStyle="bold"
@@ -57,8 +57,8 @@
         android:id="@+id/bEndRange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="@dimen/def_indent"
+        android:paddingEnd="@dimen/def_indent"
         app:layout_constraintStart_toEndOf="@id/div"
         app:layout_constraintTop_toBottomOf="@id/label" />
 
@@ -75,12 +75,12 @@
         android:id="@+id/bClearRequests"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:paddingStart="20dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="10dp"
+        android:layout_marginTop="@dimen/def_indent"
+        android:layout_marginEnd="@dimen/def_indent"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:paddingBottom="@dimen/def_indent"
         android:text="@string/clear_requests"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rvOptions" />
@@ -89,11 +89,11 @@
         android:id="@+id/bOk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:paddingStart="20dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="10dp"
+        android:layout_marginTop="@dimen/def_indent"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:paddingBottom="@dimen/def_indent"
         android:text="@android:string/ok"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rvOptions" />

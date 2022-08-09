@@ -11,23 +11,23 @@
         style="@style/CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="@dimen/half_indent"
         android:text="@string/notif_sound" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp" />
+        android:layout_marginBottom="@dimen/half_indent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bRingtone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="20dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:layout_marginEnd="@dimen/def_indent"
+        android:layout_marginBottom="@dimen/double_indent"
+        android:paddingStart="@dimen/def_indent"
+        android:paddingEnd="@dimen/def_indent"
         android:text="@string/select" />
 
     <com.google.android.material.checkbox.MaterialCheckBox
@@ -35,7 +35,7 @@
         style="@style/CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/double_indent"
         android:text="@string/vibr" />
 
     <com.google.android.material.button.MaterialButton
@@ -43,8 +43,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="@dimen/def_indent"
+        android:paddingEnd="@dimen/def_indent"
         android:text="@android:string/ok" />
 
 </LinearLayout>

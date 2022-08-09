@@ -27,7 +27,7 @@
                 style="@style/CheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="@dimen/def_indent"
                 android:checked="false"
                 android:text="@string/search_in_results"
                 app:layout_constraintStart_toStartOf="parent"
@@ -37,25 +37,25 @@
                 android:id="@+id/svLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="@dimen/half_indent"
                 app:layout_constraintTop_toBottomOf="@id/cbSearchInResults">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tvLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="5dp"
-                    android:padding="5dp" />
+                    android:layout_marginLeft="@dimen/def_indent"
+                    android:layout_marginRight="@dimen/def_indent"
+                    android:layout_marginBottom="@dimen/half_indent"
+                    android:padding="@dimen/half_indent" />
             </androidx.core.widget.NestedScrollView>
 
             <SeekBar
                 android:id="@+id/sbResults"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginStart="@dimen/def_indent"
+                android:layout_marginEnd="@dimen/def_indent"
                 android:max="10"
                 android:progressDrawable="@drawable/progress_bar"
                 android:thumb="@drawable/sb_thumb"

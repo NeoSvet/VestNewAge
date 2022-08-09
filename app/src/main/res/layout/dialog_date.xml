@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/def_indent"
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
@@ -25,8 +25,8 @@
             android:id="@+id/bMinus"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
+            android:layout_marginStart="@dimen/half_indent"
+            android:layout_marginEnd="@dimen/half_indent"
             android:gravity="center"
             android:padding="0dp"
             android:text="–" />
@@ -41,8 +41,8 @@
             android:id="@+id/bPlus"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
+            android:layout_marginStart="@dimen/half_indent"
+            android:layout_marginEnd="@dimen/half_indent"
             android:gravity="center"
             android:padding="0dp"
             android:text="+" />
@@ -62,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="@dimen/def_indent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"
@@ -70,9 +70,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_margin="6dp"
-        android:paddingStart="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingBottom="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
         android:text="@android:string/ok" />
 </LinearLayout>

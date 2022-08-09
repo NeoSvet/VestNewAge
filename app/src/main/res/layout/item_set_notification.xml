@@ -17,13 +17,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:padding="@dimen/def_indent">
 
             <ImageView
                 android:id="@+id/imgTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="@dimen/def_indent"
                 android:background="@drawable/button_norm"
                 android:src="@drawable/plus" />
 
@@ -45,23 +45,23 @@
                 android:id="@+id/label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginStart="@dimen/double_indent"
+                android:layout_marginTop="@dimen/double_indent"
+                android:layout_marginEnd="@dimen/double_indent"
+                android:layout_marginBottom="@dimen/def_indent" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginStart="@dimen/double_indent"
+                android:layout_marginEnd="@dimen/double_indent"
+                android:layout_marginBottom="@dimen/double_indent">
 
                 <SeekBar
                     android:id="@+id/seekBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="@dimen/half_indent"
                     android:max="60"
                     android:progress="0"
                     android:progressDrawable="@drawable/progress_bar"
@@ -73,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="@dimen/double_indent"
                     android:layout_marginTop="2dp"
                     android:text="@string/on" />
 
@@ -84,7 +84,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
                     android:layout_marginTop="2dp"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginEnd="@dimen/double_indent"
                     android:text="@string/off" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -107,11 +107,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="20dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
+                android:layout_marginStart="@dimen/double_indent"
+                android:layout_marginEnd="@dimen/double_indent"
+                android:layout_marginBottom="@dimen/double_indent"
+                android:paddingStart="@dimen/def_indent"
+                android:paddingEnd="@dimen/def_indent"
                 android:text="@string/set_notif" />
         </LinearLayout>
     </LinearLayout>

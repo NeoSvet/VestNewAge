@@ -18,10 +18,10 @@
             style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/def_indent"
             android:background="@drawable/card_bg"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
+            android:paddingStart="@dimen/def_indent"
+            android:paddingEnd="@dimen/def_indent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
@@ -30,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
+            android:paddingStart="@dimen/def_indent"
+            android:paddingEnd="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tvTitle"
             app:selectionRequired="true"
             app:singleSelection="true">
@@ -60,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:padding="10dp"
+            android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tgPlace" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:hint="@string/desctription"
-            android:padding="10dp"
+            android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tvSel">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -86,7 +86,7 @@
         <ImageView
             android:id="@+id/bClearDes"
             style="@style/ClearButton"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="@dimen/half_indent"
             android:layout_marginEnd="15dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilDes"
@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:hint="@string/add_col"
-            android:padding="10dp"
+            android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tilDes">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -116,7 +116,7 @@
         <ImageView
             android:id="@+id/bClearCol"
             style="@style/ClearButton"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="@dimen/half_indent"
             android:layout_marginEnd="15dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilCol"
@@ -129,7 +129,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
-            android:padding="10dp"
+            android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tilCol" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

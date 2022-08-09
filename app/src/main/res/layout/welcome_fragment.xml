@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/def_indent"
         android:text="@string/welcome_back" />
 
     <androidx.recyclerview.widget.RecyclerView

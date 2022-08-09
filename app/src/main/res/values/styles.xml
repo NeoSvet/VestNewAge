@@ -48,31 +48,31 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="Button" parent="Label">
-        <item name="android:padding">10dp</item>
+        <item name="android:padding">@dimen/def_indent</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/button</item>
     </style>
 
     <style name="CheckBox" parent="Label">
-        <item name="android:padding">10dp</item>
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:padding">@dimen/def_indent</item>
+        <item name="android:layout_marginStart">@dimen/def_indent</item>
+        <item name="android:layout_marginEnd">@dimen/def_indent</item>
         <item name="android:background">@drawable/press</item>
         <item name="android:button">@drawable/check_selector</item>
         <item name="android:drawableLeft">@android:color/transparent</item>
-        <item name="android:drawablePadding">10dp</item>
+        <item name="android:drawablePadding">@dimen/def_indent</item>
         <item name="android:buttonTint">@android:color/transparent</item>
         <item name="android:buttonTintMode">screen</item>
     </style>
 
     <style name="CheckedTextView" parent="Label">
-        <item name="android:paddingStart">10dp</item>
-        <item name="android:paddingEnd">10dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
-        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:paddingStart">@dimen/def_indent</item>
+        <item name="android:paddingEnd">@dimen/def_indent</item>
+        <item name="android:paddingTop">@dimen/half_indent</item>
+        <item name="android:paddingBottom">@dimen/half_indent</item>
+        <item name="android:layout_marginStart">@dimen/def_indent</item>
+        <item name="android:layout_marginEnd">@dimen/def_indent</item>
+        <item name="android:layout_marginTop">@dimen/def_indent</item>
         <item name="android:background">@drawable/press</item>
     </style>
 
@@ -80,7 +80,7 @@
         <item name="android:layout_width">154dp</item>
         <item name="android:layout_height">56dp</item>
         <item name="android:paddingStart">30dp</item>
-        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingEnd">@dimen/def_indent</item>
         <item name="android:textSize">20sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
@@ -97,12 +97,12 @@
     </style>
 
     <style name="ItemBG" parent="Label">
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
-        <item name="android:layout_marginBottom">5dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
+        <item name="android:layout_marginStart">@dimen/def_indent</item>
+        <item name="android:layout_marginTop">@dimen/half_indent</item>
+        <item name="android:layout_marginEnd">@dimen/def_indent</item>
+        <item name="android:layout_marginBottom">@dimen/half_indent</item>
+        <item name="android:paddingTop">@dimen/half_indent</item>
+        <item name="android:paddingBottom">@dimen/half_indent</item>
     </style>
 
     <style name="UpdateLabel" parent="ItemBG">
@@ -110,18 +110,18 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/item_bg</item>
         <item name="android:layout_marginBottom">0dp</item>
-        <item name="android:paddingStart">10dp</item>
-        <item name="android:paddingEnd">10dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingStart">@dimen/def_indent</item>
+        <item name="android:paddingEnd">@dimen/def_indent</item>
+        <item name="android:paddingTop">@dimen/half_indent</item>
+        <item name="android:paddingBottom">@dimen/half_indent</item>
     </style>
 
     <style name="TextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
-        <item name="android:layout_marginBottom">5dp</item>
-        <item name="android:padding">5dp</item>
+        <item name="android:layout_marginStart">@dimen/def_indent</item>
+        <item name="android:layout_marginTop">@dimen/half_indent</item>
+        <item name="android:layout_marginEnd">@dimen/def_indent</item>
+        <item name="android:layout_marginBottom">@dimen/half_indent</item>
+        <item name="android:padding">@dimen/half_indent</item>
         <item name="hintTextColor">@color/colorAccentLight</item>
         <item name="boxStrokeColor">@color/box_stroke</item>
         <item name="boxStrokeWidth">2dp</item>
@@ -130,9 +130,9 @@
 
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="android:textCursorDrawable">@drawable/cursor</item>
-        <item name="android:paddingStart">10dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingStart">@dimen/def_indent</item>
+        <item name="android:paddingTop">@dimen/def_indent</item>
+        <item name="android:paddingBottom">@dimen/def_indent</item>
         <item name="android:paddingEnd">@dimen/padding_for_clear</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:fontFamily">@font/myriad</item>
@@ -142,8 +142,8 @@
         <item name="android:layout_width">@dimen/string_size</item>
         <item name="android:layout_height">@dimen/string_size</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_marginTop">@dimen/half_indent</item>
+        <item name="android:layout_marginEnd">@dimen/def_indent</item>
         <item name="android:scaleType">fitXY</item>
         <item name="android:src">@drawable/ic_close</item>
         <item name="android:tint">@color/colorAccentLight</item>
@@ -164,8 +164,8 @@
 
     <style name="RecyclerViewStyle">
         <item name="android:clipToPadding">false</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingTop">@dimen/half_indent</item>
+        <item name="android:paddingBottom">@dimen/half_indent</item>
     </style>
 
 </resources>

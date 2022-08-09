@@ -13,10 +13,10 @@
         style="@style/ItemBG"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="@dimen/half_indent"
         android:background="@drawable/card_bg"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="@dimen/def_indent"
+        android:paddingEnd="@dimen/def_indent"
         android:text="@string/cabinet_title" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -83,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="@dimen/half_indent"
             android:text="@string/remember_email"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilPassword" />

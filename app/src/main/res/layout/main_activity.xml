@@ -41,8 +41,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
-                android:paddingStart="5dp"
-                android:paddingTop="5dp"
+                android:paddingStart="@dimen/half_indent"
+                android:paddingTop="@dimen/half_indent"
                 android:paddingEnd="45dp"
                 android:paddingBottom="7dp"
                 android:shadowColor="@android:color/black"
@@ -56,11 +56,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginTop="@dimen/half_indent"
+                android:layout_marginEnd="@dimen/half_indent"
                 android:background="@drawable/button"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
+                android:paddingStart="@dimen/half_indent"
+                android:paddingEnd="@dimen/half_indent"
                 android:src="@drawable/more"
                 app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
                 app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
@@ -70,8 +70,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="@dimen/def_indent"
+                android:layout_marginBottom="@dimen/half_indent"
                 android:shadowColor="@android:color/black"
                 android:shadowDx="3"
                 android:shadowDy="3"
@@ -134,10 +134,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="@dimen/def_indent"
         android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
-        android:padding="10dp"
+        android:padding="@dimen/def_indent"
         android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -148,7 +148,7 @@
         android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/def_indent"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView

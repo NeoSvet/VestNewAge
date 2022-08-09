@@ -16,6 +16,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:maxLines="1"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp" />
+        android:paddingTop="@dimen/def_indent"
+        android:paddingBottom="@dimen/def_indent" />
 </LinearLayout>

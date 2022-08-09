@@ -17,13 +17,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:padding="@dimen/def_indent">
 
             <ImageView
                 android:id="@+id/imgTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="@dimen/def_indent"
                 android:background="@drawable/button_norm"
                 android:src="@drawable/plus" />
 
@@ -51,9 +51,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_margin="20dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp" />
+                android:layout_margin="@dimen/double_indent"
+                android:paddingStart="@dimen/def_indent"
+                android:paddingEnd="@dimen/def_indent" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>
