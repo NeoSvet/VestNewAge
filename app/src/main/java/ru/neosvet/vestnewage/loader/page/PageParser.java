@@ -98,6 +98,10 @@ public class PageParser {
             elem.end = false;
             elem.tag = s.substring(0, n);
             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
+            if (elem.tag.equals("em")) {
+                content.current().setHtml(content.current().html + elem.html);
+                continue;
+            }
             if (elem.tag.equals(Const.PAR)) {
                 if (startPar)
                     content.add(new HTMLElem(Const.PAR));
