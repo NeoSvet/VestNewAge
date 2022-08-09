@@ -138,7 +138,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                toiler.cancel()
                 toiler.selectedTab = tab.position
                 toiler.openList(true)
                 checkChangeTab()
