@@ -63,6 +63,7 @@ abstract class NeoToiler : StateToiler() {
 
     protected suspend fun reLoad() {
         if (loadIfNeed && checkConnect()) {
+            isRun = true
             postState(NeoState.Loading)
             loadIfNeed = false
             doLoad()
