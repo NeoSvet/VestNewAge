@@ -22,12 +22,12 @@ class RecyclerHolder(
 
     fun setItem(item: ListItem) {
         if (item.title.contains("<"))
-            tvTitle.text = Html.fromHtml(item.title)
+            tvTitle.text = Html.fromHtml(item.title).trimEnd()
         else
             tvTitle.text = item.title
         tvDes?.let {
             if (item.des.contains("<"))
-                it.text = Html.fromHtml(item.des)
+                it.text = Html.fromHtml(item.des).trimEnd()
             else
                 it.text = item.des
         }
