@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.loader.*
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -201,6 +201,8 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun startLoad() {
         progress.count = 0
+        val styleLoader = StyleLoader()
+        styleLoader.download(false)
         when (mode) {
             DOWNLOAD_ALL -> {
                 progress.count = 3
