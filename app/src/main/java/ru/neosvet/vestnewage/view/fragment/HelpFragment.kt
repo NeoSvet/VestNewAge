@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -103,18 +105,41 @@ class HelpFragment : Fragment(), Observer<NeoState> {
                     adapter.notifyDataSetChanged()
                 ListEvent.CHANGE ->
                     adapter.updateItem(index)
-                ListEvent.REMOTE -> {
-                    val sendIntent = Intent(Intent.ACTION_SEND)
-                    sendIntent.type = "text/plain"
-                    sendIntent.putExtra(
-                        Intent.EXTRA_TEXT, getString(R.string.title_app)
-                                + getString(R.string.url_on_app)
-                    )
-                    startActivity(sendIntent)
-                }
                 ListEvent.MOVE ->
-                    Lib.openInApps("http://neosvet.ucoz.ru/vna/privacy.html", null)
+                    Lib.openInApps(NetConst.WEB_PAGE + "privacy.html", null)
+                ListEvent.REMOTE -> shareAppLink(
+                    if (this.index == HelpToiler.LINK_ON_GOOGLE)
+                        getString(R.string.url_on_google)
+                    else
+                        getString(R.string.url_on_huawei)
+                )
             }
         }
+    }
+
+    private fun shareAppLink(link: String) {
+        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
+            .setMessage(getString(R.string.link_on_app))
+            .setPositiveButton(
+                getString(R.string.share)
+            ) { _, _ ->
+                val sendIntent = Intent(Intent.ACTION_SEND)
+                sendIntent.type = "text/plain"
+                sendIntent.putExtra(
+                    Intent.EXTRA_TEXT, getString(R.string.title_app) + " $link"
+                )
+                startActivity(sendIntent)
+            }
+            .setNeutralButton(
+                getString(R.string.copy)
+            ) { _, _ ->
+                Lib.copyAddress(link)
+            }
+            .setNegativeButton(
+                getString(R.string.open)
+            ) { _, _ ->
+                Lib.openInApps(link, null)
+            }
+        builder.create().show()
     }
 }

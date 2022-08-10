@@ -247,8 +247,11 @@
     <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
     <!--HelpFragment-->
     <string name="title_app">Приложение «Весть Века»</string>
-    <string name="url_on_app">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
+    <string name="url_on_google">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
+    <string name="url_on_huawei">https://appgallery.cloud.huawei.com/ag/n/app/C106820457?locale=ru_RU</string>
     <string name="srv_info">\nСлужебная информация:\n</string>
+    <string name="copy">Скопировать</string>
+    <string name="link_on_app">Ссылка на приложение</string>
     <!--SearchFragment-->
     <string name="not_found">Не найдено</string>
     <string name="clear_requests">Удалить запросы</string>

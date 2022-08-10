@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
+import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.TipActivity
@@ -19,12 +20,13 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     companion object {
         private const val FEEDBACK = 1
-        private const val FEEDBACK_COUNT = 5
+        private const val FEEDBACK_COUNT = 6
         private const val WRITE_TO_DEV = 1
-        private const val LINK_ON_APP = 2
-        private const val TG_CHANNEL = 3
-        private const val LINK_ON_SITE = 4
-        private const val CHANGELOG = 5
+        const val LINK_ON_GOOGLE = 2
+        const val LINK_ON_HUAWEI = 3
+        private const val TG_CHANNEL = 4
+        private const val LINK_ON_SITE = 5
+        private const val CHANGELOG = 6
         private const val TIPS = 3
         private const val TIPS_COUNT = 3
         private const val TIP_MAIN = 0
@@ -70,9 +72,14 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
 
     private fun getFeedback(): List<HelpItem> {
         if (listFeedback.isEmpty()) {
-            val icons =
-                arrayOf(R.drawable.gm, R.drawable.play_store, R.drawable.tg, R.drawable.www, 0)
-
+            val icons = arrayOf(
+                R.drawable.gm,
+                R.drawable.play_store,
+                R.drawable.app_gallery,
+                R.drawable.tg,
+                R.drawable.www,
+                0
+            )
             for (i in icons.indices) {
                 val item = if (icons[i] == 0) HelpItem(
                     title = strings.feedback[i],
@@ -149,14 +156,14 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                 val msg = strings.srv_info + list[FEEDBACK + CHANGELOG].content
                 Lib.openInApps(Const.mailto + msg, null)
             }
-            LINK_ON_APP ->
-                mstate.value = NeoState.ListState(ListEvent.REMOTE)
             TG_CHANNEL ->
                 Lib.openInApps("https://t.me/+nUS5nlrZsvM3MTEy", null)
             LINK_ON_SITE ->
-                Lib.openInApps("http://neosvet.ucoz.ru/vna/", null)
+                Lib.openInApps(NetConst.WEB_PAGE, null)
             CHANGELOG ->
-                Lib.openInApps("http://neosvet.ucoz.ru/vna/changelog.html", null)
+                Lib.openInApps(NetConst.WEB_PAGE + "changelog.html", null)
+            else -> // LINK_ON_GOOGLE or LINK_ON_HUAWEI
+                mstate.value = NeoState.ListState(ListEvent.REMOTE, index)
         }
     }
 
