@@ -14,6 +14,7 @@ import java.util.List;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.ListItem;
 import ru.neosvet.vestnewage.network.NeoClient;
+import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 import ru.neosvet.vestnewage.view.dialog.CustomDialog;
 
@@ -126,7 +127,7 @@ public class AdsUtils {
                         list.add(0, new ListItem(ad + context.getString(R.string.current_version)));
                     }
                     list.get(0).addHead(d);
-                    list.get(0).addLink(context.getString(R.string.url_on_app));
+                    list.get(0).addLink(NetConst.WEB_PAGE);
                     break;
                 default:
                     list.add(0, new ListItem(ad + t));

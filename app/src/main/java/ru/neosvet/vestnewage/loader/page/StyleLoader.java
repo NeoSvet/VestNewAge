@@ -38,8 +38,7 @@ public class StyleLoader {
     }
 
     private void downloadFromUcoz(File fLight, File fDark) throws Exception {
-        String site = "http://neosvet.ucoz.ru/vna/";
-        builderRequest.url(site + fLight.getName());
+        builderRequest.url(NetConst.WEB_PAGE + fLight.getName());
         Response response = client.newCall(builderRequest.build()).execute();
         BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
@@ -49,7 +48,7 @@ public class StyleLoader {
         bw.write(s);
         bw.close();
 
-        builderRequest.url(site + fDark.getName());
+        builderRequest.url(NetConst.WEB_PAGE + fDark.getName());
         response = client.newCall(builderRequest.build()).execute();
         br = new BufferedReader(response.body().charStream(), 1000);
         bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));

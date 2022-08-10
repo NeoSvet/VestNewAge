@@ -81,7 +81,7 @@ class MainToiler : NeoToiler() {
     }
 
     private suspend fun loadNew() {
-        var s = "http://neosvet.ucoz.ru/vna/new.txt"
+        var s = NetConst.WEB_PAGE + "new.txt"
         val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
         var time: Long
         val storage = PageStorage()

@@ -7,5 +7,6 @@ public interface NetConst {
             SITE2 = "https://chenneling.info/",
             CAB_SITE = "https://www.otkroveniya.com/",
             DOCTRINE_SITE = "https://doktrina.info/doktrina-sozdatelya/",
-            DOCTRINE_BASE = "http://neosvet.ucoz.ru/doctrine/";
+            DOCTRINE_BASE = "http://neosvet.ucoz.ru/doctrine/",
+            WEB_PAGE = "http://neosvet.ucoz.ru/vna/";
 }
