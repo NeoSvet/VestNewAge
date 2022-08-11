@@ -15,6 +15,10 @@ import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileReader
+import java.io.FileWriter
 
 class LaunchUtils {
     companion object {
@@ -82,6 +86,27 @@ class LaunchUtils {
             storage.delete()
             storage.close()
         }
+        if (ver < 64) checkSearchRequests()
+    }
+
+    private fun checkSearchRequests() {
+        val f = Lib.getFileS(Const.SEARCH)
+        if (!f.exists()) return
+        val list = mutableListOf<String>()
+        val br = BufferedReader(FileReader(f))
+        var s: String? = br.readLine()
+        while (s != null && list.size < SearchHelper.REQUESTS_LIMIT) {
+            if (!list.contains(s))
+                list.add(s)
+            s = br.readLine()
+        }
+        br.close()
+        f.delete()
+        val bw = BufferedWriter(FileWriter(f))
+        list.forEach {
+            bw.write(it + Const.N)
+        }
+        bw.close()
     }
 
     private fun checkSearchDates() {

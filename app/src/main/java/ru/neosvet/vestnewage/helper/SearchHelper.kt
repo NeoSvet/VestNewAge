@@ -16,6 +16,7 @@ import java.io.FileWriter
 class SearchHelper(context: Context) {
     companion object {
         const val TAG = "Search"
+        const val REQUESTS_LIMIT = 20
         const val LABEL = "l"
         const val INVERT = "inv"
         const val LETTER_CASE = "reg"
