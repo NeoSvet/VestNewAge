@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
@@ -31,6 +32,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.RequestAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.SearchToiler
@@ -58,9 +60,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private val toiler: SearchToiler
         get() = neotoiler as SearchToiler
     private var binding: SearchFragmentBinding? = null
-    private val adRequest: ArrayAdapter<String> by lazy {
+    private val adSearch: ArrayAdapter<String> by lazy {
         ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
     }
+    private lateinit var adRequest: RequestAdapter
     private val adDefault: RecyclerAdapter by lazy {
         RecyclerAdapter(this::defaultClick)
     }
@@ -108,7 +111,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     @SuppressLint("ClickableViewAccessibility")
     private fun initSearchBox() = binding?.run {
         etSearch.threshold = 1
-        etSearch.setAdapter(adRequest)
+        etSearch.setAdapter(adSearch)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
@@ -119,14 +122,41 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             false
         }
         bSearch.setOnClickListener { enterSearch() }
+        etSearch.setOnTouchListener { _, motionEvent: MotionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_DOWN)
+                hideRequests()
+            false
+        }
         etSearch.doAfterTextChanged {
             bClear.isVisible = it?.isNotEmpty() ?: false
         }
+
+        adRequest = RequestAdapter(
+            helper.requests,
+            this@SearchFragment::selectRequest,
+            this@SearchFragment::removeRequest
+        )
+        rvRequests.layoutManager = GridLayoutManager(requireContext(), 1)
+        rvRequests.adapter = adRequest
+
         bClear.setOnClickListener { etSearch.setText("") }
-        bExpanded.setOnClickListener { etSearch.showDropDown() }
+        bRequestsSwitcher.setOnClickListener {
+            val v = rvRequests.isVisible
+            rvRequests.isVisible = !v
+            if (v)
+                bRequestsSwitcher.setImageResource(R.drawable.ic_triangle_down)
+            else
+                bRequestsSwitcher.setImageResource(R.drawable.ic_triangle_up)
+        }
+    }
+
+    private fun hideRequests() = binding?.run {
+        rvRequests.isVisible = false
+        bRequestsSwitcher.setImageResource(R.drawable.ic_triangle_down)
     }
 
     override fun onDestroyView() {
+        helper.saveRequest()
         binding = null
         super.onDestroyView()
     }
@@ -264,6 +294,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun enterSearch() = binding?.run {
+        hideRequests()
         etSearch.dismissDropDown()
         if (etSearch.length() < 3)
             act?.showToast(getString(R.string.low_sym_for_search))
@@ -279,7 +310,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             tvStatus.text = getString(R.string.search)
             SearchEngine.MODE_RESULTS
         } else helper.mode
-        val request = etSearch.text.toString()
+        val request = etSearch.text.toString().trim()
         adResult.submitData(lifecycle, PagingData.empty())
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
@@ -288,14 +319,37 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         addRequest(request)
     }
 
-    private fun addRequest(request: String) {
-        for (i in 0 until adRequest.count) {
-            if (adRequest.getItem(i) == request)
-                return
+    private fun addRequest(r: String) = helper.run {
+        var i = requests.indexOf(r)
+        if (i == 0) return@run
+        if (i > -1) {
+            requests.removeAt(i)
+            adRequest.notifyItemRemoved(i)
+        } else {
+            adSearch.add(r)
+            adSearch.notifyDataSetChanged()
         }
-        adRequest.add(request)
-        adRequest.notifyDataSetChanged()
-        helper.saveRequest(request)
+        requests.add(0, r)
+        adRequest.notifyItemInserted(0)
+        if (requests.size == SearchHelper.REQUESTS_LIMIT) {
+            i = SearchHelper.REQUESTS_LIMIT - 1
+            requests.removeAt(i)
+            adRequest.notifyItemRemoved(i)
+        }
+    }
+
+    private fun removeRequest(index: Int) {
+        adSearch.remove(helper.requests[index])
+        helper.requests.removeAt(index)
+        adRequest.notifyItemRemoved(index)
+    }
+
+    private fun selectRequest(index: Int) {
+        binding?.etSearch?.let {
+            it.setText(helper.requests[index])
+            it.dismissDropDown()
+        }
+        hideRequests()
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -434,9 +488,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         openSettings()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun clearHistory() {
-        adRequest.clear()
-        adRequest.notifyDataSetChanged()
+        adSearch.clear()
+        adSearch.notifyDataSetChanged()
         helper.clearRequests()
+        adRequest.notifyDataSetChanged()
     }
 }

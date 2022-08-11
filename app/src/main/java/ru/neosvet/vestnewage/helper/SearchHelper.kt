@@ -48,6 +48,7 @@ class SearchHelper(context: Context) {
     var label: String = ""
     var request: String = ""
     val options = mutableListOf<Boolean>()
+    val requests = mutableListOf<String>()
     private val optionsNames = mutableListOf<String>()
     private val stringOptionsOff = context.resources.getString(R.string.all_turn_off)
     private val stringRange = context.resources.getString(R.string.range)
@@ -106,23 +107,25 @@ class SearchHelper(context: Context) {
 
     fun getListRequests(): List<String> {
         val f = Lib.getFileS(Const.SEARCH)
-        val list = mutableListOf<String>()
-        if (f.exists()) {
+        if (f.exists() && requests.isEmpty()) {
             val br = BufferedReader(FileReader(f))
             var s: String? = br.readLine()
             while (s != null) {
-                list.add(s)
+                requests.add(s)
                 s = br.readLine()
             }
             br.close()
         }
-        return list
+        return requests
     }
 
-    fun saveRequest(request: String) {
+    fun saveRequest() {
         val f = Lib.getFileS(Const.SEARCH)
-        val bw = BufferedWriter(FileWriter(f, true))
-        bw.write(request + Const.N)
+        f.delete()
+        val bw = BufferedWriter(FileWriter(f))
+        requests.forEach {
+            bw.write(it + Const.N)
+        }
         bw.close()
     }
 
@@ -177,6 +180,7 @@ class SearchHelper(context: Context) {
     }
 
     fun clearRequests() {
+        requests.clear()
         val f = Lib.getFileS(Const.SEARCH)
         if (f.exists()) f.delete()
     }
