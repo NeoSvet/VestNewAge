@@ -59,7 +59,7 @@
 
         <ImageView
             android:id="@+id/bClear"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:layout_marginTop="@dimen/half_indent"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"

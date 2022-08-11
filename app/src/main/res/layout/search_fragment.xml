@@ -58,7 +58,7 @@
 
         <ImageView
             android:id="@+id/bClear"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
             app:layout_constraintEnd_toEndOf="@id/tilSearch"

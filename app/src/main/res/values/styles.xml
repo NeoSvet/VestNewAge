@@ -138,7 +138,7 @@
         <item name="android:fontFamily">@font/myriad</item>
     </style>
 
-    <style name="ClearButton">
+    <style name="InTextFieldButton">
         <item name="android:layout_width">@dimen/string_size</item>
         <item name="android:layout_height">@dimen/string_size</item>
         <item name="android:layout_gravity">center_vertical</item>

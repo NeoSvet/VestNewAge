@@ -45,7 +45,7 @@
 
         <ImageView
             android:id="@+id/bClearEmail"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilEmail"
             app:layout_constraintEnd_toEndOf="@id/tilEmail"
@@ -71,7 +71,7 @@
 
         <ImageView
             android:id="@+id/bClearPassword"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilPassword"
             app:layout_constraintEnd_toEndOf="@id/tilPassword"

@@ -85,7 +85,7 @@
 
         <ImageView
             android:id="@+id/bClearDes"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:layout_marginTop="@dimen/half_indent"
             android:layout_marginEnd="15dp"
             android:visibility="gone"
@@ -115,7 +115,7 @@
 
         <ImageView
             android:id="@+id/bClearCol"
-            style="@style/ClearButton"
+            style="@style/InTextFieldButton"
             android:layout_marginTop="@dimen/half_indent"
             android:layout_marginEnd="15dp"
             android:visibility="gone"
