@@ -52,14 +52,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionSearch"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingEnd="70dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <ImageView
             android:id="@+id/bClear"
             style="@style/InTextFieldButton"
+            android:layout_marginEnd="0dp"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tilSearch"
+            app:layout_constraintEnd_toStartOf="@id/bExpanded"
+            app:layout_constraintTop_toTopOf="@id/tilSearch" />
+
+        <ImageView
+            android:id="@+id/bExpanded"
+            style="@style/InTextFieldButton"
+            android:layout_marginStart="0dp"
+            android:src="@drawable/ic_down"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
             app:layout_constraintEnd_toEndOf="@id/tilSearch"
             app:layout_constraintTop_toTopOf="@id/tilSearch" />

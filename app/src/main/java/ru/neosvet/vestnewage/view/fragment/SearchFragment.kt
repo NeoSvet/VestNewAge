@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
@@ -119,16 +118,12 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             }
             false
         }
-        etSearch.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_DOWN)
-                etSearch.showDropDown()
-            false
-        }
         bSearch.setOnClickListener { enterSearch() }
         etSearch.doAfterTextChanged {
             bClear.isVisible = it?.isNotEmpty() ?: false
         }
         bClear.setOnClickListener { etSearch.setText("") }
+        bExpanded.setOnClickListener { etSearch.showDropDown() }
     }
 
     override fun onDestroyView() {
