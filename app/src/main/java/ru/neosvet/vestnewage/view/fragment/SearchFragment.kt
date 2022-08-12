@@ -162,6 +162,16 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         super.onDestroyView()
     }
 
+    override fun onBackPressed(): Boolean {
+        binding?.run {
+            if (rvRequests.isVisible) {
+                hideRequests()
+                return false
+            }
+        }
+        return super.onBackPressed()
+    }
+
     override fun setStatus(load: Boolean) {
         binding?.run {
             if (load) {
