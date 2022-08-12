@@ -12,9 +12,10 @@
         android:id="@+id/sMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/double_indent"
         android:background="@drawable/button"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="@id/bStartRange"
+        app:layout_constraintBottom_toTopOf="@id/rvOptions"
         app:layout_constraintEnd_toStartOf="@id/bStartRange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,7 +24,6 @@
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/half_indent"
         android:paddingBottom="@dimen/half_indent"
         android:text="@string/range_for_search"
         android:textColor="@android:color/white"
@@ -57,7 +57,7 @@
         android:id="@+id/bEndRange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/def_indent"
+        android:layout_marginEnd="@dimen/double_indent"
         android:paddingStart="@dimen/def_indent"
         android:paddingEnd="@dimen/def_indent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,10 +67,10 @@
         android:id="@+id/rvOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="0dp"
+        android:layout_marginTop="@dimen/def_indent"
         android:padding="0dp"
         app:layout_constraintBottom_toTopOf="@id/bOk"
-        app:layout_constraintTop_toBottomOf="@id/bEndRange" />
+        app:layout_constraintTop_toBottomOf="@id/sMode" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bExplanations"
