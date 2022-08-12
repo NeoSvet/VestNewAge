@@ -73,6 +73,19 @@
         app:layout_constraintTop_toBottomOf="@id/bEndRange" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/bExplanations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/def_indent"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:paddingBottom="@dimen/def_indent"
+        android:text="@string/explanations"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rvOptions" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

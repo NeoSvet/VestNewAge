@@ -3,10 +3,12 @@ package ru.neosvet.vestnewage.view.dialog
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -86,6 +88,15 @@ class SearchDialog(
         }
         bEndRange.setOnClickListener {
             showEndDatePicker(end)
+        }
+        bExplanations.setOnClickListener {
+            val ctx = bExplanations.context
+            AlertDialog.Builder(ctx, R.style.NeoDialog)
+                .setTitle(ctx.getString(R.string.explanations))
+                .setMessage(ctx.getString(R.string.explanations_content))
+                .setPositiveButton(ctx.getString(android.R.string.ok)) { dialog: DialogInterface, _ ->
+                    dialog.dismiss()
+                }.create().show()
         }
         bOk.setOnClickListener {
             parent.helper.start = start
