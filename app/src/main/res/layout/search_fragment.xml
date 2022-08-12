@@ -37,10 +37,7 @@
             style="@style/TextInputStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/half_indent"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginBottom="0dp"
+            android:layout_margin="0dp"
             android:hint="@string/search"
             app:layout_constraintEnd_toStartOf="@id/bSearch"
             app:layout_constraintStart_toEndOf="@id/bPanelSwitch"
@@ -63,14 +60,14 @@
             android:layout_marginEnd="0dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
-            app:layout_constraintEnd_toStartOf="@id/bExpanded"
+            app:layout_constraintEnd_toStartOf="@id/bRequestsSwitcher"
             app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
         <ImageView
-            android:id="@+id/bExpanded"
+            android:id="@+id/bRequestsSwitcher"
             style="@style/InTextFieldButton"
             android:layout_marginStart="0dp"
-            android:src="@drawable/ic_down"
+            android:src="@drawable/ic_triangle_down"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
             app:layout_constraintEnd_toEndOf="@id/tilSearch"
             app:layout_constraintTop_toTopOf="@id/tilSearch" />
@@ -130,5 +127,20 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRequests"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="45dp"
+        android:layout_marginBottom="@dimen/content_margin_bottom"
+        android:background="@drawable/field"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/pSearch"
+        app:layout_constraintStart_toStartOf="@id/pSearch"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

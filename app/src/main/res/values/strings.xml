@@ -254,7 +254,7 @@
     <string name="link_on_app">Ссылка на приложение</string>
     <!--SearchFragment-->
     <string name="not_found">Не найдено</string>
-    <string name="clear_requests">Удалить запросы</string>
+    <string name="clear_list">Очистить список</string>
     <string name="search_no_results">Результатов нет. Попробуйте изменить запрос или параметры поиска.</string>
     <string name="low_sym_for_search">Слишком мало символов для поиска!</string>
     <string name="range_for_search">Диапазон для поиска:</string>

@@ -68,22 +68,8 @@
         android:padding="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/bClearRequests"
+        app:layout_constraintBottom_toTopOf="@id/bOk"
         app:layout_constraintTop_toBottomOf="@id/bEndRange" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/bClearRequests"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/def_indent"
-        android:layout_marginEnd="@dimen/def_indent"
-        android:paddingStart="@dimen/double_indent"
-        android:paddingTop="@dimen/def_indent"
-        android:paddingEnd="@dimen/double_indent"
-        android:paddingBottom="@dimen/def_indent"
-        android:text="@string/clear_requests"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rvOptions" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bOk"

@@ -134,7 +134,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         adRequest = RequestAdapter(
             helper.requests,
             this@SearchFragment::selectRequest,
-            this@SearchFragment::removeRequest
+            this@SearchFragment::removeRequest,
+            this@SearchFragment::clearRequests
         )
         rvRequests.layoutManager = GridLayoutManager(requireContext(), 1)
         rvRequests.adapter = adRequest
@@ -320,28 +321,27 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun addRequest(r: String) = helper.run {
-        var i = requests.indexOf(r)
+        val i = requests.indexOf(r)
         if (i == 0) return@run
         if (i > -1) {
             requests.removeAt(i)
-            adRequest.notifyItemRemoved(i)
+            adRequest.notifyItemRemoved(i + 1)
         } else {
             adSearch.add(r)
             adSearch.notifyDataSetChanged()
         }
         requests.add(0, r)
-        adRequest.notifyItemInserted(0)
+        adRequest.notifyItemInserted(1)
         if (requests.size == SearchHelper.REQUESTS_LIMIT) {
-            i = SearchHelper.REQUESTS_LIMIT - 1
-            requests.removeAt(i)
-            adRequest.notifyItemRemoved(i)
+            requests.removeAt(SearchHelper.REQUESTS_LIMIT - 1)
+            adRequest.notifyItemRemoved(SearchHelper.REQUESTS_LIMIT)
         }
     }
 
     private fun removeRequest(index: Int) {
         adSearch.remove(helper.requests[index])
         helper.requests.removeAt(index)
-        adRequest.notifyItemRemoved(index)
+        adRequest.notifyItemRemoved(index + 1)
     }
 
     private fun selectRequest(index: Int) {
@@ -350,6 +350,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             it.dismissDropDown()
         }
         hideRequests()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun clearRequests() {
+        adSearch.clear()
+        adSearch.notifyDataSetChanged()
+        helper.clearRequests()
+        adRequest.notifyDataSetChanged()
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -486,13 +494,5 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     override fun onAction(title: String) {
         openSettings()
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    override fun clearHistory() {
-        adSearch.clear()
-        adSearch.notifyDataSetChanged()
-        helper.clearRequests()
-        adRequest.notifyDataSetChanged()
     }
 }

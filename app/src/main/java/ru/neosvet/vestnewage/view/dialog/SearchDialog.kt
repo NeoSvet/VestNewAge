@@ -27,7 +27,6 @@ class SearchDialog(
     interface Parent {
         val modes: ArrayAdapter<String>
         val helper: SearchHelper
-        fun clearHistory()
     }
 
     private var dateDialog: DateDialog? = null
@@ -87,9 +86,6 @@ class SearchDialog(
         }
         bEndRange.setOnClickListener {
             showEndDatePicker(end)
-        }
-        bClearRequests.setOnClickListener {
-            parent.clearHistory()
         }
         bOk.setOnClickListener {
             parent.helper.start = start
