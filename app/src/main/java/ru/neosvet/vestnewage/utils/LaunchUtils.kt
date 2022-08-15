@@ -10,7 +10,6 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.*
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -172,10 +171,9 @@ class LaunchUtils {
     private fun showNotifDownloadAll() {
         Thread {
             try {
-                Thread.sleep(10000)
-                val intent = Intent(App.context, LoaderService::class.java)
-                intent.putExtra(Const.MODE, LoaderService.DOWNLOAD_ALL)
-                intent.putExtra(Const.TASK, "")
+                Thread.sleep(1000)
+                val intent = Intent(App.context, MainActivity::class.java)
+                intent.putExtra(Const.DIALOG, true)
                 showNotifTip(
                     App.context.getString(R.string.downloads_all_title),
                     App.context.getString(R.string.downloads_all_msg), intent

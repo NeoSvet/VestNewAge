@@ -2,14 +2,20 @@
     <!--MainActivity-->
     <string name="app_name">Весть Века</string>
     <string name="click_for_exit">Нажмите ещё раз для выхода</string>
-    <string name="download_all">Скачать все материалы</string>
-    <string name="download_articles">Скачать все статьи</string>
-    <string name="download_book">Скачать книгу с 2016 года</string>
-    <string name="download_calendar">Скачать текущий год</string>
     <string name="god_words">Слова Создателя</string>
     <string name="yet_load">Ещё не загружены. Откройте позже.</string>
     <string name="find">Найти</string>
     <string name="unknown_error">Неизвестная ошибка</string>
+    <!--Download-->
+    <string name="download_">Скачать…</string>
+    <string name="download_alert">Выберите пункты для скачивания:</string>
+    <string name="summary_site">Сводка и объявления</string>
+    <string name="doctrine_creator">Доктрина Создателя</string>
+    <string name="otkroveniya_year">Откровения (2004 год)</string>
+    <string name="format_book_year">Толкования за 20%02d год</string>
+    <string name="book_2016">Послания и Катрены за 2016 год</string>
+    <string name="format_poems_year">Катрены за 20%d год</string>
+    <string name="format_size">%.1f МБ</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>
@@ -20,12 +26,14 @@
     <string name="error_des">Описание ошибки:</string>
     <string name="input_data">Входные данные:</string>
     <string name="warning">Внимание:</string>
+    <string name="select_all">Выбрать всё</string>
+    <string name="reset_all">Сбросить всё</string>
     <!--AdsUtils-->
     <string name="back_title">Назад</string>
     <string name="back_des">К объявлениям сайта</string>
     <!--LaunchUtils-->
     <string name="downloads_all_title">Скачайте все Катрены!</string>
-    <string name="downloads_all_msg">Нажмите, чтобы скачать все материалы.</string>
+    <string name="downloads_all_msg">Нажмите, чтобы выбрать что скачать.</string>
     <string name="check_out_settings">Ознакомтесь с настройками</string>
     <string name="example_periodic_check">Например, можно задать периодическую проверку наличия новых Катренов</string>
     <!--Lib-->
@@ -85,7 +93,6 @@
     <string name="poems">Катрены</string>
     <string name="link_to_src">Ссылка на источник</string>
     <string name="month_is_empty">Список за этот месяц пуст!</string>
-    <string name="alert_download_otkr">Скачать Послания за 2004-2015 года?\nОбъём данных для скачивания: 6,6 МБ.\nНа устройстве займёт 16,3 МБ памяти.</string>
     <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
     <string name="rnd_poem">«Случайный» Катрен</string>

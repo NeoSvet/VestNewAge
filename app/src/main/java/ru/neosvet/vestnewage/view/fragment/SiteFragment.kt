@@ -16,7 +16,6 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.network.NetConst
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -249,11 +248,6 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun onAction(title: String) {
-        when (title) {
-            getString(R.string.download_articles) ->
-                act?.download(LoaderService.DOWNLOAD_IT, Section.SITE.toString())
-            getString(R.string.refresh) ->
-                startLoad()
-        }
+        startLoad()
     }
 }

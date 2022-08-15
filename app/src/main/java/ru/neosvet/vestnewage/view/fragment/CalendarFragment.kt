@@ -19,8 +19,6 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
-import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
@@ -218,11 +216,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onAction(title: String) {
-        when (title) {
-            getString(R.string.download_calendar) ->
-                act?.download(LoaderService.DOWNLOAD_YEAR, toiler.date.year.toString())
-            getString(R.string.refresh) ->
-                startLoad()
-        }
+        startLoad()
     }
 }

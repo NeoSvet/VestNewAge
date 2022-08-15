@@ -290,6 +290,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 if (firstSection == Section.MENU)
                     updateNew()
             }
+            if (intent.getBooleanExtra(Const.DIALOG, false))
+                helper.showDownloadDialog()
         } else helper.run {
             showHead()
             setActionIcon(state.getInt(Const.SELECT))
@@ -309,6 +311,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             updateNew()
             if (curSection == Section.HELP && helper.isSideMenu)
                 helper.fabAction.isVisible = false
+            if (state.getBoolean(Const.DIALOG))
+                helper.showDownloadDialog()
         }
     }
 
@@ -335,6 +339,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString(Const.CUR_ID, helper.curSection.toString())
         outState.putBoolean(Const.PANEL, isBlocked)
+        outState.putBoolean(Const.DIALOG, helper.shownDwnDialog)
         outState.putInt(Const.SELECT, helper.actionIcon)
         super.onSaveInstanceState(outState)
     }
@@ -669,7 +674,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         toast.hideAnimated()
     }
 
-    fun download(mode: Int, request: String?) {
+    fun download(mode: Int, request: String?) { //TODO refactoring
         LoaderService.postCommand(
             mode, request, toast
         )

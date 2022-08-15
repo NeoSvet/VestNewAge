@@ -17,7 +17,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.network.NetConst
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -27,6 +26,7 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
 import ru.neosvet.vestnewage.view.list.MenuAdapter
 
@@ -49,6 +49,8 @@ class MainHelper(private val act: MainActivity) {
     var actionIcon: Int = R.drawable.star
         private set
     var shownActionMenu = false
+        private set
+    var shownDwnDialog = false
         private set
     var tvTitle: TextView? = null
     var bottomBar: BottomAppBar? = null
@@ -214,12 +216,20 @@ class MainHelper(private val act: MainActivity) {
     private fun onActionClick(index: Int, item: MenuItem) {
         hideActionMenu()
         if (index == 0) {
-            act.download(LoaderService.DOWNLOAD_ALL, null)
+            showDownloadDialog()
             return
         }
         if (index == adAction.itemCount - 1)
             return
         act.onAction(item.title)
+    }
+
+    fun showDownloadDialog() {
+        shownDwnDialog = true
+        val dialog = DownloadDialog(act).apply {
+            setOnDismissListener { shownDwnDialog = false }
+        }
+        dialog.show()
     }
 
     @SuppressLint("NonConstantResourceId", "NotifyDataSetChanged")
@@ -228,18 +238,12 @@ class MainHelper(private val act: MainActivity) {
         act.blocked()
         tipAction.show()
         if (adAction.itemCount > 0) return
-        adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_all))
+        adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_))
         when (curSection) {
-            Section.SITE -> {
-                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_articles))
-                adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
-            }
-            Section.CALENDAR -> {
-                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_calendar))
+            Section.SITE, Section.CALENDAR -> {
                 adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
             }
             Section.BOOK -> {
-                adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_book))
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_verse))
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_epistle))
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_poem))

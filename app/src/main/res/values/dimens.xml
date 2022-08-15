@@ -22,4 +22,5 @@
     <dimen name="head_margin">10dp</dimen>
     <dimen name="dialog_width_land">500dp</dimen>
     <dimen name="padding_for_clear">40dp</dimen>
+    <dimen name="list_height">400dp</dimen>
 </resources>

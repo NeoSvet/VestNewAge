@@ -1,12 +1,10 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,11 +16,9 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.network.NetConst
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -32,6 +28,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DateDialog
+import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -60,6 +57,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     override val title: String
         get() = getString(R.string.book)
     private var openedReader = false
+    private var shownDwnDialog = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,7 +102,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        dateDialog?.let { d ->
+        if (shownDwnDialog)
+            outState.putInt(Const.DIALOG, 0)
+        else dateDialog?.let { d ->
             outState.putInt(Const.DIALOG, d.date.timeInDays)
             d.dismiss()
         }
@@ -113,11 +113,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     private fun restoreState(state: Bundle?) {
         if (state != null && toiler.isRun.not()) {
-            val t = state.getInt(Const.DIALOG, 0)
+            val t = state.getInt(Const.DIALOG, -1)
             if (t > 0) {
                 val d = DateUnit.putDays(t)
                 showDatePicker(d)
-            }
+            } else if (t == 0)
+                showDownloadDialog()
         }
         binding?.tabLayout?.select(toiler.selectedTab)
         checkChangeTab()
@@ -238,7 +239,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         val d = toiler.date
         if (!plus && toiler.isPoemsTab.not()) {
             if (d.month == 1 && d.year == 2016 && helper.isLoadedOtkr().not()) {
-                showAlertDownloadOtkr()
+                showDownloadDialog()
                 return
             }
         }
@@ -256,19 +257,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
-    private fun showAlertDownloadOtkr() {
-        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
-        builder.setMessage(getString(R.string.alert_download_otkr))
-        builder.setNegativeButton(
-            getString(R.string.no)
-        ) { dialog: DialogInterface, _ -> dialog.dismiss() }
-        builder.setPositiveButton(
-            getString(R.string.yes)
-        ) { _, _ ->
-            binding?.bPrev?.isEnabled = false
-            act?.download(LoaderService.DOWNLOAD_OTKR, null)
+    private fun showDownloadDialog() {
+        shownDwnDialog = true
+        val dialog = DownloadDialog(act!!, true).apply {
+            setOnDismissListener { shownDwnDialog = false }
         }
-        builder.create().show()
+        dialog.show()
     }
 
     override fun setStatus(load: Boolean) {
@@ -342,8 +336,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     override fun onAction(title: String) {
         when (title) {
-            getString(R.string.download_book) ->
-                act?.download(LoaderService.DOWNLOAD_IT, Section.BOOK.toString())
             getString(R.string.refresh) ->
                 startLoad()
             getString(R.string.rnd_verse) ->
