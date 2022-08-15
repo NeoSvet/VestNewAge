@@ -186,7 +186,7 @@
     <string name="cache">Кэш (временные файлы)</string>
     <string name="book_prev">Книга предыдущих лет</string>
     <string name="book_cur">Книга текущего года</string>
-    <string name="materials">Материалы</string>
+    <string name="articles">Статьи</string>
     <string name="completed">Завершено</string>
     <string name="from">от</string>
     <string name="hours">часа</string>

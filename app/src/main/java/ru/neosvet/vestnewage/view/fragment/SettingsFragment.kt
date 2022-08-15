@@ -203,7 +203,7 @@ class SettingsFragment : NeoFragment() {
         val list = mutableListOf<CheckItem>()
         list.add(CheckItem(getString(R.string.book_prev)))
         list.add(CheckItem(getString(R.string.book_cur)))
-        list.add(CheckItem(getString(R.string.materials)))
+        list.add(CheckItem(getString(R.string.articles)))
         list.add(CheckItem(getString(R.string.markers)))
         list.add(CheckItem(getString(R.string.cache)))
 
