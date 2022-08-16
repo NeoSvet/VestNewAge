@@ -24,7 +24,7 @@ class SummaryLoader : LinksProvider {
         return list
     }
 
-    fun loadList(addUnread: Boolean) {
+    fun loadList(updateUnread: Boolean) {
         val stream: InputStream =
             NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
         val site = if (NeoClient.isMainSite())
@@ -39,7 +39,7 @@ class SummaryLoader : LinksProvider {
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
         val now = DateUnit.initNow()
-        val unread: UnreadUtils? = if (addUnread) UnreadUtils() else null
+        val unread = if (updateUnread) UnreadUtils() else null
         val m = br.readLine().split("<item>").toTypedArray()
         br.close()
         stream.close()
