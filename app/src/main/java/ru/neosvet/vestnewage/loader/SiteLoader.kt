@@ -18,6 +18,7 @@ class SiteLoader(private val file: String) : LinksProvider {
         val list = mutableListOf<String>()
         if (file.contains(SiteToiler.NEWS))
             return list
+        list.add(SiteToiler.FORUM)
         val br = BufferedReader(FileReader(file))
         var s: String? = br.readLine()
         while (s != null) {
