@@ -15,19 +15,17 @@ import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.util.*
 
 class CalendarLoader : LinksProvider, Loader {
     private var date = DateUnit.initToday()
-    private val storage = PageStorage()
-    private val list: MutableList<ListItem> by lazy {
-        mutableListOf()
-    }
+    private val list = Stack<ListItem>()
     private var isRun = false
-    val curDate: DateUnit
-        get() = date
 
     override fun cancel() {
         isRun = false
+        val stack = Stack<ListItem>()
+        stack.iterator()
     }
 
     fun setDate(year: Int, month: Int) {
@@ -35,6 +33,7 @@ class CalendarLoader : LinksProvider, Loader {
     }
 
     override fun getLinkList(): List<String> {
+        val storage = PageStorage()
         storage.open(date.my)
         val list = storage.getLinksList()
         storage.close()
@@ -55,18 +54,14 @@ class CalendarLoader : LinksProvider, Loader {
         var json: JSONObject? = JSONObject(s)
         json = json!!.getJSONObject("calendarData")
         if (json?.names() == null) return
-        storage.open(date.my)
-        storage.updateTime()
         var jsonI: JSONObject?
         var jsonA: JSONArray?
         var link: String
         var d: DateUnit
-        var n: Int
         var i = 0
         while (i < json.names().length() && isRun) {
             s = json.names()[i].toString()
             jsonI = json.optJSONObject(s)
-            n = list.size
             list.add(ListItem(s.substring(s.lastIndexOf("-") + 1)))
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
                 d = DateUnit.parse(s)
@@ -78,65 +73,57 @@ class CalendarLoader : LinksProvider, Loader {
                 for (j in 0 until jsonA.length()) {
                     jsonI = jsonA.getJSONObject(j)
                     link = jsonI.getString(Const.LINK) + Const.HTML
-                    if (link.contains(d.toString())) addLink(n, link)
-                    else addLink(n, "$d@$link")
+                    if (link.contains(d.toString())) addLink(link)
+                    else addLink("$d@$link")
                 }
             } else { // один элемент за день (один или несколько катренов)
                 link = jsonI.getString(Const.LINK) + Const.HTML
-                addLink(n, link)
+                addLink(link)
                 jsonA = jsonI.getJSONObject("data").optJSONArray("titles")
                 if (jsonA == null) {
                     i++
                     continue
                 }
                 for (j in 0 until jsonA.length())
-                    addLink(n, link + "#" + (j + 2))
+                    addLink(link + "#" + (j + 2))
             }
             i++
         }
-        storage.close()
-        if (isRun.not()) {
-            list.clear()
-            return
-        }
-        if (updateUnread) {
-            val unread = UnreadUtils()
-            for (x in list.indices) {
-                date.day = list[x].title.toInt()
-                list[x].links.forEach {
-                    unread.addLink(it, date)
+        if (isRun) listToStorage(updateUnread)
+    }
+
+    private fun listToStorage(updateUnread: Boolean) {
+        val storage = PageStorage()
+        storage.open(date.my)
+        storage.updateTime()
+        val unread = if (updateUnread) UnreadUtils() else null
+        while (!list.empty()) {
+            val item = list.pop()
+            if (updateUnread)
+                date.day = item.title.toInt()
+            item.links.forEach { link ->
+                val row = ContentValues()
+                row.put(Const.LINK, link)
+                // пытаемся обновить запись:
+                if (!storage.updateTitle(link, row)) {
+                    // обновить не получилось, добавляем:
+                    if (link.contains("@"))
+                        row.put(Const.TITLE, link.substring(9))
+                    else
+                        row.put(Const.TITLE, link)
+                    storage.insertTitle(row)
                 }
+                unread?.addLink(link, date)
             }
-            unread.setBadge()
         }
-        list.clear()
+        storage.close()
+        unread?.setBadge()
     }
 
-    fun loadListYear(year: Int, max_m: Int) {
-        isRun = true
-        var m = 1
-        while (m < max_m && isRun) {
-            setDate(year, m)
-            loadListMonth(false)
-            m++
+    private fun addLink(link: String) = list.peek()?.let { item ->
+        item.links.forEach {
+            if (it == link) return@let
         }
-    }
-
-    private fun addLink(n: Int, link: String) {
-        list[n].links.forEach {
-            if (it.contains(link)) return
-        }
-        list[n].addLink(link)
-        val row = ContentValues()
-        row.put(Const.LINK, link)
-        // пытаемся обновить запись:
-        if (!storage.updateTitle(link, row)) {
-            // обновить не получилось, добавляем:
-            if (link.contains("@"))
-                row.put(Const.TITLE, link.substring(9))
-            else
-                row.put(Const.TITLE, link)
-            storage.insertTitle(row)
-        }
+        item.addLink(link)
     }
 }
