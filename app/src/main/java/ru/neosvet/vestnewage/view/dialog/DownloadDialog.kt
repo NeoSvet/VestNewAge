@@ -78,7 +78,15 @@ class DownloadDialog(
             setAllLabel(v)
         }
         bOk.setOnClickListener {
-            //TODO act.download()
+            val ids = mutableListOf<Int>()
+            list.forEach {
+                if (it.isChecked) ids.add(it.id)
+            }
+            act.download(ids)
+            if (isOtkr) {
+                val book = BookHelper()
+                book.setLoadedOtkr(true)
+            }
             dismiss()
         }
     }

@@ -45,7 +45,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private lateinit var strings: BookStrings
     var helper: BookHelper? = null
         private set
-    var isLoadedOtkr: Boolean = false
+    private var isLoadedOtkr: Boolean = false
     var date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
         set(value) {
@@ -81,9 +81,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             TAB_POEMS -> loader?.loadPoemsList(2016)?.let {
                 dPoems = DateUnit.parse(it)
             }
-            TAB_EPISTLES -> if (isLoadedOtkr) loader?.loadAllEpistles()?.let {
-                dEpistles = DateUnit.parse(it)
-            } else loader?.loadNewEpistles()?.let {
+            TAB_EPISTLES -> loader?.loadEpistlesList()?.let {
                 dEpistles = DateUnit.parse(it)
             }
             TAB_DOCTRINE -> {

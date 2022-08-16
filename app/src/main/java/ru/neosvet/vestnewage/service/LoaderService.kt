@@ -12,10 +12,10 @@ import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.loader.*
+import ru.neosvet.vestnewage.loader.MasterLoader
+import ru.neosvet.vestnewage.loader.SiteLoader
+import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
-import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NetConst
@@ -33,25 +33,46 @@ class LoaderService : LifecycleService(), LoadHandler {
         private const val FINAL_ID = 780
 
         var isRun = false
-        const val STOP = -2
-        const val DOWNLOAD_ALL = 0
-        const val DOWNLOAD_IT = 1
-        const val DOWNLOAD_YEAR = 2
-        const val DOWNLOAD_PAGE = 3
-        const val DOWNLOAD_OTKR = 4
+        private const val STOP = -2
+        private const val DOWNLOAD_LIST = 0
+        private const val DOWNLOAD_PAGE = 1
+
+        /**
+         * @param list contains year (YY) for load or 0 - basic (summary and articles), 1 - doctrine
+         * @param toast for notify about load background or already run
+         */
+        @JvmStatic
+        fun loadList(list: List<Int>, toast: NeoToast) {
+            toast.autoHide = true
+            if (isRun) {
+                toast.show(App.context.getString(R.string.load_already_run))
+                return
+            } else toast.show(App.context.getString(R.string.load_background))
+
+            val intent = Intent(App.context, LoaderService::class.java)
+            intent.putExtra(Const.MODE, DOWNLOAD_LIST)
+            intent.putExtra(Const.LIST, list.toIntArray())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                App.context.startForegroundService(intent)
+            else
+                App.context.startService(intent)
+        }
 
         @JvmStatic
-        fun postCommand(mode: Int, request: String?, toast: NeoToast?) {
-            if (mode != STOP) {
-                toast?.autoHide = true
-                if (isRun) {
-                    toast?.show(App.context.getString(R.string.load_already_run))
-                    return
-                } else toast?.show(App.context.getString(R.string.load_background))
-            }
+        fun loadPage(link: String) {
             val intent = Intent(App.context, LoaderService::class.java)
-            intent.putExtra(Const.MODE, mode)
-            intent.putExtra(Const.TASK, request)
+            intent.putExtra(Const.MODE, DOWNLOAD_PAGE)
+            intent.putExtra(Const.LINK, link)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                App.context.startForegroundService(intent)
+            else
+                App.context.startService(intent)
+        }
+
+        @JvmStatic
+        fun stop() {
+            val intent = Intent(App.context, LoaderService::class.java)
+            intent.putExtra(Const.MODE, STOP)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 App.context.startForegroundService(intent)
             else
@@ -72,23 +93,18 @@ class LoaderService : LifecycleService(), LoadHandler {
         errorHandler(throwable)
     })
 
-    private val loaderBook: BookLoader by lazy { BookLoader(this) }
-    private var curLoader: Loader? = null
+    private val loader = MasterLoader(this)
     private val progress = Progress()
     private var mode = 0
     private var request: String? = null
-    private val curYear: Int by lazy {
-        DateUnit.initToday().year
-    }
-    private val curMonth: Int by lazy {
-        DateUnit.initToday().month
-    }
+    private var curYear = 0
+    private var curMonth = 0
 
     private fun errorHandler(throwable: Throwable) {
         throwable.printStackTrace()
         scope = initScope()
         isRun = false
-        curLoader?.cancel()
+        loader.cancel()
         ErrorUtils.setData(getInputData())
         ErrorUtils.setError(throwable)
         finishService(throwable.localizedMessage)
@@ -102,36 +118,82 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     override fun stopService(name: Intent?): Boolean {
         isRun = false
-        curLoader?.cancel()
+        loader.cancel()
         return super.stopService(name)
     }
 
     override fun onDestroy() {
-        curLoader?.cancel()
+        loader.cancel()
         isRun = false
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_NOT_STICKY
-        mode = intent.getIntExtra(Const.MODE, STOP)
-        if (mode == STOP) {
-            isRun = false
-            finishService(null)
-            return START_NOT_STICKY
+        when (intent.getIntExtra(Const.MODE, STOP)) {
+            STOP -> {
+                isRun = false
+                finishService(null)
+                return START_NOT_STICKY
+            }
+            DOWNLOAD_PAGE -> {
+                initStart()
+                intent.getStringExtra(Const.LINK)?.let {
+                    loadLink(it)
+                }
+                runUpdateNotifTimer()
+            }
+            DOWNLOAD_LIST -> {
+                initStart()
+                intent.getIntArrayExtra(Const.LIST)?.let {
+                    loadList(it)
+                }
+                runUpdateNotifTimer()
+            }
         }
+        return super.onStartCommand(intent, flags, startId)
+    }
 
+    private fun loadList(list: IntArray) {
+        scope.launch {
+            setCurrentDate()
+            calcMaxProgress(list)
+            val styleLoader = StyleLoader()
+            styleLoader.download(false)
+            list.forEach {
+                when (it) {
+                    0 -> loadBasic()
+                    1 -> loadDoctrine()
+                    else -> loadYear(it + 2000)
+                }
+                if (isRun.not()) return@launch
+            }
+            finishService(null)
+        }
+    }
+
+    private fun setCurrentDate() {
+        val d = DateUnit.initToday()
+        curYear = d.year
+        curMonth = d.month
+    }
+
+    private fun loadLink(link: String) {
+        scope.launch {
+            val styleLoader = StyleLoader()
+            styleLoader.download(false)
+            val loader = PageLoader()
+            loader.download(link, true)
+            loader.finish()
+            finishService(null)
+        }
+    }
+
+    private fun initStart() {
         isRun = true
         setMax(0)
         progress.text = getString(R.string.start)
-        progress.task = 1
         initNotif()
-        request = intent.getStringExtra(Const.TASK)
-        scope.launch {
-            startLoad()
-        }
-        runUpdateNotifTimer()
-        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun runUpdateNotifTimer() {
@@ -142,7 +204,7 @@ class LoaderService : LifecycleService(), LoadHandler {
             while (isRun) {
                 delay(delay)
                 if (isRun) scopeMain.launch {
-                    notif.setContentText(progress.message)
+                    notif.setContentText(progress.text)
                     notif.setProgress(progress.max, progress.prog, false)
                     manager.notify(PROGRESS_ID, notif.build())
                 }
@@ -152,7 +214,7 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun finishService(error: String?) {
-        curLoader?.cancel()
+        loader.cancel()
         val notifHelper = NotificationUtils()
         val title: String
         val main: Intent
@@ -199,111 +261,50 @@ class LoaderService : LifecycleService(), LoadHandler {
         startForeground(PROGRESS_ID, notif.build())
     }
 
-    private fun startLoad() {
-        progress.count = 0
-        val styleLoader = StyleLoader()
-        styleLoader.download(false)
-        when (mode) {
-            DOWNLOAD_ALL -> {
-                progress.count = 3
-                refreshLists(Section.MENU)
-                loadLists(Section.MENU)
-            }
-            DOWNLOAD_IT -> {
-                val section = Section.valueOf(request!!)
-                if (section == Section.BOOK)
-                    progress.count = 3
-                else
-                    progress.count = 2
-                refreshLists(section)
-                loadLists(section)
-            }
-            DOWNLOAD_OTKR -> { //загрузка Посланий за 2004-2015
-                curLoader = loaderBook
-                loaderBook.loadOldEpistles()
-            }
-            DOWNLOAD_YEAR -> {
-                val loader = ListLoader(this)
-                curLoader = loader
-                loader.loadYear(request!!.toInt())
-            }
-            DOWNLOAD_PAGE -> {
-                val loader = PageLoader()
-                loader.download(request!!, true)
-                loader.finish()
-            }
+    private fun loadYear(y: Int) {
+        var i = if (y == 2004) 8 else 1
+        val m = if (y == curYear) curMonth + 1 else 13
+        while (i < m) {
+            loader.loadMonth(i, y)
+            upProg()
+            if (isRun.not()) break
+            i++
         }
-        finishService(null)
     }
 
-    private fun loadLists(section: Section) {
-        val type = when (section) {
-            Section.MENU -> {
-                loadAllUcoz()
-                ListLoader.Type.ALL
-            }
-            Section.BOOK -> {
-                loadAllUcoz()
-                ListLoader.Type.BOOK
-            }
-            Section.SITE -> ListLoader.Type.SITE
-            else -> return
-        }
-        if (isRun.not()) return
-        val loader = ListLoader(this)
-        curLoader = loader
-        loader.loadSection(type)
+    private fun loadDoctrine() {
+        loader.loadDoctrine()
+        upProg()
     }
 
-    private fun loadAllUcoz() {
-        setMax((curYear - 2016) * 12)
-        loaderBook.loadAllUcoz()
-        progress.task++
-    }
-
-    private fun refreshLists(section: Section) {
-        calcCountLists(section)
+    private fun loadBasic() {
         val listsUtils = ListsUtils()
-        if (section == Section.MENU) {
-            if (listsUtils.summaryIsOld()) {
-                val loader = SummaryLoader()
-                loader.loadList(false)
-            }
-            if (isRun.not()) return
-            upProg()
-        }
-        if (section == Section.MENU || section == Section.SITE) {
-            if (listsUtils.siteIsOld())
-                loadSiteSection()
-            if (isRun.not()) return
-            upProg()
-        }
+        if (listsUtils.summaryIsOld()) {
+            val loader = SummaryLoader()
+            loader.loadList(false)
 
-        if (listsUtils.bookIsOld()) {
-            if (section == Section.MENU)
-                loadAllCalendar()
-            if (section == Section.MENU || section == Section.BOOK) {
-                curLoader = loaderBook
-                loaderBook.loadNewEpistles()
-                upProg()
-                loaderBook.loadPoemsList(curYear - 1)
-            }
         }
-        progress.task++
+        if (listsUtils.siteIsOld())
+            loadSiteSection()
+        if (isRun.not()) return
+        loader.loadSummary()
+        if (isRun.not()) return
+        loader.loadSite()
+        upProg()
     }
 
-    private fun loadAllCalendar() {
-        val loader = CalendarLoader()
-        curLoader = loader
-        val maxY: Int = curYear + 1
-        var maxM = 13
-        var y = 2016
-        while (y < maxY && isRun) {
-            if (y == curYear) maxM = curMonth + 1
-            loader.loadListYear(y, maxM)
-            upProg()
-            y++
+    private fun calcMaxProgress(list: IntArray) {
+        var max = 0
+        val y = curYear - 2000
+        list.forEach {
+            max += when (it) {
+                in 0..1 -> 1
+                4 -> 5
+                y -> curMonth
+                else -> 12
+            }
         }
+        setMax(max)
     }
 
     private fun loadSiteSection() {
@@ -322,18 +323,6 @@ class LoaderService : LifecycleService(), LoadHandler {
             loader.load(url[i])
             i++
         }
-    }
-
-    private fun calcCountLists(section: Section) {
-        val k = when (section) {
-            Section.MENU ->  //book (tolk + 2 year), site and rss, calendar from 2016
-                5 + curYear - 2015
-            Section.BOOK ->
-                curYear - 2015 // from 2016
-            else -> 1
-        }
-        progress.text = getString(R.string.download_list)
-        setMax(k)
     }
 
     override fun setMax(value: Int) {

@@ -674,9 +674,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         toast.hideAnimated()
     }
 
-    fun download(mode: Int, request: String?) { //TODO refactoring
-        LoaderService.postCommand(
-            mode, request, toast
-        )
+    fun download(list: List<Int>) {
+        LoaderService.loadList(list, toast)
     }
 }
