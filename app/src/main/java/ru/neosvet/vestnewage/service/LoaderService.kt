@@ -262,13 +262,13 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun loadYear(y: Int) {
-        var i = if (y == 2004) 8 else 1
-        val m = if (y == curYear) curMonth + 1 else 13
-        while (i < m) {
+        var i = if (y == curYear) curMonth else 12
+        val m = if (y == 2004) 7 else 0
+        while (i > m) {
             loader.loadMonth(i, y)
             upProg()
             if (isRun.not()) break
-            i++
+            i--
         }
     }
 
