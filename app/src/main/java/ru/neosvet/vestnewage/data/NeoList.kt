@@ -51,4 +51,21 @@ class NeoList<T> : Iterator<T> {
     }
 
     fun isNotEmpty(): Boolean = current != null
+
+    override fun toString(): String {
+        val sb = StringBuilder(this.javaClass.simpleName)
+        sb.append("[")
+        if (first == null)
+            sb.append(first?.item)
+        else {
+            reset(true)
+            this.forEach {
+                sb.append(it)
+                sb.append(", ")
+            }
+            sb.delete(sb.length - 2, sb.length)
+        }
+        sb.append("]")
+        return sb.toString()
+    }
 }
