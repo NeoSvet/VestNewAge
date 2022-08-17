@@ -71,8 +71,9 @@ class JournalFragment : NeoFragment() {
         if (s.contains(getString(R.string.rnd_verse))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
             s = s.substring(i)
-        } else s = null
-        openReader(item.link, s)
+            openReader(item.link, s)
+        } else
+            openReader(item.link, null)
     }
 
     private fun onItemLongClick(index: Int, item: ListItem): Boolean {

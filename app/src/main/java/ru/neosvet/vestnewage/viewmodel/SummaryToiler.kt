@@ -76,15 +76,15 @@ class SummaryToiler : NeoToiler() {
         postState(NeoState.LongValue(file.lastModified()))
         val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
-        var des: String
+        var d: String
         while (title != null) {
             val link = br.readLine()
-            des = br.readLine()
+            d = br.readLine()
             val time = br.readLine()
-            des = DateUnit.getDiffDate(now, time.toLong()) +
-                    sBack + Const.N + des
+            d = DateUnit.getDiffDate(now, time.toLong()) +
+                    sBack + Const.N + d
             list.add(ListItem(title, link).apply {
-                setDes(des)
+                des = d
             })
             title = br.readLine()
         }

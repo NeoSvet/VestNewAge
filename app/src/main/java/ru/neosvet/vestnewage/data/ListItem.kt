@@ -1,113 +1,86 @@
-package ru.neosvet.vestnewage.data;
+package ru.neosvet.vestnewage.data
 
-import android.util.Pair;
+import android.util.Pair
 
-import java.io.Serializable;
-import java.util.Iterator;
+class ListItem {
+    var title: String
+    var des: String = ""
+    private val heads = NeoList<String>()
+    private val listLinks = NeoList<String>()
+    private var few = false
 
-public class ListItem implements Serializable {
-    private String title, des = null;
-    private final NeoList<String> heads = new NeoList<>();
-    private final NeoList<String> links = new NeoList<>();
-    private boolean select = false, few = false;
-
-    public ListItem(String title, String link) {
-        this.title = title;
-        addLink(link);
+    constructor(title: String, link: String) {
+        this.title = title
+        addLink(link)
     }
 
-    public ListItem(String title) {
-        this.title = title;
+    constructor(title: String) {
+        this.title = title
     }
 
-    public ListItem(String title, boolean onlyTitle) {
-        this.title = title;
-        if (onlyTitle)
-            addLink("#");
+    constructor(title: String, onlyTitle: Boolean) {
+        this.title = title
+        if (onlyTitle) addLink("#")
     }
 
-    public boolean hasLink() {
-        return links.isNotEmpty();
+    val link: String
+        get() = if (listLinks.isNotEmpty()) listLinks.first() else ""
+
+    val head: String
+        get() = if (heads.isNotEmpty()) heads.first() else ""
+
+    val links: Iterator<String>
+        get() {
+            listLinks.reset(true)
+            return listLinks
+        }
+
+    fun hasLink(): Boolean {
+        return listLinks.isNotEmpty()
     }
 
-    public boolean hasFewLinks() {
-        return few;
+    fun hasFewLinks(): Boolean {
+        return few
     }
 
-    public void clear() {
-        heads.clear();
-        links.clear();
-        few = false;
+    fun clear() {
+        heads.clear()
+        listLinks.clear()
+        few = false
     }
 
-    public String getTitle() {
-        return title;
+    fun addLink(head: String, link: String) {
+        heads.add(head)
+        addLink(link)
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    fun addLink(link: String) {
+        if (!few) few = listLinks.isNotEmpty()
+        listLinks.add(link)
     }
 
-    public String getDes() {
-        if (des == null) return "";
-        return des;
+    fun addHead(head: String) {
+        heads.add(head)
     }
 
-    public void setDes(String des) {
-        this.des = des;
-    }
-
-    public String getLink() {
-        if (links.isNotEmpty())
-            return links.first();
-        else
-            return "";
-    }
-
-    public void addLink(String head, String link) {
-        heads.add(head);
-        addLink(link);
-    }
-
-    public void addLink(String link) {
-        if (!few)
-            few = links.isNotEmpty();
-        links.add(link);
-    }
-
-    public void addHead(String head) {
-        heads.add(head);
-    }
-
-    public String getHead() {
-        if (heads.isNotEmpty())
-            return heads.first();
-        else
-            return "";
-    }
-
-    public boolean isSelect() {
-        return select;
-    }
-
-    public Iterator<String> getLinks() {
-        links.reset(true);
-        return links;
-    }
-
-    public Iterator<Pair<String, String>> headsAndLinks() {
-        heads.reset(true);
-        links.reset(true);
-        return new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                return heads.hasNext() && links.hasNext();
+    fun headsAndLinks(): Iterator<Pair<String, String>> {
+        heads.reset(true)
+        listLinks.reset(true)
+        return object : Iterator<Pair<String, String>> {
+            override fun hasNext(): Boolean {
+                return heads.hasNext() && listLinks.hasNext()
             }
 
-            @Override
-            public Pair<String, String> next() {
-                return new Pair<>(heads.next(), links.next());
+            override fun next(): Pair<String, String> {
+                return Pair(heads.next(), listLinks.next())
             }
-        };
+        }
+    }
+
+    override fun toString(): String {
+        if (few)
+            return this.javaClass.simpleName + "[title=$title, links=$listLinks, des=$des, heads=$heads]"
+        else
+            return this.javaClass.simpleName + "[title=$title, link=$link, des=$des, head=$head]"
     }
 }
