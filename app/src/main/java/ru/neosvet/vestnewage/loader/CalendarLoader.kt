@@ -101,23 +101,38 @@ class CalendarLoader : LinksProvider, Loader {
             val item = list.pop()
             if (updateUnread)
                 date.day = item.title.toInt()
-            item.links.forEach { link ->
-                val row = ContentValues()
-                row.put(Const.LINK, link)
-                // пытаемся обновить запись:
-                if (!storage.updateTitle(link, row)) {
-                    // обновить не получилось, добавляем:
-                    if (link.contains("@"))
-                        row.put(Const.TITLE, link.substring(9))
-                    else
-                        row.put(Const.TITLE, link)
-                    storage.insertTitle(row)
+            if (item.hasFewLinks()) {
+                val links = mutableListOf<String>()
+                item.links.forEach {
+                    links.add(it)
                 }
-                unread?.addLink(link, date)
+                links.sort()
+                links.forEach { link ->
+                    linkToStorage(storage, link)
+                    unread?.addLink(link, date)
+                }
+                links.clear()
+            } else {
+                linkToStorage(storage, item.link)
+                unread?.addLink(item.link, date)
             }
         }
         storage.close()
         unread?.setBadge()
+    }
+
+    private fun linkToStorage(storage: PageStorage, link: String) {
+        val row = ContentValues()
+        row.put(Const.LINK, link)
+        // пытаемся обновить запись:
+        if (!storage.updateTitle(link, row)) {
+            // обновить не получилось, добавляем:
+            if (link.contains("@"))
+                row.put(Const.TITLE, link.substring(9))
+            else
+                row.put(Const.TITLE, link)
+            storage.insertTitle(row)
+        }
     }
 
     private fun addLink(link: String) = list.peek()?.let { item ->
