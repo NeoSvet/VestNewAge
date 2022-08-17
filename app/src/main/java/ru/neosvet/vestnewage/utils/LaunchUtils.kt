@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.*
 import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
@@ -85,7 +86,64 @@ class LaunchUtils {
             storage.delete()
             storage.close()
         }
-        if (ver < 64) checkSearchRequests()
+        if (ver < 64) Thread {
+            checkSearchRequests()
+            sortBase()
+        }.start()
+    }
+
+    private fun sortBase() {
+        val storage = PageStorage()
+        val list = mutableListOf<Pair<Int, String>>()
+        var d = DateUnit.initToday()
+        val max = d.timeInDays + 1
+        d = DateUnit.putYearMonth(2017, 1)
+        var n: Int
+        while (d.timeInDays < max) {
+            if (Lib.getFileDB(d.my).exists()) {
+                storage.open(d.my)
+                val cursor = storage.getListAll()
+                if (cursor.moveToFirst()) {
+                    val l = cursor.getColumnIndex(Const.LINK)
+                    val i = cursor.getColumnIndex(DataBase.ID)
+                    while (cursor.moveToNext())
+                        list.add(Pair(cursor.getInt(i), cursor.getString(l)))
+                }
+                cursor.close()
+                list.sortBy { it.second }
+                var x = 900
+                var i = 0
+                while (i < list.size) {
+                    val a = list[i].first
+                    val b = i + 2
+                    if (a == b) {
+                        i++
+                        continue
+                    }
+                    val r = list.find { p -> p.first == b }
+                    if (r == null) {
+                        storage.changeId(a, b)
+                    } else {
+                        n = list.indexOf(r)
+                        if (n + 2 == a) {
+                            storage.replaceId(a, b)
+                            list.removeAt(n)
+                        } else {
+                            storage.changeId(r.first, x)
+                            n = list.indexOf(r)
+                            list.removeAt(n)
+                            list.add(n, Pair(x, r.second))
+                            x++
+                            storage.changeId(a, b)
+                        }
+                    }
+                    i++
+                }
+                storage.close()
+                list.clear()
+            }
+            d.changeMonth(1)
+        }
     }
 
     private fun checkSearchRequests() {

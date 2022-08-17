@@ -369,4 +369,24 @@ class PageStorage {
         }
         list.clear()
     }
+
+    fun replaceId(aId: Int, bId: Int) {
+        val cv = ContentValues()
+        cv.put(DataBase.ID, 1000)
+        db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, aId.toString())
+        db.update(DataBase.PARAGRAPH, cv, DataBase.ID + DataBase.Q, aId.toString())
+        cv.put(DataBase.ID, aId)
+        db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, bId.toString())
+        db.update(DataBase.PARAGRAPH, cv, DataBase.ID + DataBase.Q, bId.toString())
+        cv.put(DataBase.ID, bId)
+        db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1000")
+        db.update(DataBase.PARAGRAPH, cv, DataBase.ID + DataBase.Q, "1000")
+    }
+
+    fun changeId(aId: Int, bId: Int) {
+        val cv = ContentValues()
+        cv.put(DataBase.ID, bId)
+        db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, aId.toString())
+        db.update(DataBase.PARAGRAPH, cv, DataBase.ID + DataBase.Q, aId.toString())
+    }
 }
