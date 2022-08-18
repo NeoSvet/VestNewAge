@@ -123,7 +123,7 @@ class DownloadDialog(
     private fun addOtkrList() {
         var i = 15
         while (i > 4) {
-            list.add(CheckItem(context.getString(R.string.format_book_year).format(i), i, true))
+            list.add(CheckItem(context.getString(R.string.format_tolkovaniya_year).format(i), i, true))
             i--
         }
         list.add(CheckItem(context.getString(R.string.otkroveniya_year), i, true))

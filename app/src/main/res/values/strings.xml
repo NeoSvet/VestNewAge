@@ -12,7 +12,7 @@
     <string name="summary_site">Сводка и объявления</string>
     <string name="doctrine_creator">Доктрина Создателя</string>
     <string name="otkroveniya_year">Откровения (2004 год)</string>
-    <string name="format_book_year">Толкования за 20%02d год</string>
+    <string name="format_tolkovaniya_year">Толкования за 20%02d год</string>
     <string name="book_2016">Послания и Катрены за 2016 год</string>
     <string name="format_poems_year">Катрены за 20%d год</string>
     <string name="format_size">%.1f МБ</string>
