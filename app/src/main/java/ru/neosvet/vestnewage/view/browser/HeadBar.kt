@@ -3,9 +3,11 @@ package ru.neosvet.vestnewage.view.browser
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.view.animation.Transformation
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import kotlin.math.absoluteValue
 
@@ -35,6 +37,10 @@ class HeadBar(
     val isExpanded: Boolean
         get() = state == State.EXPANDED && isBlocked.not()
 
+    private val anHide = AnimationUtils.loadAnimation(App.context, R.anim.hide)
+    private val anShow = AnimationUtils.loadAnimation(App.context, R.anim.show)
+    private var isFristAnim = true
+
     init {
         mainView.setOnClickListener {
             if (state == State.EXPANDED)
@@ -42,14 +48,43 @@ class HeadBar(
             else
                 changeHeight(expandedH)
         }
+        initAnim()
         mainView.setOnLongClickListener {
             onClick.invoke()
             return@setOnLongClickListener true
         }
         mainView.post {
             expandedH = mainView.height
-            collapsedH = mainView.context.resources.getDimension(R.dimen.head_collapsed_height).toInt()
+            collapsedH =
+                mainView.context.resources.getDimension(R.dimen.head_collapsed_height).toInt()
         }
+    }
+
+    private fun initAnim() {
+        anShow.duration = 300
+        anHide.duration = 300
+        anShow.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {
+                if (isFristAnim.not()) return
+                isFristAnim = false
+                for (v in additionViews)
+                    v.isVisible = true
+            }
+
+            override fun onAnimationEnd(animation: Animation) {}
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
+        anHide.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationEnd(animation: Animation) {
+                if (isFristAnim.not()) return
+                isFristAnim = false
+                for (v in additionViews)
+                    v.isVisible = false
+            }
+
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
     }
 
     private fun changeEnd() {
@@ -65,11 +100,9 @@ class HeadBar(
                 State.COLLAPSED
         }
         if (state == State.EXPANDED) {
+            isFristAnim = true
             for (v in additionViews)
-                v.isVisible = true
-        } else if (state == State.COLLAPSED) {
-            for (v in additionViews)
-                v.isVisible = false
+                v.startAnimation(anShow)
         }
         unblocked()
     }
@@ -80,6 +113,11 @@ class HeadBar(
         val i = mainView.height
         val v = h - i
         mainView.clearAnimation()
+        if (state == State.EXPANDED) {
+            isFristAnim = true
+            for (v in additionViews)
+                v.startAnimation(anHide)
+        }
         val a: Animation = object : Animation() {
             override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
                 if (interpolatedTime == 1f) {
