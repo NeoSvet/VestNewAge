@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.BookLoader
+import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
@@ -53,6 +54,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             else dEpistles = value
         }
     private var loader: BookLoader? = null
+    private var masterLoader: MasterLoader? = null
 
     fun init(context: Context) {
         helper = BookHelper().also {
@@ -76,26 +78,31 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override suspend fun doLoad() {
-        loader = BookLoader(this)
+        val loader = if (loader == null) {
+            loader = BookLoader(this)
+            loader!!
+        } else loader!!
         when (selectedTab) {
-            TAB_POEMS -> loader?.loadPoemsList(2016)?.let {
-                dPoems = DateUnit.parse(it)
-            }
-            TAB_EPISTLES -> loader?.loadEpistlesList()?.let {
-                dEpistles = DateUnit.parse(it)
-            }
+            TAB_POEMS -> loader.loadPoemsList(dPoems.year)
+            TAB_EPISTLES -> if (dEpistles.year < 2016) {
+                if (masterLoader == null)
+                    masterLoader = MasterLoader(this)
+                masterLoader?.loadMonth(dEpistles.month, dEpistles.year)
+            } else loader.loadEpistlesList()
             TAB_DOCTRINE -> {
-                loader?.loadDoctrineList()
+                loader.loadDoctrineList()
                 openDoctrine()
-                loader?.loadDoctrinePages()
+                loader.loadDoctrinePages()
                 postState(NeoState.Success)
                 return
             }
         }
+        postState(NeoState.Success)
         openList(false)
     }
 
     override fun cancel() {
+        masterLoader?.cancel()
         loader?.cancel()
         super.cancel()
     }
@@ -126,18 +133,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             val list = mutableListOf<ListItem>()
             val calendar = d.calendarString
-            val prev: Boolean
-            if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
-                // доступна для того, чтобы предложить скачать Послания за 2004-2015
-                prev = !LoaderService.isRun
-                d.changeMonth(1)
-            } else {
-                d.changeMonth(-1)
-                prev = existsList(d)
-                d.changeMonth(2)
-            }
-            val next = existsList(d)
-            d.changeMonth(-1)
             val storage = PageStorage()
             var t: String
             var s: String
@@ -185,7 +180,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             cursor.close()
             storage.close()
             if (list.isNotEmpty()) {
-                postState(NeoState.Book(calendar, prev, next, list))
+                postState(NeoState.Book(calendar, checkPrev(), checkNext(), list))
                 return@launch
             }
             val today = DateUnit.initToday()
@@ -193,6 +188,28 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 postState(NeoState.Message(strings.month_is_empty))
             else reLoad()
         }
+    }
+
+    private fun checkNext(): Boolean {
+        val max = if (isPoemsTab)
+            DateUnit.initToday().apply { day = 1 }
+        else
+            DateUnit.putYearMonth(2016, 9)
+        return date.timeInDays < max.timeInDays
+    }
+
+    private fun checkPrev(): Boolean {
+        val d = date
+        val min = if (isPoemsTab) {
+            DateUnit.putYearMonth(2016, 2)
+        } else if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
+            // доступна для того, чтобы предложить скачать Послания за 2004-2015
+            return !LoaderService.isRun
+        } else if (helper?.isLoadedOtkr() == true)
+            DateUnit.putYearMonth(2004, 8)
+        else
+            DateUnit.putYearMonth(2016, 1)
+        return d.timeInDays > min.timeInDays
     }
 
     private suspend fun openDoctrine() {

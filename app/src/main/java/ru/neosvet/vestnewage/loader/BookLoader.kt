@@ -4,7 +4,6 @@ import android.content.ContentValues
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.MyException
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -48,31 +47,25 @@ class BookLoader : Loader {
             loadList(NetConst.SITE2 + Const.PRINT + year + Const.HTML)
     }
 
-    fun loadPoemsList(startYear: Int): String? {
+    fun loadPoemsList(year: Int) {
         isRun = true
-        val d = DateUnit.initToday()
-        val finalYear = d.year
-        max = (finalYear - startYear) * 12 + d.month - 1
         cur = 0
-        var s: String? = null
-        for (i in startYear..finalYear) {
-            s = if (NeoClient.isMainSite())
-                loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + i + Const.HTML)
-            else
-                loadList(NetConst.SITE2 + Const.PRINT + i + Const.HTML)
-            if (isRun.not()) break
-        }
-        return s
+        max = 12
+        if (NeoClient.isMainSite())
+            loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
+        else
+            loadList(NetConst.SITE2 + Const.PRINT + year + Const.HTML)
     }
 
-    fun loadEpistlesList(): String? {
+    fun loadEpistlesList() {
         isRun = true
         if (NeoClient.isMainSite())
-            return loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
-        throw MyException(App.context.getString(R.string.site_unavailable))
+            loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
+        else
+            throw MyException(App.context.getString(R.string.site_unavailable))
     }
 
-    private fun loadList(url: String): String? {
+    private fun loadList(url: String) {
         val page = PageParser()
         if (NeoClient.isMainSite())
             page.load(url, "page-title")
@@ -108,7 +101,6 @@ class BookLoader : Loader {
         } while (page.nextItem != null)
         page.clear()
         date1?.let { saveData(it) }
-        return date1
     }
 
     private fun saveData(date: String) {

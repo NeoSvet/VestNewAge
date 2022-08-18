@@ -171,6 +171,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             is NeoState.Book ->
                 setBook(state)
             is NeoState.LongValue -> binding?.run {
+                if (state.value == 0L) {
+                    tvDate.text = ""
+                    adapter.clear()
+                }
                 if (!toiler.isDoctrineTab)
                     setUpdateTime(state.value, tvUpdate)
             }
@@ -197,7 +201,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 updateNew()
             }
         }
-        if (ScreenUtils.isWide)
+        if (ScreenUtils.isLand)
             tvDate.text = state.date.replace(Const.N, " ")
         else
             tvDate.text = state.date

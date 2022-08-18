@@ -6,6 +6,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -18,7 +19,20 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class MasterLoader(private val handler: LoadHandler) : Loader {
+class MasterLoader : Loader {
+    private val handler: LoadHandler?
+    private val handlerLite: LoadHandlerLite?
+
+    constructor(handler: LoadHandler) {
+        handlerLite = null
+        this.handler = handler
+    }
+
+    constructor(handler: LoadHandlerLite) {
+        this.handler = null
+        handlerLite = handler
+    }
+
     companion object {
         private const val UCOZ = "http://neosvet.ucoz.ru/databases_vna"
     }
@@ -42,7 +56,7 @@ class MasterLoader(private val handler: LoadHandler) : Loader {
         isRun = true
         loader = PageLoader()
         msg = App.context.getString(R.string.summary)
-        handler.postMessage(msg)
+        handler?.postMessage(msg)
         loadList(SummaryLoader().getLinkList())
     }
 
@@ -50,13 +64,15 @@ class MasterLoader(private val handler: LoadHandler) : Loader {
         isRun = true
         loader = PageLoader()
         msg = App.context.getString(R.string.news)
-        handler.postMessage(msg)
+        handler?.postMessage(msg)
         val loader = SiteLoader(Lib.getFile(SiteToiler.MAIN).toString())
         loadList(loader.getLinkList())
     }
 
     fun loadDoctrine() {
         isRun = true
+        msg = App.context.getString(R.string.doctrine)
+        handler?.postMessage(msg)
         getBookLoader().let {
             it.loadDoctrineList()
             it.loadDoctrinePages()
@@ -73,10 +89,11 @@ class MasterLoader(private val handler: LoadHandler) : Loader {
         isRun = true
         val d = DateUnit.putYearMonth(year, month)
         msg = d.monthString + " " + d.year
-        handler.postMessage(msg)
+        handler?.postMessage(msg)
         val url = findUrl(d)
         if (url != null) {
-            if (!Lib.getFileDB(d.my).exists())
+            val f = Lib.getFileDB(d.my)
+            if (!f.exists() || f.length() == DataBase.EMPTY_BASE_SIZE)
                 loadUcozBase(url + d.my)
         } else
             loadFromSite(d)
@@ -225,7 +242,10 @@ class MasterLoader(private val handler: LoadHandler) : Loader {
         list.forEach {
             loader.download(it, false)
             p++
-            handler.postMessage("$msg (${p.percent(max)}%)")
+            if (handler != null)
+                handler.postMessage("$msg (${p.percent(max)}%)")
+            else
+                handlerLite?.postPercent(p.percent(max))
             if (isRun.not()) return@forEach
         }
         loader.finish()
