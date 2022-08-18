@@ -38,7 +38,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         private const val DOWNLOAD_PAGE = 1
 
         /**
-         * @param list contains year (YY) for load or 0 - basic (summary and articles), 1 - doctrine
+         * @param list contains year (YY) for load or 0 - basic (summary and site), 1 - doctrine
          * @param toast for notify about load background or already run
          */
         @JvmStatic
@@ -63,16 +63,6 @@ class LoaderService : LifecycleService(), LoadHandler {
             val intent = Intent(App.context, LoaderService::class.java)
             intent.putExtra(Const.MODE, DOWNLOAD_PAGE)
             intent.putExtra(Const.LINK, link)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                App.context.startForegroundService(intent)
-            else
-                App.context.startService(intent)
-        }
-
-        @JvmStatic
-        fun stop() {
-            val intent = Intent(App.context, LoaderService::class.java)
-            intent.putExtra(Const.MODE, STOP)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 App.context.startForegroundService(intent)
             else
@@ -103,8 +93,7 @@ class LoaderService : LifecycleService(), LoadHandler {
     private fun errorHandler(throwable: Throwable) {
         throwable.printStackTrace()
         scope = initScope()
-        isRun = false
-        loader.cancel()
+        stop()
         ErrorUtils.setData(getInputData())
         ErrorUtils.setError(throwable)
         finishService(throwable.localizedMessage)
@@ -117,23 +106,25 @@ class LoaderService : LifecycleService(), LoadHandler {
         .build()
 
     override fun stopService(name: Intent?): Boolean {
-        isRun = false
-        loader.cancel()
+        stop()
         return super.stopService(name)
     }
 
     override fun onDestroy() {
-        loader.cancel()
-        isRun = false
+        stop()
         super.onDestroy()
+    }
+
+    private fun stop() {
+        isRun = false
+        loader.cancel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_NOT_STICKY
         when (intent.getIntExtra(Const.MODE, STOP)) {
             STOP -> {
-                isRun = false
-                finishService(null)
+                stop()
                 return START_NOT_STICKY
             }
             DOWNLOAD_PAGE -> {
@@ -209,7 +200,7 @@ class LoaderService : LifecycleService(), LoadHandler {
                     manager.notify(PROGRESS_ID, notif.build())
                 }
             }
-            stopForeground(true)
+            stopSelf()
         }
     }
 
@@ -220,7 +211,6 @@ class LoaderService : LifecycleService(), LoadHandler {
         val main: Intent
         val msg: String
         if (error == null) {
-            if (isRun.not()) return
             isRun = false
             title = getString(R.string.load_suc_finish)
             msg = ""
@@ -238,6 +228,7 @@ class LoaderService : LifecycleService(), LoadHandler {
             .setContentIntent(piMain)
             .setFullScreenIntent(piEmpty, true)
         manager.notify(FINAL_ID, notif.build())
+        stopSelf()
     }
 
     private fun initNotif() {
@@ -264,10 +255,9 @@ class LoaderService : LifecycleService(), LoadHandler {
     private fun loadYear(y: Int) {
         var i = if (y == curYear) curMonth else 12
         val m = if (y == 2004) 7 else 0
-        while (i > m) {
+        while (i > m && isRun) {
             loader.loadMonth(i, y)
             upProg()
-            if (isRun.not()) break
             i--
         }
     }
