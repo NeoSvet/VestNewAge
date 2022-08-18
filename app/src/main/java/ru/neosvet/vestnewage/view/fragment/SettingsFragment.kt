@@ -96,7 +96,6 @@ class SettingsFragment : NeoFragment() {
                 if (ScreenUtils.isWide) 2 else 1
             )
             rvSettings.adapter = adapter
-            setListEvents(rvSettings)
         }
     }
 
