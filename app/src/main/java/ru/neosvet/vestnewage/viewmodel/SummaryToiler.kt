@@ -51,6 +51,7 @@ class SummaryToiler : NeoToiler() {
             postState(NeoState.Progress(cur.percent(pages.size)))
         }
         loader.finish()
+        isRun = false
         postState(NeoState.Success)
     }
 

@@ -66,7 +66,8 @@ class SummaryFragment : NeoFragment() {
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        setStatus(false)
+        if (toiler.isRun.not())
+            setStatus(false)
         if (state is NeoState.ListValue) {
             val scroll = adapter.itemCount > 0
             adapter.setItems(state.list)
