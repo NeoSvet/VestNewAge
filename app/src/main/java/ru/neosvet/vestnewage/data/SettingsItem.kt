@@ -14,7 +14,7 @@ sealed class SettingsItem {
         val title: String,
         val list: List<CheckItem>,
         val buttonLabel: String,
-        val onClick: (List<Int>) -> Unit //list indexes of checked
+        val onClick: (List<Int>) -> Unit //list ids of checked
     ) : SettingsItem()
 
     data class Notification(

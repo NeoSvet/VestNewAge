@@ -145,10 +145,10 @@ class SettingsAdapter(
 
             button.setOnClickListener {
                 val checked = mutableListOf<Int>()
-                for (i in item.list.indices) {
-                    if (item.list[i].isChecked) {
-                        item.list[i].isChecked = false
-                        checked.add(i)
+                item.list.forEach { item ->
+                    if (item.isChecked) {
+                        item.isChecked = false
+                        checked.add(item.id)
                     }
                 }
                 item.onClick.invoke(checked)

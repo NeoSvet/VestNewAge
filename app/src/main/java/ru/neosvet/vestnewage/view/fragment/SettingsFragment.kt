@@ -18,9 +18,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
-import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
+import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.service.CheckStarter
@@ -201,36 +202,43 @@ class SettingsFragment : NeoFragment() {
 
     private fun initClearSection() {
         val list = mutableListOf<CheckItem>()
-        list.add(CheckItem(getString(R.string.book_prev)))
-        list.add(CheckItem(getString(R.string.book_cur)))
-        list.add(CheckItem(getString(R.string.articles)))
-        list.add(CheckItem(getString(R.string.markers)))
-        list.add(CheckItem(getString(R.string.cache)))
+        list.add(CheckItem(getString(R.string.cache), SettingsToiler.CLEAR_CACHE))
+        val book = BookHelper()
+        if (book.isLoadedOtkr())
+            list.add(
+                CheckItem(
+                    getString(R.string.format_book_years).format(2004, 2015),
+                    SettingsToiler.CLEAR_OLD_BOOK
+                )
+            )
+        val year = DateUnit.initToday().year
+        list.add(
+            CheckItem(
+                getString(R.string.format_book_years).format(2016, year - 2),
+                SettingsToiler.CLEAR_NEW_BOOK
+            )
+        )
+        list.add(
+            CheckItem(
+                getString(R.string.format_book_years).format(year - 1, year),
+                SettingsToiler.CLEAR_NOW_BOOK
+            )
+        )
+        list.add(CheckItem(getString(R.string.doctrine_creator), SettingsToiler.CLEAR_DOCTRINE))
+        list.add(CheckItem(getString(R.string.articles), SettingsToiler.CLEAR_ARTICLES))
+        list.add(CheckItem(getString(R.string.markers), SettingsToiler.CLEAR_MARKERS))
 
         adapter.addItem(
             SettingsItem.CheckListButton(
                 title = getString(R.string.free_storage),
                 list = list,
                 buttonLabel = getString(R.string.delete),
-                onClick = this::clearStorage
+                onClick = {
+                    setStatus(true)
+                    toiler.startClear(it)
+                }
             )
         )
-    }
-
-    private fun clearStorage(checkedList: List<Int>) {
-        setStatus(true)
-        val request = mutableListOf<String>()
-        if (checkedList.contains(0)) //book prev years
-            request.add(Const.START)
-        if (checkedList.contains(1)) //book cur year
-            request.add(Const.END)
-        if (checkedList.contains(2)) //materials
-            request.add(DataBase.ARTICLES)
-        if (checkedList.contains(3)) //markers
-            request.add(DataBase.MARKERS)
-        if (checkedList.contains(4)) //cache
-            request.add(Const.FILE)
-        toiler.startClear(request)
     }
 
     private fun initCheckSection() {
