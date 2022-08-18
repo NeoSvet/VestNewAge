@@ -25,7 +25,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -90,7 +89,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             setContentView(R.layout.main_activity_tablet)
         else
             setContentView(R.layout.main_activity)
-        ConnectWatcher.start(this)
         App.context = this
         initLaunch()
         helper = MainHelper(this)
@@ -318,7 +316,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onDestroy() {
         toast.destroy()
-        ConnectWatcher.stop(this)
         super.onDestroy()
     }
 

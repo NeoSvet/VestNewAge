@@ -15,15 +15,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.network.ConnectObserver
-import ru.neosvet.vestnewage.network.ConnectWatcher
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
@@ -36,7 +36,7 @@ import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
 
-class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
+class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -85,6 +85,7 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     }
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
+    private var connectWatcher: Job? = null
     private val helper: BrowserHelper
         get() = toiler.helper
     private lateinit var binding: BrowserActivityBinding
@@ -95,7 +96,6 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ConnectWatcher.start(this)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -132,7 +132,6 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
     override fun onDestroy() {
         scroll?.cancel()
         helper.position = positionOnPage
-        ConnectWatcher.unSubscribe()
         helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
         helper.save()
         super.onDestroy()
@@ -594,12 +593,8 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
                 status.setLoad(true)
                 status.loadText()
             }
-            NeoState.NoConnected -> {
-                finishLoading()
-                ConnectWatcher.subscribe(this)
-                if (ConnectWatcher.needShowMessage())
-                    toast.show(getString(R.string.no_connected))
-            }
+            NeoState.NoConnected ->
+                noConnected()
             is NeoState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
@@ -616,6 +611,17 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         }
     }
 
+    private fun noConnected() {
+        finishLoading()
+        connectWatcher = scope.launch {
+            OnlineObserver.isOnline.collect {
+                connectChanged(it)
+            }
+        }
+        if (OnlineObserver.needShowMessage())
+            toast.show(getString(R.string.no_connected))
+    }
+
     private fun finishLoading() {
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
@@ -623,13 +629,13 @@ class BrowserActivity : AppCompatActivity(), ConnectObserver, StateUtils.Host {
         bottomUnblocked()
     }
 
-    override fun connectChanged(connected: Boolean) {
+    private fun connectChanged(connected: Boolean) {
         if (connected) {
             this.runOnUiThread {
                 status.setLoad(true)
                 toiler.load()
             }
-            ConnectWatcher.unSubscribe()
+            connectWatcher?.cancel()
         }
     }
 

@@ -10,10 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.network.ConnectObserver
-import ru.neosvet.vestnewage.network.ConnectWatcher
+import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.StateUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
@@ -21,7 +23,7 @@ import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
+abstract class NeoFragment : Fragment(), StateUtils.Host {
     @JvmField
     protected var act: MainActivity? = null
     protected val neotoiler: NeoToiler by lazy {
@@ -32,6 +34,7 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     private val stateUtils: StateUtils by lazy {
         StateUtils(this, neotoiler)
     }
+    private var connectWatcher: Job? = null
 
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
@@ -69,7 +72,6 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     }
 
     override fun onDestroyView() {
-        ConnectWatcher.unSubscribe()
         scroll?.deAttach()
         act = null
         super.onDestroyView()
@@ -114,7 +116,7 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
 
     open fun startLoad() {
         if (neotoiler.isRun) return
-        if (ConnectWatcher.connected.not()) {
+        if (OnlineObserver.isOnline.value.not()) {
             noConnected()
             return
         }
@@ -122,19 +124,23 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     }
 
     private fun noConnected() {
-        ConnectWatcher.subscribe(this)
-        if (ConnectWatcher.needShowMessage())
+        connectWatcher = scope.launch {
+            OnlineObserver.isOnline.collect {
+                connectChanged(it)
+            }
+        }
+        if (OnlineObserver.needShowMessage())
             act?.showToast(getString(R.string.no_connected))
         setStatus(false)
     }
 
-    override fun connectChanged(connected: Boolean) {
+    private fun connectChanged(connected: Boolean) {
         if (connected) {
             act?.runOnUiThread {
                 setStatus(true)
                 neotoiler.load()
             }
-            ConnectWatcher.unSubscribe()
+            connectWatcher?.cancel()
         }
     }
 

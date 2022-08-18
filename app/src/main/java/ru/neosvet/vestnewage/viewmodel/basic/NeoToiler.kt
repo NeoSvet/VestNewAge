@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.viewmodel.basic
 
 import androidx.work.Data
 import kotlinx.coroutines.*
-import ru.neosvet.vestnewage.network.ConnectWatcher
+import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.ErrorUtils
 
 abstract class NeoToiler : StateToiler() {
@@ -53,7 +53,7 @@ abstract class NeoToiler : StateToiler() {
     }
 
     protected fun checkConnect(): Boolean {
-        if (ConnectWatcher.connected)
+        if (OnlineObserver.isOnline.value)
             return true
         setState(NeoState.NoConnected)
         return false
