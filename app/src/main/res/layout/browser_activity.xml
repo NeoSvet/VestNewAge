@@ -6,9 +6,9 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivHeadBack"
-        android:background="@android:color/black"
         android:layout_width="match_parent"
         android:layout_height="@dimen/head_height"
+        android:background="@android:color/black"
         android:scaleType="matrix"
         android:src="@drawable/head_back"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,6 +22,16 @@
         app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintStart_toEndOf="@id/bBack"
         app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
+
+    <ImageButton
+        android:id="@+id/btnFullScreen"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="@dimen/half_indent"
+        android:background="@drawable/button"
+        android:src="@drawable/ic_fullscreen"
+        app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvGodWords"
@@ -70,8 +80,8 @@
         android:id="@+id/bBack"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:padding="@dimen/def_indent"
         android:background="@drawable/press"
+        android:padding="@dimen/def_indent"
         android:src="@drawable/ic_left"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

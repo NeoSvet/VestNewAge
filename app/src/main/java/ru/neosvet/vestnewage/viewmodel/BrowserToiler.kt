@@ -132,7 +132,7 @@ class BrowserToiler : NeoToiler() {
             val file = Lib.getFile(PAGE)
             val p = if (newPage || !file.exists())
                 generatePage(file)
-            else Pair(false, false) //isNeedUpdate, isOtrk
+            else Pair(false, false) //isNeedUpdate, isOtkr
             var s = file.toString()
             if (link.contains("#"))
                 s += link.substring(link.indexOf("#"))
@@ -158,7 +158,7 @@ class BrowserToiler : NeoToiler() {
         return true
     }
 
-    private fun generatePage(file: File): Pair<Boolean, Boolean> { //isNeedUpdate, isOtrk
+    private fun generatePage(file: File): Pair<Boolean, Boolean> { //isNeedUpdate, isOtkr
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)

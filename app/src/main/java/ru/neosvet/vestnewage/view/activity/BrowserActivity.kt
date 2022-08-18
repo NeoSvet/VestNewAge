@@ -93,6 +93,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         get() = binding.content.wvBrowser.run {
             scrollY.toFloat() / scale / contentHeight.toFloat()
         }
+    private val isBigHead: Boolean
+        get() {
+            val h = resources.getDimension(R.dimen.head_height) / resources.displayMetrics.density
+            return h > 110
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -177,6 +182,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 binding.content.etSearch.setText(helper.request)
             }
         }
+        if (helper.isFullScreen) binding.btnFullScreen.post {
+            switchFullScreen(true)
+        }
     }
 
     private fun restoreSearch() = helper.run {
@@ -249,6 +257,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 status.setError(null)
                 bottomUnblocked()
             }
+            helper.isFullScreen ->
+                switchFullScreen(false)
             binding.bottomBar.isScrolledDown -> {
                 if (isSearch.not())
                     headBar.show()
@@ -342,6 +352,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
+            if (helper.isFullScreen) return@setOnTouchListener false
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                 scroll?.cancel()
                 if (isSearch.not() && wvBrowser.scrollY == 0) {
@@ -368,7 +379,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     navIsTop = false
                 }
             }
-
+            if (helper.isFullScreen) return@setOnScrollChangeListener
             if (isTouch) {
                 isScrollTop = scrollY >= oldScrollY
                 if (isScrollTop.not()) if (helper.isAutoReturn.not())
@@ -445,7 +456,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         headBar = HeadBar(
             mainView = ivHeadBack,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
-            additionViews = listOf(btnGodWords, tvGodWords)
+            additionViews = listOf(btnFullScreen, btnGodWords, tvGodWords)
         ) {
             if (helper.link.contains(Const.DOCTRINE))
                 Lib.openInApps(NetConst.DOCTRINE_SITE, null)
@@ -454,13 +465,23 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             else
                 Lib.openInApps(NetConst.SITE, null)
         }
+        btnFullScreen.setOnClickListener {
+            switchFullScreen(true)
+        }
     }
 
-    private val isBigHead: Boolean
-        get() {
-            val h = resources.getDimension(R.dimen.head_height) / resources.displayMetrics.density
-            return h > 110
+    private fun switchFullScreen(value: Boolean) {
+        helper.isFullScreen = value
+        if (value) {
+            binding.fabNav.isVisible = false
+            headBar.hide()
+            bottomBlocked()
+        } else {
+            binding.fabNav.isVisible = helper.isNavButton
+            headBar.show()
+            bottomUnblocked()
         }
+    }
 
     private fun setHeadBar() = binding.run {
         if (helper.isDoctrine) {

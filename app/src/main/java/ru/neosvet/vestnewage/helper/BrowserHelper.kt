@@ -28,6 +28,7 @@ class BrowserHelper(context: Context) {
     var isAutoReturn: Boolean = pref.getBoolean(AUTORETURN, false)
     var isDoctrine: Boolean = false
         private set
+    var isFullScreen: Boolean = false
     var link: String = ""
         get() = field
         set(value) {
