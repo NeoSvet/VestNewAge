@@ -93,6 +93,7 @@ abstract class NeoFragment : Fragment(), ConnectObserver, StateUtils.Host {
     abstract fun onChangedOtherState(state: NeoState)
 
     override fun onChangedState(state: NeoState) {
+        if (isDetached) return
         when (state) {
             is NeoState.None ->
                 return
