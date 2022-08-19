@@ -120,10 +120,7 @@ class BrowserHelper(context: Context) {
         context.startActivity(intent)
     }
 
-    fun checkTip() {
-        if (pref.getBoolean(Const.TIP, true).not()) return
-        editor.putBoolean(Const.TIP, false)
-        editor.apply()
-        TipActivity.showTip(TipName.BROWSER_PANEL)
+    fun showTip() {
+        TipActivity.showTipIfNeed(TipName.BROWSER_PANEL)
     }
 }

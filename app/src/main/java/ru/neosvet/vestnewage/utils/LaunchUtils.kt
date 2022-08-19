@@ -14,6 +14,8 @@ import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -86,10 +88,36 @@ class LaunchUtils {
             storage.delete()
             storage.close()
         }
-        if (ver < 64) Thread {
-            checkSearchRequests()
-            sortBase()
-        }.start()
+        if (ver < 64) {
+            refTips()
+            Thread {
+                checkSearchRequests()
+                sortBase()
+            }.start()
+        }
+    }
+
+    private fun refTips() {
+        val name = "calendar"
+        val pref = App.context.getSharedPreferences(TipActivity.TAG, Context.MODE_PRIVATE)
+        val editor = pref.edit()
+        var p = App.context.getSharedPreferences(name, Context.MODE_PRIVATE)
+        if (!p.getBoolean(TipActivity.TAG, true))
+            editor.putBoolean(TipName.CALENDAR.toString(), false)
+        val f = Lib.getFileP("/shared_prefs/$name.xml")
+        f.delete()
+
+        p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
+        if (!p.getBoolean(TipActivity.TAG, true))
+            editor.putBoolean(TipName.MAIN_STAR.toString(), false)
+        p.edit().remove(TipActivity.TAG).apply()
+
+        p = App.context.getSharedPreferences(BrowserHelper.TAG, Context.MODE_PRIVATE)
+        if (!p.getBoolean(TipActivity.TAG, true))
+            editor.putBoolean(TipName.BROWSER_PANEL.toString(), false)
+        p.edit().remove(TipActivity.TAG).apply()
+
+        editor.apply()
     }
 
     private fun sortBase() {

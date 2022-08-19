@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -81,7 +80,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
 
     private fun restoreState(state: Bundle?) {
         if (state == null) {
-            checkTip()
+            showTip()
             toiler.openCalendar(0)
             if (toiler.isNeedReload())
                 startLoad()
@@ -92,13 +91,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
         }
     }
 
-    private fun checkTip() {
-        val pref = requireContext().getSharedPreferences("calendar", AppCompatActivity.MODE_PRIVATE)
-        if (pref.getBoolean(Const.TIP, true).not()) return
-        val editor = pref.edit()
-        editor.putBoolean(Const.TIP, false)
-        editor.apply()
-        TipActivity.showTip(TipName.CALENDAR)
+    private fun showTip() {
+        TipActivity.showTipIfNeed(TipName.CALENDAR)
     }
 
     @SuppressLint("ClickableViewAccessibility")

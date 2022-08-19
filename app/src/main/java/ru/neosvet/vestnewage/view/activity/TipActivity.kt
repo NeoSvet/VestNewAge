@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.view.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -33,6 +35,23 @@ enum class TipName {
 
 class TipActivity : AppCompatActivity() {
     companion object {
+        const val TAG = "tip"
+        private var pref: SharedPreferences? = null
+
+        @JvmStatic
+        fun showTipIfNeed(name: TipName) {
+            if (pref == null)
+                pref = App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
+            pref?.let {
+                if (it.getBoolean(name.toString(), true)) {
+                    showTip(name)
+                    val editor = it.edit()
+                    editor.putBoolean(name.toString(), false)
+                    editor.apply()
+                }
+            }
+        }
+
         @JvmStatic
         fun showTip(name: TipName) {
             val intent = Intent(App.context, TipActivity::class.java)
@@ -40,7 +59,6 @@ class TipActivity : AppCompatActivity() {
             intent.putExtra(Const.MODE, name)
             App.context.startActivity(intent)
         }
-
     }
 
     private lateinit var binding: TipActivityBinding

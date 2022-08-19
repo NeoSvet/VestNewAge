@@ -273,18 +273,14 @@ class MainHelper(private val act: MainActivity) {
     fun setActionIcon(icon: Int) {
         actionIcon = if (icon == 0) R.drawable.star else icon
         type = if (actionIcon == R.drawable.star) {
-            checkTip()
+            showTip()
             ActionType.MENU
         } else ActionType.ACTION
         fabAction.setImageDrawable(ContextCompat.getDrawable(act, actionIcon))
         bottomBar?.requestLayout()
     }
 
-    private fun checkTip() {
-        if (pref.getBoolean(Const.TIP, true).not()) return
-        val editor = pref.edit()
-        editor.putBoolean(Const.TIP, false)
-        editor.apply()
-        TipActivity.showTip(TipName.MAIN_STAR)
+    private fun showTip() {
+        TipActivity.showTipIfNeed(TipName.MAIN_STAR)
     }
 }

@@ -154,7 +154,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             headBar.setExpandable(helper.isMiniTop)
         }
         if (state == null) {
-            helper.checkTip()
+            helper.showTip()
             val link = intent.getStringExtra(Const.LINK) ?: return
             toiler.openLink(link, true)
             intent.getStringExtra(Const.SEARCH)?.let {
