@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 
 abstract class StateToiler : ViewModel() {
     private var primaryState: NeoState? = null
@@ -47,6 +46,9 @@ abstract class StateToiler : ViewModel() {
 
     private fun addToCache(state: NeoState) {
         when (state) {
+            //Skip
+            is NeoState.Progress, NeoState.Loading, NeoState.None ->
+                return
             //Primary states:
             is NeoState.ListValue, is NeoState.Calendar, is NeoState.Book, is NeoState.ListState ->
                 primaryState = state
