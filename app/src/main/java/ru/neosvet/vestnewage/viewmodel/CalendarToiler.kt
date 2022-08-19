@@ -9,6 +9,8 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
+import ru.neosvet.vestnewage.loader.MasterLoader
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -17,7 +19,7 @@ import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-class CalendarToiler : NeoToiler() {
+class CalendarToiler : NeoToiler(), LoadHandlerLite {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year
@@ -36,6 +38,7 @@ class CalendarToiler : NeoToiler() {
     private val next: Boolean
         get() = if (date.year == todayY) date.month != todayM else true
     private var time: Long = 0
+    private var masterLoader: MasterLoader? = null
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
@@ -46,10 +49,6 @@ class CalendarToiler : NeoToiler() {
 
     override suspend fun doLoad() { //loadFromSite
         loadIfNeed = false
-        if (date.year < 2016) {
-            postState(NeoState.Ready)
-            return
-        }
         val list = loadMonth()
         if (loadFromStorage()) {
             postState(NeoState.Calendar(date.calendarString, prev, next, calendar))
@@ -76,7 +75,12 @@ class CalendarToiler : NeoToiler() {
     private fun loadMonth(): List<String> {
         val loader = CalendarLoader()
         loader.setDate(date.year, date.month)
-        loader.loadListMonth(isCurMonth())
+        if (date.year < 2016) {
+            if (masterLoader == null)
+                masterLoader = MasterLoader(this)
+            masterLoader?.loadMonth(date.month, date.year)
+        } else
+            loader.loadListMonth(isCurMonth())
         return loader.getLinkList()
     }
 
@@ -231,5 +235,9 @@ class CalendarToiler : NeoToiler() {
         val result = storage.getTitle(s)
         storage.close()
         return result
+    }
+
+    override fun postPercent(value: Int) {
+        setState(NeoState.Progress(value))
     }
 }

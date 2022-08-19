@@ -243,7 +243,6 @@
     <string name="error_code">Ошибка на сайте:&#160;</string>
     <string name="error_site">Сайт не ответил на запрос</string>
     <string name="site_unavailable">Сайт недоступен</string>
-    <string name="load_unavailable">Загрузка недоступна</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
     <string name="done">Готово</string>

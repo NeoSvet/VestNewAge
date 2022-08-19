@@ -194,8 +194,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             is NeoState.LongValue -> binding?.run {
                 setUpdateTime(state.value, tvUpdate)
             }
-            NeoState.Ready ->
-                act?.showToast(getString(R.string.load_unavailable))
             else -> {}
         }
     }
