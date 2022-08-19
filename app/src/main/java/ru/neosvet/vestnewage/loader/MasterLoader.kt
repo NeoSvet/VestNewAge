@@ -195,11 +195,14 @@ class MasterLoader : Loader {
             1000
         )
         var n = 2
+        var max = 0
+        var p = 2
         var s: String? = br.readLine()
         while (s != null) {
             if (s == Const.AND) {
                 isTitle = false
                 s = br.readLine()
+                max = n - 2
             }
             v = br.readLine()
             s?.let {
@@ -212,6 +215,13 @@ class MasterLoader : Loader {
                     ids[n.toString()] = id
                     n++
                 } else ids[it]?.let { id ->
+                    if (p != id) {
+                        if (handler != null)
+                            handler.postMessage("$msg (${(p - 1).percent(max)}%)")
+                        else
+                            handlerLite?.postPercent((p - 1).percent(max))
+                        p = id
+                    }
                     storage.insertParagraph(getRow(id, v))
                 }
             }
