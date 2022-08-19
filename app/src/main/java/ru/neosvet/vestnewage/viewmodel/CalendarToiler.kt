@@ -7,7 +7,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
@@ -55,11 +55,10 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
 
     private fun checkPrev(): Boolean {
         val days = date.timeInDays
-        val isLoadedOtkr = BookHelper().isLoadedOtkr()
-        val min = if (isLoadedOtkr)
-            BookHelper.MIN_DAYS_OLD_BOOK
+        val min = if (DateHelper.isLoadedOtkr())
+            DateHelper.MIN_DAYS_OLD_BOOK
         else
-            BookHelper.MIN_DAYS_NEW_BOOK
+            DateHelper.MIN_DAYS_NEW_BOOK
         return days > min
     }
 

@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
-import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.service.CheckStarter
@@ -202,8 +202,7 @@ class SettingsFragment : NeoFragment() {
     private fun initClearSection() {
         val list = mutableListOf<CheckItem>()
         list.add(CheckItem(getString(R.string.cache), SettingsToiler.CLEAR_CACHE))
-        val book = BookHelper()
-        if (book.isLoadedOtkr())
+        if (DateHelper.isLoadedOtkr())
             list.add(
                 CheckItem(
                     getString(R.string.format_book_years).format(2004, 2015),

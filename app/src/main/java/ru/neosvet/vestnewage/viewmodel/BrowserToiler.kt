@@ -8,8 +8,8 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.BrowserHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NetConst
@@ -371,14 +371,13 @@ class BrowserToiler : NeoToiler() {
 
     private fun getMinMY(): String {
         if (link.isPoem) {
-            val d = DateUnit.putDays(BookHelper.MIN_DAYS_POEMS)
+            val d = DateUnit.putDays(DateHelper.MIN_DAYS_POEMS)
             return d.my
         }
-        val book = BookHelper()
-        val d = if (book.isLoadedOtkr())
-            DateUnit.putDays(BookHelper.MIN_DAYS_OLD_BOOK)
+        val d = if (DateHelper.isLoadedOtkr())
+            DateUnit.putDays(DateHelper.MIN_DAYS_OLD_BOOK)
         else
-            DateUnit.putDays(BookHelper.MIN_DAYS_NEW_BOOK)
+            DateUnit.putDays(DateHelper.MIN_DAYS_NEW_BOOK)
         return d.my
     }
 }

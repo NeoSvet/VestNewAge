@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
@@ -57,8 +58,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private var masterLoader: MasterLoader? = null
 
     fun init(context: Context) {
+        isLoadedOtkr = DateHelper.isLoadedOtkr()
         helper = BookHelper().also {
-            isLoadedOtkr = it.isLoadedOtkr()
             it.loadDates()
             dPoems = DateUnit.putDays(it.poemsDays)
             dEpistles = DateUnit.putDays(it.epistlesDays)
@@ -135,7 +136,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             var t: String
             var s: String
             var cursor: Cursor
-            if (d.timeInDays == BookHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
+            if (d.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
                 storage.open("12.04")
                 cursor = storage.getListAll()
@@ -192,7 +193,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val max = if (isPoemsTab)
             DateUnit.initToday().apply { day = 1 }.timeInDays
         else
-            BookHelper.MAX_DAYS_BOOK
+            DateHelper.MAX_DAYS_BOOK
         return date.timeInDays < max
     }
 
@@ -200,14 +201,14 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val d = date
         val days = d.timeInDays
         val min = if (isPoemsTab) {
-            BookHelper.MIN_DAYS_POEMS
-        } else if (days == BookHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
+            DateHelper.MIN_DAYS_POEMS
+        } else if (isLoadedOtkr)
+            DateHelper.MIN_DAYS_OLD_BOOK
+        else if (days == DateHelper.MIN_DAYS_NEW_BOOK) {
             // доступна для того, чтобы предложить скачать Послания за 2004-2015
             return !LoaderService.isRun
-        } else if (isLoadedOtkr)
-            BookHelper.MIN_DAYS_OLD_BOOK
-        else
-            BookHelper.MIN_DAYS_NEW_BOOK
+        } else
+            DateHelper.MIN_DAYS_NEW_BOOK
         return days > min
     }
 

@@ -43,8 +43,6 @@ class SearchHelper(context: Context) {
     var end: DateUnit
     var mode: Int = 0
     var countMaterials: Int = 0
-    val minMonth: Int
-    val minYear: Int
     var label: String = ""
     var request: String = ""
     val options = mutableListOf<Boolean>()
@@ -68,22 +66,13 @@ class SearchHelper(context: Context) {
         get() = options[I_ALL_WORDS]
 
     init {
-        val f = Lib.getFileDB("12.15")
-        if (f.exists()) {
-            // если последний загружаемый месяц с сайта Откровений загружен, значит расширяем диапозон поиска
-            minMonth = 8 //aug
-            minYear = 2004
-        } else {
-            minMonth = 1
-            minYear = 2016
-        }
-
         val d = pref.getInt(Const.START, 0)
         if (d == 0) {
             end = DateUnit.initToday()
-            //if (mode < 5)// открываем ссылку с сайта Благая Весть
-            //    start = DateHelper.putYearMonth(act, 2016, 1);
-            start = DateUnit.putYearMonth(minYear, minMonth)
+            start = if (DateHelper.isLoadedOtkr())
+                DateUnit.putDays(DateHelper.MIN_DAYS_OLD_BOOK)
+            else
+                DateUnit.putDays(DateHelper.MIN_DAYS_NEW_BOOK)
         } else {
             start = DateUnit.putDays(d)
             end = DateUnit.putDays(pref.getInt(Const.END, 0))

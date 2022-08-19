@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
-import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
@@ -136,8 +136,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
 
     private fun showDatePicker(d: DateUnit) {
         dateDialog = DateDialog(act, d).apply {
-            val book = BookHelper()
-            if (book.isLoadedOtkr()) {
+            if (DateHelper.isLoadedOtkr()) {
                 setMinMonth(8)
                 setMinYear(2004)
             }

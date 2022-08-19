@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -242,7 +243,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private fun openMonth(plus: Boolean) {
         val d = toiler.date
         if (!plus && toiler.isPoemsTab.not()) {
-            if (d.timeInDays == BookHelper.MIN_DAYS_NEW_BOOK && helper.isLoadedOtkr().not()) {
+            if (d.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && DateHelper.isLoadedOtkr().not()) {
                 showDownloadDialog()
                 return
             }
@@ -293,7 +294,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             if (toiler.isPoemsTab) {
                 setMinMonth(2) //feb
             } else { //epistles
-                if (helper.isLoadedOtkr()) {
+                if (DateHelper.isLoadedOtkr()) {
                     setMinMonth(8) //aug
                     setMinYear(2004)
                 }

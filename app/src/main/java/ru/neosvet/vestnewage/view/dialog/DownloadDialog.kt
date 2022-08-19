@@ -7,7 +7,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.DownloadDialogBinding
-import ru.neosvet.vestnewage.helper.BookHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.CheckAdapter
@@ -83,10 +83,8 @@ class DownloadDialog(
                 if (it.isChecked) ids.add(it.id)
             }
             act.download(ids)
-            if (isOtkr) {
-                val book = BookHelper()
-                book.setLoadedOtkr(true)
-            }
+            if (isOtkr)
+                DateHelper.setLoadedOtkr(true)
             dismiss()
         }
     }
@@ -100,8 +98,7 @@ class DownloadDialog(
             if (list.isNotEmpty() && list[0].id == 0) return
             list.clear()
             addBasicList()
-            val book = BookHelper()
-            if (book.isLoadedOtkr())
+            if (DateHelper.isLoadedOtkr())
                 addOtkrList()
         }
     }
@@ -123,7 +120,13 @@ class DownloadDialog(
     private fun addOtkrList() {
         var i = 15
         while (i > 4) {
-            list.add(CheckItem(context.getString(R.string.format_tolkovaniya_year).format(i), i, true))
+            list.add(
+                CheckItem(
+                    context.getString(R.string.format_tolkovaniya_year).format(i),
+                    i,
+                    true
+                )
+            )
             i--
         }
         list.add(CheckItem(context.getString(R.string.otkroveniya_year), i, true))

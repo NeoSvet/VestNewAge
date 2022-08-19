@@ -190,8 +190,8 @@ class SearchDialog(
     private fun showStartDatePicker(d: DateUnit) {
         isStartDate = true
         dateDialog = DateDialog(act, d).apply {
-            setMinMonth(parent.helper.minMonth)
-            setMinYear(parent.helper.minYear)
+            setMinMonth(start.month)
+            setMinYear(start.year)
             setMaxMonth(end.month)
             setMaxYear(end.year)
             setResult(this@SearchDialog)
