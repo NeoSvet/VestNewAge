@@ -143,12 +143,12 @@ class MarkerActivity : AppCompatActivity() {
                     .setPositiveButton(
                         getString(R.string.send)
                     ) { _, _ ->
-                        Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
+                        Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null)
                     }
                     .setNegativeButton(
                         getString(android.R.string.cancel)
                     ) { dialog, _ -> dialog.dismiss() }
-                    .setOnDismissListener { _ -> ErrorUtils.clear() }
+                    .setOnDismissListener { ErrorUtils.clear() }
                 builder.create().show()
             }
             else -> {}

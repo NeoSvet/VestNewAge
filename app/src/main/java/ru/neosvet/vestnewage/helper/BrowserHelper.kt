@@ -30,7 +30,6 @@ class BrowserHelper(context: Context) {
         private set
     var isFullScreen: Boolean = false
     var link: String = ""
-        get() = field
         set(value) {
             isDoctrine = value.contains(Const.DOCTRINE)
             field = value

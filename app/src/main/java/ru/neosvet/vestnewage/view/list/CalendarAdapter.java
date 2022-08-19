@@ -53,7 +53,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.ViewHo
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView num;
+        private final TextView num;
 
         ViewHolder(View itemView) {
             super(itemView);

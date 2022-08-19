@@ -4,15 +4,12 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import ru.neosvet.vestnewage.utils.Lib;
 import ru.neosvet.vestnewage.view.activity.BrowserActivity;
 
 public class WebClient extends WebViewClient {
     private final String files = "file";
-    private BrowserActivity act;
+    private final BrowserActivity act;
 
     public WebClient(BrowserActivity act) {
         this.act = act;

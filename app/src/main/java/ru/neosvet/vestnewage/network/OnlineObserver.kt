@@ -6,13 +6,12 @@ import android.net.Network
 import android.net.NetworkRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import ru.neosvet.vestnewage.utils.Lib
 
 object OnlineObserver {
     private const val INTERVAL = 30000
     private var timeMessage = 0L
     private var lastValue = false
-    private val _isOnline = MutableStateFlow<Boolean>(lastValue)
+    private val _isOnline = MutableStateFlow(lastValue)
     val isOnline: StateFlow<Boolean> = _isOnline
 
     private val availableNetworks = mutableSetOf<Int>()

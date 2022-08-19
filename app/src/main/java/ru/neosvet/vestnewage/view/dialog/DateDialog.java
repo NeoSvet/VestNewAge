@@ -61,7 +61,7 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_date);
 
-        tvYear = (TextView) findViewById(R.id.tvYear);
+        tvYear = findViewById(R.id.tvYear);
         findViewById(R.id.bMinus).setOnClickListener(view -> {
             if (date.getYear() > min_year) {
                 date.changeYear(-1);
@@ -87,7 +87,7 @@ public class DateDialog extends Dialog implements View.OnClickListener {
             setCalendar();
         });
 
-        RecyclerView rvMonth = (RecyclerView) findViewById(R.id.rvMonth);
+        RecyclerView rvMonth = findViewById(R.id.rvMonth);
         GridLayoutManager layoutManager = new GridLayoutManager(act, 3);
         adMonth = new MonthAdapter(this);
         for (int i = 0; i < 12; i++) {

@@ -42,11 +42,11 @@ class MarkerAdapter(
     inner class ViewHolder(root: View) : RecyclerView.ViewHolder(root) {
         private val tvTitle: TextView = root.findViewById(R.id.text_item)
         private val tvDes: TextView? = root.findViewById(R.id.des_item)
-        private val item_bg: View = root.findViewById(R.id.item_bg)
+        private val itemBg: View = root.findViewById(R.id.item_bg)
         private var index: Int = 0
 
         init {
-            item_bg.setOnClickListener {
+            itemBg.setOnClickListener {
                 toiler.run {
                     val oldSel = iSel
                     onClick(index)
@@ -56,7 +56,7 @@ class MarkerAdapter(
                         notifyItemChanged(index)
                 }
             }
-            item_bg.setOnLongClickListener {
+            itemBg.setOnLongClickListener {
                 if (toiler.iSel == -1)
                     longClicker.invoke(index)
                 else false
@@ -68,9 +68,9 @@ class MarkerAdapter(
             tvTitle.text = data[index].title
             tvDes?.text = data[index].des
             if (index == toiler.iSel)
-                item_bg.setBackgroundResource(R.drawable.select_item_bg)
+                itemBg.setBackgroundResource(R.drawable.select_item_bg)
             else
-                item_bg.setBackgroundResource(R.drawable.item_bg)
+                itemBg.setBackgroundResource(R.drawable.item_bg)
         }
     }
 }

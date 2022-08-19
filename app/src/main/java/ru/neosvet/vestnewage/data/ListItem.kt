@@ -78,9 +78,9 @@ class ListItem {
     }
 
     override fun toString(): String {
-        if (few)
-            return this.javaClass.simpleName + "[title=$title, links=$listLinks, des=$des, heads=$heads]"
+        return if (few)
+            this.javaClass.simpleName + "[title=$title, links=$listLinks, des=$des, heads=$heads]"
         else
-            return this.javaClass.simpleName + "[title=$title, link=$link, des=$des, head=$head]"
+            this.javaClass.simpleName + "[title=$title, link=$link, des=$des, head=$head]"
     }
 }

@@ -230,10 +230,10 @@ class SearchEngine(
         var i = 0
         while (i < s.length) {
             if (s[i] == '"') {
-                if (i == 0 || s.isNotLetter(i - 1))
-                    s = s.substring(0, i) + "&laquo;" + s.substring(i + 1)
+                s = if (i == 0 || s.isNotLetter(i - 1))
+                    s.substring(0, i) + "&laquo;" + s.substring(i + 1)
                 else
-                    s = s.substring(0, i) + "&raquo;" + s.substring(i + 1)
+                    s.substring(0, i) + "&raquo;" + s.substring(i + 1)
                 i += 7
             } else i++
         }

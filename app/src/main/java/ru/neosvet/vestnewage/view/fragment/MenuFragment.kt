@@ -21,7 +21,6 @@ import ru.neosvet.vestnewage.view.list.ScrollHelper
 
 class MenuFragment : Fragment() {
     companion object {
-        private const val MAX = 12
         private val mMenu = listOf(
             Section.NEW, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,

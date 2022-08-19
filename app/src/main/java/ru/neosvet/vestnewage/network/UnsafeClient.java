@@ -45,12 +45,7 @@ public class UnsafeClient {
 
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-            builder.hostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
+            builder.hostnameVerifier((hostname, session) -> true);
 
             builder.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
             builder.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);

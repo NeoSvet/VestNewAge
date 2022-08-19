@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.storage.PageStorage;
 public class UnreadUtils {
     public static final String NAME = "noread";
     private DataBase dbUnread;
-    private PageStorage storage = new PageStorage();
+    private final PageStorage storage = new PageStorage();
     private long time = 0;
     private int[] ids_new;
     private boolean isClosed = true;

@@ -52,7 +52,7 @@ class MenuAdapter(
     inner class Holder(
         private val root: View
     ) : RecyclerView.ViewHolder(root) {
-        private val itemView: View = root.findViewById(R.id.item_bg)
+        private val itemBg: View = root.findViewById(R.id.item_bg)
         private val tvTitle: TextView = root.findViewById(R.id.text_item)
         private val ivImage: ImageView = root.findViewById(R.id.image_item)
 
@@ -60,9 +60,9 @@ class MenuAdapter(
             tvTitle.text = item.title
             ivImage.setImageResource(item.image)
             if (item.isSelect)
-                itemView.setBackgroundResource(R.drawable.selected)
+                itemBg.setBackgroundResource(R.drawable.selected)
             else
-                itemView.setBackgroundResource(R.drawable.item_bg)
+                itemBg.setBackgroundResource(R.drawable.item_bg)
             root.setOnClickListener {
                 clicker.invoke(layoutPosition, item)
             }

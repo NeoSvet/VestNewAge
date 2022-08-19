@@ -53,11 +53,4 @@ class Tip(context: Context?, private val view: View) {
         view.visibility = View.GONE
         isShow = false
     }
-
-    fun hideAnimated() {
-        if (!isShow) return
-        job?.cancel()
-        view.clearAnimation()
-        view.startAnimation(anHide)
-    }
 }

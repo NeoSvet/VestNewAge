@@ -32,7 +32,7 @@ class LaunchUtils {
     }
 
     private val pref = App.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private var notif_id = START_ID
+    private var notifId = START_ID
     private var notifHelper: NotificationUtils? = null
     val intent = Intent()
 
@@ -287,11 +287,11 @@ class LaunchUtils {
             notifBuilder.setFullScreenIntent(piEmpty, false)
         }
         notifBuilder.setSound(null)
-        notifHelper!!.notify(++notif_id, notifBuilder)
+        notifHelper!!.notify(++notifId, notifBuilder)
     }
 
     private fun showSummaryNotif() {
-        if (notif_id - START_ID < 2) return  //notifications < 2, summary is not need
+        if (notifId - START_ID < 2) return  //notifications < 2, summary is not need
         val notifBuilder = notifHelper!!.getSummaryNotif(
             App.context.getString(R.string.tips),
             NotificationUtils.CHANNEL_TIPS

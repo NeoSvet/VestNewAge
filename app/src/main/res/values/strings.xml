@@ -234,7 +234,6 @@
     <string name="load_background">Загрузка запущена в фоне (см. уведомления)</string>
     <string name="load_already_run">Загрузка уже запущена (см. уведомления)</string>
     <string name="stop">Остановить</string>
-    <string name="download_list">Загрузка списков</string>
     <string name="load_suc_finish">Загрузка успешно завершена</string>
     <string name="cab_fail">Отсутствует доступ к интернету или требуется VPN</string>
     <string name="error_load">Ошибка при загрузке</string>

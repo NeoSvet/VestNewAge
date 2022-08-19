@@ -53,8 +53,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
-    private val helper: BookHelper
-        get() = toiler.helper!!
     override val title: String
         get() = getString(R.string.book)
     private var openedReader = false
@@ -77,7 +75,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (toiler.helper == null) {
+        if (toiler.isNotInit) {
             toiler.init(requireContext())
             arguments?.let {
                 toiler.selectedTab = it.getInt(Const.TAB)

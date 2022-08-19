@@ -15,9 +15,9 @@ import androidx.appcompat.app.AlertDialog;
 import ru.neosvet.vestnewage.R;
 
 public class CustomDialog {
-    private Activity act;
+    private final Activity act;
     private AlertDialog dialog;
-    private View dialogView;
+    private final View dialogView;
     private EditText input = null;
 
     public CustomDialog(Activity act) {
@@ -40,12 +40,12 @@ public class CustomDialog {
     }
 
     public void setTitle(String title) {
-        TextView tv = (TextView) dialogView.findViewById(R.id.title);
+        TextView tv = dialogView.findViewById(R.id.title);
         tv.setText(title);
     }
 
     public void setMessage(@Nullable String msg) {
-        TextView tv = (TextView) dialogView.findViewById(R.id.message);
+        TextView tv = dialogView.findViewById(R.id.message);
         if (msg == null)
             tv.setVisibility(View.GONE);
         else
@@ -53,14 +53,14 @@ public class CustomDialog {
     }
 
     public void setLeftButton(String title, View.OnClickListener click) {
-        Button button = (Button) dialogView.findViewById(R.id.leftButton);
+        Button button = dialogView.findViewById(R.id.leftButton);
         button.setText(title);
         button.setOnClickListener(click);
         button.setVisibility(View.VISIBLE);
     }
 
     public void setRightButton(String title, View.OnClickListener click) {
-        Button button = (Button) dialogView.findViewById(R.id.rightButton);
+        Button button = dialogView.findViewById(R.id.rightButton);
         button.setText(title);
         button.setOnClickListener(click);
         button.setVisibility(View.VISIBLE);

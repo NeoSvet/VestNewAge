@@ -8,8 +8,7 @@ class NeoToast(
     private val view: TextView,
     private val hideEvent: (() -> Unit)?
 ) {
-    var isShow = false
-        private set
+    private var isShow = false
     var autoHide = true
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default)

@@ -5,9 +5,10 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 public class ResizeAnim extends Animation {
-    private int iStart, iSize;
-    private View mView;
-    private boolean hor;
+    private int iStart;
+    private final int iSize;
+    private final View mView;
+    private final boolean hor;
 
     public ResizeAnim(View view, boolean hor, int size) {
         mView = view;

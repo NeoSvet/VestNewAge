@@ -45,9 +45,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private lateinit var dPoems: DateUnit
     private lateinit var dEpistles: DateUnit
     private lateinit var strings: BookStrings
-    var helper: BookHelper? = null
+    private var helper: BookHelper? = null
+    var isNotInit = true
         private set
-    private var isLoadedOtkr: Boolean = false
+    private var isLoadedOtkr = false
     var date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
         set(value) {
@@ -73,6 +74,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             from = context.getString(R.string.from),
             month_is_empty = context.getString(R.string.month_is_empty)
         )
+        isNotInit = false
         openList(true)
     }
 

@@ -24,10 +24,10 @@ import java.io.InputStreamReader
 
 
 class MainToiler : NeoToiler() {
-    private lateinit var updated_page: String
+    private lateinit var updatedPage: String
 
     fun init(context: Context) {
-        updated_page = context.getString(R.string.updated_page)
+        updatedPage = context.getString(R.string.updated_page)
     }
 
     override fun getInputData(): Data = Data.Builder()
@@ -99,7 +99,7 @@ class MainToiler : NeoToiler() {
                     LoaderService.loadPage(s)
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
                     list.add(ListItem(cursor.getString(iTitle), s).apply {
-                        des = updated_page
+                        des = updatedPage
                     })
                 }
             }
