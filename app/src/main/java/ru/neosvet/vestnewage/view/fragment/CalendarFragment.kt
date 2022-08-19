@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
+import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
 import ru.neosvet.vestnewage.view.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
@@ -39,6 +40,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     override val title: String
         get() = getString(R.string.calendar)
     private var openedReader = false
+    private var shownDwnDialog = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,6 +73,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        if (shownDwnDialog)
+            outState.putInt(Const.DIALOG, 0)
         dateDialog?.let { d ->
             outState.putInt(Const.DIALOG, d.date.timeInDays)
             d.dismiss()
@@ -85,9 +89,11 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             if (toiler.isNeedReload())
                 startLoad()
         } else {
-            val d = state.getInt(Const.DIALOG)
-            if (d > 0)
+            val d = state.getInt(Const.DIALOG, -1)
+            if (d > 0) {
                 showDatePicker(DateUnit.putDays(d))
+            } else if (d == 0)
+                showDownloadDialog()
         }
     }
 
@@ -111,6 +117,10 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun openMonth(offset: Int) {
+        if (offset < 0 && toiler.date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && !DateHelper.isLoadedOtkr()) {
+            showDownloadDialog()
+            return
+        }
         binding?.tvDate?.let {
             it.setBackgroundResource(R.drawable.selected)
             lifecycleScope.launch {
@@ -119,6 +129,14 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             }
         }
         toiler.openCalendar(offset)
+    }
+
+    private fun showDownloadDialog() {
+        shownDwnDialog = true
+        val dialog = DownloadDialog(act!!, true).apply {
+            setOnDismissListener { shownDwnDialog = false }
+        }
+        dialog.show()
     }
 
     override fun setStatus(load: Boolean) {

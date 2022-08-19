@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -57,7 +58,10 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         val days = date.timeInDays
         val min = if (DateHelper.isLoadedOtkr())
             DateHelper.MIN_DAYS_OLD_BOOK
-        else
+        else if (days == DateHelper.MIN_DAYS_NEW_BOOK) {
+            // доступна для того, чтобы предложить скачать Послания за 2004-2015
+            return !LoaderService.isRun
+        } else
             DateHelper.MIN_DAYS_NEW_BOOK
         return days > min
     }
