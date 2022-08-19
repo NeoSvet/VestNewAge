@@ -28,15 +28,6 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         changeMonth(-1)
     }
     private val calendar = arrayListOf<CalendarItem>()
-    private val prev: Boolean
-        get() {
-            return if (date.year == 2016 && date.month == 1) {
-                val book = BookHelper()
-                book.isLoadedOtkr()
-            } else !(date.year == 2004 && date.month == 8)
-        }
-    private val next: Boolean
-        get() = if (date.year == todayY) date.month != todayM else true
     private var time: Long = 0
     private var masterLoader: MasterLoader? = null
 
@@ -51,10 +42,25 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         loadIfNeed = false
         val list = loadMonth()
         if (loadFromStorage()) {
-            postState(NeoState.Calendar(date.calendarString, prev, next, calendar))
+            postState(NeoState.Calendar(date.calendarString, checkPrev(), checkNext(), calendar))
             postState(NeoState.LongValue(time))
             if (isRun) loadPages(list)
         }
+    }
+
+    private fun checkNext(): Boolean {
+        val max = DateUnit.initToday().apply { day = 1 }.timeInDays
+        return date.timeInDays < max
+    }
+
+    private fun checkPrev(): Boolean {
+        val days = date.timeInDays
+        val isLoadedOtkr = BookHelper().isLoadedOtkr()
+        val min = if (isLoadedOtkr)
+            BookHelper.MIN_DAYS_OLD_BOOK
+        else
+            BookHelper.MIN_DAYS_NEW_BOOK
+        return days > min
     }
 
     private suspend fun loadPages(pages: List<String>) {
@@ -111,7 +117,14 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             if (calendar.isEmpty())
                 createField()
             if (loadFromStorage()) {
-                postState(NeoState.Calendar(date.calendarString, prev, next, calendar))
+                postState(
+                    NeoState.Calendar(
+                        date.calendarString,
+                        checkPrev(),
+                        checkNext(),
+                        calendar
+                    )
+                )
                 postState(NeoState.LongValue(time))
             } else {
                 postState(NeoState.Calendar(date.calendarString, false, false, calendar))
