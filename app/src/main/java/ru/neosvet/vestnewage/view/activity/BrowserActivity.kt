@@ -182,7 +182,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 binding.content.etSearch.setText(helper.request)
             }
         }
-        if (helper.isFullScreen) binding.btnFullScreen.post {
+        if (helper.isFullScreen) binding.bottomBar.post {
             switchFullScreen(true)
         }
     }
@@ -274,6 +274,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private fun setViews() = binding.run {
         bBack.setOnClickListener { finish() }
         fabNav.setOnClickListener {
+            if (helper.isNavButton.not()) {
+                switchFullScreen(true)
+                return@setOnClickListener
+            }
             headBar.blocked()
             if (navIsTop) {
                 content.wvBrowser.scrollTo(0, 0)
@@ -297,8 +301,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
         if (helper.isNavButton)
             setCheckItem(menu.buttons, true)
-        else
-            fabNav.isVisible = false
+        else {
+            btnFullScreen.alpha = 0f
+            fabNav.setImageResource(R.drawable.ic_fullscreen)
+        }
         if (helper.isMiniTop)
             setCheckItem(menu.top, true)
         if (helper.isAutoReturn)
@@ -370,15 +376,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
 
         wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, oldScrollY: Int ->
-            if (helper.isNavButton) {
-                if (scrollY > 300) {
-                    binding.fabNav.setImageResource(R.drawable.ic_top)
-                    navIsTop = true
-                } else {
-                    binding.fabNav.setImageResource(R.drawable.ic_bottom)
-                    navIsTop = false
-                }
-            }
+            if (helper.isNavButton)
+                setNavButton(scrollY)
             if (helper.isFullScreen) return@setOnScrollChangeListener
             if (isTouch) {
                 isScrollTop = scrollY >= oldScrollY
@@ -438,6 +437,16 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         bClear.setOnClickListener { etSearch.setText("") }
     }
 
+    private fun setNavButton(scrollY: Int) {
+        if (scrollY > 300) {
+            binding.fabNav.setImageResource(R.drawable.ic_top)
+            navIsTop = true
+        } else {
+            binding.fabNav.setImageResource(R.drawable.ic_bottom)
+            navIsTop = false
+        }
+    }
+
     private fun initTheme() = binding.content.run {
         toiler.lightTheme = helper.isLightTheme
         val context = this@BrowserActivity
@@ -456,7 +465,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         headBar = HeadBar(
             mainView = ivHeadBack,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
-            additionViews = listOf(btnFullScreen, btnGodWords, tvGodWords)
+            additionViews = listOf(btnGodWords, tvGodWords, btnFullScreen)
         ) {
             if (helper.link.contains(Const.DOCTRINE))
                 Lib.openInApps(NetConst.DOCTRINE_SITE, null)
@@ -473,11 +482,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private fun switchFullScreen(value: Boolean) {
         helper.isFullScreen = value
         if (value) {
-            binding.fabNav.isVisible = false
+            setNavVisible(false)
             headBar.hide()
             bottomBlocked()
         } else {
-            binding.fabNav.isVisible = helper.isNavButton
+            setNavVisible(true)
             headBar.show()
             bottomUnblocked()
         }
@@ -519,7 +528,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
-                    fabNav.isVisible = helper.isNavButton
+                    btnFullScreen.alpha = if (helper.isNavButton)
+                        1f else 0f
+                    setNavVisible(true)
                 }
                 R.id.nav_minitop -> {
                     helper.isMiniTop = helper.isMiniTop.not()
@@ -647,7 +658,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
-        bottomUnblocked()
+        if (!helper.isFullScreen)
+            bottomUnblocked()
     }
 
     private fun connectChanged(connected: Boolean) {
@@ -662,11 +674,21 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     private fun bottomBlocked() {
         binding.bottomBar.isVisible = false
-        binding.fabNav.isVisible = false
+        setNavVisible(false)
     }
 
     private fun bottomUnblocked() {
         binding.bottomBar.isVisible = true
-        binding.fabNav.isVisible = helper.isNavButton
+        setNavVisible(true)
+    }
+
+    private fun setNavVisible(value: Boolean) = binding.run {
+        if (value) {
+            if (helper.isNavButton)
+                setNavButton(content.wvBrowser.scrollY)
+            else
+                fabNav.setImageResource(R.drawable.ic_fullscreen)
+        }
+        fabNav.isVisible = value
     }
 }
