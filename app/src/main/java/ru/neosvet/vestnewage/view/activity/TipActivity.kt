@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import com.google.android.material.snackbar.Snackbar
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.TipActivityBinding
@@ -73,6 +74,22 @@ class TipActivity : AppCompatActivity() {
         initTip(getUnit())
         binding.btnOk.setOnClickListener {
             onBackPressed()
+        }
+        binding.btnOffAll.setOnClickListener {
+            val editor = pref!!.edit()
+            TipName.values().forEach {
+                editor.putBoolean(it.toString(), false)
+            }
+            editor.apply()
+            Snackbar.make(
+                binding.tvTip,
+                getString(R.string.look_tips_in_help),
+                Snackbar.LENGTH_SHORT
+            ).setBackgroundTint(getColor(R.color.colorPrimary))
+                .setActionTextColor(getColor(R.color.colorAccentLight))
+                .setAction(android.R.string.ok) {
+                    onBackPressed()
+                }.show()
         }
     }
 

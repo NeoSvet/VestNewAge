@@ -32,6 +32,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/btn_off_all"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="6dp"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:text="@string/off_all_tips"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/btn_ok"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_ok" />
+
+    <Button
         android:id="@+id/btn_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
