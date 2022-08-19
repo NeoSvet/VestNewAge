@@ -121,6 +121,7 @@ class BrowserHelper(context: Context) {
     }
 
     fun showTip() {
+        TipActivity.showTipIfNeed(TipName.BROWSER_FULLSCREEN)
         TipActivity.showTipIfNeed(TipName.BROWSER_PANEL)
     }
 }

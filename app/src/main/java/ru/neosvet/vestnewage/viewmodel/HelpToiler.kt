@@ -190,8 +190,10 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                 TipActivity.showTip(TipName.MAIN_STAR)
             TIP_CALENDAR ->
                 TipActivity.showTip(TipName.CALENDAR)
-            TIP_BROWSER ->
+            TIP_BROWSER -> {
+                TipActivity.showTip(TipName.BROWSER_FULLSCREEN)
                 TipActivity.showTip(TipName.BROWSER_PANEL)
+            }
         }
     }
 

@@ -31,7 +31,7 @@ data class TipUnit(
 )
 
 enum class TipName {
-    MAIN_STAR, CALENDAR, BROWSER_PANEL
+    MAIN_STAR, CALENDAR, BROWSER_PANEL, BROWSER_FULLSCREEN
 }
 
 class TipActivity : AppCompatActivity() {
@@ -96,8 +96,8 @@ class TipActivity : AppCompatActivity() {
     private fun initTip(tip: TipUnit) = binding.run {
         tvTip.text = tip.message
         ivTip.setImageResource(tip.imgId)
+        val parent = ConstraintLayout.LayoutParams.PARENT_ID
         ivTip.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            val parent = ConstraintLayout.LayoutParams.PARENT_ID
             if (tip.alignV == AlignV.BOTTOM) {
                 bottomToTop = btnOk.id
                 topToTop = -1
@@ -121,6 +121,12 @@ class TipActivity : AppCompatActivity() {
                     topToBottom = ivTip.id
                 else
                     bottomToTop = ivTip.id
+                if (tip.alignH == AlignH.CENTER)
+                    endToEnd = parent
+                else if (tip.alignH == AlignH.RIGHT) {
+                    startToStart = -1
+                    endToEnd = parent
+                }
             }
             ivArrow.isVisible = true
             tvTip.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -165,6 +171,13 @@ class TipActivity : AppCompatActivity() {
                 alignH = AlignH.CENTER,
                 alignV = AlignV.BOTTOM,
                 addArrow = false
+            )
+            TipName.BROWSER_FULLSCREEN -> TipUnit(
+                message = getString(R.string.tip_browser2),
+                imgId = R.drawable.tip_browser2,
+                alignH = AlignH.LEFT,
+                alignV = AlignV.TOP,
+                addArrow = true
             )
         }
 }
