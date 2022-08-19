@@ -361,13 +361,12 @@ class PageStorage {
         isClosed = true
     }
 
-    fun deletePages(list: MutableList<String>) {
+    fun deletePages(list: List<String>) {
         list.forEach {
             val id = getPageId(it)
             deleteTitle(id)
             deleteParagraphs(id)
         }
-        list.clear()
     }
 
     fun replaceId(aId: Int, bId: Int) {

@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -104,31 +105,32 @@ class BookLoader : Loader {
     }
 
     private fun saveData(date: String) {
-        if (title.size > 0) {
-            val storage = PageStorage()
-            storage.open(date)
-            val list = if (storage.isOldBook) null
-            else storage.getLinksList()
-            var row = ContentValues()
-            row.put(Const.TIME, System.currentTimeMillis())
-            if (!storage.updateTitle(1, row))
+        if (title.isEmpty()) return
+        val storage = PageStorage()
+        storage.open(date)
+        //clear storage:
+        val isPoem = links[0].isPoem
+        val list = storage.getLinksList()
+            .filter { link -> link.isPoem == isPoem && !links.contains(link) }
+        if (list.isNotEmpty()) storage.deletePages(list)
+        //fill in storage:
+        var row = ContentValues()
+        row.put(Const.TIME, System.currentTimeMillis())
+        if (!storage.updateTitle(1, row))
+            storage.insertTitle(row)
+        for (i in 0 until title.size) {
+            row = ContentValues()
+            row.put(Const.TITLE, title[i])
+            // пытаемся обновить запись:
+            if (!storage.updateTitle(links[i], row)) {
+                // обновить не получилось, добавляем:
+                row.put(Const.LINK, links[i])
                 storage.insertTitle(row)
-            for (i in 0 until title.size) {
-                list?.remove(links[i])
-                row = ContentValues()
-                row.put(Const.TITLE, title[i])
-                // пытаемся обновить запись:
-                if (!storage.updateTitle(links[i], row)) {
-                    // обновить не получилось, добавляем:
-                    row.put(Const.LINK, links[i])
-                    storage.insertTitle(row)
-                }
             }
-            list?.let { storage.deletePages(it) }
-            storage.close()
-            title.clear()
-            links.clear()
         }
+        storage.close()
+        title.clear()
+        links.clear()
     }
 
     fun loadDoctrineList() {
