@@ -371,14 +371,14 @@ class BrowserToiler : NeoToiler() {
 
     private fun getMinMY(): String {
         if (link.isPoem) {
-            val d = DateUnit.putYearMonth(2016, 2)
+            val d = DateUnit.putDays(BookHelper.MIN_DAYS_POEMS)
             return d.my
         }
         val book = BookHelper()
         val d = if (book.isLoadedOtkr())
-            DateUnit.putYearMonth(2004, 8)
+            DateUnit.putDays(BookHelper.MIN_DAYS_OLD_BOOK)
         else
-            DateUnit.putYearMonth(2016, 1)
+            DateUnit.putDays(BookHelper.MIN_DAYS_NEW_BOOK)
         return d.my
     }
 }

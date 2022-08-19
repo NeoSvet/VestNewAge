@@ -242,7 +242,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     private fun openMonth(plus: Boolean) {
         val d = toiler.date
         if (!plus && toiler.isPoemsTab.not()) {
-            if (d.month == 1 && d.year == 2016 && helper.isLoadedOtkr().not()) {
+            if (d.timeInDays == BookHelper.MIN_DAYS_NEW_BOOK && helper.isLoadedOtkr().not()) {
                 showDownloadDialog()
                 return
             }

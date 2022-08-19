@@ -63,8 +63,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             dPoems = DateUnit.putDays(it.poemsDays)
             dEpistles = DateUnit.putDays(it.epistlesDays)
         }
-        if (isLoadedOtkr.not() && dEpistles.year < 2016)
-            dEpistles = DateUnit.putYearMonth(2016, 1)
         strings = BookStrings(
             rnd_epistle = context.getString(R.string.rnd_epistle),
             rnd_poem = context.getString(R.string.rnd_poem),
@@ -137,7 +135,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             var t: String
             var s: String
             var cursor: Cursor
-            if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
+            if (d.timeInDays == BookHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
                 storage.open("12.04")
                 cursor = storage.getListAll()
@@ -192,24 +190,25 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     private fun checkNext(): Boolean {
         val max = if (isPoemsTab)
-            DateUnit.initToday().apply { day = 1 }
+            DateUnit.initToday().apply { day = 1 }.timeInDays
         else
-            DateUnit.putYearMonth(2016, 9)
-        return date.timeInDays < max.timeInDays
+            BookHelper.MAX_DAYS_BOOK
+        return date.timeInDays < max
     }
 
     private fun checkPrev(): Boolean {
         val d = date
+        val days = d.timeInDays
         val min = if (isPoemsTab) {
-            DateUnit.putYearMonth(2016, 2)
-        } else if (d.month == 1 && d.year == 2016 && isLoadedOtkr.not()) {
+            BookHelper.MIN_DAYS_POEMS
+        } else if (days == BookHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
             // доступна для того, чтобы предложить скачать Послания за 2004-2015
             return !LoaderService.isRun
-        } else if (helper?.isLoadedOtkr() == true)
-            DateUnit.putYearMonth(2004, 8)
+        } else if (isLoadedOtkr)
+            BookHelper.MIN_DAYS_OLD_BOOK
         else
-            DateUnit.putYearMonth(2016, 1)
-        return d.timeInDays > min.timeInDays
+            BookHelper.MIN_DAYS_NEW_BOOK
+        return days > min
     }
 
     private suspend fun openDoctrine() {
