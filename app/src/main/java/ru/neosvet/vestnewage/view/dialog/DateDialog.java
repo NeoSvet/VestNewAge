@@ -19,6 +19,7 @@ import java.util.List;
 
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.DateUnit;
+import ru.neosvet.vestnewage.helper.DateHelper;
 
 public class DateDialog extends Dialog implements View.OnClickListener {
     private final Activity act;
@@ -33,6 +34,10 @@ public class DateDialog extends Dialog implements View.OnClickListener {
         super(act);
         this.act = act;
         this.date = DateUnit.putDays(date.getTimeInDays());
+        if (DateHelper.isLoadedOtkr()) {
+            min_year = 2004;
+            min_month = 8;
+        }
     }
 
     public void setResult(Result result) {

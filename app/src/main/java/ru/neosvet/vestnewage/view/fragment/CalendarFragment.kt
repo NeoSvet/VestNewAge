@@ -154,10 +154,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
 
     private fun showDatePicker(d: DateUnit) {
         dateDialog = DateDialog(act, d).apply {
-            if (DateHelper.isLoadedOtkr()) {
-                setMinMonth(8)
-                setMinYear(2004)
-            }
             setResult(this@CalendarFragment)
             setOnDismissListener { dateDialog = null }
             show()

@@ -291,11 +291,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             setResult(this@BookFragment)
             if (toiler.isPoemsTab) {
                 setMinMonth(2) //feb
+                setMinYear(2016)
             } else { //epistles
-                if (DateHelper.isLoadedOtkr()) {
-                    setMinMonth(8) //aug
-                    setMinYear(2004)
-                }
                 setMaxMonth(9) //sep
                 setMaxYear(2016)
             }
