@@ -11,6 +11,7 @@ object DateHelper {
     const val MIN_DAYS_NEW_BOOK = 16801 //Январь 2016
     const val MAX_DAYS_BOOK = 17045 //Сентябрь 2016
 
+    @JvmStatic
     fun isLoadedOtkr(): Boolean {
         if (loadedOtkr == null) {
             val pref = App.context.getSharedPreferences(BookHelper.TAG, Context.MODE_PRIVATE)
@@ -19,6 +20,7 @@ object DateHelper {
         return loadedOtkr!!
     }
 
+    @JvmStatic
     fun setLoadedOtkr(value: Boolean) {
         loadedOtkr = value
         val pref = App.context.getSharedPreferences(BookHelper.TAG, Context.MODE_PRIVATE)
