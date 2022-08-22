@@ -8,6 +8,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
+import ru.neosvet.vestnewage.loader.MasterLoader
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
@@ -19,7 +21,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
 
-class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
+class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHandlerLite {
     private val paging = NeoPaging(this)
     override val factory: SearchFactory by lazy {
         SearchFactory(storage, paging)
@@ -36,6 +38,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
         private set
     private var loadDate: String? = null
     private var loadLink: String? = null
+    private var loader: MasterLoader? = null
+    private var msgLoad = ""
 
     private val storage = SearchStorage()
     private val engine = SearchEngine(
@@ -70,15 +74,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
     override suspend fun doLoad() {
         loadDate?.let { date ->
             val d = dateFromString(date)
-            postState(
-                NeoState.Message(
-                    String.format(strings.format_load, d.monthString + " " + d.year)
-                )
-            )
-            val loader = CalendarLoader()
-            loader.setDate(d.year, d.month)
-            loader.loadListMonth(false)
-            val links = loader.getLinkList().sorted()
+            msgLoad = String.format(strings.format_load, d.monthString + " " + d.year)
+            postState(NeoState.Message(msgLoad))
+            if (loader == null)
+                loader = MasterLoader(this)
+            loader?.loadMonth(d.month, d.year)
+            val calendar = CalendarLoader()
+            calendar.setDate(d.year, d.month)
+            val links = calendar.getLinkList() //.sorted()
             val pageLoader = PageLoader()
             storage.deleteByLink(date)
             for (link in links) {
@@ -108,8 +111,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
     }
 
     override fun cancel() {
-        super.cancel()
+        loader?.cancel()
         engine.stop()
+        super.cancel()
     }
 
     override fun getInputData(): Data {
@@ -279,5 +283,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
         val result = cursor.moveToFirst()
         cursor.close()
         return result
+    }
+
+    override fun postPercent(value: Int) {
+        setState(NeoState.Message("$msgLoad ($value%)"))
     }
 }
