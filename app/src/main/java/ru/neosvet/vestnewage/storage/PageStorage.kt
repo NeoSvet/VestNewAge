@@ -58,6 +58,12 @@ class PageStorage {
         private set
     val isOldBook: Boolean
         get() = year in 2004..2015
+    val isArticle: Boolean
+        get() = name == DataBase.ARTICLES
+    val isDoctrine: Boolean
+        get() = name == DataBase.DOCTRINE
+    val isBook: Boolean
+        get() = !isArticle && patternBook.matcher(name).matches()
 
     fun open(name: String) {
         val n = if (name.contains(Const.HTML))
@@ -84,7 +90,7 @@ class PageStorage {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle() || isDoctrine() || link.contains("2004") || link.contains("pred")) {
+        return if (isArticle || isDoctrine || link.contains("2004") || link.contains("pred")) {
             title
         } else {
             var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
@@ -135,15 +141,6 @@ class PageStorage {
         return exists
     }
 
-    fun isArticle(): Boolean =
-        name == DataBase.ARTICLES
-
-    fun isDoctrine(): Boolean =
-        name == DataBase.DOCTRINE
-
-    fun isBook(): Boolean =
-        !isArticle() && patternBook.matcher(name).matches()
-
     fun getList(isPoems: Boolean): Cursor {
         val selection = if (isPoems) Const.LINK + DataBase.LIKE
         else Const.LINK + " NOT" + DataBase.LIKE
@@ -172,7 +169,7 @@ class PageStorage {
     }
 
     private fun getCursor(isPoems: Boolean): Cursor? {
-        val cursor = if (isDoctrine()) db.query(
+        val cursor = if (isDoctrine) db.query(
             Const.TITLE, null, null,
             null, null, null, DataBase.ID
         ) else if (isOldBook) getListAll()
@@ -185,7 +182,7 @@ class PageStorage {
             cursor.close()
             return null
         }
-        if (isDoctrine())
+        if (isDoctrine)
             cursor.moveToNext()
         return cursor
     }

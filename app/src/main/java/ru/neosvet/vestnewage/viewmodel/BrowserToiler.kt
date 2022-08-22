@@ -173,7 +173,7 @@ class BrowserToiler : NeoToiler() {
             val s = storage.getPageTitle(cursor.getString(iTitle), link)
             val iTime = cursor.getColumnIndex(Const.TIME)
             d = DateUnit.putMills(cursor.getLong(iTime))
-            if (storage.isArticle()) //обновлять только статьи
+            if (storage.isArticle) //обновлять только статьи
                 isNeedUpdate =
                     DateUnit.initNow().timeInSeconds - d.timeInSeconds > PERIOD_FOR_REFRESH
             bw.write("<html><head>\n<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n")
@@ -208,7 +208,7 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         bw.write("<div style='margin-top:20px' class='print2'>\n")
-        if (storage.isBook() || helper.isDoctrine) {
+        if (storage.isBook || helper.isDoctrine) {
             bw.write(SCRIPT)
             bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
             bw.write(SCRIPT)
