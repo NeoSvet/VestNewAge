@@ -22,7 +22,7 @@ class SearchEngine(
         suspend fun notifyPercent(p: Int)
         suspend fun notifyDate(d: DateUnit)
         fun clearLast()
-        suspend fun notifySpecialEvent(m: Long)
+        suspend fun notifySpecialEvent(e: Long)
         suspend fun searchFinish()
     }
 
@@ -35,7 +35,8 @@ class SearchEngine(
         const val MODE_LINKS = 4
         const val MODE_BOOK = 5
         const val MODE_DOCTRINE = 6
-        const val MODE_RESULTS = 7
+        const val MODE_RESULT_TEXT = 7
+        const val MODE_RESULT_PAR = 8
         private const val OR = " OR "
         private const val startSelect = "<font color='#99ccff'><b>"
         private const val endSelect = "</b></font>"
@@ -73,8 +74,10 @@ class SearchEngine(
         countMatches = 0
         storage.open()
         isRun = true
-        if (mode == MODE_RESULTS)
-            searchInResults()
+        if (mode == MODE_RESULT_TEXT)
+            searchInResultText()
+        else if (mode == MODE_RESULT_PAR)
+            searchInResultPar()
         else
             searchInPages()
         pages.close()
@@ -138,7 +141,7 @@ class SearchEngine(
         pages.close()
     }
 
-    private suspend fun searchInResults() {
+    private suspend fun searchInResultText() {
         val links = mutableListOf<String>()
         val cursor = storage.getResults(helper.isDesc)
         if (cursor.moveToFirst()) {
@@ -163,6 +166,56 @@ class SearchEngine(
         }
         pages.close()
         links.clear()
+    }
+
+    private suspend fun searchInResultPar() {
+        val items = mutableListOf<ListItem>()
+        val cursor = storage.getResults(helper.isDesc)
+        if (cursor.moveToFirst()) {
+            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iTitle = cursor.getColumnIndex(Const.TITLE)
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            do {
+                val d = cursor.getString(iDes)
+                if (d.isNullOrEmpty().not() && d.contains("<")) {
+                    val item = ListItem(cursor.getString(iTitle), cursor.getString(iLink)).apply {
+                        des = Lib.withOutTags(d)
+                    }
+                    items.add(item)
+                }
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        if (items.isEmpty()) {
+            searchInResultText()
+            return
+        }
+        storage.clear()
+
+        parent.clearLast()
+        var n = 1
+        var u: Int
+        for (i in items.indices) {
+            val item = items[i]
+            pages.open(item.link)
+            val list = getResultList(n, item.link).toMutableList()
+            u = 0
+            while (u < list.size) when {
+                item.des.contains(Lib.withOutTags(list[u].des)) -> u++
+                u + 1 < list.size && list[u].id == list[u + 1].id -> {
+                    list[u].des = list[u + 1].des
+                    list.removeAt(u + 1)
+                }
+                else -> list.removeAt(u)
+            }
+            if (list.isNotEmpty()) {
+                listToStorage(list)
+                n += list.size
+            }
+            parent.notifyPercent(i.percent(items.size))
+        }
+        pages.close()
+        items.clear()
     }
 
     private fun searchInLink(startId: Int, link: String?): List<BaseItem> {
@@ -348,22 +401,19 @@ class SearchEngine(
                         if (k < con.size) con[k] = true
                     }
                     i = s.indexOf(w, i + w.length)
-                }
+                } //end перебор совпадений
                 k++
-            }
-            if (sb.contains(endSelect)) {
-                list[n].string = sb.toString()
-                n++
-            } else when {
+            } //end перебор слов
+            when {
+                sb.contains(endSelect) -> {
+                    list[n].string = sb.toString()
+                    n++
+                }
                 n + 1 < list.size && id == list[n + 1].id -> {
                     list[n].des = list[n + 1].des
                     list.removeAt(n + 1)
                 }
-                n > 0 && id == list[n - 1].id ->
-                    list.removeAt(n)
-                else -> {
-                    list.removeAt(n)
-                }
+                else -> list.removeAt(n)
             }
         }
         if (helper.isAllWords && n > 0 && con.contains(false)) {

@@ -77,6 +77,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         get() = manager.findFirstVisibleItemPosition() + SearchFactory.min
     override lateinit var modeAdapter: ArrayAdapter<String>
         private set
+    private lateinit var resultAdapter: ArrayAdapter<String>
 
     private var settings: SearchDialog? = null
     private var jobResult: Job? = null
@@ -287,6 +288,12 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             resources.getStringArray(R.array.search_mode)
         )
         modeAdapter.setDropDownViewResource(R.layout.spinner_item)
+        resultAdapter = ArrayAdapter(
+            requireContext(), R.layout.spinner_button,
+            resources.getStringArray(R.array.search_mode_results)
+        )
+        resultAdapter.setDropDownViewResource(R.layout.spinner_item)
+        content.sSearchInResults.adapter = resultAdapter
         bPanelSwitch.setOnClickListener {
             if (content.pAdditionSet.isVisible) {
                 bPanelSwitch.setImageResource(R.drawable.ic_bottom)
@@ -317,9 +324,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         act?.hideToast()
         softKeyboard.hide()
         setStatus(true)
-        val mode = if (content.cbSearchInResults.isChecked) {
+        val i = content.sSearchInResults.selectedItemPosition
+        val mode = if (i > 0) {
             tvStatus.text = getString(R.string.search)
-            SearchEngine.MODE_RESULTS
+            if (i == 1) SearchEngine.MODE_RESULT_TEXT
+            else SearchEngine.MODE_RESULT_PAR
         } else helper.mode
         val request = etSearch.text.toString().trim()
         adResult.submitData(lifecycle, PagingData.empty())
@@ -436,7 +445,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         binding?.run {
             bPanelSwitch.isVisible = false
             content.pAdditionSet.isVisible = false
-            content.cbSearchInResults.isChecked = false
+            content.sSearchInResults.setSelection(0)
         }
         act?.showStaticToast(getString(R.string.search_no_results))
     }

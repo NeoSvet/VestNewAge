@@ -22,23 +22,30 @@
             android:padding="0dp"
             android:visibility="gone">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/cbSearchInResults"
-                style="@style/CheckBox"
+            <Spinner
+                android:id="@+id/sSearchInResults"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/def_indent"
-                android:checked="false"
-                android:text="@string/search_in_results"
+                android:layout_margin="@dimen/def_indent"
+                android:background="@drawable/button"
+                android:paddingEnd="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                style="@style/InTextFieldButton"
+                android:layout_margin="0dp"
+                android:src="@drawable/ic_triangle_down"
+                app:layout_constraintBottom_toBottomOf="@id/sSearchInResults"
+                app:layout_constraintEnd_toEndOf="@id/sSearchInResults"
+                app:layout_constraintTop_toTopOf="@id/sSearchInResults" />
 
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/svLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/half_indent"
-                app:layout_constraintTop_toBottomOf="@id/cbSearchInResults">
+                app:layout_constraintTop_toBottomOf="@id/sSearchInResults">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tvLabel"

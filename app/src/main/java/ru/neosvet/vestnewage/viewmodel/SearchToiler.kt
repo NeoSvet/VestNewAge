@@ -167,7 +167,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent {
         helper.request = request
         scope.launch {
             isRun = true
-            labelMode = if (mode == SearchEngine.MODE_RESULTS)
+            labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
                 strings.search_in_results
             else
                 strings.search_mode[mode]

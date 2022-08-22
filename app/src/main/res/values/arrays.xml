@@ -92,6 +92,11 @@
         <item>В разделе «Календарь»</item>
         <item>На экране чтения</item>
     </string-array>
+    <string-array name="search_mode_results">
+        <item>Новый поиск</item>
+        <item>Искать в найденных текстах</item>
+        <item>Искать в найденных абзацах</item>
+    </string-array>
     <string-array name="search_options">
         <item>Обратное направление&#160;</item>
         <item>Учитывать регистр</item>
