@@ -98,27 +98,6 @@ class BrowserHelper(context: Context) {
         prog--
     }
 
-    fun sharePage(context: Context, title: String) {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "text/plain"
-        if (isDoctrine) {
-            shareIntent.putExtra(
-                Intent.EXTRA_TEXT,
-                context.getString(R.string.doctrine_pages) +
-                        link.substring(Const.DOCTRINE.length) + Const.N + NetConst.DOCTRINE_SITE
-            )
-        } else {
-            var s: String = title
-            if (s.length > 9)
-                s = s.substring(9) + " (" +
-                        context.getString(R.string.from) +
-                        " " + s.substring(0, 8) + ")"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, s + Const.N + NetConst.SITE + link)
-        }
-        val intent = Intent.createChooser(shareIntent, context.getString(R.string.share))
-        context.startActivity(intent)
-    }
-
     fun showTip() {
         TipActivity.showTipIfNeed(TipName.BROWSER_FULLSCREEN)
         TipActivity.showTipIfNeed(TipName.BROWSER_PANEL)

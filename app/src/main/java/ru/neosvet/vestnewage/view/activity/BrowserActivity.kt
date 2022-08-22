@@ -32,6 +32,7 @@ import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
+import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
@@ -53,8 +54,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         val buttons: MenuItem,
         val top: MenuItem,
         val autoreturn: MenuItem,
-        val refresh: MenuItem,
-        val share: MenuItem
+        val refresh: MenuItem
     )
 
     private val softKeyboard: SoftKeyboard by lazy {
@@ -511,7 +511,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         bottomBar.menu.let {
             menu = NeoMenu(
                 refresh = it.getItem(4),
-                share = it.getItem(1),
                 buttons = it.getItem(0).subMenu.getItem(0),
                 top = it.getItem(0).subMenu.getItem(1),
                 autoreturn = it.getItem(0).subMenu.getItem(2),
@@ -524,7 +523,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 R.id.nav_refresh ->
                     toiler.refresh()
                 R.id.nav_share ->
-                    helper.sharePage(this@BrowserActivity, getPageTitle())
+                    ShareDialog(this@BrowserActivity, helper.link).show()
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
@@ -631,7 +630,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
-                menu.share.isVisible = state.isOtkr.not()
             }
             NeoState.Ready ->
                 binding.tvNotFound.isVisible = true

@@ -117,6 +117,7 @@
     <string name="tip_end_list">Достигнут конец списка</string>
     <string name="not_found_page">Страница не найдена и не может быть загружена</string>
     <string name="share">Поделиться</string>
+    <string name="copied">Скопировано</string>
     <string name="in_markers">В закладки</string>
     <string name="opt_scale">Оптимальный масштаб</string>
     <string name="src_scale">Исходный масштаб</string>

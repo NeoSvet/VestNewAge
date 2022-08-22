@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Theme.DialogTheme"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/field"
+    android:orientation="vertical"
+    android:padding="@dimen/def_indent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:padding="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bShare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/def_indent"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:paddingBottom="@dimen/def_indent"
+        android:text="@string/share" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bCopy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/def_indent"
+        android:paddingStart="@dimen/double_indent"
+        android:paddingTop="@dimen/def_indent"
+        android:paddingEnd="@dimen/double_indent"
+        android:paddingBottom="@dimen/def_indent"
+        android:text="@string/copy" />
+
+</LinearLayout>
