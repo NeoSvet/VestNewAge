@@ -27,7 +27,7 @@ class SearchDialog(
     private val parent: Parent
 ) : Dialog(act), DateDialog.Result {
     interface Parent {
-        val modes: ArrayAdapter<String>
+        val modeAdapter: ArrayAdapter<String>
         val helper: SearchHelper
     }
 
@@ -57,7 +57,7 @@ class SearchDialog(
     private fun setViews() = binding.run {
         bStartRange.text = formatDate(start)
         bEndRange.text = formatDate(end)
-        sMode.adapter = parent.modes
+        sMode.adapter = parent.modeAdapter
         sMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onItemSelected(

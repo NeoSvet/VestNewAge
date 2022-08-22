@@ -75,7 +75,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
     private val listPosition: Int
         get() = manager.findFirstVisibleItemPosition() + SearchFactory.min
-    override lateinit var modes: ArrayAdapter<String>
+    override lateinit var modeAdapter: ArrayAdapter<String>
         private set
 
     private var settings: SearchDialog? = null
@@ -282,11 +282,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         bStop.setOnClickListener { toiler.cancel() }
-        modes = ArrayAdapter(
+        modeAdapter = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode)
         )
-        modes.setDropDownViewResource(R.layout.spinner_item)
+        modeAdapter.setDropDownViewResource(R.layout.spinner_item)
         bPanelSwitch.setOnClickListener {
             if (content.pAdditionSet.isVisible) {
                 bPanelSwitch.setImageResource(R.drawable.ic_bottom)
