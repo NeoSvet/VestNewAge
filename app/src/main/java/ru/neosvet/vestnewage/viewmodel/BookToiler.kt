@@ -18,9 +18,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.isPoem
+import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -167,14 +165,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 do {
                     s = cursor.getString(iLink)
-                    if (s.contains("2004") || s.contains("pred"))
-                        t = cursor.getString(iTitle)
-                    else {
-                        t = s.substring(s.lastIndexOf("/") + 1, s.lastIndexOf("."))
-                        if (t.contains("_")) t = t.substring(0, t.indexOf("_"))
-                        if (t.contains("#")) t = t.substring(0, t.indexOf("#"))
-                        t = cursor.getString(iTitle) + " (" + strings.from + " $t)"
-                    }
+                    t = if (s.noHasDate)
+                        cursor.getString(iTitle)
+                    else
+                        cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
                     list.add(ListItem(t, s))
                 } while (cursor.moveToNext())
             } else dModList = d

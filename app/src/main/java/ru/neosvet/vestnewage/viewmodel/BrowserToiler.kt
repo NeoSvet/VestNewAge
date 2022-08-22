@@ -17,6 +17,7 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -58,6 +59,9 @@ class BrowserToiler : NeoToiler() {
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()
     }
+
+    private val dateFromLink: DateUnit
+        get() = DateUnit.parse(link.date)
 
     fun init(context: Context) {
         strings = BrowserStrings(
@@ -313,12 +317,6 @@ class BrowserToiler : NeoToiler() {
         }
     }
 
-    private fun getDateFromLink(): DateUnit {
-        var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
-        if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
-        return DateUnit.parse(s)
-    }
-
     fun nextPage() {
         storage.open(link)
         storage.getNextPage(link)?.let {
@@ -330,7 +328,7 @@ class BrowserToiler : NeoToiler() {
             return
         }
         val today = DateUnit.initToday().my
-        val d: DateUnit = getDateFromLink()
+        val d = dateFromLink
         if (d.my == today) {
             setState(NeoState.Success)
             return
@@ -355,7 +353,7 @@ class BrowserToiler : NeoToiler() {
             return
         }
         val min: String = getMinMY()
-        val d = getDateFromLink()
+        val d = dateFromLink
         if (d.my == min) {
             setState(NeoState.Success)
             return

@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.isPoem
 import java.util.regex.Pattern
 
@@ -38,9 +39,7 @@ class PageStorage {
                 } else if (s.contains("-")) { ///2005/01-02.08.05.html
                     s = s.substring(s.indexOf("-") + 4, s.lastIndexOf("."))
                 } else { //http://blagayavest.info/poems/11.03.17.html
-                    s = s.substring(s.lastIndexOf("/") + 4, s.lastIndexOf("."))
-                    if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
-                    if (s.contains("#")) s = s.substring(0, s.indexOf("#"))
+                    s = s.date.substring(3)
                 }
                 s
             }
@@ -93,11 +92,9 @@ class PageStorage {
         return if (isArticle || isDoctrine || link.contains("2004") || link.contains("pred")) {
             title
         } else {
-            var s = link.substring(link.lastIndexOf("/") + 1, link.lastIndexOf("."))
-            if (s.contains("_")) s = s.substring(0, s.indexOf("_"))
-            if (s.contains("#")) s = s.substring(0, s.indexOf("#"))
+            val s = link.date
             if (link.isPoem) {
-                s + (" " + App.context.getString(R.string.poem) + " " + Const.KV_OPEN + title + Const.KV_CLOSE)
+                s + " " + App.context.getString(R.string.poem) + " " + Const.KV_OPEN + title + Const.KV_CLOSE
             } else "$s $title"
         }
     }
