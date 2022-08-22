@@ -157,11 +157,7 @@ class MasterLoader : Loader {
         val list = mutableListOf<String>()
         var s: String? = br.readLine()
         var isDelete: Boolean
-        while (s != null) {
-            if (isRun.not()) {
-                br.close()
-                return list
-            }
+        while (s != null && isRun) {
             name = s.substring(0, s.indexOf(" "))
             isDelete = s.contains("delete")
             if (isDelete.not())
@@ -198,7 +194,7 @@ class MasterLoader : Loader {
         var max = 0
         var p = 2
         var s: String? = br.readLine()
-        while (s != null) {
+        while (s != null && isRun) {
             if (s == Const.AND) {
                 isTitle = false
                 s = br.readLine()
