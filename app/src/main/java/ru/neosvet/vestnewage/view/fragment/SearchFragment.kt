@@ -470,7 +470,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
                 }
             }
             CLEAR_RESULTS -> {
-                helper.deleteBase()
+                toiler.clearBase()
                 adDefault.clear()
             }
         }

@@ -288,4 +288,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     override fun postPercent(value: Int) {
         setState(NeoState.Message("$msgLoad ($value%)"))
     }
+
+    fun clearBase() {
+        storage.clear()
+    }
 }

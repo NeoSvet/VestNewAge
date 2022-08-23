@@ -163,11 +163,6 @@ class SearchHelper(context: Context) {
             optionsString += " $stringRange ${start.my}-${end.my}."
     }
 
-    fun deleteBase() {
-        val f = Lib.getFileDB(Const.SEARCH)
-        if (f.exists()) f.delete()
-    }
-
     fun clearRequests() {
         requests.clear()
         val f = Lib.getFileS(Const.SEARCH)
