@@ -575,13 +575,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
     }
 
-    private fun getPageTitle(): String {
-        val t = binding.content.wvBrowser.title
-        if (t.isNullOrEmpty())
-            return getString(R.string.default_title)
-        return t
-    }
-
     private fun setCheckItem(item: MenuItem, check: Boolean) {
         item.setIcon(if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple)
     }
