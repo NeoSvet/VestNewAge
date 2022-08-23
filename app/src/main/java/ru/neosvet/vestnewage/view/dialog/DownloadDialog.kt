@@ -82,9 +82,11 @@ class DownloadDialog(
             list.forEach {
                 if (it.isChecked) ids.add(it.id)
             }
-            act.download(ids)
-            if (isOtkr)
-                DateHelper.setLoadedOtkr(true)
+            if (ids.isNotEmpty()) {
+                act.download(ids)
+                if (isOtkr)
+                    DateHelper.setLoadedOtkr(true)
+            }
             dismiss()
         }
     }
