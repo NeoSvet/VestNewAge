@@ -110,14 +110,14 @@ class HeadBar(
     private fun changeHeight(h: Int) {
         if (System.currentTimeMillis() - time < 500) return
         blocked()
-        val i = mainView.height
-        val v = h - i
         mainView.clearAnimation()
-        if (state == State.EXPANDED) {
+        if (h != expandedH) {
             isFristAnim = true
             for (v in additionViews)
                 v.startAnimation(anHide)
         }
+        val i = mainView.height
+        val v = h - i
         val a: Animation = object : Animation() {
             override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
                 if (interpolatedTime == 1f) {

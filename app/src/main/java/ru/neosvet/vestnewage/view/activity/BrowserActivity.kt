@@ -168,7 +168,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 binding.content.etSearch.setText(it)
             }
         }
-
+        if (helper.isFullScreen) binding.bottomBar.post {
+            switchFullScreen(true)
+        }
         if (isSearch) {
             binding.content.pSearch.isVisible = true
             headBar.hide()
@@ -181,9 +183,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 )
                 binding.content.etSearch.setText(helper.request)
             }
-        }
-        if (helper.isFullScreen) binding.bottomBar.post {
-            switchFullScreen(true)
         }
     }
 
@@ -228,7 +227,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         isSearch = false
         softKeyboard.hide()
         helper.clearSearch()
-        headBar.show()
+        if (helper.isFullScreen.not())
+            headBar.show()
     }
 
     private fun findRequest() {
