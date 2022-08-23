@@ -523,7 +523,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 R.id.nav_refresh ->
                     toiler.refresh()
                 R.id.nav_share ->
-                    ShareDialog(this@BrowserActivity, helper.link).show()
+                    ShareDialog.newInstance(helper.link).show(supportFragmentManager, null)
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
