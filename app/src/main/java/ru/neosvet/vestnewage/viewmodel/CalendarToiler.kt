@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import androidx.work.Data
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
@@ -31,6 +32,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private val calendar = arrayListOf<CalendarItem>()
     private var time: Long = 0
     private var masterLoader: MasterLoader? = null
+    private var pageLoader: PageLoader? = null
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
@@ -67,18 +69,26 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     private suspend fun loadPages(pages: List<String>) {
-        val loader = PageLoader()
-        var cur = 0
-        pages.forEach { link ->
-            loader.download(link, false)
-            if (isRun.not())
-                return@forEach
-            cur++
-            postState(NeoState.Progress(cur.percent(pages.size)))
+        if (pageLoader == null)
+            pageLoader = PageLoader()
+        val loader = pageLoader!!
+        if (loader.isFinish.not()) {
+            isRun = false
+            while (loader.isFinish.not())
+                delay(100) //wait cancel prev loadPages
+            isRun = true
+        }
+        var i = 0
+        while (i < pages.size && isRun) {
+            loader.download(pages[i], false)
+            i++
+            postState(NeoState.Progress(i.percent(pages.size)))
         }
         loader.finish()
-        isRun = false
-        postState(NeoState.Success)
+        if (isRun) {
+            isRun = false
+            postState(NeoState.Success)
+        }
     }
 
     private fun loadMonth(): List<String> {

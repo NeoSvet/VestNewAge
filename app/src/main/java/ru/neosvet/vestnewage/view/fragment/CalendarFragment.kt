@@ -121,6 +121,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             showDownloadDialog()
             return
         }
+        toiler.cancel()
         binding?.tvDate?.let {
             it.setBackgroundResource(R.drawable.selected)
             lifecycleScope.launch {
