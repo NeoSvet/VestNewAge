@@ -50,17 +50,18 @@ class CalendarLoader : LinksProvider, Loader {
         var s = br.readLine()
         br.close()
         stream.close()
-        if (s.length < 20) return
+        if (s == null || s.length < 20) return
         var json: JSONObject? = JSONObject(s)
-        json = json!!.getJSONObject("calendarData")
+        json = json?.getJSONObject("calendarData")
         if (json?.names() == null) return
+        val names = json.names()!!
         var jsonI: JSONObject?
         var jsonA: JSONArray?
         var link: String
         var d: DateUnit
         var i = 0
-        while (i < json.names().length() && isRun) {
-            s = json.names()[i].toString()
+        while (i < names.length() && isRun) {
+            s = names[i].toString()
             jsonI = json.optJSONObject(s)
             list.add(ListItem(s.substring(s.lastIndexOf("-") + 1)))
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
