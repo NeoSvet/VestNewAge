@@ -18,8 +18,14 @@ public class PageLoader {
     private int k_requests = 0;
     private long time_requests = 0;
     private final PageStorage storage = new PageStorage();
+    private boolean isFinish = true;
+
+    public boolean isFinish() {
+        return isFinish;
+    }
 
     public boolean download(String link, boolean singlePage) throws Exception {
+        isFinish = false;
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         storage.open(link);
         if (!singlePage && storage.existsPage(link)) {
@@ -106,8 +112,10 @@ public class PageLoader {
             s = page.getNextElem();
         } while (s != null);
 
-        if (singlePage)
+        if (singlePage) {
+            isFinish = true;
             storage.close();
+        }
         page.clear();
         return true;
     }
@@ -164,6 +172,7 @@ public class PageLoader {
     }
 
     public void finish() {
+        isFinish = true;
         storage.close();
     }
 }
