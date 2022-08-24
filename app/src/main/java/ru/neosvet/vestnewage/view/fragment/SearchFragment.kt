@@ -1,6 +1,9 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -9,6 +12,9 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +26,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
@@ -91,6 +98,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     override val title: String
         get() = getString(R.string.search)
+
+    private val exportResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) result.data?.let {
+            parseFileResult(it)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -302,6 +317,25 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             } else
                 showAdditionPanel()
         }
+        content.bExport.setOnClickListener {
+            if (toiler.isRun) return@setOnClickListener
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            intent.type = "text/html"
+            val date = DateUnit.initToday()
+            intent.putExtra(
+                Intent.EXTRA_TITLE, getString(R.string.search_results) + " "
+                        + date.toString().replace(".", "-") + ".html"
+            )
+            exportResult.launch(intent)
+        }
+    }
+
+    private fun parseFileResult(data: Intent) {
+        data.dataString?.let { file ->
+            binding?.tvStatus?.text = getString(R.string.export)
+            setStatus(true)
+            toiler.startExport(file)
+        }
     }
 
     private fun showAdditionPanel() {
@@ -383,8 +417,12 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is NeoState.Message ->
-                binding?.tvStatus?.text = state.message
+            is NeoState.Message -> {
+                if (toiler.isExport) //finish export
+                    doneExport(state.message)
+                else
+                    binding?.tvStatus?.text = state.message
+            }
             is NeoState.ListValue -> { //finish load page
                 setStatus(false)
                 adResult.update(state.list[0])
@@ -508,6 +546,24 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
             item.des, des
         )
         return true
+    }
+
+    private fun doneExport(file: String) {
+        setStatus(false)
+        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
+            .setMessage(getString(R.string.send_file))
+            .setPositiveButton(
+                getString(R.string.yes)
+            ) { _, _ ->
+                val sendIntent = Intent(Intent.ACTION_SEND)
+                sendIntent.type = "text/plain"
+                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
+                startActivity(sendIntent)
+            }
+            .setNegativeButton(
+                getString(R.string.no)
+            ) { _, _ -> }
+        builder.create().show()
     }
 
     private fun finishedList() {
