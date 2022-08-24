@@ -24,10 +24,10 @@ class ListItem {
     }
 
     val link: String
-        get() = if (listLinks.isNotEmpty()) listLinks.first() else ""
+        get() = if (listLinks.isNotEmpty) listLinks.first() else ""
 
     val head: String
-        get() = if (heads.isNotEmpty()) heads.first() else ""
+        get() = if (heads.isNotEmpty) heads.first() else ""
 
     val links: Iterator<String>
         get() {
@@ -36,7 +36,7 @@ class ListItem {
         }
 
     fun hasLink(): Boolean {
-        return listLinks.isNotEmpty()
+        return listLinks.isNotEmpty
     }
 
     fun hasFewLinks(): Boolean {
@@ -55,7 +55,7 @@ class ListItem {
     }
 
     fun addLink(link: String) {
-        if (!few) few = listLinks.isNotEmpty()
+        if (!few) few = listLinks.isNotEmpty
         listLinks.add(link)
     }
 

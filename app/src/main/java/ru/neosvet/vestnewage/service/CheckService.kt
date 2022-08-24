@@ -65,7 +65,7 @@ class CheckService : LifecycleService() {
     }
 
     private fun startLoad() {
-        if (checkSummary() && list.isNotEmpty())
+        if (checkSummary() && list.isNotEmpty)
             existsUpdates()
         isRun = false
         postCommand(false)

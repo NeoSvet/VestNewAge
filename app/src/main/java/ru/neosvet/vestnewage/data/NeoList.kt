@@ -9,6 +9,8 @@ class NeoList<T> : Iterator<T> {
     private var first: Node<T>? = null
     private var current: Node<T>? = null
     private var isFirst = true
+    val isNotEmpty: Boolean
+        get() = current != null
 
     fun reset(forIterator: Boolean) {
         isFirst = forIterator
@@ -49,8 +51,6 @@ class NeoList<T> : Iterator<T> {
         while (first != null)
             first = first?.next
     }
-
-    fun isNotEmpty(): Boolean = current != null
 
     override fun toString(): String {
         val sb = StringBuilder(this.javaClass.simpleName)
