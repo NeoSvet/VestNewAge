@@ -16,8 +16,8 @@ class SearchStorage {
     private var isClosed = false
 
     fun getResults(sortDesc: Boolean): Cursor = db.query(
-        Const.SEARCH, null, null, null, null,
-        null, DataBase.ID + if (sortDesc) DataBase.DESC else ""
+        table = Const.SEARCH,
+        orderBy = DataBase.ID + if (sortDesc) DataBase.DESC else ""
     )
 
     fun update(id: String, row: ContentValues): Boolean =
@@ -74,9 +74,10 @@ class SearchStorage {
 
     fun getIdByLink(link: String): Int {
         val cursor: Cursor = db.query(
-            Const.SEARCH, arrayOf(DataBase.ID),
-            Const.LINK + DataBase.Q, arrayOf(link),
-            null, null, null
+            table = Const.SEARCH,
+            column = DataBase.ID,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = link
         )
         val r = if (cursor.moveToFirst())
             cursor.getInt(0)

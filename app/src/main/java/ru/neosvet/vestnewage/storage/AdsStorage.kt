@@ -24,14 +24,20 @@ class AdsStorage {
     fun insert(row: ContentValues) =
         db.insert(NAME, row)
 
-    fun getAll(): Cursor =
-        db.query(NAME, null)
+    fun getAll(): Cursor = db.query(NAME)
 
-    fun getUnread(): Cursor =
-        db.query(NAME, null, Const.UNREAD + DataBase.Q, "1")
+    fun getUnread(): Cursor = db.query(
+        table = NAME,
+        selection = Const.UNREAD + DataBase.Q,
+        selectionArg = "1"
+    )
 
-    fun getTime(): Cursor =
-        db.query(NAME, arrayOf(Const.TITLE), Const.MODE + DataBase.Q, MODE_T.toString())
+    fun getTime(): Cursor = db.query(
+        table = NAME,
+        column = Const.TITLE,
+        selection = Const.MODE + DataBase.Q,
+        selectionArg = MODE_T.toString()
+    )
 
     fun updateByTitle(title: String, row: ContentValues): Boolean =
         db.update(NAME, row, Const.TITLE + DataBase.Q, title) > 0
@@ -60,7 +66,12 @@ class AdsStorage {
         db.close()
 
     fun existsTitle(title: String): Boolean {
-        val cursor = db.query(NAME, arrayOf(Const.TITLE), Const.TITLE + DataBase.Q, title)
+        val cursor = db.query(
+            table = NAME,
+            column = Const.TITLE,
+            selection = Const.TITLE + DataBase.Q,
+            selectionArg = title
+        )
         val result = cursor.moveToFirst()
         cursor.close()
         return result

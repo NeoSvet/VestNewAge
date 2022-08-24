@@ -97,10 +97,11 @@ class PageStorage {
     }
 
     fun getPageId(link: String): Int {
-        val cursor: Cursor = db.query(
-            Const.TITLE, arrayOf(DataBase.ID),
-            Const.LINK + DataBase.Q, arrayOf(link),
-            null, null, null
+        val cursor = db.query(
+            table = Const.TITLE,
+            column = DataBase.ID,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = link
         )
         val r = if (cursor.moveToFirst())
             cursor.getInt(0)
@@ -112,19 +113,17 @@ class PageStorage {
     fun existsPage(link: String): Boolean {
         var exists = false
         try {
-            val curTitle: Cursor = db.query(
-                Const.TITLE, arrayOf(DataBase.ID),
-                Const.LINK + DataBase.Q, arrayOf(link), null, null, null
+            val curTitle = db.query(
+                table = Const.TITLE,
+                column = DataBase.ID,
+                selection = Const.LINK + DataBase.Q,
+                selectionArg = link
             )
             if (curTitle.moveToFirst()) {
-                val curPar: Cursor = db.query(
-                    DataBase.PARAGRAPH,
-                    null,
-                    DataBase.ID + DataBase.Q,
-                    arrayOf(curTitle.getInt(0).toString()),
-                    null,
-                    null,
-                    null
+                val curPar = db.query(
+                    table = DataBase.PARAGRAPH,
+                    selection = DataBase.ID + DataBase.Q,
+                    selectionArg = curTitle.getInt(0).toString()
                 )
                 exists = curPar.moveToFirst()
                 curPar.close()
@@ -135,15 +134,13 @@ class PageStorage {
         return exists
     }
 
-    fun getList(isPoems: Boolean): Cursor {
-        val selection = if (isPoems) Const.LINK + DataBase.LIKE
-        else Const.LINK + " NOT" + DataBase.LIKE
-        return db.query(
-            Const.TITLE, null,
-            selection, arrayOf("%" + Const.POEMS + "%"),
-            null, null, Const.LINK
-        )
-    }
+    fun getList(isPoems: Boolean): Cursor = db.query(
+        table = Const.TITLE,
+        selection = if (isPoems) Const.LINK + DataBase.LIKE
+        else Const.LINK + " NOT" + DataBase.LIKE,
+        selectionArg = "%" + Const.POEMS + "%",
+        orderBy = Const.LINK
+    )
 
     fun getNextPage(link: String): String? {
         val cursor = getCursor(link.isPoem) ?: return null
@@ -164,8 +161,8 @@ class PageStorage {
 
     private fun getCursor(isPoems: Boolean): Cursor? {
         val cursor = if (isDoctrine) db.query(
-            Const.TITLE, null, null,
-            null, null, null, DataBase.ID
+            table = Const.TITLE,
+            orderBy = DataBase.ID
         ) else if (isOldBook) getListAll()
         else getList(isPoems)
         if (!cursor.moveToFirst()) {
@@ -200,7 +197,11 @@ class PageStorage {
 
     @SuppressLint("Range")
     fun getContentPage(link: String, onlyTitle: Boolean): String? {
-        var cursor = db.query(Const.TITLE, null, Const.LINK + DataBase.Q, link)
+        var cursor = db.query(
+            table = Const.TITLE,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = link
+        )
         val id: Int
         val content = StringBuilder()
         id = if (cursor.moveToFirst()) {
@@ -224,10 +225,10 @@ class PageStorage {
         }
         cursor.close()
         cursor = db.query(
-            DataBase.PARAGRAPH,
-            arrayOf(DataBase.PARAGRAPH),
-            DataBase.ID + DataBase.Q,
-            id.toString()
+            table = DataBase.PARAGRAPH,
+            column = DataBase.PARAGRAPH,
+            selection = DataBase.ID + DataBase.Q,
+            selectionArg = id.toString()
         )
         if (cursor.moveToFirst()) {
             do {
@@ -244,16 +245,27 @@ class PageStorage {
         return content.toString()
     }
 
-    fun getPage(link: String): Cursor =
-        db.query(Const.TITLE, null, Const.LINK + DataBase.Q, link)
+    fun getPage(link: String): Cursor = db.query(
+        table = Const.TITLE,
+        selection = Const.LINK + DataBase.Q,
+        selectionArg = link
+    )
 
-    fun getPageById(id: String): Cursor =
-        db.query(Const.TITLE, null, DataBase.ID + DataBase.Q, id)
+    fun getPageById(id: String): Cursor = db.query(
+        table = Const.TITLE,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = id
+    )
 
     fun getPageById(id: Int): Cursor = getPageById(id.toString())
 
     fun getTitle(link: String): String {
-        val cursor = db.query(Const.TITLE, arrayOf(Const.TITLE), Const.LINK + DataBase.Q, link)
+        val cursor = db.query(
+            table = Const.TITLE,
+            column = Const.TITLE,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = link
+        )
         val title = if (cursor.moveToFirst())
             cursor.getString(0) else link
         cursor.close()
@@ -262,8 +274,10 @@ class PageStorage {
     }
 
     fun getParagraphs(id: String): Cursor = db.query(
-        DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
-        DataBase.ID + DataBase.Q, id
+        table = DataBase.PARAGRAPH,
+        column = DataBase.PARAGRAPH,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = id
     )
 
     fun getParagraphs(id: Int): Cursor = getParagraphs(id.toString())
@@ -271,10 +285,10 @@ class PageStorage {
     fun getParagraphs(title: Cursor): Cursor {
         val i = title.getColumnIndex(DataBase.ID)
         return db.query(
-            DataBase.PARAGRAPH, arrayOf(
-                DataBase.PARAGRAPH
-            ),
-            DataBase.ID + DataBase.Q, title.getInt(i).toString()
+            table = DataBase.PARAGRAPH,
+            column = DataBase.PARAGRAPH,
+            selection = DataBase.ID + DataBase.Q,
+            selectionArg = title.getInt(i).toString()
         )
     }
 
@@ -296,8 +310,10 @@ class PageStorage {
     fun deleteParagraphs(pageId: Int) =
         db.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, pageId.toString())
 
-    fun getLinks(): Cursor =
-        db.query(Const.TITLE, arrayOf(Const.LINK))
+    fun getLinks(): Cursor = db.query(
+        table = Const.TITLE,
+        column = Const.LINK
+    )
 
     fun getLinksList(): MutableList<String> {
         val list = mutableListOf<String>()
@@ -313,37 +329,45 @@ class PageStorage {
         return list
     }
 
-    fun getTime(): Cursor =
-        db.query(Const.TITLE, arrayOf(Const.TIME))
+    fun getTime(): Cursor = db.query(
+        table = Const.TITLE,
+        column = Const.TIME
+    )
 
-    fun getListAll(): Cursor =
-        db.query(Const.TITLE, null)
+    fun getListAll(): Cursor = db.query(Const.TITLE)
 
     fun rawQuery(from: String, where: String): Cursor =
         db.rawQuery("SELECT * FROM $from WHERE $where")
 
     fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
-        DataBase.PARAGRAPH, arrayOf(DataBase.PARAGRAPH),
-        DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,
-        arrayOf(getPageId(link).toString(), find)
+        table = DataBase.PARAGRAPH,
+        column = DataBase.PARAGRAPH,
+        selection = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,
+        selectionArgs = arrayOf(getPageId(link).toString(), find)
     )
 
     fun searchParagraphs(operator: String, find: String): Cursor = db.query(
-        DataBase.PARAGRAPH, null, DataBase.PARAGRAPH + operator, find
+        table = DataBase.PARAGRAPH,
+        selection = DataBase.PARAGRAPH + operator,
+        selectionArg = find
     )
 
     fun searchTitle(link: String, operator: String, find: String): Cursor = db.query(
-        Const.TITLE, null,
-        Const.LINK + DataBase.Q + " AND " + Const.TITLE + operator,
-        arrayOf(link, find)
+        table = Const.TITLE,
+        selection = Const.LINK + DataBase.Q + " AND " + Const.TITLE + operator,
+        selectionArgs = arrayOf(link, find)
     )
 
     fun searchTitle(operator: String, find: String): Cursor = db.query(
-        Const.TITLE, null, Const.TITLE + operator, find
+        table = Const.TITLE,
+        selection = Const.TITLE + operator,
+        selectionArg = find
     )
 
     fun searchLink(find: String): Cursor = db.query(
-        Const.TITLE, null, Const.LINK + DataBase.LIKE, "%$find%"
+        table = Const.TITLE,
+        selection = Const.LINK + DataBase.LIKE,
+        selectionArg = "%$find%"
     )
 
     fun close() {

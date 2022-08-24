@@ -13,6 +13,7 @@ class UnreadUtils {
     companion object {
         const val NAME = "noread"
     }
+
     private lateinit var db: DataBase
     private val storage = PageStorage()
     private var time: Long = 0
@@ -32,7 +33,12 @@ class UnreadUtils {
         storage.open(s)
         if (storage.existsPage(s)) return false // скаченную страницу игнорируем
         s = s.replace(Const.HTML, "")
-        val cursor = db.query(NAME, arrayOf(Const.LINK), Const.LINK + DataBase.Q, s)
+        val cursor = db.query(
+            table = NAME,
+            column = Const.LINK,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = s
+        )
         val exists = cursor.moveToFirst()
         cursor.close()
         if (exists) return true // уже есть в списке непрочитанного
@@ -59,8 +65,8 @@ class UnreadUtils {
             open()
             val links: MutableList<String> = ArrayList()
             val cursor = db.query(
-                NAME, null, null,
-                null, null, null, Const.TIME
+                table = NAME,
+                orderBy = Const.TIME
             )
             if (cursor.moveToFirst()) {
                 val iLink = cursor.getColumnIndex(Const.LINK)
@@ -77,10 +83,7 @@ class UnreadUtils {
     val count: Int
         get() {
             open()
-            val cursor = db.query(
-                NAME, null, null,
-                null, null, null, Const.TIME
-            )
+            val cursor = db.query(NAME)
             var k = 0
             if (cursor.moveToFirst()) k = cursor.count
             cursor.close()
@@ -132,7 +135,11 @@ class UnreadUtils {
 
     fun setBadge(count_ads: Int) {
         open()
-        val cursor = db.query(NAME, null, Const.TIME + " > ?", "0")
+        val cursor = db.query(
+            table = NAME,
+            selection = Const.TIME + " > ?",
+            selectionArg = "0"
+        )
         val k = count_ads + cursor.count
         if (k == 0) ShortcutBadger.removeCount(App.context)
         else ShortcutBadger.applyCount(App.context, k)

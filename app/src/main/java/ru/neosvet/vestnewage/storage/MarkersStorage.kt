@@ -53,65 +53,72 @@ class MarkersStorage {
         db.insert(DataBase.COLLECTIONS, cv)
 
     fun getCollections(sortBy: String): Cursor = db.query(
-        DataBase.COLLECTIONS, null, null,
-        null, null, null, sortBy
+        table = DataBase.COLLECTIONS,
+        orderBy = sortBy
     )
 
     fun getCollectionsTitle(): Cursor = db.query(
-        DataBase.COLLECTIONS,
-        arrayOf(DataBase.ID, Const.TITLE),
-        null, null, null, null, Const.PLACE
+        table = DataBase.COLLECTIONS,
+        columns = arrayOf(DataBase.ID, Const.TITLE),
+        orderBy = Const.PLACE
     )
 
     fun getCollectionsPlace(): Cursor = db.query(
-        DataBase.COLLECTIONS,
-        arrayOf(DataBase.ID, Const.PLACE)
+        table = DataBase.COLLECTIONS,
+        columns = arrayOf(DataBase.ID, Const.PLACE)
     )
 
     fun getCollection(colId: String): Cursor = db.query(
-        DataBase.COLLECTIONS, null,
-        DataBase.ID + DataBase.Q, arrayOf(colId),
-        null, null, Const.PLACE
+        table = DataBase.COLLECTIONS,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = colId,
+        orderBy = Const.PLACE
     )
 
     fun getCollectionId(title: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(
-            DataBase.ID
-        ),
-        Const.TITLE + DataBase.Q, arrayOf(title),
-        null, null, Const.PLACE
+        table = DataBase.COLLECTIONS,
+        column = DataBase.ID,
+        selection = Const.TITLE + DataBase.Q,
+        selectionArg = title,
+        orderBy = Const.PLACE
     )
 
     fun getCollectionByPlace(place: Int): Cursor = db.query(
-        DataBase.COLLECTIONS, null,
-        Const.PLACE + DataBase.Q, arrayOf(place.toString())
+        table = DataBase.COLLECTIONS,
+        selection = Const.PLACE + DataBase.Q,
+        selectionArg = place.toString()
     )
 
     fun getMarkersList(colId: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(
-            DataBase.MARKERS
-        ),
-        DataBase.ID + DataBase.Q, colId
+        table = DataBase.COLLECTIONS,
+        column = DataBase.MARKERS,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = colId
     )
 
     fun getMarkers(): Cursor = db.query(
-        DataBase.MARKERS, null, null,
-        null, null, null, DataBase.ID
+        table = DataBase.MARKERS,
+        orderBy = DataBase.ID
     )
 
     fun getMarkersListByTitle(colTitle: String): Cursor = db.query(
-        DataBase.COLLECTIONS, arrayOf(
-            DataBase.MARKERS
-        ),
-        Const.TITLE + DataBase.Q, colTitle
+        table = DataBase.COLLECTIONS,
+        column = DataBase.MARKERS,
+        selection = Const.TITLE + DataBase.Q,
+        selectionArg = colTitle
     )
 
-    fun getMarker(marId: String): Cursor =
-        db.query(DataBase.MARKERS, null, DataBase.ID + DataBase.Q, marId)
+    fun getMarker(marId: String): Cursor = db.query(
+        table = DataBase.MARKERS,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = marId
+    )
 
     fun getMarkerCollections(marId: String): Cursor = db.query(
-        DataBase.MARKERS, arrayOf(DataBase.COLLECTIONS),
-        DataBase.ID + DataBase.Q, marId
+        table = DataBase.MARKERS,
+        column = DataBase.COLLECTIONS,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = marId
     )
 
     fun deleteCollection(id: String, markersList: Array<String>, defColTitle: String) {
@@ -168,10 +175,10 @@ class MarkersStorage {
             var s = closeList(collections.getString(0)) //список подборок у закладки
             for (item in getList(s)) { //перебираем список подборок
                 val cursor = db.query(
-                    DataBase.COLLECTIONS,
-                    arrayOf(DataBase.MARKERS),
-                    DataBase.ID + DataBase.Q,
-                    item
+                    table = DataBase.COLLECTIONS,
+                    column = DataBase.MARKERS,
+                    selection = DataBase.ID + DataBase.Q,
+                    selectionArg = item
                 )
                 if (cursor.moveToFirst()) {
                     s = closeList(cursor.getString(0)) //список закладок у подборки
@@ -194,12 +201,11 @@ class MarkersStorage {
 
     fun foundMarker(values: Array<String>): Int {
         val cursor = db.query(
-            DataBase.MARKERS, arrayOf(
-                DataBase.ID
-            ),
-            Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
+            table = DataBase.MARKERS,
+            column = DataBase.ID,
+            selection = Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
                     DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
-            values
+            selectionArgs = values
         )
         val result = if (cursor.moveToFirst())
             cursor.getInt(0) else -1

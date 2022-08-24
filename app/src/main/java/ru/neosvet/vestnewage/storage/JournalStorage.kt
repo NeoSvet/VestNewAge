@@ -11,10 +11,6 @@ import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import java.util.*
 
-/**
- * Created by NeoSvet on 23.03.2022.
- */
-
 class JournalStorage {
     companion object {
         private const val LIMIT = 100
@@ -28,16 +24,14 @@ class JournalStorage {
     fun insert(row: ContentValues) =
         db.insert(DataBase.JOURNAL, row)
 
-    fun getIds(): Cursor =
-        db.query(
-            DataBase.JOURNAL, arrayOf(
-                DataBase.ID
-            )
-        )
+    fun getIds(): Cursor = db.query(
+        table = DataBase.JOURNAL,
+        column = DataBase.ID
+    )
 
     fun getAll(): Cursor = db.query(
-        DataBase.JOURNAL, null, null, null,
-        null, null, Const.TIME + DataBase.DESC
+        table = DataBase.JOURNAL,
+        orderBy = Const.TIME + DataBase.DESC
     )
 
     fun delete(id: String) =
