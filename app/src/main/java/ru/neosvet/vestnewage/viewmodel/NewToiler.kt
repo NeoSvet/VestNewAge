@@ -67,7 +67,6 @@ class NewToiler : NeoToiler() {
                     } else
                         list.add(ListItem(t, s + Const.HTML))
                 }
-                links.clear()
             }
             postState(NeoState.ListValue(list))
             needOpen = false
