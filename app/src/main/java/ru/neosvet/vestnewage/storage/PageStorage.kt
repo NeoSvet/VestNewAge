@@ -6,10 +6,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.date
-import ru.neosvet.vestnewage.utils.isPoem
+import ru.neosvet.vestnewage.utils.*
 import java.util.regex.Pattern
 
 /**
@@ -89,7 +86,7 @@ class PageStorage {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle || isDoctrine || link.contains("2004") || link.contains("pred")) {
+        return if (isArticle || isDoctrine || link.noHasDate) {
             title
         } else {
             val s = link.date
