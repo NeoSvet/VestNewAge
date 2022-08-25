@@ -175,7 +175,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             cursor.close()
             storage.close()
             if (list.isNotEmpty()) {
-                postState(NeoState.Book(calendar, checkPrev(), checkNext(), list))
+                postState(NeoState.Book(calendar, list))
                 return@launch
             }
             val today = DateUnit.initToday()
@@ -185,7 +185,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         }
     }
 
-    private fun checkNext(): Boolean {
+    fun checkNext(): Boolean {
         val max = if (isPoemsTab)
             DateUnit.initToday().apply { day = 1 }.timeInDays
         else
@@ -193,7 +193,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         return date.timeInDays < max
     }
 
-    private fun checkPrev(): Boolean {
+    fun checkPrev(): Boolean {
         val d = date
         val days = d.timeInDays
         val min = if (isPoemsTab) {

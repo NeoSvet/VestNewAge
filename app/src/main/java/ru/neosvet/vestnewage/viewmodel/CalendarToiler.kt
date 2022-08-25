@@ -45,18 +45,18 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         loadIfNeed = false
         val list = loadMonth()
         if (loadFromStorage()) {
-            postState(NeoState.Calendar(date.calendarString, checkPrev(), checkNext(), calendar))
+            postState(NeoState.Calendar(date.calendarString, calendar))
             postState(NeoState.LongValue(time))
             if (isRun) loadPages(list)
         }
     }
 
-    private fun checkNext(): Boolean {
+    fun checkNext(): Boolean {
         val max = DateUnit.initToday().apply { day = 1 }.timeInDays
         return date.timeInDays < max
     }
 
-    private fun checkPrev(): Boolean {
+    fun checkPrev(): Boolean {
         val days = date.timeInDays
         val min = if (DateHelper.isLoadedOtkr())
             DateHelper.MIN_DAYS_OLD_BOOK
@@ -130,17 +130,10 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             if (calendar.isEmpty())
                 createField()
             if (loadFromStorage()) {
-                postState(
-                    NeoState.Calendar(
-                        date.calendarString,
-                        checkPrev(),
-                        checkNext(),
-                        calendar
-                    )
-                )
+                postState(NeoState.Calendar(date.calendarString, calendar))
                 postState(NeoState.LongValue(time))
             } else {
-                postState(NeoState.Calendar(date.calendarString, false, false, calendar))
+                postState(NeoState.Calendar(date.calendarString, calendar))
                 postState(NeoState.LongValue(0))
                 isRun = true
                 reLoad()

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +18,6 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
-import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
@@ -204,8 +204,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             tvDate.text = state.date.replace(Const.N, " ")
         else
             tvDate.text = state.date
-        bPrev.isEnabled = state.prev
-        bNext.isEnabled = state.next
         adapter.setItems(state.list)
         rvBook.smoothScrollToPosition(0)
     }
@@ -272,16 +270,17 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         super.setStatus(load)
         binding?.run {
             val tabHost = tabLayout.getChildAt(0) as ViewGroup
+            tabHost.children.forEach {
+                it.isEnabled = !load
+            }
             if (load) {
-                tabHost.getChildAt(0).isEnabled = false
-                tabHost.getChildAt(1).isEnabled = false
                 tvDate.isEnabled = false
                 bPrev.isEnabled = false
                 bNext.isEnabled = false
             } else {
-                tabHost.getChildAt(0).isEnabled = true
-                tabHost.getChildAt(1).isEnabled = true
                 tvDate.isEnabled = true
+                bPrev.isEnabled = toiler.checkPrev()
+                bNext.isEnabled = toiler.checkNext()
             }
         }
     }

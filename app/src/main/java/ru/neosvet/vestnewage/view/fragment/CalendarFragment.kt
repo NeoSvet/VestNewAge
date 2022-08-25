@@ -149,6 +149,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
                 bNext.isEnabled = false
             } else {
                 tvDate.isEnabled = true
+                bPrev.isEnabled = toiler.checkPrev()
+                bNext.isEnabled = toiler.checkNext()
             }
         }
     }
@@ -199,8 +201,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             is NeoState.Calendar -> binding?.run {
                 act?.updateNew()
                 tvDate.text = state.date
-                bPrev.isEnabled = state.prev
-                bNext.isEnabled = state.next
                 adCalendar.setItems(state.list)
                 if (root.isVisible.not())
                     showView(root)

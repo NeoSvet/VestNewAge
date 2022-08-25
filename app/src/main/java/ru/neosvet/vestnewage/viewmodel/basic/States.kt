@@ -106,15 +106,11 @@ sealed class NeoState {
 
     data class Calendar(
         val date: String,
-        val prev: Boolean,
-        val next: Boolean,
         val list: List<CalendarItem>
     ) : NeoState()
 
     data class Book(
         val date: String,
-        val prev: Boolean,
-        val next: Boolean,
         val list: List<ListItem>
     ) : NeoState()
 
