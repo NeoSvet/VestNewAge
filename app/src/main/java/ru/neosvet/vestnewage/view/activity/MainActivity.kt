@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var isShowBottomArea = true
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
+    private val snackbar = NeoSnackbar()
     private val toast: NeoToast by lazy {
         NeoToast(helper.tvToast) {
             statusBack = StatusBack.PAGE
@@ -470,6 +471,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onBackPressed() {
+        if (snackbar.isShown) {
+            snackbar.hide()
+            return
+        }
         if (status.isCrash) {
             status.setError(null)
             unblocked()
@@ -652,7 +657,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             blocked()
             status.setError(error)
         } else
-            NeoSnackbar().show(helper.fabAction, error.message)
+            snackbar.show(helper.fabAction, error.message)
     }
 
     fun showStaticToast(msg: String) {

@@ -80,6 +80,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private val wordsUtils: WordsUtils by lazy {
         WordsUtils()
     }
+    private val snackbar = NeoSnackbar()
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
     private var connectWatcher: Job? = null
@@ -249,6 +250,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     override fun onBackPressed() {
         when {
+            snackbar.isShown ->
+                snackbar.hide()
             status.isVisible -> {
                 status.setError(null)
                 bottomUnblocked()
@@ -628,7 +631,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     status.setError(state)
                 else {
                     finishLoading()
-                    NeoSnackbar().show(binding.fabNav, state.message)
+                    snackbar.show(binding.fabNav, state.message)
                 }
             else -> {}
         }
