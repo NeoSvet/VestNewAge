@@ -85,6 +85,7 @@ class BrowserToiler : NeoToiler() {
         storage.close()
         restoreStyle()
         styleLoader.download(isRefresh)
+        if(isRun.not()) return
         pageLoader.download(link, true)
         openPage(true)
     }

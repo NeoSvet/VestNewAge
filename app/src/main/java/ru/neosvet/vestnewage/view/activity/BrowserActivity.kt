@@ -313,10 +313,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
-            else {
-                bottomUnblocked()
+            else
                 status.onClick()
-            }
+            finishLoading()
         }
     }
 
@@ -673,6 +672,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun bottomUnblocked() {
+        Lib.LOG("unblock")
         binding.bottomBar.isVisible = true
         setNavVisible(true)
     }
