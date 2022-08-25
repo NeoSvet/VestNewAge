@@ -349,7 +349,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         toast.hide()
         statusBack = StatusBack.PAGE
         setMenu(section, savePrev)
-        status.setError(false)
+        status.setError(null)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
@@ -471,8 +471,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onBackPressed() {
         if (status.isCrash) {
-            ErrorUtils.clear()
-            status.setError(false)
+            status.setError(null)
             unblocked()
             curFragment?.resetError()
             return
@@ -574,7 +573,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
-            is NeoState.Error -> setError()
+            is NeoState.Error -> setError(state)
             else -> {}
         }
     }
@@ -648,12 +647,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.topBar?.setExpanded(false)
     }
 
-    fun setError() {
-        if (ErrorUtils.isNeedReport) {
+    fun setError(error: NeoState.Error) {
+        if (error.isNeedReport) {
             blocked()
-            status.setError(true)
+            status.setError(error)
         } else
-            NeoSnackbar().show(helper.fabAction, ErrorUtils.message)
+            NeoSnackbar().show(helper.fabAction, error.message)
     }
 
     fun showStaticToast(msg: String) {

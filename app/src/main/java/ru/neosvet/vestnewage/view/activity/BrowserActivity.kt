@@ -250,7 +250,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     override fun onBackPressed() {
         when {
             status.isVisible -> {
-                status.setError(false)
+                status.setError(null)
                 bottomUnblocked()
             }
             helper.isFullScreen ->
@@ -624,11 +624,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             NeoState.Success ->
                 tipFinish.show()
             is NeoState.Error ->
-                if (ErrorUtils.isNeedReport)
-                    status.setError(true)
+                if (state.isNeedReport)
+                    status.setError(state)
                 else {
                     finishLoading()
-                    NeoSnackbar().show(binding.fabNav, ErrorUtils.message)
+                    NeoSnackbar().show(binding.fabNav, state.message)
                 }
             else -> {}
         }
@@ -669,7 +669,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun bottomUnblocked() {
-        Lib.LOG("unblock")
         binding.bottomBar.isVisible = true
         setNavVisible(true)
     }

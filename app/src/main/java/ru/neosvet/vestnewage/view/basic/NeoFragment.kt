@@ -108,7 +108,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
                 noConnected()
             is NeoState.Error -> {
                 setStatus(false)
-                act?.setError()
+                act?.setError(state)
             }
             else -> onChangedOtherState(state)
         }

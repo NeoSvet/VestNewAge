@@ -26,7 +26,6 @@ import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.ErrorUtils
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
@@ -143,12 +142,11 @@ class MarkerActivity : AppCompatActivity() {
                     .setPositiveButton(
                         getString(R.string.send)
                     ) { _, _ ->
-                        Lib.openInApps(Const.mailto + ErrorUtils.information, null)
+                        Lib.openInApps(Const.mailto + state.information, null)
                     }
                     .setNegativeButton(
                         getString(android.R.string.cancel)
                     ) { dialog, _ -> dialog.dismiss() }
-                    .setOnDismissListener { ErrorUtils.clear() }
                 builder.create().show()
             }
             else -> {}

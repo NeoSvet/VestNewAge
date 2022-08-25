@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
 /**
  * Created by NeoSvet on 19.11.2019.
@@ -95,9 +96,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         throwable.printStackTrace()
         scope = initScope()
         stop()
-        ErrorUtils.setData(getInputData())
-        ErrorUtils.setError(throwable)
-        finishService(ErrorUtils.message)
+        finishService(NeoState.Error(throwable, getInputData()))
     }
 
     private fun getInputData(): Data = Data.Builder()
@@ -206,7 +205,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
     }
 
-    private fun finishService(error: String?) {
+    private fun finishService(error: NeoState.Error?) {
         loader.cancel()
         val notifHelper = NotificationUtils()
         val title: String
@@ -219,14 +218,13 @@ class LoaderService : LifecycleService(), LoadHandler {
             main = Intent(this, MainActivity::class.java)
         } else {
             title = getString(R.string.error_load)
-            if (ErrorUtils.isNeedReport) {
+            if (error.isNeedReport) {
                 main = Intent(Intent.ACTION_VIEW)
-                main.data = Uri.parse(Const.mailto + ErrorUtils.information)
-                ErrorUtils.clear()
-                msg = error + Const.N + getString(R.string.touch_to_send)
+                main.data = Uri.parse(Const.mailto + error.information)
+                msg = error.message + Const.N + getString(R.string.touch_to_send)
             } else {
                 main = Intent(App.context, MainActivity::class.java)
-                msg = error
+                msg = error.message
             }
         }
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)

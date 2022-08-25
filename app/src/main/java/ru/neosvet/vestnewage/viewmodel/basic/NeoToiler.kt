@@ -4,7 +4,6 @@ import androidx.work.Data
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.network.OnlineObserver
-import ru.neosvet.vestnewage.utils.ErrorUtils
 
 abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
@@ -30,11 +29,8 @@ abstract class NeoToiler : StateToiler() {
         isRun = false
         if (loadIfNeed && throwable !is BaseIsBusyException)
             load()
-        else {
-            ErrorUtils.setError(throwable)
-            ErrorUtils.setData(getInputData())
-            setState(NeoState.Error(throwable))
-        }
+        else
+            setState(NeoState.Error(throwable, getInputData()))
     }
 
     open fun cancel() {

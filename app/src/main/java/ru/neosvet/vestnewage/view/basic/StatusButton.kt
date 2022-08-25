@@ -11,8 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.ErrorUtils
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
 class StatusButton(
     private val context: Context,
@@ -23,7 +23,7 @@ class StatusButton(
     private val tv: TextView = panel.findViewById(R.id.tvStatus)
     private val iv: ImageView = panel.findViewById(R.id.ivStatus)
     private val progBar: ProgressBar = panel.findViewById(R.id.progStatus)
-    private var error: String? = null
+    private var error: NeoState.Error? = null
     private var stop = true
     var isVisible = false
         private set
@@ -49,7 +49,7 @@ class StatusButton(
     }
 
     fun setLoad(start: Boolean) {
-        setError(false)
+        setError(null)
         stop = !start
         if (prog) {
             prog = false
@@ -68,19 +68,18 @@ class StatusButton(
         }
     }
 
-    fun setError(hasError: Boolean) {
+    fun setError(error: NeoState.Error?) {
         stop = true
         clearAnimation()
-        if (hasError) {
-            error = ErrorUtils.message
+        if (error != null) {
+            this.error = error
             if (prog) progBar.isVisible = false
             tv.text = context.getString(R.string.crash)
             panel.setBackgroundResource(R.drawable.shape_red)
             iv.setImageResource(R.drawable.ic_close)
             isVisible = true
         } else {
-            ErrorUtils.clear()
-            error = null
+            this.error = null
             panel.isVisible = false
             isVisible = false
             panel.setBackgroundResource(R.drawable.shape_norm)
@@ -100,26 +99,20 @@ class StatusButton(
     }
 
     fun onClick(): Boolean {
-        if (isCrash) {
+        error?.let {
             val builder = AlertDialog.Builder(context, R.style.NeoDialog)
                 .setTitle(context.getString(R.string.error))
-                .setMessage(error)
+                .setMessage(it.message)
                 .setPositiveButton(context.getString(R.string.send))
-                { _, _ -> sendError() }
+                { _, _ -> Lib.openInApps(Const.mailto + it.information, null) }
                 .setNegativeButton(context.getString(android.R.string.cancel))
-                { _, _ -> ErrorUtils.clear() }
-                .setOnDismissListener { ErrorUtils.clear() }
+                { _, _ -> setError(null) }
+                .setOnDismissListener { setError(null) }
             builder.create().show()
             setLoad(false)
-            setError(false)
             return true
         }
         return false
-    }
-
-    private fun sendError() {
-        Lib.openInApps(Const.mailto + ErrorUtils.information, null)
-        ErrorUtils.clear()
     }
 
     fun setProgress(percent: Int) {
