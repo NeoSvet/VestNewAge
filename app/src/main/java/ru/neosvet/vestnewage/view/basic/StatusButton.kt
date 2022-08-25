@@ -22,7 +22,7 @@ class StatusButton(
     private val anHide = AnimationUtils.loadAnimation(context, R.anim.hide)
     private val tv: TextView = panel.findViewById(R.id.tvStatus)
     private val iv: ImageView = panel.findViewById(R.id.ivStatus)
-    private val progBar: ProgressBar = panel.findViewById(R.id.progStatus)
+    private val progBar: ProgressBar? = panel.findViewById(R.id.progStatus)
     private var error: NeoState.Error? = null
     private var stop = true
     var isVisible = false
@@ -53,8 +53,8 @@ class StatusButton(
         stop = !start
         if (prog) {
             prog = false
-            progBar.progress = 0
-            progBar.visibility = View.GONE
+            progBar?.progress = 0
+            progBar?.visibility = View.GONE
         }
         clearAnimation()
         if (start) {
@@ -73,7 +73,7 @@ class StatusButton(
         clearAnimation()
         if (error != null) {
             this.error = error
-            if (prog) progBar.isVisible = false
+            if (prog) progBar?.isVisible = false
             tv.text = context.getString(R.string.crash)
             panel.setBackgroundResource(R.drawable.shape_red)
             iv.setImageResource(R.drawable.ic_close)
@@ -118,10 +118,10 @@ class StatusButton(
     fun setProgress(percent: Int) {
         if (!prog) {
             clearAnimation()
-            progBar.isVisible = true
+            progBar?.isVisible = true
             prog = true
         }
-        progBar.progress = percent
+        progBar?.progress = percent
     }
 
     private fun clearAnimation() {
