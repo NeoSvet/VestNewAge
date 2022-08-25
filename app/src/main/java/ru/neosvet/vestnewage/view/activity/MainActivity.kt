@@ -51,8 +51,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
 
-    @JvmField
-    val status = StatusButton()
+    lateinit var status: StatusButton
+        private set
     private var prom: PromUtils? = null
     private var tab = 0
     private var isBlocked = false
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun initStatusButton() {
-        status.init(this, helper.pStatus)
+        status = StatusButton(this, helper.pStatus)
         status.setClick {
             if (status.onClick()) {
                 unblocked()

@@ -32,7 +32,7 @@ import ru.neosvet.vestnewage.view.dialog.CustomDialog;
 
 public class CabinetActivity extends AppCompatActivity {
     private WebView wvBrowser;
-    private final StatusButton status = new StatusButton();
+    private StatusButton status;
     private View fabClose;
     private boolean twoPointers = false;
 
@@ -83,7 +83,7 @@ public class CabinetActivity extends AppCompatActivity {
             }
             return false;
         });
-        status.init(this, findViewById(R.id.pStatus));
+        status = new StatusButton(this, findViewById(R.id.pStatus));
         fabClose = findViewById(R.id.fabClose);
         fabClose.setOnClickListener(view -> onBackPressed());
     }

@@ -57,7 +57,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding.content.etSearch)
     }
-    private val status = StatusButton()
+    private lateinit var status: StatusButton
     private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
@@ -238,7 +238,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     private fun initViews() {
         tipFinish = Tip(this, binding.tvFinish)
-        status.init(this, binding.pStatus)
+        status = StatusButton(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
         prom = if (pref.getBoolean(Const.PROM_FLOAT, false))

@@ -1,167 +1,140 @@
-package ru.neosvet.vestnewage.view.basic;
+package ru.neosvet.vestnewage.view.basic
 
-import android.content.Context;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.content.Context
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
+import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.utils.Lib
 
-import androidx.appcompat.app.AlertDialog;
+class StatusButton(
+    private val context: Context,
+    private val panel: View
+) {
+    private val anRotate = AnimationUtils.loadAnimation(context, R.anim.rotate)
+    private val anHide = AnimationUtils.loadAnimation(context, R.anim.hide)
+    private val tv: TextView = panel.findViewById(R.id.tvStatus)
+    private val iv: ImageView = panel.findViewById(R.id.ivStatus)
+    private val progBar: ProgressBar = panel.findViewById(R.id.progStatus)
+    private var error: String? = null
+    private var stop = true
+    var isVisible = false
+        private set
+    private var prog = false
 
-import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.utils.Const;
-import ru.neosvet.vestnewage.utils.ErrorUtils;
-import ru.neosvet.vestnewage.utils.Lib;
-
-public class StatusButton {
-    private Context context;
-    private Animation anRotate;
-    private Animation anHide;
-    private View panel;
-    private TextView tv;
-    private ImageView iv;
-    private ProgressBar progBar;
-    private String error = null;
-    private boolean stop = true, visible, prog = false;
-
-    public void init(Context context, View p) {
-        this.context = context;
-        this.panel = p;
-        tv = panel.findViewById(R.id.tvStatus);
-        iv = panel.findViewById(R.id.ivStatus);
-        progBar = panel.findViewById(R.id.progStatus);
-
-        anRotate = AnimationUtils.loadAnimation(context, R.anim.rotate);
-        anRotate.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
+    init {
+        anRotate.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationEnd(animation: Animation) {
+                if (!stop && isVisible) iv.startAnimation(anRotate)
             }
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                if (!stop && visible)
-                    iv.startAnimation(anRotate);
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
+        anHide.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationEnd(animation: Animation) {
+                panel.visibility = View.GONE
             }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        anHide = AnimationUtils.loadAnimation(context, R.anim.hide);
-        anHide.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                panel.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
     }
 
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setLoad(boolean start) {
-        setError(false);
-        stop = !start;
+    fun setLoad(start: Boolean) {
+        setError(false)
+        stop = !start
         if (prog) {
-            prog = false;
-            progBar.setProgress(0);
-            progBar.setVisibility(View.GONE);
+            prog = false
+            progBar.progress = 0
+            progBar.visibility = View.GONE
         }
-        clearAnimation();
+        clearAnimation()
         if (start) {
-            loadText();
-            visible = true;
-            iv.startAnimation(anRotate);
+            loadText()
+            isVisible = true
+            iv.startAnimation(anRotate)
         } else {
-            visible = false;
-            tv.setText(context.getString(R.string.done));
-            panel.startAnimation(anHide);
+            isVisible = false
+            tv.text = context.getString(R.string.done)
+            panel.startAnimation(anHide)
         }
     }
 
-    public void setError(Boolean hasError) {
-        stop = true;
-        clearAnimation();
+    fun setError(hasError: Boolean) {
+        stop = true
+        clearAnimation()
         if (hasError) {
-            this.error = ErrorUtils.getMessage();
-            if (prog) progBar.setVisibility(View.GONE);
-            tv.setText(context.getString(R.string.crash));
-            panel.setBackgroundResource(R.drawable.shape_red);
-            iv.setImageResource(R.drawable.ic_close);
-            visible = true;
+            error = ErrorUtils.message
+            if (prog) progBar.isVisible = false
+            tv.text = context.getString(R.string.crash)
+            panel.setBackgroundResource(R.drawable.shape_red)
+            iv.setImageResource(R.drawable.ic_close)
+            isVisible = true
         } else {
-            ErrorUtils.clear();
-            this.error = null;
-            panel.setVisibility(View.GONE);
-            visible = false;
-            panel.setBackgroundResource(R.drawable.shape_norm);
-            iv.setImageResource(R.drawable.ic_refresh);
+            ErrorUtils.clear()
+            error = null
+            panel.isVisible = false
+            isVisible = false
+            panel.setBackgroundResource(R.drawable.shape_norm)
+            iv.setImageResource(R.drawable.ic_refresh)
         }
     }
 
-    public boolean isCrash() {
-        return error != null;
+    val isCrash: Boolean
+        get() = error != null
+
+    fun loadText() {
+        tv.text = context.getString(R.string.load)
     }
 
-    public void loadText() {
-        tv.setText(context.getString(R.string.load));
+    fun setClick(event: View.OnClickListener?) {
+        panel.setOnClickListener(event)
     }
 
-    public void setClick(View.OnClickListener event) {
-        panel.setOnClickListener(event);
-    }
-
-    public boolean onClick() {
-        if (isCrash()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.NeoDialog)
-                    .setTitle(context.getString(R.string.error))
-                    .setMessage(error)
-                    .setPositiveButton(context.getString(R.string.send),
-                            (dialog, id) -> sendError())
-                    .setNegativeButton(context.getString(android.R.string.cancel),
-                            (dialog, id) -> ErrorUtils.clear())
-                    .setOnDismissListener(dialog -> ErrorUtils.clear());
-            builder.create().show();
-            setLoad(false);
-            setError(false);
-            return true;
+    fun onClick(): Boolean {
+        if (isCrash) {
+            val builder = AlertDialog.Builder(context, R.style.NeoDialog)
+                .setTitle(context.getString(R.string.error))
+                .setMessage(error)
+                .setPositiveButton(context.getString(R.string.send))
+                { _, _ -> sendError() }
+                .setNegativeButton(context.getString(android.R.string.cancel))
+                { _, _ -> ErrorUtils.clear() }
+                .setOnDismissListener { ErrorUtils.clear() }
+            builder.create().show()
+            setLoad(false)
+            setError(false)
+            return true
         }
-        return false;
+        return false
     }
 
-    private void sendError() {
-        Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null);
-        ErrorUtils.clear();
+    private fun sendError() {
+        Lib.openInApps(Const.mailto + ErrorUtils.information, null)
+        ErrorUtils.clear()
     }
 
-    public void setProgress(int p) {
+    fun setProgress(percent: Int) {
         if (!prog) {
-            clearAnimation();
-            progBar.setVisibility(View.VISIBLE);
-            prog = true;
+            clearAnimation()
+            progBar.isVisible = true
+            prog = true
         }
-        progBar.setProgress(p);
+        progBar.progress = percent
     }
 
-    private void clearAnimation() {
-        iv.clearAnimation();
-        anHide.cancel();
-        anRotate.cancel();
-        panel.setVisibility(View.VISIBLE);
+    private fun clearAnimation() {
+        iv.clearAnimation()
+        anHide.cancel()
+        anRotate.cancel()
+        panel.isVisible = true
     }
 }
