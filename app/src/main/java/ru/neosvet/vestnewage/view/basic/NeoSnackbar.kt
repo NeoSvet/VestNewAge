@@ -13,7 +13,7 @@ class NeoSnackbar {
         val context = view.context
         snackbar = Snackbar.make(
             view, msg,
-            Snackbar.LENGTH_LONG
+            Snackbar.LENGTH_INDEFINITE
         ).setBackgroundTint(context.getColor(R.color.colorPrimary))
             .setTextColor(context.getColor(android.R.color.white))
             .setActionTextColor(context.getColor(R.color.colorAccentLight))
