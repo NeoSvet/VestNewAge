@@ -471,23 +471,20 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onBackPressed() {
-        if (snackbar.isShown) {
-            snackbar.hide()
-            return
-        }
-        if (status.isCrash) {
-            status.setError(null)
-            unblocked()
-            curFragment?.resetError()
-            return
-        }
-        if (curFragment?.onBackPressed() == false)
-            return
         when {
+            snackbar.isShown ->
+                snackbar.hide()
+            status.isCrash -> {
+                status.setError(null)
+                unblocked()
+                curFragment?.resetError()
+            }
             helper.shownActionMenu ->
                 helper.hideActionMenu()
             helper.bottomAreaIsHide ->
                 showBottomArea()
+            curFragment?.onBackPressed() == false ->
+                return
             firstSection == Section.NEW -> {
                 firstSection = helper.getFirstSection()
                 setSection(firstSection, false)
