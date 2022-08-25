@@ -9,6 +9,7 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.MyException
 import ru.neosvet.vestnewage.utils.Const
+import java.net.SocketTimeoutException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
 
@@ -37,17 +38,9 @@ sealed class NeoState {
                     isNeedReport = true
                     App.context.getString(R.string.unknown_error)
                 }
-                msg == "timeout" || msg == "Read timed out" ||
-                        throwable is SSLHandshakeException || throwable is CertificateException ->
+               throwable is SocketTimeoutException ||   throwable is SSLHandshakeException ||
+                       throwable is CertificateException ->
                     App.context.getString(R.string.error_site)
-                msg.contains("failed to connect") -> {
-                    //failed to connect to blagayavest.info/188.120.225.50 (port 443) from /10.242.40.42 (port 38926) after 20000ms
-                    var i = msg.indexOf("connect") + 11
-                    val site = msg.substring(i, msg.indexOf("/", i))
-                    i = msg.indexOf("after") + 6
-                    val sec = msg.substring(i, i + 2)
-                    String.format(App.context.getString(R.string.format_timeout), site, sec)
-                }
                 else -> {
                     isNeedReport = throwable !is MyException
                     msg
