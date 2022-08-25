@@ -214,6 +214,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                     i = link.substring(i, i + 2).toInt()
                 }
                 i = getIndexByDay(i)
+                if (i == -1) continue
                 calendar[i].addLink(link)
                 if (storage.existsPage(link)) {
                     title = storage.getPageTitle(title, link)
@@ -239,9 +240,8 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                 if (begin) return -1
                 begin = true
             }
-            if (begin && calendar[i].num == d) {
+            if (begin && calendar[i].num == d)
                 return i
-            }
         }
         return -1
     }

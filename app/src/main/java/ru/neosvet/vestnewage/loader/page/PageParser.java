@@ -190,6 +190,7 @@ public class PageParser {
     }
 
     private String itemToString() {
+        if (!content.isNotEmpty()) return "";
         HTMLElem elem = content.current();
         if (elem.end)
             return elem.getCode();
@@ -232,6 +233,8 @@ public class PageParser {
     }
 
     public boolean isHead() {
-        return content.current().tag.indexOf(Const.HEAD) == 0;
+        if (content.isNotEmpty())
+            return content.current().tag.indexOf(Const.HEAD) == 0;
+        return false;
     }
 }

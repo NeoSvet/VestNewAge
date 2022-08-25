@@ -9,10 +9,6 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.*
 import java.util.regex.Pattern
 
-/**
- * Created by NeoSvet on 23.03.2022.
- */
-
 class PageStorage {
     companion object {
         @JvmStatic
@@ -328,11 +324,6 @@ class PageStorage {
         cursor.close()
         return list
     }
-
-    fun getTime(): Cursor = db.query(
-        table = Const.TITLE,
-        column = Const.TIME
-    )
 
     fun getListAll(): Cursor = db.query(Const.TITLE)
 
