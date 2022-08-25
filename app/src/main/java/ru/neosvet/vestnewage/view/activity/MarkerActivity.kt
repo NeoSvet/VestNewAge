@@ -138,7 +138,7 @@ class MarkerActivity : AppCompatActivity() {
             is NeoState.Error -> {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.NeoDialog)
                     .setTitle(getString(R.string.error))
-                    .setMessage(state.throwable.localizedMessage)
+                    .setMessage(state.message)
                     .setPositiveButton(
                         getString(R.string.send)
                     ) { _, _ ->

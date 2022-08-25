@@ -22,7 +22,10 @@ sealed class NeoState {
     object Success : NeoState()
     data class LongValue(val value: Long) : NeoState()
 
-    class Error(val throwable: Throwable, val data: Data) : NeoState() {
+    class Error(
+        private val throwable: Throwable,
+        private val data: Data
+    ) : NeoState() {
         var message = ""
             private set
         var isNeedReport = false
