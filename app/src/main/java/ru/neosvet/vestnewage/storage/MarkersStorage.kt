@@ -4,12 +4,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
+import java.io.Closeable
 
-/**
- * Created by NeoSvet on 23.03.2022.
- */
-
-class MarkersStorage {
+class MarkersStorage : Closeable {
     companion object {
         fun closeList(s: String?): String {
             return if (s == null) ""
@@ -196,7 +193,7 @@ class MarkersStorage {
         db.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, id)
     }
 
-    fun close() =
+    override fun close() =
         db.close()
 
     fun foundMarker(values: Array<String>): Int {

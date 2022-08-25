@@ -5,12 +5,9 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
+import java.io.Closeable
 
-/**
- * Created by NeoSvet on 24.03.2022.
- */
-
-class SearchStorage {
+class SearchStorage : Closeable {
     private var db = DataBase(Const.SEARCH)
     var isDesc = false
     private var isClosed = false
@@ -35,7 +32,7 @@ class SearchStorage {
     fun clear() =
         db.delete(Const.SEARCH)
 
-    fun close() {
+    override fun close() {
         if (isClosed) return
         db.close()
         isClosed = true

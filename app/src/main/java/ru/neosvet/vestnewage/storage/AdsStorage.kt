@@ -4,12 +4,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
+import java.io.Closeable
 
-/**
- * Created by NeoSvet on 24.03.2022.
- */
-
-class AdsStorage {
+class AdsStorage : Closeable {
     companion object {
         const val NAME = "devads"
         const val MODE_T: Byte = 0
@@ -62,7 +59,7 @@ class AdsStorage {
     fun clear() =
         db.delete(NAME, Const.MODE + " != ?", MODE_T.toString())
 
-    fun close() =
+    override fun close() =
         db.close()
 
     fun existsTitle(title: String): Boolean {

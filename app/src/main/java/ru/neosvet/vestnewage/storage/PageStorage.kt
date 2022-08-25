@@ -7,9 +7,10 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.*
+import java.io.Closeable
 import java.util.regex.Pattern
 
-class PageStorage {
+class PageStorage : Closeable {
     companion object {
         @JvmStatic
         fun getDatePage(link: String): String {
@@ -361,7 +362,7 @@ class PageStorage {
         selectionArg = "%$find%"
     )
 
-    fun close() {
+    override fun close() {
         if (isClosed) return
         db.close()
         isClosed = true

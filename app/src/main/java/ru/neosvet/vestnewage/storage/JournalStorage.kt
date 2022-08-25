@@ -9,9 +9,10 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
+import java.io.Closeable
 import java.util.*
 
-class JournalStorage {
+class JournalStorage : Closeable {
     companion object {
         private const val LIMIT = 100
     }
@@ -40,7 +41,7 @@ class JournalStorage {
     fun clear() =
         db.delete(DataBase.JOURNAL)
 
-    fun close() =
+    override fun close() =
         db.close()
 
     suspend fun getList(offset: Int, strings: JournalStrings): List<ListItem> {

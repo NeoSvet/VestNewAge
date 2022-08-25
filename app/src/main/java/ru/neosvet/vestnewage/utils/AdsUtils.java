@@ -7,6 +7,7 @@ import android.database.Cursor;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.storage.AdsStorage;
 import ru.neosvet.vestnewage.view.dialog.CustomDialog;
 
-public class AdsUtils {
+public class AdsUtils implements Closeable {
     public static final int TITLE = 0, LINK = 1, DES = 2;
     private AdsStorage storage;
     private CustomDialog alert;
@@ -231,6 +232,7 @@ public class AdsUtils {
         storage.insert(row);
     }
 
+    @Override
     public void close() {
         if (isClosed)
             return;
