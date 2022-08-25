@@ -82,14 +82,13 @@ public class StatusButton {
             progBar.setProgress(0);
             progBar.setVisibility(View.GONE);
         }
+        clearAnimation();
         if (start) {
             loadText();
-            panel.setVisibility(View.VISIBLE);
             visible = true;
             iv.startAnimation(anRotate);
         } else {
             visible = false;
-            iv.clearAnimation();
             tv.setText(context.getString(R.string.done));
             panel.startAnimation(anHide);
         }
@@ -97,15 +96,14 @@ public class StatusButton {
 
     public void setError(String error) {
         stop = true;
+        clearAnimation();
         if (error != null) {
             if (prog) progBar.setVisibility(View.GONE);
             error = parseError(error);
             tv.setText(context.getString(R.string.crash));
             panel.setBackgroundResource(R.drawable.shape_red);
             iv.setImageResource(R.drawable.ic_close);
-            iv.clearAnimation();
             visible = true;
-            panel.setVisibility(View.VISIBLE);
         } else {
             panel.setVisibility(View.GONE);
             visible = false;
@@ -163,9 +161,17 @@ public class StatusButton {
 
     public void setProgress(int p) {
         if (!prog) {
+            clearAnimation();
             progBar.setVisibility(View.VISIBLE);
             prog = true;
         }
         progBar.setProgress(p);
+    }
+
+    private void clearAnimation() {
+        iv.clearAnimation();
+        anHide.cancel();
+        anRotate.cancel();
+        panel.setVisibility(View.VISIBLE);
     }
 }
