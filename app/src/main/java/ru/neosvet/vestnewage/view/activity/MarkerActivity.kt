@@ -143,7 +143,7 @@ class MarkerActivity : AppCompatActivity() {
                     .setPositiveButton(
                         getString(R.string.send)
                     ) { _, _ ->
-                        Lib.openInApps(Const.mailto + ErrorUtils.getInformation(), null)
+                        Lib.openInApps(Const.mailto + ErrorUtils.information, null)
                     }
                     .setNegativeButton(
                         getString(android.R.string.cancel)

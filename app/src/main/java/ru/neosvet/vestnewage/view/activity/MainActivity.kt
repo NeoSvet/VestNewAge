@@ -28,10 +28,7 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.BottomAnim
-import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.NeoToast
-import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.basic.*
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
@@ -352,7 +349,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         toast.hide()
         statusBack = StatusBack.PAGE
         setMenu(section, savePrev)
-        status.setError(null)
+        status.setError(false)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
@@ -475,7 +472,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     override fun onBackPressed() {
         if (status.isCrash) {
             ErrorUtils.clear()
-            status.setError(null)
+            status.setError(false)
             unblocked()
             curFragment?.resetError()
             return
@@ -577,8 +574,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
-            is NeoState.Error ->
-                status.setError(state.throwable)
+            is NeoState.Error -> setError()
             else -> {}
         }
     }
@@ -652,9 +648,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.topBar?.setExpanded(false)
     }
 
-    fun setError(error: Throwable) {
-        blocked()
-        status.setError(error)
+    fun setError() {
+        if (ErrorUtils.isNeedReport) {
+            blocked()
+            status.setError(true)
+        } else
+            NeoSnackbar().show(helper.fabAction, ErrorUtils.message)
     }
 
     fun showStaticToast(msg: String) {

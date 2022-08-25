@@ -28,13 +28,10 @@ abstract class NeoToiler : StateToiler() {
         throwable.printStackTrace()
         scope = initScope()
         isRun = false
-        if(throwable is BaseIsBusyException) {
-            setState(NeoState.Error(throwable))
-            return
-        }
-        if (loadIfNeed)
+        if (loadIfNeed && throwable !is BaseIsBusyException)
             load()
         else {
+            ErrorUtils.setError(throwable)
             ErrorUtils.setData(getInputData())
             setState(NeoState.Error(throwable))
         }

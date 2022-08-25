@@ -97,7 +97,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         stop()
         ErrorUtils.setData(getInputData())
         ErrorUtils.setError(throwable)
-        finishService(ErrorUtils.getMessage())
+        finishService(ErrorUtils.message)
     }
 
     private fun getInputData(): Data = Data.Builder()
@@ -219,10 +219,15 @@ class LoaderService : LifecycleService(), LoadHandler {
             main = Intent(this, MainActivity::class.java)
         } else {
             title = getString(R.string.error_load)
-            msg = error + Const.N + getString(R.string.touch_to_send)
-            main = Intent(Intent.ACTION_VIEW)
-            main.data = Uri.parse(Const.mailto + ErrorUtils.getInformation())
-            ErrorUtils.clear()
+            if (ErrorUtils.isNeedReport) {
+                main = Intent(Intent.ACTION_VIEW)
+                main.data = Uri.parse(Const.mailto + ErrorUtils.information)
+                ErrorUtils.clear()
+                msg = error + Const.N + getString(R.string.touch_to_send)
+            } else {
+                main = Intent(App.context, MainActivity::class.java)
+                msg = error
+            }
         }
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
         val piEmpty = PendingIntent.getActivity(this, 0, Intent(), FLAGS)

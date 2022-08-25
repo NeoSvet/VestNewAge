@@ -107,11 +107,8 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
             NeoState.NoConnected ->
                 noConnected()
             is NeoState.Error -> {
-                if (state.throwable is BaseIsBusyException)
-                    state.throwable.show(requireView())
-                else
-                    act?.setError(state.throwable)
                 setStatus(false)
+                act?.setError()
             }
             else -> onChangedOtherState(state)
         }

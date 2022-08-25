@@ -75,7 +75,7 @@ public class StatusButton {
     }
 
     public void setLoad(boolean start) {
-        setError(null);
+        setError(false);
         stop = !start;
         if (prog) {
             prog = false;
@@ -94,11 +94,10 @@ public class StatusButton {
         }
     }
 
-    public void setError(Throwable error) {
+    public void setError(Boolean hasError) {
         stop = true;
         clearAnimation();
-        if (error != null) {
-            ErrorUtils.setError(error);
+        if (hasError) {
             this.error = ErrorUtils.getMessage();
             if (prog) progBar.setVisibility(View.GONE);
             tv.setText(context.getString(R.string.crash));
@@ -139,7 +138,7 @@ public class StatusButton {
                     .setOnDismissListener(dialog -> ErrorUtils.clear());
             builder.create().show();
             setLoad(false);
-            setError(null);
+            setError(false);
             return true;
         }
         return false;

@@ -19,17 +19,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.*
-import ru.neosvet.vestnewage.view.basic.NeoToast
-import ru.neosvet.vestnewage.view.basic.SoftKeyboard
-import ru.neosvet.vestnewage.view.basic.StatusButton
-import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.basic.*
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
@@ -254,8 +250,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     override fun onBackPressed() {
         when {
             status.isVisible -> {
-                ErrorUtils.clear()
-                status.setError(null)
+                status.setError(false)
                 bottomUnblocked()
             }
             helper.isFullScreen ->
@@ -629,10 +624,12 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             NeoState.Success ->
                 tipFinish.show()
             is NeoState.Error ->
-                if (state.throwable is BaseIsBusyException) {
+                if (ErrorUtils.isNeedReport)
+                    status.setError(true)
+                else {
                     finishLoading()
-                    state.throwable.show(binding.bottomBar)
-                } else status.setError(state.throwable)
+                    NeoSnackbar().show(binding.fabNav, ErrorUtils.message)
+                }
             else -> {}
         }
     }

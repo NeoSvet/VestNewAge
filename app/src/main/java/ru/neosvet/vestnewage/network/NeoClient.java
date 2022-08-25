@@ -13,7 +13,6 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.MyException;
-import ru.neosvet.vestnewage.utils.ErrorUtils;
 import ru.neosvet.vestnewage.utils.Lib;
 
 public class NeoClient {
