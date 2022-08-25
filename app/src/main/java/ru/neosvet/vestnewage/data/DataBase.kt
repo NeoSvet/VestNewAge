@@ -34,7 +34,7 @@ class DataBase(name: String, write: Boolean = false) :
     }
 
     private var db: SQLiteDatabase = if (write) {
-        if (names.contains(name)) throw BaseIsBusyException()
+        if (names.contains(name)) throw MyException.BaseIsBusy()
         names.add(name)
         this.writableDatabase
     } else this.readableDatabase
@@ -125,7 +125,7 @@ class DataBase(name: String, write: Boolean = false) :
 
     private fun checkWritable() {
         if (!isReadOnly) return
-        if (names.contains(databaseName)) throw BaseIsBusyException()
+        if (names.contains(databaseName)) throw MyException.BaseIsBusy()
         isReadOnly = false
         names.add(databaseName)
         db.close()

@@ -50,7 +50,7 @@ public class NeoClient {
                 first = false;
                 return getStream(url.replace(NetConst.SITE, NetConst.SITE2));
             } else
-                throw new MyException(App.context.getString(R.string.error_site));
+                throw new MyException.SiteNoResponse();
         }
 
         if (response.code() != 200) {
@@ -58,12 +58,11 @@ public class NeoClient {
                 first = false;
                 return getStream(url.replace(NetConst.SITE, NetConst.SITE2));
             } else
-                throw new MyException(App.context.getString(R.string.error_code)
-                        + response.code());
+                throw new MyException.SiteCode(response.code());
         }
 
         if (response.body() == null)
-            throw new MyException(App.context.getString(R.string.error_site));
+            throw new MyException.SiteNoResponse();
         InputStream inStream = response.body().byteStream();
         File file = Lib.getFileP("/cache/file");
         if (file.exists()) file.delete();

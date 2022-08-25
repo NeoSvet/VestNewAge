@@ -240,8 +240,8 @@
     <string name="error_load">Ошибка при загрузке</string>
     <string name="touch_to_send">[нажмите чтобы отправить]</string>
     <string name="error">Ошибка</string>
-    <string name="error_code">Ошибка на сайте:&#160;</string>
-    <string name="error_site">Сайт не ответил на запрос</string>
+    <string name="site_code">Ошибка на сайте:&#160;</string>
+    <string name="site_no_response">Сайт не ответил на запрос</string>
     <string name="site_unavailable">Сайт недоступен</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>

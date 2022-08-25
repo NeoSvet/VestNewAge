@@ -63,7 +63,7 @@ class BookLoader : Loader {
         if (NeoClient.isMainSite())
             loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
         else
-            throw MyException(App.context.getString(R.string.site_unavailable))
+            throw MyException.SiteUnavailable()
     }
 
     private fun loadList(url: String) {

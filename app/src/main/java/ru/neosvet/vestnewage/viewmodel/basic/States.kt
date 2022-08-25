@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.work.Data
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.MyException
@@ -30,20 +29,17 @@ sealed class NeoState {
             private set
 
         init {
-            val msg = throwable.localizedMessage
             message = when {
-                throwable is BaseIsBusyException ->
-                    App.context.getString(R.string.busy_base_error)
-                msg.isNullOrEmpty() -> {
+                throwable.localizedMessage.isNullOrEmpty() -> {
                     isNeedReport = true
                     App.context.getString(R.string.unknown_error)
                 }
-               throwable is SocketTimeoutException ||   throwable is SSLHandshakeException ||
-                       throwable is CertificateException ->
-                    App.context.getString(R.string.error_site)
+                throwable is SocketTimeoutException || throwable is SSLHandshakeException ||
+                        throwable is CertificateException ->
+                    App.context.getString(R.string.site_no_response)
                 else -> {
                     isNeedReport = throwable !is MyException
-                    msg
+                    throwable.localizedMessage!!
                 }
             }
         }
