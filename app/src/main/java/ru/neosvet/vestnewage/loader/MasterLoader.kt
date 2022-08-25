@@ -100,12 +100,13 @@ class MasterLoader : Loader {
     }
 
     private fun loadFromSite(d: DateUnit) {
+        if (DataBase.isBusy(d.my)) return
+        val storage = PageStorage()
+        storage.open(d.my, true)
         if (lastYear != d.year) {
             getBookLoader().loadYearList(d.year)
             lastYear = d.year
         }
-        val storage = PageStorage()
-        storage.open(d.my, true)
         val list = storage.getLinksList()
         storage.close()
         loadList(list)
@@ -178,13 +179,15 @@ class MasterLoader : Loader {
     }
 
     private fun loadUcozBase(url: String) {
+        val name = url.substring(url.lastIndexOf("/") + 1)
+        if (DataBase.isBusy(name)) return
         val storage = PageStorage()
+        storage.open(name, true)
         var isTitle: Boolean
         val ids = HashMap<String, Int>()
         var id: Int
         var v: String
         val time = System.currentTimeMillis()
-        storage.open(url.substring(url.lastIndexOf("/") + 1), true)
         isTitle = true
         val br = BufferedReader(
             InputStreamReader(NeoClient.getStream(url), Const.ENCODING),

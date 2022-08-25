@@ -11,6 +11,7 @@ import androidx.work.Data
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
@@ -116,6 +117,7 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun stop() {
+        DataBase.clearBusy()
         isRun = false
         loader.cancel()
     }

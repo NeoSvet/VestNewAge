@@ -26,9 +26,18 @@ class DataBase(name: String, write: Boolean = false) :
         const val ARTICLES = "00.00"
         const val DOCTRINE = "00.01"
         const val EMPTY_BASE_SIZE = 24576L
+        private val names: MutableSet<String> = LinkedHashSet()
+        fun isBusy(name: String): Boolean = names.contains(name)
+        fun clearBusy() {
+            names.clear()
+        }
     }
 
-    private var db: SQLiteDatabase = if (write) this.writableDatabase else this.readableDatabase
+    private var db: SQLiteDatabase = if (write) {
+        if (names.contains(name)) throw BaseIsBusyException()
+        names.add(name)
+        this.writableDatabase
+    } else this.readableDatabase
     var isReadOnly = !write
         private set
 
@@ -107,13 +116,18 @@ class DataBase(name: String, write: Boolean = false) :
     @Synchronized
     override fun close() {
         db.close()
-        isReadOnly = true
+        if (isReadOnly.not()) {
+            names.remove(databaseName)
+            isReadOnly = true
+        }
         super.close()
     }
 
     private fun checkWritable() {
         if (!isReadOnly) return
+        if (names.contains(databaseName)) throw BaseIsBusyException()
         isReadOnly = false
+        names.add(databaseName)
         db.close()
         db = this.writableDatabase
     }

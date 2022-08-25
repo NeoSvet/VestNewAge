@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.StateUtils
@@ -106,11 +107,13 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
             NeoState.NoConnected ->
                 noConnected()
             is NeoState.Error -> {
-                act?.setError(state.throwable.localizedMessage)
+                if (state.throwable is BaseIsBusyException)
+                    state.throwable.show(requireView())
+                else
+                    act?.setError(state.throwable.localizedMessage)
                 setStatus(false)
             }
-            else ->
-                onChangedOtherState(state)
+            else -> onChangedOtherState(state)
         }
     }
 

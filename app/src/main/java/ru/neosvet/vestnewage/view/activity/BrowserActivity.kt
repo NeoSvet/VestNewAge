@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
@@ -629,7 +630,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             NeoState.Success ->
                 tipFinish.show()
             is NeoState.Error ->
-                status.setError(state.throwable.localizedMessage)
+                if (state.throwable is BaseIsBusyException) {
+                    finishLoading()
+                    state.throwable.show(binding.bottomBar)
+                } else status.setError(state.throwable.localizedMessage)
             else -> {}
         }
     }

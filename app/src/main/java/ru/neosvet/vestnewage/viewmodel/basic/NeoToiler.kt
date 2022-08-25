@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel.basic
 
 import androidx.work.Data
 import kotlinx.coroutines.*
+import ru.neosvet.vestnewage.data.BaseIsBusyException
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.ErrorUtils
 
@@ -27,6 +28,10 @@ abstract class NeoToiler : StateToiler() {
         throwable.printStackTrace()
         scope = initScope()
         isRun = false
+        if(throwable is BaseIsBusyException) {
+            setState(NeoState.Error(throwable))
+            return
+        }
         if (loadIfNeed)
             load()
         else {
