@@ -182,7 +182,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         for (i in 0 until calendar.size)
             calendar[i].clear()
         val storage = PageStorage()
-        storage.open(date.my)
+        storage.open(date.my, false)
         val cursor = storage.getListAll()
         var empty = true
         if (cursor.moveToFirst()) {

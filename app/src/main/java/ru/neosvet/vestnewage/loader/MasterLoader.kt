@@ -105,7 +105,7 @@ class MasterLoader : Loader {
             lastYear = d.year
         }
         val storage = PageStorage()
-        storage.open(d.my)
+        storage.open(d.my, true)
         val list = storage.getLinksList()
         storage.close()
         loadList(list)
@@ -184,7 +184,7 @@ class MasterLoader : Loader {
         var id: Int
         var v: String
         val time = System.currentTimeMillis()
-        storage.open(url.substring(url.lastIndexOf("/") + 1))
+        storage.open(url.substring(url.lastIndexOf("/") + 1), true)
         isTitle = true
         val br = BufferedReader(
             InputStreamReader(NeoClient.getStream(url), Const.ENCODING),

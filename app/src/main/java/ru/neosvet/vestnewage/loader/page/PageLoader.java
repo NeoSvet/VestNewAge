@@ -27,7 +27,7 @@ public class PageLoader {
     public boolean download(String link, boolean singlePage) throws Exception {
         isFinish = false;
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
-        storage.open(link);
+        storage.open(link, true);
         if (!singlePage && storage.existsPage(link)) {
             return false;
         }

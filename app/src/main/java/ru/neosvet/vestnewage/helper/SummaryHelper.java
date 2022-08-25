@@ -62,7 +62,7 @@ public class SummaryHelper {
             link = br.readLine();
             br.readLine(); //des
             br.readLine(); //time
-            storage.open(link);
+            storage.open(link, true);
             if (!storage.existsPage(link)) {
                 row = new ContentValues();
                 row.put(Const.TITLE, title);

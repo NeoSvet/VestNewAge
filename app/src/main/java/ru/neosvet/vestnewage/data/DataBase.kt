@@ -10,7 +10,8 @@ import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.UnreadUtils
 
-class DataBase(name: String?) : SQLiteOpenHelper(App.context, name, null, 1) {
+class DataBase(name: String, write: Boolean = false) :
+    SQLiteOpenHelper(App.context, name, null, 1) {
     companion object {
         const val PARAGRAPH = "par"
         const val JOURNAL = "journal"
@@ -27,7 +28,9 @@ class DataBase(name: String?) : SQLiteOpenHelper(App.context, name, null, 1) {
         const val EMPTY_BASE_SIZE = 24576L
     }
 
-    private var db: SQLiteDatabase = this.readableDatabase
+    private var db: SQLiteDatabase = if (write) this.writableDatabase else this.readableDatabase
+    var isReadOnly = !write
+        private set
 
     override fun onCreate(db: SQLiteDatabase) {
         if (databaseName.contains(".")) { // базы данных с материалами
@@ -104,14 +107,24 @@ class DataBase(name: String?) : SQLiteOpenHelper(App.context, name, null, 1) {
     @Synchronized
     override fun close() {
         db.close()
+        isReadOnly = true
         super.close()
     }
 
+    private fun checkWritable() {
+        if (!isReadOnly) return
+        isReadOnly = false
+        db.close()
+        db = this.writableDatabase
+    }
+
     fun insert(table: String, nullColumnHack: String, row: ContentValues): Long {
+        checkWritable()
         return db.insert(table, nullColumnHack, row)
     }
 
     fun insert(table: String, row: ContentValues): Long {
+        checkWritable()
         return db.insert(table, null, row)
     }
 
@@ -121,10 +134,12 @@ class DataBase(name: String?) : SQLiteOpenHelper(App.context, name, null, 1) {
         whereClause: String,
         whereArgs: Array<String>
     ): Int {
+        checkWritable()
         return db.update(table, row, whereClause, whereArgs)
     }
 
     fun update(table: String, row: ContentValues, whereClause: String, whereArg: String): Int {
+        checkWritable()
         return db.update(table, row, whereClause, arrayOf(whereArg))
     }
 
@@ -149,14 +164,17 @@ class DataBase(name: String?) : SQLiteOpenHelper(App.context, name, null, 1) {
     }
 
     fun delete(table: String): Int {
+        checkWritable()
         return db.delete(table, null, null)
     }
 
     fun delete(table: String, whereClause: String, whereArg: String): Int {
+        checkWritable()
         return db.delete(table, whereClause, arrayOf(whereArg))
     }
 
     fun delete(table: String, whereClause: String, whereArgs: Array<String>): Int {
+        checkWritable()
         return db.delete(table, whereClause, whereArgs)
     }
 }

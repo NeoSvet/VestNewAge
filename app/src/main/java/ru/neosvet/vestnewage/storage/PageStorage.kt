@@ -61,7 +61,7 @@ class PageStorage {
     val isBook: Boolean
         get() = !isArticle && patternBook.matcher(name).matches()
 
-    fun open(name: String) {
+    fun open(name: String, write: Boolean = false) {
         val n = if (name.contains(Const.HTML))
             getDatePage(name)
         else if (name.contains(Const.DOCTRINE))
@@ -72,7 +72,7 @@ class PageStorage {
                 return
             db.close()
         }
-        db = DataBase(n)
+        db = DataBase(n, write)
         isClosed = false
         month = n.substring(0, 2).toInt()
         year = n.substring(3).toInt() + 2000
