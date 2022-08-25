@@ -4,14 +4,17 @@ import android.os.Build;
 
 import androidx.work.Data;
 
+import java.security.cert.CertificateException;
 import java.util.Map;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.data.MyException;
+import ru.neosvet.vestnewage.data.BaseIsBusyException;
 
 public class ErrorUtils {
-    private static Throwable error;
+    private static Throwable error = null;
     private static Data data;
 
     public static void clear() {
@@ -24,8 +27,26 @@ public class ErrorUtils {
     }
 
     public static void setError(Throwable error) {
-        if (!(error instanceof MyException))
-            ErrorUtils.error = error;
+        ErrorUtils.error = error;
+    }
+
+    public static String getMessage() {
+        if (error == null) return "";
+        if (error instanceof BaseIsBusyException)
+            return App.context.getString(R.string.busy_base_error);
+        String msg = error.getLocalizedMessage();
+        if (msg == null || msg.isEmpty())
+            return App.context.getString(R.string.unknown_error);
+        if (msg.equals("timeout") || error instanceof SSLHandshakeException || error instanceof CertificateException)
+            return App.context.getString(R.string.error_site);
+        if (msg.contains("failed to connect")) {
+            int i = msg.indexOf("connect") + 11;
+            String site = msg.substring(i, msg.indexOf("/", i));
+            i = msg.indexOf("after") + 6;
+            String sec = msg.substring(i, i + 2);
+            return String.format(App.context.getString(R.string.format_timeout), site, sec);
+        }
+        return msg;
     }
 
     public static String getInformation() {

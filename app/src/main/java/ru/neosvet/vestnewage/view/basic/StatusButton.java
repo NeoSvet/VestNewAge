@@ -94,34 +94,25 @@ public class StatusButton {
         }
     }
 
-    public void setError(String error) {
+    public void setError(Throwable error) {
         stop = true;
         clearAnimation();
         if (error != null) {
+            ErrorUtils.setError(error);
+            this.error = ErrorUtils.getMessage();
             if (prog) progBar.setVisibility(View.GONE);
-            error = parseError(error);
             tv.setText(context.getString(R.string.crash));
             panel.setBackgroundResource(R.drawable.shape_red);
             iv.setImageResource(R.drawable.ic_close);
             visible = true;
         } else {
+            ErrorUtils.clear();
+            this.error = null;
             panel.setVisibility(View.GONE);
             visible = false;
             panel.setBackgroundResource(R.drawable.shape_norm);
             iv.setImageResource(R.drawable.ic_refresh);
         }
-        this.error = error;
-    }
-
-    private String parseError(String error) {
-        if (error.contains("failed to connect")) { //SocketTimeoutException
-            int i = error.indexOf("connect") + 11;
-            String site = error.substring(i, error.indexOf("/", i));
-            i = error.indexOf("after") + 6;
-            String sec = error.substring(i, i + 2);
-            return String.format(context.getString(R.string.format_timeout), site, sec);
-        }
-        return error;
     }
 
     public boolean isCrash() {

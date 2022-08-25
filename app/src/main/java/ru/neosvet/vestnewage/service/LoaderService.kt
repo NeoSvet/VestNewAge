@@ -97,7 +97,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         stop()
         ErrorUtils.setData(getInputData())
         ErrorUtils.setError(throwable)
-        finishService(throwable.localizedMessage ?: getString(R.string.unknown_error))
+        finishService(ErrorUtils.getMessage())
     }
 
     private fun getInputData(): Data = Data.Builder()

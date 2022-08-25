@@ -110,7 +110,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
                 if (state.throwable is BaseIsBusyException)
                     state.throwable.show(requireView())
                 else
-                    act?.setError(state.throwable.localizedMessage)
+                    act?.setError(state.throwable)
                 setStatus(false)
             }
             else -> onChangedOtherState(state)

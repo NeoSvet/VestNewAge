@@ -633,7 +633,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 if (state.throwable is BaseIsBusyException) {
                     finishLoading()
                     state.throwable.show(binding.bottomBar)
-                } else status.setError(state.throwable.localizedMessage)
+                } else status.setError(state.throwable)
             else -> {}
         }
     }

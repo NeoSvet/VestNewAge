@@ -46,7 +46,6 @@ public class NeoClient {
             OkHttpClient client = createHttpClient();
             response = client.newCall(builderRequest.build()).execute();
         } catch (Exception e) {
-            ErrorUtils.setError(e);
             e.printStackTrace();
             if (url.contains(NetConst.SITE)) {
                 first = false;

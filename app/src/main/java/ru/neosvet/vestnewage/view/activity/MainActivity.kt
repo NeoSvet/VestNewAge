@@ -578,7 +578,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 frWelcome?.list?.addAll(state.list)
             }
             is NeoState.Error ->
-                status.setError(state.throwable.localizedMessage)
+                status.setError(state.throwable)
             else -> {}
         }
     }
@@ -652,9 +652,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.topBar?.setExpanded(false)
     }
 
-    fun setError(msg: String?) {
+    fun setError(error: Throwable) {
         blocked()
-        status.setError(msg ?: getString(R.string.unknown_error))
+        status.setError(error)
     }
 
     fun showStaticToast(msg: String) {

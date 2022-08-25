@@ -36,7 +36,6 @@ abstract class NeoToiler : StateToiler() {
             load()
         else {
             ErrorUtils.setData(getInputData())
-            ErrorUtils.setError(throwable)
             setState(NeoState.Error(throwable))
         }
     }
