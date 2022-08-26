@@ -199,7 +199,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             setStatus(false)
         when (state) {
             is NeoState.Calendar -> binding?.run {
-                act?.updateNew()
+                if(toiler.isUpdateUnread)
+                    act?.updateNew()
                 tvDate.text = state.date
                 adCalendar.setItems(state.list)
                 if (root.isVisible.not())

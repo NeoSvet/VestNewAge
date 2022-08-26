@@ -23,6 +23,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class CalendarToiler : NeoToiler(), LoadHandlerLite {
     var date: DateUnit = DateUnit.initToday().apply { day = 1 }
+        private set
     private val todayM = date.month
     private val todayY = date.year
     private val prevDate = DateUnit.initToday().apply {
@@ -33,15 +34,17 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private var time: Long = 0
     private var masterLoader: MasterLoader? = null
     private var pageLoader: PageLoader? = null
+    var isUpdateUnread = false
+        private set
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
         .putInt(Const.MONTH, date.month)
         .putInt(Const.YEAR, date.year)
-        .putBoolean(Const.UNREAD, isCurMonth()) //updateUnread
+        .putBoolean(Const.UNREAD, isUpdateUnread)
         .build()
 
-    override suspend fun doLoad() { //loadFromSite
+    override suspend fun doLoad() {
         loadIfNeed = false
         val list = loadMonth()
         if (loadFromStorage()) {
@@ -94,12 +97,13 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private fun loadMonth(): List<String> {
         val loader = CalendarLoader()
         loader.setDate(date.year, date.month)
+        isUpdateUnread = isCurMonth()
         if (date.year < 2016) {
             if (masterLoader == null)
                 masterLoader = MasterLoader(this)
             masterLoader?.loadMonth(date.month, date.year)
         } else
-            loader.loadListMonth(isCurMonth())
+            loader.loadListMonth(isUpdateUnread)
         return loader.getLinkList()
     }
 
@@ -121,6 +125,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun openCalendar(offsetMonth: Int) {
+        isUpdateUnread = false
         loadIfNeed = true
         scope.launch {
             if (offsetMonth != 0) {

@@ -24,7 +24,6 @@ class NewFragment : NeoFragment() {
         get() = neotoiler as NewToiler
     override val title: String
         get() = getString(R.string.new_section)
-    private var openedReader = false
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(NewToiler::class.java).apply { init(requireActivity()) }
@@ -40,16 +39,11 @@ class NewFragment : NeoFragment() {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null)
-            toiler.openList()
     }
 
     override fun onResume() {
         super.onResume()
-        if (openedReader) {
-            openedReader = false
-            toiler.openList()
-        }
+        toiler.openList()
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -88,8 +82,8 @@ class NewFragment : NeoFragment() {
             toiler.openAd(item, index)
         } else if (item.link != "") {
             toiler.needOpen = true
-            openedReader = true
             openReader(item.link, null)
+            act?.updateNew()
         }
     }
 

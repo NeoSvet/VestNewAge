@@ -66,14 +66,15 @@ class SummaryFragment : NeoFragment() {
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        if (toiler.isRun.not())
+        if (toiler.isRun.not()) {
             setStatus(false)
+            act?.updateNew()
+        }
         if (state is NeoState.ListValue) {
             val scroll = adapter.itemCount > 0
             adapter.setItems(state.list)
             if (scroll)
                 binding?.rvSummary?.smoothScrollToPosition(0)
-            act?.updateNew()
         } else if (state is NeoState.LongValue) binding?.run {
             setUpdateTime(state.value, tvUpdate)
         }

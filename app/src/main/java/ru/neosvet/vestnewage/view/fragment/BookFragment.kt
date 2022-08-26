@@ -194,12 +194,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun setBook(state: NeoState.Book) = binding?.run {
-        act?.run {
-            if (status.isVisible) {
-                setStatus(false)
-                updateNew()
-            }
-        }
         if (ScreenUtils.isLand)
             tvDate.text = state.date.replace(Const.N, " ")
         else
@@ -319,8 +313,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 alertRnd?.dismiss()
             }
             setRightButton(getString(R.string.open)) {
-                openedReader = true
                 openReader(link, place)
+                act?.updateNew()
                 alertRnd?.dismiss()
             }
         }
