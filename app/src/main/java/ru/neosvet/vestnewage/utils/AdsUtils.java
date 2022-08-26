@@ -258,7 +258,7 @@ public class AdsUtils implements Closeable {
         isNew = false;
         long t = getTime();
         String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-        BufferedInputStream in = NeoClient.getStream(s);
+        BufferedInputStream in = NeoClient.getStream(s, null);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();
         if (Long.parseLong(s) > t) {

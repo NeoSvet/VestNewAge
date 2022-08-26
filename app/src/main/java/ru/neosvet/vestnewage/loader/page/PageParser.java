@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.data.NeoList;
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite;
 import ru.neosvet.vestnewage.network.NeoClient;
 import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.utils.Lib;
@@ -14,8 +15,8 @@ import ru.neosvet.vestnewage.utils.Lib;
 public class PageParser {
     private final NeoList<HTMLElem> content = new NeoList<>();
 
-    public void load(String url, String start) throws Exception {
-        InputStream in = NeoClient.getStream(url);
+    public void load(String url, String start, LoadHandlerLite handler) throws Exception {
+        InputStream in = NeoClient.getStream(url, handler);
         BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
         String s;
         while ((s = br.readLine()) != null) {

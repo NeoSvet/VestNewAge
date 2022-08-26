@@ -51,11 +51,11 @@ class SiteLoader(private val file: String) : LinksProvider {
         val page = PageParser()
         val isSite = link == NetConst.SITE
         if (isSite) {
-            page.load(link, "page-title")
+            page.load(link, "page-title", null)
         } else {
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            page.load(url, "razdel")
+            page.load(url, "razdel", null)
         }
         var s: String? = page.currentElem
         var t: String

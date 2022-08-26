@@ -51,9 +51,9 @@ public class PageLoader {
         boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser();
         if (NeoClient.isMainSite())
-            page.load(NetConst.SITE + Const.PRINT + s, "page-title");
+            page.load(NetConst.SITE + Const.PRINT + s, "page-title", null);
         else
-            page.load(NetConst.SITE2 + Const.PRINT + s, "<h2>");
+            page.load(NetConst.SITE2 + Const.PRINT + s, "<h2>", null);
         if (singlePage)
             storage.deleteParagraphs(storage.getPageId(link));
 
@@ -122,7 +122,7 @@ public class PageLoader {
 
     private void downloadDoctrinePage(String link) throws Exception {
         String s = link.substring(Const.DOCTRINE.length()); //pages
-        BufferedInputStream stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + s + ".p");
+        BufferedInputStream stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + s + ".p", null);
         BufferedReader br = new BufferedReader(new InputStreamReader(stream, Const.ENCODING), 1000);
         long time = Long.parseLong(br.readLine());
         ContentValues row = new ContentValues();

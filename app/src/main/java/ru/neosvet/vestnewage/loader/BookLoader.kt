@@ -42,7 +42,7 @@ class BookLoader : Loader {
         if (year == 2016)
             loadEpistlesList()
         if (isRun.not()) return
-        if (NeoClient.isMainSite())
+        if (NeoClient.isMainSite)
             loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
         else
             loadList(NetConst.SITE2 + Const.PRINT + year + Const.HTML)
@@ -52,7 +52,7 @@ class BookLoader : Loader {
         isRun = true
         cur = 0
         max = 12
-        if (NeoClient.isMainSite())
+        if (NeoClient.isMainSite)
             loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
         else
             loadList(NetConst.SITE2 + Const.PRINT + year + Const.HTML)
@@ -60,7 +60,7 @@ class BookLoader : Loader {
 
     fun loadEpistlesList() {
         isRun = true
-        if (NeoClient.isMainSite())
+        if (NeoClient.isMainSite)
             loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
         else
             throw MyException.SiteUnavailable()
@@ -68,10 +68,10 @@ class BookLoader : Loader {
 
     private fun loadList(url: String) {
         val page = PageParser()
-        if (NeoClient.isMainSite())
-            page.load(url, "page-title")
+        if (NeoClient.isMainSite)
+            page.load(url, "page-title", handlerLite)
         else
-            page.load(url, "<h2>")
+            page.load(url, "<h2>", handlerLite)
         var a: String?
         var s: String
         var date1: String? = null

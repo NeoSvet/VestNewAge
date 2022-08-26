@@ -27,7 +27,7 @@ class SummaryLoader : LinksProvider {
     fun loadList(updateUnread: Boolean) {
         val stream: InputStream =
             NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
-        val site = if (NeoClient.isMainSite())
+        val site = if (NeoClient.isMainSite)
             NetConst.SITE.substring(
                 NetConst.SITE.indexOf("/") + 2
             )

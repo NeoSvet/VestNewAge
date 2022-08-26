@@ -19,7 +19,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class MasterLoader : Loader {
+class MasterLoader : Loader, LoadHandlerLite {
     private val handler: LoadHandler?
     private val handlerLite: LoadHandlerLite?
 
@@ -189,19 +189,14 @@ class MasterLoader : Loader {
         var v: String
         val time = System.currentTimeMillis()
         isTitle = true
-        val br = BufferedReader(
-            InputStreamReader(NeoClient.getStream(url), Const.ENCODING),
-            1000
-        )
+        val stream = NeoClient.getStream(url, this)
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         var n = 2
-        var max = 0
-        var p = 2
         var s: String? = br.readLine()
         while (s != null && isRun) {
             if (s == Const.AND) {
                 isTitle = false
                 s = br.readLine()
-                max = n - 2
             }
             v = br.readLine()
             s?.let {
@@ -214,13 +209,6 @@ class MasterLoader : Loader {
                     ids[n.toString()] = id
                     n++
                 } else ids[it]?.let { id ->
-                    if (p != id) {
-                        if (handler != null)
-                            handler.postMessage("$msg (${(p - 1).percent(max)}%)")
-                        else
-                            handlerLite?.postPercent((p - 1).percent(max))
-                        p = id
-                    }
                     storage.insertParagraph(getRow(id, v))
                 }
             }
@@ -258,5 +246,12 @@ class MasterLoader : Loader {
             if (isRun.not()) return@forEach
         }
         loader.finish()
+    }
+
+    override fun postPercent(value: Int) {
+        if (handler != null)
+            handler.postMessage("$msg ($value%)")
+        else
+            handlerLite?.postPercent(value)
     }
 }
