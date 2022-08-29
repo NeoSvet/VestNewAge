@@ -111,13 +111,19 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state != null && toiler.isRun.not()) {
-            val t = state.getInt(Const.DIALOG, -1)
-            if (t > 0) {
-                val d = DateUnit.putDays(t)
-                showDatePicker(d)
-            } else if (t == 0)
-                showDownloadDialog()
+        if (toiler.isRun.not()) {
+            binding?.run {
+                bPrev.isEnabled = toiler.checkPrev()
+                bNext.isEnabled = toiler.checkNext()
+            }
+            if (state != null) {
+                val t = state.getInt(Const.DIALOG, -1)
+                if (t > 0) {
+                    val d = DateUnit.putDays(t)
+                    showDatePicker(d)
+                } else if (t == 0)
+                    showDownloadDialog()
+            }
         }
         binding?.tabLayout?.select(toiler.selectedTab)
         checkChangeTab()
@@ -204,8 +210,6 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        bPrev.isEnabled = false
-        bNext.isEnabled = false
         rvBook.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBook.adapter = adapter
         setListEvents(rvBook, false)
