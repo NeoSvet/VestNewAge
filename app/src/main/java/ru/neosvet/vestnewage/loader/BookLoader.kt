@@ -1,8 +1,6 @@
 package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
-import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.MyException
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
@@ -154,8 +152,7 @@ class BookLoader : Loader {
                 storage.insertTitle(row).toInt()
             else
                 storage.updateTitle(link, row)
-            if (isRun.not())
-                break
+            if (isRun.not()) break
             link = br.readLine()
         }
         br.close()
