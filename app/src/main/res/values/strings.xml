@@ -5,8 +5,15 @@
     <string name="god_words">Слова Создателя</string>
     <string name="yet_load">Ещё не загружены. Откройте позже.</string>
     <string name="find">Найти</string>
+    <!--Error-->
     <string name="unknown_error">Неизвестная ошибка</string>
-    <string name="busy_base_error">База данных занята, дождитесь завершения загрузки</string>
+    <string name="busy_base_error">База данных занята, попробуйте позже</string>
+    <string name="error_load">Ошибка при загрузке</string>
+    <string name="touch_to_send">[нажмите чтобы отправить]</string>
+    <string name="error">Ошибка</string>
+    <string name="site_code">Ошибка на сайте: %d, попробуйте позже</string>
+    <string name="site_no_response">Проблемы с сетью, попробуйте позже</string>
+    <string name="site_unavailable">Сайт недоступен</string>
     <!--Download-->
     <string name="download_">Скачать…</string>
     <string name="download_alert">Выберите пункты для скачивания:</string>
@@ -239,12 +246,6 @@
     <string name="stop">Остановить</string>
     <string name="load_suc_finish">Загрузка успешно завершена</string>
     <string name="cab_fail">Отсутствует доступ к интернету или требуется VPN</string>
-    <string name="error_load">Ошибка при загрузке</string>
-    <string name="touch_to_send">[нажмите чтобы отправить]</string>
-    <string name="error">Ошибка</string>
-    <string name="site_code">Ошибка на сайте:&#160;</string>
-    <string name="site_no_response">Сайт не ответил на запрос</string>
-    <string name="site_unavailable">Сайт недоступен</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
     <string name="done">Готово</string>
