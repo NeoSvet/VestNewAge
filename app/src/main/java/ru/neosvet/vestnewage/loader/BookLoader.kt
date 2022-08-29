@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.MyException
+import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
@@ -61,7 +61,7 @@ class BookLoader : Loader {
         if (NeoClient.isMainSite)
             loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
         else
-            throw MyException.SiteUnavailable()
+            throw NeoException.SiteUnavailable()
     }
 
     private fun loadList(url: String) {

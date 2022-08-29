@@ -3,8 +3,8 @@ package ru.neosvet.vestnewage.network
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.data.MyException.SiteCode
-import ru.neosvet.vestnewage.data.MyException.SiteNoResponse
+import ru.neosvet.vestnewage.data.NeoException.SiteCode
+import ru.neosvet.vestnewage.data.NeoException.SiteNoResponse
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent

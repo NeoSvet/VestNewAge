@@ -122,7 +122,7 @@ class DataBase(name: String, write: Boolean = false) :
 
     private fun checkWritable() {
         if (!isReadOnly) return
-        if (names.contains(databaseName)) throw MyException.BaseIsBusy()
+        if (names.contains(databaseName)) throw NeoException.BaseIsBusy()
         isReadOnly = false
         names.add(databaseName)
         db.close()

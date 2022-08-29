@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.data.MyException
+import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.utils.Const
 import java.net.SocketTimeoutException
 import java.security.cert.CertificateException
@@ -41,7 +41,7 @@ sealed class NeoState {
                         throwable is CertificateException ->
                     App.context.getString(R.string.site_no_response)
                 else -> {
-                    isNeedReport = throwable !is MyException
+                    isNeedReport = throwable !is NeoException
                     throwable.localizedMessage!!
                 }
             }
