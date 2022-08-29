@@ -46,6 +46,7 @@ class MarkersFragment : NeoFragment() {
         initAnimation()
     }
     private var isStopRotate = false
+    private var isNeedRestore = false
     private var collectResult: Job? = null
     private val toiler: MarkersToiler
         get() = neotoiler as MarkersToiler
@@ -118,6 +119,7 @@ class MarkersFragment : NeoFragment() {
             return
         }
         toiler.run {
+            isNeedRestore = true
             if (iSel > -1) {
                 goToEdit()
                 lifecycleScope.launch {
@@ -300,8 +302,14 @@ class MarkersFragment : NeoFragment() {
                 doneExport(state.message)
             else
                 act?.showToast(state.message)
-            is NeoState.ListState ->
+            is NeoState.ListState -> {
+                if (isNeedRestore && state.event != ListEvent.RELOAD) {
+                    isNeedRestore = false
+                    toiler.restoreList()
+                    return
+                }
                 updateList(state)
+            }
             NeoState.Ready -> {//import toiler.task==MarkersModel.Type.FILE
                 setStatus(false)
                 toiler.openColList()

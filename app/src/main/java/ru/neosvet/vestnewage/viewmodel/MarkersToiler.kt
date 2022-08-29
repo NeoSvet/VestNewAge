@@ -316,6 +316,10 @@ class MarkersToiler : NeoToiler() {
         else openMarList()
     }
 
+    fun restoreList() {
+        setState(NeoState.ListState(ListEvent.RELOAD))
+    }
+
     fun canEdit(): Boolean {
         if (list.isEmpty())
             return false
