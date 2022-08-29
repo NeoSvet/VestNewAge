@@ -28,10 +28,11 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         private const val LINK_ON_SITE = 5
         private const val CHANGELOG = 6
         private const val TIPS = 3
-        private const val TIPS_COUNT = 3
+        private const val TIPS_COUNT = 4
         private const val TIP_MAIN = 0
         private const val TIP_CALENDAR = 1
         private const val TIP_BROWSER = 2
+        private const val TIP_SEARCH = 3
     }
 
     private val mstate = MutableLiveData<NeoState>()
@@ -102,8 +103,10 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
 
     private fun getTips(): List<HelpItem> {
         if (listTips.isEmpty()) {
-            val icons = arrayOf(R.drawable.little_star, R.drawable.ic_calendar, R.drawable.ic_menu)
-
+            val icons = arrayOf(
+                R.drawable.little_star, R.drawable.ic_calendar,
+                R.drawable.ic_menu, R.drawable.ic_search
+            )
             for (i in icons.indices)
                 listTips.add(
                     HelpItem(
@@ -112,7 +115,6 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                     )
                 )
         }
-
         return listTips
     }
 
@@ -194,6 +196,8 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                 TipActivity.showTip(TipName.BROWSER_FULLSCREEN)
                 TipActivity.showTip(TipName.BROWSER_PANEL)
             }
+            TIP_SEARCH ->
+                TipActivity.showTip(TipName.SEARCH)
         }
     }
 

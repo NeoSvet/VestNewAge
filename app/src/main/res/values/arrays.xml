@@ -91,6 +91,7 @@
         <item>Основное</item>
         <item>В разделе «Календарь»</item>
         <item>На экране чтения</item>
+        <item>В разделе «Поиск»</item>
     </string-array>
     <string-array name="share_list">
         <item>Заголовок</item>

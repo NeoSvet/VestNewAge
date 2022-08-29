@@ -35,6 +35,8 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.SearchEngine
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
+import ru.neosvet.vestnewage.view.activity.TipActivity
+import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
@@ -221,7 +223,9 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
                 helper.mode = args.getInt(Const.MODE)
                 helper.request = args.getString(Const.STRING) ?: ""
             }
-            if (helper.request.isNotEmpty()) {
+            if (helper.request.isEmpty())
+                TipActivity.showTipIfNeed(TipName.SEARCH)
+            else {
                 etSearch.setText(helper.request)
                 etSearch.setSelection(helper.request.length)
                 startSearch()

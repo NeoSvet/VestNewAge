@@ -31,7 +31,7 @@ data class TipUnit(
 )
 
 enum class TipName {
-    MAIN_STAR, CALENDAR, BROWSER_PANEL, BROWSER_FULLSCREEN
+    MAIN_STAR, CALENDAR, BROWSER_PANEL, BROWSER_FULLSCREEN, SEARCH
 }
 
 class TipActivity : AppCompatActivity() {
@@ -175,6 +175,13 @@ class TipActivity : AppCompatActivity() {
             TipName.BROWSER_FULLSCREEN -> TipUnit(
                 message = getString(R.string.tip_browser2),
                 imgId = R.drawable.tip_browser2,
+                alignH = AlignH.LEFT,
+                alignV = AlignV.TOP,
+                addArrow = true
+            )
+            TipName.SEARCH -> TipUnit(
+                message = getString(R.string.tip_search),
+                imgId = R.drawable.tip_search,
                 alignH = AlignH.LEFT,
                 alignV = AlignV.TOP,
                 addArrow = true
