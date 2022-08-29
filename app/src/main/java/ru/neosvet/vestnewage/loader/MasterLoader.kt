@@ -37,7 +37,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         private const val UCOZ = "http://neosvet.ucoz.ru/databases_vna"
     }
 
-    private var loader = PageLoader()
+    private val loader = PageLoader()
     private var loaderBook: BookLoader? = null
     private var isRun = false
     private var lastYear = 0
@@ -48,13 +48,13 @@ class MasterLoader : Loader, LoadHandlerLite {
     }
 
     override fun cancel() {
+        loader.cancel()
         loaderBook?.cancel()
         isRun = false
     }
 
     fun loadSummary() {
         isRun = true
-        loader = PageLoader()
         msg = App.context.getString(R.string.summary)
         handler?.postMessage(msg)
         loadList(SummaryLoader().getLinkList())
@@ -62,7 +62,6 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     fun loadSite() {
         isRun = true
-        loader = PageLoader()
         msg = App.context.getString(R.string.news)
         handler?.postMessage(msg)
         val loader = SiteLoader(Lib.getFile(SiteToiler.MAIN).toString())

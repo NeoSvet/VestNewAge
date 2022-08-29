@@ -8,13 +8,14 @@ import java.io.InputStreamReader;
 
 import ru.neosvet.vestnewage.data.DataBase;
 import ru.neosvet.vestnewage.data.DateUnit;
+import ru.neosvet.vestnewage.loader.basic.Loader;
 import ru.neosvet.vestnewage.network.NeoClient;
 import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.storage.PageStorage;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.Lib;
 
-public class PageLoader {
+public class PageLoader implements Loader {
     private int k_requests = 0;
     private long time_requests = 0;
     private final PageStorage storage = new PageStorage();
@@ -112,10 +113,8 @@ public class PageLoader {
             s = page.getNextElem();
         } while (s != null);
 
-        if (singlePage) {
-            isFinish = true;
-            storage.close();
-        }
+        if (singlePage)
+            finish();
         page.clear();
         return true;
     }
@@ -174,5 +173,10 @@ public class PageLoader {
     public void finish() {
         isFinish = true;
         storage.close();
+    }
+
+    @Override
+    public void cancel() {
+        finish();
     }
 }

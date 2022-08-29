@@ -20,9 +20,6 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.InputStreamReader
 
-/**
- * Created by NeoSvet on 09.11.2019.
- */
 class CheckService : LifecycleService() {
     companion object {
         @JvmStatic
@@ -38,6 +35,7 @@ class CheckService : LifecycleService() {
 
     private val list = NeoList<Pair<String, String>>() //title and link
     private var isRun = false
+    private val loader = PageLoader()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
@@ -65,8 +63,12 @@ class CheckService : LifecycleService() {
     }
 
     private fun startLoad() {
-        if (checkSummary() && list.isNotEmpty)
-            existsUpdates()
+        try {
+            if (checkSummary() && list.isNotEmpty)
+                existsUpdates()
+        } catch (ignored: Exception) {
+        }
+        loader.cancel()
         isRun = false
         postCommand(false)
     }
@@ -96,7 +98,6 @@ class CheckService : LifecycleService() {
             br.close()
             return false
         }
-        val loader = PageLoader()
         val bwRSS = BufferedWriter(FileWriter(file))
         val unread = UnreadUtils()
         var d: DateUnit
@@ -125,7 +126,7 @@ class CheckService : LifecycleService() {
             bwRSS.flush()
             if (unread.addLink(link, d)) {
                 list.add(Pair(title, link))
-                loader.download(link, true)
+                loader.download(link, false)
             }
         }
         bwRSS.close()

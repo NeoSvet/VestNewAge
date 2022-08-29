@@ -28,9 +28,6 @@ class DataBase(name: String, write: Boolean = false) :
         const val EMPTY_BASE_SIZE = 24576L
         private val names: MutableSet<String> = LinkedHashSet()
         fun isBusy(name: String): Boolean = names.contains(name)
-        fun clearBusy() {
-            names.clear()
-        }
     }
 
     private var db: SQLiteDatabase = if (write) {

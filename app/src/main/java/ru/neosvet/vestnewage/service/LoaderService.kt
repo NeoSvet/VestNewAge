@@ -116,7 +116,6 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun stop() {
-        DataBase.clearBusy()
         isRun = false
         loader.cancel()
     }
@@ -176,7 +175,6 @@ class LoaderService : LifecycleService(), LoadHandler {
             styleLoader.download(false)
             val loader = PageLoader()
             loader.download(link, true)
-            loader.finish()
             finishService(null)
         }
     }

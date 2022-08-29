@@ -53,8 +53,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             if (isPoemsTab) dPoems = value
             else dEpistles = value
         }
-    private var loader: BookLoader? = null
-    private var masterLoader: MasterLoader? = null
+    private val loader: BookLoader by lazy {
+        BookLoader(this)
+    }
+    private val masterLoader: MasterLoader by lazy {
+        MasterLoader(this)
+    }
 
     fun init(context: Context) {
         isLoadedOtkr = DateHelper.isLoadedOtkr()
@@ -77,16 +81,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override suspend fun doLoad() {
-        val loader = if (loader == null) {
-            loader = BookLoader(this)
-            loader!!
-        } else loader!!
+        currentLoader = loader
         when (selectedTab) {
             TAB_POEMS -> loader.loadPoemsList(dPoems.year)
             TAB_EPISTLES -> if (dEpistles.year < 2016) {
-                if (masterLoader == null)
-                    masterLoader = MasterLoader(this)
-                masterLoader?.loadMonth(dEpistles.month, dEpistles.year)
+                currentLoader = masterLoader
+                masterLoader.loadMonth(dEpistles.month, dEpistles.year)
             } else loader.loadEpistlesList()
             TAB_DOCTRINE -> {
                 loader.loadDoctrineList()
@@ -98,12 +98,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         }
         postState(NeoState.Success)
         openList(false)
-    }
-
-    override fun cancel() {
-        masterLoader?.cancel()
-        loader?.cancel()
-        super.cancel()
     }
 
     override fun onDestroy() {

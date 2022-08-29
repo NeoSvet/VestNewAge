@@ -20,6 +20,10 @@ import java.io.FileReader
 class SummaryToiler : NeoToiler() {
     private var sBack: String = ""
 
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, SummaryHelper.TAG)
+        .build()
+
     fun init(context: Context) {
         if (sBack.isEmpty())
             sBack = context.getString(R.string.back)
@@ -32,7 +36,8 @@ class SummaryToiler : NeoToiler() {
         summaryHelper.updateBook()
         val list = openList()
         postState(NeoState.ListValue(list))
-        loadPages(list)
+        if (isRun)
+            loadPages(list)
     }
 
     private fun isNeedReload(): Boolean {
@@ -42,22 +47,17 @@ class SummaryToiler : NeoToiler() {
 
     private suspend fun loadPages(pages: List<ListItem>) {
         val loader = PageLoader()
-        var cur = 0
-        pages.forEach { item ->
-            loader.download(item.link, false)
-            if (isRun.not())
-                return@forEach
-            cur++
-            postState(NeoState.Progress(cur.percent(pages.size)))
+        currentLoader = loader
+        var i = 0
+        while (i < pages.size && isRun) {
+            loader.download(pages[i].link, false)
+            i++
+            postState(NeoState.Progress(i.percent(pages.size)))
         }
         loader.finish()
         isRun = false
         postState(NeoState.Success)
     }
-
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, SummaryHelper.TAG)
-        .build()
 
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed

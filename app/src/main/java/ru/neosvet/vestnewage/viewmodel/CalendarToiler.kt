@@ -32,8 +32,12 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
     private val calendar = arrayListOf<CalendarItem>()
     private var time: Long = 0
-    private var masterLoader: MasterLoader? = null
-    private var pageLoader: PageLoader? = null
+    private val masterLoader: MasterLoader by lazy {
+        MasterLoader(this)
+    }
+    private val pageLoader: PageLoader by lazy {
+        PageLoader()
+    }
     var isUpdateUnread = false
         private set
 
@@ -72,22 +76,20 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     private suspend fun loadPages(pages: List<String>) {
-        if (pageLoader == null)
-            pageLoader = PageLoader()
-        val loader = pageLoader!!
-        if (loader.isFinish.not()) {
+        currentLoader = pageLoader
+        if (pageLoader.isFinish.not()) {
             isRun = false
-            while (loader.isFinish.not())
+            while (pageLoader.isFinish.not())
                 delay(100) //wait cancel prev loadPages
             isRun = true
         }
         var i = 0
         while (i < pages.size && isRun) {
-            loader.download(pages[i], false)
+            pageLoader.download(pages[i], false)
             i++
             postState(NeoState.Progress(i.percent(pages.size)))
         }
-        loader.finish()
+        pageLoader.finish()
         if (isRun) {
             isRun = false
             postState(NeoState.Success)
@@ -99,11 +101,12 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         loader.setDate(date.year, date.month)
         isUpdateUnread = isCurMonth()
         if (date.year < 2016) {
-            if (masterLoader == null)
-                masterLoader = MasterLoader(this)
-            masterLoader?.loadMonth(date.month, date.year)
-        } else
+            currentLoader = masterLoader
+            masterLoader.loadMonth(date.month, date.year)
+        } else {
+            currentLoader = loader
             loader.loadListMonth(isUpdateUnread)
+        }
         return loader.getLinkList()
     }
 

@@ -46,7 +46,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         private set
     private var loadDate: String? = null
     private var loadLink: String? = null
-    private var loader: MasterLoader? = null
     private var msgLoad = ""
 
     private val storage = SearchStorage()
@@ -85,13 +84,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             val d = dateFromString(date)
             msgLoad = String.format(strings.format_load, d.monthString + " " + d.year)
             postState(NeoState.Message(msgLoad))
-            if (loader == null)
-                loader = MasterLoader(this)
-            loader?.loadMonth(d.month, d.year)
-            val calendar = CalendarLoader()
-            calendar.setDate(d.year, d.month)
-            val links = calendar.getLinkList() //.sorted()
+            val masterLoader = MasterLoader(this)
+            currentLoader = masterLoader
+            masterLoader.loadMonth(d.month, d.year)
+            val calendarLoader = CalendarLoader()
+            calendarLoader.setDate(d.year, d.month)
+            val links = calendarLoader.getLinkList() //.sorted()
             val pageLoader = PageLoader()
+            currentLoader = pageLoader
             storage.deleteByLink(date)
             for (link in links) {
                 pageLoader.download(link, false)
@@ -107,6 +107,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
             val pageLoader = PageLoader()
+            currentLoader = pageLoader
             pageLoader.download(link, true)
             pageLoader.finish()
             val item = engine.findInPage(link, id)
@@ -120,7 +121,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     override fun cancel() {
-        loader?.cancel()
         engine.stop()
         super.cancel()
     }

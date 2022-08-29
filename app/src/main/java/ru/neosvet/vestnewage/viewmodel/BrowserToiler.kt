@@ -85,7 +85,8 @@ class BrowserToiler : NeoToiler() {
         storage.close()
         restoreStyle()
         styleLoader.download(isRefresh)
-        if(isRun.not()) return
+        if (isRun.not()) return
+        currentLoader = pageLoader
         pageLoader.download(link, true)
         openPage(true)
     }
@@ -119,6 +120,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     fun openPage(newPage: Boolean) {
+        cancel()
         scope.launch {
             storage.open(link)
             loadIfNeed = true

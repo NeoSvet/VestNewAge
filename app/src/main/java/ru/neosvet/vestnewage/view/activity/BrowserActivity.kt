@@ -133,6 +133,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     override fun onDestroy() {
+        toiler.cancel()
         scroll?.cancel()
         helper.position = positionOnPage
         helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
@@ -253,6 +254,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             snackbar.isShown ->
                 snackbar.hide()
             status.isVisible -> {
+                toiler.cancel()
                 status.setError(null)
                 bottomUnblocked()
             }

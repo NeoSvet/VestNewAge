@@ -3,11 +3,13 @@ package ru.neosvet.vestnewage.viewmodel.basic
 import androidx.work.Data
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.data.MyException
+import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.OnlineObserver
 
 abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
     protected var loadIfNeed = false
+    protected var currentLoader: Loader? = null
     var isRun: Boolean = false
         protected set
 
@@ -25,6 +27,7 @@ abstract class NeoToiler : StateToiler() {
 
     private fun errorHandler(throwable: Throwable) {
         throwable.printStackTrace()
+        currentLoader?.cancel()
         scope = initScope()
         isRun = false
         if (loadIfNeed && throwable !is MyException.BaseIsBusy)
@@ -34,6 +37,7 @@ abstract class NeoToiler : StateToiler() {
     }
 
     open fun cancel() {
+        currentLoader?.cancel()
         isRun = false
     }
 

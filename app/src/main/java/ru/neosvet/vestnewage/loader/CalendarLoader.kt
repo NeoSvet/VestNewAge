@@ -18,14 +18,14 @@ import java.io.InputStreamReader
 import java.util.*
 
 class CalendarLoader : LinksProvider, Loader {
+    private val storage = PageStorage()
     private var date = DateUnit.initToday()
     private val list = Stack<ListItem>()
     private var isRun = false
 
     override fun cancel() {
+        storage.close()
         isRun = false
-        val stack = Stack<ListItem>()
-        stack.iterator()
     }
 
     fun setDate(year: Int, month: Int) {
@@ -33,7 +33,6 @@ class CalendarLoader : LinksProvider, Loader {
     }
 
     override fun getLinkList(): List<String> {
-        val storage = PageStorage()
         storage.open(date.my)
         val list = storage.getLinksList()
         storage.close()
@@ -94,7 +93,6 @@ class CalendarLoader : LinksProvider, Loader {
     }
 
     private fun listToStorage(updateUnread: Boolean) {
-        val storage = PageStorage()
         storage.open(date.my)
         storage.updateTime()
         val unread = if (updateUnread) UnreadUtils() else null
@@ -109,12 +107,12 @@ class CalendarLoader : LinksProvider, Loader {
                 }
                 links.sort()
                 links.forEach { link ->
-                    linkToStorage(storage, link)
+                    linkToStorage(link)
                     unread?.addLink(link, date)
                 }
                 links.clear()
             } else {
-                linkToStorage(storage, item.link)
+                linkToStorage(item.link)
                 unread?.addLink(item.link, date)
             }
         }
@@ -122,7 +120,7 @@ class CalendarLoader : LinksProvider, Loader {
         unread?.setBadge()
     }
 
-    private fun linkToStorage(storage: PageStorage, link: String) {
+    private fun linkToStorage(link: String) {
         val row = ContentValues()
         row.put(Const.LINK, link)
         // пытаемся обновить запись:
