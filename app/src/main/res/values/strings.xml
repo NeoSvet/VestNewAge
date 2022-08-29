@@ -17,6 +17,7 @@
     <string name="book_2016">Послания и Катрены за 2016 год</string>
     <string name="format_poems_year">Катрены за 20%d год</string>
     <string name="format_size">%.1f МБ</string>
+    <string name="format_about_size">Максимальный объём для скачивания: %.1f МБ\nНа устройстве потребуется не более %.1f МБ\n\n[Нажмите, чтобы закрыть]</string>
     <!--Dialog-->
     <string name="delete">Удалить</string>
     <string name="yes">Да</string>

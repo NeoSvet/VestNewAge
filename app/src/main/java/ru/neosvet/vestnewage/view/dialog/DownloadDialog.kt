@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.view.dialog
 
 import android.app.Dialog
 import android.os.Bundle
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
@@ -36,6 +37,7 @@ class DownloadDialog(
     private lateinit var adapter: CheckAdapter
     private var curYear = 0
     private var curYearInProc = 0f
+    private var size: Int = 0
     private var midSize: Int = 0
         get() {
             if (field == 0) calcMidSize()
@@ -70,14 +72,14 @@ class DownloadDialog(
     }
 
     private fun setViews() = binding.run {
-        bAll.setOnClickListener {
+        btnAll.setOnClickListener {
             val v = calcSelected() != list.size
             for (i in list.indices)
                 adapter.setChecked(i, v)
             calcSize()
             setAllLabel(v)
         }
-        bOk.setOnClickListener {
+        btnOk.setOnClickListener {
             val ids = mutableListOf<Int>()
             list.forEach {
                 if (it.isChecked) ids.add(it.id)
@@ -88,6 +90,15 @@ class DownloadDialog(
                     DateHelper.setLoadedOtkr(true)
             }
             dismiss()
+        }
+        btnSize.setOnClickListener {
+            val f = size / 1048576f
+            val msg = context.getString(R.string.format_about_size).format(f, f * 3)
+            tvAboutSize.text = msg
+            tvAboutSize.isVisible = true
+        }
+        tvAboutSize.setOnClickListener {
+            tvAboutSize.isVisible = false
         }
     }
 
@@ -135,7 +146,7 @@ class DownloadDialog(
     }
 
     private fun setAllLabel(isReset: Boolean) {
-        binding.bAll.text = context.getString(
+        binding.btnAll.text = context.getString(
             if (isReset) R.string.reset_all
             else R.string.select_all
         )
@@ -150,7 +161,7 @@ class DownloadDialog(
     }
 
     private fun calcSize() {
-        var size = 0
+        size = 0
         if (isOtkr) {
             for (i in list.indices)
                 if (list[i].isChecked)
@@ -169,7 +180,7 @@ class DownloadDialog(
                     }
                 }
         }
-        binding.tvSize.text = context.getString(R.string.format_size).format(size / 1048576f)
+        binding.btnSize.text = context.getString(R.string.format_size).format(size / 1048576f)
     }
 
     private fun calcMidSize() {
