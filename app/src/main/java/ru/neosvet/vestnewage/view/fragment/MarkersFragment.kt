@@ -5,8 +5,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -18,7 +16,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -28,7 +28,8 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.InputDialog
+import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
@@ -45,6 +46,7 @@ class MarkersFragment : NeoFragment() {
         initAnimation()
     }
     private var isStopRotate = false
+    private var collectResult: Job? = null
     private val toiler: MarkersToiler
         get() = neotoiler as MarkersToiler
     private val markerResult = registerForActivityResult(
@@ -93,6 +95,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     override fun onDestroyView() {
+        collectResult?.cancel()
         binding = null
         super.onDestroyView()
     }
@@ -123,10 +126,22 @@ class MarkersFragment : NeoFragment() {
                         post { smoothScrollToPosition(iSel) }
                     }
                 }
-                if (diName != null) renameDialog(diName!!)
-                else if (diDelete) deleteDialog()
+                when (state.getString(Const.DIALOG)) {
+                    Const.STRING -> collectResultDelete()
+                    Const.TITLE -> collectResultRename()
+                }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (childFragmentManager.fragments.isNotEmpty()) {
+            val frag = childFragmentManager.fragments[0]
+            val d = if (frag is PromptDialog)
+                Const.STRING else Const.TITLE
+            outState.putString(Const.DIALOG, d)
+        }
+        super.onSaveInstanceState(outState)
     }
 
     private fun initAnimation(): Animation {
@@ -190,51 +205,34 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun deleteDialog() = toiler.selectedItem?.title?.let { title ->
-        toiler.diDelete = true
         binding?.content?.rvMarker?.smoothScrollToPosition(toiler.iSel)
-        val dialog = CustomDialog(act)
-        dialog.setTitle(getString(R.string.delete) + "?")
-        dialog.setMessage(title)
-        dialog.setLeftButton(getString(R.string.no)) { dialog.dismiss() }
-        dialog.setRightButton(getString(R.string.yes)) {
-            toiler.deleteSelected()
-            dialog.dismiss()
+        PromptDialog.newInstance(getString(R.string.format_delete).format(title))
+            .show(childFragmentManager, null)
+        collectResultDelete()
+    }
+
+    private fun collectResultDelete() {
+        collectResult?.cancel()
+        collectResult = lifecycleScope.launch {
+            PromptDialog.result.collect {
+                if (it) toiler.deleteSelected()
+            }
         }
-        dialog.show { toiler.diDelete = false }
     }
 
     private fun renameDialog(old_name: String) {
-        toiler.diName = old_name
-        val dialog = CustomDialog(act)
-        dialog.setTitle(getString(R.string.new_name))
-        dialog.setMessage(null)
-        dialog.setInputText(old_name, object : TextWatcher {
-            override fun beforeTextChanged(
-                charSequence: CharSequence,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
-            }
+        InputDialog.newInstance(getString(R.string.new_name), old_name)
+            .show(childFragmentManager, null)
+        collectResultRename()
+    }
 
-            override fun onTextChanged(
-                charSequence: CharSequence,
-                start: Int,
-                before: Int,
-                count: Int
-            ) {
+    private fun collectResultRename() {
+        collectResult?.cancel()
+        collectResult = lifecycleScope.launch {
+            InputDialog.result.collect {
+                if (it != null) toiler.renameSelected(it)
             }
-
-            override fun afterTextChanged(editable: Editable) {
-                toiler.diName = dialog.inputText
-            }
-        })
-        dialog.setLeftButton(getString(R.string.no)) { dialog.dismiss() }
-        dialog.setRightButton(getString(R.string.yes)) {
-            toiler.renameSelected(dialog.inputText)
-            dialog.dismiss()
         }
-        dialog.show { toiler.diName = null }
     }
 
     private fun longClick(index: Int): Boolean {

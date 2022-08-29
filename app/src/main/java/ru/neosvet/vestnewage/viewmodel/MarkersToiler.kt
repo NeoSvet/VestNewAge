@@ -32,9 +32,7 @@ class MarkersToiler : NeoToiler() {
     var iSel = -1
         private set
     var change = false
-    var diDelete = false
     private var sCol: String? = null
-    var diName: String? = null
     private lateinit var strings: MarkersStrings
     private var task: Type = Type.NONE
     val list = mutableListOf<MarkerItem>()
