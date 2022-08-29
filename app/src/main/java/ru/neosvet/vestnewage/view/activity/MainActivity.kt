@@ -481,10 +481,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
             helper.shownActionMenu ->
                 helper.hideActionMenu()
-            helper.bottomAreaIsHide ->
-                showBottomArea()
             curFragment?.onBackPressed() == false ->
                 return
+            helper.bottomAreaIsHide ->
+                showBottomArea()
             firstSection == Section.NEW -> {
                 firstSection = helper.getFirstSection()
                 setSection(firstSection, false)
