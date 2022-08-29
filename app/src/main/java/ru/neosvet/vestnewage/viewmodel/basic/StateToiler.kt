@@ -57,7 +57,9 @@ abstract class StateToiler : ViewModel() {
             //Secondary states:
             NeoState.Ready, NeoState.Success, NeoState.NoConnected ->
                 oneState = state
-            is NeoState.Message, is NeoState.Error, is NeoState.Rnd ->
+            is NeoState.Error ->
+                if (state.isNeedReport) twoState = state
+            is NeoState.Message, is NeoState.Rnd ->
                 twoState = state
             else -> {}
         }
