@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.core.text.isDigitsOnly
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -47,6 +48,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     private var loadDate: String? = null
     private var loadLink: String? = null
     private var msgLoad = ""
+    private var jobSearch: Job? = null
 
     private val storage = SearchStorage()
     private val engine = SearchEngine(
@@ -109,7 +111,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             val pageLoader = PageLoader()
             currentLoader = pageLoader
             pageLoader.download(link, true)
-            pageLoader.finish()
             val item = engine.findInPage(link, id)
             postState(NeoState.ListValue(listOf(item)))
             loadLink = null
@@ -122,6 +123,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     override fun cancel() {
         engine.stop()
+        jobSearch?.cancel()
         super.cancel()
     }
 
@@ -182,9 +184,10 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     fun startSearch(request: String, mode: Int) {
+        if (isRun) cancel()
         isExport = false
         helper.request = request
-        scope.launch {
+        jobSearch = scope.launch {
             isRun = true
             labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
                 strings.search_in_results
