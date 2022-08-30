@@ -100,12 +100,12 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     private fun loadFromSite(d: DateUnit) {
         if (DataBase.isBusy(d.my)) return
-        val storage = PageStorage()
-        storage.open(d.my, true)
         if (lastYear != d.year) {
             getBookLoader().loadYearList(d.year)
             lastYear = d.year
         }
+        val storage = PageStorage()
+        storage.open(d.my, false)
         val list = storage.getLinksList()
         storage.close()
         loadList(list)
