@@ -39,6 +39,7 @@ import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
+import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.RequestAdapter
@@ -556,12 +557,13 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
-                if (it) {
+                if (it == PromptResult.Yes) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "text/plain"
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
                     startActivity(sendIntent)
                 }
+                toiler.clearStates()
             }
         }
     }

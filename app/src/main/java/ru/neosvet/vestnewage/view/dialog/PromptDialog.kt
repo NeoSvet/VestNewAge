@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.dialog
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import ru.neosvet.vestnewage.databinding.PromptDialogBinding
 import ru.neosvet.vestnewage.utils.Const
 
+sealed class PromptResult {
+    object Yes : PromptResult()
+    object No : PromptResult()
+    object Cancel : PromptResult()
+}
+
 class PromptDialog : BottomSheetDialogFragment() {
     companion object {
         fun newInstance(message: String) = PromptDialog().apply {
@@ -20,11 +27,12 @@ class PromptDialog : BottomSheetDialogFragment() {
             }
         }
 
-        private val mresult = Channel<Boolean>()
-        val result = mresult.receiveAsFlow()
+        private val resultChannel = Channel<PromptResult>()
+        val result = resultChannel.receiveAsFlow()
     }
 
     private var binding: PromptDialogBinding? = null
+    private var isSend = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,6 +45,12 @@ class PromptDialog : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        if (binding != null && !isSend)
+            resultChannel.trySend(PromptResult.Cancel)
+        super.onDismiss(dialog)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,11 +67,13 @@ class PromptDialog : BottomSheetDialogFragment() {
 
     private fun setButtons() = binding?.run {
         btnNo.setOnClickListener {
-            mresult.trySend(false)
-            dialog?.dismiss()
+            isSend = true
+            resultChannel.trySend(PromptResult.No)
+            dismiss()
         }
         btnYes.setOnClickListener {
-            mresult.trySend(true)
+            isSend = true
+            resultChannel.trySend(PromptResult.Yes)
             dismiss()
         }
     }

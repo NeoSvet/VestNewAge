@@ -29,6 +29,7 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.InputDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
+import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
@@ -215,7 +216,8 @@ class MarkersFragment : NeoFragment() {
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
-                if (it) toiler.deleteSelected()
+                if (it == PromptResult.Yes)
+                    toiler.deleteSelected()
             }
         }
     }
@@ -325,12 +327,13 @@ class MarkersFragment : NeoFragment() {
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
-                if (it) {
+                if (it == PromptResult.Yes) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "text/plain"
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
                     startActivity(sendIntent)
                 }
+                toiler.clearStates()
             }
         }
     }
