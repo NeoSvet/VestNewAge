@@ -25,7 +25,7 @@
         <item name="android:itemBackground">@drawable/menu_selector</item>
         <item name="android:dropDownListViewStyle">@style/DropListStyle</item>
         <item name="recyclerViewStyle">@style/RecyclerViewStyle</item>
-        <item name="android:navigationBarColor">#113366</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
     </style>
 
     <style name="Theme.DialogTheme" parent="@style/Theme.AppCompat.Dialog">

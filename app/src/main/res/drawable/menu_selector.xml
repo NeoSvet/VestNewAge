@@ -6,7 +6,7 @@
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <gradient android:angle="270"
-                android:centerColor="#99ccff"
+                android:centerColor="@color/colorAccentLight"
                 android:endColor="@color/colorPrimary"
                 android:startColor="@color/colorPrimary" />
         </shape>
