@@ -11,7 +11,6 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -137,8 +136,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (childFragmentManager.fragments.isNotEmpty()) {
-            val frag = childFragmentManager.fragments[0]
+        childFragmentManager.findFragmentByTag(Const.DIALOG)?.let { frag ->
             val d = if (frag is PromptDialog)
                 Const.STRING else Const.TITLE
             outState.putString(Const.DIALOG, d)
@@ -209,7 +207,7 @@ class MarkersFragment : NeoFragment() {
     private fun deleteDialog() = toiler.selectedItem?.title?.let { title ->
         binding?.content?.rvMarker?.smoothScrollToPosition(toiler.iSel)
         PromptDialog.newInstance(getString(R.string.format_delete).format(title))
-            .show(childFragmentManager, null)
+            .show(childFragmentManager, Const.DIALOG)
         collectResultDelete()
     }
 
@@ -224,7 +222,7 @@ class MarkersFragment : NeoFragment() {
 
     private fun renameDialog(old_name: String) {
         InputDialog.newInstance(getString(R.string.new_name), old_name)
-            .show(childFragmentManager, null)
+            .show(childFragmentManager, Const.DIALOG)
         collectResultRename()
     }
 
@@ -321,20 +319,20 @@ class MarkersFragment : NeoFragment() {
 
     private fun doneExport(file: String) {
         setStatus(false)
-        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
-            .setMessage(getString(R.string.send_file))
-            .setPositiveButton(
-                getString(R.string.yes)
-            ) { _, _ ->
-                val sendIntent = Intent(Intent.ACTION_SEND)
-                sendIntent.type = "text/plain"
-                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
-                startActivity(sendIntent)
+        if (childFragmentManager.findFragmentByTag(Const.FILE) == null)
+            PromptDialog.newInstance(getString(R.string.send_file))
+                .show(childFragmentManager, Const.FILE)
+        collectResult?.cancel()
+        collectResult = lifecycleScope.launch {
+            PromptDialog.result.collect {
+                if (it) {
+                    val sendIntent = Intent(Intent.ACTION_SEND)
+                    sendIntent.type = "text/plain"
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
+                    startActivity(sendIntent)
+                }
             }
-            .setNegativeButton(
-                getString(R.string.no)
-            ) { _, _ -> }
-        builder.create().show()
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

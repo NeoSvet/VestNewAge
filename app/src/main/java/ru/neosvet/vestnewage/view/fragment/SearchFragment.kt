@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
@@ -39,6 +38,7 @@ import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
+import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.RequestAdapter
@@ -91,6 +91,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private var settings: SearchDialog? = null
     private var jobResult: Job? = null
     private var isNotUser = false
+    private var collectResult: Job? = null
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -549,20 +550,20 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     private fun doneExport(file: String) {
         setStatus(false)
-        val builder = AlertDialog.Builder(requireContext(), R.style.NeoDialog)
-            .setMessage(getString(R.string.send_file))
-            .setPositiveButton(
-                getString(R.string.yes)
-            ) { _, _ ->
-                val sendIntent = Intent(Intent.ACTION_SEND)
-                sendIntent.type = "text/plain"
-                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
-                startActivity(sendIntent)
+        if (childFragmentManager.findFragmentByTag(Const.FILE) == null)
+            PromptDialog.newInstance(getString(R.string.send_file))
+                .show(childFragmentManager, Const.FILE)
+        collectResult?.cancel()
+        collectResult = lifecycleScope.launch {
+            PromptDialog.result.collect {
+                if (it) {
+                    val sendIntent = Intent(Intent.ACTION_SEND)
+                    sendIntent.type = "text/plain"
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
+                    startActivity(sendIntent)
+                }
             }
-            .setNegativeButton(
-                getString(R.string.no)
-            ) { _, _ -> }
-        builder.create().show()
+        }
     }
 
     private fun finishedList() {
