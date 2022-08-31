@@ -91,7 +91,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     private var settings: SearchDialog? = null
     private var jobResult: Job? = null
     private var isNotUser = false
-    private var listIsNeedUpdate = false
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -374,7 +373,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
-        listIsNeedUpdate = true
+        content.sbResults.isEnabled = false
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -457,20 +456,18 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         if (helper.countMaterials <= Const.MAX_ON_PAGE) {
             setResultScroll(1)
             content.sbResults.max = 1
-            content.sbResults.isEnabled = false
-            listIsNeedUpdate = true
         } else {
-            setResultScroll(0)
+            if (content.sbResults.isEnabled.not()) {
+                setResultScroll(0)
+                content.sbResults.isEnabled = true
+            }
             val count = helper.countMaterials / Const.MAX_ON_PAGE - 1
             content.sbResults.max = count
-            content.sbResults.isEnabled = true
-            if (listIsNeedUpdate)
-                startPaging()
         }
+        startPaging()
     }
 
     private fun startPaging() {
-        listIsNeedUpdate = false
         jobResult?.cancel()
         jobResult = lifecycleScope.launch {
             toiler.paging().collect {
@@ -481,7 +478,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     private fun finishSearch() {
         setStatus(false)
-        listIsNeedUpdate = true
         if (helper.countMaterials == 0 && helper.isNeedLoad.not())
             noResults()
         else
@@ -519,7 +515,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun resultClick(index: Int, item: ListItem) {
-        listIsNeedUpdate = true
         when (helper.getType(item)) {
             SearchHelper.Type.NORMAL -> {
                 val s = when {
