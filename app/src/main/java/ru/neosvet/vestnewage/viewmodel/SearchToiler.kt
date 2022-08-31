@@ -378,9 +378,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             }
         } while (cursor.moveToNext() && isRun)
         cursor.close()
-        bw.write("\"\"]; function open(p) {var s=''; var a=p*10;var max=a+10; if(max>data.length) ")
+        val count = when (engine.mode) {
+            SearchEngine.MODE_TITLES -> 20
+            SearchEngine.MODE_LINKS -> 15
+            else -> 10
+        }
+        bw.write("\"\"]; function open(p) {var q=$count; var s=''; var a=p*q;var max=a+q; if(max>data.length) ")
         bw.write("max=data.length; for(var i=a;i<max;i++) s+=data[i];document.getElementById('content').innerHTML=s;")
-        bw.write(" s=''; var n=0; var x=a-40; while(x<0)x+=10; for(var i=x;n<9 && i<data.length;i+=10,n++) { p=i/10;")
+        bw.write(" s=''; var n=0; var x=a-q*4; while(x<0)x+=q; for(var i=x;n<9 && i<data.length;i+=q,n++) { p=i/q;")
         bw.write("if(a==i) s+='<font color=\"#1040FF\"><b>'+(p+1)+'</b></font> '; else s+='<a style=\"padding:20px\" ")
         bw.write("href=\"javascript:paging('+p+')\">'+(p+1)+'</a> ';} document.getElementById('pages').innerHTML=s;}")
         bw.flush()
