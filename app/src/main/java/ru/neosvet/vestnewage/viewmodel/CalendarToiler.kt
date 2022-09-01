@@ -224,8 +224,8 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                 } else
                     title = getTitleByLink(link)
                 calendar[i].addTitle(title)
-                empty = false
             }
+            empty = calendar.isEmpty() && DateUnit.isLongAgo(time)
         }
         cursor.close()
         storage.close()
