@@ -19,7 +19,7 @@
             style="@style/EditTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionGo"
             android:inputType="textShortMessage" />
 
     </com.google.android.material.textfield.TextInputLayout>

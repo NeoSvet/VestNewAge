@@ -22,8 +22,8 @@ class InputDialog : BottomSheetDialogFragment() {
             }
         }
 
-        private val mresult = Channel<String?>()
-        val result = mresult.receiveAsFlow()
+        private val resultChannel = Channel<String?>()
+        val result = resultChannel.receiveAsFlow()
     }
 
     private var binding: InputDialogBinding? = null
@@ -65,11 +65,11 @@ class InputDialog : BottomSheetDialogFragment() {
             btnOk.isEnabled = s.isNotEmpty() && s != value
         }
         btnCancel.setOnClickListener {
-            mresult.trySend(null)
+            resultChannel.trySend(null)
             dialog?.dismiss()
         }
         btnOk.setOnClickListener {
-            mresult.trySend(binding?.etInput?.text?.toString()?.trim())
+            resultChannel.trySend(binding?.etInput?.text?.toString()?.trim())
             dismiss()
         }
     }
