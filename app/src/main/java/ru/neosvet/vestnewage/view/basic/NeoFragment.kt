@@ -196,7 +196,11 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     protected fun setUpdateTime(time: Long, tv: TextView) {
         if (time == 0L) {
-            tv.text = getString(R.string.no_loaded_list)
+            tv.text = getString(R.string.list_no_loaded)
+            return
+        }
+        if (time == 1L) {
+            tv.text = getString(R.string.list_empty)
             return
         }
         val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)

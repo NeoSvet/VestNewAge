@@ -49,7 +49,8 @@
     <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <string name="loaded">Загружено&#160;</string>
-    <string name="no_loaded_list">Список не загружен</string>
+    <string name="list_no_loaded">Список не загружен</string>
+    <string name="list_empty">Список пуст</string>
     <!--NotificationHelper-->
     <string name="mute_notif">Беззвучные</string>
     <string name="tips">Подсказки</string>
@@ -101,7 +102,6 @@
     <string name="epistles">Послания</string>
     <string name="poems">Катрены</string>
     <string name="link_to_src">Ссылка на источник</string>
-    <string name="month_is_empty">Список за этот месяц пуст!</string>
     <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
     <string name="rnd_poem">«Случайный» Катрен</string>
