@@ -414,7 +414,7 @@ class MarkersToiler : NeoToiler() {
         row.put(Const.TITLE, name)
         if (storage.updateCollection(list[iSel].id, row)) {
             list[iSel].title = name
-            setState(NeoState.ListState(ListEvent.CHANGE))
+            setState(NeoState.ListState(ListEvent.CHANGE, iSel))
         } else
             setState(NeoState.Message(strings.cancel_rename))
     }
