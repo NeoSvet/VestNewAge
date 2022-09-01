@@ -176,12 +176,18 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             is NeoState.Book ->
                 setBook(state)
             is NeoState.LongValue -> binding?.run {
-                if (state.value == 0L) {
-                    tvDate.text = ""
-                    adapter.clear()
-                }
-                if (!toiler.isDoctrineTab)
+                adapter.clear()
+                if (!toiler.isDoctrineTab) {
                     setUpdateTime(state.value, tvUpdate)
+                    if (state.value < 2L) {
+                        bPrev.isEnabled = true
+                        bNext.isEnabled = false
+                        if (ScreenUtils.isLand)
+                            tvDate.text = toiler.date.calendarString.replace(Const.N, " ")
+                        else
+                            tvDate.text = toiler.date.calendarString
+                    }
+                }
             }
             is NeoState.ListValue -> binding?.run { //doctrine
                 adapter.setItems(state.list)

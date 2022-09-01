@@ -34,8 +34,7 @@ data class BookStrings(
     val rnd_verse: String,
     val alert_rnd: String,
     val try_again: String,
-    val from: String,
-    val month_is_empty: String
+    val from: String
 )
 
 data class MarkersStrings(

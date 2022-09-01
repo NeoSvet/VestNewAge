@@ -73,8 +73,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             rnd_verse = context.getString(R.string.rnd_verse),
             alert_rnd = context.getString(R.string.alert_rnd),
             try_again = context.getString(R.string.try_again),
-            from = context.getString(R.string.from),
-            month_is_empty = context.getString(R.string.month_is_empty)
+            from = context.getString(R.string.from)
         )
         isNotInit = false
         openList(true)
@@ -120,8 +119,13 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             val d = date
             if (!existsList(d)) {
-                postState(NeoState.LongValue(0))
-                reLoad()
+                val today = DateUnit.initToday()
+                if (loadIfNeed.not() || d.month == today.month && d.year == today.year)
+                    postState(NeoState.LongValue(1))
+                else {
+                    postState(NeoState.LongValue(0))
+                    reLoad()
+                }
                 return@launch
             }
             val list = mutableListOf<ListItem>()
@@ -144,11 +148,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             storage.open(d.my)
             cursor = storage.getListAll()
-            val dModList: DateUnit
             if (cursor.moveToFirst()) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
                 postState(NeoState.LongValue(time))
-                dModList = DateUnit.putMills(time)
                 if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isPoemsTab)
@@ -165,17 +167,14 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                         cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
                     list.add(ListItem(t, s))
                 } while (cursor.moveToNext())
-            } else dModList = d
+            }
             cursor.close()
             storage.close()
-            if (list.isNotEmpty()) {
-                postState(NeoState.Book(calendar, list))
-                return@launch
-            }
-            val today = DateUnit.initToday()
-            if (loadIfNeed.not() || dModList.month == today.month && dModList.year == today.year)
-                postState(NeoState.Message(strings.month_is_empty))
-            else reLoad()
+            if (list.isNotEmpty()) postState(NeoState.Book(calendar, list))
+            else if (loadIfNeed) {
+                postState(NeoState.LongValue(0))
+                reLoad()
+            } else postState(NeoState.LongValue(1))
         }
     }
 
