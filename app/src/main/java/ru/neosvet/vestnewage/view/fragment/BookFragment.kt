@@ -200,6 +200,8 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun setBook(state: NeoState.Book) = binding?.run {
+        bPrev.isEnabled = toiler.checkPrev()
+        bNext.isEnabled = toiler.checkNext()
         if (ScreenUtils.isLand)
             tvDate.text = state.date.replace(Const.N, " ")
         else
