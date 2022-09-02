@@ -51,7 +51,6 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
         stateUtils.runObserve()
         onViewCreated(savedInstanceState)
         if (neotoiler.isRun) setStatus(true)
-        stateUtils.restore()
     }
 
     fun disableUpdateRoot() {
@@ -79,7 +78,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     override fun onResume() {
         super.onResume()
-        neotoiler.resume()
+        stateUtils.restore()
     }
 
     open fun onBackPressed(): Boolean {

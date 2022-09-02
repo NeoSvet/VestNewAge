@@ -10,16 +10,11 @@ abstract class StateToiler : ViewModel() {
     private var longValue: NeoState.LongValue? = null
     private var oneState: NeoState? = null
     private var twoState: NeoState? = null
-    private val mstate = Channel<NeoState>()
-    val state = mstate.receiveAsFlow()
-
-    fun resume() {
-        longValue?.let {
-            mstate.trySend(it)
-        }
-    }
+    private val stateChannel = Channel<NeoState>()
+    val state = stateChannel.receiveAsFlow()
 
     fun cacheState() = flow {
+        longValue?.let { emit(it) }
         primaryState?.let { emit(it) }
         oneState?.let { emit(it) }
         twoState?.let { emit(it) }
@@ -36,12 +31,12 @@ abstract class StateToiler : ViewModel() {
 
     protected fun setState(state: NeoState) {
         addToCache(state)
-        mstate.trySend(state)
+        stateChannel.trySend(state)
     }
 
     protected suspend fun postState(state: NeoState) {
         addToCache(state)
-        mstate.send(state)
+        stateChannel.send(state)
     }
 
     private fun addToCache(state: NeoState) {
