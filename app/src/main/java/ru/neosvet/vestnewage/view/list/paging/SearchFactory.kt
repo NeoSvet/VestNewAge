@@ -37,11 +37,12 @@ class SearchFactory(
         offset = position
         parent.startPaging()
         val list = storage.getList(offset)
+        val prev = position - Const.MAX_ON_PAGE
         val next = position + Const.MAX_ON_PAGE
         parent.finishPaging()
         return LoadResult.Page(
             data = list,
-            prevKey = if (position == 0) null else position - Const.MAX_ON_PAGE,
+            prevKey = if (prev <= min) null else prev,
             nextKey = if (next >= total) null else next
         )
     }

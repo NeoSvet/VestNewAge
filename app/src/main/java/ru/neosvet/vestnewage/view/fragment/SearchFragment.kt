@@ -220,6 +220,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
 
     private fun restoreState(state: Bundle?) = binding?.run {
         if (state == null) {
+            SearchFactory.reset(0)
             arguments?.let { args ->
                 helper.mode = args.getInt(Const.MODE)
                 helper.request = args.getString(Const.STRING) ?: ""
@@ -376,6 +377,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
         content.sbResults.isEnabled = false
+        setResultScroll(1)
+        content.sbResults.max = 1
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -455,16 +458,16 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
         else
             bPanelSwitch.setImageResource(R.drawable.ic_bottom)
         content.tvLabel.text = helper.label
-        if (helper.countMaterials <= Const.MAX_ON_PAGE) {
-            setResultScroll(1)
-            content.sbResults.max = 1
-        } else {
-            if (content.sbResults.isEnabled.not()) {
-                setResultScroll(0)
-                content.sbResults.isEnabled = true
-            }
+        if (helper.countMaterials > Const.MAX_ON_PAGE) {
             val count = helper.countMaterials / Const.MAX_ON_PAGE - 1
-            content.sbResults.max = count
+            if (content.sbResults.max != count) {
+                if (content.sbResults.isEnabled.not()) {
+                    if ((binding?.content?.sbResults?.progress ?: 0) >= count)
+                        setResultScroll(0)
+                    content.sbResults.isEnabled = true
+                }
+                content.sbResults.max = count
+            }
         }
         startPaging()
     }
