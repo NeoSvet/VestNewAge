@@ -101,15 +101,14 @@ class MarkerActivity : AppCompatActivity() {
     }
     private val mainLayout: View
         get() = binding.content.root
-    private var density = 0f
-
     private val helper: MarkerHelper
         get() = toiler.helper
-
-    private var heightDialog = 0
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
+    private var density = 0f
+    private var heightDialog = 0
+    private var hasError = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,13 +129,14 @@ class MarkerActivity : AppCompatActivity() {
         when (state) {
             NeoState.Success ->
                 showData()
-            NeoState.Ready -> {
-                if (helper.title.isEmpty())
-                    toast.show(getString(R.string.not_load_page))
-                onBackPressed()
+            NeoState.Ready -> if (helper.title.isEmpty()) {
+                hasError = true
+                toast.autoHide = false
+                toast.show(getString(R.string.not_load_page))
             }
             is NeoState.Error -> {
-                val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.NeoDialog)
+                hasError = true
+                val builder = AlertDialog.Builder(this, R.style.NeoDialog)
                     .setTitle(getString(R.string.error))
                     .setMessage(state.message)
                     .setPositiveButton(
@@ -213,6 +213,10 @@ class MarkerActivity : AppCompatActivity() {
             }
         })
         fabOk.setOnClickListener {
+            if (hasError) {
+                super.onBackPressed()
+                return@setOnClickListener
+            }
             when (helper.type) {
                 MarkerHelper.Type.NONE -> {
                     if (content.etCol.isFocused) {
@@ -256,6 +260,7 @@ class MarkerActivity : AppCompatActivity() {
     @SuppressLint("Range")
     private fun initContent() = binding.content.run {
         rPar.setOnClickListener {
+            if (hasError) return@setOnClickListener
             if (rPar.isChecked) {
                 helper.isPar = true
                 helper.updateSel()
@@ -263,6 +268,7 @@ class MarkerActivity : AppCompatActivity() {
             }
         }
         rPos.setOnClickListener {
+            if (hasError) return@setOnClickListener
             if (rPos.isChecked) {
                 helper.isPar = false
                 helper.updateSel()
@@ -270,6 +276,7 @@ class MarkerActivity : AppCompatActivity() {
             }
         }
         tvSel.setOnClickListener {
+            if (hasError) return@setOnClickListener
             binding.run {
                 if (helper.isPar) {
                     helper.type = MarkerHelper.Type.PAR
@@ -284,6 +291,7 @@ class MarkerActivity : AppCompatActivity() {
             }
         }
         tvCol.setOnClickListener {
+            if (hasError) return@setOnClickListener
             helper.type = MarkerHelper.Type.COL
             binding.rvList.adapter = adCol
             showView(binding.rvList)
@@ -292,7 +300,7 @@ class MarkerActivity : AppCompatActivity() {
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_GO
             ) {
-                createCol(etCol.text.toString())
+                if (!hasError) createCol(etCol.text.toString())
                 return@setOnKeyListener true
             }
             false
@@ -376,6 +384,10 @@ class MarkerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        if (hasError) {
+            super.onBackPressed()
+            return
+        }
         when (helper.type) {
             MarkerHelper.Type.NONE ->
                 super.onBackPressed()
