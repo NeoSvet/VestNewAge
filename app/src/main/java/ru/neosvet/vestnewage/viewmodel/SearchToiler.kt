@@ -31,7 +31,7 @@ import java.io.OutputStreamWriter
 class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHandlerLite {
     private val paging = NeoPaging(this)
     override val factory: SearchFactory by lazy {
-        SearchFactory(storage, paging)
+        SearchFactory(paging)
     }
     val isLoading: Boolean
         get() = paging.isPaging
@@ -118,6 +118,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     override fun onDestroy() {
+        factory.destroy()
         storage.close()
     }
 

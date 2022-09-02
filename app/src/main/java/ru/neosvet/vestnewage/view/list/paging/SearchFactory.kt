@@ -7,7 +7,6 @@ import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
 
 class SearchFactory(
-    private val storage: SearchStorage,
     private val parent: NeoPaging
 ) : PagingSource<Int, ListItem>() {
     companion object {
@@ -27,6 +26,11 @@ class SearchFactory(
     }
 
     var total = 0
+    private val storage = SearchStorage()
+
+    fun destroy() {
+        storage.close()
+    }
 
     override fun getRefreshKey(state: PagingState<Int, ListItem>): Int? {
         return null
