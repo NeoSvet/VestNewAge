@@ -31,7 +31,7 @@ class DataBase(name: String, write: Boolean = false) :
     }
 
     private var db: SQLiteDatabase = if (write) {
-        if (names.contains(name)) throw MyException.BaseIsBusy()
+        if (names.contains(name)) throw NeoException.BaseIsBusy()
         names.add(name)
         this.writableDatabase
     } else this.readableDatabase
