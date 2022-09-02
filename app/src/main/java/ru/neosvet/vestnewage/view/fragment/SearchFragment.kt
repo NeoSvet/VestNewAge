@@ -572,6 +572,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent {
     }
 
     private fun finishedList() {
+        act?.temporaryBlockHead()
         if (toiler.isLoading)
             startPaging()
         else

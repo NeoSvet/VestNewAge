@@ -14,8 +14,11 @@ import androidx.appcompat.widget.ActionMenuView
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -36,6 +39,7 @@ import ru.neosvet.vestnewage.viewmodel.MainToiler
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import kotlin.math.absoluteValue
+
 
 class MainActivity : AppCompatActivity(), ItemClicker {
     companion object {
@@ -647,6 +651,26 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     fun hideHead() {
         helper.topBar?.setExpanded(false)
+    }
+
+    fun temporaryBlockHead() {
+        findViewById<CollapsingToolbarLayout>(R.id.collapsingBar)?.let {
+            val params = it.layoutParams as AppBarLayout.LayoutParams
+            val flags = params.scrollFlags
+            it.updateLayoutParams<AppBarLayout.LayoutParams> {
+                scrollFlags = 0
+            }
+            helper.topBar?.isVisible = false
+            lifecycleScope.launch {
+                delay(200)
+                it.post {
+                    helper.topBar?.isVisible = true
+                    it.updateLayoutParams<AppBarLayout.LayoutParams> {
+                        scrollFlags = flags
+                    }
+                }
+            }
+        }
     }
 
     fun setError(error: NeoState.Error) {
