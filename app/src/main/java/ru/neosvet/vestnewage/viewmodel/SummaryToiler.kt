@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
@@ -18,7 +20,19 @@ import java.io.BufferedReader
 import java.io.FileReader
 
 class SummaryToiler : NeoToiler() {
+    companion object {
+        const val TAB_RSS = 0
+        const val TAB_ADD = 1
+    }
+
+    var selectedTab = TAB_RSS
+    val isRss: Boolean
+        get() = selectedTab == TAB_RSS
     private var sBack: String = ""
+    private var isOpened = false
+    private val storage: AdditionStorage by lazy {
+        AdditionStorage()
+    }
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, SummaryHelper.TAG)
@@ -29,19 +43,27 @@ class SummaryToiler : NeoToiler() {
             sBack = context.getString(R.string.back)
     }
 
+    override fun onDestroy() {
+        if (isOpened)
+            storage.close()
+    }
+
     override suspend fun doLoad() {
         val loader = SummaryLoader()
-        loader.loadList(true)
-        val summaryHelper = SummaryHelper()
-        summaryHelper.updateBook()
-        val list = openList()
+        if (isRss) {
+            loader.loadRss(true)
+            val summaryHelper = SummaryHelper()
+            summaryHelper.updateBook()
+        } else
+            loader.loadAddition(storage, 0)
+        val list = if (isRss) openRss() else openAddition()
         postState(NeoState.ListValue(list))
-        if (isRun)
+        if (isRun && isRss)
             loadPages(list)
     }
 
     private fun isNeedReload(): Boolean {
-        val f = Lib.getFile(Const.RSS)
+        val f = if (isRss) Lib.getFile(Const.RSS) else Lib.getFileDB(DataBase.ADDITION)
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
@@ -62,7 +84,7 @@ class SummaryToiler : NeoToiler() {
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
         scope.launch {
-            val list = openList()
+            val list = if (isRss) openRss() else openAddition()
             postState(NeoState.ListValue(list))
             if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
                 reLoad()
@@ -70,7 +92,13 @@ class SummaryToiler : NeoToiler() {
         }
     }
 
-    private suspend fun openList(): List<ListItem> {
+    private fun openAddition(): List<ListItem> {
+        storage.open()
+        isOpened = true
+        return storage.getList(0)
+    }
+
+    private suspend fun openRss(): List<ListItem> {
         val list = mutableListOf<ListItem>()
         val now = System.currentTimeMillis()
         val file = Lib.getFile(Const.RSS)

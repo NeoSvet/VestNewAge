@@ -16,6 +16,7 @@ class DataBase(name: String, write: Boolean = false) :
         const val PARAGRAPH = "par"
         const val JOURNAL = "journal"
         const val MARKERS = "markers"
+        const val ADDITION = "addition"
         const val LIKE = " LIKE ?"
         const val GLOB = " GLOB ?"
         const val Q = " = ?"
@@ -83,6 +84,13 @@ class DataBase(name: String, write: Boolean = false) :
                 "create table if not exists " + JOURNAL + " ("
                         + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
                         + Const.TIME + " integer);"
+            )
+            ADDITION -> db.execSQL(
+                "create table if not exists " + ADDITION + " ("
+                        + ID + " integer primary key," //number post on site
+                        + Const.LINK + " integer," //number post in Telegram
+                        + Const.TITLE + " text,"
+                        + Const.DESCTRIPTION + " text);"
             )
             MARKERS -> {
                 db.execSQL(

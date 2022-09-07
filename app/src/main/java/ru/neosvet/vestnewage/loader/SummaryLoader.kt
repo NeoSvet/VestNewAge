@@ -1,10 +1,13 @@
 package ru.neosvet.vestnewage.loader
 
+import android.content.ContentValues
 import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
@@ -24,7 +27,7 @@ class SummaryLoader : LinksProvider {
         return list
     }
 
-    fun loadList(updateUnread: Boolean) {
+    fun loadRss(updateUnread: Boolean) {
         val stream: InputStream =
             NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
         val site = if (NeoClient.isMainSite)
@@ -73,5 +76,49 @@ class SummaryLoader : LinksProvider {
 
     private fun withOutTag(s: String): String {
         return s.substring(s.indexOf(">") + 1)
+    }
+
+    fun loadAddition(storage: AdditionStorage, startId: Int) {
+        val max = loadMax()
+        if (storage.max == 0) storage.findMax()
+        var n = if (storage.max > 0) storage.max
+        else max - Const.MAX_ON_PAGE - 1
+        while (n < max) {
+            n++
+            storage.insert(loadPost(n))
+        }
+        if (startId >= max || startId == 0) return
+        var end = startId - Const.MAX_ON_PAGE
+        if (end < 1) end = 1
+        for (i in startId downTo end)
+            storage.insert(loadPost(i))
+    }
+
+    private fun loadPost(id: Int): ContentValues {
+        val d = (id / 200).toString()
+        val stream = NeoClient.getStream(NetConst.ADDITION_URL + "$d/$id.p")
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+        val row = ContentValues()
+        row.put(DataBase.ID, id)
+        row.put(Const.TITLE, br.readLine())
+        row.put(Const.LINK, br.readLine().toInt())
+        var s: String? = br.readLine()
+        val des = StringBuilder()
+        while (s != null) {
+            des.append(s)
+            des.append(Const.N)
+            s = br.readLine()
+        }
+        br.close()
+        row.put(Const.DESCTRIPTION, des.toString().trim())
+        return row
+    }
+
+    private fun loadMax(): Int {
+        val stream = NeoClient.getStream(NetConst.ADDITION_URL + "max.txt")
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+        val s = br.readLine()
+        br.close()
+        return s.toInt()
     }
 }

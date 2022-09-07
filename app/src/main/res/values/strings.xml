@@ -83,6 +83,9 @@
     <string name="format_delete">Удалить %s?</string>
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>
+    <!--SummaryFragment-->
+    <string name="additionally">Дополнительно</string>
+    <string name="link_on_post">Ссылка на сообщение</string>
     <!--CalendarFragment-->
     <string name="ad">Объявление</string>
     <string name="poem">Катрен</string>
