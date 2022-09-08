@@ -9,8 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
@@ -23,15 +27,20 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class SummaryFragment : NeoFragment() {
     private var binding: SummaryFragmentBinding? = null
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adRss = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adAddition: PagingAdapter by lazy {
+        PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
+    }
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
+    private var jobList: Job? = null
     override val title: String
         get() = getString(R.string.summary)
     private var openedReader = false
@@ -40,6 +49,7 @@ class SummaryFragment : NeoFragment() {
         ViewModelProvider(this).get(SummaryToiler::class.java).apply { init(requireContext()) }
 
     override fun onDestroyView() {
+        jobList?.cancel()
         binding = null
         super.onDestroyView()
     }
@@ -61,16 +71,30 @@ class SummaryFragment : NeoFragment() {
 
     override fun onResume() {
         super.onResume()
+        //TODO fix restore status when is not rss
         if (openedReader) {
             openedReader = false
             act?.updateNew()
         }
     }
 
+    override fun setStatus(load: Boolean) {
+        super.setStatus(load)
+        binding?.run {
+            val tabHost = tabLayout.getChildAt(0) as ViewGroup
+            if (load) {
+                tabHost.getChildAt(0).isEnabled = false
+                tabHost.getChildAt(1).isEnabled = false
+            } else {
+                tabHost.getChildAt(0).isEnabled = true
+                tabHost.getChildAt(1).isEnabled = true
+            }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         rvSummary.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rvSummary.adapter = adapter
         setListEvents(rvSummary)
         tvUpdate.setOnClickListener {
             if (toiler.isRss.not())
@@ -90,7 +114,7 @@ class SummaryFragment : NeoFragment() {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 toiler.selectedTab = tab.position
-                adapter.clear()
+                adRss.clear()
                 toiler.openList(true)
             }
         })
@@ -99,18 +123,40 @@ class SummaryFragment : NeoFragment() {
     override fun onChangedOtherState(state: NeoState) {
         if (toiler.isRun.not()) {
             setStatus(false)
-            act?.updateNew()
+            if (toiler.isRss) act?.updateNew()
         }
-        if (state is NeoState.ListValue) {
-            val scroll = adapter.itemCount > 0
-            adapter.setItems(state.list)
-            binding?.run {
-                if (scroll) rvSummary.smoothScrollToPosition(0)
-                if (toiler.isRss.not())
-                    tvUpdate.setText(R.string.link_to_src)
+        when (state) {
+            is NeoState.ListValue -> {
+                jobList?.cancel()
+                val scroll = adRss.itemCount > 0
+                adRss.setItems(state.list)
+                binding?.run {
+                    rvSummary.adapter = adRss
+                    if (scroll)
+                        rvSummary.smoothScrollToPosition(0)
+                }
+
             }
-        } else if (state is NeoState.LongValue) binding?.run {
-            setUpdateTime(state.value, tvUpdate)
+            is NeoState.LongValue -> binding?.run {
+                setUpdateTime(state.value, tvUpdate)
+            }
+            NeoState.Success -> {
+                if (toiler.isRss) {
+                    act?.updateNew()
+                    return
+                }
+                jobList?.cancel()
+                binding?.tvUpdate?.setText(R.string.link_to_src)
+                binding?.rvSummary?.adapter = adAddition
+                jobList = lifecycleScope.launch {
+                    toiler.paging().collect {
+                        adAddition.submitData(lifecycle, it)
+                    }
+                }
+            }
+            NeoState.Ready ->
+                act?.hideToast()
+            else -> {}
         }
     }
 
@@ -163,5 +209,12 @@ class SummaryFragment : NeoFragment() {
 
     override fun onAction(title: String) {
         startLoad()
+    }
+
+    private fun finishedList() {
+        if (toiler.isLoading)
+            act?.showStaticToast(getString(R.string.load))
+        else
+            act?.showToast(getString(R.string.finish_list))
     }
 }

@@ -14,6 +14,8 @@ import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.*
 
 class SummaryLoader : LinksProvider {
+    private var maxPost = 0
+
     override fun getLinkList(): List<String> {
         val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
         val list = mutableListOf<String>()
@@ -79,19 +81,25 @@ class SummaryLoader : LinksProvider {
     }
 
     fun loadAddition(storage: AdditionStorage, startId: Int) {
-        val max = loadMax()
+        if (maxPost == 0)
+            maxPost = loadMax()
         if (storage.max == 0) storage.findMax()
         var n = if (storage.max > 0) storage.max
-        else max - Const.MAX_ON_PAGE - 1
-        while (n < max) {
+        else maxPost - Const.MAX_ON_PAGE
+        while (n < maxPost) {
             n++
-            storage.insert(loadPost(n))
+            val post = loadPost(n)
+            if (storage.update(n, post).not())
+                storage.insert(post)
         }
-        if (startId >= max || startId == 0) return
-        var end = startId - Const.MAX_ON_PAGE
+        if (startId >= maxPost || startId == 0) return
+        var end = startId - Const.MAX_ON_PAGE + 1
         if (end < 1) end = 1
-        for (i in startId downTo end)
-            storage.insert(loadPost(i))
+        for (i in startId downTo end) {
+            val post = loadPost(i)
+            if (storage.update(i, post).not())
+                storage.insert(post)
+        }
     }
 
     private fun loadPost(id: Int): ContentValues {

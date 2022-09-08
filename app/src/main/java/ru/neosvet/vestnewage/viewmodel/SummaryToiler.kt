@@ -1,7 +1,9 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
+import androidx.lifecycle.viewModelScope
 import androidx.work.Data
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -14,28 +16,44 @@ import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.BufferedReader
 import java.io.FileReader
 
-class SummaryToiler : NeoToiler() {
+class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     companion object {
         const val TAB_RSS = 0
         const val TAB_ADD = 1
     }
 
     var selectedTab = TAB_RSS
+        set(value) {
+            if (value == TAB_ADD && isOpened)
+                factory.offset = storage.max
+            field = value
+        }
     val isRss: Boolean
         get() = selectedTab == TAB_RSS
     private var sBack: String = ""
     private var isOpened = false
+    private val paging: NeoPaging by lazy {
+        NeoPaging(this)
+    }
     private val storage: AdditionStorage by lazy {
         AdditionStorage()
+    }
+    val isLoading: Boolean
+        get() = paging.isPaging
+    override val factory: AdditionFactory by lazy {
+        AdditionFactory(storage, paging)
     }
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, SummaryHelper.TAG)
+        .putInt(Const.TAB, selectedTab)
         .build()
 
     fun init(context: Context) {
@@ -54,12 +72,15 @@ class SummaryToiler : NeoToiler() {
             loader.loadRss(true)
             val summaryHelper = SummaryHelper()
             summaryHelper.updateBook()
-        } else
+            val list = openRss()
+            postState(NeoState.ListValue(list))
+            if (isRun && isRss)
+                loadPages(list)
+        } else {
             loader.loadAddition(storage, 0)
-        val list = if (isRss) openRss() else openAddition()
-        postState(NeoState.ListValue(list))
-        if (isRun && isRss)
-            loadPages(list)
+            openAddition()
+            postState(NeoState.Success)
+        }
     }
 
     private fun isNeedReload(): Boolean {
@@ -84,18 +105,26 @@ class SummaryToiler : NeoToiler() {
     fun openList(loadIfNeed: Boolean) {
         this.loadIfNeed = loadIfNeed
         scope.launch {
-            val list = if (isRss) openRss() else openAddition()
-            postState(NeoState.ListValue(list))
-            if (loadIfNeed && (list.isEmpty() || isNeedReload())) {
-                reLoad()
+            val isEmpty = if (isRss) {
+                val list = openRss()
+                postState(NeoState.ListValue(list))
+                list.isEmpty()
+            } else {
+                openAddition()
             }
+
+            if (loadIfNeed && (isEmpty || isNeedReload())) {
+                reLoad()
+            } else if (isRss.not())
+                postState(NeoState.Success)
         }
     }
 
-    private fun openAddition(): List<ListItem> {
+    private fun openAddition(): Boolean {
         storage.open()
         isOpened = true
-        return storage.getList(0)
+        storage.findMax()
+        return storage.max == 0
     }
 
     private suspend fun openRss(): List<ListItem> {
@@ -119,5 +148,19 @@ class SummaryToiler : NeoToiler() {
         }
         br.close()
         return list
+    }
+
+    fun paging() = paging.run()
+
+    override val pagingScope: CoroutineScope
+        get() = viewModelScope
+
+    override suspend fun postFinish() {
+        if (storage.max > 0)
+            postState(NeoState.Ready)
+    }
+
+    override fun postError(error: Exception) {
+        setState(NeoState.Error(error, getInputData()))
     }
 }
