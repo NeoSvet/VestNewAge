@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 object OnlineObserver {
     private const val INTERVAL = 15000
     private var timeMessage = 0L
-    private var lastValue = true
+    private var lastValue = false
     private val mIsOnline = MutableStateFlow(lastValue)
     val isOnline: StateFlow<Boolean> = mIsOnline
 
@@ -47,7 +47,7 @@ object OnlineObserver {
     }
 
     private fun update(online: Boolean) {
-        if (online != lastValue) return
+        if (online == lastValue) return
         lastValue = online
         mIsOnline.tryEmit(online)
     }
