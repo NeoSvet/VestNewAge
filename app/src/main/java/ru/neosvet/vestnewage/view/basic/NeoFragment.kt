@@ -65,9 +65,10 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        act = activity as MainActivity
-        act?.setFragment(this)
-        act?.title = title
+        act = (activity as MainActivity).apply {
+            setFragment(this@NeoFragment)
+            title = this@NeoFragment.title
+        }
     }
 
     override fun onDestroyView() {
@@ -145,13 +146,13 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     open fun setStatus(load: Boolean) {
         act?.run {
             if (load) {
-                act?.blocked()
+                blocked()
                 status.loadText()
                 status.setLoad(true)
             } else if (status.isCrash.not()) {
                 if (status.isVisible)
                     status.setLoad(false)
-                act?.unblocked()
+                unblocked()
             }
         }
     }
