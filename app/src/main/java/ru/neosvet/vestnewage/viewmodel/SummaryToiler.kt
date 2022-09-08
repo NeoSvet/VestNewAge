@@ -79,6 +79,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         } else {
             loader.loadAddition(storage, 0)
             openAddition()
+            factory.offset = storage.max
             postState(NeoState.Success)
         }
     }
@@ -111,6 +112,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                 list.isEmpty()
             } else {
                 openAddition()
+                postState(NeoState.Success)
+                storage.max == 0
             }
 
             if (loadIfNeed && (isEmpty || isNeedReload())) {
@@ -119,18 +122,16 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                     val f = Lib.getFileDB(DataBase.ADDITION)
                     f.setLastModified(System.currentTimeMillis())
                 }
-            } else if (isRss.not())
-                postState(NeoState.Success)
+            }
         }
     }
 
-    private fun openAddition(): Boolean {
+    private fun openAddition() {
         clearPrimaryState()
         clearLongValue()
         storage.open()
         isOpened = true
         storage.findMax()
-        return storage.max == 0
     }
 
     private suspend fun openRss(): List<ListItem> {
