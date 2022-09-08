@@ -77,4 +77,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         if (isEmpty.not())
             postState(NeoState.Success)
     }
+
+    override fun postError(error: Exception) {
+        setState(NeoState.Error(error, getInputData()))
+    }
 }

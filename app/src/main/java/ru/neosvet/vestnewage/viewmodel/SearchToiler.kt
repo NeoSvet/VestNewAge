@@ -167,6 +167,10 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         postState(NeoState.Ready)
     }
 
+    override fun postError(error: Exception) {
+        setState(NeoState.Error(error, getInputData()))
+    }
+
     fun setEndings(context: Context) {
         if (engine.endings == null)
             engine.endings = context.resources.getStringArray(R.array.endings)

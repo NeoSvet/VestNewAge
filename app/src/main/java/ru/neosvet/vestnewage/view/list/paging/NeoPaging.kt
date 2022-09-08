@@ -19,6 +19,7 @@ class NeoPaging(
         val isRun: Boolean
         val pagingScope: CoroutineScope
         suspend fun postFinish()
+        fun postError(error: Exception)
     }
 
     var isPaging = false
@@ -43,5 +44,9 @@ class NeoPaging(
             parent.postFinish()
             isPaging = false
         }
+    }
+
+    fun onError(error: Exception) {
+        parent.postError(error)
     }
 }
