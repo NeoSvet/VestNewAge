@@ -115,6 +115,10 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
+                if (isRss.not()) {
+                    val f = Lib.getFileDB(DataBase.ADDITION)
+                    f.setLastModified(System.currentTimeMillis())
+                }
             } else if (isRss.not())
                 postState(NeoState.Success)
         }
