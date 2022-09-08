@@ -29,6 +29,10 @@ abstract class StateToiler : ViewModel() {
         twoState = null
     }
 
+    fun clearPrimaryState() {
+        primaryState = null
+    }
+
     protected fun setState(state: NeoState) {
         addToCache(state)
         stateChannel.trySend(state)

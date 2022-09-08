@@ -67,11 +67,12 @@ class SummaryFragment : NeoFragment() {
         initTabs()
         if (savedInstanceState == null)
             toiler.openList(true)
+        else if (toiler.selectedTab == SummaryToiler.TAB_ADD)
+            initAddition()
     }
 
     override fun onResume() {
         super.onResume()
-        //TODO fix restore status when is not rss
         if (openedReader) {
             openedReader = false
             act?.updateNew()
@@ -105,8 +106,7 @@ class SummaryFragment : NeoFragment() {
     private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.summary))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.additionally))
-        if (toiler.selectedTab == SummaryToiler.TAB_RSS)
-            tabLayout.select(toiler.selectedTab)
+        tabLayout.select(toiler.selectedTab)
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {}
 
@@ -141,22 +141,25 @@ class SummaryFragment : NeoFragment() {
                 setUpdateTime(state.value, tvUpdate)
             }
             NeoState.Success -> {
-                if (toiler.isRss) {
+                if (toiler.isRss)
                     act?.updateNew()
-                    return
-                }
-                jobList?.cancel()
-                binding?.tvUpdate?.setText(R.string.link_to_src)
-                binding?.rvSummary?.adapter = adAddition
-                jobList = lifecycleScope.launch {
-                    toiler.paging().collect {
-                        adAddition.submitData(lifecycle, it)
-                    }
-                }
+                else
+                    initAddition()
             }
             NeoState.Ready ->
                 act?.hideToast()
             else -> {}
+        }
+    }
+
+    private fun initAddition() {
+        jobList?.cancel()
+        binding?.tvUpdate?.setText(R.string.link_to_src)
+        binding?.rvSummary?.adapter = adAddition
+        jobList = lifecycleScope.launch {
+            toiler.paging().collect {
+                adAddition.submitData(lifecycle, it)
+            }
         }
     }
 

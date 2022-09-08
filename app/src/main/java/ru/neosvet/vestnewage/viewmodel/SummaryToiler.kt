@@ -121,6 +121,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun openAddition(): Boolean {
+        clearPrimaryState()
+        clearLongValue()
         storage.open()
         isOpened = true
         storage.findMax()
