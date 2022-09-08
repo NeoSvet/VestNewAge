@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
@@ -242,7 +243,7 @@ class SiteFragment : NeoFragment() {
         if (toiler.isRun) return
         if (isAds(index, item)) return
         if (item.hasFewLinks())
-            openMultiLink(item, binding!!.rvSite.findViewHolderForAdapterPosition(index)!!.itemView)
+            openMultiLink(item, binding!!.rvSite.getItemView(index))
         else
             openSingleLink(item.link)
     }

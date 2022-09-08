@@ -25,6 +25,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
@@ -135,7 +136,6 @@ class SummaryFragment : NeoFragment() {
                     if (scroll)
                         rvSummary.smoothScrollToPosition(0)
                 }
-
             }
             is NeoState.LongValue -> binding?.run {
                 setUpdateTime(state.value, tvUpdate)
@@ -168,12 +168,9 @@ class SummaryFragment : NeoFragment() {
         if (toiler.isRss) {
             openedReader = true
             openReader(item.link, null)
-        } else if (item.hasFewLinks()) {
-            openMultiLink(
-                item,
-                binding!!.rvSummary.findViewHolderForAdapterPosition(index)!!.itemView
-            )
-        } else
+        } else if (item.hasFewLinks())
+            openMultiLink(item, binding!!.rvSummary.getItemView(index))
+        else
             Lib.openInApps(NetConst.TELEGRAM_URL + item.link, null)
     }
 
