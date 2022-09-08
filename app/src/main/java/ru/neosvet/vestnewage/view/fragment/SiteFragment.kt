@@ -242,7 +242,7 @@ class SiteFragment : NeoFragment() {
         if (toiler.isRun) return
         if (isAds(index, item)) return
         if (item.hasFewLinks())
-            openMultiLink(item, binding!!.rvSite)
+            openMultiLink(item, binding!!.rvSite.findViewHolderForAdapterPosition(index)!!.itemView)
         else
             openSingleLink(item.link)
     }
