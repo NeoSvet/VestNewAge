@@ -35,10 +35,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class SummaryFragment : NeoFragment() {
     private var binding: SummaryFragmentBinding? = null
-    private val adRss = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
-    private val adAddition: PagingAdapter by lazy {
-        PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
-    }
+    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
     private var jobList: Job? = null
@@ -129,7 +126,7 @@ class SummaryFragment : NeoFragment() {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 toiler.selectedTab = tab.position
-                adRss.clear()
+                adapter.clear()
                 toiler.openList(true)
             }
         })
@@ -143,10 +140,10 @@ class SummaryFragment : NeoFragment() {
         when (state) {
             is NeoState.ListValue -> {
                 jobList?.cancel()
-                val scroll = adRss.itemCount > 0
-                adRss.setItems(state.list)
+                val scroll = adapter.itemCount > 0
+                adapter.setItems(state.list)
                 binding?.run {
-                    rvSummary.adapter = adRss
+                    rvSummary.adapter = adapter
                     if (scroll)
                         rvSummary.smoothScrollToPosition(0)
                 }
@@ -169,10 +166,11 @@ class SummaryFragment : NeoFragment() {
     private fun initAddition() {
         jobList?.cancel()
         binding?.tvUpdate?.setText(R.string.link_to_src)
-        binding?.rvSummary?.adapter = adAddition
+        val adapter = PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
+        binding?.rvSummary?.adapter = adapter
         jobList = lifecycleScope.launch {
             toiler.paging().collect {
-                adAddition.submitData(lifecycle, it)
+                adapter.submitData(lifecycle, it)
             }
         }
     }
