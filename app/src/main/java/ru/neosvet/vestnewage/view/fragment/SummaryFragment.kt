@@ -186,7 +186,7 @@ class SummaryFragment : NeoFragment() {
             }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            if (item.intent.action != null)
+            if (item.intent != null)
                 Lib.openInApps(item.intent.action, null)
             else
                 Lib.openInApps(NetConst.TELEGRAM_URL + post, null)
