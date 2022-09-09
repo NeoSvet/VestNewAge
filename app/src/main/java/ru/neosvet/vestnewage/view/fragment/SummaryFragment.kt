@@ -97,10 +97,24 @@ class SummaryFragment : NeoFragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         rvSummary.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        setListEvents(rvSummary)
+        setListEvents(rvSummary, false)
         tvUpdate.setOnClickListener {
             if (toiler.isRss.not())
                 Lib.openInApps(NetConst.TELEGRAM_URL, null)
+        }
+    }
+
+    override fun swipeLeft() {
+        binding?.run {
+            val t = tabLayout.selectedTabPosition
+            if (t < 1) tabLayout.select(t + 1)
+        }
+    }
+
+    override fun swipeRight() {
+        binding?.run {
+            val t = tabLayout.selectedTabPosition
+            if (t > 0) tabLayout.select(t - 1)
         }
     }
 
