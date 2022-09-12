@@ -96,4 +96,16 @@ class AdditionStorage : Closeable {
         else 0
         cursor.close()
     }
+
+    fun hasPost(id: Int): Boolean {
+        val cursor = db.query(
+            table = DataBase.ADDITION,
+            column = DataBase.ID,
+            selection = DataBase.ID + DataBase.Q,
+            selectionArg = id.toString()
+        )
+        val result = cursor.moveToFirst()
+        cursor.close()
+        return result
+    }
 }

@@ -90,13 +90,16 @@ class SummaryLoader : LinksProvider {
         else maxPost - Const.MAX_ON_PAGE
         while (n < maxPost) {
             n++
-            storage.insert(loadPost(n))
+            if (storage.hasPost(n).not())
+                storage.insert(loadPost(n))
         }
         if (startId >= maxPost || startId == 0) return
         var end = startId - Const.MAX_ON_PAGE + 1
         if (end < 1) end = 1
-        for (i in startId downTo end)
-            storage.insert(loadPost(n))
+        for (i in startId downTo end) {
+            if (storage.hasPost(i).not())
+                storage.insert(loadPost(i))
+        }
     }
 
     private fun loadPost(id: Int): ContentValues {
