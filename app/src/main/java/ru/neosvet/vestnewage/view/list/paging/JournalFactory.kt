@@ -12,9 +12,12 @@ class JournalFactory(
     private val strings: JournalStrings,
     private val parent: NeoPaging
 ) : PagingSource<Int, ListItem>() {
-    var total = 0
-    var offset = 0
-        private set
+    companion object {
+        var offset = 0
+        var total = 0
+        val page: Int
+            get() = offset / Const.MAX_ON_PAGE
+    }
 
     override fun getRefreshKey(state: PagingState<Int, ListItem>): Int? {
         return null

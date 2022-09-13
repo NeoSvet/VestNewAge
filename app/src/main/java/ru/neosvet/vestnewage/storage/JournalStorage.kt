@@ -14,7 +14,7 @@ import java.util.*
 
 class JournalStorage : Closeable {
     companion object {
-        private const val LIMIT = 100
+        private const val LIMIT = 150
     }
 
     private val db = DataBase(DataBase.JOURNAL)

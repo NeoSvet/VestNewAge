@@ -24,8 +24,6 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false
-    val offset: Int
-        get() = factory.offset
     private var isInit = false
 
     fun init(context: Context) {
@@ -52,11 +50,12 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         viewModelScope.launch {
             val cursor = journal.getAll()
             if (cursor.moveToFirst())
-                factory.total = cursor.count
-            if (factory.total == 0) {
+                JournalFactory.total = cursor.count
+            if (JournalFactory.total == 0) {
                 isEmpty = true
                 postState(NeoState.Ready)
-            }
+            } else
+                postState(NeoState.LongValue(JournalFactory.total.toLong()))
             cursor.close()
         }
     }

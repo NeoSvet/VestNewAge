@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -19,6 +20,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -33,9 +35,17 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     override val title: String
         get() = getString(R.string.journal)
+    private var jobList: Job? = null
+    private var isUserScroll = true
+    private var startPage = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
+
+    override fun onDestroyView() {
+        jobList?.cancel()
+        super.onDestroyView()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,13 +67,19 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rv.adapter = adapter
         setListEvents(rv)
-        lifecycleScope.launch {
+        startPaging()
+        if (JournalFactory.offset > 0)
+            rv.smoothScrollToPosition(JournalFactory.offset)
+    }
+
+    private fun startPaging() {
+        jobList?.cancel()
+        startPage = JournalFactory.page
+        jobList = lifecycleScope.launch {
             toiler.paging().collect {
                 adapter.submitData(lifecycle, it)
             }
         }
-        if (toiler.offset > 0)
-            rv.smoothScrollToPosition(toiler.offset)
     }
 
     override fun onItemClick(index: Int, item: ListItem) {
@@ -95,7 +111,12 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onChangePage(page: Int) {
-        //TODO("Not yet implemented")
+        isUserScroll = false
+        val p = JournalFactory.page
+        if (p < startPage)
+            startPage = p
+        act?.setScrollBar(page + startPage)
+        isUserScroll = true
     }
 
     override fun onFinishList() {
@@ -109,11 +130,21 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         when (state) {
             NeoState.Success ->
                 act?.hideToast()
+            is NeoState.LongValue ->
+                if (state.value > Const.MAX_ON_PAGE)
+                    act?.initScrollBar(state.value.toInt() / Const.MAX_ON_PAGE, this::onScroll)
             NeoState.Ready -> act?.run {
                 showStaticToast(getString(R.string.empty_journal))
                 setAction(0)
             }
             else -> {}
+        }
+    }
+
+    private fun onScroll(value: Int) {
+        if (isUserScroll) {
+            JournalFactory.offset = value * Const.MAX_ON_PAGE
+            startPaging()
         }
     }
 
