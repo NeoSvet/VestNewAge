@@ -28,6 +28,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -43,6 +44,10 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     override val title: String
         get() = getString(R.string.summary)
     private var openedReader = false
+    private var isUserScroll = true
+    private val page: Int
+        get() = (toiler.max - AdditionFactory.offset) / Const.MAX_ON_PAGE
+    private var startPage = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(SummaryToiler::class.java).apply { init(requireContext()) }
@@ -127,6 +132,8 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 toiler.selectedTab = tab.position
+                if (toiler.isRss)
+                    act?.initScrollBar(0, null)
                 adRecycler.clear()
                 toiler.openList(true)
             }
@@ -168,11 +175,20 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
         binding?.rvSummary?.adapter = adPaging
+        act?.initScrollBar(toiler.max / Const.MAX_ON_PAGE, this::onScroll)
         startPaging()
+    }
+
+    private fun onScroll(value: Int) {
+        if (isUserScroll) {
+            AdditionFactory.offset = toiler.max - value * Const.MAX_ON_PAGE
+            startPaging()
+        }
     }
 
     private fun startPaging() {
         jobList?.cancel()
+        startPage = page
         jobList = lifecycleScope.launch {
             toiler.paging().collect {
                 adPaging.submitData(lifecycle, it)
@@ -229,7 +245,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onChangePage(page: Int) {
-        //TODO("Not yet implemented")
+        isUserScroll = false
+        val p = this.page
+        if (p < startPage)
+            startPage = p
+        act?.setScrollBar(page + startPage)
+        isUserScroll = true
     }
 
     override fun onFinishList() {

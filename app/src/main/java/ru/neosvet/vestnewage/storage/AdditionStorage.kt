@@ -38,7 +38,8 @@ class AdditionStorage : Closeable {
     private fun getCursor(offset: Int): Cursor = db.query(
         table = DataBase.ADDITION,
         groupBy = DataBase.ID,
-        having = if (offset == 0) null else "${DataBase.ID} < ${offset + 1}",
+        having = if (offset == 0) null
+        else "${DataBase.ID} < ${offset + 1} AND ${DataBase.ID} > ${offset - Const.MAX_ON_PAGE}",
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + Const.MAX_ON_PAGE
     )
 

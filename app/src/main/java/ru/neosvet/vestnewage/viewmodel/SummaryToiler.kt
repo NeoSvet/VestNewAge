@@ -29,10 +29,12 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         const val TAB_ADD = 1
     }
 
+    val max: Int
+        get() = storage.max
     var selectedTab = TAB_RSS
         set(value) {
             if (value == TAB_ADD && isOpened)
-                factory.offset = storage.max
+                AdditionFactory.offset = storage.max
             field = value
         }
     val isRss: Boolean
@@ -79,7 +81,6 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         } else {
             loader.loadAddition(storage, 0)
             openAddition()
-            factory.offset = storage.max
             postState(NeoState.Success)
         }
     }
@@ -132,6 +133,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         storage.open()
         isOpened = true
         storage.findMax()
+        AdditionFactory.offset = storage.max
     }
 
     private suspend fun openRss(): List<ListItem> {

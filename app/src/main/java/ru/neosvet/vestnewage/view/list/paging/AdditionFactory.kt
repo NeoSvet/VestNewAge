@@ -13,10 +13,13 @@ class AdditionFactory(
     private val storage: AdditionStorage,
     private val parent: NeoPaging
 ) : PagingSource<Int, ListItem>() {
+    companion object {
+        var offset = 0
+    }
+
     private val loader: SummaryLoader by lazy {
         SummaryLoader()
     }
-    var offset = storage.max
 
     override fun getRefreshKey(state: PagingState<Int, ListItem>): Int? {
         return null
