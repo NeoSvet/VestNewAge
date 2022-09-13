@@ -24,11 +24,11 @@ import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-class JournalFragment : NeoFragment() {
+class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private val toiler: JournalToiler
         get() = neotoiler as JournalToiler
     private val adapter: PagingAdapter by lazy {
-        PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
+        PagingAdapter(this)
     }
 
     override val title: String
@@ -66,7 +66,7 @@ class JournalFragment : NeoFragment() {
             rv.smoothScrollToPosition(toiler.offset)
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
+    override fun onItemClick(index: Int, item: ListItem) {
         var s = item.des
         if (s.contains(getString(R.string.rnd_verse))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
@@ -76,7 +76,7 @@ class JournalFragment : NeoFragment() {
             openReader(item.link, null)
     }
 
-    private fun onItemLongClick(index: Int, item: ListItem): Boolean {
+    override fun onItemLongClick(index: Int, item: ListItem): Boolean {
         var des = item.des
         var par = ""
         var i = des.indexOf(getString(R.string.rnd_verse))
@@ -94,7 +94,11 @@ class JournalFragment : NeoFragment() {
         return true
     }
 
-    private fun finishedList() {
+    override fun onChangePage(page: Int) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onFinishList() {
         val msg = if (toiler.isLoading)
             getString(R.string.load)
         else getString(R.string.finish_list)

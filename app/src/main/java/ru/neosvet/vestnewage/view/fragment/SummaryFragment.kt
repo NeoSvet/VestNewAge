@@ -33,9 +33,10 @@ import ru.neosvet.vestnewage.viewmodel.SummaryToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-class SummaryFragment : NeoFragment() {
+class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     private var binding: SummaryFragmentBinding? = null
-    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adRecycler = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private lateinit var adPaging: PagingAdapter
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
     private var jobList: Job? = null
@@ -126,7 +127,7 @@ class SummaryFragment : NeoFragment() {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 toiler.selectedTab = tab.position
-                adapter.clear()
+                adRecycler.clear()
                 toiler.openList(true)
             }
         })
@@ -140,10 +141,10 @@ class SummaryFragment : NeoFragment() {
         when (state) {
             is NeoState.ListValue -> {
                 jobList?.cancel()
-                val scroll = adapter.itemCount > 0
-                adapter.setItems(state.list)
+                val scroll = adRecycler.itemCount > 0
+                adRecycler.setItems(state.list)
                 binding?.run {
-                    rvSummary.adapter = adapter
+                    rvSummary.adapter = adRecycler
                     if (scroll)
                         rvSummary.smoothScrollToPosition(0)
                 }
@@ -164,18 +165,22 @@ class SummaryFragment : NeoFragment() {
     }
 
     private fun initAddition() {
-        jobList?.cancel()
         binding?.tvUpdate?.setText(R.string.link_to_src)
-        val adapter = PagingAdapter(this::onItemClick, this::onItemLongClick, this::finishedList)
-        binding?.rvSummary?.adapter = adapter
+        adPaging = PagingAdapter(this)
+        binding?.rvSummary?.adapter = adPaging
+        startPaging()
+    }
+
+    private fun startPaging() {
+        jobList?.cancel()
         jobList = lifecycleScope.launch {
             toiler.paging().collect {
-                adapter.submitData(lifecycle, it)
+                adPaging.submitData(lifecycle, it)
             }
         }
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
+    override fun onItemClick(index: Int, item: ListItem) {
         if (toiler.isRun) return
         if (toiler.isRss) {
             openedReader = true
@@ -207,7 +212,7 @@ class SummaryFragment : NeoFragment() {
         pMenu.show()
     }
 
-    private fun onItemLongClick(index: Int, item: ListItem): Boolean {
+    override fun onItemLongClick(index: Int, item: ListItem): Boolean {
         if (toiler.isRss) {
             MarkerActivity.addByPar(
                 requireContext(),
@@ -223,7 +228,11 @@ class SummaryFragment : NeoFragment() {
         startLoad()
     }
 
-    private fun finishedList() {
+    override fun onChangePage(page: Int) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onFinishList() {
         if (toiler.isLoading)
             act?.showStaticToast(getString(R.string.load))
         else

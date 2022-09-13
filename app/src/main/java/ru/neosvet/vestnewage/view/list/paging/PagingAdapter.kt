@@ -4,21 +4,42 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.RecyclerHolder
 
 class PagingAdapter(
-    private val clicker: (Int, ListItem) -> Unit,
-    private val longClicker: ((Int, ListItem) -> Boolean)?,
-    private val finishedList: () -> Unit
+    private val parent: Parent
 ) : PagingDataAdapter<ListItem, RecyclerHolder>(ItemsComparator) {
+    interface Parent {
+        fun onItemClick(index: Int, item: ListItem)
+        fun onItemLongClick(index: Int, item: ListItem): Boolean
+        fun onChangePage(page: Int)
+        fun onFinishList()
+    }
+
     companion object {
         private const val TYPE_SIMPLE = 0
         private const val TYPE_DETAIL = 1
     }
 
     private var isFirst = true
+    private var prevPage = 0
+
+    private val scroller = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            val manager = recyclerView.layoutManager as GridLayoutManager
+            val page = manager.findFirstVisibleItemPosition() / Const.MAX_ON_PAGE
+            if (prevPage != page) {
+                prevPage = page
+                parent.onChangePage(page)
+            }
+        }
+    }
 
     override fun getItemViewType(position: Int): Int {
         val item = getItem(position)
@@ -26,23 +47,30 @@ class PagingAdapter(
             TYPE_DETAIL else TYPE_SIMPLE
     }
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): RecyclerHolder {
+    override fun onCreateViewHolder(host: ViewGroup, viewType: Int): RecyclerHolder {
         val layout = if (viewType == TYPE_SIMPLE)
-            LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
+            LayoutInflater.from(host.context).inflate(R.layout.item_list, null)
         else
-            LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
-        return RecyclerHolder(layout, clicker, longClicker)
+            LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)
+        return RecyclerHolder(layout, parent::onItemClick, parent::onItemLongClick)
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        recyclerView.addOnScrollListener(scroller)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        recyclerView.removeOnScrollListener(scroller)
     }
 
     override fun onBindViewHolder(holder: RecyclerHolder, position: Int) {
         val item = getItem(position)
         when {
             isFirst -> isFirst = false
-            position == 0 -> finishedList.invoke()
-            position == itemCount - 1 -> finishedList.invoke()
+            position == 0 -> parent.onFinishList()
+            position == itemCount - 1 -> parent.onFinishList()
         }
         item?.let { holder.setItem(it) }
     }
