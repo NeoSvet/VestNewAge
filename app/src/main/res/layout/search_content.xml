@@ -56,25 +56,6 @@
             android:padding="@dimen/half_indent"
             app:layout_constraintTop_toBottomOf="@id/sSearchInResults" />
 
-        <SeekBar
-            android:id="@+id/sbResults"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/def_indent"
-            android:layout_marginEnd="@dimen/def_indent"
-            android:max="10"
-            android:progressDrawable="@drawable/progress_bar"
-            android:thumb="@drawable/sb_thumb"
-            app:layout_constraintTop_toBottomOf="@id/tvLabel" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/scroll_results"
-            app:layout_constraintBottom_toBottomOf="@id/sbResults"
-            app:layout_constraintEnd_toEndOf="@id/sbResults"
-            app:layout_constraintStart_toStartOf="@id/sbResults"
-            app:layout_constraintTop_toTopOf="@id/sbResults" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

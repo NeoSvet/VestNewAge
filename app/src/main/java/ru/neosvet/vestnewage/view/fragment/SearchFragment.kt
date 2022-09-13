@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import android.widget.SeekBar
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
@@ -92,6 +91,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private var jobList: Job? = null
     private var isUserScroll = true
     private var collectResult: Job? = null
+    private var prevMax = 0
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -266,15 +266,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             rvSearch.adapter = adDefault
         }
         setListEvents(rvSearch)
-        sbResults.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {}
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                if (isUserScroll.not()) return
-                SearchFactory.reset(seekBar.progress * Const.MAX_ON_PAGE)
-                startPaging()
-            }
-        })
     }
 
     private fun openSettings() {
@@ -359,9 +350,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
-        content.sbResults.isEnabled = false
-        onChangePage(1)
-        content.sbResults.max = 1
+        act?.initScrollBar(0, null)
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -443,11 +432,20 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         content.tvLabel.text = helper.label
         if (helper.countMaterials > Const.MAX_ON_PAGE) {
             val count = helper.countMaterials / Const.MAX_ON_PAGE - 1
-            if (content.sbResults.max != count)
-                content.sbResults.max = count
+            if (prevMax != count) {
+                prevMax = count
+                act?.initScrollBar(count, this@SearchFragment::onScroll)
+            }
+            onChangePage(0)
         }
-        onChangePage(0)
         startPaging()
+    }
+
+    private fun onScroll(value: Int) {
+        if (isUserScroll) {
+            SearchFactory.reset(value * Const.MAX_ON_PAGE)
+            startPaging()
+        }
     }
 
     private fun startPaging() {
@@ -555,9 +553,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     override fun onChangePage(page: Int) {
         isUserScroll = false
-        binding?.content?.run {
-            sbResults.progress = SearchFactory.min / Const.MAX_ON_PAGE + page
-        }
+        act?.setScrollBar(SearchFactory.min / Const.MAX_ON_PAGE + page)
         isUserScroll = true
     }
 

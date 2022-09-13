@@ -100,6 +100,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/menu_fragment" />
 
+    <com.lukelorusso.verticalseekbar.VerticalSeekBar
+        android:id="@+id/vsbScrollBar"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="@dimen/content_margin_bottom"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:vsb_bar_background="@color/colorAccent"
+        app:vsb_bar_progress_gradient_end="@color/colorPrimaryDark"
+        app:vsb_bar_progress_gradient_start="@color/colorPrimary"
+        app:vsb_thumb_container_tint="#00000000"
+        app:vsb_thumb_placeholder_src="@drawable/sb_thumb" />
+
     <RelativeLayout
         android:id="@+id/pStatus"
         android:layout_width="210dp"

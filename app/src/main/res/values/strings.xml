@@ -286,7 +286,6 @@
     <string name="search_in_results">Искать в результатах</string>
     <string name="results_last_search">Показать результаты предыдущего поиска</string>
     <string name="clear_results_search">Удалить эти результаты</string>
-    <string name="scroll_results">прокрутка результатов</string>
     <string name="words_not_found">В запросе не обнаружены слова</string>
     <string name="all_turn_off">все отключены.</string>
     <string name="range">Диапазон:</string>

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
@@ -66,6 +67,10 @@ class MainHelper(private val act: MainActivity) {
         private set
     lateinit var tvToast: TextView
         private set
+    lateinit var vsbScrollBar: VerticalSeekBar
+        private set
+    private var isRightScroll = false
+    private var isEndScrollAnim = true
 
     val unread = UnreadUtils()
     var countNew: Int = 0
@@ -84,6 +89,7 @@ class MainHelper(private val act: MainActivity) {
         tvToast = act.findViewById(R.id.tvToast)
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
         fabAction = act.findViewById(R.id.fabAction)
+        vsbScrollBar = act.findViewById(R.id.vsbScrollBar)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
         tipAction = Tip(act, rvAction)
         tipAction.autoHide = false
@@ -282,5 +288,17 @@ class MainHelper(private val act: MainActivity) {
 
     private fun showTip() {
         TipActivity.showTipIfNeed(TipName.MAIN_STAR)
+    }
+
+    fun moveScrollBar(isRight: Boolean) {
+        if (isRightScroll == isRight || isEndScrollAnim.not()) return
+        isRightScroll = isRight
+        val d = 35 * act.resources.displayMetrics.density
+        isEndScrollAnim = false
+        vsbScrollBar.animate()
+            .withEndAction { isEndScrollAnim = true }
+            .setDuration(300)
+            .translationXBy(if (isRight) d else -d)
+            .start()
     }
 }

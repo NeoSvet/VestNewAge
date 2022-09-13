@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private val wordsUtils: WordsUtils by lazy {
         WordsUtils()
     }
+    private var isMoveScrollBar = true
 
     val newId: Int
         get() = helper.newId
@@ -351,6 +352,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     @SuppressLint("NonConstantResourceId")
     fun setSection(section: Section, savePrev: Boolean) {
         if (section == helper.curSection) return
+        helper.vsbScrollBar.isVisible = false
         toast.hide()
         statusBack = StatusBack.PAGE
         setMenu(section, savePrev)
@@ -697,5 +699,38 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     fun download(list: List<Int>) {
         LoaderService.loadList(list, toast)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun initScrollBar(max: Int, onChange: ((Int) -> Unit)?) = helper.vsbScrollBar.let {
+        it.isVisible = onChange?.let { event ->
+            helper.moveScrollBar(false)
+            it.maxValue = max
+            it.progress = max
+            it.setOnReleaseListener { v ->
+                hideHead()
+                event.invoke(max - v)
+                lifecycleScope.launch {
+                    delay(900)
+                    helper.moveScrollBar(true)
+                }
+            }
+            it.setOnProgressChangeListener { v ->
+                if (isMoveScrollBar)
+                    helper.moveScrollBar(false)
+                else
+                    isMoveScrollBar = true
+            }
+            lifecycleScope.launch {
+                delay(600)
+                helper.moveScrollBar(true)
+            }
+            true
+        } ?: false
+    }
+
+    fun setScrollBar(value: Int) {
+        isMoveScrollBar = false
+        helper.vsbScrollBar.progress = helper.vsbScrollBar.maxValue - value
     }
 }
