@@ -5,6 +5,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
 
 class SearchStorage : Closeable {
@@ -64,7 +65,7 @@ class SearchStorage : Closeable {
                 item.des = it
             }
             list.add(item)
-        } while (cursor.moveToNext() && list.size < Const.MAX_ON_PAGE)
+        } while (cursor.moveToNext() && list.size < NeoPaging.ON_PAGE)
         cursor.close()
         return list
     }

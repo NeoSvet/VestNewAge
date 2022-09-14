@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.list.paging.JournalFactory
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -37,7 +37,6 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         get() = getString(R.string.journal)
     private var jobList: Job? = null
     private var isUserScroll = true
-    private var startPage = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
@@ -67,16 +66,12 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rv.adapter = adapter
         setListEvents(rv)
-        startPaging()
-        if (JournalFactory.offset > 0)
-            rv.smoothScrollToPosition(JournalFactory.offset)
     }
 
-    private fun startPaging() {
+    private fun startPaging(page: Int) {
         jobList?.cancel()
-        startPage = JournalFactory.page
         jobList = lifecycleScope.launch {
-            toiler.paging().collect {
+            toiler.paging(page, adapter).collect {
                 adapter.submitData(lifecycle, it)
             }
         }
@@ -112,27 +107,27 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     override fun onChangePage(page: Int) {
         isUserScroll = false
-        val p = JournalFactory.page
-        if (p < startPage)
-            startPage = p
-        act?.setScrollBar(page + startPage)
+        act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
-        val msg = if (toiler.isLoading)
-            getString(R.string.load)
-        else getString(R.string.finish_list)
-        act?.showToast(msg)
+        act?.temporaryBlockHead()
+        if (toiler.isLoading)
+            act?.showToast(getString(R.string.load))
+        else
+            act?.showToast(getString(R.string.finish_list))
     }
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
             NeoState.Success ->
                 act?.hideToast()
-            is NeoState.LongValue ->
-                if (state.value > Const.MAX_ON_PAGE)
-                    act?.initScrollBar(state.value.toInt() / Const.MAX_ON_PAGE, this::onScroll)
+            is NeoState.ListState -> {
+                if (state.index > NeoPaging.ON_PAGE)
+                    act?.initScrollBar(state.index / NeoPaging.ON_PAGE, this::onScroll)
+                startPaging(toiler.page)
+            }
             NeoState.Ready -> act?.run {
                 showStaticToast(getString(R.string.empty_journal))
                 setAction(0)
@@ -142,10 +137,8 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     private fun onScroll(value: Int) {
-        if (isUserScroll) {
-            JournalFactory.offset = value * Const.MAX_ON_PAGE
-            startPaging()
-        }
+        if (isUserScroll)
+            startPaging(value)
     }
 
     override fun onAction(title: String) {

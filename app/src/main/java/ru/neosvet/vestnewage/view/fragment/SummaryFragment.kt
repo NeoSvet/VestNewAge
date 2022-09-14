@@ -28,7 +28,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
-import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -45,9 +45,6 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         get() = getString(R.string.summary)
     private var openedReader = false
     private var isUserScroll = true
-    private val page: Int
-        get() = (toiler.max - AdditionFactory.offset) / Const.MAX_ON_PAGE
-    private var startPage = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this).get(SummaryToiler::class.java).apply { init(requireContext()) }
@@ -71,8 +68,6 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         initTabs()
         if (savedInstanceState == null)
             toiler.openList(true)
-        else if (toiler.selectedTab == SummaryToiler.TAB_ADD)
-            initAddition()
     }
 
     override fun onResume() {
@@ -159,38 +154,33 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             is NeoState.LongValue -> binding?.run {
                 setUpdateTime(state.value, tvUpdate)
             }
-            NeoState.Success -> {
-                if (toiler.isRss)
-                    act?.updateNew()
-                else
-                    initAddition()
-            }
+            is NeoState.ListState ->
+                initAddition(state.index)
+            NeoState.Success ->
+                act?.updateNew()
             NeoState.Ready ->
                 act?.hideToast()
             else -> {}
         }
     }
 
-    private fun initAddition() {
+    private fun initAddition(max: Int) {
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
         binding?.rvSummary?.adapter = adPaging
-        act?.initScrollBar(toiler.max / Const.MAX_ON_PAGE, this::onScroll)
-        startPaging()
+        act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
+        startPaging(0)
     }
 
     private fun onScroll(value: Int) {
-        if (isUserScroll) {
-            AdditionFactory.offset = toiler.max - value * Const.MAX_ON_PAGE
-            startPaging()
-        }
+        if (isUserScroll)
+            startPaging(value)
     }
 
-    private fun startPaging() {
+    private fun startPaging(page: Int) {
         jobList?.cancel()
-        startPage = page
         jobList = lifecycleScope.launch {
-            toiler.paging().collect {
+            toiler.paging(page, adPaging).collect {
                 adPaging.submitData(lifecycle, it)
             }
         }
@@ -246,14 +236,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
 
     override fun onChangePage(page: Int) {
         isUserScroll = false
-        val p = this.page
-        if (p < startPage)
-            startPage = p
-        act?.setScrollBar(page + startPage)
+        act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
+        act?.temporaryBlockHead()
         if (toiler.isLoading)
             act?.showStaticToast(getString(R.string.load))
         else

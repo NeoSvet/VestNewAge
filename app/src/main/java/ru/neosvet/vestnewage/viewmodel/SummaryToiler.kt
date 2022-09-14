@@ -2,8 +2,10 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -18,6 +20,7 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.BufferedReader
@@ -29,29 +32,24 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         const val TAB_ADD = 1
     }
 
-    val max: Int
-        get() = storage.max
     var selectedTab = TAB_RSS
-        set(value) {
-            if (value == TAB_ADD && isOpened)
-                AdditionFactory.offset = storage.max
-            field = value
-        }
     val isRss: Boolean
         get() = selectedTab == TAB_RSS
     private var sBack: String = ""
     private var isOpened = false
-    private val paging: NeoPaging by lazy {
-        NeoPaging(this)
-    }
     private val storage: AdditionStorage by lazy {
         AdditionStorage()
     }
-    val isLoading: Boolean
-        get() = paging.isPaging
+    private val paging: NeoPaging by lazy {
+        NeoPaging(this)
+    }
     override val factory: AdditionFactory by lazy {
         AdditionFactory(storage, paging)
     }
+    val page: Int
+        get() = factory.page
+    val isLoading: Boolean
+        get() = paging.isPaging
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, SummaryHelper.TAG)
@@ -81,7 +79,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         } else {
             loader.loadAddition(storage, 0)
             openAddition()
-            postState(NeoState.Success)
+            postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
         }
     }
 
@@ -113,7 +111,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                 list.isEmpty()
             } else {
                 openAddition()
-                postState(NeoState.Success)
+                postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
                 storage.max == 0
             }
 
@@ -133,7 +131,6 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         storage.open()
         isOpened = true
         storage.findMax()
-        AdditionFactory.offset = storage.max
     }
 
     private suspend fun openRss(): List<ListItem> {
@@ -159,7 +156,10 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         return list
     }
 
-    fun paging() = paging.run()
+    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<ListItem>> {
+        paging.setPager(pager)
+        return paging.run(page)
+    }
 
     override val pagingScope: CoroutineScope
         get() = viewModelScope

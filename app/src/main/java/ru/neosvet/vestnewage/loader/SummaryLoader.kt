@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.*
 
 class SummaryLoader : LinksProvider {
@@ -87,14 +88,14 @@ class SummaryLoader : LinksProvider {
         }
         if (storage.max == 0) storage.findMax()
         var n = if (storage.max > 0) storage.max
-        else maxPost - Const.MAX_ON_PAGE
+        else maxPost - NeoPaging.ON_PAGE
         while (n < maxPost) {
             n++
             if (storage.hasPost(n).not())
                 storage.insert(loadPost(n))
         }
         if (startId >= maxPost || startId == 0) return
-        var end = startId - Const.MAX_ON_PAGE + 1
+        var end = startId - NeoPaging.ON_PAGE + 1
         if (end < 1) end = 1
         for (i in startId downTo end) {
             if (storage.hasPost(i).not())

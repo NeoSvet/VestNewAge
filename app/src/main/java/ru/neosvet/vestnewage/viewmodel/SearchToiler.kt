@@ -3,13 +3,16 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import android.net.Uri
 import androidx.core.text.isDigitsOnly
+import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
@@ -33,6 +36,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     override val factory: SearchFactory by lazy {
         SearchFactory(paging)
     }
+    val page: Int
+        get() = factory.page
     val isLoading: Boolean
         get() = paging.isPaging
     private var isInit = false
@@ -158,7 +163,10 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             .build()
     }
 
-    fun paging() = paging.run()
+    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<ListItem>> {
+        paging.setPager(pager)
+        return paging.run(page)
+    }
 
     override val pagingScope: CoroutineScope
         get() = scope
@@ -199,7 +207,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             else
                 strings.search_mode[mode]
             helper.countMaterials = 0
-            SearchFactory.reset(0)
             notifyResult()
             shownResult = true
             engine.startSearch(mode)
@@ -290,7 +297,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             postState(NeoState.Message(String.format(strings.format_search_proc, p)))
         } else {
             val now = System.currentTimeMillis()
-            if (helper.countMaterials - lastCount > Const.MAX_ON_PAGE &&
+            if (helper.countMaterials - lastCount > NeoPaging.ON_PAGE &&
                 now - lastTime > SearchEngine.DELAY_UPDATE
             ) {
                 lastTime = now

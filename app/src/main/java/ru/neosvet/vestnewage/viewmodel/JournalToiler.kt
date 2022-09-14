@@ -2,15 +2,19 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
+import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
@@ -21,6 +25,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     override val factory: JournalFactory by lazy {
         JournalFactory(journal, strings, paging)
     }
+    val page: Int
+        get() = factory.page
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false
@@ -49,13 +55,13 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     fun preparing() {
         viewModelScope.launch {
             val cursor = journal.getAll()
-            if (cursor.moveToFirst())
-                JournalFactory.total = cursor.count
-            if (JournalFactory.total == 0) {
+            if (cursor.moveToFirst()) {
+                factory.total = cursor.count
+                postState(NeoState.ListState(ListEvent.RELOAD, cursor.count))
+            } else {
                 isEmpty = true
                 postState(NeoState.Ready)
-            } else
-                postState(NeoState.LongValue(JournalFactory.total.toLong()))
+            }
             cursor.close()
         }
     }
@@ -67,7 +73,10 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         setState(NeoState.Ready)
     }
 
-    fun paging() = paging.run()
+    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<ListItem>> {
+        paging.setPager(pager)
+        return paging.run(page)
+    }
 
     override val pagingScope: CoroutineScope
         get() = viewModelScope

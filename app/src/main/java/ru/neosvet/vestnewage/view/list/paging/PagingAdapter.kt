@@ -8,12 +8,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.RecyclerHolder
 
 class PagingAdapter(
     private val parent: Parent
-) : PagingDataAdapter<ListItem, RecyclerHolder>(ItemsComparator) {
+) : PagingDataAdapter<ListItem, RecyclerHolder>(ItemsComparator), NeoPaging.Pager {
     interface Parent {
         fun onItemClick(index: Int, item: ListItem)
         fun onItemLongClick(index: Int, item: ListItem): Boolean
@@ -26,14 +25,20 @@ class PagingAdapter(
         private const val TYPE_DETAIL = 1
     }
 
+    private var startPage = 0
     private var isFirst = true
     private var prevPage = 0
+    private lateinit var manager: GridLayoutManager
+
+    override fun setPage(page: Int) {
+        startPage = page
+    }
 
     private val scroller = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            val manager = recyclerView.layoutManager as GridLayoutManager
-            val page = manager.findFirstVisibleItemPosition() / Const.MAX_ON_PAGE
+            val p = manager.findFirstVisibleItemPosition()
+            val page = p / NeoPaging.ON_PAGE + startPage
             if (prevPage != page) {
                 prevPage = page
                 parent.onChangePage(page)
@@ -57,6 +62,7 @@ class PagingAdapter(
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        manager = recyclerView.layoutManager as GridLayoutManager
         recyclerView.addOnScrollListener(scroller)
     }
 

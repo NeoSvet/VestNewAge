@@ -5,6 +5,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
 
 class AdditionStorage : Closeable {
@@ -39,8 +40,8 @@ class AdditionStorage : Closeable {
         table = DataBase.ADDITION,
         groupBy = DataBase.ID,
         having = if (offset == 0) null
-        else "${DataBase.ID} < ${offset + 1} AND ${DataBase.ID} > ${offset - Const.MAX_ON_PAGE}",
-        orderBy = DataBase.ID + DataBase.DESC + LIMIT + Const.MAX_ON_PAGE
+        else "${DataBase.ID} < ${offset + 1} AND ${DataBase.ID} > ${offset - NeoPaging.ON_PAGE}",
+        orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
     fun getList(offset: Int): List<ListItem> {

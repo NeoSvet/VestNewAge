@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.isPoem
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import java.io.Closeable
 import java.util.*
@@ -99,7 +100,7 @@ class JournalStorage : Closeable {
             }
             cursor.close()
             storage.close()
-        } while (curJ.moveToNext() && i < Const.MAX_ON_PAGE)
+        } while (curJ.moveToNext() && i < NeoPaging.ON_PAGE)
         curJ.close()
         removeList.forEach {
             delete(it)

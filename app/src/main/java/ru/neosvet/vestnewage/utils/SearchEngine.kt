@@ -7,6 +7,7 @@ import ru.neosvet.vestnewage.data.*
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
 import java.util.*
 
@@ -130,7 +131,7 @@ class SearchEngine(
             if (d.timeInDays == finish) break
             d.changeMonth(step)
             val now = System.currentTimeMillis()
-            if (countMaterials - prev > Const.MAX_ON_PAGE &&
+            if (countMaterials - prev > NeoPaging.ON_PAGE &&
                 now - time > DELAY_UPDATE
             ) {
                 time = now

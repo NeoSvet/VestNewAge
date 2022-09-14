@@ -41,8 +41,8 @@ import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.RequestAdapter
+import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
-import ru.neosvet.vestnewage.view.list.paging.SearchFactory
 import ru.neosvet.vestnewage.viewmodel.SearchToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -78,11 +78,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private val adResult: PagingAdapter by lazy {
         PagingAdapter(this)
     }
-    private val manager: GridLayoutManager by lazy {
-        GridLayoutManager(requireContext(), 1)
-    }
-    private val listPosition: Int
-        get() = manager.findFirstVisibleItemPosition() + SearchFactory.min
     override lateinit var modeAdapter: ArrayAdapter<String>
         private set
     private lateinit var resultAdapter: ArrayAdapter<String>
@@ -210,16 +205,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         settings?.let {
             outState.putBundle(SETTINGS, it.onSaveInstanceState())
         }
-        binding?.run {
+        if (toiler.shownResult) binding?.run {
             outState.putBoolean(ADDITION, content.pAdditionSet.isVisible)
         }
-        outState.putInt(Const.PAGE, listPosition)
         super.onSaveInstanceState(outState)
     }
 
     private fun restoreState(state: Bundle?) = binding?.run {
         if (state == null) {
-            SearchFactory.reset(0)
             arguments?.let { args ->
                 helper.mode = args.getInt(Const.MODE)
                 helper.request = args.getString(Const.STRING) ?: ""
@@ -233,7 +226,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             }
             return@run
         }
-        SearchFactory.reset(state.getInt(Const.PLACE))
         if (toiler.shownResult) {
             toiler.showLastResult()
             etSearch.setText(helper.request)
@@ -252,7 +244,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     private fun initSearchList() = binding?.content?.run {
-        rvSearch.layoutManager = manager
+        rvSearch.layoutManager = GridLayoutManager(requireContext(), 1)
         if (toiler.shownResult) {
             rvSearch.adapter = adResult
         } else {
@@ -430,28 +422,26 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         else
             bPanelSwitch.setImageResource(R.drawable.ic_bottom)
         content.tvLabel.text = helper.label
-        if (helper.countMaterials > Const.MAX_ON_PAGE) {
-            val count = helper.countMaterials / Const.MAX_ON_PAGE - 1
+        if (helper.countMaterials > NeoPaging.ON_PAGE) {
+            val count = helper.countMaterials / NeoPaging.ON_PAGE - 1
             if (prevMax != count) {
                 prevMax = count
                 act?.initScrollBar(count, this@SearchFragment::onScroll)
             }
             onChangePage(0)
         }
-        startPaging()
+        startPaging(toiler.page)
     }
 
     private fun onScroll(value: Int) {
-        if (isUserScroll) {
-            SearchFactory.reset(value * Const.MAX_ON_PAGE)
-            startPaging()
-        }
+        if (isUserScroll)
+            startPaging(value)
     }
 
-    private fun startPaging() {
+    private fun startPaging(page: Int) {
         jobList?.cancel()
         jobList = lifecycleScope.launch {
-            toiler.paging().collect {
+            toiler.paging(page, adResult).collect {
                 adResult.submitData(lifecycle, it)
             }
         }
@@ -553,14 +543,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     override fun onChangePage(page: Int) {
         isUserScroll = false
-        act?.setScrollBar(SearchFactory.min / Const.MAX_ON_PAGE + page)
+        act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
         act?.temporaryBlockHead()
         if (toiler.isLoading)
-            startPaging()
+            act?.showToast(getString(R.string.search_continue))
         else
             act?.showToast(getString(R.string.finish_list))
     }
