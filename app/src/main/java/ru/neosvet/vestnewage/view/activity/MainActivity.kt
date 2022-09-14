@@ -28,6 +28,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -224,6 +225,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 firstSection = Section.valueOf(it)
             }
         } else if (utils.isNeedLoad) {
+            NeoClient.deleteTempFiles()
             starLoad()
         }
     }
@@ -664,7 +666,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
             helper.topBar?.isVisible = false
             lifecycleScope.launch {
-                delay(200)
+                delay(500)
                 it.post {
                     helper.topBar?.isVisible = true
                     it.updateLayoutParams<AppBarLayout.LayoutParams> {

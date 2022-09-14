@@ -95,6 +95,10 @@ class LaunchUtils {
                 sortBase()
             }.start()
         }
+        if (ver < 65) {
+            val file = Lib.getFileP("/cache/file")
+            if (file.exists()) file.delete()
+        }
     }
 
     private fun refTips() {

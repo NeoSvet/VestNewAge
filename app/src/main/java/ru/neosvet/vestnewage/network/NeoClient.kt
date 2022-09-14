@@ -3,12 +3,14 @@ package ru.neosvet.vestnewage.network
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException.SiteCode
 import ru.neosvet.vestnewage.data.NeoException.SiteNoResponse
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
@@ -18,6 +20,7 @@ object NeoClient {
     val isMainSite: Boolean
         get() = first
     private var first = true
+    private const val PATH = "/cache/file"
 
     @JvmStatic
     fun createHttpClient(): OkHttpClient {
@@ -57,8 +60,7 @@ object NeoClient {
         if (response.body == null) throw SiteNoResponse()
         val inStream = response.body!!.byteStream()
         val max = response.body!!.contentLength().toInt()
-        val file = Lib.getFileP("/cache/file")
-        if (file.exists()) file.delete()
+        val file = getTempFile()
         val outStream = FileOutputStream(file)
         val buffer = ByteArray(1024)
         var length = inStream.read(buffer)
@@ -74,5 +76,29 @@ object NeoClient {
         inStream.close()
         outStream.close()
         return BufferedInputStream(FileInputStream(file))
+    }
+
+    private fun getTempFile(): File {
+        var n = 1
+        var f = Lib.getFileP(PATH + n)
+        while (f.exists()) {
+            if (DateUnit.isLongAgo(f.lastModified()))
+                f.delete()
+            else {
+                n++
+                f = Lib.getFileP(PATH + n)
+            }
+        }
+        return f
+    }
+
+    fun deleteTempFiles() {
+        var n = 1
+        var f = Lib.getFileP(PATH + n)
+        while (f.exists()) {
+            f.delete()
+            n++
+            f = Lib.getFileP(PATH + n)
+        }
     }
 }
