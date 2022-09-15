@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
@@ -15,22 +14,13 @@ import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class BookLoader : Loader {
-    private val handlerLite: LoadHandlerLite?
-
-    constructor() {
-        handlerLite = null
-    }
-
-    constructor(handler: LoadHandlerLite) {
-        handlerLite = handler
-    }
-
+class BookLoader(private val client: NeoClient) : Loader {
     private val title = mutableListOf<String>()
     private val links = mutableListOf<String>()
-    private var cur = 0
-    private var max = 0
     private var isRun = true
+    private val clientDoctrine: NeoClient by lazy {
+        NeoClient(NeoClient.Type.MAIN)
+    }
 
     override fun cancel() {
         isRun = false
@@ -45,8 +35,6 @@ class BookLoader : Loader {
 
     fun loadPoemsList(year: Int) {
         isRun = true
-        cur = 0
-        max = 12
         loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
     }
 
@@ -56,8 +44,8 @@ class BookLoader : Loader {
     }
 
     private fun loadList(url: String) {
-        val page = PageParser()
-        page.load(url, "page-title", handlerLite)
+        val page = PageParser(client)
+        page.load(url, "page-title")
         var a: String?
         var s: String
         var date1: String? = null
@@ -74,10 +62,6 @@ class BookLoader : Loader {
                 date1 = date2
             else if (date2 != date1) {
                 saveData(date1)
-                if (max > 0) {
-                    handlerLite?.postPercent(cur.percent(max))
-                    cur++
-                }
                 date1 = date2
             }
             s = page.text
@@ -125,7 +109,7 @@ class BookLoader : Loader {
         //line 1: pages
         //line 2: title
         val url = NetConst.DOCTRINE_BASE + "list.txt"
-        val br = BufferedReader(InputStreamReader(NeoClient.getStream(url), Const.ENCODING), 1000)
+        val br = BufferedReader(InputStreamReader(clientDoctrine.getStream(url), Const.ENCODING), 1000)
         val storage = PageStorage()
         storage.open(DataBase.DOCTRINE)
         var link: String? = br.readLine()
@@ -147,15 +131,15 @@ class BookLoader : Loader {
         storage.close()
     }
 
-    fun loadDoctrinePages() {
+    fun loadDoctrinePages(handler: LoadHandlerLite?) {
         isRun = true
         val storage = PageStorage()
         storage.open(DataBase.DOCTRINE)
         var s: String?
         var time: Long
         val cursor = storage.getListAll()
-        max = cursor.count - 1
-        cur = 0
+        val max = cursor.count - 1
+        var cur = 0
         cursor.moveToFirst()
         val iId = cursor.getColumnIndex(DataBase.ID)
         val iLink = cursor.getColumnIndex(Const.LINK)
@@ -165,7 +149,7 @@ class BookLoader : Loader {
             val link = cursor.getString(iLink)
             time = cursor.getLong(iTime)
             s = link.substring(Const.DOCTRINE.length) //pages
-            val stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + "$s.p")
+            val stream = clientDoctrine.getStream(NetConst.DOCTRINE_BASE + "$s.p")
             val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
             s = br.readLine() //time
             if (s != null && s.toLong() != time) {
@@ -184,7 +168,7 @@ class BookLoader : Loader {
                 storage.updateTitle(link, row)
             }
             br.close()
-            handlerLite?.let {
+            handler?.let {
                 cur++
                 it.postPercent(cur.percent(max))
             }

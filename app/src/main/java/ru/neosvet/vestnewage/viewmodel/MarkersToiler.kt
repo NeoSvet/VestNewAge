@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -68,7 +69,7 @@ class MarkersToiler : NeoToiler() {
     override suspend fun doLoad() {
         page?.let { link ->
             task = Type.PAGE
-            val loader = PageLoader()
+            val loader = PageLoader(NeoClient(NeoClient.Type.SECTION))
             loader.download(link, true)
             page = null
             openList()

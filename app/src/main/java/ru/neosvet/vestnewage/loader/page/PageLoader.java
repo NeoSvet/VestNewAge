@@ -16,10 +16,15 @@ import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.utils.Lib;
 
 public class PageLoader implements Loader {
+    private final NeoClient client;
     private int k_requests = 0;
     private long time_requests = 0;
     private final PageStorage storage = new PageStorage();
     private boolean isFinish = true;
+
+    public PageLoader(NeoClient client) {
+        this.client = client;
+    }
 
     public boolean isFinish() {
         return isFinish;
@@ -50,8 +55,8 @@ public class PageLoader implements Loader {
 
         int n = k;
         boolean boolArticle = storage.isArticle();
-        PageParser page = new PageParser();
-        page.load(NetConst.SITE + Const.PRINT + s, "page-title", null);
+        PageParser page = new PageParser(client);
+        page.load(NetConst.SITE + Const.PRINT + s, "page-title");
         if (singlePage)
             storage.deleteParagraphs(storage.getPageId(link));
 
@@ -118,7 +123,7 @@ public class PageLoader implements Loader {
 
     private void downloadDoctrinePage(String link) throws Exception {
         String s = link.substring(Const.DOCTRINE.length()); //pages
-        BufferedInputStream stream = NeoClient.getStream(NetConst.DOCTRINE_BASE + s + ".p", null);
+        BufferedInputStream stream = client.getStream(NetConst.DOCTRINE_BASE + s + ".p");
         BufferedReader br = new BufferedReader(new InputStreamReader(stream, Const.ENCODING), 1000);
         long time = Long.parseLong(br.readLine());
         ContentValues row = new ContentValues();

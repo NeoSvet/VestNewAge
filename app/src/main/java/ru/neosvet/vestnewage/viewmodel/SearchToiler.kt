@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
@@ -87,6 +88,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     override suspend fun doLoad() {
         isExport = false
+        val client = NeoClient(NeoClient.Type.SECTION)
+        val pageLoader = PageLoader(client)
         loadDate?.let { date ->
             val d = dateFromString(date)
             msgLoad = String.format(strings.format_load, d.monthString + " " + d.year)
@@ -94,10 +97,9 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             val masterLoader = MasterLoader(this)
             currentLoader = masterLoader
             masterLoader.loadMonth(d.month, d.year)
-            val calendarLoader = CalendarLoader()
+            val calendarLoader = CalendarLoader(client)
             calendarLoader.setDate(d.year, d.month)
             val links = calendarLoader.getLinkList() //.sorted()
-            val pageLoader = PageLoader()
             currentLoader = pageLoader
             storage.deleteByLink(date)
             for (link in links) {
@@ -113,7 +115,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             postState(NeoState.Message(String.format(strings.format_load, link)))
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
-            val pageLoader = PageLoader()
+            val pageLoader = PageLoader(client)
             currentLoader = pageLoader
             pageLoader.download(link, true)
             val item = engine.findInPage(link, id)

@@ -25,6 +25,7 @@ import java.io.InputStreamReader
 
 class MainToiler : NeoToiler() {
     private lateinit var updatedPage: String
+    private val client = NeoClient(NeoClient.Type.MAIN)
 
     fun init(context: Context) {
         updatedPage = context.getString(R.string.updated_page)
@@ -38,7 +39,7 @@ class MainToiler : NeoToiler() {
         loadQuote()
         val timeDiff = synchronizationTime()
         val ads = AdsUtils(App.context)
-        ads.loadAds()
+        ads.loadAds(client)
         ads.close()
         postState(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
@@ -46,7 +47,7 @@ class MainToiler : NeoToiler() {
 
     private suspend fun loadQuote() {
         var s = NetConst.SITE + "AjaxData/Calendar"
-        val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
+        val br = BufferedReader(InputStreamReader(client.getStream(s)))
         s = br.readLine()
         br.close()
         var i = s.indexOf("quoteBlock")
@@ -82,7 +83,7 @@ class MainToiler : NeoToiler() {
 
     private suspend fun loadNew() {
         var s = NetConst.WEB_PAGE + "new.txt"
-        val br = BufferedReader(InputStreamReader(NeoClient.getStream(s)))
+        val br = BufferedReader(InputStreamReader(client.getStream(s)))
         var time: Long
         val storage = PageStorage()
         var cursor: Cursor

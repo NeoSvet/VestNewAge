@@ -254,11 +254,11 @@ public class AdsUtils implements Closeable {
         return k;
     }
 
-    public void loadAds() throws Exception {
+    public void loadAds(NeoClient client) throws Exception {
         isNew = false;
         long t = getTime();
         String s = "http://neosvet.ucoz.ru/ads_vna.txt";
-        BufferedInputStream in = NeoClient.getStream(s, null);
+        BufferedInputStream in = client.getStream(s);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();
         if (Long.parseLong(s) > t) {

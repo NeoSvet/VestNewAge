@@ -7,6 +7,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
@@ -40,6 +41,7 @@ class SiteToiler : NeoToiler() {
     private val nameFiles = arrayOf(NEWS, MAIN)
     private val file: File
         get() = Lib.getFile(nameFiles[selectedTab])
+    private val client = NeoClient(NeoClient.Type.SECTION)
     private val url: String
         get() = if (selectedTab == TAB_SITE)
             NetConst.SITE
@@ -67,7 +69,7 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun loadList() {
-        val loader = SiteLoader(file.toString())
+        val loader = SiteLoader(client, file.toString())
         val list = loader.load(url) as MutableList
         postState(NeoState.LongValue(file.lastModified()))
         list.add(0, getFirstItem())
@@ -75,7 +77,7 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun loadAds() {
-        ads.loadAds()
+        ads.loadAds(client)
         postState(NeoState.LongValue(ads.time))
         val list = ads.loadList(false)
         list.add(0, getFirstItem())

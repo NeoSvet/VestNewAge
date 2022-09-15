@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -54,7 +55,7 @@ class BrowserToiler : NeoToiler() {
             helper.link = value
         }
     private val pageLoader: PageLoader by lazy {
-        PageLoader()
+        PageLoader(NeoClient(NeoClient.Type.SECTION))
     }
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()

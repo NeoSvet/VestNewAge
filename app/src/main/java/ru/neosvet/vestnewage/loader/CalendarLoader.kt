@@ -17,7 +17,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
 
-class CalendarLoader : LinksProvider, Loader {
+class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private val storage = PageStorage()
     private var date = DateUnit.initToday()
     private val list = Stack<ListItem>()
@@ -41,7 +41,7 @@ class CalendarLoader : LinksProvider, Loader {
 
     fun loadListMonth(updateUnread: Boolean) {
         isRun = true
-        val stream: InputStream = NeoClient.getStream(
+        val stream = client.getStream(
             NetConst.SITE + "AjaxData/Calendar/"
                     + date.year + "-" + date.month + ".json"
         )

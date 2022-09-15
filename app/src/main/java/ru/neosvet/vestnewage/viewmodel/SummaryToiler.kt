@@ -14,6 +14,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -46,6 +47,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     override val factory: AdditionFactory by lazy {
         AdditionFactory(storage, paging)
     }
+    private val client = NeoClient(NeoClient.Type.SECTION)
     val page: Int
         get() = factory.page
     val isLoading: Boolean
@@ -67,7 +69,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     override suspend fun doLoad() {
-        val loader = SummaryLoader()
+        val loader = SummaryLoader(client)
         if (isRss) {
             loader.loadRss(true)
             val summaryHelper = SummaryHelper()
@@ -89,7 +91,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private suspend fun loadPages(pages: List<ListItem>) {
-        val loader = PageLoader()
+        val loader = PageLoader(client)
         currentLoader = loader
         var i = 0
         while (i < pages.size && isRun) {

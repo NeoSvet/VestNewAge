@@ -22,22 +22,30 @@ import java.io.InputStreamReader
 class MasterLoader : Loader, LoadHandlerLite {
     private val handler: LoadHandler?
     private val handlerLite: LoadHandlerLite?
+    private val clientBase: NeoClient
+    private val client: NeoClient
+    private val loader:PageLoader
 
     constructor(handler: LoadHandler) {
         handlerLite = null
         this.handler = handler
+        client = NeoClient(NeoClient.Type.LOADER)
+        clientBase = NeoClient(NeoClient.Type.LOADER, this)
+         loader = PageLoader(client)
     }
 
     constructor(handler: LoadHandlerLite) {
         this.handler = null
         handlerLite = handler
+        client = NeoClient(NeoClient.Type.SECTION, handler)
+        clientBase = NeoClient(NeoClient.Type.SECTION, this)
+         loader = PageLoader(client)
     }
 
     companion object {
         private const val UCOZ = "http://neosvet.ucoz.ru/databases_vna"
     }
 
-    private val loader = PageLoader()
     private var loaderBook: BookLoader? = null
     private var isRun = false
     private var lastYear = 0
@@ -57,14 +65,14 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = true
         msg = App.context.getString(R.string.summary)
         handler?.postMessage(msg)
-        loadList(SummaryLoader().getLinkList())
+        loadList(SummaryLoader(client).getLinkList())
     }
 
     fun loadSite() {
         isRun = true
         msg = App.context.getString(R.string.news)
         handler?.postMessage(msg)
-        val loader = SiteLoader(Lib.getFile(SiteToiler.MAIN).toString())
+        val loader = SiteLoader(client,Lib.getFile(SiteToiler.MAIN).toString())
         loadList(loader.getLinkList())
     }
 
@@ -74,13 +82,13 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadDoctrineList()
-            it.loadDoctrinePages()
+            it.loadDoctrinePages(null)
         }
     }
 
     private fun getBookLoader(): BookLoader {
         if (loaderBook == null)
-            loaderBook = BookLoader()
+            loaderBook = BookLoader(client)
         return loaderBook!!
     }
 
@@ -153,7 +161,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         //list format:
         //01.05 delete [time] - при необходимости список обновить
         //02.05 [length] - проверка целостности
-        val br = BufferedReader(InputStreamReader(NeoClient.getStream(url)), 1000)
+        val br = BufferedReader(InputStreamReader(client.getStream(url)), 1000)
         val list = mutableListOf<String>()
         var s: String? = br.readLine()
         var isDelete: Boolean
@@ -188,7 +196,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         var v: String
         val time = System.currentTimeMillis()
         isTitle = true
-        val stream = NeoClient.getStream(url, this)
+        val stream = clientBase.getStream(url)
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         var n = 2
         var s: String? = br.readLine()

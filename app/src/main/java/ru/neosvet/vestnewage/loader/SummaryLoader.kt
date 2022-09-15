@@ -14,7 +14,7 @@ import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.*
 
-class SummaryLoader : LinksProvider {
+class SummaryLoader(private val client: NeoClient) : LinksProvider {
     private var maxPost = 0
 
     override fun getLinkList(): List<String> {
@@ -31,8 +31,7 @@ class SummaryLoader : LinksProvider {
     }
 
     fun loadRss(updateUnread: Boolean) {
-        val stream: InputStream =
-            NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
+        val stream = client.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
         val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
@@ -97,7 +96,7 @@ class SummaryLoader : LinksProvider {
 
     private fun loadPost(id: Int): ContentValues {
         val d = (id / 200).toString()
-        val stream = NeoClient.getStream(NetConst.ADDITION_URL + "$d/$id.p")
+        val stream = client.getStream(NetConst.ADDITION_URL + "$d/$id.p")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val row = ContentValues()
         row.put(DataBase.ID, id)
@@ -116,7 +115,7 @@ class SummaryLoader : LinksProvider {
     }
 
     private fun loadMax(): Int {
-        val stream = NeoClient.getStream(NetConst.ADDITION_URL + "max.txt")
+        val stream = client.getStream(NetConst.ADDITION_URL + "max.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val s = br.readLine()
         br.close()
@@ -125,7 +124,7 @@ class SummaryLoader : LinksProvider {
 
     private fun loadChanges(storage: AdditionStorage) {
         val baseTime = Lib.getFileDB(DataBase.ADDITION).lastModified()
-        val stream = NeoClient.getStream(NetConst.ADDITION_URL + "changed.txt")
+        val stream = client.getStream(NetConst.ADDITION_URL + "changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         var s: String? = br.readLine()
         while (s != null) {

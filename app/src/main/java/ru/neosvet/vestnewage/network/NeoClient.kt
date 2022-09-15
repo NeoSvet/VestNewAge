@@ -10,25 +10,40 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedInputStream
-import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
-object NeoClient {
-    private const val PATH = "/cache/file"
-
-    @JvmStatic
-    fun createHttpClient(): OkHttpClient {
-        val client = OkHttpClient.Builder()
-        client.connectTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
-        client.readTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
-        client.writeTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
-        return client.build()
+class NeoClient(
+    private val type: Type,
+    private val handler: LoadHandlerLite? = null
+) {
+    enum class Type(val value: Int) {
+        MAIN(1), LOADER(2), CHECK(3), SECTION(4)
     }
 
-    @JvmStatic
-    fun getStream(url: String, handler: LoadHandlerLite? = null): BufferedInputStream {
+    companion object {
+        private const val PATH = "/cache/file"
+
+        @JvmStatic
+        fun createHttpClient(): OkHttpClient {
+            val client = OkHttpClient.Builder()
+            client.connectTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
+            client.readTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
+            client.writeTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
+            return client.build()
+        }
+
+        fun deleteTempFiles() {
+            val d = Lib.getFileP("/cache")
+            d.listFiles()?.forEach { f ->
+                if (f.isFile && DateUnit.isLongAgo(f.lastModified()))
+                    f.delete()
+            }
+        }
+    }
+
+    fun getStream(url: String): BufferedInputStream {
         val response = try {
             val builderRequest = Request.Builder()
             builderRequest.url(url)
@@ -45,7 +60,8 @@ object NeoClient {
         if (response.body == null) throw SiteNoResponse()
         val inStream = response.body!!.byteStream()
         val max = response.body!!.contentLength().toInt()
-        val file = getTempFile()
+        val file = Lib.getFileP(PATH + type.value)
+        if (file.exists()) file.delete()
         val outStream = FileOutputStream(file)
         val buffer = ByteArray(1024)
         var length = inStream.read(buffer)
@@ -61,29 +77,5 @@ object NeoClient {
         inStream.close()
         outStream.close()
         return BufferedInputStream(FileInputStream(file))
-    }
-
-    private fun getTempFile(): File {
-        var n = 1
-        var f = Lib.getFileP(PATH + n)
-        while (f.exists()) {
-            if (DateUnit.isLongAgo(f.lastModified()))
-                f.delete()
-            else {
-                n++
-                f = Lib.getFileP(PATH + n)
-            }
-        }
-        return f
-    }
-
-    fun deleteTempFiles() {
-        var n = 1
-        var f = Lib.getFileP(PATH + n)
-        while (f.exists()) {
-            f.delete()
-            n++
-            f = Lib.getFileP(PATH + n)
-        }
     }
 }

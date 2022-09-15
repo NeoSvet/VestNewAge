@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -54,7 +55,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             else dEpistles = value
         }
     private val loader: BookLoader by lazy {
-        BookLoader(this)
+        BookLoader(NeoClient(NeoClient.Type.SECTION, this))
     }
     private val masterLoader: MasterLoader by lazy {
         MasterLoader(this)
@@ -90,7 +91,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             TAB_DOCTRINE -> {
                 loader.loadDoctrineList()
                 openDoctrine()
-                loader.loadDoctrinePages()
+                loader.loadDoctrinePages(this)
                 postState(NeoState.Success)
                 return
             }

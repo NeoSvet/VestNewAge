@@ -35,7 +35,8 @@ class CheckService : LifecycleService() {
 
     private val list = NeoList<Pair<String, String>>() //title and link
     private var isRun = false
-    private val loader = PageLoader()
+    private val client = NeoClient(NeoClient.Type.CHECK)
+    private val loader = PageLoader(client)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
@@ -74,7 +75,7 @@ class CheckService : LifecycleService() {
     }
 
     private fun checkSummary(): Boolean {
-        val stream = NeoClient.getStream(
+        val stream = client.getStream(
             NetConst.SITE + "rss/?" + System.currentTimeMillis()
         )
         val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)

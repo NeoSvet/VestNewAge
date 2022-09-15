@@ -13,6 +13,7 @@ import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -32,11 +33,12 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
     private val calendar = arrayListOf<CalendarItem>()
     private var time: Long = 0
+    private val client = NeoClient(NeoClient.Type.SECTION)
     private val masterLoader: MasterLoader by lazy {
         MasterLoader(this)
     }
     private val pageLoader: PageLoader by lazy {
-        PageLoader()
+        PageLoader(client)
     }
     var isUpdateUnread = false
         private set
@@ -97,7 +99,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     private fun loadMonth(): List<String> {
-        val loader = CalendarLoader()
+        val loader = CalendarLoader(client)
         loader.setDate(date.year, date.month)
         isUpdateUnread = isCurMonth()
         if (date.year < 2016) {

@@ -3,13 +3,17 @@ package ru.neosvet.vestnewage.loader
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.page.PageParser
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.*
 import java.util.regex.Pattern
 
-class SiteLoader(private val file: String) : LinksProvider {
+class SiteLoader(
+    private val client: NeoClient,
+    private val file: String
+) : LinksProvider {
     private val patternList: Pattern by lazy {
         Pattern.compile("\\d{4}\\.html")
     }
@@ -48,14 +52,14 @@ class SiteLoader(private val file: String) : LinksProvider {
     }
 
     private fun loadList(link: String): List<ListItem> {
-        val page = PageParser()
+        val page = PageParser(client)
         val isSite = link == NetConst.SITE
         if (isSite) {
-            page.load(link, "page-title", null)
+            page.load(link, "page-title")
         } else {
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            page.load(url, "razdel", null)
+            page.load(url, "razdel")
         }
         var s: String? = page.currentElem
         var t: String

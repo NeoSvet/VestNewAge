@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -25,9 +26,6 @@ import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
-/**
- * Created by NeoSvet on 19.11.2019.
- */
 class LoaderService : LifecycleService(), LoadHandler {
     companion object {
         private const val PROGRESS_ID = 777
@@ -84,6 +82,8 @@ class LoaderService : LifecycleService(), LoadHandler {
         errorHandler(throwable)
     })
 
+
+    private val client = NeoClient(NeoClient.Type.LOADER)
     private val loader = MasterLoader(this)
     private val progress = Progress()
     private var mode = 0
@@ -172,7 +172,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         scope.launch {
             val styleLoader = StyleLoader()
             styleLoader.download(false)
-            val loader = PageLoader()
+            val loader = PageLoader(client)
             loader.download(link, true)
             finishService(null)
         }
@@ -186,13 +186,12 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun runUpdateNotifTimer() {
-        val scope = CoroutineScope(Dispatchers.Default)
-        val scopeMain = CoroutineScope(Dispatchers.Main)
+        val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
             val delay = DateUnit.SEC_IN_MILLS.toLong()
             while (isRun) {
                 delay(delay)
-                if (isRun) scopeMain.launch {
+                if (isRun) {
                     notif.setContentText(progress.text)
                     notif.setProgress(progress.max, progress.prog, false)
                     manager.notify(PROGRESS_ID, notif.build())
@@ -272,7 +271,7 @@ class LoaderService : LifecycleService(), LoadHandler {
     private fun loadBasic() {
         val listsUtils = ListsUtils()
         if (listsUtils.summaryIsOld()) {
-            val loader = SummaryLoader()
+            val loader = SummaryLoader(client)
             loader.loadRss(false)
 
         }
@@ -311,7 +310,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         var loader: SiteLoader
         var i = 0
         while (i < url.size && isRun) {
-            loader = SiteLoader(file[i])
+            loader = SiteLoader(client, file[i])
             loader.load(url[i])
             i++
         }
