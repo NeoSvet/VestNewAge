@@ -83,7 +83,7 @@ public class DateUnit {
         }
         if (fDate != null)
             return new DateUnit(LocalDate.parse(s, fDate), null);
-        boolean offset = s.contains("+0300");
+        boolean offset = s.contains("+03");
         if (s.contains("-")) { //2020-03-25T00:00:00+03:00
             s = s.substring(0, s.length() - 6).replace("T", " ");
             fDate = DateTimeFormatter
