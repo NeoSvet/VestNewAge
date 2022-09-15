@@ -33,15 +33,7 @@ class SummaryLoader : LinksProvider {
     fun loadRss(updateUnread: Boolean) {
         val stream: InputStream =
             NeoClient.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
-        val site = if (NeoClient.isMainSite)
-            NetConst.SITE.substring(
-                NetConst.SITE.indexOf("/") + 2
-            )
-        else
-            NetConst.SITE2.substring(
-                NetConst.SITE2.indexOf("/") + 2
-            )
-
+        val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
         val now = DateUnit.initNow()

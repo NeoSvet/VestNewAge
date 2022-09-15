@@ -16,10 +16,6 @@ import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 object NeoClient {
-    @JvmStatic
-    val isMainSite: Boolean
-        get() = first
-    private var first = true
     private const val PATH = "/cache/file"
 
     @JvmStatic
@@ -33,30 +29,19 @@ object NeoClient {
 
     @JvmStatic
     fun getStream(url: String, handler: LoadHandlerLite? = null): BufferedInputStream {
-        val u = if (!first && url.contains(NetConst.SITE))
-            url.replace(NetConst.SITE, NetConst.SITE2)
-        else url
         val response = try {
             val builderRequest = Request.Builder()
-            builderRequest.url(u)
-            if (u.contains(NetConst.SITE))
+            builderRequest.url(url)
+            if (url.contains(NetConst.SITE))
                 builderRequest.header("Referer", NetConst.SITE)
             builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
             val client = createHttpClient()
             client.newCall(builderRequest.build()).execute()
         } catch (e: Exception) {
             e.printStackTrace()
-            if (u.contains(NetConst.SITE)) {
-                first = false;
-                return getStream(u.replace(NetConst.SITE, NetConst.SITE2));
-            } else throw SiteNoResponse()
+            throw SiteNoResponse()
         }
-        if (response.code != 200) {
-            if (u.contains(NetConst.SITE)) {
-                first = false;
-                return getStream(u.replace(NetConst.SITE, NetConst.SITE2));
-            } else throw SiteCode(response.code)
-        }
+        if (response.code != 200) throw SiteCode(response.code)
         if (response.body == null) throw SiteNoResponse()
         val inStream = response.body!!.byteStream()
         val max = response.body!!.contentLength().toInt()

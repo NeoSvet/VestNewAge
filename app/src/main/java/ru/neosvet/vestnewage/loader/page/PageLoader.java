@@ -51,10 +51,7 @@ public class PageLoader implements Loader {
         int n = k;
         boolean boolArticle = storage.isArticle();
         PageParser page = new PageParser();
-        if (NeoClient.isMainSite())
-            page.load(NetConst.SITE + Const.PRINT + s, "page-title", null);
-        else
-            page.load(NetConst.SITE2 + Const.PRINT + s, "<h2>", null);
+        page.load(NetConst.SITE + Const.PRINT + s, "page-title", null);
         if (singlePage)
             storage.deleteParagraphs(storage.getPageId(link));
 

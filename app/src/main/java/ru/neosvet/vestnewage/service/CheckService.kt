@@ -77,14 +77,7 @@ class CheckService : LifecycleService() {
         val stream = NeoClient.getStream(
             NetConst.SITE + "rss/?" + System.currentTimeMillis()
         )
-        val site = if (NeoClient.isMainSite)
-            NetConst.SITE.substring(
-                NetConst.SITE.indexOf("/") + 2
-            )
-        else
-            NetConst.SITE2.substring(
-                NetConst.SITE2.indexOf("/") + 2
-            )
+        val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
         br.close()

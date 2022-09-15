@@ -30,33 +30,8 @@ public class StyleLoader {
         final File fLight = Lib.getFileL(Const.LIGHT);
         final File fDark = Lib.getFileL(Const.DARK);
         if (!fLight.exists() || !fDark.exists() || replaceStyle) {
-            if (NeoClient.isMainSite())
-                downloadStyleFromSite(fLight, fDark);
-            else
-                downloadFromUcoz(fLight, fDark);
+            downloadStyleFromSite(fLight, fDark);
         }
-    }
-
-    private void downloadFromUcoz(File fLight, File fDark) throws Exception {
-        builderRequest.url(NetConst.WEB_PAGE + fLight.getName());
-        Response response = client.newCall(builderRequest.build()).execute();
-        BufferedReader br = new BufferedReader(response.body().charStream(), 1000);
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fLight)));
-        String s = br.readLine();
-        br.close();
-        response.close();
-        bw.write(s);
-        bw.close();
-
-        builderRequest.url(NetConst.WEB_PAGE + fDark.getName());
-        response = client.newCall(builderRequest.build()).execute();
-        br = new BufferedReader(response.body().charStream(), 1000);
-        bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fDark)));
-        s = br.readLine();
-        br.close();
-        response.close();
-        bw.write(s);
-        bw.close();
     }
 
     private void downloadStyleFromSite(File fLight, File fDark) throws Exception {
