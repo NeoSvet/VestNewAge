@@ -426,7 +426,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             url.substring(0, url.lastIndexOf("/"))
         else url
         val i = if (s.isDigitsOnly()) s.toInt() else 2016
-        return if (i < 2016) NetConst.CAB_SITE + url
+        return if (i < 2016) NetConst.SITE_COM + url
         else NetConst.SITE + url
 
     }

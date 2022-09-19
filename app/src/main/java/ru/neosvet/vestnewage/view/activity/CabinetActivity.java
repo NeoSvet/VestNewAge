@@ -50,7 +50,7 @@ public class CabinetActivity extends AppCompatActivity {
         setContentView(R.layout.cabinet_activity);
         initView();
         status.setLoad(true);
-        wvBrowser.loadUrl(NetConst.CAB_SITE + getIntent().getStringExtra(Const.LINK));
+        wvBrowser.loadUrl(NetConst.SITE_COM + getIntent().getStringExtra(Const.LINK));
     }
 
     @Override

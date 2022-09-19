@@ -121,7 +121,7 @@ class CabinetFragment : NeoFragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initLogin() = binding?.login?.run {
         tvTip.setOnClickListener {
-            Lib.openInApps(NetConst.CAB_SITE, null)
+            Lib.openInApps(NetConst.SITE_COM, null)
         }
         etEmail.doAfterTextChanged {
             checkReadyEnter()

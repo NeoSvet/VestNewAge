@@ -129,7 +129,7 @@ class CabinetToiler : NeoToiler() {
     private suspend fun doLogin(email: String, password: String) {
         helper.email = email
         var request: Request = Request.Builder()
-            .url(NetConst.CAB_SITE)
+            .url(NetConst.SITE_COM)
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .build()
         val client = createHttpClient()
@@ -144,7 +144,7 @@ class CabinetToiler : NeoToiler() {
             .build()
         request = Request.Builder()
             .post(requestBody)
-            .url(NetConst.CAB_SITE + "auth.php")
+            .url(NetConst.SITE_COM + "auth.php")
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .addHeader(NetConst.COOKIE, cookie)
             .build()
@@ -180,7 +180,7 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun loadAnketa(loadWordList: Boolean): String {
         val builderRequest = Request.Builder()
-        builderRequest.url(NetConst.CAB_SITE + "edinenie/anketa.html")
+        builderRequest.url(NetConst.SITE_COM + "edinenie/anketa.html")
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
         val client = createHttpClient()
@@ -239,7 +239,7 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun sendWord(index: Int, word: String) {
         val builderRequest = Request.Builder()
-        builderRequest.url(NetConst.CAB_SITE + "savedata.php")
+        builderRequest.url(NetConst.SITE_COM + "savedata.php")
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
         val requestBody: RequestBody = FormBody.Builder()
