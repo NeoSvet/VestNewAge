@@ -21,8 +21,17 @@ public class PageParser {
     private final NeoList<HTMLElem> content = new NeoList<>();
 
     public void load(String url, String start) throws Exception {
+        String end = "<!--/row-->";
         InputStream in = client.getStream(url);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in), 1000);
+        BufferedReader br;
+        if (NeoClient.isSiteCom()) {
+            br = new BufferedReader(new InputStreamReader(in, "cp1251"), 1000);
+            if (start.isEmpty()) start = "class=\"title";
+            end = "id=\"print2";
+        } else {
+            br = new BufferedReader(new InputStreamReader(in), 1000);
+            if (start.isEmpty()) start = "page-title";
+        }
         String s;
         while ((s = br.readLine()) != null) {
             if (s.contains(start))
@@ -35,12 +44,17 @@ public class PageParser {
         }
         StringBuilder sb = new StringBuilder(s);
         while ((s = br.readLine()) != null) {
-            if (s.contains("<!--/row-->"))
+            if (s.contains(end))
                 break;
             sb.append(" ").append(s);
         }
         br.close();
         in.close();
+
+        if (end.contains("print2")) {
+            sb.delete(0, 33);
+            sb.delete(sb.length() - 10, sb.length());
+        }
 
         String t = sb.toString();
         t = t.replace("&nbsp;", " ")
@@ -104,7 +118,7 @@ public class PageParser {
             elem.end = false;
             elem.tag = s.substring(0, n);
             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
-            if (elem.tag.equals("em")) {
+            if (elem.tag.equals("em") || elem.tag.equals("i")) {
                 content.current().setHtml(content.current().html + elem.html);
                 continue;
             }
@@ -228,7 +242,7 @@ public class PageParser {
     }
 
     public String getLink() {
-        if (content.current().tag.equals(Const.LINK))
+        if (content.isNotEmpty() && content.current().tag.equals(Const.LINK))
             return content.current().par;
         else
             return null;

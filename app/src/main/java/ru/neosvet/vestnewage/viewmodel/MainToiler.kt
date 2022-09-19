@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.viewmodel
 
-
 import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
@@ -22,10 +21,9 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-
 class MainToiler : NeoToiler() {
     private lateinit var updatedPage: String
-    private val client = NeoClient(NeoClient.Type.MAIN)
+    private var client = NeoClient(NeoClient.Type.MAIN)
 
     fun init(context: Context) {
         updatedPage = context.getString(R.string.updated_page)
@@ -36,13 +34,34 @@ class MainToiler : NeoToiler() {
         .build()
 
     override suspend fun doLoad() {
-        loadQuote()
+        if (NeoClient.isSiteCom)
+            loadQuoteCom()
+        else
+            loadQuote()
         val timeDiff = synchronizationTime()
         val ads = AdsUtils(App.context)
         ads.loadAds(client)
         ads.close()
         postState(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
+    }
+
+    private suspend fun loadQuoteCom() {
+        val request: Request = Request.Builder()
+            .url(NetConst.SITE_COM)
+            .addHeader(NetConst.USER_AGENT, App.context.packageName)
+            .build()
+        val client = NeoClient.createHttpClient()
+        val response = client.newCall(request).execute()
+        val stream = response.body!!.byteStream()
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING))
+        var s = br.readLine()
+        while (!s.contains("quote"))
+            s = br.readLine()
+        br.close()
+        val i = s.indexOf("quote") + 7
+        s = s.substring(i, s.indexOf("</div>", i)).replace(Const.BR, " ")
+        WordsUtils.saveGodWords(s)
     }
 
     private suspend fun loadQuote() {

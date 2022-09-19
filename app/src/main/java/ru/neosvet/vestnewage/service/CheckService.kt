@@ -75,55 +75,76 @@ class CheckService : LifecycleService() {
     }
 
     private fun checkSummary(): Boolean {
-        val stream = client.getStream(
-            NetConst.SITE + "rss/?" + System.currentTimeMillis()
-        )
-        val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)
+        val stream = client.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
-        br.close()
-        stream.close()
-        var a = s.indexOf("lastBuildDate") + 14
+        if (NeoClient.isSiteCom) {
+            while (!s.contains("pubDate"))
+                s = br.readLine()
+        }
+        var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
         val file = Lib.getFile(Const.RSS)
-        var secFile: Long = 0
-        if (file.exists()) secFile = DateUnit.putMills(file.lastModified()).timeInSeconds
+        val secFile = if (file.exists())
+            DateUnit.putMills(file.lastModified()).timeInSeconds
+        else 0L
         if (secFile > secList) { //список в загрузке не нуждается
             br.close()
             return false
         }
-        val bwRSS = BufferedWriter(FileWriter(file))
+        val m = (if (NeoClient.isSiteCom) {
+            val sb = StringBuilder()
+            var line: String? = br.readLine()
+            while (line != null) {
+                sb.append(line)
+                line = br.readLine()
+            }
+            sb.toString()
+        } else s).split("<item>")
+        br.close()
+        val bw = BufferedWriter(FileWriter(file))
+        val site = NeoClient.getSite()
         val unread = UnreadUtils()
         var d: DateUnit
         var title: String
         var link: String
         var b: Int
-        val m = s.split("<item>").toTypedArray()
+
         for (i in 1 until m.size) {
-            a = m[i].indexOf("</link")
-            link = withOutTag(m[i].substring(0, a))
-            if (link.contains(site)) link = link.substring(link.indexOf("info/") + 5)
+            a = m[i].indexOf("<link") + 6
+            b = m[i].indexOf("</", a)
+            link = m[i].substring(a, b)
+            if (link.contains(site))
+                link = link.substring(link.indexOf(site) + site.length + 1)
             if (link.contains("#0")) link = link.replace("#0", "#2")
-            b = m[i].indexOf("</title")
-            title = withOutTag(m[i].substring(a + 10, b))
-            bwRSS.write(title) //title
-            bwRSS.write(Const.N)
-            bwRSS.write(link) //link
-            bwRSS.write(Const.N)
-            a = m[i].indexOf("</des")
-            bwRSS.write(withOutTag(m[i].substring(b + 10, a))) //des
-            bwRSS.write(Const.N)
-            b = m[i].indexOf("</a10")
-            s = withOutTag(m[i].substring(a + 15, b))
-            d = DateUnit.parse(s)
-            bwRSS.write(d.timeInMills.toString() + Const.N) //time
-            bwRSS.flush()
+
+            a = m[i].indexOf("<title") + 7
+            b = m[i].indexOf("</", a)
+            title = m[i].substring(a, b)
+            bw.write(title) //title
+            bw.write(Const.N)
+            bw.write(link) //link
+            bw.write(Const.N)
+
+            a = m[i].indexOf("<des") + 13
+            b = m[i].indexOf("</", a)
+            bw.write(withOutTag(m[i].substring(a, b))) //des
+            bw.write(Const.N)
+
+            a = m[i].indexOf("updated>")
+            if (a == -1)
+                a = m[i].indexOf("pubDate>")
+            b = m[i].indexOf("</", a)
+            d = DateUnit.parse(m[i].substring(a + 8, b))
+            bw.write(d.timeInMills.toString() + Const.N) //time
+            bw.flush()
+
             if (unread.addLink(link, d)) {
                 list.add(Pair(title, link))
                 loader.download(link, false)
             }
         }
-        bwRSS.close()
+        bw.close()
         loader.finish()
         unread.setBadge()
         return true

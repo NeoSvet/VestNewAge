@@ -54,12 +54,18 @@ class SiteLoader(
     private fun loadList(link: String): List<ListItem> {
         val page = PageParser(client)
         val isSite = link == NetConst.SITE
+        val end: String
         if (isSite) {
-            page.load(link, "page-title")
+            page.load(link, "")
+            end = if (NeoClient.isSiteCom) "bgimage" else "<button"
         } else {
+            end = if (NeoClient.isSiteCom) "print2" else "<button"
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            page.load(url, "razdel")
+            if (NeoClient.isSiteCom) {
+                page.load(url, "")
+                page.nextItem
+            } else page.load(url, "razdel")
         }
         var s: String? = page.currentElem
         var t: String
@@ -84,8 +90,8 @@ class SiteLoader(
                 a = page.link
                 t = page.text
                 if (isSite) {
-                    if (t.isNotEmpty() && !s!!.contains("\"#\"")) {
-                        if (s.contains("&times;") || s.contains("<button>")) break
+                    if (s == null || s.contains(end)) break
+                    if (t.isNotEmpty() && !s.contains("\"#\"")) {
                         if (!s.contains("<")) item?.des = s
                         else {
                             item = ListItem(t)
@@ -111,6 +117,14 @@ class SiteLoader(
         if (setDes(item, t).not())
             list.add(ListItem(t))
         page.clear()
+        if (isSite && NeoClient.isSiteCom) {
+            var i = list.size - 1
+            while (i > 1) {
+                if (i in 17..24 || i in 11..13 || (i in 2..6 && i != 4))
+                    list.removeAt(i)
+                i--
+            }
+        }
         return list
     }
 

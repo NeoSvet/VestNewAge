@@ -23,14 +23,29 @@ class NeoClient(
     }
 
     companion object {
+        @JvmStatic
+        val isSiteCom: Boolean
+            get() = if (isCom == null) getCom() else isCom!!
+        private var isCom: Boolean? = null
         private const val PATH = "/cache/file"
+        private const val COM_FILE = "/com"
+
+        private fun getCom(): Boolean =
+            Lib.getFile(COM_FILE).exists().also { isCom = it }
+
+        fun setCom(value: Boolean) {
+            isCom = value
+            val f = Lib.getFile(COM_FILE)
+            if (value) f.createNewFile()
+            else if (f.exists()) f.delete()
+        }
 
         @JvmStatic
         fun createHttpClient(): OkHttpClient {
             val client = OkHttpClient.Builder()
-            client.connectTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
-            client.readTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
-            client.writeTimeout(NetConst.TIMEOUT.toLong(), TimeUnit.SECONDS)
+            client.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
+            client.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
+            client.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
             return client.build()
         }
 
@@ -41,14 +56,22 @@ class NeoClient(
                     f.delete()
             }
         }
+
+        fun getSite(): String {
+            val s = (if (isSiteCom) NetConst.SITE_COM else NetConst.SITE).substring(8)
+            return s.substring(0, s.length - 1)
+        }
     }
 
     fun getStream(url: String): BufferedInputStream {
+        val u = if (isSiteCom) url.replace(NetConst.SITE, NetConst.SITE_COM) else url
         val response = try {
             val builderRequest = Request.Builder()
-            builderRequest.url(url)
-            if (url.contains(NetConst.SITE))
+            builderRequest.url(u)
+            if (u.contains(NetConst.SITE))
                 builderRequest.header("Referer", NetConst.SITE)
+            else if (u.contains(NetConst.SITE_COM))
+                builderRequest.header("Referer", NetConst.SITE_COM)
             builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
             val client = createHttpClient()
             client.newCall(builderRequest.build()).execute()

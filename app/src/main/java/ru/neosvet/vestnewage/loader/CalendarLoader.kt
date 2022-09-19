@@ -11,16 +11,16 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
 
 class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private val storage = PageStorage()
     private var date = DateUnit.initToday()
-    private val list = Stack<ListItem>()
+    private val list = LinkedList<ListItem>()
     private var isRun = false
 
     override fun cancel() {
@@ -41,16 +41,71 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
 
     fun loadListMonth(updateUnread: Boolean) {
         isRun = true
-        val stream = client.getStream(
-            NetConst.SITE + "AjaxData/Calendar/"
-                    + date.year + "-" + date.month + ".json"
-        )
+        var s = if (NeoClient.isSiteCom)
+            NetConst.SITE_COM + "ajax.php?m=${date.month}&y=${date.year - 2004}"
+        else
+            NetConst.SITE + "AjaxData/Calendar/${date.year}-${date.month}.json"
+        val stream = client.getStream(s)
         val br = BufferedReader(InputStreamReader(stream), 1000)
-        var s = br.readLine()
+        s = br.readText()
         br.close()
         stream.close()
-        if (s == null || s.length < 20) return
-        var json: JSONObject? = JSONObject(s)
+        if (s.length < 20) return
+        if (NeoClient.isSiteCom)
+            parseHtml(s)
+        else
+            parseJson(s)
+        if (isRun) listToStorage(updateUnread)
+    }
+
+    private fun parseHtml(content: String) {
+        val a = "href=\""
+        var i = content.indexOf(a)
+        var n: Int
+        while (i > -1) {
+            i += a.length + 1
+            val link = content.substring(i, content.indexOf("\"", i))
+            i = content.indexOf(">", i) + 1
+            val d = content.substring(i, content.indexOf("</a", i))
+            if (d.contains("<"))
+                list.add(ListItem(Lib.withOutTags(d)))
+            else
+                list.add(ListItem(d))
+            Lib.LOG("first link $link")
+            addLink(link)
+            if (link.contains('_'))
+                checkLink(link, '_')
+            else if (link.contains('#'))
+                checkLink(link, '#')
+            if (date.year == 2016 && link.contains("2016")) {
+                val add = when (date.month) {
+                    1 -> false
+                    2 -> !link.contains("05") && !link.contains("12")
+                    4 -> !link.contains("06")
+                    else -> true
+                }
+                if (add) {
+                    Lib.LOG("poem link ${link.replace("2016", Const.POEMS)}")
+                    addLink(link.replace("2016", Const.POEMS))
+                }
+            }
+            i = content.indexOf(a, i)
+        }
+    }
+
+    private fun checkLink(link: String, c: Char) {
+        var n = link.indexOf(c) + 1
+        n = link.substring(n, n + 1).toInt()
+        if (n == 3) {
+            Lib.LOG("2 link ${link.replace("$c$n", "${c}2")}")
+            addLink(link.replace("$c$n", "${c}2"))
+        }
+        Lib.LOG("0 link ${link.replace("$c$n", "")}")
+        addLink(link.replace("$c$n", ""))
+    }
+
+    private fun parseJson(content: String) {
+        var json: JSONObject? = JSONObject(content)
         json = json?.getJSONObject("calendarData")
         if (json?.names() == null) return
         val names = json.names()!!
@@ -60,7 +115,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         var d: DateUnit
         var i = 0
         while (i < names.length() && isRun) {
-            s = names[i].toString()
+            val s = names[i].toString()
             jsonI = json.optJSONObject(s)
             list.add(ListItem(s.substring(s.lastIndexOf("-") + 1)))
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
@@ -89,15 +144,15 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
             }
             i++
         }
-        if (isRun) listToStorage(updateUnread)
     }
 
     private fun listToStorage(updateUnread: Boolean) {
         storage.open(date.my)
         storage.updateTime()
         val unread = if (updateUnread) UnreadUtils() else null
-        while (!list.empty()) {
-            val item = list.pop()
+        while (list.isNotEmpty()) {
+            val item = if (NeoClient.isSiteCom)
+                list.removeFirst() else list.removeLast()
             if (updateUnread)
                 date.day = item.title.toInt()
             if (item.hasFewLinks()) {
@@ -134,7 +189,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         }
     }
 
-    private fun addLink(link: String) = list.peek()?.let { item ->
+    private fun addLink(link: String) = list.last().let { item ->
         item.links.forEach {
             if (it == link) return@let
         }

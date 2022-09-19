@@ -32,36 +32,56 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
 
     fun loadRss(updateUnread: Boolean) {
         val stream = client.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
-        val site = NetConst.SITE.substring(NetConst.SITE.indexOf("/") + 2)
+        val site = NeoClient.getSite()
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
         val now = DateUnit.initNow()
         val unread = if (updateUnread) UnreadUtils() else null
-        val m = br.readLine().split("<item>").toTypedArray()
+        val m = (if (NeoClient.isSiteCom) {
+            val sb = StringBuilder()
+            var line: String? = br.readLine()
+            while (line != null) {
+                sb.append(line)
+                line = br.readLine()
+            }
+            sb.toString()
+        } else br.readLine())
+            .split("<item>")
         br.close()
         stream.close()
-        var line: String
         var a: Int
         var b: Int
+        var s: String
         for (i in 1 until m.size) {
-            a = m[i].indexOf("</link")
-            line = withOutTag(m[i].substring(0, a))
-            if (line.contains(site)) line = line.substring(line.indexOf("info/") + 5)
-            if (line.contains("#0")) line = line.replace("#0", "#2")
-            b = m[i].indexOf("</title")
-            bw.write(withOutTag(m[i].substring(a + 10, b))) //title
+            a = m[i].indexOf("<link") + 6
+            b = m[i].indexOf("</", a)
+            s = m[i].substring(a, b)
+            if (s.contains(site))
+                s = s.substring(s.indexOf(site) + site.length + 1)
+            if (s.contains("#0")) s = s.replace("#0", "#2")
+
+            a = m[i].indexOf("<title") + 7
+            b = m[i].indexOf("</", a)
+            bw.write(m[i].substring(a, b)) //title
             bw.write(Const.N)
-            bw.write(withOutTag(line)) //link
+            bw.write(s) //link
             bw.write(Const.N)
-            unread?.addLink(line, now)
-            a = m[i].indexOf("</des")
-            bw.write(withOutTag(m[i].substring(b + 10, a))) //des
+            unread?.addLink(s, now)
+
+            a = m[i].indexOf("<des") + 13
+            b = m[i].indexOf("</", a)
+            bw.write(withOutTag(m[i].substring(a, b))) //des
             bw.write(Const.N)
-            b = m[i].indexOf("</a10")
+
+            a = m[i].indexOf("updated>")
+            if (a == -1)
+                a = m[i].indexOf("pubDate>")
+            b = m[i].indexOf("</", a)
             bw.write(
-                DateUnit.parse(withOutTag(m[i].substring(a + 15, b)))
+                DateUnit.parse(m[i].substring(a + 8, b))
                     .timeInMills.toString() + Const.N
             ) //time
+
             bw.flush()
         }
         bw.close()
