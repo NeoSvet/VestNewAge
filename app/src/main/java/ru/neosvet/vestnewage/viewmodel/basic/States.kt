@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.utils.Const
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
@@ -37,8 +38,8 @@ sealed class NeoState {
                     isNeedReport = true
                     App.context.getString(R.string.unknown_error)
                 }
-                throwable is SocketTimeoutException || throwable is SSLHandshakeException ||
-                        throwable is CertificateException ->
+                throwable is SocketTimeoutException || throwable is SocketException ||
+                        throwable is SSLHandshakeException || throwable is CertificateException ->
                     App.context.getString(R.string.site_no_response)
                 else -> {
                     isNeedReport = throwable !is NeoException
