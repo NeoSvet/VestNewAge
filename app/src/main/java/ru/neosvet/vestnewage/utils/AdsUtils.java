@@ -257,7 +257,8 @@ public class AdsUtils implements Closeable {
     public void loadAds(NeoClient client) throws Exception {
         isNew = false;
         long t = getTime();
-        String s = "http://neosvet.ucoz.ru/ads_vna.txt";
+        String s = NeoClient.isSiteCom() ? "http://neosvet.somee.com/vna/ads.txt" :
+                "http://neosvet.ucoz.ru/ads_vna.txt";
         BufferedInputStream in = client.getStream(s);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         s = br.readLine();

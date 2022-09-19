@@ -114,9 +114,12 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
         }
     }
 
+    private val additionUrl: String
+        get() = if (NeoClient.isSiteCom) NetConst.ADDITION_URL_COM else NetConst.ADDITION_URL
+
     private fun loadPost(id: Int): ContentValues {
         val d = (id / 200).toString()
-        val stream = client.getStream(NetConst.ADDITION_URL + "$d/$id.p")
+        val stream = client.getStream("$additionUrl$d/$id.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val row = ContentValues()
         row.put(DataBase.ID, id)
@@ -135,7 +138,7 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
     }
 
     private fun loadMax(): Int {
-        val stream = client.getStream(NetConst.ADDITION_URL + "max.txt")
+        val stream = client.getStream("${additionUrl}max.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val s = br.readLine()
         br.close()
@@ -144,7 +147,7 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
 
     private fun loadChanges(storage: AdditionStorage) {
         val baseTime = Lib.getFileDB(DataBase.ADDITION).lastModified()
-        val stream = client.getStream(NetConst.ADDITION_URL + "changed.txt")
+        val stream = client.getStream("${additionUrl}changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         var s: String? = br.readLine()
         while (s != null) {

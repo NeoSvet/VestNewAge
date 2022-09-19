@@ -44,6 +44,7 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     companion object {
         private const val UCOZ = "http://neosvet.ucoz.ru/databases_vna"
+        private const val SOMEE = "http://neosvet.somee.com/vna/databases"
     }
 
     private var loaderBook: BookLoader? = null
@@ -65,7 +66,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = true
         msg = App.context.getString(R.string.summary)
         handler?.postMessage(msg)
-        loadList(SummaryLoader(client).getLinkList())
+        loadPages(SummaryLoader(client).getLinkList())
     }
 
     fun loadSite() {
@@ -73,7 +74,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         msg = App.context.getString(R.string.news)
         handler?.postMessage(msg)
         val loader = SiteLoader(client,Lib.getFile(SiteToiler.MAIN).toString())
-        loadList(loader.getLinkList())
+        loadPages(loader.getLinkList())
     }
 
     fun loadDoctrine() {
@@ -101,7 +102,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         if (url != null) {
             val f = Lib.getFileDB(d.my)
             if (!f.exists() || f.length() == DataBase.EMPTY_BASE_SIZE)
-                loadUcozBase(url + d.my)
+                loadBase(url + d.my)
         } else
             loadFromSite(d)
     }
@@ -116,19 +117,20 @@ class MasterLoader : Loader, LoadHandlerLite {
         storage.open(d.my, false)
         val list = storage.getLinksList()
         storage.close()
-        loadList(list)
+        loadPages(list)
     }
 
     private fun findUrl(d: DateUnit): String? {
         val my = d.my
+        val host = if(NeoClient.isSiteCom) SOMEE else UCOZ
         listBase.forEach {
             if (it.second.contains(my)) {
-                return if (it.first < 2) "$UCOZ/"
-                else "$UCOZ${it.first}/"
+                return if (it.first < 2) "$host/"
+                else "$host${it.first}/"
             }
         }
         val folder: Int
-        val url = UCOZ + when (d.year) {
+        val url = host + when (d.year) {
             in 2004..2015 -> {
                 folder = 0
                 "/list.txt"
@@ -145,16 +147,16 @@ class MasterLoader : Loader, LoadHandlerLite {
         if (folder == lastFolder)
             return null
         lastFolder = folder
-        val list = loadUcozList(url)
+        val list = loadList(url)
         listBase.add(Pair(folder, list))
         if (list.contains(my)) {
-            return if (folder < 2) "$UCOZ/"
-            else "$UCOZ${folder}/"
+            return if (folder < 2) "$host/"
+            else "$host${folder}/"
         }
         return null
     }
 
-    private fun loadUcozList(url: String): List<String> {
+    private fun loadList(url: String): List<String> {
         var name: String
         var f: File
         var l: Long
@@ -185,7 +187,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         return list
     }
 
-    private fun loadUcozBase(url: String) {
+    private fun loadBase(url: String) {
         val name = url.substring(url.lastIndexOf("/") + 1)
         if (DataBase.isBusy(name)) return
         val storage = PageStorage()
@@ -240,7 +242,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         return row
     }
 
-    private fun loadList(list: List<String>) {
+    private fun loadPages(list: List<String>) {
         var p = 0
         val max = list.size
         list.forEach {

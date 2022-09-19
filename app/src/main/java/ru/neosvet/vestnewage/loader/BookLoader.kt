@@ -108,8 +108,9 @@ class BookLoader(private val client: NeoClient) : Loader {
         //list format:
         //line 1: pages
         //line 2: title
-        val url = NetConst.DOCTRINE_BASE + "list.txt"
-        val br = BufferedReader(InputStreamReader(clientDoctrine.getStream(url), Const.ENCODING), 1000)
+        val host = if (NeoClient.isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
+        val stream = InputStreamReader(clientDoctrine.getStream("${host}list.txt"), Const.ENCODING)
+        val br = BufferedReader(stream, 1000)
         val storage = PageStorage()
         storage.open(DataBase.DOCTRINE)
         var link: String? = br.readLine()
@@ -141,6 +142,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         val max = cursor.count - 1
         var cur = 0
         cursor.moveToFirst()
+        val host = if (NeoClient.isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
         val iId = cursor.getColumnIndex(DataBase.ID)
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iTime = cursor.getColumnIndex(Const.TIME)
@@ -149,7 +151,7 @@ class BookLoader(private val client: NeoClient) : Loader {
             val link = cursor.getString(iLink)
             time = cursor.getLong(iTime)
             s = link.substring(Const.DOCTRINE.length) //pages
-            val stream = clientDoctrine.getStream(NetConst.DOCTRINE_BASE + "$s.p")
+            val stream = clientDoctrine.getStream("$host$s.txt")
             val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
             s = br.readLine() //time
             if (s != null && s.toLong() != time) {

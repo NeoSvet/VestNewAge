@@ -123,7 +123,8 @@ public class PageLoader implements Loader {
 
     private void downloadDoctrinePage(String link) throws Exception {
         String s = link.substring(Const.DOCTRINE.length()); //pages
-        BufferedInputStream stream = client.getStream(NetConst.DOCTRINE_BASE + s + ".p");
+        String host = NeoClient.isSiteCom() ? NetConst.DOCTRINE_BASE_COM : NetConst.DOCTRINE_BASE;
+        BufferedInputStream stream = client.getStream(host + s + ".txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(stream, Const.ENCODING), 1000);
         long time = Long.parseLong(br.readLine());
         ContentValues row = new ContentValues();
