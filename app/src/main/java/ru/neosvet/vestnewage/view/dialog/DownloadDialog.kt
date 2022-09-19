@@ -21,10 +21,10 @@ class DownloadDialog(
         private const val BASIC_SIZE = 165000
         private const val DOCTRINE_SIZE = 215984
         private val BOOK_SIZE = arrayOf(
-            1133299, 1056687, 1057064, 1010414, 972633, 485471
+            1133299, 1056687, 1057064, 1010414, 972633, 484820
         )
         private val OTRK_SIZE = arrayOf(
-            669063, 714810, 643777, 500279, 547107, 541682,
+            675521, 714810, 643777, 500279, 547107, 541682,
             546371, 591472, 560708, 759755, 555979, 285863
         )
         private val list = mutableListOf<CheckItem>()
