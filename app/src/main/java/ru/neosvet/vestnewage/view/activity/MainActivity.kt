@@ -580,7 +580,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
-            is NeoState.Error -> setError(state)
             else -> {}
         }
     }
