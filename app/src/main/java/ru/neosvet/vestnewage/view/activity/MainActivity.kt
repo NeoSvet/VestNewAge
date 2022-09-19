@@ -74,9 +74,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.PAGE
         }
     }
-    private val wordsUtils: WordsUtils by lazy {
-        WordsUtils()
-    }
     private var isMoveScrollBar = true
 
     val newId: Int
@@ -116,7 +113,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun initWords() {
         val funClick = { v: View ->
-            wordsUtils.showAlert(this, this::openSearch)
+            WordsUtils.showAlert(this, this::openSearch)
         }
         findViewById<View>(R.id.btnGodWords).setOnClickListener(funClick)
         findViewById<View>(R.id.tvGodWords).setOnClickListener(funClick)

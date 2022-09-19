@@ -77,9 +77,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
-    private val wordsUtils: WordsUtils by lazy {
-        WordsUtils()
-    }
     private val snackbar = NeoSnackbar()
     override val scope: LifecycleCoroutineScope
         get() = lifecycleScope
@@ -321,7 +318,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     private fun initWords() {
         val funClick = { v: View ->
-            wordsUtils.showAlert(this) {
+            WordsUtils.showAlert(this) {
                 val main = Intent(this, MainActivity::class.java)
                 main.putExtra(Const.START_SCEEN, false)
                 main.putExtra(Const.SEARCH, it)

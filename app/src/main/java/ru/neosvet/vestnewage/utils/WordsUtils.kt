@@ -8,17 +8,16 @@ import java.io.BufferedWriter
 import java.io.FileReader
 import java.io.FileWriter
 
-class WordsUtils {
-    companion object {
-        private const val GOD_WORDS = "/god_words"
-        fun saveGodWords(words: String) {
-            val bw = BufferedWriter(FileWriter(Lib.getFile(GOD_WORDS)))
-            bw.write(words)
-            bw.close()
-        }
-    }
-
+object WordsUtils {
+    private const val GOD_WORDS = "/god_words"
     private var godWords: String = ""
+
+    fun saveGodWords(words: String) {
+        godWords = words
+        val bw = BufferedWriter(FileWriter(Lib.getFile(GOD_WORDS)))
+        bw.write(words)
+        bw.close()
+    }
 
     private fun getGodWords(): String {
         if (godWords.isNotEmpty())
@@ -27,7 +26,7 @@ class WordsUtils {
         if (f.exists().not())
             return godWords
         val br = BufferedReader(FileReader(f))
-        godWords = br.readLine()
+        godWords = br.readText()
         br.close()
         return godWords
     }
@@ -42,7 +41,10 @@ class WordsUtils {
         } else {
             dialog.setMessage(msg)
             dialog.setLeftButton(act.getString(R.string.find)) {
-                searchFun.invoke(msg.trim('.'))
+                if (msg.contains(Const.N))
+                    searchFun.invoke(msg.substring(0, msg.indexOf(Const.N)).trim('.'))
+                else
+                    searchFun.invoke(msg.trim('.'))
                 dialog.dismiss()
             }
         }

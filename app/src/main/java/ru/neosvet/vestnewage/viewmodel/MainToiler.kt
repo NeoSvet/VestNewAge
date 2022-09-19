@@ -60,7 +60,7 @@ class MainToiler : NeoToiler() {
             s = br.readLine()
         br.close()
         val i = s.indexOf("quote") + 7
-        s = s.substring(i, s.indexOf("</div>", i)).replace(Const.BR, " ")
+        s = s.substring(i, s.indexOf("</div>", i)).replace(Const.BR, Const.N)
         WordsUtils.saveGodWords(s)
     }
 
@@ -72,7 +72,7 @@ class MainToiler : NeoToiler() {
         var i = s.indexOf("quoteBlock")
         i = s.indexOf("class", i)
         s = s.substring(i, s.indexOf("\\u003C/p", i))
-        s = s.replace("\\u0022", "\"").replace("\\u0020", " ").replace("\\u003Cbr\\u003E", " ")
+        s = s.replace("\\u0022", "\"").replace("\\u0020", " ").replace("\\u003Cbr\\u003E", Const.N)
         val bytes = mutableListOf<Byte>()
         i = s.indexOf("\\u")
         var n = 0
