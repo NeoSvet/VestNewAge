@@ -343,7 +343,7 @@ class LaunchUtils {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                     clearSummaryNotif(id)
                     InputData(0, Section.SUMMARY)
-                } else null
+                } else InputData(1, Section.SUMMARY)
             link.length < 2 || link == "/index.html" ->
                 InputData(0, Section.SITE)
             link == SiteToiler.NOVOSTI ->

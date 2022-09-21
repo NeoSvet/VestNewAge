@@ -8,9 +8,11 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.helper.SummaryHelper
+import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -65,13 +67,29 @@ class CheckService : LifecycleService() {
 
     private fun startLoad() {
         try {
-            if (checkSummary() && list.isNotEmpty)
+            if ((checkSummary() || checkAddition()) && list.isNotEmpty)
                 existsUpdates()
         } catch (ignored: Exception) {
         }
         loader.cancel()
         isRun = false
         postCommand(false)
+    }
+
+    private fun checkAddition(): Boolean {
+        val storage = AdditionStorage()
+        storage.open()
+        storage.findMax()
+        val loader = SummaryLoader(client)
+        val max = loader.loadMax()
+        if (max > storage.max) {
+            loader.loadAddition(storage, storage.max)
+            storage.close()
+            list.add(Pair(getString(R.string.new_in_additionally), Const.RSS))
+            return true
+        }
+        storage.close()
+        return false
     }
 
     private fun checkSummary(): Boolean {

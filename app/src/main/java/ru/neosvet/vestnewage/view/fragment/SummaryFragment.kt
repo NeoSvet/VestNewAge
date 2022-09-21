@@ -35,6 +35,15 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
 class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
+    companion object {
+        fun newInstance(tab: Int): SummaryFragment =
+            SummaryFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(Const.TAB, tab)
+                }
+            }
+    }
+
     private var binding: SummaryFragmentBinding? = null
     private val adRecycler = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private lateinit var adPaging: PagingAdapter
@@ -66,8 +75,14 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         initTabs()
-        if (savedInstanceState == null)
+        if (savedInstanceState == null) {
+            arguments?.let {
+                val tab = it.getInt(Const.TAB, 0)
+                binding?.tabLayout?.select(tab)
+                toiler.selectedTab = tab
+            }
             toiler.openList(true)
+        }
     }
 
     override fun onResume() {

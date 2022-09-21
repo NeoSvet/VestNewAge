@@ -375,7 +375,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 helper.frMenu?.setSelect(Section.NEW)
             }
             Section.SUMMARY -> {
-                curFragment = SummaryFragment().also {
+                curFragment = SummaryFragment.newInstance(tab).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
                 val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)

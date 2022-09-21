@@ -137,7 +137,7 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
         return row
     }
 
-    private fun loadMax(): Int {
+    fun loadMax(): Int {
         val stream = client.getStream("${additionUrl}max.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val s = br.readLine()

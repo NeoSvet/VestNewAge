@@ -84,6 +84,7 @@
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>
     <!--SummaryFragment-->
+    <string name="new_in_additionally">в Сводке-Дополнительном</string>
     <string name="additionally">Дополнительно</string>
     <string name="link_on_post">Ссылка на сообщение</string>
     <!--CalendarFragment-->
