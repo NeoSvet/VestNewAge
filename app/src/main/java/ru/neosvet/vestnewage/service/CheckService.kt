@@ -67,7 +67,9 @@ class CheckService : LifecycleService() {
 
     private fun startLoad() {
         try {
-            if ((checkSummary() || checkAddition()) && list.isNotEmpty)
+            val isNewRss = checkSummary()
+            val isNewAdd = checkAddition()
+            if ((isNewRss || isNewAdd) && list.isNotEmpty)
                 existsUpdates()
         } catch (ignored: Exception) {
         }
