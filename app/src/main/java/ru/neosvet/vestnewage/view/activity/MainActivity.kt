@@ -216,12 +216,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun initLaunch() {
         utils = LaunchUtils()
         utils.checkAdapterNewVersion()
-        if (utils.openLink(intent)) {
-            tab = utils.intent.getIntExtra(Const.TAB, tab)
-            utils.intent.getStringExtra(Const.CUR_ID)?.let {
-                firstSection = Section.valueOf(it)
-            }
-        } else if (utils.isNeedLoad) {
+        utils.openLink(intent)?.let {
+            if (it.tab == -1)
+                exit()
+            tab = it.tab
+            firstSection = it.section
+            return
+        }
+        if (utils.isNeedLoad) {
             NeoClient.deleteTempFiles()
             starLoad()
         }
@@ -253,7 +255,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.FIRST
             return
         }
-        firstSection = helper.getFirstSection()
+        if (firstSection == Section.CALENDAR)
+            firstSection = helper.getFirstSection()
         if (helper.startWithNew()) {
             setSection(Section.NEW, false)
             helper.prevSection = firstSection
@@ -375,7 +378,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 curFragment = SummaryFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
-                clearSummaryNotif()
+                val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
+                intent.removeExtra(DataBase.ID)
+                utils.clearSummaryNotif(id)
             }
             Section.SITE -> {
                 curFragment = SiteFragment.newInstance(tab).also {
@@ -397,11 +402,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     intent.hasExtra(Const.LINK) -> {
                         SearchFragment.newInstance(
                             intent.getStringExtra(Const.LINK), tab
-                        )
-                    }
-                    utils.intent.hasExtra(Const.LINK) -> {
-                        SearchFragment.newInstance(
-                            utils.intent.getStringExtra(Const.LINK), tab
                         )
                     }
                     else -> SearchFragment()
@@ -445,25 +445,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun setMenu(section: Section, savePrev: Boolean) {
         helper.changeSection(section, savePrev)
         if (helper.isSideMenu) helper.setMenuFragment()
-    }
-
-    private fun clearSummaryNotif() {
-        var id = 0
-        if (intent.hasExtra(DataBase.ID)) {
-            id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
-            intent.removeExtra(DataBase.ID)
-        } else if (utils.intent.hasExtra(DataBase.ID)) {
-            id = utils.intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
-            utils.intent.removeExtra(DataBase.ID)
-        }
-        if (id != 0) {
-            val helper = NotificationUtils()
-            var i = NotificationUtils.NOTIF_SUMMARY
-            while (i <= id) {
-                helper.cancel(i)
-                i++
-            }
-        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -31,10 +31,11 @@ class LaunchUtils {
         private var ver = -1
     }
 
+    data class InputData(val tab: Int, val section: Section)
+
     private val pref = App.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     private var notifId = START_ID
     private var notifHelper: NotificationUtils? = null
-    val intent = Intent()
 
     val isNeedLoad: Boolean
         get() = DateUnit.isLongAgo(pref.getLong(Const.TIME, 0))
@@ -331,50 +332,70 @@ class LaunchUtils {
         }
     }
 
-    fun openLink(intent: Intent): Boolean {
-        if (intent.getBooleanExtra(Const.ADS, false)) {
-            intent.putExtra(Const.CUR_ID, Section.SITE.toString())
-            intent.putExtra(Const.TAB, 2)
-            return true
+    fun openLink(intent: Intent): InputData? {
+        if (intent.getBooleanExtra(Const.ADS, false))
+            return InputData(2, Section.SITE)
+        val data = intent.data ?: return null
+        var link = data.path ?: return null
+        return when {
+            link.contains(Const.RSS) ->
+                if (intent.hasExtra(DataBase.ID)) {
+                    val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
+                    clearSummaryNotif(id)
+                    InputData(0, Section.SUMMARY)
+                } else null
+            link.length < 2 || link == "/index.html" ->
+                InputData(0, Section.SITE)
+            link == SiteToiler.NOVOSTI ->
+                InputData(1, Section.SITE)
+            link.contains(Const.HTML) -> {
+                if (link.contains("/tolk")) { //https://www.otkroveniya.info/tolk4/t4-15.09.16.html
+                    val i = link.lastIndexOf(".")
+                    val y = 2000 + link.substring(i - 2, i).toInt()
+                    link = "/print/$y/" + link.substring(i - 8)
+                }
+                openReader(link.substring(1), null)
+                InputData(-1, Section.MENU)
+            }
+            data.query?.contains("date") == true -> { //http://blagayavest.info/poems/?date=11-3-2017
+                val s = data.query!!.substring(5)
+                Lib.LOG("query: ${data.query!!}")
+                val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
+                link = (link.substring(1) + s.substring(0, s.indexOf("-"))
+                        + "." + (if (m.length == 1) "0" else "") + m
+                        + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML)
+                openReader(link, null)
+                InputData(-1, Section.MENU)
+            }
+            link.contains("-") -> { //https://blagayavest.info/poems/2022-09-17
+                val i = link.lastIndexOf("/") + 3
+                link = Const.POEMS + "/" + link.substring(i + 6, i + 8) + "." +
+                        link.substring(i + 3, i + 5) + "." + link.substring(i, i + 2) + ".html"
+                openReader(link, null)
+                InputData(-1, Section.MENU)
+            }
+            link.contains("/poems") ->
+                InputData(0, Section.BOOK)
+            link.contains("/tolkovaniya") || link.contains("/2016") ->
+                InputData(1, Section.BOOK)
+            else -> null
         }
-        val data = intent.data ?: return false
-        var link = data.path ?: return false
-        if (link.contains(Const.RSS)) {
-            intent.putExtra(Const.CUR_ID, Section.SUMMARY.toString())
-            if (intent.hasExtra(DataBase.ID)) intent.putExtra(
-                DataBase.ID, intent.getIntExtra(
-                    DataBase.ID,
-                    NotificationUtils.NOTIF_SUMMARY
-                )
-            )
-        } else if (link.length < 2 || link == "/index.html") {
-            intent.putExtra(Const.CUR_ID, Section.SITE.toString())
-            intent.putExtra(Const.TAB, 0)
-        } else if (link == SiteToiler.NOVOSTI) {
-            intent.putExtra(Const.CUR_ID, Section.SITE.toString())
-            intent.putExtra(Const.TAB, 1)
-        } else if (link.contains(Const.HTML)) {
-            openReader(link.substring(1), null)
-        } else if (data.query != null && data.query!!.contains("date")) { //http://blagayavest.info/poems/?date=11-3-2017
-            val s = data.query!!.substring(5)
-            val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
-            link = (link.substring(1) + s.substring(0, s.indexOf("-"))
-                    + "." + (if (m.length == 1) "0" else "") + m
-                    + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML)
-            openReader(link, null)
-        } else if (link.contains("/poems")) {
-            intent.putExtra(Const.CUR_ID, Section.BOOK.toString())
-            intent.putExtra(Const.TAB, 0)
-        } else if (link.contains("/tolkovaniya") || link.contains("/2016")) {
-            intent.putExtra(Const.CUR_ID, Section.BOOK.toString())
-            intent.putExtra(Const.TAB, 1)
-        }
-        return true
     }
 
     fun updateTime() {
         val editor = pref.edit()
         editor.putLong(Const.TIME, System.currentTimeMillis())
         editor.apply()
+    }
+
+    fun clearSummaryNotif(id: Int) {
+        if (id != 0) {
+            val helper = NotificationUtils()
+            var i = NotificationUtils.NOTIF_SUMMARY
+            while (i <= id) {
+                helper.cancel(i)
+                i++
+            }
+        }
     }
 }

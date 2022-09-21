@@ -37,27 +37,27 @@
                 <data
                     android:host="blagayavest.info"
                     android:pathPrefix="/"
-                    android:scheme="http" />
+                    android:scheme="https" />
                 <data
-                    android:host="otkroveniya.info"
+                    android:host="blagayavest.info"
                     android:pathPrefix="/"
                     android:scheme="http" />
                 <data
-                    android:host="otkroveniya.eu"
+                    android:host="otkroveniya.com"
                     android:pathPrefix="/"
-                    android:scheme="http" />
+                    android:scheme="https" />
                 <data
-                    android:host="otkroveniya.ru"
+                    android:host="www.otkroveniya.com"
                     android:pathPrefix="/"
-                    android:scheme="http" />
-                <data
-                    android:host="www.blagayavest.info"
-                    android:pathPrefix="/"
-                    android:scheme="http" />
+                    android:scheme="https" />
                 <data
                     android:host="www.otkroveniya.info"
                     android:pathPrefix="/"
-                    android:scheme="http" />
+                    android:scheme="https" />
+                <data
+                    android:host="www.otkroveniya.eu"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
                 <data
                     android:host="www.otkroveniya.eu"
                     android:pathPrefix="/"
@@ -67,15 +67,7 @@
                     android:pathPrefix="/"
                     android:scheme="http" />
                 <data
-                    android:host="www.otkroveniya.com"
-                    android:pathPrefix="/"
-                    android:scheme="http" />
-                <data
-                    android:host="o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru"
-                    android:pathPrefix="/"
-                    android:scheme="http" />
-                <data
-                    android:host="0s.o53xo.n52gw4tpozsw42lzmexgk5i.cmle.ru"
+                    android:host="otkroveniya.ru"
                     android:pathPrefix="/"
                     android:scheme="http" />
             </intent-filter>
