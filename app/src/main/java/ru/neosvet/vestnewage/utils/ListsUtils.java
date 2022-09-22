@@ -1,12 +1,9 @@
 package ru.neosvet.vestnewage.utils;
 
-import android.database.Cursor;
-
 import java.io.File;
 
 import ru.neosvet.vestnewage.data.DateUnit;
 import ru.neosvet.vestnewage.viewmodel.SiteToiler;
-import ru.neosvet.vestnewage.storage.PageStorage;
 
 public class ListsUtils {
     private final long timeNow;
