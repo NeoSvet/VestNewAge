@@ -185,10 +185,14 @@ class CabinetFragment : NeoFragment() {
         when (toiler.screen) {
             CabinetToiler.Screen.LOGIN -> {
                 val s = when (index) {
-                    0 -> "sendpass.html"
-                    1 -> "register.html"
-                    2 -> "reginfo.html"
-                    3 -> "regstat.html"
+                    0 -> {
+                        Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
+                        return
+                    }
+                    1 -> "sendpass.html"
+                    2 -> "register.html"
+                    3 -> "reginfo.html"
+                    4 -> "regstat.html"
                     else -> "trans.html"
                 }
                 CabinetActivity.openPage(s)
