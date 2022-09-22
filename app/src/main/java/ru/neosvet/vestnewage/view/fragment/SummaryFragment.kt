@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
@@ -224,10 +223,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            if (item.intent != null)
-                Lib.openInApps(item.intent.action, null)
-            else
-                Lib.openInApps(NetConst.TELEGRAM_URL + post, null)
+            Lib.openInApps(item.intent?.action ?: (NetConst.TELEGRAM_URL + post), null)
             true
         }
         pMenu.show()

@@ -505,14 +505,16 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun setBottomBar() = binding.run {
-        bottomBar.menu.let {
-            menu = NeoMenu(
-                refresh = it.getItem(4),
-                buttons = it.getItem(0).subMenu.getItem(0),
-                top = it.getItem(0).subMenu.getItem(1),
-                autoreturn = it.getItem(0).subMenu.getItem(2),
-                theme = it.getItem(0).subMenu.getItem(3),
-            )
+        bottomBar.menu.let { main ->
+            main.getItem(0).subMenu?.let {
+                menu = NeoMenu(
+                    refresh = main.getItem(4),
+                    buttons = it.getItem(0),
+                    top = it.getItem(1),
+                    autoreturn = it.getItem(2),
+                    theme = it.getItem(3),
+                )
+            }
         }
         bottomBar.setBackgroundResource(R.drawable.panel_bg)
         bottomBar.setOnMenuItemClickListener {

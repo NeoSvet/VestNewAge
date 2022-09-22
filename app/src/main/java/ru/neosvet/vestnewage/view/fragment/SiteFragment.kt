@@ -160,7 +160,7 @@ class SiteFragment : NeoFragment() {
             item.intent = Intent().apply { this.action = it.second }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            item.intent.action?.let {
+            item.intent?.action?.let {
                 openPage(it)
             }
             true
