@@ -113,7 +113,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                 list.isEmpty()
             } else {
                 openAddition()
-                postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
+                if (storage.max > 0)
+                    postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
                 storage.max == 0
             }
 
