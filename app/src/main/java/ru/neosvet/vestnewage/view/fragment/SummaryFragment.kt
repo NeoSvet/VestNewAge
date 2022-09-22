@@ -97,6 +97,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         binding?.run {
             val tabHost = tabLayout.getChildAt(0) as ViewGroup
             if (load) {
+                act?.initScrollBar(0, null)
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
             } else {

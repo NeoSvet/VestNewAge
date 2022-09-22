@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -86,7 +85,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private var jobList: Job? = null
     private var isUserScroll = true
     private var collectResult: Job? = null
-    private var prevMax = 0
+    private var maxPages = 0
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -189,6 +188,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     override fun setStatus(load: Boolean) {
         binding?.run {
             if (load) {
+                act?.initScrollBar(0, null)
                 act?.hideHead()
                 act?.blocked()
                 pStatus.isVisible = true
@@ -342,7 +342,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
-        act?.initScrollBar(0, null)
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -423,11 +422,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             bPanelSwitch.setImageResource(R.drawable.ic_bottom)
         content.tvLabel.text = helper.label
         if (helper.countMaterials > NeoPaging.ON_PAGE) {
-            val count = helper.countMaterials / NeoPaging.ON_PAGE - 1
-            if (prevMax != count) {
-                prevMax = count
-                act?.initScrollBar(count, this@SearchFragment::onScroll)
-            }
+            maxPages = helper.countMaterials / NeoPaging.ON_PAGE - 1
             onChangePage(0)
         }
         startPaging(toiler.page)
@@ -451,8 +446,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         setStatus(false)
         if (helper.countMaterials == 0 && helper.isNeedLoad.not())
             noResults()
-        else
+        else {
             showResult()
+            if (maxPages > 0)
+                act?.initScrollBar(maxPages, this::onScroll)
+        }
     }
 
     private fun noResults() {
