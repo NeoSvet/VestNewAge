@@ -67,7 +67,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }.root
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(BookToiler::class.java)
+        ViewModelProvider(this)[BookToiler::class.java]
 
     override fun onDestroyView() {
         binding = null

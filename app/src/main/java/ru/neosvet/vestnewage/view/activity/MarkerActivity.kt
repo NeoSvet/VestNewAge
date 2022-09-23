@@ -87,7 +87,7 @@ class MarkerActivity : AppCompatActivity() {
     }
 
     private val toiler: MarkerToiler by lazy {
-        ViewModelProvider(this).get(MarkerToiler::class.java).apply { init(baseContext) }
+        ViewModelProvider(this)[MarkerToiler::class.java].apply { init(baseContext) }
     }
     private val adPar: CheckAdapter by lazy {
         CheckAdapter(list = helper.parsList, onChecked = helper::checkPars)

@@ -69,7 +69,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private var twoPointers = false
     private var scroll: Job? = null
     private val toiler: BrowserToiler by lazy {
-        ViewModelProvider(this).get(BrowserToiler::class.java)
+        ViewModelProvider(this)[BrowserToiler::class.java]
     }
     private val stateUtils: StateUtils by lazy {
         StateUtils(this, toiler)

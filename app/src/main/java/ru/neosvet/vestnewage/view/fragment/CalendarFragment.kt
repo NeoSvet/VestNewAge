@@ -51,7 +51,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }.root
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(CalendarToiler::class.java)
+        ViewModelProvider(this)[CalendarToiler::class.java]
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         disableUpdateRoot()

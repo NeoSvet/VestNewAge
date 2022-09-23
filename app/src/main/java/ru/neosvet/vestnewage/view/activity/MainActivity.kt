@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun starLoad() {
-        val toiler = ViewModelProvider(this).get(MainToiler::class.java)
+        val toiler = ViewModelProvider(this)[MainToiler::class.java]
         lifecycleScope.launch {
             toiler.state.collect {
                 onChangedState(it)

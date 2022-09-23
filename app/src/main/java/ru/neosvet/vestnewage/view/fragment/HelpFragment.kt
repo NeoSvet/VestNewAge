@@ -36,7 +36,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
     }
 
     private val toiler: HelpToiler by lazy {
-        ViewModelProvider(this).get(HelpToiler::class.java)
+        ViewModelProvider(this)[HelpToiler::class.java]
     }
     private val adapter: HelpAdapter by lazy {
         HelpAdapter(toiler, toiler.list)

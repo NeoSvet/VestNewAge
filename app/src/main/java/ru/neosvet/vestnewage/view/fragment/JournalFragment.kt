@@ -39,7 +39,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private var isUserScroll = true
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(JournalToiler::class.java).apply { init(requireContext()) }
+        ViewModelProvider(this)[JournalToiler::class.java].apply { init(requireContext()) }
 
     override fun onDestroyView() {
         jobList?.cancel()

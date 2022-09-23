@@ -56,7 +56,7 @@ class SiteFragment : NeoFragment() {
     }.root
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(SiteToiler::class.java)
+        ViewModelProvider(this)[SiteToiler::class.java]
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()

@@ -71,7 +71,7 @@ class MarkersFragment : NeoFragment() {
         get() = getString(R.string.markers)
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(MarkersToiler::class.java).apply { init(requireContext()) }
+        ViewModelProvider(this)[MarkersToiler::class.java].apply { init(requireContext()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,

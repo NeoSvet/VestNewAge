@@ -69,9 +69,8 @@ class SettingsFragment : NeoFragment() {
         SettingsAdapter(toiler.panels, ScreenUtils.isWide)
     }
 
-    override fun initViewModel(): NeoToiler {
-        return ViewModelProvider(this).get(SettingsToiler::class.java)
-    }
+    override fun initViewModel(): NeoToiler =
+        ViewModelProvider(this)[SettingsToiler::class.java]
 
     override val title: String
         get() = getString(R.string.settings)

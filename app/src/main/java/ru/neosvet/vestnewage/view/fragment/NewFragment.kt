@@ -26,7 +26,7 @@ class NewFragment : NeoFragment() {
         get() = getString(R.string.new_section)
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(NewToiler::class.java).apply { init(requireActivity()) }
+        ViewModelProvider(this)[NewToiler::class.java].apply { init(requireActivity()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,

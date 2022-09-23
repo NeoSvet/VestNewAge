@@ -38,7 +38,7 @@ class CabinetFragment : NeoFragment() {
         get() = toiler.helper
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(CabinetToiler::class.java).apply { init(requireContext()) }
+        ViewModelProvider(this)[CabinetToiler::class.java].apply { init(requireContext()) }
 
     override val title: String
         get() = getString(R.string.cabinet)

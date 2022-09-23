@@ -55,7 +55,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     private var isUserScroll = true
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(SummaryToiler::class.java).apply { init(requireContext()) }
+        ViewModelProvider(this)[SummaryToiler::class.java].apply { init(requireContext()) }
 
     override fun onDestroyView() {
         jobList?.cancel()

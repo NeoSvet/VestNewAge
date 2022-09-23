@@ -112,7 +112,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }.root
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this).get(SearchToiler::class.java).apply { init(requireContext()) }
+        ViewModelProvider(this)[SearchToiler::class.java].apply { init(requireContext()) }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initSearchBox()
