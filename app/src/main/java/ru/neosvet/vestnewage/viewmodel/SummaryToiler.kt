@@ -48,8 +48,6 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         AdditionFactory(storage, paging)
     }
     private val client = NeoClient(NeoClient.Type.SECTION)
-    val page: Int
-        get() = factory.page
     val isLoading: Boolean
         get() = paging.isPaging
 

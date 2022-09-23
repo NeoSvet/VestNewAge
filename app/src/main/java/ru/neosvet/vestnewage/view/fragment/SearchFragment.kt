@@ -86,6 +86,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private var isUserScroll = true
     private var collectResult: Job? = null
     private var maxPages = 0
+    private var firstPosition = 0
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -207,6 +208,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         }
         if (toiler.shownResult) binding?.run {
             outState.putBoolean(ADDITION, content.pAdditionSet.isVisible)
+            firstPosition = adResult.firstPosition
+            outState.putInt(Const.PLACE, firstPosition)
         }
         super.onSaveInstanceState(outState)
     }
@@ -234,6 +237,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             bPanelSwitch.isVisible = true
             if (state.getBoolean(ADDITION))
                 showAdditionPanel()
+            firstPosition = state.getInt(Const.PLACE, 0)
         }
         state.getBundle(SETTINGS)?.let {
             openSettings()
@@ -342,6 +346,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
+        firstPosition = 0
         toiler.startSearch(request, mode)
         addRequest(request)
     }
@@ -425,7 +430,13 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             maxPages = helper.countMaterials / NeoPaging.ON_PAGE - 1
             onChangePage(0)
         }
-        startPaging(toiler.page)
+        if (firstPosition == 0)
+            startPaging(0)
+        else {
+            startPaging(firstPosition / NeoPaging.ON_PAGE)
+            if (firstPosition % NeoPaging.ON_PAGE > 0)
+                adResult.scrollTo(firstPosition)
+        }
     }
 
     private fun onScroll(value: Int) {

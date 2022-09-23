@@ -53,6 +53,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         get() = getString(R.string.summary)
     private var openedReader = false
     private var isUserScroll = true
+    private var firstPosition = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[SummaryToiler::class.java].apply { init(requireContext()) }
@@ -81,7 +82,18 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
                 toiler.selectedTab = tab
             }
             toiler.openList(true)
+        } else {
+            firstPosition = savedInstanceState.getInt(Const.PLACE, 0)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (toiler.isRss.not()) {
+            firstPosition = adPaging.firstPosition
+            Lib.LOG("save $firstPosition")
+            outState.putInt(Const.PLACE, firstPosition)
+        }
+        super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
@@ -184,7 +196,13 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         adPaging = PagingAdapter(this)
         binding?.rvSummary?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
-        startPaging(0)
+        if (firstPosition == 0)
+            startPaging(0)
+        else {
+            startPaging(firstPosition / NeoPaging.ON_PAGE)
+            if (firstPosition % NeoPaging.ON_PAGE > 0)
+                adPaging.scrollTo(firstPosition)
+        }
     }
 
     private fun onScroll(value: Int) {

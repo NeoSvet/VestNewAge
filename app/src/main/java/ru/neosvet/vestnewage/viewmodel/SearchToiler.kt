@@ -37,8 +37,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     override val factory: SearchFactory by lazy {
         SearchFactory(paging)
     }
-    val page: Int
-        get() = factory.page
     val isLoading: Boolean
         get() = paging.isPaging
     private var isInit = false

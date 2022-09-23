@@ -25,8 +25,6 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     override val factory: JournalFactory by lazy {
         JournalFactory(journal, strings, paging)
     }
-    val page: Int
-        get() = factory.page
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false

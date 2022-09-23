@@ -11,7 +11,6 @@ import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
@@ -37,6 +36,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         get() = getString(R.string.journal)
     private var jobList: Job? = null
     private var isUserScroll = true
+    private var firstPosition = 0
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[JournalToiler::class.java].apply { init(requireContext()) }
@@ -57,7 +57,16 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            firstPosition = savedInstanceState.getInt(Const.PLACE, 0)
+        }
         toiler.preparing()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        firstPosition = adapter.firstPosition
+        outState.putInt(Const.PLACE, firstPosition)
+        super.onSaveInstanceState(outState)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -70,6 +79,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     private fun startPaging(page: Int) {
         jobList?.cancel()
+        onChangePage(page)
         jobList = lifecycleScope.launch {
             toiler.paging(page, adapter).collect {
                 adapter.submitData(lifecycle, it)
@@ -123,16 +133,25 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         when (state) {
             NeoState.Success ->
                 act?.hideToast()
-            is NeoState.ListState -> {
-                if (state.index > NeoPaging.ON_PAGE)
-                    act?.initScrollBar(state.index / NeoPaging.ON_PAGE, this::onScroll)
-                startPaging(toiler.page)
-            }
+            is NeoState.ListState ->
+                openList(state.index)
             NeoState.Ready -> act?.run {
                 showStaticToast(getString(R.string.empty_journal))
                 setAction(0)
             }
             else -> {}
+        }
+    }
+
+    private fun openList(max: Int) {
+        if (max > NeoPaging.ON_PAGE)
+            act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
+        if (firstPosition == 0)
+            startPaging(0)
+        else {
+            startPaging(firstPosition / NeoPaging.ON_PAGE)
+            if (firstPosition % NeoPaging.ON_PAGE > 0)
+                adapter.scrollTo(firstPosition)
         }
     }
 
