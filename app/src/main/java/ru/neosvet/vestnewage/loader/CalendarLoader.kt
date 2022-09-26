@@ -61,7 +61,6 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private fun parseHtml(content: String) {
         val a = "href=\""
         var i = content.indexOf(a)
-        var n: Int
         while (i > -1) {
             i += a.length + 1
             val link = content.substring(i, content.indexOf("\"", i))
@@ -71,7 +70,6 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
                 list.add(ListItem(Lib.withOutTags(d)))
             else
                 list.add(ListItem(d))
-            Lib.LOG("first link $link")
             addLink(link)
             if (link.contains('_'))
                 checkLink(link, '_')
@@ -84,10 +82,8 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
                     4 -> !link.contains("06")
                     else -> true
                 }
-                if (add) {
-                    Lib.LOG("poem link ${link.replace("2016", Const.POEMS)}")
+                if (add)
                     addLink(link.replace("2016", Const.POEMS))
-                }
             }
             i = content.indexOf(a, i)
         }
@@ -96,11 +92,8 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private fun checkLink(link: String, c: Char) {
         var n = link.indexOf(c) + 1
         n = link.substring(n, n + 1).toInt()
-        if (n == 3) {
-            Lib.LOG("2 link ${link.replace("$c$n", "${c}2")}")
+        if (n == 3)
             addLink(link.replace("$c$n", "${c}2"))
-        }
-        Lib.LOG("0 link ${link.replace("$c$n", "")}")
         addLink(link.replace("$c$n", ""))
     }
 

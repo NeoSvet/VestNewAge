@@ -91,7 +91,6 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     override fun onSaveInstanceState(outState: Bundle) {
         if (toiler.isRss.not()) {
             firstPosition = adPaging.firstPosition
-            Lib.LOG("save $firstPosition")
             outState.putInt(Const.PLACE, firstPosition)
         }
         super.onSaveInstanceState(outState)

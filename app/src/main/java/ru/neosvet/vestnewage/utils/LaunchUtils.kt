@@ -359,7 +359,6 @@ class LaunchUtils {
             }
             data.query?.contains("date") == true -> { //http://blagayavest.info/poems/?date=11-3-2017
                 val s = data.query!!.substring(5)
-                Lib.LOG("query: ${data.query!!}")
                 val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
                 link = (link.substring(1) + s.substring(0, s.indexOf("-"))
                         + "." + (if (m.length == 1) "0" else "") + m
