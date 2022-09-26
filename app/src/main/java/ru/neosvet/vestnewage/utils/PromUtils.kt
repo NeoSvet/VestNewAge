@@ -140,7 +140,7 @@ class PromUtils(textView: View?) {
             if (tv.id == R.id.tvPromTimeFloat && isHours(t)) {
                 var n = App.context.getString(R.string.to_prom).length + 1
                 n = t.substring(n, n + 1).toInt()
-                tv.isVisible = n < 3
+                tv.post { tv.isVisible = n < 3 }
             }
         }
     }
