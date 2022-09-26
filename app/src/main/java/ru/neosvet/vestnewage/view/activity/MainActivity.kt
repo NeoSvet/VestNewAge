@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private lateinit var utils: LaunchUtils
     private var jobBottomArea: Job? = null
+    private var jobFinishStar: Job? = null
     private var isShowBottomArea = true
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
@@ -203,7 +204,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             })
             provider.view.startAnimation(anStar)
         }
-        lifecycleScope.launch {
+        jobFinishStar = lifecycleScope.launch {
             delay(1600)
             helper.fabAction.post {
                 finishFlashStar()
@@ -337,6 +338,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        jobFinishStar?.cancel()
         outState.putString(Const.CUR_ID, helper.curSection.toString())
         outState.putBoolean(Const.PANEL, isBlocked)
         outState.putBoolean(Const.DIALOG, helper.shownDwnDialog)
