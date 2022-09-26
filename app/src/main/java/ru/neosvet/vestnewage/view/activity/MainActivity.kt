@@ -628,10 +628,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         prom?.show()
     }
 
-    fun hideHead() {
-        helper.topBar?.setExpanded(false)
-    }
-
     fun lockHead() {
         helper.topBar?.let {
             it.setExpanded(false)

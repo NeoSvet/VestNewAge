@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -245,9 +244,11 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun goToEdit() {
-        act?.hideHead()
+        act?.let {
+            it.lockHead()
+            it.blocked()
+        }
         adapter.notifyItemChanged(toiler.iSel)
-        act?.blocked()
         binding?.content?.pEdit?.isVisible = true
     }
 
@@ -259,7 +260,10 @@ class MarkersFragment : NeoFragment() {
         }
         toiler.change = false
         binding?.content?.pEdit?.isVisible = false
-        act?.unblocked()
+        act?.let {
+            it.unlockHead()
+            it.unblocked()
+        }
     }
 
     private fun selectFile(isExport: Boolean) {
