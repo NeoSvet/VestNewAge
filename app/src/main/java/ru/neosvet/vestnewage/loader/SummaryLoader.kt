@@ -5,12 +5,14 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.*
 
@@ -90,6 +92,23 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider {
 
     private fun withOutTag(s: String): String {
         return s.substring(s.indexOf(">") + 1)
+    }
+
+    fun loadAllAddition(handler: LoadHandlerLite) {
+        val storage = AdditionStorage()
+        storage.open()
+        if (maxPost == 0) {
+            loadChanges(storage)
+            maxPost = loadMax()
+        }
+        var p = maxPost
+        while (p > 0) {
+            if (storage.hasPost(p).not())
+                storage.insert(loadPost(p))
+            p--
+            handler.postPercent(100 - p.percent(maxPost))
+        }
+        storage.close()
     }
 
     fun loadAddition(storage: AdditionStorage, startId: Int) {

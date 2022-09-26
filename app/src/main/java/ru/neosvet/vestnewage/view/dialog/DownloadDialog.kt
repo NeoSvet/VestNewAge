@@ -19,6 +19,8 @@ class DownloadDialog(
 ) : Dialog(act) {
     companion object {
         private const val BASIC_SIZE = 165000
+        private const val ADDITION_DAY_SIZE = 450
+        private const val ADDITION_IN_DAYS = 19078
         private const val DOCTRINE_SIZE = 215984
         private val BOOK_SIZE = arrayOf(
             1133299, 1056687, 1057064, 1010414, 972633, 484820
@@ -35,6 +37,7 @@ class DownloadDialog(
         DownloadDialogBinding.inflate(layoutInflater)
     }
     private lateinit var adapter: CheckAdapter
+    private var todayInDays = 0
     private var curYear = 0
     private var curYearInProc = 0f
     private var size: Int = 0
@@ -120,6 +123,7 @@ class DownloadDialog(
         list.add(CheckItem(context.getString(R.string.summary_site), 0, true))
         list.add(CheckItem(context.getString(R.string.doctrine_creator), 1))
         val d = DateUnit.initToday()
+        todayInDays = d.timeInDays
         curYear = d.year - 2000
         var i = curYear
         curYearInProc = d.month / 12f
@@ -169,7 +173,7 @@ class DownloadDialog(
         } else list.forEach {
             if (it.isChecked)
                 size += when (it.id) {
-                    0 -> BASIC_SIZE
+                    0 -> BASIC_SIZE + ADDITION_DAY_SIZE * (todayInDays - ADDITION_IN_DAYS)
                     1 -> DOCTRINE_SIZE
                     curYear -> (midSize * curYearInProc).toInt()
                     else -> {

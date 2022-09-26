@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
+import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -272,17 +273,22 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun loadBasic() {
         val listsUtils = ListsUtils()
-        if (listsUtils.summaryIsOld()) {
-            val loader = SummaryLoader(client)
-            loader.loadRss(false)
-
-        }
+        val summaryLoader = SummaryLoader(client)
+        if (listsUtils.summaryIsOld())
+            summaryLoader.loadRss(false)
         if (listsUtils.siteIsOld())
             loadSiteSection()
         if (isRun.not()) return
         loader.loadSummary()
         if (isRun.not()) return
         loader.loadSite()
+        if (isRun.not()) return
+        postMessage(getString(R.string.additionally))
+        summaryLoader.loadAllAddition(object : LoadHandlerLite {
+            override fun postPercent(value: Int) {
+                postMessage(getString(R.string.additionally) + " ($value%)")
+            }
+        })
         upProg()
     }
 
