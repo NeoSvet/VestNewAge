@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.utils.ErrorUtils
 
 abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
@@ -25,15 +26,18 @@ abstract class NeoToiler : StateToiler() {
         super.onCleared()
     }
 
-    private fun errorHandler(throwable: Throwable) {
+    protected fun errorHandler(throwable: Throwable) {
         throwable.printStackTrace()
         currentLoader?.cancel()
         scope = initScope()
         isRun = false
         if (loadIfNeed && throwable !is NeoException.BaseIsBusy)
             load()
-        else
-            setState(NeoState.Error(throwable, getInputData()))
+        else {
+            val utils = ErrorUtils(throwable)
+            if (utils.isNotSkip)
+                setState(utils.getErrorState(getInputData()))
+        }
     }
 
     open fun cancel() {

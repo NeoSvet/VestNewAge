@@ -175,8 +175,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         postState(NeoState.Ready)
     }
 
-    override fun postError(error: Exception) {
-        setState(NeoState.Error(error, getInputData()))
+    override fun postError(error: NeoState.Error) {
+        setState(error)
     }
 
     fun setEndings(context: Context) {

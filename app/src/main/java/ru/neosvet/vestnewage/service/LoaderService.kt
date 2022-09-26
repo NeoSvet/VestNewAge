@@ -95,7 +95,9 @@ class LoaderService : LifecycleService(), LoadHandler {
         throwable.printStackTrace()
         scope = initScope()
         stop()
-        finishService(NeoState.Error(throwable, getInputData()))
+        val utils = ErrorUtils(throwable)
+        if (utils.isNotSkip)
+            finishService(utils.getErrorState(getInputData()))
     }
 
     private fun getInputData(): Data = Data.Builder()

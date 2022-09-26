@@ -170,7 +170,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             postState(NeoState.Ready)
     }
 
-    override fun postError(error: Exception) {
-        setState(NeoState.Error(error, getInputData()))
+    override fun postError(error: NeoState.Error) {
+        setState(error)
     }
 }

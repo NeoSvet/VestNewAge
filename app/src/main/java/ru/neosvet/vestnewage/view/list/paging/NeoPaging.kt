@@ -4,11 +4,15 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 
 class NeoPaging(
     private val parent: Parent,
@@ -28,7 +32,7 @@ class NeoPaging(
         val isRun: Boolean
         val pagingScope: CoroutineScope
         suspend fun postFinish()
-        fun postError(error: Exception)
+        fun postError(error: NeoState.Error)
     }
 
     interface Pager {
@@ -72,7 +76,15 @@ class NeoPaging(
         }
     }
 
+    private fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, "Paging")
+        .putString("Parent", parent.javaClass.simpleName)
+        .putInt("Offset", parent.factory.offset)
+        .build()
+
     fun onError(error: Exception) {
-        parent.postError(error)
+        val utils = ErrorUtils(error)
+        if (utils.isNotSkip)
+            parent.postError(utils.getErrorState(getInputData()))
     }
 }
