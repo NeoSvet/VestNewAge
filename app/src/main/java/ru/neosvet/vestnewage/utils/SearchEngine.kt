@@ -131,8 +131,8 @@ class SearchEngine(
             if (d.timeInDays == finish) break
             d.changeMonth(step)
             val now = System.currentTimeMillis()
-            if (countMaterials - prev > NeoPaging.ON_PAGE &&
-                now - time > DELAY_UPDATE
+            if (((countMaterials < NeoPaging.ON_PAGE && countMaterials > prev) ||
+                        countMaterials - prev > NeoPaging.ON_PAGE) && now - time > DELAY_UPDATE
             ) {
                 time = now
                 parent.notifyResult()
