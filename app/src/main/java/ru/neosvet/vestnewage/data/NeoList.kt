@@ -9,6 +9,8 @@ class NeoList<T> : Iterator<T> {
     private var first: Node<T>? = null
     private var current: Node<T>? = null
     private var isFirst = true
+    var size = 0
+        private set
     val isNotEmpty: Boolean
         get() = current != null
 
@@ -18,6 +20,7 @@ class NeoList<T> : Iterator<T> {
     }
 
     fun add(elem: T) {
+        size++
         if (first == null) {
             first = Node(elem)
             current = first
@@ -47,6 +50,7 @@ class NeoList<T> : Iterator<T> {
     }
 
     fun clear() {
+        size = 0
         current = null
         while (first != null)
             first = first?.next
