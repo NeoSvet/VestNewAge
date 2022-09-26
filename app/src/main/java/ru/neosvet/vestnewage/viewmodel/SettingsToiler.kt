@@ -14,7 +14,7 @@ class SettingsToiler : NeoToiler() {
     companion object {
         const val CLEAR_CACHE = 0
         const val CLEAR_MARKERS = 1
-        const val CLEAR_ARTICLES = 2
+        const val CLEAR_ART_AND_ADD = 2
         const val CLEAR_DOCTRINE = 3
         const val CLEAR_OLD_BOOK = 4
         const val CLEAR_NEW_BOOK = 5
@@ -44,8 +44,10 @@ class SettingsToiler : NeoToiler() {
                         clearFolder(Lib.getFileP("/cache"))
                     CLEAR_MARKERS ->
                         deleteFile(DataBase.MARKERS)
-                    CLEAR_ARTICLES ->
+                    CLEAR_ART_AND_ADD -> {
                         deleteFile(DataBase.ARTICLES)
+                        deleteFile(DataBase.ADDITION)
+                    }
                     CLEAR_DOCTRINE ->
                         deleteFile(DataBase.DOCTRINE)
                     CLEAR_OLD_BOOK ->
