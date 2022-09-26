@@ -8,7 +8,7 @@
         android:id="@+id/rvSettings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/content_margin_bottom"
+        android:layout_marginBottom="@dimen/title_margin_bottom"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
