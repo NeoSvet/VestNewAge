@@ -84,7 +84,7 @@
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>
     <!--SummaryFragment-->
-    <string name="new_in_additionally">в Сводке-Дополнительном</string>
+    <string name="new_in_additionally">Новое в Сводке-Дополнительном</string>
     <string name="additionally">Дополнительно</string>
     <string name="link_on_post">Ссылка на сообщение</string>
     <!--CalendarFragment-->
@@ -257,7 +257,6 @@
     <string name="done">Готово</string>
     <!--SummaryNotif-->
     <string name="check_new">Проверка на наличие нового</string>
-    <string name="appeared_new">Новое:&#160;</string>
     <string name="appeared_new_some">Новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
     <string name="postpone">Отложить</string>

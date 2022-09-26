@@ -117,7 +117,7 @@ public class SummaryHelper {
     }
 
     public void singleNotification(String text) {
-        notifBuilder.setContentText(App.context.getString(R.string.appeared_new) + text);
+        notifBuilder.setContentText(text);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }

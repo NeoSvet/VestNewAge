@@ -55,8 +55,8 @@ class CheckService : LifecycleService() {
 
     private fun initNotif() {
         val context = applicationContext
-        val notifHelper = NotificationUtils()
-        val notif = notifHelper.getNotification(
+        val utils = NotificationUtils()
+        val notif = utils.getNotification(
             context.getString(R.string.site_name),
             context.getString(R.string.check_new),
             NotificationUtils.CHANNEL_MUTE
@@ -175,23 +175,24 @@ class CheckService : LifecycleService() {
     }
 
     private fun existsUpdates() {
-        val summaryHelper = SummaryHelper()
-        summaryHelper.updateBook()
-        val several = list.first() != list.current()
+        val helper = SummaryHelper()
+        val several = list.size > 2 || (list.size == 2 && list.current().second != Const.RSS)
+        if (several || list.first().second != Const.RSS)
+            helper.updateBook()
         list.reset(true)
         list.forEach {
-            if (summaryHelper.isNotification && !several)
-                summaryHelper.showNotification()
-            summaryHelper.createNotification(it.first, it.second)
+            if (helper.isNotification && !several)
+                helper.showNotification()
+            helper.createNotification(it.first, it.second)
             if (several)
-                summaryHelper.muteNotification()
+                helper.muteNotification()
         }
         if (several)
-            summaryHelper.groupNotification()
+            helper.groupNotification()
         else
-            summaryHelper.singleNotification(list.first().first)
-        summaryHelper.setPreferences()
-        summaryHelper.showNotification()
+            helper.singleNotification(list.current().first)
+        helper.setPreferences()
+        helper.showNotification()
         list.clear()
     }
 }
