@@ -33,7 +33,7 @@ class PageStorage : Closeable {
                 } else if (s.contains("-")) { ///2005/01-02.08.05.html
                     s = s.substring(s.indexOf("-") + 4, s.lastIndexOf("."))
                 } else { //http://blagayavest.info/poems/11.03.17.html
-                    s = s.date.substring(3)
+                    s = if (s.noHasDate) DataBase.ARTICLES else s.date.substring(3)
                 }
                 s
             }

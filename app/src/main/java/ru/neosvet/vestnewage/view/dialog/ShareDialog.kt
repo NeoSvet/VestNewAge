@@ -23,6 +23,7 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.date
+import ru.neosvet.vestnewage.utils.noHasDate
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class ShareDialog : BottomSheetDialogFragment() {
@@ -121,7 +122,8 @@ class ShareDialog : BottomSheetDialogFragment() {
     private fun initOptions() {
         val list = mutableListOf<CheckItem>()
         var i = 0
-        val d = DateUnit.parse(link.date)
+        val d = if (link.noHasDate) DateUnit.initToday()
+        else DateUnit.parse(link.date)
         if (d.year < 2016) //no share link
             options[2] = false
         resources.getStringArray(R.array.share_list).forEach {
