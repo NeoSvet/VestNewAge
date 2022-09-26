@@ -265,7 +265,11 @@ public class DateUnit {
         int i = time.getSecond() + offset;
         if (i < 0) {
             changeMinutes(i / GRAD - 1);
-            setSeconds(i % GRAD + GRAD);
+            i = i % GRAD;
+            if (i == 0)
+                setSeconds(0);
+            else
+                setSeconds(i + GRAD);
         } else if (i >= GRAD) {
             changeMinutes(i / GRAD);
             setSeconds(i % GRAD);
@@ -278,7 +282,11 @@ public class DateUnit {
         int i = time.getMinute() + offset;
         if (i < 0) {
             changeHours(i / GRAD - 1);
-            setMinutes(i % GRAD + GRAD);
+            i = i % GRAD;
+            if (i == 0)
+                setMinutes(0);
+            else
+                setMinutes(i + GRAD);
         } else if (i >= GRAD) {
             changeHours(i / GRAD);
             setMinutes(i % GRAD);
@@ -291,7 +299,11 @@ public class DateUnit {
         int i = time.getHour() + offset;
         if (i < 0) {
             changeDay(i / DAY_IN_HOUR - 1);
-            setHours(i % DAY_IN_HOUR + DAY_IN_HOUR);
+            i = i % DAY_IN_HOUR;
+            if (i == 0)
+                setHours(0);
+            else
+                setHours(i + DAY_IN_HOUR);
         } else if (i >= DAY_IN_HOUR) {
             changeDay(i / DAY_IN_HOUR);
             setHours(i % DAY_IN_HOUR);
