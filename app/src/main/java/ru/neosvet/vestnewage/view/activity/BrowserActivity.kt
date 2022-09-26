@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -623,8 +622,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
             }
-            NeoState.Ready ->
+            NeoState.Ready -> {
                 binding.tvNotFound.isVisible = true
+                menu.refresh.isVisible = false
+            }
             NeoState.Success ->
                 tipFinish.show()
             is NeoState.Error ->
