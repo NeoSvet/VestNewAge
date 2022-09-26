@@ -171,6 +171,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onDestroyView() {
+        act?.unlockHead()
         helper.saveRequest()
         binding = null
         super.onDestroyView()
@@ -189,13 +190,18 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     override fun setStatus(load: Boolean) {
         binding?.run {
             if (load) {
-                act?.initScrollBar(0, null)
-                act?.hideHead()
-                act?.blocked()
+                act?.let {
+                    it.initScrollBar(0, null)
+                    it.lockHead()
+                    it.blocked()
+                }
                 pStatus.isVisible = true
                 etSearch.isEnabled = false
             } else {
-                act?.unblocked()
+                act?.let {
+                    it.unlockHead()
+                    it.unblocked()
+                }
                 pStatus.isVisible = false
                 etSearch.isEnabled = true
             }
@@ -315,7 +321,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     private fun showAdditionPanel() {
-        act?.hideHead()
+        act?.lockHead()
         binding?.run {
             bPanelSwitch.setImageResource(R.drawable.ic_top)
             content.pAdditionSet.isVisible = true
@@ -551,16 +557,19 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onChangePage(page: Int) {
+        if (page > 0)
+            act?.lockHead()
         isUserScroll = false
         act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
-        act?.temporaryBlockHead()
         if (toiler.isLoading)
             act?.showToast(getString(R.string.search_continue))
-        else
-            act?.showToast(getString(R.string.finish_list))
+        else act?.let {
+            it.showToast(getString(R.string.finish_list))
+            it.unlockHead()
+        }
     }
 }

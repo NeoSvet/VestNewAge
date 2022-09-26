@@ -95,7 +95,7 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.lukelorusso.verticalseekbar.VerticalSeekBar
+    <ru.neosvet.vestnewage.view.basic.NeoScrollBar
         android:id="@+id/vsbScrollBar"
         android:layout_width="40dp"
         android:layout_height="match_parent"

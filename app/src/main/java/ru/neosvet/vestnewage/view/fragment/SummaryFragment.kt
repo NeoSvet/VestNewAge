@@ -59,6 +59,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         ViewModelProvider(this)[SummaryToiler::class.java].apply { init(requireContext()) }
 
     override fun onDestroyView() {
+        act?.unlockHead()
         jobList?.cancel()
         binding = null
         super.onDestroyView()
@@ -154,8 +155,10 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
 
             override fun onTabSelected(tab: TabLayout.Tab) {
                 toiler.selectedTab = tab.position
-                if (toiler.isRss)
+                if (toiler.isRss) {
                     act?.initScrollBar(0, null)
+                    act?.unlockHead()
+                }
                 adRecycler.clear()
                 toiler.openList(true)
             }
@@ -265,16 +268,19 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onChangePage(page: Int) {
+        if (page > 0)
+            act?.lockHead()
         isUserScroll = false
         act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
-        act?.temporaryBlockHead()
         if (toiler.isLoading)
             act?.showStaticToast(getString(R.string.load))
-        else
-            act?.showToast(getString(R.string.finish_list))
+        else act?.let {
+            it.showToast(getString(R.string.finish_list))
+            it.unlockHead()
+        }
     }
 }

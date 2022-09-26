@@ -116,17 +116,20 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onChangePage(page: Int) {
+        if (page > 0)
+            act?.lockHead()
         isUserScroll = false
         act?.setScrollBar(page)
         isUserScroll = true
     }
 
     override fun onFinishList() {
-        act?.temporaryBlockHead()
         if (toiler.isLoading)
             act?.showToast(getString(R.string.load))
-        else
-            act?.showToast(getString(R.string.finish_list))
+        else act?.let {
+            it.showToast(getString(R.string.finish_list))
+            it.unlockHead()
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {

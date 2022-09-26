@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
@@ -18,10 +19,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -74,7 +73,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.PAGE
         }
     }
-    private var isMoveScrollBar = true
 
     val newId: Int
         get() = helper.newId
@@ -634,23 +632,23 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.topBar?.setExpanded(false)
     }
 
-    fun temporaryBlockHead() {
-        findViewById<CollapsingToolbarLayout>(R.id.collapsingBar)?.let {
-            val params = it.layoutParams as AppBarLayout.LayoutParams
-            val flags = params.scrollFlags
-            it.updateLayoutParams<AppBarLayout.LayoutParams> {
-                scrollFlags = 0
-            }
-            helper.topBar?.isVisible = false
-            lifecycleScope.launch {
-                delay(500)
-                it.post {
-                    helper.topBar?.isVisible = true
-                    it.updateLayoutParams<AppBarLayout.LayoutParams> {
-                        scrollFlags = flags
-                    }
-                }
-            }
+    fun lockHead() {
+        helper.topBar?.let {
+            it.setExpanded(false)
+            it.isVisible = false
+        }
+        helper.svMain?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            behavior = null
+        }
+    }
+
+    fun unlockHead() {
+        helper.svMain?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            behavior = AppBarLayout.ScrollingViewBehavior()
+        }
+        helper.topBar?.let {
+            it.setExpanded(true)
+            it.isVisible = true
         }
     }
 
@@ -681,35 +679,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun initScrollBar(max: Int, onChange: ((Int) -> Unit)?) = helper.vsbScrollBar.let {
-        it.isVisible = onChange?.let { event ->
-            helper.moveScrollBar(false)
-            it.maxValue = max
-            it.progress = max
-            it.setOnReleaseListener { v ->
-                hideHead()
-                event.invoke(max - v)
-                lifecycleScope.launch {
-                    delay(900)
-                    helper.moveScrollBar(true)
-                }
-            }
-            it.setOnProgressChangeListener { v ->
-                if (isMoveScrollBar)
-                    helper.moveScrollBar(false)
-                else
-                    isMoveScrollBar = true
-            }
-            lifecycleScope.launch {
-                delay(600)
-                helper.moveScrollBar(true)
-            }
+    fun initScrollBar(max: Int, onChange: ((Int) -> Unit)?) {
+        helper.vsbScrollBar.isVisible = onChange?.let { event ->
+            helper.vsbScrollBar.init(max, lifecycleScope, event)
             true
         } ?: false
     }
 
     fun setScrollBar(value: Int) {
-        isMoveScrollBar = false
-        helper.vsbScrollBar.progress = helper.vsbScrollBar.maxValue - value
+        helper.vsbScrollBar.value = value
     }
 }
