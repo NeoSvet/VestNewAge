@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
 
@@ -26,7 +27,8 @@ class ErrorUtils(private val throwable: Throwable) {
                 App.context.getString(R.string.unknown_error)
             }
             throwable is SocketTimeoutException || throwable is SocketException ||
-                    throwable is SSLHandshakeException || throwable is CertificateException ->
+                    throwable is UnknownHostException || throwable is SSLHandshakeException ||
+                    throwable is CertificateException ->
                 App.context.getString(R.string.site_no_response)
             else -> {
                 isNeedReport = throwable !is NeoException
