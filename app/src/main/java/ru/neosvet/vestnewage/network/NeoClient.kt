@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.network
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException.SiteCode
@@ -79,10 +80,10 @@ class NeoClient(
             e.printStackTrace()
             throw SiteNoResponse()
         }
-        if (response.code != 200) throw SiteCode(response.code)
-        if (response.body == null) throw SiteNoResponse()
-        val inStream = response.body!!.byteStream()
-        val max = response.body!!.contentLength().toInt()
+        if (response.isSuccessful.not()) throw SiteCode(response.code)
+        if (response.promisesBody().not()) throw SiteNoResponse()
+        val inStream = response.body.byteStream()
+        val max = response.body.contentLength().toInt()
         val file = Lib.getFileP(PATH + type.value)
         if (file.exists()) file.delete()
         val outStream = FileOutputStream(file)
