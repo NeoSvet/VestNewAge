@@ -133,7 +133,10 @@ class MainToiler : NeoToiler() {
 
     private suspend fun synchronizationTime(): Int {
         val builderRequest = Request.Builder()
-        builderRequest.url(NetConst.SITE)
+        if (NeoClient.isSiteCom)
+            builderRequest.url(NetConst.SITE_COM)
+        else
+            builderRequest.url(NetConst.SITE)
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         val client = NeoClient.createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
