@@ -75,10 +75,10 @@ class MenuFragment : Fragment() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
-        rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
-        }
         if (isTabletLand.not()) {
+            rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
+            }
             isFullScreen = true
             act!!.title = getString(R.string.app_name)
         }
