@@ -49,13 +49,9 @@ class LaunchUtils {
         get() {
             val prev = pref.getInt("ver", 0)
             try {
-                val cur = App.context.packageManager.getPackageInfo(
-                    App.context.packageName,
-                    0
-                ).versionCode
-                if (prev < cur) {
+                if (prev < App.version) {
                     val editor = pref.edit()
-                    editor.putInt("ver", cur)
+                    editor.putInt("ver", App.version)
                     editor.apply()
                     reInitProm()
                 }

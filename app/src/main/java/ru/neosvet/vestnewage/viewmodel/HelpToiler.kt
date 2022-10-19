@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.NetConst
@@ -41,7 +42,6 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
     private lateinit var strings: HelpStrings
     private var feedback = false
     private var tips = false
-    private var verCode = 0
     private var verName = ""
     val list = mutableListOf<HelpItem>()
     private val listFeedback = mutableListOf<HelpItem>()
@@ -62,7 +62,6 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
         restore()
 
         verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName
-        verCode = act.packageManager.getPackageInfo(act.packageName, 0).versionCode
         strings = HelpStrings(
             srv_info = act.getString(R.string.srv_info),
             format_info = act.getString(R.string.format_info),
@@ -86,7 +85,7 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
                     title = strings.feedback[i],
                     opened = true,
                     content = String.format(
-                        strings.format_info, verName, verCode,
+                        strings.format_info, verName, App.version,
                         Build.VERSION.RELEASE,
                         Build.VERSION.SDK_INT
                     )

@@ -80,10 +80,7 @@ class ErrorUtils(private val throwable: Throwable) {
                         App.context.packageName,
                         0
                     ).versionName,
-                    App.context.packageManager.getPackageInfo(
-                        App.context.packageName,
-                        0
-                    ).versionCode,
+                    App.version,
                     Build.VERSION.RELEASE,
                     Build.VERSION.SDK_INT
                 )

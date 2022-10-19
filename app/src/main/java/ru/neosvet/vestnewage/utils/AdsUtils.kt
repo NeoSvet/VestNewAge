@@ -111,11 +111,7 @@ class AdsUtils(private val storage: AdsStorage) {
                 AdsStorage.MODE_T -> continue
                 AdsStorage.MODE_U -> {
                     m = t.toByte()
-                    val item = if (m > App.context.packageManager.getPackageInfo(
-                            App.context.packageName,
-                            0
-                        ).versionCode
-                    )
+                    val item = if (m > App.version)
                         ListItem(ad + App.context.getString(R.string.access_new_version))
                     else
                         ListItem(ad + App.context.getString(R.string.current_version))

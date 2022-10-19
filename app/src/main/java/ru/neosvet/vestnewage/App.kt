@@ -7,6 +7,8 @@ import ru.neosvet.vestnewage.network.OnlineObserver
 class App : Application() {
     companion object {
         lateinit var context: Context
+        val version: Int
+            get() = context.packageManager.getPackageInfo(context.packageName, 0).versionCode
     }
 
     override fun onCreate() {
