@@ -7,9 +7,11 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
@@ -185,11 +187,10 @@ class CabinetToiler : NeoToiler() {
         builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
         val client = createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
-        val br = BufferedReader(
-            InputStreamReader(
-                response.body!!.byteStream(), Const.ENCODING
-            ), 1000
-        )
+        if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
+        if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
+        val inStream = response.body.byteStream()
+        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING), 1000)
         var s = br.readLine()
         while (s != null) {
             if (s.contains(ERROR_BOX) || s.contains(WORDS_BOX)) //s.contains("fd_box") &
@@ -250,11 +251,10 @@ class CabinetToiler : NeoToiler() {
         builderRequest.post(requestBody)
         val client = createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()
-        val br = BufferedReader(
-            InputStreamReader(
-                response.body!!.byteStream(), Const.ENCODING
-            ), 1000
-        )
+        if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
+        if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
+        val inStream = response.body.byteStream()
+        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING), 1000)
         val s = br.readLine()
         br.close()
         response.close()

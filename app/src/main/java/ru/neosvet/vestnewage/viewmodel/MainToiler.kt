@@ -4,10 +4,12 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import okhttp3.Request
+import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
@@ -55,8 +57,10 @@ class MainToiler : NeoToiler() {
             .build()
         val client = NeoClient.createHttpClient()
         val response = client.newCall(request).execute()
-        val stream = response.body!!.byteStream()
-        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING))
+        if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
+        if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
+        val inStream = response.body.byteStream()
+        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING))
         var s = br.readLine()
         while (!s.contains("quote"))
             s = br.readLine()
