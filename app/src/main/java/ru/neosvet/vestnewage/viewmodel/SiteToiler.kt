@@ -67,7 +67,7 @@ class SiteToiler : NeoToiler() {
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Site")
-        .putString(Const.FILE, file.toString())
+        .putInt(Const.TAB, selectedTab)
         .putString(Const.LINK, url)
         .build()
 
