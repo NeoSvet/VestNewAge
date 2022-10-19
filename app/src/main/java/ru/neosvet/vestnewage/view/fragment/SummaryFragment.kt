@@ -237,7 +237,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         val post = links.link
         links.headsAndLinks().forEach {
             if (it.second == post)
-                pMenu.menu.add(getString(R.string.link_on_post))
+                pMenu.menu.add(getString(R.string.open_post))
             else {
                 val item = pMenu.menu.add(it.first)
                 item.intent = Intent().apply { this.action = it.second }
