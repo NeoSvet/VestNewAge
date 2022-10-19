@@ -9,8 +9,8 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdk 23
         targetSdk 33
-        versionCode 65
-        versionName "4.4"
+        versionCode 66
+        versionName "4.5"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
@@ -29,6 +29,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'ru.neosvet.vestnewage'
 }
 
 dependencies {
