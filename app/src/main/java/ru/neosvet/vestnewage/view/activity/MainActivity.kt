@@ -70,6 +70,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
     private val snackbar = NeoSnackbar()
+    private val toiler: MainToiler by lazy {
+        ViewModelProvider(this)[MainToiler::class.java]
+    }
     private val toast: NeoToast by lazy {
         NeoToast(helper.tvToast) {
             statusBack = StatusBack.PAGE
@@ -107,6 +110,15 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             intent.getStringExtra(Const.SEARCH)?.let {
                 openSearch(it)
                 statusBack = StatusBack.EXIT
+            }
+        }
+        if (toiler.isRun) runObservation()
+    }
+
+    private fun runObservation() {
+        lifecycleScope.launch {
+            toiler.state.collect {
+                onChangedState(it)
             }
         }
     }
@@ -225,18 +237,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
         if (utils.isNeedLoad) {
             NeoClient.deleteTempFiles()
-            starLoad()
+            runObservation()
+            toiler.load()
         }
-    }
-
-    private fun starLoad() {
-        val toiler = ViewModelProvider(this)[MainToiler::class.java]
-        lifecycleScope.launch {
-            toiler.state.collect {
-                onChangedState(it)
-            }
-        }
-        toiler.load()
     }
 
     fun setFragment(fragment: NeoFragment) {
