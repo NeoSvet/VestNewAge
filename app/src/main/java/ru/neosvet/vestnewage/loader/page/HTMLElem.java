@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.loader.page;
 
 public class HTMLElem {
     public String tag, par = "";
-    public String html = "";
+    private String html = "";
     public boolean start = false, end = false;
 
     public HTMLElem() {
@@ -19,7 +19,7 @@ public class HTMLElem {
     }
 
     public void setHtml(String html) {
-        if (html.contains("& ")) //"&#x"
+        if (html.contains("&")) //"&#x"
             this.html = android.text.Html.fromHtml(html).toString();
         else
             this.html = html;

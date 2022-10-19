@@ -101,17 +101,17 @@ public class PageParser {
                 if (content.isNotEmpty()) {
                     if (content.current().tag.equals(elem.tag)) {
                         content.current().end = true;
-                        if (s.indexOf(">") < s.length() - 1) {
-                            elem = new HTMLElem(Const.TEXT);
-                            elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
-                            content.add(elem);
-                        }
-                        continue;
+                    } else {
+                        elem.start = false;
+                        elem.end = true;
+                        content.add(elem);
                     }
-                    elem.start = false;
-                    elem.end = true;
                 }
-                content.add(elem);
+                if (s.indexOf(">") < s.length() - 1) {
+                    elem = new HTMLElem(Const.TEXT);
+                    elem.setHtml(s.substring(s.indexOf(">") + 1));
+                    content.add(elem);
+                }
                 continue;
             }
             elem.start = true;
@@ -119,7 +119,7 @@ public class PageParser {
             elem.tag = s.substring(0, n);
             elem.setHtml(m[i].substring(m[i].indexOf(">") + 1));
             if (elem.tag.equals("em") || elem.tag.equals("i")) {
-                content.current().setHtml(content.current().html + elem.html);
+                content.current().setHtml(content.current().getHtml() + elem.getHtml());
                 continue;
             }
             if (elem.tag.equals(Const.PAR)) {
@@ -162,7 +162,7 @@ public class PageParser {
                     else if (elem.par.contains("noind")) {
                         if (wasNoind) {
                             content.current().tag = Const.LINE;
-                            content.current().html = elem.html;
+                            content.current().setHtml(elem.getHtml());
                             wasNoind = false;
                             continue;
                         } else
@@ -249,7 +249,7 @@ public class PageParser {
     }
 
     public String getText() {
-        return Lib.withOutTags(content.current().html);
+        return Lib.withOutTags(content.current().getHtml());
     }
 
     public boolean isHead() {
