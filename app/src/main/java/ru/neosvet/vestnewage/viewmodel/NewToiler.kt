@@ -1,10 +1,11 @@
 package ru.neosvet.vestnewage.viewmodel
 
-import android.app.Activity
 import androidx.work.Data
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -17,20 +18,20 @@ class NewToiler : NeoToiler() {
 
     var needOpen: Boolean = true
     private var isInit = false
+    private val storage = AdsStorage()
     private lateinit var ads: AdsUtils
     private lateinit var poemFrom: String
-    private var task: Task = Task.NONE
+    private var task = Task.NONE
 
-    fun init(act: Activity) {
+    fun init() {
         if (isInit) return
-        ads = AdsUtils(act)
-        poemFrom = act.getString(R.string.poem) +
-                " " + act.getString(R.string.from) + " "
+        ads = AdsUtils(storage)
+        poemFrom = App.context.getString(R.string.poem) + " " + App.context.getString(R.string.from) + " "
         isInit = true
     }
 
     override fun onDestroy() {
-        ads.close()
+        storage.close()
     }
 
     override fun getInputData(): Data = Data.Builder()
@@ -49,10 +50,10 @@ class NewToiler : NeoToiler() {
             var s: String
             var n: Int
             val unread = UnreadUtils()
-            unread.setBadge(ads.unreadCount)
+            unread.setBadge(storage.unreadCount)
             if (unread.lastModified() > 0) {
                 val links = unread.list
-                for (i in links.size - 1 downTo -1 + 1) {
+                for (i in links.size - 1 downTo 0) {
                     s = links[i]
                     t = s.substring(s.lastIndexOf(File.separator) + 1)
                     if (t.contains("_")) {
@@ -70,18 +71,7 @@ class NewToiler : NeoToiler() {
             }
             postState(NeoState.ListValue(list))
             needOpen = false
-            if (ads.index > -1)
-                showAd(list[ads.index])
         }
-    }
-
-    private fun showAd(item: ListItem) {
-        val t = item.title
-        ads.showAd(
-            t.substring(t.indexOf(" ") + 1),
-            item.link,
-            item.head
-        )
     }
 
     fun clearList() {
@@ -89,14 +79,12 @@ class NewToiler : NeoToiler() {
         scope.launch {
             val unread = UnreadUtils()
             unread.clearList()
-            unread.setBadge(ads.unreadCount)
+            unread.setBadge(storage.unreadCount)
             postState(NeoState.Ready)
         }
     }
 
-    fun openAd(item: ListItem, pos: Int) {
-        task = Task.NONE
-        ads.index = pos
-        showAd(item)
+    fun readAds(item: ListItem) {
+        storage.setRead(item)
     }
 }

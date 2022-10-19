@@ -9,6 +9,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -47,12 +48,21 @@ class SiteToiler : NeoToiler() {
             NetConst.SITE
         else
             NetConst.SITE + NOVOSTI
-    private val ads: AdsUtils by lazy {
-        AdsUtils(App.context)
+    private val storage: AdsStorage by lazy {
+        AdsStorage()
     }
+    private val ads: AdsUtils by lazy {
+        AdsUtils(storage)
+    }
+    val isDevTab: Boolean
+        get() = selectedTab == TAB_DEV
+    val isNewsTab: Boolean
+        get() = selectedTab == TAB_NEWS
+    val isSiteTab: Boolean
+        get() = selectedTab == TAB_SITE
 
     override fun onDestroy() {
-        ads.close()
+        storage.close()
     }
 
     override fun getInputData(): Data = Data.Builder()
@@ -63,7 +73,7 @@ class SiteToiler : NeoToiler() {
 
     override suspend fun doLoad() {
         if (selectedTab == TAB_DEV)
-            loadAds()
+            loadAds(true)
         else
             loadList()
     }
@@ -76,8 +86,8 @@ class SiteToiler : NeoToiler() {
         postState(NeoState.ListValue(list))
     }
 
-    private suspend fun loadAds() {
-        ads.loadAds(client)
+    private suspend fun loadAds(reload: Boolean) {
+        if (reload) ads.loadAds(client)
         postState(NeoState.LongValue(ads.time))
         val list = ads.loadList(false)
         list.add(0, getFirstItem())
@@ -143,17 +153,11 @@ class SiteToiler : NeoToiler() {
     fun openAds() {
         loadIfNeed = false
         scope.launch {
-            postState(NeoState.LongValue(ads.time))
-            val list = ads.loadList(false)
-            list.add(0, getFirstItem())
-            postState(NeoState.ListValue(list))
+            loadAds(false)
         }
     }
 
-    val isDevTab: Boolean
-        get() = selectedTab == TAB_DEV
-    val isNewsTab: Boolean
-        get() = selectedTab == TAB_NEWS
-    val isSiteTab: Boolean
-        get() = selectedTab == TAB_SITE
+    fun readAds(item: ListItem) {
+        storage.setRead(item)
+    }
 }

@@ -7,6 +7,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 
 class UnreadUtils {
@@ -87,9 +88,9 @@ class UnreadUtils {
             var k = 0
             if (cursor.moveToFirst()) k = cursor.count
             cursor.close()
-            val ads = AdsUtils(App.context)
-            k += ads.unreadCount
-            ads.close()
+            val storage = AdsStorage()
+            k += storage.unreadCount
+            storage.close()
             close()
             return k
         }
@@ -128,9 +129,9 @@ class UnreadUtils {
     }
 
     fun setBadge() {
-        val ads = AdsUtils(App.context)
-        setBadge(ads.unreadCount)
-        ads.close()
+        val storage = AdsStorage()
+        setBadge(storage.unreadCount)
+        storage.close()
     }
 
     fun setBadge(count_ads: Int) {

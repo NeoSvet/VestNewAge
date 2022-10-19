@@ -2,7 +2,10 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
 import java.io.Closeable
 
@@ -17,6 +20,14 @@ class AdsStorage : Closeable {
     }
 
     private val db = DataBase(NAME)
+
+    val unreadCount: Int
+        get() {
+            val cursor = getUnread()
+            val k = cursor.count
+            cursor.close()
+            return k
+        }
 
     fun insert(row: ContentValues) =
         db.insert(NAME, row)
@@ -51,6 +62,16 @@ class AdsStorage : Closeable {
         if (db.update(NAME, row, Const.MODE + DataBase.Q, MODE_T.toString()) < 1)
             insert(row)
         return time
+    }
+
+    fun setRead(item: ListItem) {
+        val row = ContentValues()
+        row.put(Const.UNREAD, 0)
+        var t = item.title
+        if (t.indexOf(App.context.getString(R.string.ad)) == 0)
+            t = t.substring(t.indexOf(" ") + 1)
+        if (!updateByTitle(t, row))
+            updateByDes(item.head, row)
     }
 
     fun delete() =

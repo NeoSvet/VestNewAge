@@ -40,12 +40,10 @@ class SiteFragment : NeoFragment() {
     private val toiler: SiteToiler
         get() = neotoiler as SiteToiler
     private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
-    private val ads: AdsUtils by lazy {
-        AdsUtils(act)
-    }
     private var binding: SiteFragmentBinding? = null
     override val title: String
         get() = getString(R.string.news)
+    private var itemAds: ListItem? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,14 +67,10 @@ class SiteFragment : NeoFragment() {
         super.onDestroyView()
     }
 
-    override fun onStop() {
-        super.onStop()
-        ads.close()
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
-        if (ads.index > -1)
-            outState.putInt(Const.ADS, ads.index)
+        itemAds?.let {
+            outState.putStringArray(Const.ADS, it.main)
+        }
         super.onSaveInstanceState(outState)
     }
 
@@ -95,10 +89,9 @@ class SiteFragment : NeoFragment() {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state != null) {
-            val indexAds = state.getInt(Const.ADS, -1)
-            if (indexAds > -1)
-                ads.index = indexAds
+        if (state != null) state.getStringArray(Const.ADS)?.let {
+            itemAds = ListItem(it)
+            AdsUtils.showAd(requireActivity(), itemAds!!, this::closeAds)
         } else {
             arguments?.let {
                 toiler.selectedTab = it.getInt(Const.TAB)
@@ -191,9 +184,9 @@ class SiteFragment : NeoFragment() {
                     tabLayout.select(SiteToiler.TAB_NEWS)
                     return true
                 }
-                ads.index = index
-                ads.showAd(item.title, item.link, item.head)
                 item.des = ""
+                itemAds = item
+                AdsUtils.showAd(requireActivity(), item, this@SiteFragment::closeAds)
                 adapter.notifyItemChanged(index)
                 return true
             }
@@ -204,6 +197,11 @@ class SiteFragment : NeoFragment() {
             }
         }
         return false
+    }
+
+    private fun closeAds() = itemAds?.let {
+        toiler.readAds(it)
+        itemAds = null
     }
 
     private fun openPage(url: String) {
@@ -230,10 +228,6 @@ class SiteFragment : NeoFragment() {
                     act?.hideToast()
             }
             adapter.setItems(state.list)
-            if (toiler.isDevTab && ads.index > -1) {
-                val item = state.list[ads.index]
-                ads.showAd(item.title, item.link, item.head)
-            }
         } else if (state is NeoState.LongValue) binding?.run {
             setUpdateTime(state.value, tvUpdate)
         }

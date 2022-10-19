@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
@@ -39,9 +40,10 @@ class MainToiler : NeoToiler() {
         else
             loadQuote()
         val timeDiff = synchronizationTime()
-        val ads = AdsUtils(App.context)
+        val storage = AdsStorage()
+        val ads = AdsUtils(storage)
         ads.loadAds(client)
-        ads.close()
+        storage.close()
         postState(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
     }

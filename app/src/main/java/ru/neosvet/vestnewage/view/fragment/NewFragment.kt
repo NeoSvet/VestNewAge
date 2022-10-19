@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -24,9 +26,10 @@ class NewFragment : NeoFragment() {
         get() = neotoiler as NewToiler
     override val title: String
         get() = getString(R.string.new_section)
+    private var itemAds: ListItem? = null
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[NewToiler::class.java].apply { init(requireActivity()) }
+        ViewModelProvider(this)[NewToiler::class.java].apply { init() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +42,17 @@ class NewFragment : NeoFragment() {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        savedInstanceState?.getStringArray(Const.ADS)?.let {
+                itemAds = ListItem(it)
+                AdsUtils.showAd(requireActivity(), itemAds!!, this::closeAds)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        itemAds?.let {
+            outState.putStringArray(Const.ADS, it.main)
+        }
+        super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
@@ -79,7 +93,8 @@ class NewFragment : NeoFragment() {
 
     private fun onItemClick(index: Int, item: ListItem) {
         if (item.title.contains(getString(R.string.ad))) {
-            toiler.openAd(item, index)
+            itemAds = item
+            AdsUtils.showAd(requireActivity(), item, this::closeAds)
         } else if (item.link != "") {
             toiler.needOpen = true
             openReader(item.link, null)
@@ -89,5 +104,10 @@ class NewFragment : NeoFragment() {
 
     override fun onAction(title: String) {
         toiler.clearList()
+    }
+
+    private fun closeAds() = itemAds?.let {
+        toiler.readAds(it)
+        itemAds = null
     }
 }

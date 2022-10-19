@@ -29,6 +29,7 @@ import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.*
@@ -519,9 +520,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun showWarnAds(warn: Int) {
-        val ads = AdsUtils(this)
+        val storage = AdsStorage()
+        val ads = AdsUtils(storage)
         val item = ads.getItem(warn)
-        ads.close()
+        storage.close()
         if (item[AdsUtils.TITLE].isEmpty()) return
         val builder = AlertDialog.Builder(this, R.style.NeoDialog)
             .setTitle(getString(R.string.warning) + " " + item[AdsUtils.TITLE])
@@ -530,7 +532,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 dialog.dismiss()
             }
             .setOnDismissListener { showWelcome() }
-        if (item[AdsUtils.LINK] != null) {
+        if (item[AdsUtils.LINK].isNotEmpty()) {
             builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
                 Lib.openInApps(item[AdsUtils.LINK], null)
             }
