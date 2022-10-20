@@ -91,7 +91,7 @@ class SiteFragment : NeoFragment() {
     private fun restoreState(state: Bundle?) {
         if (state != null) state.getStringArray(Const.ADS)?.let {
             itemAds = ListItem(it)
-            AdsUtils.showAd(requireActivity(), itemAds!!, this::closeAds)
+            AdsUtils.showDialog(requireActivity(), itemAds!!, this::closeAds)
         } else {
             arguments?.let {
                 toiler.selectedTab = it.getInt(Const.TAB)
@@ -186,7 +186,7 @@ class SiteFragment : NeoFragment() {
                 }
                 item.des = ""
                 itemAds = item
-                AdsUtils.showAd(requireActivity(), item, this@SiteFragment::closeAds)
+                AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
                 adapter.notifyItemChanged(index)
                 return true
             }

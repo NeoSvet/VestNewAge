@@ -7,7 +7,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import java.io.BufferedReader
@@ -18,8 +17,9 @@ class AdsUtils(private val storage: AdsStorage) {
         const val TITLE = 0
         const val LINK = 1
         const val DES = 2
+        private const val UPDATE = "update"
 
-        fun showAd(act: Activity, item: ListItem, close: () -> Unit) {
+        fun showDialog(act: Activity, item: ListItem, close: () -> Unit) {
             if (item.head.isEmpty()) { // only link
                 Lib.openInApps(item.link, null)
                 close.invoke()
@@ -30,12 +30,24 @@ class AdsUtils(private val storage: AdsStorage) {
                 setTitle(App.context.getString(R.string.ad))
                 setMessage(item.head)
             }
-            if (item.link.isEmpty()) { // only des
-                alert.setRightButton(App.context.getString(android.R.string.ok)) { alert.dismiss() }
-            } else {
-                alert.setRightButton(App.context.getString(R.string.open_link)) {
-                    Lib.openInApps(item.link, null)
-                    alert.dismiss()
+            when {
+                item.link.isEmpty() -> // only des
+                    alert.setRightButton(App.context.getString(android.R.string.ok)) { alert.dismiss() }
+                item.link == UPDATE -> {
+                    alert.setLeftButton("Google Play") {
+                        Lib.openInApps(App.context.getString(R.string.url_on_google), null)
+                        alert.dismiss()
+                    }
+                    alert.setRightButton("AppGallery") {
+                        Lib.openInApps(App.context.getString(R.string.url_on_huawei), null)
+                        alert.dismiss()
+                    }
+                }
+                else -> {
+                    alert.setRightButton(App.context.getString(R.string.open_link)) {
+                        Lib.openInApps(item.link, null)
+                        alert.dismiss()
+                    }
                 }
             }
             alert.show { close.invoke() }
@@ -116,7 +128,7 @@ class AdsUtils(private val storage: AdsStorage) {
                     else
                         ListItem(ad + App.context.getString(R.string.current_version))
                     item.addHead(d)
-                    item.addLink(NetConst.WEB_PAGE)
+                    item.addLink(UPDATE)
                     list.add(0, item)
                 }
                 else -> {

@@ -44,7 +44,7 @@ class NewFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         savedInstanceState?.getStringArray(Const.ADS)?.let {
                 itemAds = ListItem(it)
-                AdsUtils.showAd(requireActivity(), itemAds!!, this::closeAds)
+                AdsUtils.showDialog(requireActivity(), itemAds!!, this::closeAds)
         }
     }
 
@@ -94,7 +94,7 @@ class NewFragment : NeoFragment() {
     private fun onItemClick(index: Int, item: ListItem) {
         if (item.title.contains(getString(R.string.ad))) {
             itemAds = item
-            AdsUtils.showAd(requireActivity(), item, this::closeAds)
+            AdsUtils.showDialog(requireActivity(), item, this::closeAds)
         } else if (item.link != "") {
             toiler.needOpen = true
             openReader(item.link, null)
