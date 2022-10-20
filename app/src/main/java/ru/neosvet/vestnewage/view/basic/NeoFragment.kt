@@ -11,11 +11,11 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.StateUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
@@ -105,10 +105,8 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
                 setStatus(true)
             NeoState.NoConnected ->
                 noConnected()
-            is NeoState.Error -> {
-                setStatus(false)
+            is NeoState.Error ->
                 act?.setError(state)
-            }
             else -> onChangedOtherState(state)
         }
     }
@@ -145,6 +143,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     open fun setStatus(load: Boolean) {
         act?.run {
+            Lib.LOG("status $load ${status.isCrash} ${status.isVisible}")
             if (load) {
                 blocked()
                 status.loadText()
