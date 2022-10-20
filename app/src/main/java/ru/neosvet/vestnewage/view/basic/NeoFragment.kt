@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.StateUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
@@ -143,7 +142,6 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     open fun setStatus(load: Boolean) {
         act?.run {
-            Lib.LOG("status $load ${status.isCrash} ${status.isVisible}")
             if (load) {
                 blocked()
                 status.loadText()
