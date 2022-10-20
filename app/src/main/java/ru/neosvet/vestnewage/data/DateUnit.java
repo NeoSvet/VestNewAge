@@ -248,6 +248,14 @@ public class DateUnit {
 
     // TIME ~~~~~~~~~~~~~~~~~~~~~~~~
 
+    public int getHour() {
+        return time.getHour();
+    }
+
+    public int getMinute() {
+        return time.getMinute();
+    }
+
     private void setSeconds(int seconds) {
         time = time.withSecond(seconds);
     }
