@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.service
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.LifecycleService
@@ -68,7 +69,8 @@ class CheckService : LifecycleService() {
     private fun startLoad() {
         try {
             val isNewRss = checkSummary()
-            val isNewAdd = checkAddition()
+            val pref = getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
+            val isNewAdd = if (pref.getBoolean(Const.MODE, true)) checkAddition() else false
             if ((isNewRss || isNewAdd) && list.isNotEmpty)
                 existsUpdates()
         } catch (ignored: Exception) {
