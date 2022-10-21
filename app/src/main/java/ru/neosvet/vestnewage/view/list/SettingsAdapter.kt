@@ -3,10 +3,7 @@ package ru.neosvet.vestnewage.view.list
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.SeekBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -180,8 +177,11 @@ class SettingsAdapter(
             val label = root.findViewById(R.id.label) as TextView
             val button = root.findViewById(R.id.button) as Button
             val seekBar = root.findViewById(R.id.seekBar) as SeekBar
+            val checkBox = root.findViewById(R.id.checkBox) as CheckBox
             labelOff.text = item.offLabel
             labelOn.text = item.onLabel
+            checkBox.text = item.checkBoxLabel
+            checkBox.isChecked = item.checkBoxValue
             seekBar.max = item.maxSeek
             if (item.valueSeek == 0)
                 seekBar.progress = 1
@@ -191,20 +191,25 @@ class SettingsAdapter(
                         tvOn.isVisible = true
                         tvOff.isVisible = false
                         button.isEnabled = false
+                        checkBox.isEnabled = false
                     } else {
                         button.isEnabled = true
                         tvOn.isVisible = false
                         tvOff.isVisible = true
+                        checkBox.isEnabled = true
                     }
                     item.changeValue.invoke(label, progress)
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    item.stopTracking.invoke(seekBar.progress)
+                    item.fixValue.invoke(seekBar.progress, checkBox.isChecked)
                 }
             })
             seekBar.progress = item.valueSeek
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                item.fixValue.invoke(-seekBar.progress, isChecked)
+            }
             button.setOnClickListener { item.onClick.invoke() }
         }
     }

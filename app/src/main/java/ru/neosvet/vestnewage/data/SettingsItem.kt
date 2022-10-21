@@ -21,11 +21,13 @@ sealed class SettingsItem {
         val title: String,
         val offLabel: String,
         val onLabel: String,
+        val checkBoxLabel: String,
+        val checkBoxValue: Boolean,
         val valueSeek: Int,
         val maxSeek: Int,
         val changeValue: (TextView, Int) -> Unit, //label, value
-        val stopTracking: (Int) -> Unit, //value
-        val onClick: () -> Unit //set_notif
+        val fixValue: (Int, Boolean) -> Unit, //value of seek, value of check
+        val onClick: () -> Unit //Настроить сигнал, вибрацию
     ) : SettingsItem()
 
     data class Message(

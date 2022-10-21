@@ -215,10 +215,16 @@
     <string name="off">выкл</string>
     <string name="on">вкл</string>
     <string name="check_summary">Проверка сводки</string>
+    <string name="check_additionally">Проверять на вкладке "Дополнительно"</string>
     <string name="each_one">каждый час</string>
     <string name="each_more">каждые</string>
     <string name="prom_notif">Напомнить о Посыле</string>
     <string name="prom_notif_off">Не напоминать о Посыле</string>
+    <string name="set_alarm">Установить будильник</string>
+    <string name="about_alarms">Чтобы уведомление сработало точно в срок, в стандартном приложении «Часы» можно установить будильник. Удалять их надо вручную в «Часах». При смене часового пояса, будильники надо задать заново (удалив предыдущие).</string>
+    <string name="alarm1">Будильник до 3:00 (МСК)</string>
+    <string name="alarm2">Будильник до 11:00 (МСК)</string>
+    <string name="alarm3">Будильник до 19:00 (МСК)</string>
     <string name="in">за</string>
     <string name="often">чаще</string>
     <string name="less">реже</string>

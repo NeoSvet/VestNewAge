@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -233,7 +234,12 @@ class SettingsFragment : NeoFragment() {
             )
         )
         list.add(CheckItem(getString(R.string.doctrine_creator), SettingsToiler.CLEAR_DOCTRINE))
-        list.add(CheckItem(getString(R.string.articles_and_addition), SettingsToiler.CLEAR_ART_AND_ADD))
+        list.add(
+            CheckItem(
+                getString(R.string.articles_and_addition),
+                SettingsToiler.CLEAR_ART_AND_ADD
+            )
+        )
         list.add(CheckItem(getString(R.string.markers), SettingsToiler.CLEAR_MARKERS))
 
         adapter.addItem(
@@ -262,10 +268,12 @@ class SettingsFragment : NeoFragment() {
             title = getString(R.string.notif_new),
             offLabel = getString(R.string.less),
             onLabel = getString(R.string.often),
+            checkBoxLabel = getString(R.string.check_additionally),
+            checkBoxValue = prefSummary.getBoolean(Const.MODE, true),
             valueSeek = v,
             maxSeek = CHECK_MAX,
             changeValue = this::setCheckTime,
-            stopTracking = this::saveCheck,
+            fixValue = this::saveCheck,
             onClick = {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
@@ -289,10 +297,12 @@ class SettingsFragment : NeoFragment() {
             title = getString(R.string.notif_prom),
             offLabel = getString(R.string.advance),
             onLabel = getString(R.string.prom),
+            checkBoxLabel = getString(R.string.set_alarm),
+            checkBoxValue = prefProm.getBoolean(Const.MODE, false),
             valueSeek = v,
             maxSeek = PROM_MAX,
             changeValue = this::setPromTime,
-            stopTracking = this::saveProm,
+            fixValue = this::saveProm,
             onClick = {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
@@ -339,27 +349,39 @@ class SettingsFragment : NeoFragment() {
         act?.finish()
     }
 
-    private fun saveCheck(value: Int) {
+    private fun saveCheck(value: Int, checkAdditionally: Boolean) {
         val editor = prefSummary.edit()
-        var v = value
-        if (v < CHECK_MAX) {
-            if (v > 2) v = (v - 2) * 4 else v++
-            v *= 15
-            if (v == 15) v = 20
-        } else v = Const.TURN_OFF
-        editor.putInt(Const.TIME, v)
+        if (value > -1) {
+            var v = value
+            if (v < CHECK_MAX) {
+                if (v > 2) v = (v - 2) * 4 else v++
+                v *= 15
+                if (v == 15) v = 20
+            } else v = Const.TURN_OFF
+            editor.putInt(Const.TIME, v)
+            CheckStarter.set(v)
+        }
+        editor.putBoolean(Const.MODE, checkAdditionally)
         editor.apply()
-        CheckStarter.set(v)
     }
 
-    private fun saveProm(value: Int) {
+    private fun saveProm(value: Int, isAlarm: Boolean) {
+        val prevAlarm = prefProm.getBoolean(Const.MODE, false)
         val editor = prefProm.edit()
-        val v = if (value == PROM_MAX)
-            Const.TURN_OFF else value
-        editor.putInt(Const.TIME, v)
+        val v = if (value > -1) value else -value
+        if (value > -1) {
+            editor.putInt(Const.TIME, if (v == PROM_MAX) Const.TURN_OFF else v)
+            val prom = PromUtils(null)
+            prom.initNotif(v)
+        }
+        editor.putBoolean(Const.MODE, isAlarm)
         editor.apply()
-        val prom = PromUtils(null)
-        prom.initNotif(v)
+        if (!isAlarm && !prevAlarm) return
+        if (!isAlarm || v == PROM_MAX)
+            toiler.offAlarm()
+        else {
+            //TODO show panel with alarms
+        }
     }
 
     private fun setCheckTime(label: TextView, value: Int) {
