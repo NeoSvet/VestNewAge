@@ -256,15 +256,15 @@ public class DateUnit {
         return time.getMinute();
     }
 
-    private void setSeconds(int seconds) {
+    public void setSeconds(int seconds) {
         time = time.withSecond(seconds);
     }
 
-    private void setMinutes(int min) {
+    public void setMinutes(int min) {
         time = time.withMinute(min);
     }
 
-    private void setHours(int hours) {
+    public void setHours(int hours) {
         time = time.withHour(hours);
     }
 
@@ -317,5 +317,10 @@ public class DateUnit {
             setHours(i % DAY_IN_HOUR);
         } else
             time = time.plusHours(offset);
+    }
+
+    public int getOffset() {
+        ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
+        return zoneOffset.getTotalSeconds();
     }
 }
