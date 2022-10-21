@@ -156,8 +156,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun showDatePicker(d: DateUnit) {
-        dateDialog = DateDialog(act, d).apply {
-            setResult(this@CalendarFragment)
+        dateDialog = DateDialog(requireActivity(), d, this).apply {
             setOnDismissListener { dateDialog = null }
             show()
         }
@@ -199,7 +198,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             setStatus(false)
         when (state) {
             is NeoState.Calendar -> binding?.run {
-                if(toiler.isUpdateUnread)
+                if (toiler.isUpdateUnread)
                     act?.updateNew()
                 tvDate.text = state.date
                 adCalendar.setItems(state.list)

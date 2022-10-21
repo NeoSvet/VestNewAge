@@ -292,14 +292,13 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun showDatePicker(d: DateUnit) {
-        dateDialog = DateDialog(act, d).apply {
-            setResult(this@BookFragment)
+        dateDialog = DateDialog(requireActivity(), d, this).apply {
             if (toiler.isPoemsTab) {
-                setMinMonth(2) //feb
-                setMinYear(2016)
+                minMonth = 2 //feb
+                minYear = 2016
             } else { //epistles
-                setMaxMonth(9) //sep
-                setMaxYear(2016)
+                maxMonth = 9 //sep
+                maxYear = 2016
             }
             setOnDismissListener { dateDialog = null }
             show()
