@@ -13,7 +13,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/p_alarm"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/dialog_width_land"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
@@ -54,7 +54,6 @@
             android:layout_marginTop="@dimen/def_indent"
             android:padding="@dimen/def_indent"
             android:text="@string/alarm2"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btn_alarm1" />
 
@@ -66,8 +65,7 @@
             android:padding="@dimen/def_indent"
             android:text="@string/alarm3"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btn_alarm2" />
+            app:layout_constraintTop_toBottomOf="@id/label" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_close"

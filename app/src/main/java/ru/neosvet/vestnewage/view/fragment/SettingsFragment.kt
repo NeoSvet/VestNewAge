@@ -98,6 +98,14 @@ class SettingsFragment : NeoFragment() {
             )
             rvSettings.adapter = adapter
         }
+        savedInstanceState?.let {
+            binding?.pAlarm?.isVisible = it.getBoolean(Const.DIALOG)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(Const.DIALOG, binding?.pAlarm?.isVisible ?: false)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
@@ -315,6 +323,24 @@ class SettingsFragment : NeoFragment() {
                 }
             }
         ))
+
+        binding?.run {
+            btnAlarm1.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnAlarm2.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnAlarm3.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnClose.setOnClickListener {
+                pAlarm.isVisible = false
+            }
+        }
+    }
+
+    private fun clickAlarm(v: View) {
+        val h = when (v.id) {
+            R.id.btn_alarm1 -> 3
+            R.id.btn_alarm2 -> 11
+            else -> 19 //R.id.btn_alarm3
+        }
+        toiler.setAlarm(h, prefProm.getInt(Const.TIME, -1))
     }
 
     private fun initMessageSection() {
@@ -379,9 +405,8 @@ class SettingsFragment : NeoFragment() {
         if (!isAlarm && !prevAlarm) return
         if (!isAlarm || v == PROM_MAX)
             toiler.offAlarm()
-        else {
-            //TODO show panel with alarms
-        }
+        else
+            binding?.pAlarm?.isVisible = true
     }
 
     private fun setCheckTime(label: TextView, value: Int) {

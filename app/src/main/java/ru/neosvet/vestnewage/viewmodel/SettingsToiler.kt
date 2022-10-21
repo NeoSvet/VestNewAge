@@ -1,7 +1,11 @@
 package ru.neosvet.vestnewage.viewmodel
 
+import android.content.Intent
+import android.provider.AlarmClock
 import androidx.work.Data
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
@@ -9,6 +13,7 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import java.io.File
+import java.util.*
 
 class SettingsToiler : NeoToiler() {
     companion object {
@@ -19,6 +24,7 @@ class SettingsToiler : NeoToiler() {
         const val CLEAR_OLD_BOOK = 4
         const val CLEAR_NEW_BOOK = 5
         const val CLEAR_NOW_BOOK = 6
+        private const val OFFSET_MSK = 10800
     }
 
     private var size: Long = 0
@@ -28,6 +34,19 @@ class SettingsToiler : NeoToiler() {
             if (field == 0) field = DateUnit.initToday().year
             return field
         }
+
+
+    private val alarmDays: ArrayList<Int> by lazy {
+        arrayListOf(
+            Calendar.MONDAY,
+            Calendar.TUESDAY,
+            Calendar.WEDNESDAY,
+            Calendar.THURSDAY,
+            Calendar.FRIDAY,
+            Calendar.SATURDAY,
+            Calendar.SUNDAY
+        )
+    }
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Settings.Clear")
@@ -98,5 +117,35 @@ class SettingsToiler : NeoToiler() {
                 clearFolder(f)
             f.delete()
         }
+    }
+
+    fun setAlarm(h: Int, v: Int) {
+        val d = DateUnit.initNow()
+        d.setSeconds(0)
+        d.setMinutes(0)
+        d.setHours(h)
+        d.changeSeconds(d.offset - OFFSET_MSK)
+        d.changeMinutes(-(v + 1))
+
+        val intent = Intent(AlarmClock.ACTION_SET_ALARM)
+        // intent.putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+        intent.putExtra(AlarmClock.EXTRA_HOUR, d.hour)
+        intent.putExtra(AlarmClock.EXTRA_MINUTES, d.minute)
+        intent.putExtra(AlarmClock.EXTRA_ALARM_SNOOZE_DURATION, 1)
+        intent.putExtra(AlarmClock.EXTRA_DAYS, alarmDays)
+        intent.putExtra(
+            AlarmClock.EXTRA_MESSAGE,
+            App.context.getString(R.string.prom_for_soul_unite)
+        )
+        App.context.startActivity(intent)
+    }
+
+    fun offAlarm() {
+        val intent = Intent(AlarmClock.ACTION_DISMISS_ALARM)
+        intent.putExtra(
+            AlarmClock.ALARM_SEARCH_MODE_LABEL,
+            App.context.getString(R.string.prom_for_soul_unite)
+        )
+        App.context.startActivity(intent)
     }
 }
