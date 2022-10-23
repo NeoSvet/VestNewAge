@@ -133,7 +133,7 @@ class MarkerActivity : AppCompatActivity() {
                 hasError = true
                 toast.autoHide = false
                 toast.show(getString(R.string.not_load_page))
-            }
+            } else super.onBackPressed()
             is NeoState.Error -> {
                 hasError = true
                 val builder = AlertDialog.Builder(this, R.style.NeoDialog)
