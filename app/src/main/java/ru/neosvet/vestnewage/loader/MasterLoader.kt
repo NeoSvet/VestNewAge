@@ -24,14 +24,14 @@ class MasterLoader : Loader, LoadHandlerLite {
     private val handlerLite: LoadHandlerLite?
     private val clientBase: NeoClient
     private val client: NeoClient
-    private val loader:PageLoader
+    private val loader: PageLoader
 
     constructor(handler: LoadHandler) {
         handlerLite = null
         this.handler = handler
         client = NeoClient(NeoClient.Type.LOADER)
         clientBase = NeoClient(NeoClient.Type.LOADER, this)
-         loader = PageLoader(client)
+        loader = PageLoader(client)
     }
 
     constructor(handler: LoadHandlerLite) {
@@ -39,7 +39,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handlerLite = handler
         client = NeoClient(NeoClient.Type.SECTION, handler)
         clientBase = NeoClient(NeoClient.Type.SECTION, this)
-         loader = PageLoader(client)
+        loader = PageLoader(client)
     }
 
     companion object {
@@ -73,7 +73,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = true
         msg = App.context.getString(R.string.news)
         handler?.postMessage(msg)
-        val loader = SiteLoader(client,Lib.getFile(SiteToiler.MAIN).toString())
+        val loader = SiteLoader(client, Lib.getFile(SiteToiler.MAIN).toString())
         loadPages(loader.getLinkList())
     }
 
@@ -101,7 +101,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         val url = findUrl(d)
         if (url != null) {
             val f = Lib.getFileDB(d.my)
-            if (!f.exists() || f.length() == DataBase.EMPTY_BASE_SIZE)
+            if (!f.exists() || f.length() <= DataBase.EMPTY_BASE_SIZE)
                 loadBase(url + d.my)
         } else
             loadFromSite(d)
@@ -122,7 +122,7 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     private fun findUrl(d: DateUnit): String? {
         val my = d.my
-        val host = if(NeoClient.isSiteCom) SOMEE else UCOZ
+        val host = if (NeoClient.isSiteCom) SOMEE else UCOZ
         listBase.forEach {
             if (it.second.contains(my)) {
                 return if (it.first < 2) "$host/"
@@ -190,16 +190,15 @@ class MasterLoader : Loader, LoadHandlerLite {
     private fun loadBase(url: String) {
         val name = url.substring(url.lastIndexOf("/") + 1)
         if (DataBase.isBusy(name)) return
+        val stream = clientBase.getStream(url)
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val storage = PageStorage()
         storage.open(name, true)
-        var isTitle: Boolean
+        val time = System.currentTimeMillis()
+        var isTitle = true
         val ids = HashMap<String, Int>()
         var id: Int
         var v: String
-        val time = System.currentTimeMillis()
-        isTitle = true
-        val stream = clientBase.getStream(url)
-        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         var n = 2
         var s: String? = br.readLine()
         while (s != null && isRun) {
