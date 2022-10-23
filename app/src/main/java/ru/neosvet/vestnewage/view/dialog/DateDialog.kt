@@ -60,8 +60,8 @@ class DateDialog(
         val layoutManager = GridLayoutManager(act, 3)
         adDate = DateAdapter(minYear, this)
         binding.run {
-            rvMonth.layoutManager = layoutManager
-            rvMonth.adapter = adDate
+            rvDate.layoutManager = layoutManager
+            rvDate.adapter = adDate
         }
         if (modeMonths)
             showMonths()
@@ -74,12 +74,21 @@ class DateDialog(
     @SuppressLint("NotifyDataSetChanged")
     private fun showYears() {
         adDate.clear()
+        var select = 0
         for (i in minYear..maxYear) {
             adDate.addItem(i.toString())
             if (i == date.year)
-                adDate.selected = adDate.itemCount - 1
+                select = adDate.itemCount - 1
         }
         adDate.notifyDataSetChanged()
+        adDate.selected = select
+        binding.run {
+            rvDate.smoothScrollToPosition(select)
+            btnEnd.isEnabled = false
+            btnStart.isEnabled = false
+            btnMinus.isEnabled = false
+            btnPlus.isEnabled = false
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -89,31 +98,35 @@ class DateDialog(
             adDate.addItem(act.resources.getStringArray(R.array.months)[i])
         setCalendar()
         adDate.notifyDataSetChanged()
+        binding.run {
+            btnEnd.isEnabled = true
+            btnStart.isEnabled = true
+            btnMinus.isEnabled = true
+            btnPlus.isEnabled = true
+        }
     }
 
     private fun initButtons() = binding.run {
         btnMinus.setOnClickListener {
-            if (modeMonths && date.year > minYear) {
+            if (date.year > minYear) {
                 date.changeYear(-1)
                 date.month = 12
                 setCalendar()
             }
         }
         btnPlus.setOnClickListener {
-            if (modeMonths && date.year < maxYear) {
+            if (date.year < maxYear) {
                 date.changeYear(1)
                 date.month = 1
                 setCalendar()
             }
         }
         btnStart.setOnClickListener {
-            if (!modeMonths) return@setOnClickListener
             date.year = minYear
             date.month = minMonth
             setCalendar()
         }
         btnEnd.setOnClickListener {
-            if (!modeMonths) return@setOnClickListener
             date.year = maxYear
             date.month = maxMonth
             setCalendar()

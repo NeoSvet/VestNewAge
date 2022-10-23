@@ -7,7 +7,7 @@
     android:padding="4dp">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_month"
+        android:id="@+id/rv_date"
         android:layout_width="@dimen/date_table_width"
         android:layout_height="@dimen/date_table_height"
         android:layout_margin="0dp" />
