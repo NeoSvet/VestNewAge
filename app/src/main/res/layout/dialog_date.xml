@@ -9,7 +9,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_month"
         android:layout_width="@dimen/date_table_width"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/date_table_height"
         android:layout_margin="0dp" />
 
     <LinearLayout
@@ -36,12 +36,11 @@
             android:padding="0dp"
             android:text="–" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tv_year"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_year"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/def_indent"
-            android:paddingVertical="@dimen/half_indent"
+            android:layout_height="44dp"
+            android:background="@drawable/button"
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton

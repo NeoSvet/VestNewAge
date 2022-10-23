@@ -1,19 +1,18 @@
 package ru.neosvet.vestnewage.view.dialog
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.DialogDateBinding
 import ru.neosvet.vestnewage.helper.DateHelper.isLoadedOtkr
+import ru.neosvet.vestnewage.view.list.DateAdapter
 
 class DateDialog(
     private val act: Activity, date: DateUnit, private val result: Result
@@ -23,20 +22,18 @@ class DateDialog(
     }
 
     companion object {
-        const val NONE_MIN = -1
-        const val NONE_MAX = 12
+        private var modeMonths = true
     }
 
     private val binding: DialogDateBinding by lazy {
         DialogDateBinding.inflate(layoutInflater)
     }
     val date: DateUnit = DateUnit.putDays(date.timeInDays)
-    private lateinit var adMonth: MonthAdapter
+    private lateinit var adDate: DateAdapter
     var minYear: Int
     var minMonth: Int
     var maxYear = 0
     var maxMonth = 0
-    private var cancel = true
 
     init {
         if (isLoadedOtkr()) {
@@ -46,6 +43,9 @@ class DateDialog(
             minYear = 2016
             minMonth = 1
         }
+        val d = DateUnit.initToday()
+        if (maxYear == 0) maxYear = d.year
+        if (maxMonth == 0) maxMonth = d.month
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,134 +58,103 @@ class DateDialog(
 
     private fun initList() {
         val layoutManager = GridLayoutManager(act, 3)
-        adMonth = MonthAdapter(this@DateDialog)
-        for (i in 0..11)
-            adMonth.addItem(act.resources.getStringArray(R.array.months)[i])
+        adDate = DateAdapter(minYear, this)
         binding.run {
             rvMonth.layoutManager = layoutManager
-            rvMonth.adapter = adMonth
+            rvMonth.adapter = adDate
         }
-        val d = DateUnit.initToday()
-        if (maxYear == 0) maxYear = d.year
-        if (maxMonth == 0) maxMonth = d.month
+        if (modeMonths)
+            showMonths()
+        else {
+            binding.btnYear.text = date.year.toString()
+            showYears()
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun showYears() {
+        adDate.clear()
+        for (i in minYear..maxYear) {
+            adDate.addItem(i.toString())
+            if (i == date.year)
+                adDate.selected = adDate.itemCount - 1
+        }
+        adDate.notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun showMonths() {
+        adDate.clear()
+        for (i in 0..11)
+            adDate.addItem(act.resources.getStringArray(R.array.months)[i])
         setCalendar()
+        adDate.notifyDataSetChanged()
     }
 
     private fun initButtons() = binding.run {
         btnMinus.setOnClickListener {
-            if (date.year > minYear) {
+            if (modeMonths && date.year > minYear) {
                 date.changeYear(-1)
                 date.month = 12
                 setCalendar()
             }
         }
         btnPlus.setOnClickListener {
-            if (date.year < maxYear) {
+            if (modeMonths && date.year < maxYear) {
                 date.changeYear(1)
                 date.month = 1
                 setCalendar()
             }
         }
         btnStart.setOnClickListener {
+            if (!modeMonths) return@setOnClickListener
             date.year = minYear
             date.month = minMonth
             setCalendar()
         }
         btnEnd.setOnClickListener {
+            if (!modeMonths) return@setOnClickListener
             date.year = maxYear
             date.month = maxMonth
             setCalendar()
         }
         btnOk.setOnClickListener {
             result.putDate(date)
-            cancel = false
+            modeMonths = true
             dismiss()
+        }
+        btnYear.setOnClickListener {
+            modeMonths = !modeMonths
+            if (modeMonths)
+                showMonths()
+            else
+                showYears()
         }
     }
 
     private fun setCalendar() {
-        binding.tvYear.text = date.year.toString()
-        if (date.year == minYear) adMonth.setMinPos(minMonth - 1)
-        else adMonth.setMinPos(NONE_MIN)
-        if (date.year == maxYear) adMonth.setMaxPos(maxMonth - 1)
-        else adMonth.setMaxPos(NONE_MAX)
-        adMonth.setSelect(date.month - 1)
+        binding.btnYear.text = date.year.toString()
+        adDate.minPos = if (date.year == minYear) minMonth - 1 else -1
+        adDate.maxPos = if (date.year == maxYear) maxMonth - 1 else -1
+        adDate.selected = date.month - 1
     }
 
-    override fun dismiss() {
-        if (cancel) result.putDate(null)
-        super.dismiss()
+    override fun cancel() {
+        modeMonths = true
+        result.putDate(null)
+        super.cancel()
     }
 
     override fun onClick(v: View) { //click month item
         val pos = v.tag as Int
-        date.month = pos + 1
-        adMonth.setSelect(pos)
-    }
-
-    internal inner class MonthAdapter(
-        private val click: View.OnClickListener
-    ) : RecyclerView.Adapter<MonthAdapter.ViewHolder>() {
-        private val data = mutableListOf<String>()
-        private var select = 0
-        private var minPos = 0
-        private var maxPos = 11
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(act).inflate(R.layout.item_date, parent, false)
-            return ViewHolder(view)
-        }
-
-        fun setMinPos(min_pos: Int) {
-            val i = this.minPos
-            this.minPos = min_pos
-            notifyItemChanged(i)
-            notifyItemChanged(min_pos)
-        }
-
-        fun setMaxPos(max_pos: Int) {
-            val i = this.maxPos
-            this.maxPos = max_pos
-            notifyItemChanged(i)
-            notifyItemChanged(max_pos)
-        }
-
-        fun setSelect(pos: Int) {
-            if (pos in minPos..maxPos) {
-                val s = select
-                select = pos
-                notifyItemChanged(s)
-                notifyItemChanged(select)
-            }
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, pos: Int) {
-            holder.tv.text = data[pos]
-            when (pos) {
-                in (maxPos + 1) until minYear -> {
-                    holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
-                    holder.bg.isEnabled = false
-                }
-                maxPos, minPos ->
-                    if (pos == select) holder.bg.setBackgroundResource(R.drawable.cell_bg_all)
-                    else holder.bg.setBackgroundResource(R.drawable.cell_bg_epi)
-                select ->
-                    holder.bg.setBackgroundResource(R.drawable.cell_bg_poe)
-                else ->
-                    holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
-            }
-            holder.tv.tag = pos
-            holder.tv.setOnClickListener(click)
-        }
-
-        override fun getItemCount() = data.size
-
-        fun addItem(s: String) {
-            data.add(s)
-        }
-
-        internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val bg: View = itemView.findViewById(R.id.cell_bg)
-            val tv: TextView = itemView.findViewById(R.id.cell_tv)
+        if (modeMonths) {
+            date.month = pos + 1
+            adDate.selected = pos
+        } else if (pos != adDate.selected) {
+            val tv = v as TextView
+            date.year = tv.text.toString().toInt()
+            modeMonths = true
+            showMonths()
         }
     }
 }

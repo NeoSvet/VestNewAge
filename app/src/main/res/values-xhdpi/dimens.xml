@@ -3,5 +3,6 @@
     <dimen name="cell_size">47dp</dimen>
     <dimen name="string_size">34dp</dimen>
     <dimen name="date_table_width">325dp</dimen>
+    <dimen name="date_table_height">220dp</dimen>
     <dimen name="date_cell_width">105dp</dimen>
 </resources>
