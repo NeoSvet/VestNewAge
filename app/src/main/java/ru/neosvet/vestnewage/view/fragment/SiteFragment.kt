@@ -206,12 +206,11 @@ class SiteFragment : NeoFragment() {
 
     private fun openPage(url: String) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(NetConst.SITE))
-                Lib.openInApps(url, getString(R.string.to_load))
-            else
-                Lib.openInApps(url, null)
-        } else
-            openReader(url, null)
+            if (url.contains(NetConst.SITE)) Lib.openInApps(url, getString(R.string.to_load))
+            else Lib.openInApps(url, null)
+        } else if (url.contains(".jp") || url.contains(".mp")) {
+            Lib.openInApps(NetConst.SITE + url, null)
+        } else openReader(url, null)
     }
 
     override fun onChangedOtherState(state: NeoState) {
