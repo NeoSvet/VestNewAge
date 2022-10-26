@@ -72,12 +72,14 @@ public class PageParser {
 
         for (int i = 0; i < m.length; i++) {
             s = m[i].trim();
+            if (s.isEmpty()) continue;
+            if (s.toCharArray()[s.length() - 1] != '>') s = m[i];
             if (s.contains("!--")) {
                 n = s.indexOf("!--");
                 if (n == 1) n = 0;
                 s = s.substring(0, n) + s.substring(s.indexOf(">", n) + 1);
             }
-            if (s.length() == 0) continue;
+            if (s.isEmpty()) continue;
             if (s.indexOf(Const.DIV) == 0 || s.indexOf(Const.SPAN) == 0) {
                 s = s.substring(s.indexOf(">") + 1);
                 if (s.length() > 0) {
@@ -188,6 +190,11 @@ public class PageParser {
                             elem.par += " " + s;
                     }
                 }
+            }
+            if (elem.tag.equals(Const.LINK) && elem.getHtml().isEmpty()) {
+                s = elem.par.substring(elem.par.lastIndexOf("/") + 1);
+                if (s.contains("?")) s = s.substring(0, s.indexOf("?"));
+                elem.setHtml(s);
             }
             content.add(elem);
         }

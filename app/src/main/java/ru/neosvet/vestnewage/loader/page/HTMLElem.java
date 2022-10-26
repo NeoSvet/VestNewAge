@@ -21,6 +21,8 @@ public class HTMLElem {
     public void setHtml(String html) {
         if (html.contains("&")) //"&#x"
             this.html = android.text.Html.fromHtml(html).toString();
+        else if (tag.equals(Const.LINK))
+            this.html = html.trim();
         else
             this.html = html;
     }
