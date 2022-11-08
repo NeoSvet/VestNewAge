@@ -91,10 +91,6 @@ public class SummaryHelper {
             notifBuilder.setFullScreenIntent(piEmpty, true);
     }
 
-    public boolean isNotification() {
-        return notifBuilder != null;
-    }
-
     public void muteNotification() {
         notifBuilder.setChannelId(NotificationUtils.CHANNEL_MUTE);
     }
@@ -112,7 +108,8 @@ public class SummaryHelper {
         intent.putExtra(DataBase.ID, notif_id);
         PendingIntent piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS);
         notifBuilder.setContentIntent(piSummary)
-                .setGroup(NotificationUtils.GROUP_SUMMARY);
+                .setGroup(NotificationUtils.GROUP_SUMMARY)
+                .setGroupSummary(true);
         notifBuilder.setFullScreenIntent(piEmpty, true);
     }
 

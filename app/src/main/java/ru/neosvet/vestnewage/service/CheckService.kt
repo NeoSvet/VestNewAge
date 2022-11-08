@@ -178,16 +178,16 @@ class CheckService : LifecycleService() {
 
     private fun existsUpdates() {
         val helper = SummaryHelper()
-        val several = list.size > 2 || (list.size == 2 && list.current().second != Const.RSS)
+        val several = list.size > 1
         if (several || list.first().second != Const.RSS)
             helper.updateBook()
         list.reset(true)
         list.forEach {
-            if (helper.isNotification && !several)
-                helper.showNotification()
             helper.createNotification(it.first, it.second)
-            if (several)
+            if (several) {
                 helper.muteNotification()
+                helper.showNotification()
+            }
         }
         if (several)
             helper.groupNotification()
