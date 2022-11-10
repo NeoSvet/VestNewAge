@@ -69,49 +69,39 @@ class SiteLoader(
         }
         var s: String? = page.currentElem
         var t: String
-        var a: String?
         var d = StringBuilder()
         val list = mutableListOf<ListItem>()
-        var item: ListItem? = null
+        var item = ListItem("")
         do {
-            if (page.isHead) {
-                if (isSite)
-                    item = ListItem(page.text, true)
-                else {
-                    t = d.toString()
-                    if (setDes(item, t).not())
-                        list.add(ListItem(t))
-                    d = StringBuilder()
-                    item = ListItem(page.text)
-                    addLink(item, "", "@")
+            when {
+                page.isHead -> {
+                    if (isSite)
+                        item = ListItem(page.text, true)
+                    else {
+                        t = d.toString()
+                        if (setDes(item, t).not()) list.add(ListItem(t))
+                        d = StringBuilder()
+                        item = ListItem(page.text)
+                        addLink(item, "", "@")
+                    }
+                    list.add(item)
                 }
-                list.add(item)
-            } else {
-                a = page.link
-                t = page.text
-                if (isSite) {
+                isSite -> {
                     if (s == null || s.contains(end)) break
+                    t = page.text
                     if (t.isNotEmpty() && !s.contains("\"#\"")) {
-                        if (!s.contains("<")) item?.des = s
-                        else {
-                            item = ListItem(t)
-                            list.add(item)
-                        }
-                        a?.let { addLink(item!!, t, it) }
+                        if (!s.contains("<")) item.des = s
+                        else item = ListItem(t).also { list.add(it) }
+                        page.link?.let { addLink(item, t, it) }
                     }
-                } else {
-                    if (t.isEmpty()) {
-                        s = page.nextItem
-                        t = getTitleItem(s)
-                        s = "<a href='$a'>$t</a><br>"
-                    }
-                    a?.let { addLink(item!!, t, it) }
+                }
+                page.isSimple -> d.append(s)
+                else -> {
+                    page.link?.let { addLink(item, page.text, it) }
                     d.append(s)
                 }
             }
             s = page.nextItem
-            while (!page.curItem().start && s != null)
-                s = page.nextItem
         } while (s != null)
         t = d.toString()
         if (setDes(item, t).not())

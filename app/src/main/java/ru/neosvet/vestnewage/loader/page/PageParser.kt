@@ -239,4 +239,6 @@ class PageParser(private val client: NeoClient) {
         get() = Lib.withOutTags(content.current().html)
     val isHead: Boolean
         get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.HEAD) == 0 else false
+    val isSimple: Boolean
+        get() = content.current().let { it.tag == Const.TEXT || (it.start.not() && it.end) }
 }
