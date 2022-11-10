@@ -334,6 +334,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onResume() {
         super.onResume()
+        if (curFragment == null && jobFinishStar?.isCancelled == true)
+            finishFlashStar()
         prom?.resume()
     }
 
