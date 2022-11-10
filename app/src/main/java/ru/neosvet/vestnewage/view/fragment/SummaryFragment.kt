@@ -53,7 +53,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         get() = getString(R.string.summary)
     private var openedReader = false
     private var isUserScroll = true
-    private var firstPosition = 0
+    private var firstPosition = -1
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[SummaryToiler::class.java].apply { init(requireContext()) }
@@ -84,7 +84,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             }
             toiler.openList(true)
         } else {
-            firstPosition = savedInstanceState.getInt(Const.PLACE, 0)
+            firstPosition = savedInstanceState.getInt(Const.PLACE, -1)
         }
     }
 
@@ -198,9 +198,10 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         adPaging = PagingAdapter(this)
         binding?.rvSummary?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
-        if (firstPosition == 0)
+        if (firstPosition == -1) {
+            firstPosition = 0
             startPaging(0)
-        else {
+        } else if (firstPosition != adPaging.firstPosition) {
             startPaging(firstPosition / NeoPaging.ON_PAGE)
             if (firstPosition % NeoPaging.ON_PAGE > 0)
                 adPaging.scrollTo(firstPosition)
@@ -226,10 +227,13 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         if (toiler.isRss) {
             openedReader = true
             openReader(item.link, null)
-        } else if (item.hasFewLinks())
-            openMultiLink(item, binding!!.rvSummary.getItemView(index))
-        else
-            Lib.openInApps(NetConst.TELEGRAM_URL + item.link, null)
+        } else {
+            firstPosition = index
+            if (item.hasFewLinks())
+                openMultiLink(item, binding!!.rvSummary.getItemView(index))
+            else
+                Lib.openInApps(NetConst.TELEGRAM_URL + item.link, null)
+        }
     }
 
     private fun openMultiLink(links: ListItem, parent: View) {
