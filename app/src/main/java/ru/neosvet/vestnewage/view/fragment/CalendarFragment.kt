@@ -83,13 +83,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state == null) {
+        if (toiler.isEmptyState) {
             showTip()
             toiler.openCalendar(0)
             if (toiler.isNeedReload())
                 startLoad()
         } else {
-            val d = state.getInt(Const.DIALOG, -1)
+            val d = state?.getInt(Const.DIALOG, -1) ?: -1
             if (d > 0) {
                 showDatePicker(DateUnit.putDays(d))
             } else if (d == 0)

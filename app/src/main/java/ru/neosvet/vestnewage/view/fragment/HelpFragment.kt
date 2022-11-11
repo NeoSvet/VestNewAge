@@ -89,7 +89,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state == null) {
+        if (state == null || toiler.list.isEmpty()) {
             val section = arguments?.getInt(Const.TAB) ?: -1
             toiler.init(requireActivity(), section)
         } else {

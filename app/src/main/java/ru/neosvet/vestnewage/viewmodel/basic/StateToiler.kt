@@ -13,6 +13,9 @@ abstract class StateToiler : ViewModel() {
     private val stateChannel = Channel<NeoState>()
     val state = stateChannel.receiveAsFlow()
 
+    val isEmptyState: Boolean
+        get() = primaryState == null
+
     fun cacheState() = flow {
         longValue?.let { emit(it) }
         primaryState?.let { emit(it) }

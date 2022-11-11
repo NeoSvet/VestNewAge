@@ -76,7 +76,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         initTabs()
-        if (savedInstanceState == null) {
+        if (toiler.isEmptyState) {
             arguments?.let {
                 val tab = it.getInt(Const.TAB, 0)
                 binding?.tabLayout?.select(tab)
@@ -84,7 +84,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             }
             toiler.openList(true)
         } else {
-            firstPosition = savedInstanceState.getInt(Const.PLACE, -1)
+            firstPosition = savedInstanceState?.getInt(Const.PLACE, -1) ?: -1
         }
     }
 

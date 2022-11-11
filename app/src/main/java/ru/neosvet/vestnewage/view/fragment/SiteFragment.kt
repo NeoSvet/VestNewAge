@@ -89,10 +89,7 @@ class SiteFragment : NeoFragment() {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state != null) state.getStringArray(Const.ADS)?.let {
-            itemAds = ListItem(it)
-            AdsUtils.showDialog(requireActivity(), itemAds!!, this::closeAds)
-        } else {
+        if (toiler.isEmptyState) {
             arguments?.let {
                 toiler.selectedTab = it.getInt(Const.TAB)
                 binding?.tabLayout?.select(toiler.selectedTab)
@@ -100,6 +97,10 @@ class SiteFragment : NeoFragment() {
             when (toiler.selectedTab) {
                 SiteToiler.TAB_DEV -> toiler.openAds()
                 else -> toiler.openList(true)
+            }
+        } else state?.getStringArray(Const.ADS)?.let {
+            itemAds = ListItem(it).also { item ->
+                AdsUtils.showDialog(requireActivity(), item, this::closeAds)
             }
         }
     }

@@ -54,7 +54,7 @@ class CabinetFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initMain()
         initLogin()
-        restoreState(savedInstanceState)
+        restoreState()
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -95,8 +95,8 @@ class CabinetFragment : NeoFragment() {
 
     override fun onBackPressed(): Boolean = toiler.onBack()
 
-    private fun restoreState(state: Bundle?) {
-        if (state == null) {
+    private fun restoreState() {
+        if (toiler.isEmptyState) {
             val p = helper.getAuthPair()
             binding?.login?.run {
                 if (p.first.isNotEmpty()) {

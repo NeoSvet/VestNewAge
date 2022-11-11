@@ -112,7 +112,7 @@ class MarkersFragment : NeoFragment() {
     }
 
     private fun restoreState(state: Bundle?) {
-        if (state == null) {
+        if (state == null || toiler.isEmptyState) {
             toiler.openList()
             return
         }
