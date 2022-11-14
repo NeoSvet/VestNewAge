@@ -171,7 +171,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         while (d.month == curMonth) {
             calendar.add(CalendarItem(d.day, android.R.color.white))
             if (d.day == n)
-                calendar.last().setBold()
+                calendar.last().isBold = true
             d.changeDay(1)
         }
         while (d.dayWeek != DateUnit.MONDAY.toInt()) {

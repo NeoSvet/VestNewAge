@@ -26,16 +26,15 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
-import ru.neosvet.vestnewage.view.list.CalendarAdapter.Clicker
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 
-class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
+class CalendarFragment : NeoFragment(), DateDialog.Result {
     private val toiler: CalendarToiler
         get() = neotoiler as CalendarToiler
     private var binding: CalendarFragmentBinding? = null
-    private val adCalendar: CalendarAdapter = CalendarAdapter(this)
+    private val adCalendar = CalendarAdapter(this::onClick)
     private var dateDialog: DateDialog? = null
     override val title: String
         get() = getString(R.string.calendar)
@@ -167,7 +166,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result, Clicker {
             toiler.changeDate(date)
     }
 
-    override fun onClick(view: View, item: CalendarItem) {
+    private fun onClick(view: View, item: CalendarItem) {
         if (toiler.isRun) return
         when (item.count) {
             1 -> {

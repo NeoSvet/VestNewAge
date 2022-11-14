@@ -18,7 +18,6 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -332,11 +331,7 @@ class MarkerActivity : AppCompatActivity() {
         softKeyboard.hide()
         mainLayout.isVisible = false
         view.isVisible = true
-        val anim = ResizeAnim(
-            view,
-            false,
-            heightDialog
-        )
+        val anim = ResizeAnim(view, false, heightDialog)
         anim.duration = 800
         view.clearAnimation()
         view.startAnimation(anim)
