@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.noHasDate
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -223,7 +224,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                     title = storage.getPageTitle(title, link)
                     if (title.contains("."))
                         title = title.substring(title.indexOf(" ") + 1)
-                } else
+                } else if (link.noHasDate)
                     title = getTitleByLink(link)
                 calendar[i].addTitle(title)
             }
