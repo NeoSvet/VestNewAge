@@ -129,7 +129,7 @@ class DataBase(name: String, write: Boolean = false) :
     }
 
     private fun checkWritable() {
-        if (!isReadOnly) return
+        if (!isReadOnly || !db.isOpen) return
         if (names.contains(databaseName)) throw NeoException.BaseIsBusy()
         isReadOnly = false
         names.add(databaseName)
@@ -139,12 +139,16 @@ class DataBase(name: String, write: Boolean = false) :
 
     fun insert(table: String, nullColumnHack: String, row: ContentValues): Long {
         checkWritable()
-        return db.insert(table, nullColumnHack, row)
+        return if (db.isOpen)
+            db.insert(table, nullColumnHack, row)
+        else -1
     }
 
     fun insert(table: String, row: ContentValues): Long {
         checkWritable()
-        return db.insert(table, null, row)
+        return if (db.isOpen)
+            db.insert(table, null, row)
+        else -1
     }
 
     fun update(
@@ -154,12 +158,16 @@ class DataBase(name: String, write: Boolean = false) :
         whereArgs: Array<String>
     ): Int {
         checkWritable()
-        return db.update(table, row, whereClause, whereArgs)
+        return if (db.isOpen)
+            db.update(table, row, whereClause, whereArgs)
+        else -1
     }
 
     fun update(table: String, row: ContentValues, whereClause: String, whereArg: String): Int {
         checkWritable()
-        return db.update(table, row, whereClause, arrayOf(whereArg))
+        return if (db.isOpen)
+            db.update(table, row, whereClause, arrayOf(whereArg))
+        else -1
     }
 
     fun query(
@@ -175,25 +183,35 @@ class DataBase(name: String, write: Boolean = false) :
     ): Cursor {
         val args = if (selectionArg != null) arrayOf(selectionArg) else selectionArgs
         val col = if (column != null) arrayOf(column) else columns
-        return db.query(table, col, selection, args, groupBy, having, orderBy)
+        return if (db.isOpen)
+            db.query(table, col, selection, args, groupBy, having, orderBy)
+        else EmptyCursor()
     }
 
     fun rawQuery(query: String): Cursor {
-        return db.rawQuery(query, null)
+        return if (db.isOpen)
+            db.rawQuery(query, null)
+        else EmptyCursor()
     }
 
     fun delete(table: String): Int {
         checkWritable()
-        return db.delete(table, null, null)
+        return if (db.isOpen)
+            db.delete(table, null, null)
+        else -1
     }
 
     fun delete(table: String, whereClause: String, whereArg: String): Int {
         checkWritable()
-        return db.delete(table, whereClause, arrayOf(whereArg))
+        return if (db.isOpen)
+            db.delete(table, whereClause, arrayOf(whereArg))
+        else -1
     }
 
     fun delete(table: String, whereClause: String, whereArgs: Array<String>): Int {
         checkWritable()
-        return db.delete(table, whereClause, whereArgs)
+        return if (db.isOpen)
+            db.delete(table, whereClause, whereArgs)
+        else -1
     }
 }
