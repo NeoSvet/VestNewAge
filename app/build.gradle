@@ -9,8 +9,8 @@ android {
         applicationId "ru.neosvet.vestnewage"
         minSdk 23
         targetSdk 33
-        versionCode 66
-        versionName "4.5"
+        versionCode 67
+        versionName "5.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
@@ -35,7 +35,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
@@ -44,6 +44,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-service:2.5.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.0'
-    implementation "androidx.paging:paging-runtime-ktx:3.2.0-alpha02"
+    implementation "androidx.paging:paging-runtime-ktx:3.2.0-alpha03"
     implementation 'com.github.lukelorusso:VerticalSeekBar:1.2.7'
 }
