@@ -23,6 +23,10 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private val list = LinkedList<ListItem>()
     private var isRun = false
 
+    override fun load() {
+        loadListMonth(true)
+    }
+
     override fun cancel() {
         storage.close()
         isRun = false

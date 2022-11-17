@@ -56,6 +56,14 @@ class MasterLoader : Loader, LoadHandlerLite {
         mutableListOf() //Int - number folder, List - dates (MY) in folder
     }
 
+    override fun load() {
+        loadSummary()
+        loadSite()
+        loadDoctrine()
+        val date = DateUnit.initToday()
+        loadMonth(date.month, date.year)
+    }
+
     override fun cancel() {
         loader.cancel()
         loaderBook?.cancel()
