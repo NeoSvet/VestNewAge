@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.SummaryHelper
+import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -67,9 +68,9 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     override suspend fun doLoad() {
-        val loader = SummaryLoader(client)
         if (isRss) {
-            loader.loadRss(true)
+            val loader = SummaryLoader(client)
+            loader.load()
             val summaryHelper = SummaryHelper()
             summaryHelper.updateBook()
             val list = openRss()
@@ -77,7 +78,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             if (isRun && isRss)
                 loadPages(list)
         } else {
-            loader.loadAddition(storage, 0)
+            val loader = AdditionLoader(client)
+            loader.load(storage, 0)
             openAddition()
             postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
         }

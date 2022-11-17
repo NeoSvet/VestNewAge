@@ -4,7 +4,7 @@ import androidx.paging.PagingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.neosvet.vestnewage.data.ListItem
-import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.AdditionStorage
 
@@ -12,8 +12,8 @@ class AdditionFactory(
     private val storage: AdditionStorage,
     private val parent: NeoPaging
 ) : NeoPaging.Factory() {
-    private val loader: SummaryLoader by lazy {
-        SummaryLoader(NeoClient(NeoClient.Type.SECTION))
+    private val loader: AdditionLoader by lazy {
+        AdditionLoader(NeoClient(NeoClient.Type.SECTION))
     }
 
     override fun getRefreshKey(state: PagingState<Int, ListItem>): Int? {
@@ -46,7 +46,7 @@ class AdditionFactory(
         withContext(Dispatchers.IO) {
             val list = storage.getList(position)
             list.ifEmpty {
-                loader.loadAddition(storage, position)
+                loader.load(storage, position)
                 storage.getList(position)
             }
         }
