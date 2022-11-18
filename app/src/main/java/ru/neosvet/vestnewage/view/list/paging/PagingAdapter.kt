@@ -29,6 +29,7 @@ class PagingAdapter(
         private const val TYPE_DETAIL = 1
     }
 
+    var withTime = false //for addition 16.11.2022 14:02
     private var startPage = 0
     private var isFirst = true
     private var prevPage = 0
@@ -87,7 +88,9 @@ class PagingAdapter(
     }
 
     override fun onCreateViewHolder(host: ViewGroup, viewType: Int): RecyclerHolder {
-        val layout = if (viewType == TYPE_SIMPLE)
+        val layout = if (withTime)
+            LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
+        else if (viewType == TYPE_SIMPLE)
             LayoutInflater.from(host.context).inflate(R.layout.item_list, null)
         else
             LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)

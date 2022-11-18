@@ -80,6 +80,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         row.put(DataBase.ID, id)
         row.put(Const.TITLE, br.readLine())
         row.put(Const.LINK, br.readLine().toInt())
+        row.put(Const.TIME, br.readLine())
         var s: String? = br.readLine()
         val des = StringBuilder()
         while (s != null) {

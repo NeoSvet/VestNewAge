@@ -90,6 +90,7 @@ class DataBase(name: String, write: Boolean = false) :
                         + ID + " integer primary key," //number post on site
                         + Const.LINK + " integer," //number post in Telegram
                         + Const.TITLE + " text,"
+                        + Const.TIME + " text,"
                         + Const.DESCTRIPTION + " text);"
             )
             MARKERS -> {

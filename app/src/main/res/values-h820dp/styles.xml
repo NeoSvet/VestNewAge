@@ -8,6 +8,9 @@
     <style name="Des" parent="Label">
         <item name="android:textSize">22sp</item>
     </style>
+    <style name="Time" parent="Label">
+        <item name="android:textSize">20sp</item>
+    </style>
     <style name="Title">
         <item name="android:textColor">@color/colorAccentLight</item>
         <item name="android:textSize">28sp</item>
