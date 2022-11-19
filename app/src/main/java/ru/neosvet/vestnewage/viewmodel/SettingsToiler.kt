@@ -24,7 +24,6 @@ class SettingsToiler : NeoToiler() {
         const val CLEAR_OLD_BOOK = 4
         const val CLEAR_NEW_BOOK = 5
         const val CLEAR_NOW_BOOK = 6
-        private const val OFFSET_MSK = 10800
     }
 
     private var size: Long = 0
@@ -124,7 +123,7 @@ class SettingsToiler : NeoToiler() {
         d.setSeconds(0)
         d.setMinutes(0)
         d.setHours(h)
-        d.changeSeconds(d.offset - OFFSET_MSK)
+        d.changeSeconds(d.offset - DateUnit.OFFSET_MSK)
         d.changeMinutes(-(v + 1))
 
         val intent = Intent(AlarmClock.ACTION_SET_ALARM)
