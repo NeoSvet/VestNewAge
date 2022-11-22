@@ -83,7 +83,7 @@ class PageStorage : Closeable {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle || isDoctrine || link.noHasDate) {
+        return if (isArticle || isDoctrine || link.noHasDate || title == link) {
             title
         } else {
             val s = link.date
@@ -266,7 +266,7 @@ class PageStorage : Closeable {
         val title = if (cursor.moveToFirst())
             cursor.getString(0) else link
         cursor.close()
-        return if (title.isEmpty()) link
+        return if (title == link) link
         else getPageTitle(title, link)
     }
 
