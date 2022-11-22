@@ -186,14 +186,12 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     fun loadMonth(date: String) { //MM.yy
         loadDate = date
-        if (checkConnect())
-            load()
+        load()
     }
 
     fun loadPage(link: String) {
         loadLink = link
-        if (checkConnect())
-            load()
+        load()
     }
 
     fun startSearch(request: String, mode: Int) {
