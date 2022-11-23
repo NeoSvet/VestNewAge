@@ -9,6 +9,16 @@
         <item>Пт</item>
         <item>Сб</item>
     </array>
+    <array name="post_days">
+        <item>вчера</item>
+        <item>понедельник</item>
+        <item>вторник</item>
+        <item>среда</item>
+        <item>четверг</item>
+        <item>пятница</item>
+        <item>суббота</item>
+        <item>воскресенье</item>
+    </array>
     <array name="months">
         <item>Январь</item>
         <item>Февраль</item>

@@ -19,6 +19,9 @@ class AdditionStorage : Closeable {
 
     private val today = DateUnit.initToday()
     private val yesterday = DateUnit.initToday().apply { day-- }
+    private val weekDays: Array<String> by lazy {
+        App.context.resources.getStringArray(R.array.post_days)
+    }
     private lateinit var db: DataBase
     val name: String
         get() = db.databaseName
@@ -90,8 +93,10 @@ class AdditionStorage : Closeable {
         ) return date.toTimeString()
         if (date.day == yesterday.day && date.month == yesterday.month
             && date.year == yesterday.year
-        ) return date.toTimeString() + ", " + App.context.getString(R.string.yesterday)
+        ) return date.toTimeString() + ", " + weekDays[0]
         if (date.year == today.year) {
+            if (today.timeInDays - date.timeInDays < 8)
+                return date.toTimeString() + ", " + weekDays[date.dayWeek]
             val t = date.toAlterString()
             return t.substring(0, t.length - 5)
         }
