@@ -83,6 +83,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS), 1);
+        }
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
