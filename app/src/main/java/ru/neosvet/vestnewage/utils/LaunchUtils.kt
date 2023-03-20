@@ -96,6 +96,10 @@ class LaunchUtils {
             val file = Lib.getFileP("/cache/file")
             if (file.exists()) file.delete()
         }
+        if (ver < 67) {
+            val file = Lib.getFileDB(DataBase.ADDITION)
+            if (file.exists()) file.delete()
+        }
     }
 
     private fun refTips() {
