@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
@@ -274,8 +275,10 @@ class LoaderService : LifecycleService(), LoadHandler {
     private fun loadBasic() {
         val listsUtils = ListsUtils()
         val summaryLoader = SummaryLoader(client)
-        if (listsUtils.summaryIsOld())
-            summaryLoader.loadRss(false)
+        if (listsUtils.summaryIsOld()) {
+            summaryLoader.updateUnread = false
+            summaryLoader.load()
+        }
         if (listsUtils.siteIsOld())
             loadSiteSection()
         if (isRun.not()) return
@@ -284,7 +287,8 @@ class LoaderService : LifecycleService(), LoadHandler {
         loader.loadSite()
         if (isRun.not()) return
         postMessage(getString(R.string.additionally))
-        summaryLoader.loadAllAddition(object : LoadHandlerLite {
+        val additionLoader = AdditionLoader(client)
+        additionLoader.loadAll(object : LoadHandlerLite {
             override fun postPercent(value: Int) {
                 postMessage(getString(R.string.additionally) + " ($value%)")
             }

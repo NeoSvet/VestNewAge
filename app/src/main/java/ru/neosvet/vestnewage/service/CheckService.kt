@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.helper.SummaryHelper
-import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
@@ -84,10 +84,10 @@ class CheckService : LifecycleService() {
         val storage = AdditionStorage()
         storage.open()
         storage.findMax()
-        val loader = SummaryLoader(client)
+        val loader = AdditionLoader(client)
         val max = loader.loadMax()
         if (max > storage.max) {
-            loader.loadAddition(storage, storage.max)
+            loader.load(storage, storage.max)
             storage.close()
             list.add(Pair(getString(R.string.new_in_additionally), Const.RSS))
             return true
