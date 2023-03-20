@@ -84,7 +84,12 @@ public class DateUnit {
         if (fDate != null)
             return new DateUnit(LocalDate.parse(s, fDate), null);
         boolean offset = s.contains("+03");
-        if (s.contains("-")) { //2020-03-25T00:00:00+03:00
+        if (s.length() == 16) { //for addition
+            offset = true;
+            fDate = DateTimeFormatter
+                    .ofPattern("dd.MM.yyyy HH:mm")
+                    .withLocale(Locale.US);
+        } else if (s.contains("-")) { //2020-03-25T00:00:00+03:00
             s = s.substring(0, s.length() - 6).replace("T", " ");
             fDate = DateTimeFormatter
                     .ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -186,6 +191,33 @@ public class DateUnit {
         if (s.contains(",0"))
             return s.substring(0, s.length() - 2);
         return s;
+    }
+
+    @NonNull
+    public String toTimeString() {
+        if (time == null)
+            return "";
+        ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
+        LocalDateTime dateTime = LocalDateTime.of(date, time);
+        dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
+        return dateTime.format(formatter);
+    }
+
+    @NonNull
+    public String toAlterString() {
+        ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
+        LocalDateTime dateTime;
+        DateTimeFormatter formatter;
+        if (time == null) {
+            formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault());
+            dateTime = LocalDateTime.of(date, LocalTime.of(0, 0, 0));
+        } else {
+            formatter = DateTimeFormatter.ofPattern("HH:mm, dd.MM.yyyy").withZone(ZoneId.systemDefault());
+            dateTime = LocalDateTime.of(date, time);
+        }
+        dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
+        return dateTime.format(formatter);
     }
 
     @NonNull

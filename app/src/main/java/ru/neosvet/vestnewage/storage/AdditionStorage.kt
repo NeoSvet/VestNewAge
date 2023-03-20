@@ -2,7 +2,10 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
@@ -14,6 +17,11 @@ class AdditionStorage : Closeable {
         private const val LINK = "href=\""
     }
 
+    private val today = DateUnit.initToday()
+    private val yesterday = DateUnit.initToday().apply { changeDay(-1) }
+    private val weekDays: Array<String> by lazy {
+        App.context.resources.getStringArray(R.array.post_days)
+    }
     private lateinit var db: DataBase
     val name: String
         get() = db.databaseName
@@ -51,13 +59,14 @@ class AdditionStorage : Closeable {
             val iID = cursor.getColumnIndex(DataBase.ID)
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTitle = cursor.getColumnIndex(Const.TITLE)
+            val iTime = cursor.getColumnIndex(Const.TIME)
             val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
             if (max == 0 && offset == 0)
                 max = cursor.getInt(iID)
             do {
                 val item = ListItem(cursor.getString(iTitle), cursor.getInt(iLink).toString())
                 item.addHead(cursor.getInt(iID).toString())
-                item.des = cursor.getString(iDes)
+                item.des = getDate(cursor.getString(iTime)) + "@" + cursor.getString(iDes)
                 if (item.des.contains(LINK))
                     addLinks(item.des, item)
                 list.add(item)
@@ -65,6 +74,33 @@ class AdditionStorage : Closeable {
         }
         cursor.close()
         return list
+    }
+
+    fun getLastDate(): String {
+        val cursor = getCursor(0)
+        val t = if (cursor.moveToFirst()) {
+            val iTime = cursor.getColumnIndex(Const.TIME)
+            getDate(cursor.getString(iTime))
+        } else ""
+        cursor.close()
+        return t
+    }
+
+    private fun getDate(s: String): String {
+        val date = DateUnit.parse(s)
+        if (date.day == today.day && date.month == today.month
+            && date.year == today.year
+        ) return date.toTimeString()
+        if (date.day == yesterday.day && date.month == yesterday.month
+            && date.year == yesterday.year
+        ) return date.toTimeString() + ", " + weekDays[0]
+        if (date.year == today.year) {
+            if (today.timeInDays - date.timeInDays < 8)
+                return date.toTimeString() + ", " + weekDays[date.dayWeek]
+            val t = date.toAlterString()
+            return t.substring(0, t.length - 5)
+        }
+        return date.toAlterString()
     }
 
     private fun addLinks(s: String, item: ListItem) {

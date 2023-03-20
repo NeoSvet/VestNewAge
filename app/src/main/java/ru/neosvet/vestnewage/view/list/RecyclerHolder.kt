@@ -13,6 +13,7 @@ class RecyclerHolder(
     private val longClicker: ((Int, ListItem) -> Boolean)?
 ) : RecyclerView.ViewHolder(root) {
     private val tvTitle: TextView = root.findViewById(R.id.text_item)
+    private val tvTime: TextView? = root.findViewById(R.id.time_item)
     private val tvDes: TextView? = root.findViewById(R.id.des_item)
 
     init {
@@ -25,11 +26,16 @@ class RecyclerHolder(
             tvTitle.text = Html.fromHtml(item.title).trimEnd()
         else
             tvTitle.text = item.title
+        val des = tvTime?.let { //for addition
+            val i = item.des.indexOf("@")
+            it.text = item.des.substring(0, i)
+            item.des.substring(i + 1)
+        } ?: item.des
         tvDes?.let {
-            if (item.des.contains("<"))
-                it.text = Html.fromHtml(item.des).trimEnd()
+            if (des.contains("<"))
+                it.text = Html.fromHtml(des).trimEnd()
             else
-                it.text = item.des
+                it.text = des
         }
         root.setOnClickListener {
             clicker.invoke(layoutPosition, item)

@@ -196,6 +196,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     private fun initAddition(max: Int) {
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
+        adPaging.withTime = true
         binding?.rvSummary?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
         if (firstPosition == -1) {
