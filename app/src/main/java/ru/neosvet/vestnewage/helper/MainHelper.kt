@@ -144,10 +144,12 @@ class MainHelper(private val act: MainActivity) {
     }
 
     fun getFirstSection(): Section {
-        val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
+        val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_HOME)
         return when {
             startScreen == Const.SCREEN_MENU && ScreenUtils.isTablet.not() ->
                 Section.MENU
+            startScreen == Const.SCREEN_HOME ->
+                Section.HOME
             startScreen == Const.SCREEN_SUMMARY ->
                 Section.SUMMARY
             else -> //startScreen == Const.SCREEN_CALENDAR || !isFullMenu ->
@@ -256,6 +258,9 @@ class MainHelper(private val act: MainActivity) {
             Section.MARKERS -> {
                 adAction.addItem(R.drawable.ic_marker, act.getString(R.string.export))
                 adAction.addItem(R.drawable.ic_marker, act.getString(R.string.import_))
+                adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
+            }
+            Section.HOME -> {
                 adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
             }
             else -> {}

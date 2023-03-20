@@ -52,7 +52,8 @@ abstract class StateToiler : ViewModel() {
             is NeoState.Progress, NeoState.Loading, NeoState.None ->
                 return
             //Primary states:
-            is NeoState.ListValue, is NeoState.Calendar, is NeoState.Book, is NeoState.ListState ->
+            is NeoState.ListValue, is NeoState.Calendar, is NeoState.HomeList,
+            is NeoState.Book, is NeoState.ListState ->
                 primaryState = state
             is NeoState.LongValue ->
                 longValue = state

@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.viewmodel.basic
 
 import ru.neosvet.vestnewage.data.CalendarItem
+import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.ListItem
 
 sealed class NeoState {
@@ -23,6 +24,14 @@ sealed class NeoState {
 
     data class ListValue(
         val list: List<ListItem>
+    ) : NeoState()
+
+    data class HomeList(
+        val list: List<HomeItem>
+    ) : NeoState()
+
+    data class HomeUpdate(
+        val item: HomeItem
     ) : NeoState()
 
     data class ListState(

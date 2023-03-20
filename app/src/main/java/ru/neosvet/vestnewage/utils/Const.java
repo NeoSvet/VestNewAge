@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.utils;
 
 public interface Const {
-    int TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_CALENDAR = 1, SCREEN_SUMMARY = 2;
+    int TURN_OFF = -1, SCREEN_MENU = 0, SCREEN_HOME = 1, SCREEN_CALENDAR = 2, SCREEN_SUMMARY = 3;
     String mailto = "mailto:neosvet333@gmail.com?subject=Приложение «Весть Века»&body=";
     String LIGHT = "/style/light.css", DARK = "/style/dark.css", ENCODING = "cp1251";
     String COMMA = ",", N = "\n", NN = "\n\n", AND = "&", SEARCH = "search";

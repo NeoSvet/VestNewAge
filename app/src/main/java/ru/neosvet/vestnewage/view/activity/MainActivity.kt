@@ -1,8 +1,10 @@
 package ru.neosvet.vestnewage.view.activity
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
@@ -186,18 +189,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     setSection(Section.SUMMARY, false)
                 else
                     setSection(Section.CALENDAR, false)
-                R.id.app_bar_book ->
-                    setSection(Section.BOOK, false)
-                R.id.app_bar_marker ->
-                    setSection(Section.MARKERS, false)
-                R.id.app_bar_journal ->
-                    setSection(Section.JOURNAL, false)
+                R.id.app_bar_home ->
+                    setSection(Section.HOME, false)
                 R.id.app_bar_search ->
                     setSection(Section.SEARCH, false)
                 R.id.app_bar_cabinet ->
                     setSection(Section.CABINET, false)
-                R.id.app_bar_prom ->
-                    openReader(Const.PROM_LINK, null)
             }
             return@setOnMenuItemClickListener true
         }
@@ -378,6 +375,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
+            }
+            Section.HOME -> {
+                unblocked()
+                fragmentTransaction.replace(R.id.my_fragment, HomeFragment())
+                helper.frMenu?.setSelect(Section.HOME)
             }
             Section.NEW -> {
                 fragmentTransaction.replace(R.id.my_fragment, NewFragment())
@@ -696,5 +698,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     fun setScrollBar(value: Int) {
         helper.vsbScrollBar.value = value
+    }
+
+    fun openAddition() {
+        tab = 1
+        setSection(Section.SUMMARY, true)
     }
 }

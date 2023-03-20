@@ -202,6 +202,9 @@ class SettingsFragment : NeoFragment() {
             )
         }
         list.add(
+            CheckItem(title = getString(R.string.home_screen), isChecked = screen == list.size)
+        )
+        list.add(
             CheckItem(title = getString(R.string.calendar), isChecked = screen == list.size)
         )
         list.add(

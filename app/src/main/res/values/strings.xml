@@ -56,6 +56,7 @@
     <string name="tips">Подсказки</string>
     <!--Menu-->
     <string name="new_section">Новое</string>
+    <string name="home_screen">Главный</string>
     <string name="summary">Сводка</string>
     <string name="news">Объявления</string>
     <string name="news_dev">Объявления от разработчика</string>
@@ -68,7 +69,6 @@
     <string name="cabinet">Кабинет</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
-    <string name="read">Чтение</string>
     <!--Formats-->
     <string name="format_load">Загрузка: %s</string>
     <string name="format_search_date">Поиск: %s %d</string>
@@ -267,6 +267,18 @@
     <string name="site_name">«Благая Весть»</string>
     <string name="postpone">Отложить</string>
     <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
+    <!--HomeFragment-->
+    <string name="additionally_from_tg">Дополнительно из Телеграма</string>
+    <string name="today_msk">Сегодня по Москве</string>
+    <string name="today_empty">За сегодня ещё ничего нет</string>
+    <string name="last_post_from">Сообщение от %s</string>
+    <string name="last_readed">В прошлый раз читали:</string>
+    <string name="nothing">ничего…</string>
+    <string name="never">Никогда…</string>
+    <string name="refreshed">Обновлено&#160;</string>
+    <string name="about_prom_time">О времени начала Посыла</string>
+    <string name="no_changes">Изменений нет</string>
+    <string name="has_changes">Есть изменения!</string>
     <!--HelpFragment-->
     <string name="title_app">Приложение «Весть Века»</string>
     <string name="url_on_google">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>

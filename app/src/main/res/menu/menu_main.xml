@@ -16,29 +16,10 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/app_bar_read"
-        android:icon="@drawable/ic_book"
-        android:title="@string/read"
-        app:showAsAction="always">
-        <menu>
-            <item
-                android:id="@+id/app_bar_prom"
-                android:icon="@drawable/little_star"
-                android:title="@string/text_prom" />
-            <item
-                android:id="@+id/app_bar_journal"
-                android:icon="@drawable/ic_journal"
-                android:title="@string/journal" />
-            <item
-                android:id="@+id/app_bar_marker"
-                android:icon="@drawable/ic_marker"
-                android:title="@string/markers" />
-            <item
-                android:id="@+id/app_bar_book"
-                android:icon="@drawable/ic_book"
-                android:title="@string/book" />
-        </menu>
-    </item>
+        android:id="@+id/app_bar_home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home_screen"
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/app_bar_search"

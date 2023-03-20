@@ -18,7 +18,7 @@ class AdditionStorage : Closeable {
     }
 
     private val today = DateUnit.initToday()
-    private val yesterday = DateUnit.initToday().apply { day-- }
+    private val yesterday = DateUnit.initToday().apply { changeDay(-1) }
     private val weekDays: Array<String> by lazy {
         App.context.resources.getStringArray(R.array.post_days)
     }

@@ -22,7 +22,7 @@ import ru.neosvet.vestnewage.view.list.ScrollHelper
 class MenuFragment : Fragment() {
     companion object {
         private val mMenu = listOf(
-            Section.NEW, Section.SUMMARY, Section.SITE, Section.CALENDAR,
+            Section.NEW, Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
             Section.CABINET, Section.SETTINGS, Section.HELP
         )
@@ -92,12 +92,12 @@ class MenuFragment : Fragment() {
         )
         rvMenu.adapter = adapter
         val mImage = intArrayOf(
-            R.drawable.ic_0, R.drawable.ic_summary, R.drawable.ic_site,
+            R.drawable.ic_0, R.drawable.ic_home, R.drawable.ic_summary, R.drawable.ic_site,
             R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
             R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
         )
         val mTitle = intArrayOf(
-            R.string.new_section, R.string.summary, R.string.news,
+            R.string.new_section, R.string.home_screen, R.string.summary, R.string.news,
             R.string.calendar, R.string.book, R.string.search, R.string.markers,
             R.string.journal, R.string.cabinet, R.string.settings, R.string.help
         )

@@ -45,6 +45,17 @@ class JournalStorage : Closeable {
     override fun close() =
         db.close()
 
+    suspend fun getLastId(): String? {
+        val cursor = db.query(
+            table = DataBase.JOURNAL,
+            column = DataBase.ID,
+            orderBy = Const.TIME + DataBase.DESC + " limit 1"
+        )
+        return if (cursor.moveToFirst())
+            cursor.getString(0)
+        else null
+    }
+
     suspend fun getList(offset: Int, strings: JournalStrings): List<ListItem> {
         val list = mutableListOf<ListItem>()
         val curJ = getAll()

@@ -28,6 +28,28 @@ data class SiteStrings(
     val back_des: String
 )
 
+data class HomeStrings(
+    val nothing: String,
+    val never: String,
+    val refreshed: String,
+    val today_empty: String,
+    val journal: String,
+    val calendar: String,
+    val summary: String,
+    val news: String,
+    val book: String,
+    val markers: String,
+    val about_prom_time: String,
+    val additionally_from_tg: String,
+    val today_msk: String,
+    val back: String,
+    val last_post_from: String,
+    val last_readed: String,
+    val prom_for_soul_unite: String,
+    val has_changes: String,
+    val no_changes: String
+)
+
 data class BookStrings(
     val rnd_epistle: String,
     val rnd_poem: String,
