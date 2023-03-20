@@ -1,8 +1,11 @@
 package ru.neosvet.vestnewage.view.activity
 
+import android.Manifest
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
@@ -83,6 +87,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_DENIED
+        ) ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS), 1)
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
