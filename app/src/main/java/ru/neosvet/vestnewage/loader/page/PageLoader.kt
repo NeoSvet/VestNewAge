@@ -20,6 +20,13 @@ class PageLoader(private val client: NeoClient) : Loader {
     var isFinish = true
         private set
 
+    override fun load() {
+    }
+
+    override fun cancel() {
+        finish()
+    }
+
     fun download(link: String, singlePage: Boolean): Boolean {
         isFinish = false
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
@@ -158,9 +165,5 @@ class PageLoader(private val client: NeoClient) : Loader {
     fun finish() {
         isFinish = true
         storage.close()
-    }
-
-    override fun cancel() {
-        finish()
     }
 }

@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
@@ -20,6 +21,10 @@ class BookLoader(private val client: NeoClient) : Loader {
     private var isRun = true
     private val clientDoctrine: NeoClient by lazy {
         NeoClient(NeoClient.Type.MAIN)
+    }
+
+    override fun load() {
+        loadYearList(DateUnit.initToday().year)
     }
 
     override fun cancel() {
