@@ -65,7 +65,8 @@ class NeoClient(
     }
 
     fun getStream(url: String): BufferedInputStream {
-        val u = if (isSiteCom) url.replace(NetConst.SITE, NetConst.SITE_COM) else url
+        val u = if (isSiteCom) url.replace(NetConst.SITE, NetConst.SITE_COM)
+        else url.replace("rss/", "rss.xml")
         val response = try {
             val builderRequest = Request.Builder()
             builderRequest.url(u)
