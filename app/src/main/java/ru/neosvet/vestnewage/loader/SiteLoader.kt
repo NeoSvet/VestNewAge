@@ -118,17 +118,6 @@ class SiteLoader(
         return list
     }
 
-    private fun getTitleItem(s: String): String {
-        val i = when {
-            s.contains("title=") ->
-                s.indexOf("title=") + 7
-            s.contains("alt=") ->
-                s.indexOf("alt=") + 5
-            else -> return ""
-        }
-        return s.substring(i, s.indexOf("\"", i))
-    }
-
     private fun addLink(item: ListItem, head: String, link: String) {
         var url = link
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
