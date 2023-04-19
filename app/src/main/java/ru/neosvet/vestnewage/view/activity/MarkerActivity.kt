@@ -11,6 +11,7 @@ import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -122,6 +123,7 @@ class MarkerActivity : AppCompatActivity() {
                 onChangedState(it)
             }
         }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     private fun onChangedState(state: NeoState) {
@@ -132,7 +134,7 @@ class MarkerActivity : AppCompatActivity() {
                 hasError = true
                 toast.autoHide = false
                 toast.show(getString(R.string.not_load_page))
-            } else super.onBackPressed()
+            } else finish()
             is NeoState.Error -> {
                 hasError = true
                 val builder = AlertDialog.Builder(this, R.style.NeoDialog)
@@ -192,7 +194,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun initActivity() = binding.run {
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            finish()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val metrics = DisplayMetrics()
@@ -213,7 +215,7 @@ class MarkerActivity : AppCompatActivity() {
         })
         fabOk.setOnClickListener {
             if (hasError) {
-                super.onBackPressed()
+                finish()
                 return@setOnClickListener
             }
             when (helper.type) {
@@ -378,23 +380,25 @@ class MarkerActivity : AppCompatActivity() {
         return helper.getPosText(f)
     }
 
-    override fun onBackPressed() {
-        if (hasError) {
-            super.onBackPressed()
-            return
-        }
-        when (helper.type) {
-            MarkerHelper.Type.NONE ->
-                super.onBackPressed()
-            MarkerHelper.Type.POS ->
-                hideView(binding.pPos)
-            MarkerHelper.Type.PAR -> {
-                hideView(binding.rvList)
-                helper.setParList()
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (hasError) {
+                finish()
+                return
             }
-            MarkerHelper.Type.COL -> {
-                hideView(binding.rvList)
-                helper.setColList()
+            when (helper.type) {
+                MarkerHelper.Type.NONE ->
+                    finish()
+                MarkerHelper.Type.POS ->
+                    hideView(binding.pPos)
+                MarkerHelper.Type.PAR -> {
+                    hideView(binding.rvList)
+                    helper.setParList()
+                }
+                MarkerHelper.Type.COL -> {
+                    hideView(binding.rvList)
+                    helper.setColList()
+                }
             }
         }
     }

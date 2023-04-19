@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
@@ -122,6 +123,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
         }
         if (toiler.isRun) runObservation()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     private fun runObservation() {
@@ -471,33 +473,35 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
     }
 
-    override fun onBackPressed() {
-        when {
-            snackbar.isShown ->
-                snackbar.hide()
-            status.isCrash -> {
-                status.setError(null)
-                unblocked()
-                curFragment?.resetError()
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            when {
+                snackbar.isShown ->
+                    snackbar.hide()
+                status.isCrash -> {
+                    status.setError(null)
+                    unblocked()
+                    curFragment?.resetError()
+                }
+                helper.shownActionMenu ->
+                    helper.hideActionMenu()
+                curFragment?.onBackPressed() == false ->
+                    return
+                helper.bottomAreaIsHide ->
+                    showBottomArea()
+                firstSection == Section.NEW -> {
+                    firstSection = helper.getFirstSection()
+                    setSection(firstSection, false)
+                }
+                else -> exit()
             }
-            helper.shownActionMenu ->
-                helper.hideActionMenu()
-            curFragment?.onBackPressed() == false ->
-                return
-            helper.bottomAreaIsHide ->
-                showBottomArea()
-            firstSection == Section.NEW -> {
-                firstSection = helper.getFirstSection()
-                setSection(firstSection, false)
-            }
-            else -> exit()
         }
     }
 
     private fun exit() {
         when {
             statusBack == StatusBack.EXIT ->
-                super.onBackPressed()
+                finish()
             helper.prevSection != null -> {
                 if (helper.prevSection == Section.SITE)
                     tab = SiteToiler.TAB_SITE

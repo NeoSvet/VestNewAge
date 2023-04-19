@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -117,6 +118,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         restoreState(savedInstanceState)
         setHeadBar()
         stateUtils.runObserve()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     override fun onPause() {
@@ -246,26 +248,28 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             PromUtils(binding.tvPromTimeHead)
     }
 
-    override fun onBackPressed() {
-        when {
-            snackbar.isShown ->
-                snackbar.hide()
-            status.isVisible -> {
-                toiler.cancel()
-                status.setError(null)
-                bottomUnblocked()
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            when {
+                snackbar.isShown ->
+                    snackbar.hide()
+                status.isVisible -> {
+                    toiler.cancel()
+                    status.setError(null)
+                    bottomUnblocked()
+                }
+                helper.isFullScreen ->
+                    switchFullScreen(false)
+                binding.bottomBar.isScrolledDown -> {
+                    if (isSearch.not())
+                        headBar.show()
+                    binding.bottomBar.performShow()
+                }
+                isSearch ->
+                    closeSearch()
+                toiler.onBackBrowser().not() ->
+                    finish()
             }
-            helper.isFullScreen ->
-                switchFullScreen(false)
-            binding.bottomBar.isScrolledDown -> {
-                if (isSearch.not())
-                    headBar.show()
-                binding.bottomBar.performShow()
-            }
-            isSearch ->
-                closeSearch()
-            toiler.onBackBrowser().not() ->
-                super.onBackPressed()
         }
     }
 
