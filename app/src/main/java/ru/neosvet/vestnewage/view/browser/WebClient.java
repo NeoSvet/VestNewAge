@@ -15,6 +15,12 @@ public class WebClient extends WebViewClient {
         this.act = act;
     }
 
+    @Override
+    public void onScaleChanged(WebView view, float oldScale, float newScale) {
+        super.onScaleChanged(view, oldScale, newScale);
+        act.setCurrentScale(newScale);
+    }
+
     private String getUrl(String url) {
         if (url.contains(act.getPackageName())) // страница во внутренем хранилище
             url = url.substring(url.indexOf("age") + 10);

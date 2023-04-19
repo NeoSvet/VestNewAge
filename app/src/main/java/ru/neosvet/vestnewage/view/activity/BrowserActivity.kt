@@ -67,6 +67,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private var isSearch = false
     private var twoPointers = false
     private var scroll: Job? = null
+    var currentScale: Float = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
     }
@@ -85,7 +86,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
-            scrollY.toFloat() / scale / contentHeight.toFloat()
+            (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
         }
     private val isBigHead: Boolean
         get() {
@@ -132,7 +133,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         toiler.cancel()
         scroll?.cancel()
         helper.position = positionOnPage
-        helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
+        helper.zoom = (currentScale * 100f).toInt()
         helper.save()
         super.onDestroy()
     }
@@ -201,7 +202,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             scrollTo(0, 0)
             return
         }
-        val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
+        val pos = (helper.position * currentScale * contentHeight.toFloat()).toInt()
         scrollTo(0, pos)
         helper.position = 0f
     }
@@ -286,7 +287,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             } else {
                 isTouch = false
                 with(content.wvBrowser) {
-                    scrollTo(0, (contentHeight * scale).toInt())
+                    scrollTo(0, (contentHeight * currentScale).toInt())
                 }
                 isTouch = false
                 if (isSearch.not()) {
@@ -316,7 +317,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun initWords() {
-        val funClick = { v: View ->
+        val funClick = { _: View ->
             WordsUtils.showAlert(this) {
                 val main = Intent(this, MainActivity::class.java)
                 main.putExtra(Const.START_SCEEN, false)
@@ -334,7 +335,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
     private fun setContent() = binding.content.run {
         etSearch.requestLayout()
         wvBrowser.settings.builtInZoomControls = true
@@ -343,14 +344,14 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         wvBrowser.settings.allowContentAccess = true
         wvBrowser.settings.allowFileAccess = true
         wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
-        if (helper.zoom > 0)
-            wvBrowser.setInitialScale(helper.zoom)
+        currentScale = helper.zoom / 100f
+        wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
                 isTouch = false
                 if (twoPointers)
-                    wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
+                    wvBrowser.setInitialScale((currentScale * 100.0).toInt())
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
@@ -434,12 +435,12 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun setNavButton(scrollY: Int) {
-        if (scrollY > 300) {
+        navIsTop = if (scrollY > 300) {
             binding.fabNav.setImageResource(R.drawable.ic_top)
-            navIsTop = true
+            true
         } else {
             binding.fabNav.setImageResource(R.drawable.ic_bottom)
-            navIsTop = false
+            false
         }
     }
 
@@ -557,7 +558,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     )
                 }
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
-                    helper.zoom = if (it.itemId == R.id.nav_opt_scale) 0 else 100
+                    helper.zoom = if (it.itemId == R.id.nav_opt_scale)
+                        (resources.displayMetrics.density * 100).toInt()
+                    else 100
                     helper.save()
                     openReader(helper.link, null)
                     finish()
