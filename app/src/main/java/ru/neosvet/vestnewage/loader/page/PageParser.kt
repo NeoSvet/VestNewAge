@@ -229,8 +229,6 @@ class PageParser(private val client: NeoClient) {
         return s.toString()
     }
 
-    val curItem: HTMLElem
-        get() = content.current()
     val nextItem: String?
         get() = if (!content.hasNext()) null else content.next().code
     val link: String?
