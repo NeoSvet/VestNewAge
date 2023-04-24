@@ -24,14 +24,12 @@ class SiteLoader(
             return list
         list.add(SiteToiler.FORUM)
         val br = BufferedReader(FileReader(file))
-        var s: String? = br.readLine()
-        while (s != null) {
-            if (isNeedLoad(s)) {
-                if (s.contains("@"))
-                    list.add(s.substring(9))
-                else list.add(s)
+        br.forEachLine {
+            if (isNeedLoad(it)) {
+                if (it.contains("@"))
+                    list.add(it.substring(9))
+                else list.add(it)
             }
-            s = br.readLine()
         }
         br.close()
         return list

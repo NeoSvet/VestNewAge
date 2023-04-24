@@ -151,10 +151,9 @@ class AdsUtils(private val storage: AdsStorage) {
         var index: Byte = 0
         warnIndex = -1
         var isNew = false
-        var s: String? = br.readLine()
-        while (s != null) {
+        br.forEachLine {
             when {
-                s.contains("<e>") -> {
+                it.contains("<e>") -> {
                     mode = when {
                         m[TITLE].contains("<u>") -> AdsStorage.MODE_U
                         m[LINK].isEmpty() -> AdsStorage.MODE_TD
@@ -171,15 +170,14 @@ class AdsUtils(private val storage: AdsStorage) {
                     }
                     m = arrayOf("", "", "")
                 }
-                s.indexOf("<") != 0 -> //multiline des
-                    m[DES] += Const.N + s
-                s.contains("<d>") ->
-                    m[DES] = s.substring(3)
-                s.contains("<l>") ->
-                    m[LINK] = s.substring(3)
-                else -> m[TITLE] = s
+                it.indexOf("<") != 0 -> //multiline des
+                    m[DES] += Const.N + it
+                it.contains("<d>") ->
+                    m[DES] = it.substring(3)
+                it.contains("<l>") ->
+                    m[LINK] = it.substring(3)
+                else -> m[TITLE] = it
             }
-            s = br.readLine()
         }
         storage.deleteItems(titles)
         time = storage.newTime()

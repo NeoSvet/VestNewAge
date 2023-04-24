@@ -38,10 +38,8 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider, Loader {
         val unread = if (updateUnread) UnreadUtils() else null
         val m = (if (NeoClient.isSiteCom) {
             val sb = StringBuilder()
-            var line: String? = br.readLine()
-            while (line != null) {
-                sb.append(line)
-                line = br.readLine()
+            br.forEachLine {
+                sb.append(it)
             }
             sb.toString()
         } else br.readLine())

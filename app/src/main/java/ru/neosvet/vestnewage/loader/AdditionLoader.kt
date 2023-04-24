@@ -81,12 +81,10 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         row.put(Const.TITLE, br.readLine())
         row.put(Const.LINK, br.readLine().toInt())
         row.put(Const.TIME, br.readLine())
-        var s: String? = br.readLine()
         val des = StringBuilder()
-        while (s != null) {
-            des.append(s)
+        br.forEachLine {
+            des.append(it)
             des.append(Const.N)
-            s = br.readLine()
         }
         br.close()
         row.put(Const.DESCTRIPTION, des.toString().trim())
@@ -105,20 +103,18 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         val baseTime = Lib.getFileDB(DataBase.ADDITION).lastModified()
         val stream = client.getStream("${additionUrl}changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
-        var s: String? = br.readLine()
-        while (s != null) {
-            val i = s.lastIndexOf(" ")
-            if (s.substring(i + 1).toLong() > baseTime) {
-                val id = s.substring(s.indexOf(" ") + 1, i).toInt()
-                if (s.contains("delete"))
+        br.forEachLine {
+            val i = it.lastIndexOf(" ")
+            if (it.substring(i + 1).toLong() > baseTime) {
+                val id = it.substring(it.indexOf(" ") + 1, i).toInt()
+                if (it.contains("delete"))
                     storage.delete(id)
-                else if (s.contains("update")) {
+                else if (it.contains("update")) {
                     val post = loadPost(id)
                     if (storage.update(id, post).not())
                         storage.insert(post)
                 }
             }
-            s = br.readLine()
         }
         br.close()
     }

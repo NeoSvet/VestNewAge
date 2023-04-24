@@ -57,20 +57,18 @@ class SummaryHelper {
         val file = Lib.getFile(Const.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
-        var s: String? = br.readLine()
-        while (s != null) {
+        br.forEachLine {
             val link = br.readLine()
             br.readLine() //des
             br.readLine() //time
             storage.open(link, true)
             if (!storage.existsPage(link)) {
                 val row = ContentValues()
-                row.put(Const.TITLE, s)
+                row.put(Const.TITLE, it)
                 row.put(Const.LINK, link)
                 storage.insertTitle(row)
                 storage.updateTime()
             }
-            s = br.readLine()
         }
         br.close()
         storage.close()

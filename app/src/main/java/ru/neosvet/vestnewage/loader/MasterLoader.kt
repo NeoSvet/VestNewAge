@@ -186,23 +186,22 @@ class MasterLoader : Loader, LoadHandlerLite {
         //02.05 [length] - проверка целостности
         val br = BufferedReader(InputStreamReader(client.getStream(url)), 1000)
         val list = mutableListOf<String>()
-        var s: String? = br.readLine()
         var isDelete: Boolean
-        while (s != null && isRun) {
-            name = s.substring(0, s.indexOf(" "))
-            isDelete = s.contains("delete")
+        br.forEachLine {
+            name = it.substring(0, it.indexOf(" "))
+            isDelete = it.contains("delete")
             if (isDelete.not())
                 list.add(name)
             f = Lib.getFileDB(name)
             if (f.exists()) {
-                l = s.substring(s.lastIndexOf(" ") + 1).toLong()
+                l = it.substring(it.lastIndexOf(" ") + 1).toLong()
                 if (isDelete) {
                     if (f.lastModified() < l)
                         f.delete()
                 } else if (l != f.length())
                     f.delete()
             }
-            s = br.readLine()
+            if (isRun.not()) return@forEachLine
         }
         br.close()
         return list

@@ -98,10 +98,8 @@ class SearchHelper(context: Context) {
         val f = Lib.getFileS(Const.SEARCH)
         if (f.exists() && requests.isEmpty()) {
             val br = BufferedReader(FileReader(f))
-            var s: String? = br.readLine()
-            while (s != null) {
-                requests.add(s)
-                s = br.readLine()
+            br.forEachLine {
+                requests.add(it)
             }
             br.close()
         }

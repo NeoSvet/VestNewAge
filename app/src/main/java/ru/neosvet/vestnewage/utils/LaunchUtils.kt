@@ -189,11 +189,11 @@ class LaunchUtils {
         if (!f.exists()) return
         val list = mutableListOf<String>()
         val br = BufferedReader(FileReader(f))
-        var s: String? = br.readLine()
-        while (s != null && list.size < SearchHelper.REQUESTS_LIMIT) {
-            if (!list.contains(s))
-                list.add(s)
-            s = br.readLine()
+        br.forEachLine {
+            if (!list.contains(it)) {
+                list.add(it)
+                if(list.size == SearchHelper.REQUESTS_LIMIT) return@forEachLine
+            }
         }
         br.close()
         f.delete()
