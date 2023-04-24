@@ -9,6 +9,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -57,6 +58,7 @@ class MasterLoader : Loader, LoadHandlerLite {
     }
 
     override fun load() {
+        loadStyle()
         loadSummary()
         loadSite()
         loadDoctrine()
@@ -70,11 +72,19 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = false
     }
 
+    fun loadStyle() {
+        isRun = true
+        val style = StyleLoader()
+        style.download(false)
+        isRun = false
+    }
+
     fun loadSummary() {
         isRun = true
         msg = App.context.getString(R.string.summary)
         handler?.postMessage(msg)
         loadPages(SummaryLoader(client).getLinkList())
+        isRun = false
     }
 
     fun loadSite() {
@@ -83,6 +93,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         val loader = SiteLoader(client, Lib.getFile(SiteToiler.MAIN).toString())
         loadPages(loader.getLinkList())
+        isRun = false
     }
 
     fun loadDoctrine() {
@@ -93,6 +104,7 @@ class MasterLoader : Loader, LoadHandlerLite {
             it.loadDoctrineList()
             it.loadDoctrinePages(null)
         }
+        isRun = false
     }
 
     private fun getBookLoader(): BookLoader {
@@ -113,6 +125,7 @@ class MasterLoader : Loader, LoadHandlerLite {
                 loadBase(url + d.my)
         } else
             loadFromSite(d)
+        isRun = false
     }
 
     private fun loadFromSite(d: DateUnit) {

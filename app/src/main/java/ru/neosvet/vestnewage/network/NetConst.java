@@ -9,6 +9,7 @@ public interface NetConst {
             DOCTRINE_BASE = "http://neosvet.ucoz.ru/doctrine/",
             DOCTRINE_BASE_COM = "http://neosvet.somee.com/vna/doctrine/",
             WEB_PAGE = "http://neosvet.ucoz.ru/vna/",
+            WEB_PAGE_COM = "http://neosvet.somee.com/vna/",
             ADDITION_URL = "http://neosvet.ucoz.ru/vna/posts/",
             ADDITION_URL_COM = "http://neosvet.somee.com/vna/posts/",
             TELEGRAM_URL = "https://t.me/Novosti_ot_SOZDATELYA/";

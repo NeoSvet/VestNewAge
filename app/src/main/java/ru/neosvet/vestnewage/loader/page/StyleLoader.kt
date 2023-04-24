@@ -16,6 +16,8 @@ class StyleLoader {
 
     private val builderRequest = Request.Builder()
     private val client = NeoClient.createHttpClient()
+    private val fLight = Lib.getFileL(Const.LIGHT)
+    private val fDark = Lib.getFileL(Const.DARK)
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
@@ -23,13 +25,31 @@ class StyleLoader {
     }
 
     fun download(replaceStyle: Boolean) {
-        val fLight = Lib.getFileL(Const.LIGHT)
-        val fDark = Lib.getFileL(Const.DARK)
-        if (!fLight.exists() || !fDark.exists() || replaceStyle)
-            downloadStyleFromSite(fLight, fDark)
+        if (!fLight.exists() || !fDark.exists() || replaceStyle) {
+            if (downloadStyle().not())
+                downloadStyleFromSite()
+        }
     }
 
-    private fun downloadStyleFromSite(fLight: File, fDark: File) {
+    private fun downloadFile(url: String, file: File): Boolean {
+        builderRequest.url(url + file.name)
+        val response = client.newCall(builderRequest.build()).execute()
+        if (response.isSuccessful.not()) return false
+        val br = BufferedReader(response.body.charStream(), 1000)
+        val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
+        bw.write(br.readLine())
+        br.close()
+        bw.close()
+        return true
+    }
+
+    private fun downloadStyle() = if (NeoClient.isSiteCom)
+        downloadFile(NetConst.WEB_PAGE_COM, fLight) &&
+                downloadFile(NetConst.WEB_PAGE_COM, fDark)
+    else downloadFile(NetConst.WEB_PAGE, fLight) &&
+            downloadFile(NetConst.WEB_PAGE, fDark)
+
+    private fun downloadStyleFromSite() {
         builderRequest.url(NetConst.SITE + "_content/BV/style-print.min.css")
         val response = client.newCall(builderRequest.build()).execute()
         val br = BufferedReader(response.body.charStream(), 1000)

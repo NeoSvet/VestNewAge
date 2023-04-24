@@ -281,6 +281,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
         if (listsUtils.siteIsOld())
             loadSiteSection()
+        loader.loadStyle()
         if (isRun.not()) return
         loader.loadSummary()
         if (isRun.not()) return
