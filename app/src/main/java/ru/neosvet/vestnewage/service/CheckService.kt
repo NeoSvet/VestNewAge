@@ -43,7 +43,10 @@ class CheckService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
-            stopForeground(true)
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
+                stopForeground(true)
+            else
+                stopForeground(STOP_FOREGROUND_REMOVE)
             return START_NOT_STICKY
         }
         if (isRun)
