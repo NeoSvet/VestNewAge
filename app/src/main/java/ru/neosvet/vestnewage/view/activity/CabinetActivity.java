@@ -24,8 +24,8 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helper.CabinetHelper;
-import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.network.UnsafeClient;
+import ru.neosvet.vestnewage.network.Urls;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.view.basic.StatusButton;
 import ru.neosvet.vestnewage.view.dialog.CustomDialog;
@@ -51,7 +51,7 @@ public class CabinetActivity extends AppCompatActivity {
         setContentView(R.layout.cabinet_activity);
         initView();
         status.setLoad(true);
-        wvBrowser.loadUrl(NetConst.SITE_COM + getIntent().getStringExtra(Const.LINK));
+        wvBrowser.loadUrl(Urls.getMainSite() + getIntent().getStringExtra(Const.LINK));
     }
 
     @Override

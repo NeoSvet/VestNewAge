@@ -5,8 +5,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -50,7 +49,7 @@ class PageLoader(private val client: NeoClient) : Loader {
         var n = k
         val boolArticle = storage.isArticle
         val page = PageParser(client)
-        page.load(NetConst.SITE + Const.PRINT + li, "")
+        page.load(Urls.Page + li, "")
         if (singlePage) storage.deleteParagraphs(storage.getPageId(li))
         var row: ContentValues
         var id = 0
@@ -112,8 +111,7 @@ class PageLoader(private val client: NeoClient) : Loader {
 
     private fun downloadDoctrinePage(link: String) {
         var s: String? = link.substring(Const.DOCTRINE.length) //pages
-        val host = if (isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
-        val stream = client.getStream("$host$s.txt")
+        val stream = client.getStream("${Urls.DoctrineBase}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val time = br.readLine().toLong()
         var row = ContentValues()

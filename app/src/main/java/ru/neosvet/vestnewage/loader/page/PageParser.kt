@@ -4,8 +4,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -18,7 +17,7 @@ class PageParser(private val client: NeoClient) {
         var end = "<!--/row-->"
         val stream = client.getStream(url)
         val br: BufferedReader
-        if (isSiteCom) {
+        if (Urls.isSiteCom) {
             br = BufferedReader(InputStreamReader(stream, "cp1251"), 1000)
             if (start.isEmpty()) start = "class=\"title"
             end = "id=\"print2"
@@ -134,7 +133,7 @@ class PageParser(private val client: NeoClient) {
                         elem.par = s.substring(n, s.indexOf("'", n))
                     elem.par = elem.par.replace("..", "").replace("&#x2B;", "+")
                     if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
-                        elem.par = NetConst.SITE + elem.par.substring(1)
+                        elem.par = Urls.Site + elem.par.substring(1)
                     if (elem.html.isEmpty()) {
                         s = elem.par.substring(elem.par.lastIndexOf("/") + 1)
                         if (s.contains("?")) s = s.substring(0, s.indexOf("?"))

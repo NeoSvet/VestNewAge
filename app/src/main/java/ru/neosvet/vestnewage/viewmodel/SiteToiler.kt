@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
@@ -27,8 +27,6 @@ class SiteToiler : NeoToiler() {
         const val TAB_DEV = 2
         const val MAIN = "/main"
         const val NEWS = "/news"
-        const val FORUM = "intforum.html"
-        const val NOVOSTI = "novosti.html"
         const val END = "<end>"
     }
 
@@ -45,9 +43,9 @@ class SiteToiler : NeoToiler() {
     private val client = NeoClient(NeoClient.Type.SECTION)
     private val url: String
         get() = if (selectedTab == TAB_SITE)
-            NetConst.SITE
+            Urls.Site
         else
-            NetConst.SITE + NOVOSTI
+            Urls.Ads
     private val storage: AdsStorage by lazy {
         AdsStorage()
     }
@@ -121,7 +119,6 @@ class SiteToiler : NeoToiler() {
                 } else {
                     list.add(ListItem(t).apply { des = d })
                     if (h != END) {
-                        if (l == END) l = ""
                         list[i].addLink(h, l)
                         l = br.readLine()
                         while (l != END) {
@@ -146,7 +143,7 @@ class SiteToiler : NeoToiler() {
     private fun getFirstItem(): ListItem =
         when (selectedTab) {
             TAB_NEWS -> ListItem(strings.news_dev).apply { addLink("") }
-            TAB_SITE -> ListItem(strings.novosti).apply { addLink(FORUM) }
+            TAB_SITE -> ListItem(strings.novosti).apply { addLink(Urls.News) }
             else -> ListItem(strings.back_title).apply { des = strings.back_des } //TAB_DEV
         }
 

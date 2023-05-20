@@ -11,6 +11,7 @@ import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -143,7 +144,7 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     private fun findUrl(d: DateUnit): String? {
         val my = d.my
-        val host = if (NeoClient.isSiteCom) SOMEE else UCOZ
+        val host = if (Urls.isSiteCom) SOMEE else UCOZ
         listBase.forEach {
             if (it.second.contains(my)) {
                 return if (it.first < 2) "$host/"

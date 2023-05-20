@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.UnsafeClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
@@ -131,7 +132,7 @@ class CabinetToiler : NeoToiler() {
     private suspend fun doLogin(email: String, password: String) {
         helper.email = email
         var request: Request = Request.Builder()
-            .url(NetConst.SITE_COM)
+            .url(Urls.MainSite)
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .build()
         val client = createHttpClient()
@@ -146,7 +147,7 @@ class CabinetToiler : NeoToiler() {
             .build()
         request = Request.Builder()
             .post(requestBody)
-            .url(NetConst.SITE_COM + "auth.php")
+            .url(Urls.MainSite + "auth.php")
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .addHeader(NetConst.COOKIE, cookie)
             .build()
@@ -182,7 +183,7 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun loadAnketa(loadWordList: Boolean): String {
         val builderRequest = Request.Builder()
-        builderRequest.url(NetConst.SITE_COM + "edinenie/anketa.html")
+        builderRequest.url(Urls.MainSite + "edinenie/anketa.html")
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
         val client = createHttpClient()
@@ -240,7 +241,7 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun sendWord(index: Int, word: String) {
         val builderRequest = Request.Builder()
-        builderRequest.url(NetConst.SITE_COM + "savedata.php")
+        builderRequest.url(Urls.MainSite + "savedata.php")
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
         val requestBody: RequestBody = FormBody.Builder()

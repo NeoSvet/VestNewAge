@@ -7,7 +7,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.isPoem
@@ -35,17 +35,17 @@ class BookLoader(private val client: NeoClient) : Loader {
         if (year == 2016)
             loadEpistlesList()
         if (isRun.not()) return
-        loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
+        loadList(Urls.getPoems(year))
     }
 
     fun loadPoemsList(year: Int) {
         isRun = true
-        loadList(NetConst.SITE + Const.PRINT + Const.POEMS + "/" + year + Const.HTML)
+        loadList(Urls.getPoems(year))
     }
 
     fun loadEpistlesList() {
         isRun = true
-        loadList(NetConst.SITE + Const.PRINT + "tolkovaniya" + Const.HTML)
+        loadList(Urls.Epistles)
     }
 
     private fun loadList(url: String) {
@@ -113,8 +113,10 @@ class BookLoader(private val client: NeoClient) : Loader {
         //list format:
         //line 1: pages
         //line 2: title
-        val host = if (NeoClient.isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
-        val stream = InputStreamReader(clientDoctrine.getStream("${host}list.txt"), Const.ENCODING)
+        val stream = InputStreamReader(
+            clientDoctrine.getStream("${Urls.DoctrineBase}list.txt"),
+            Const.ENCODING
+        )
         val br = BufferedReader(stream, 1000)
         val storage = PageStorage()
         storage.open(DataBase.DOCTRINE)
@@ -147,7 +149,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         val max = cursor.count - 1
         var cur = 0
         cursor.moveToFirst()
-        val host = if (NeoClient.isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
+        val host = Urls.DoctrineBase
         val iId = cursor.getColumnIndex(DataBase.ID)
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iTime = cursor.getColumnIndex(Const.TIME)

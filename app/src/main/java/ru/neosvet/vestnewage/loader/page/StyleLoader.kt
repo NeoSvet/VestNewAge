@@ -4,6 +4,7 @@ import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.*
@@ -21,7 +22,7 @@ class StyleLoader {
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
-        builderRequest.header("Referer", NetConst.SITE)
+        builderRequest.header(NetConst.REFERER, Urls.Host)
     }
 
     fun download(replaceStyle: Boolean) {
@@ -43,14 +44,12 @@ class StyleLoader {
         return true
     }
 
-    private fun downloadStyle() = if (NeoClient.isSiteCom)
-        downloadFile(NetConst.WEB_PAGE_COM, fLight) &&
-                downloadFile(NetConst.WEB_PAGE_COM, fDark)
-    else downloadFile(NetConst.WEB_PAGE, fLight) &&
-            downloadFile(NetConst.WEB_PAGE, fDark)
+    private fun downloadStyle() =
+        downloadFile(Urls.DevSite, fLight) &&
+                downloadFile(Urls.DevSite, fDark)
 
     private fun downloadStyleFromSite() {
-        builderRequest.url(NetConst.SITE + "_content/BV/style-print.min.css")
+        builderRequest.url(Urls.Style)
         val response = client.newCall(builderRequest.build()).execute()
         val br = BufferedReader(response.body.charStream(), 1000)
         val bwLight = BufferedWriter(OutputStreamWriter(FileOutputStream(fLight)))

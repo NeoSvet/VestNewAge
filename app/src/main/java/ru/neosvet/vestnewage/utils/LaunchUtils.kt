@@ -10,13 +10,13 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.*
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -346,7 +346,7 @@ class LaunchUtils {
                 } else InputData(1, Section.SUMMARY)
             link.length < 2 || link == "/index.html" ->
                 InputData(0, Section.SITE)
-            link == SiteToiler.NOVOSTI ->
+            link == Urls.Ads ->
                 InputData(1, Section.SITE)
             link.contains(Const.HTML) -> {
                 if (link.contains("/tolk")) { //https://www.otkroveniya.info/tolk4/t4-15.09.16.html

@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -45,17 +45,14 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
 
     fun loadListMonth(updateUnread: Boolean) {
         isRun = true
-        var s = if (NeoClient.isSiteCom)
-            NetConst.SITE_COM + "ajax.php?m=${date.month}&y=${date.year - 2004}"
-        else
-            NetConst.SITE + "AjaxData/Calendar/${date.year}-${date.month}.json"
-        val stream = client.getStream(s)
+        val url = Urls.getCalendar(date.month, date.year)
+        val stream = client.getStream(url)
         val br = BufferedReader(InputStreamReader(stream), 1000)
-        s = br.readText()
+        val s = br.readText()
         br.close()
         stream.close()
         if (s.length < 20) return
-        if (NeoClient.isSiteCom)
+        if (Urls.isSiteCom)
             parseHtml(s)
         else
             parseJson(s)
@@ -148,7 +145,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         storage.updateTime()
         val unread = if (updateUnread) UnreadUtils() else null
         while (list.isNotEmpty()) {
-            val item = if (NeoClient.isSiteCom)
+            val item = if (Urls.isSiteCom)
                 list.removeFirst() else list.removeLast()
             if (updateUnread)
                 date.day = item.title.toInt()

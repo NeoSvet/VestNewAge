@@ -14,7 +14,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
 import ru.neosvet.vestnewage.helper.CabinetHelper
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity

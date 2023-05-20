@@ -22,8 +22,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.*
 import ru.neosvet.vestnewage.view.browser.HeadBar
@@ -249,20 +249,25 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             when {
                 snackbar.isShown ->
                     snackbar.hide()
+
                 status.isVisible -> {
                     toiler.cancel()
                     status.setError(null)
                     bottomUnblocked()
                 }
+
                 helper.isFullScreen ->
                     switchFullScreen(false)
+
                 binding.bottomBar.isScrolledDown -> {
                     if (isSearch.not())
                         headBar.show()
                     binding.bottomBar.performShow()
                 }
+
                 isSearch ->
                     closeSearch()
+
                 toiler.onBackBrowser().not() ->
                     finish()
             }
@@ -465,11 +470,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             additionViews = listOf(btnGodWords, tvGodWords, btnFullScreen)
         ) {
             if (helper.link.contains(Const.DOCTRINE))
-                Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+                Lib.openInApps(Urls.DoctrineSite, null)
             else if (menu.refresh.isVisible)
-                Lib.openInApps(NetConst.SITE + helper.link, null)
+                Lib.openInApps(Urls.Site + helper.link, null)
             else
-                Lib.openInApps(NetConst.SITE, null)
+                Lib.openInApps(Urls.Site, null)
         }
         btnFullScreen.setOnClickListener {
             switchFullScreen(true)
@@ -521,8 +526,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             when (it.itemId) {
                 R.id.nav_refresh ->
                     toiler.refresh()
+
                 R.id.nav_share ->
                     ShareDialog.newInstance(helper.link).show(supportFragmentManager, null)
+
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
@@ -530,15 +537,18 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                         1f else 0f
                     setNavVisible(true)
                 }
+
                 R.id.nav_minitop -> {
                     helper.isMiniTop = helper.isMiniTop.not()
                     setCheckItem(it, helper.isMiniTop)
                     headBar.setExpandable(helper.isMiniTop)
                 }
+
                 R.id.nav_autoreturn -> {
                     helper.isAutoReturn = helper.isAutoReturn.not()
                     setCheckItem(it, helper.isAutoReturn)
                 }
+
                 R.id.nav_search -> with(content) {
                     headBar.hide()
                     pSearch.isVisible = true
@@ -546,6 +556,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     etSearch.post { etSearch.requestFocus() }
                     softKeyboard.show()
                 }
+
                 R.id.nav_marker -> {
                     val des = if (helper.isSearch)
                         getString(R.string.search_for) + " “" + helper.request + "”"
@@ -557,6 +568,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                         des
                     )
                 }
+
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
                     helper.zoom = if (it.itemId == R.id.nav_opt_scale)
                         (resources.displayMetrics.density * 100).toInt()
@@ -565,6 +577,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     openReader(helper.link, null)
                     finish()
                 }
+
                 R.id.nav_theme -> {
                     helper.isLightTheme = helper.isLightTheme.not()
                     initTheme()
@@ -618,19 +631,24 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 status.setLoad(true)
                 status.loadText()
             }
+
             NeoState.NoConnected ->
                 noConnected()
+
             is NeoState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.refresh.isVisible = state.isOtkr.not()
             }
+
             NeoState.Ready -> {
                 binding.tvNotFound.isVisible = true
                 menu.refresh.isVisible = false
             }
+
             NeoState.Success ->
                 tipFinish.show()
+
             is NeoState.Error ->
                 if (state.isNeedReport)
                     status.setError(state)
@@ -638,6 +656,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     finishLoading()
                     snackbar.show(binding.fabNav, state.message)
                 }
+
             else -> {}
         }
     }

@@ -4,7 +4,7 @@ import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.*
@@ -22,7 +22,7 @@ class SiteLoader(
         val list = mutableListOf<String>()
         if (file.contains(SiteToiler.NEWS))
             return list
-        list.add(SiteToiler.FORUM)
+        list.add(Urls.News)
         val br = BufferedReader(FileReader(file))
         br.forEachLine {
             if (isNeedLoad(it)) {
@@ -51,16 +51,16 @@ class SiteLoader(
 
     private fun loadList(link: String): List<ListItem> {
         val page = PageParser(client)
-        val isSite = link == NetConst.SITE
+        val isSite = link == Urls.Site
         val end: String
         if (isSite) {
             page.load(link, "")
-            end = if (NeoClient.isSiteCom) "bgimage" else "<button"
+            end = if (Urls.isSiteCom) "bgimage" else "<button"
         } else {
-            end = if (NeoClient.isSiteCom) "print2" else "<button"
+            end = if (Urls.isSiteCom) "print2" else "<button"
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            if (NeoClient.isSiteCom) {
+            if (Urls.isSiteCom) {
                 page.load(url, "")
                 page.nextItem
             } else page.load(url, "razdel")
@@ -84,15 +84,23 @@ class SiteLoader(
                     }
                     list.add(item)
                 }
+
                 isSite -> {
                     if (s == null || s.contains(end)) break
-                    t = page.text
-                    if (t.isNotEmpty() && !s.contains("\"#\"")) {
-                        if (!s.contains("<")) item.des = s
-                        else item = ListItem(t).also { list.add(it) }
-                        page.link?.let { addLink(item, t, it) }
+                    if (page.link?.contains("javascript") == true) {
+                        page.nextItem //DisableEnableUnread("true")
+                        page.nextItem //DisableEnableUnread("false")
+                        page.nextItem //непрочитанное
+                    } else {
+                        t = page.text
+                        if (t.isNotEmpty() && !s.contains("\"#\"")) {
+                            if (!s.contains("<")) item.des = s
+                            else item = ListItem(t).also { list.add(it) }
+                            page.link?.let { addLink(item, t, it) }
+                        }
                     }
                 }
+
                 page.isSimple -> d.append(s)
                 else -> {
                     page.link?.let { addLink(item, page.text, it) }
@@ -105,7 +113,7 @@ class SiteLoader(
         if (setDes(item, t).not())
             list.add(ListItem(t))
         page.clear()
-        if (isSite && NeoClient.isSiteCom) {
+        if (isSite && Urls.isSiteCom) {
             var i = list.size - 1
             while (i > 1) {
                 if (i in 17..24 || i in 11..13 || (i in 2..6 && i != 4))
@@ -121,7 +129,7 @@ class SiteLoader(
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
             || url.lastIndexOf("/") == url.length - 1
         )
-            url = NetConst.SITE + url.substring(1)
+            url = Urls.Site + url.substring(1)
         if (url.indexOf("/") == 0) url = url.substring(1)
         if (item.link == "@")
             item.clear()
@@ -151,6 +159,7 @@ class SiteLoader(
                         bw.write(it.first + Const.N)
                     }
                 }
+
                 list[i].hasLink() -> bw.write(list[i].link + Const.N)
                 else -> bw.write("@" + Const.N)
             }

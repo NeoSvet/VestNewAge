@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -207,10 +207,10 @@ class SiteFragment : NeoFragment() {
 
     private fun openPage(url: String) {
         if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(NetConst.SITE)) Lib.openInApps(url, getString(R.string.to_load))
+            if (url.contains(Urls.Site)) Lib.openInApps(url, getString(R.string.to_load))
             else Lib.openInApps(url, null)
         } else if (url.contains(".jp") || url.contains(".mp")) {
-            Lib.openInApps(NetConst.SITE + url, null)
+            Lib.openInApps(Urls.Site + url, null)
         } else openReader(url, null)
     }
 

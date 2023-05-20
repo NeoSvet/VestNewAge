@@ -1,10 +1,7 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName

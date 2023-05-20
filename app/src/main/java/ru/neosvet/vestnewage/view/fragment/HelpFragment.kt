@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -106,7 +106,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
                 ListEvent.CHANGE ->
                     adapter.updateItem(index)
                 ListEvent.MOVE ->
-                    Lib.openInApps(NetConst.WEB_PAGE + "privacy.html", null)
+                    Lib.openInApps(Urls.WebPage + "privacy.html", null)
                 ListEvent.REMOTE -> shareAppLink(
                     if (this.index == HelpToiler.LINK_ON_GOOGLE)
                         getString(R.string.url_on_google)

@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.*
@@ -237,6 +238,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun initLaunch() {
+        Urls.restore()
         utils = LaunchUtils()
         utils.checkAdapterNewVersion()
         utils.openLink(intent)?.let {

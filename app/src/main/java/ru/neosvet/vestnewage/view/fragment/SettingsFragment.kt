@@ -25,7 +25,7 @@ import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.CheckStarter
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -167,7 +167,7 @@ class SettingsFragment : NeoFragment() {
         list.add(
             CheckItem(
                 title = getString(R.string.use_site_com),
-                isChecked = NeoClient.isSiteCom
+                isChecked = Urls.isSiteCom
             )
         )
         adapter.addItem(SettingsItem.CheckList(
@@ -176,7 +176,7 @@ class SettingsFragment : NeoFragment() {
             list = list,
             onChecked = { index, checked ->
                 if (index == 2) {
-                    NeoClient.setCom(checked)
+                    Urls.setCom(checked)
                     return@CheckList
                 }
                 val name = if (index == 0) {

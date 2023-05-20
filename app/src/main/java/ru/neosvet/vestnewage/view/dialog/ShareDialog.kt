@@ -18,7 +18,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.ShareDialogBinding
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -111,9 +111,10 @@ class ShareDialog : BottomSheetDialogFragment() {
             storage.isDoctrine -> {
                 sb.append(getString(R.string.doctrine_pages))
                 sb.appendLine(link.substring(Const.DOCTRINE.length))
-                sb.append(NetConst.DOCTRINE_SITE)
+                sb.append(Urls.DoctrineSite)
             }
-            !storage.isOldBook -> sb.append(NetConst.SITE + link)
+
+            !storage.isOldBook -> sb.append(Urls.Site + link)
         }
 
         return sb.toString().trimEnd()

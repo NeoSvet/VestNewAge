@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import java.io.BufferedReader
@@ -196,10 +196,8 @@ class AdsUtils(private val storage: AdsStorage) {
     fun loadAds(client: NeoClient) {
         isNew = false
         val t = time
-        var s = if (isSiteCom) "http://neosvet.somee.com/vna/ads.txt"
-        else "http://neosvet.ucoz.ru/ads_vna.txt"
-        val br = BufferedReader(InputStreamReader(client.getStream(s)))
-        s = br.readLine()
+        val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevAds)))
+        val s = br.readLine()
         if (s.toLong() > t) {
             if (update(br)) {
                 isNew = true

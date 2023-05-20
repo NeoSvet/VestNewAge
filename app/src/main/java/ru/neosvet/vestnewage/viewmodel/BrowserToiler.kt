@@ -13,7 +13,7 @@ import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -235,7 +235,7 @@ class BrowserToiler : NeoToiler() {
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
-            val url = NetConst.SITE + link
+            val url = Urls.Site + link
             bw.write(LINK_FORMAT.format(url, url))
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
