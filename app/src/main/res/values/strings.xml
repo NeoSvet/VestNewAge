@@ -14,6 +14,7 @@
     <string name="site_code">Ошибка на сайте: %d, попробуйте позже</string>
     <string name="site_no_response">Проблемы с сетью, попробуйте позже</string>
     <string name="site_unavailable">Сайт недоступен</string>
+    <string name="about_no_response">Возможно, вам надо включить или выключить использование зеркала в домене .COM. Или изменился адрес, с которого загружается информация – попробуйте позже. Подробнее написано в «Справке».</string>
     <!--Download-->
     <string name="download_">Скачать…</string>
     <string name="download_alert">Выберите пункты для скачивания:</string>

@@ -26,7 +26,7 @@ abstract class NeoToiler : StateToiler() {
         super.onCleared()
     }
 
-    protected fun errorHandler(throwable: Throwable) {
+    private fun errorHandler(throwable: Throwable) {
         throwable.printStackTrace()
         currentLoader?.cancel()
         scope = initScope()
