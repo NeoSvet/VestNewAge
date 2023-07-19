@@ -100,6 +100,10 @@ class LaunchUtils {
             val file = Lib.getFileDB(DataBase.ADDITION)
             if (file.exists()) file.delete()
         }
+        if (ver < 69) {
+            val file = Lib.getFileDB("07.23")
+            if (file.exists()) file.delete()
+        }
     }
 
     private fun refTips() {
@@ -192,7 +196,7 @@ class LaunchUtils {
         br.forEachLine {
             if (!list.contains(it)) {
                 list.add(it)
-                if(list.size == SearchHelper.REQUESTS_LIMIT) return@forEachLine
+                if (list.size == SearchHelper.REQUESTS_LIMIT) return@forEachLine
             }
         }
         br.close()
@@ -344,10 +348,13 @@ class LaunchUtils {
                     clearSummaryNotif(id)
                     InputData(0, Section.SUMMARY)
                 } else InputData(1, Section.SUMMARY)
+
             link.length < 2 || link == "/index.html" ->
                 InputData(0, Section.SITE)
+
             link == Urls.Ads ->
                 InputData(1, Section.SITE)
+
             link.contains(Const.HTML) -> {
                 if (link.contains("/tolk")) { //https://www.otkroveniya.info/tolk4/t4-15.09.16.html
                     val i = link.lastIndexOf(".")
@@ -357,6 +364,7 @@ class LaunchUtils {
                 openReader(link.substring(1), null)
                 InputData(-1, Section.MENU)
             }
+
             data.query?.contains("date") == true -> { //http://blagayavest.info/poems/?date=11-3-2017
                 val s = data.query!!.substring(5)
                 val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
@@ -366,6 +374,7 @@ class LaunchUtils {
                 openReader(link, null)
                 InputData(-1, Section.MENU)
             }
+
             link.contains("-") -> { //https://blagayavest.info/poems/2022-09-17
                 val i = link.lastIndexOf("/") + 3
                 link = Const.POEMS + "/" + link.substring(i + 6, i + 8) + "." +
@@ -373,10 +382,13 @@ class LaunchUtils {
                 openReader(link, null)
                 InputData(-1, Section.MENU)
             }
+
             link.contains("/poems") ->
                 InputData(0, Section.BOOK)
+
             link.contains("/tolkovaniya") || link.contains("/2016") ->
                 InputData(1, Section.BOOK)
+
             else -> null
         }
     }
