@@ -117,6 +117,7 @@ class BrowserToiler : NeoToiler() {
             }
             link = url
         }
+        loadIfNeed = true
         openPage(true)
     }
 
@@ -124,7 +125,6 @@ class BrowserToiler : NeoToiler() {
         cancel()
         scope.launch {
             storage.open(link)
-            loadIfNeed = true
             if (storage.name.contains(".")) {
                 if (storage.isOldBook) loadIfNeed = false
             }
