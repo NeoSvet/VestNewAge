@@ -642,6 +642,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             }
 
             NeoState.Ready -> {
+                finishLoading()
                 binding.tvNotFound.isVisible = true
                 menu.refresh.isVisible = false
             }
