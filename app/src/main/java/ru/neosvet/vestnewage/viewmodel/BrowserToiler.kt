@@ -141,12 +141,9 @@ class BrowserToiler : NeoToiler() {
             val p = if (newPage || !file.exists())
                 generatePage(file)
             else Pair(false, false) //isNeedUpdate, isOtkr
-            var s = file.toString()
-            if (link.contains("#"))
-                s += link.substring(link.indexOf("#"))
             postState(
                 NeoState.Page(
-                    url = FILE + s,
+                    url = FILE + file.toString(),
                     isOtkr = p.second
                 )
             )
