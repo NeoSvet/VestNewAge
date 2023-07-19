@@ -25,11 +25,15 @@ class PageParser(private val client: NeoClient) {
             br = BufferedReader(InputStreamReader(stream), 1000)
             if (start.isEmpty()) start = "page-title"
         }
+        if (url.contains("#"))
+            start = "a name=\"" + url.substring(url.indexOf("#") + 1)
         var line: String? = br.readLine()
         while (line != null) {
             if (line.contains(start)) break
             line = br.readLine()
         }
+        if (line?.contains("<h1") == false)
+            line = br.readLine()
         if (line == null) {
             br.close()
             stream.close()
@@ -65,6 +69,8 @@ class PageParser(private val client: NeoClient) {
         var i = 0
         while (i < m.size) {
             var s = m[i].trim { it <= ' ' }
+            if (s.indexOf("a name") == 0)
+                break
             if (s.isEmpty()) {
                 i++
                 continue
@@ -140,15 +146,18 @@ class PageParser(private val client: NeoClient) {
                         elem.html = s
                     }
                 }
+
                 Const.IMAGE -> {
                     elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/")
                 }
+
                 Const.FRAME -> {
                     elem.tag = Const.LINK
                     n = s.indexOf("src") + 5
                     elem.par = s.substring(n, s.indexOf("\"", n))
                     elem.html = App.context.getString(R.string.video_on_site)
                 }
+
                 Const.PAR -> {
                     if (startPar) content.add(HTMLElem(Const.PAR)) else startPar = true
                     s = s.substring(0, s.indexOf(">")).replace("\"", "'")
