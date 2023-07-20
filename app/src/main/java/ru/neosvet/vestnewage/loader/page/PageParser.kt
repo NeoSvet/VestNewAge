@@ -32,8 +32,10 @@ class PageParser(private val client: NeoClient) {
             if (line.contains(start)) break
             line = br.readLine()
         }
-        if (line?.contains("<h1") == false)
+        while (line != null) {
+            if (line.contains("<h1")) break
             line = br.readLine()
+        }
         if (line == null) {
             br.close()
             stream.close()
@@ -42,15 +44,16 @@ class PageParser(private val client: NeoClient) {
         val sb = StringBuilder(line)
         line = br.readLine()
         while (line != null) {
-            if (line.contains(end)) break
+            if (line.contains(end) || line.contains("div class=\"next")) break
             sb.append(" ").append(line)
             line = br.readLine()
         }
         br.close()
         stream.close()
         if (end.contains("print2")) {
-            sb.delete(0, 33)
-            sb.delete(sb.length - 10, sb.length)
+            if (sb[1] == 't') sb.delete(0, 33) //if <td else <h1
+            if (line?.contains("div class=\"next") == false)
+                sb.delete(sb.length - 10, sb.length)
         }
         var t = sb.toString()
         t = t.replace("&nbsp;", " ")
@@ -69,8 +72,6 @@ class PageParser(private val client: NeoClient) {
         var i = 0
         while (i < m.size) {
             var s = m[i].trim { it <= ' ' }
-            if (s.indexOf("a name") == 0)
-                break
             if (s.isEmpty()) {
                 i++
                 continue
