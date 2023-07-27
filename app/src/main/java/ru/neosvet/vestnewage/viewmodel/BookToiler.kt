@@ -47,7 +47,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private var helper: BookHelper? = null
     var isNotInit = true
         private set
-    private var isLoadedOtkr = false
+    private val isLoadedOtkr
+        get() = DateHelper.isLoadedOtkr()
     var date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
         set(value) {
@@ -62,7 +63,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun init(context: Context) {
-        isLoadedOtkr = DateHelper.isLoadedOtkr()
         helper = BookHelper().also {
             it.loadDates()
             dPoems = DateUnit.putDays(it.poemsDays)
