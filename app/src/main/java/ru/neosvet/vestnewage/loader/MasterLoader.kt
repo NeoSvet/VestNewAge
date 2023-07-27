@@ -44,11 +44,6 @@ class MasterLoader : Loader, LoadHandlerLite {
         loader = PageLoader(client)
     }
 
-    companion object {
-        private const val UCOZ = "http://neosvet.ucoz.ru/databases_vna"
-        private const val SOMEE = "http://neosvet.somee.com/vna/databases"
-    }
-
     private var loaderBook: BookLoader? = null
     private var isRun = false
     private var lastYear = 0
@@ -144,7 +139,7 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     private fun findUrl(d: DateUnit): String? {
         val my = d.my
-        val host = if (Urls.isSiteCom) SOMEE else UCOZ
+        val host = Urls.Databases
         listBase.forEach {
             if (it.second.contains(my)) {
                 return if (it.first < 2) "$host/"

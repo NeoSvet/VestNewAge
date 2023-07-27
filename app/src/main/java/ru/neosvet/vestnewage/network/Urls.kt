@@ -32,7 +32,8 @@ object Urls {
         "print/poems/%Y.html", "", //POEMS 24 25
         "print/tolkovaniya.html", "", //EPISTLES 26 27
         "intforum.html", "", //NEWS 28 29
-        "novosti.html", "" //ADS 30 31
+        "novosti.html", "", //ADS 30 31
+        "databases_vna", "vna/databases" //DATABASES 32 33
     )
 
     @JvmStatic
@@ -73,6 +74,10 @@ object Urls {
     val DevAds: String
         get() = if (isSiteCom) URL[1] + URL[11].ifEmpty { URL[10] }
         else URL[0] + URL[10]
+
+    val Databases: String
+        get() = if (isSiteCom) URL[1] + URL[33].ifEmpty { URL[32] }
+        else URL[0] + URL[32]
 
     val WebPage: String
         get() = if (isSiteCom) URL[13].ifEmpty { URL[12] } else URL[12]
@@ -170,6 +175,7 @@ object Urls {
                 if (s.isEmpty() || s[0] != '[') {
                     URL[i] = s
                     i++
+                    if (i == URL.size) break
                 }
                 s = br.readLine()
             }
