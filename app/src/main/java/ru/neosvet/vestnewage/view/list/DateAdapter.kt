@@ -36,7 +36,7 @@ class DateAdapter(
         }
     var selected = 0
         set(value) {
-            if (value in minPos..maxPos || minPos == -1) {
+            if (field != value && value in minPos..maxPos) {
                 val i = field
                 field = value
                 notifyItemChanged(i)
