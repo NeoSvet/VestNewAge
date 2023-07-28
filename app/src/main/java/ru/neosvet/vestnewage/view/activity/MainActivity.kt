@@ -11,6 +11,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
@@ -87,11 +88,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_DENIED
-        ) ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS), 1)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            doCheckPermission()
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
@@ -123,6 +121,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
         if (toiler.isRun) runObservation()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun doCheckPermission() {
+        val n = POST_NOTIFICATIONS
+        if (ContextCompat.checkSelfPermission(this, n) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(this, arrayOf(n), 1)
     }
 
     private fun runObservation() {
