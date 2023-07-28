@@ -1,5 +1,8 @@
 package ru.neosvet.vestnewage.network
 
+import android.content.Intent
+import android.net.Uri
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
@@ -193,5 +196,14 @@ object Urls {
             if (e is NeoException && isCom == isSiteCom)
                 update(client, !isSiteCom)
         }
+    }
+
+    fun openInBrowser(url: String) {
+        val emptyBrowserIntent = Intent(Intent.ACTION_VIEW)
+        emptyBrowserIntent.data = Uri.fromParts("http", "", null)
+        val targetIntent = Intent(Intent.ACTION_VIEW)
+        targetIntent.data = Uri.parse(url)
+        targetIntent.selector = emptyBrowserIntent
+        App.context.startActivity(targetIntent)
     }
 }

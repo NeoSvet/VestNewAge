@@ -470,11 +470,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             additionViews = listOf(btnGodWords, tvGodWords, btnFullScreen)
         ) {
             if (helper.link.contains(Const.DOCTRINE))
-                Lib.openInApps(Urls.DoctrineSite, null)
+                Urls.openInBrowser(Urls.DoctrineSite)
             else if (menu.refresh.isVisible)
-                Lib.openInApps(Urls.Site + helper.link, null)
+                Urls.openInBrowser(Urls.Site + helper.link)
             else
-                Lib.openInApps(Urls.Site, null)
+                Urls.openInBrowser(Urls.Site)
         }
         btnFullScreen.setOnClickListener {
             switchFullScreen(true)
