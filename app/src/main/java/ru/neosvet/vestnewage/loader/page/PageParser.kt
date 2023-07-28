@@ -33,7 +33,7 @@ class PageParser(private val client: NeoClient) {
             line = br.readLine()
         }
         while (line != null) {
-            if (line.contains("<h1")) break
+            if (line.contains("<h")) break
             line = br.readLine()
         }
         if (line == null) {
