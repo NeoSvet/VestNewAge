@@ -235,6 +235,11 @@
     <string name="set_notif">Настроить сигнал, вибрацию</string>
     <string name="about_manager">Об автозапуске</string>
     <string name="info_manager">На некоторых устройствах присутствует менеджер автозапуска (может называться по другому). Для работы проверки и напоминания необходимо в менеджере разрешить автозапуск для данного приложения.</string>
+    <string name="about_default">Открытие ссылок</string>
+    <string name="set_">Настроить</string>
+    <string name="info_default">Приложение может открывать ссылки на сайты «Благая Весть» и «Откровения людям Нового века». После нажатия на кнопку «Настроить»:</string>
+    <string name="info_default_a">«Открывать по умолчанию» – «Открывать поддерживаемые ссылки» – «Открывать в этом приложении».</string>
+    <string name="info_default_b">Включить «Открывать поддерживаемые ссылки» и добавить ссылки (или выбрать веб-адреса).</string>
     <string name="set_battery">Настроить энергосбережение</string>
     <string name="info_battery">Так же рекомендуется отключить энергосбережение для данного приложения (особенно для Android 9+). И то может быть задержка до 6 минут.</string>
     <string name="default_">По умолчанию</string>
@@ -268,7 +273,7 @@
     <string name="appeared_new_some">Новые материалы</string>
     <string name="site_name">«Благая Весть»</string>
     <string name="postpone">Отложить</string>
-    <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
+    <string name="postpone_alert">Уведомление отложено на 15–20 минут</string>
     <!--HelpFragment-->
     <string name="title_app">Приложение «Весть Века»</string>
     <string name="url_on_google">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>

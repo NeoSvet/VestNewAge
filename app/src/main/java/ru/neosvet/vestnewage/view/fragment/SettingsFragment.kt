@@ -90,6 +90,7 @@ class SettingsFragment : NeoFragment() {
         initCheckSection()
         initPromSection()
         initClearSection()
+        initDefaultSection()
         initMessageSection()
         binding?.run {
             rvSettings.layoutManager = GridLayoutManager(
@@ -343,6 +344,33 @@ class SettingsFragment : NeoFragment() {
         toiler.setAlarm(h, prefProm.getInt(Const.TIME, -1))
     }
 
+    private fun initDefaultSection() {
+        val pack = Uri.parse("package:ru.neosvet.vestnewage")
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            adapter.addItem(SettingsItem.Message(
+                title = getString(R.string.about_default),
+                text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_a),
+                buttonLabel = getString(R.string.set_),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
+                    startActivity(intent)
+                }
+            ))
+            return
+        }
+
+        adapter.addItem(SettingsItem.Message(
+            title = getString(R.string.about_default),
+            text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_b),
+            buttonLabel = getString(R.string.set_),
+            onClick = {
+                val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
+                startActivity(intent)
+            }
+        ))
+    }
+
     private fun initMessageSection() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             adapter.addItem(SettingsItem.Message(
@@ -450,11 +478,13 @@ class SettingsFragment : NeoFragment() {
         when (v) {
             1 ->
                 t.append(resources.getStringArray(R.array.time)[3])
+
             in 5..20 -> {
                 t.append(v)
                 t.append(" ")
                 t.append(resources.getStringArray(R.array.time)[4])
             }
+
             else -> {
                 t.append(v)
                 t.append(" ")
