@@ -249,8 +249,8 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private fun checkTime(time: Long): Boolean {
         if (time == 0L)
             return true
-        if (isCurMonth() && DateUnit.isLongAgo(time))
-            return true
+        if (isCurMonth())
+            return DateUnit.isLongAgo(time)
         val d = DateUnit.putMills(time)
         if (date.month == d.month && date.year == d.year)
             return true
