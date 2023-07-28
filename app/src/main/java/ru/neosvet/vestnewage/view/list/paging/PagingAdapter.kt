@@ -121,7 +121,7 @@ class PagingAdapter(
 
     fun update(item: ListItem) {
         if (itemCount == 0) return
-        for (i in 0..itemCount) {
+        for (i in 0 until itemCount) {
             getItem(i)?.let {
                 if (it.link == item.link) {
                     it.title = item.title
