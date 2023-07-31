@@ -20,6 +20,10 @@
                 android:icon="@drawable/uncheckbox_simple"
                 android:title="@string/auto_return_panels" />
             <item
+                android:id="@+id/nav_numpar"
+                android:icon="@drawable/uncheckbox_simple"
+                android:title="@string/num_par" />
+            <item
                 android:id="@+id/nav_theme"
                 android:icon="@drawable/ic_theme"
                 android:title="@string/dark_theme" />

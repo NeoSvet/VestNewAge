@@ -140,6 +140,7 @@
     <string name="nav_button">Кнопка вверх/вниз</string>
     <string name="collapsing_top">Верх не разворачивать</string>
     <string name="auto_return_panels">Автовозврат панелей</string>
+    <string name="num_par">Нумерация абзацев</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <!--MarkersFragment-->

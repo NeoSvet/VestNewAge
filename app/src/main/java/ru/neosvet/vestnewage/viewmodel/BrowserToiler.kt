@@ -171,6 +171,7 @@ class BrowserToiler : NeoToiler() {
         var isNeedUpdate = false
         var isOtkr = false
         val d: DateUnit
+        var n = 1
         if (cursor.moveToFirst()) {
             val iId = cursor.getColumnIndex(DataBase.ID)
             id = cursor.getInt(iId)
@@ -200,13 +201,22 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
-        val poems = link.contains("poems/")
+        var s = ""
+        val poems = link.isPoem
         if (cursor.moveToFirst()) {
             do {
+                s = cursor.getString(0)
                 if (poems) {
-                    bw.write("<p class='poem'")
-                    bw.write(cursor.getString(0).substring(2))
-                } else bw.write(cursor.getString(0))
+                    if (helper.isNumPar && !s.contains("noind")) {
+                        bw.write("<p class='poem'>")
+                        bw.write("$n. ")
+                        n++
+                        bw.write(s.substring(3))
+                    } else {
+                        bw.write("<p class='poem'")
+                        bw.write(s.substring(2))
+                    }
+                } else bw.write(s)
                 bw.write(Const.N)
                 bw.flush()
             } while (cursor.moveToNext())

@@ -48,6 +48,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     data class NeoMenu(
         val theme: MenuItem,
+        val numpar: MenuItem,
         val buttons: MenuItem,
         val top: MenuItem,
         val autoreturn: MenuItem,
@@ -312,6 +313,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             setCheckItem(menu.top, true)
         if (helper.isAutoReturn)
             setCheckItem(menu.autoreturn, true)
+        if (helper.isNumPar)
+            setCheckItem(menu.numpar, true)
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
@@ -517,7 +520,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     buttons = it.getItem(0),
                     top = it.getItem(1),
                     autoreturn = it.getItem(2),
-                    theme = it.getItem(3),
+                    numpar = it.getItem(3),
+                    theme = it.getItem(4)
                 )
             }
         }
@@ -547,6 +551,12 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 R.id.nav_autoreturn -> {
                     helper.isAutoReturn = helper.isAutoReturn.not()
                     setCheckItem(it, helper.isAutoReturn)
+                }
+
+                R.id.nav_numpar -> {
+                    helper.isNumPar = helper.isNumPar.not()
+                    setCheckItem(it, helper.isNumPar)
+                    toiler.openPage(true)
                 }
 
                 R.id.nav_search -> with(content) {
@@ -638,6 +648,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             is NeoState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
+                menu.numpar.isVisible = helper.link.isPoem
                 menu.refresh.isVisible = state.isOtkr.not()
             }
 
