@@ -50,7 +50,7 @@ class DataBase(name: String, write: Boolean = false) :
             )
             //записываем дату создания (в дальнейшем это будет дата изменений):
             val row = ContentValues()
-            row.put(Const.TIME, System.currentTimeMillis())
+            row.put(Const.TIME, 0)
             db.insert(Const.TITLE, null, row)
             db.execSQL(
                 "create table " + PARAGRAPH + " ("

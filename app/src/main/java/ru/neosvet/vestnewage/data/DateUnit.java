@@ -23,7 +23,7 @@ public class DateUnit {
     public static final byte MONDAY = 1, SUNDAY = 0;
     public static final int DAY_IN_SEC = 86400, //MONTH_IN_SEC = 2592000,
             HOUR_IN_MILLS = 3600000, SEC_IN_MILLS = 1000,
-            GRAD = 60, DAY_IN_HOUR = 24, OFFSET_MSK = 10800;
+            GRAD = 60, DAY_IN_HOUR = 24;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
     private LocalTime time;
