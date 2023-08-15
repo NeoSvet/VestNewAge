@@ -27,7 +27,7 @@ class SettingsToiler : NeoToiler() {
     }
 
     private var size: Long = 0
-    val panels = mutableListOf(true, false, false, false, false, false)
+    val panels = mutableListOf(true, false, false, false, false, false, false)
     private var currentYear: Int = 0
         get() {
             if (field == 0) field = DateUnit.initToday().year

@@ -47,7 +47,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private var helper: BookHelper? = null
     var isNotInit = true
         private set
-    private var isLoadedOtkr = false
+    private val isLoadedOtkr
+        get() = DateHelper.isLoadedOtkr()
     var date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
         set(value) {
@@ -62,7 +63,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun init(context: Context) {
-        isLoadedOtkr = DateHelper.isLoadedOtkr()
         helper = BookHelper().also {
             it.loadDates()
             dPoems = DateUnit.putDays(it.poemsDays)
@@ -88,6 +88,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 currentLoader = masterLoader
                 masterLoader.loadMonth(dEpistles.month, dEpistles.year)
             } else loader.loadEpistlesList()
+
             TAB_DOCTRINE -> {
                 loader.loadDoctrineList()
                 openDoctrine()
@@ -120,13 +121,11 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             val d = date
             if (!existsList(d)) {
-                val today = DateUnit.initToday()
-                if (loadIfNeed.not() || d.month == today.month && d.year == today.year)
-                    postState(NeoState.LongValue(1))
-                else {
+                if (loadIfNeed) {
                     postState(NeoState.LongValue(0))
                     reLoad()
-                }
+                } else
+                    postState(NeoState.LongValue(1))
                 return@launch
             }
             val list = mutableListOf<ListItem>()
@@ -300,10 +299,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     title = strings.rnd_poem
                     curTitle = storage.getList(true)
                 }
+
                 RndType.EPISTLE -> {
                     title = strings.rnd_epistle
                     curTitle = storage.getList(false)
                 }
+
                 RndType.VERSE ->
                     curTitle = storage.getListAll()
             }

@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -113,7 +113,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             postState(NeoState.Message(String.format(strings.format_load, link)))
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
-            val pageLoader = PageLoader(client)
             currentLoader = pageLoader
             pageLoader.download(link, true)
             val item = engine.findInPage(link, id)
@@ -186,12 +185,14 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     fun loadMonth(date: String) { //MM.yy
         loadDate = date
-        load()
+        if (checkConnect())
+            load()
     }
 
     fun loadPage(link: String) {
         loadLink = link
-        load()
+        if (checkConnect())
+            load()
     }
 
     fun startSearch(request: String, mode: Int) {
@@ -367,7 +368,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
                 if (isDoctrine) {
                     title = App.context.getString(R.string.doctrine_pages) +
                             link.substring(Const.DOCTRINE.length)
-                    bw.write(NetConst.DOCTRINE_SITE)
+                    bw.write(Urls.DoctrineSite)
                 } else bw.write(getUrl(link))
                 bw.write("'>")
                 s = ""
@@ -422,8 +423,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             url.substring(0, url.lastIndexOf("/"))
         else url
         val i = if (s.isDigitsOnly()) s.toInt() else 2016
-        return if (i < 2016) NetConst.SITE_COM + url
-        else NetConst.SITE + url
+        return if (i < 2016) Urls.MainSite + url
+        else Urls.Site + url
 
     }
 }

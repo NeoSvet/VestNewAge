@@ -15,8 +15,8 @@ import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -68,7 +68,6 @@ class HomeToiler : NeoToiler() {
         .build()
 
     fun init(context: Context) {
-        onLoading = false
         if (task == Task.NONE) {
             strings = HomeStrings(
                 nothing = context.getString(R.string.nothing),
@@ -204,7 +203,7 @@ class HomeToiler : NeoToiler() {
     private suspend fun loadNews() {
         postState(NeoState.ListState(ListEvent.RELOAD, INDEX_NEWS))
         val loader = SiteLoader(client, Lib.getFile(SiteToiler.NEWS).toString())
-        loader.load(NetConst.SITE + SiteToiler.NOVOSTI)
+        loader.load(Urls.Ads)
         clearPrimaryState()
         postState(NeoState.HomeUpdate(createNewsItem()))
     }

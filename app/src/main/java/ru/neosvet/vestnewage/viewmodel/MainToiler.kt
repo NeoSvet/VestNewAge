@@ -13,6 +13,7 @@ import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -37,7 +38,8 @@ class MainToiler : NeoToiler() {
         .build()
 
     override suspend fun doLoad() {
-        if (NeoClient.isSiteCom)
+        Urls.update(client)
+        if (Urls.isSiteCom)
             loadQuoteCom()
         else
             loadQuote()
@@ -52,7 +54,7 @@ class MainToiler : NeoToiler() {
 
     private suspend fun loadQuoteCom() {
         val request: Request = Request.Builder()
-            .url(NetConst.SITE_COM)
+            .url(Urls.QuoteCom)
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .build()
         val client = NeoClient.createHttpClient()
@@ -71,9 +73,8 @@ class MainToiler : NeoToiler() {
     }
 
     private suspend fun loadQuote() {
-        var s = NetConst.SITE + "AjaxData/Calendar"
-        val br = BufferedReader(InputStreamReader(client.getStream(s)))
-        s = br.readLine()
+        val br = BufferedReader(InputStreamReader(client.getStream(Urls.Quote)))
+        var s = br.readLine()
         br.close()
         var i = s.indexOf("quoteBlock")
         i = s.indexOf("class", i)
@@ -107,12 +108,11 @@ class MainToiler : NeoToiler() {
     }
 
     private suspend fun loadNew() {
-        var s = NetConst.WEB_PAGE + "new.txt"
-        val br = BufferedReader(InputStreamReader(client.getStream(s)))
+        val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevSite + "new.txt")))
         var time: Long
         val storage = PageStorage()
         var cursor: Cursor
-        s = br.readLine()
+        var s = br.readLine()
         val list = mutableListOf<ListItem>()
         while (s != Const.END) {
             time = s.toLong()
@@ -139,10 +139,7 @@ class MainToiler : NeoToiler() {
 
     private suspend fun synchronizationTime(): Int {
         val builderRequest = Request.Builder()
-        if (NeoClient.isSiteCom)
-            builderRequest.url(NetConst.SITE_COM)
-        else
-            builderRequest.url(NetConst.SITE)
+        builderRequest.url(Urls.Site)
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
         val client = NeoClient.createHttpClient()
         val response = client.newCall(builderRequest.build()).execute()

@@ -28,10 +28,6 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         private set
     private val todayM = date.month
     private val todayY = date.year
-    private val prevDate = DateUnit.initToday().apply {
-        day = 1
-        changeMonth(-1)
-    }
     private val calendar = arrayListOf<CalendarItem>()
     private var time: Long = 0
     private val client = NeoClient(NeoClient.Type.SECTION)
@@ -182,7 +178,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     @SuppressLint("Range", "NotifyDataSetChanged")
-    private suspend fun loadFromStorage(): Boolean {
+    private fun loadFromStorage(): Boolean {
         for (i in 0 until calendar.size)
             calendar[i].clear()
         val storage = PageStorage()
@@ -191,7 +187,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         var empty = true
         if (cursor.moveToFirst()) {
             time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-            if (loadIfNeed && checkTime((time / DateUnit.SEC_IN_MILLS))) {
+            if (loadIfNeed && checkTime(time)) {
                 cursor.close()
                 storage.close()
                 return false
@@ -227,8 +223,8 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                 } else if (link.noHasDate)
                     title = getTitleByLink(link)
                 calendar[i].addTitle(title)
+                empty = false
             }
-            empty = calendar.isEmpty() && DateUnit.isLongAgo(time)
         }
         cursor.close()
         storage.close()
@@ -250,11 +246,13 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         return -1
     }
 
-    private fun checkTime(sec: Long): Boolean {
-        if (date.my != prevDate.my)
-            return false
-        val d = DateUnit.putSeconds(sec.toInt())
-        if (d.month == prevDate.month)
+    private fun checkTime(time: Long): Boolean {
+        if (time == 0L)
+            return true
+        if (isCurMonth())
+            return DateUnit.isLongAgo(time)
+        val d = DateUnit.putMills(time)
+        if (date.month == d.month && date.year == d.year)
             return true
         return false
     }

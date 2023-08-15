@@ -11,7 +11,6 @@ abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
     protected var loadIfNeed = false
     protected var currentLoader: Loader? = null
-    protected var onLoading = true
     var isRun: Boolean = false
         protected set
 
@@ -48,21 +47,20 @@ abstract class NeoToiler : StateToiler() {
 
     fun load() {
         if (isRun) return
+        if (checkConnect().not()) return
+        isRun = true
         scope.launch {
-            if (checkConnect().not()) return@launch
-            isRun = true
             loadIfNeed = false
-            if (onLoading)
-                postState(NeoState.Loading)
+            postState(NeoState.Loading)
             doLoad()
             isRun = false
         }
     }
 
-    protected suspend fun checkConnect(): Boolean {
+    protected fun checkConnect(): Boolean {
         if (OnlineObserver.isOnline.value)
             return true
-        postState(NeoState.NoConnected)
+        setState(NeoState.NoConnected)
         return false
     }
 
@@ -71,8 +69,7 @@ abstract class NeoToiler : StateToiler() {
     protected suspend fun reLoad() {
         if (loadIfNeed && checkConnect()) {
             isRun = true
-            if (onLoading)
-                postState(NeoState.Loading)
+            postState(NeoState.Loading)
             loadIfNeed = false
             doLoad()
         }
