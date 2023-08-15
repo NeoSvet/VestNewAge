@@ -5,7 +5,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
@@ -30,18 +30,16 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider, Loader {
     override fun cancel() {}
 
     override fun load() {
-        val stream = client.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
-        val site = NeoClient.getSite()
+        val stream = client.getStream(Urls.Rss)
+        val host = Urls.Host
         val br = BufferedReader(InputStreamReader(stream), 1000)
         val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
         val now = DateUnit.initNow()
         val unread = if (updateUnread) UnreadUtils() else null
-        val m = (if (NeoClient.isSiteCom) {
+        val m = (if (Urls.isSiteCom) {
             val sb = StringBuilder()
-            var line: String? = br.readLine()
-            while (line != null) {
-                sb.append(line)
-                line = br.readLine()
+            br.forEachLine {
+                sb.append(it)
             }
             sb.toString()
         } else br.readLine())
@@ -55,8 +53,8 @@ class SummaryLoader(private val client: NeoClient) : LinksProvider, Loader {
             a = m[i].indexOf("<link") + 6
             b = m[i].indexOf("</", a)
             s = m[i].substring(a, b)
-            if (s.contains(site))
-                s = s.substring(s.indexOf(site) + site.length + 1)
+            if (s.contains(host))
+                s = s.substring(s.indexOf(host) + host.length + 1)
             if (s.contains("#0")) s = s.replace("#0", "#2")
 
             a = m[i].indexOf("<title") + 7

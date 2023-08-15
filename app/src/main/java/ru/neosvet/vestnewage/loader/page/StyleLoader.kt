@@ -4,6 +4,7 @@ import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.*
@@ -16,21 +17,39 @@ class StyleLoader {
 
     private val builderRequest = Request.Builder()
     private val client = NeoClient.createHttpClient()
+    private val fLight = Lib.getFileL(Const.LIGHT)
+    private val fDark = Lib.getFileL(Const.DARK)
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
-        builderRequest.header("Referer", NetConst.SITE)
+        builderRequest.header(NetConst.REFERER, Urls.Host)
     }
 
     fun download(replaceStyle: Boolean) {
-        val fLight = Lib.getFileL(Const.LIGHT)
-        val fDark = Lib.getFileL(Const.DARK)
-        if (!fLight.exists() || !fDark.exists() || replaceStyle)
-            downloadStyleFromSite(fLight, fDark)
+        if (!fLight.exists() || !fDark.exists() || replaceStyle) {
+            if (downloadStyle().not())
+                downloadStyleFromSite()
+        }
     }
 
-    private fun downloadStyleFromSite(fLight: File, fDark: File) {
-        builderRequest.url(NetConst.SITE + "_content/BV/style-print.min.css")
+    private fun downloadFile(url: String, file: File): Boolean {
+        builderRequest.url(url + file.name)
+        val response = client.newCall(builderRequest.build()).execute()
+        if (response.isSuccessful.not()) return false
+        val br = BufferedReader(response.body.charStream(), 1000)
+        val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
+        bw.write(br.readLine())
+        br.close()
+        bw.close()
+        return true
+    }
+
+    private fun downloadStyle() =
+        downloadFile(Urls.DevSite, fLight) &&
+                downloadFile(Urls.DevSite, fDark)
+
+    private fun downloadStyleFromSite() {
+        builderRequest.url(Urls.Style)
         val response = client.newCall(builderRequest.build()).execute()
         val br = BufferedReader(response.body.charStream(), 1000)
         val bwLight = BufferedWriter(OutputStreamWriter(FileOutputStream(fLight)))

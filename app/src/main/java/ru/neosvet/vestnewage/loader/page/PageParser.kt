@@ -4,8 +4,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -18,7 +17,7 @@ class PageParser(private val client: NeoClient) {
         var end = "<!--/row-->"
         val stream = client.getStream(url)
         val br: BufferedReader
-        if (isSiteCom) {
+        if (Urls.isSiteCom) {
             br = BufferedReader(InputStreamReader(stream, "cp1251"), 1000)
             if (start.isEmpty()) start = "class=\"title"
             end = "id=\"print2"
@@ -26,9 +25,15 @@ class PageParser(private val client: NeoClient) {
             br = BufferedReader(InputStreamReader(stream), 1000)
             if (start.isEmpty()) start = "page-title"
         }
+        if (url.contains("#"))
+            start = "a name=\"" + url.substring(url.indexOf("#") + 1)
         var line: String? = br.readLine()
         while (line != null) {
             if (line.contains(start)) break
+            line = br.readLine()
+        }
+        while (line != null) {
+            if (line.contains("<h")) break
             line = br.readLine()
         }
         if (line == null) {
@@ -39,15 +44,16 @@ class PageParser(private val client: NeoClient) {
         val sb = StringBuilder(line)
         line = br.readLine()
         while (line != null) {
-            if (line.contains(end)) break
+            if (line.contains(end) || line.contains("div class=\"next")) break
             sb.append(" ").append(line)
             line = br.readLine()
         }
         br.close()
         stream.close()
         if (end.contains("print2")) {
-            sb.delete(0, 33)
-            sb.delete(sb.length - 10, sb.length)
+            if (sb[1] == 't') sb.delete(0, 33) //if <td else <h1
+            if (line?.contains("div class=\"next") == false)
+                sb.delete(sb.length - 10, sb.length)
         }
         var t = sb.toString()
         t = t.replace("&nbsp;", " ")
@@ -134,22 +140,25 @@ class PageParser(private val client: NeoClient) {
                         elem.par = s.substring(n, s.indexOf("'", n))
                     elem.par = elem.par.replace("..", "").replace("&#x2B;", "+")
                     if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
-                        elem.par = NetConst.SITE + elem.par.substring(1)
+                        elem.par = Urls.Site + elem.par.substring(1)
                     if (elem.html.isEmpty()) {
                         s = elem.par.substring(elem.par.lastIndexOf("/") + 1)
                         if (s.contains("?")) s = s.substring(0, s.indexOf("?"))
                         elem.html = s
                     }
                 }
+
                 Const.IMAGE -> {
                     elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/")
                 }
+
                 Const.FRAME -> {
                     elem.tag = Const.LINK
                     n = s.indexOf("src") + 5
                     elem.par = s.substring(n, s.indexOf("\"", n))
                     elem.html = App.context.getString(R.string.video_on_site)
                 }
+
                 Const.PAR -> {
                     if (startPar) content.add(HTMLElem(Const.PAR)) else startPar = true
                     s = s.substring(0, s.indexOf(">")).replace("\"", "'")
@@ -229,8 +238,6 @@ class PageParser(private val client: NeoClient) {
         return s.toString()
     }
 
-    val curItem: HTMLElem
-        get() = content.current()
     val nextItem: String?
         get() = if (!content.hasNext()) null else content.next().code
     val link: String?

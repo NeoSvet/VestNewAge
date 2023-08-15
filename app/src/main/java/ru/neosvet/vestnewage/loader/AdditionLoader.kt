@@ -5,7 +5,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -69,24 +69,19 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         }
     }
 
-    private val additionUrl: String
-        get() = if (NeoClient.isSiteCom) NetConst.ADDITION_URL_COM else NetConst.ADDITION_URL
-
     private fun loadPost(id: Int): ContentValues {
         val d = (id / 200).toString()
-        val stream = client.getStream("$additionUrl$d/$id.txt")
+        val stream = client.getStream("${Urls.Addition}$d/$id.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val row = ContentValues()
         row.put(DataBase.ID, id)
         row.put(Const.TITLE, br.readLine())
         row.put(Const.LINK, br.readLine().toInt())
         row.put(Const.TIME, br.readLine())
-        var s: String? = br.readLine()
         val des = StringBuilder()
-        while (s != null) {
-            des.append(s)
+        br.forEachLine {
+            des.append(it)
             des.append(Const.N)
-            s = br.readLine()
         }
         br.close()
         row.put(Const.DESCTRIPTION, des.toString().trim())
@@ -94,7 +89,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
     }
 
     fun loadMax(): Int {
-        val stream = client.getStream("${additionUrl}max.txt")
+        val stream = client.getStream("${Urls.Addition}max.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val s = br.readLine()
         br.close()
@@ -103,22 +98,20 @@ class AdditionLoader(private val client: NeoClient) : Loader {
 
     private fun loadChanges(storage: AdditionStorage) {
         val baseTime = Lib.getFileDB(DataBase.ADDITION).lastModified()
-        val stream = client.getStream("${additionUrl}changed.txt")
+        val stream = client.getStream("${Urls.Addition}changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
-        var s: String? = br.readLine()
-        while (s != null) {
-            val i = s.lastIndexOf(" ")
-            if (s.substring(i + 1).toLong() > baseTime) {
-                val id = s.substring(s.indexOf(" ") + 1, i).toInt()
-                if (s.contains("delete"))
+        br.forEachLine {
+            val i = it.lastIndexOf(" ")
+            if (it.substring(i + 1).toLong() > baseTime) {
+                val id = it.substring(it.indexOf(" ") + 1, i).toInt()
+                if (it.contains("delete"))
                     storage.delete(id)
-                else if (s.contains("update")) {
+                else if (it.contains("update")) {
                     val post = loadPost(id)
                     if (storage.update(id, post).not())
                         storage.insert(post)
                 }
             }
-            s = br.readLine()
         }
         br.close()
     }

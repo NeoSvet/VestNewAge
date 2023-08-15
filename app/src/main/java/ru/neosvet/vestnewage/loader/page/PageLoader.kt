@@ -5,8 +5,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -40,64 +39,46 @@ class PageLoader(private val client: NeoClient) : Loader {
             return true
         }
         if (!singlePage) checkRequests()
-        var k = 1
-        var li = link
-        if (link.contains("#")) {
-            k = li.substring(li.indexOf("#") + 1).toInt()
-            li = li.substring(0, li.indexOf("#"))
-            if (link.contains("?")) li += link.substring(link.indexOf("?"))
-        }
-        var n = k
-        val boolArticle = storage.isArticle
         val page = PageParser(client)
-        page.load(NetConst.SITE + Const.PRINT + li, "")
-        if (singlePage) storage.deleteParagraphs(storage.getPageId(li))
+        page.load(Urls.Page + link, "")
+        if (singlePage) storage.deleteParagraphs(storage.getPageId(link))
         var row: ContentValues
         var id = 0
         var bid = 0
         var s: String? = page.currentElem
         do {
             if (page.isHead) {
-                k--
-                if (k == -1 && !boolArticle) {
-                    n++
-                    if (li.contains("#")) li = li.substring(0, li.indexOf("#"))
-                    li += "#$n"
-                    k = 0
-                }
-                if (k == 0) {
-                    id = storage.getPageId(li)
-                    row = ContentValues()
-                    row.put(Const.TIME, System.currentTimeMillis())
-                    if (id == -1) { // id не найден, материала нет - добавляем
-                        if (li.contains("#")) {
-                            id = bid
-                            row = ContentValues()
-                            row.put(DataBase.ID, id)
-                            row.put(DataBase.PARAGRAPH, s)
-                            storage.insertParagraph(row)
-                        } else {
-                            row.put(Const.TITLE, getTitle(s, storage.name))
-                            row.put(Const.LINK, li)
-                            id = storage.insertTitle(row).toInt()
-                            //обновляем дату изменения списка:
-                            row = ContentValues()
-                            row.put(Const.TIME, System.currentTimeMillis())
-                            storage.updateTitle(1, row)
-                        }
-                    } else { // id найден, значит материал есть
-                        //обновляем заголовок
+                id = storage.getPageId(link)
+                row = ContentValues()
+                row.put(Const.TIME, System.currentTimeMillis())
+                if (id == -1) { // id не найден, материала нет - добавляем
+                    if (link.contains("#")) {
+                        id = bid
+                        row = ContentValues()
+                        row.put(DataBase.ID, id)
+                        row.put(DataBase.PARAGRAPH, s)
+                        storage.insertParagraph(row)
+                    } else {
                         row.put(Const.TITLE, getTitle(s, storage.name))
-                        //обновляем дату загрузки материала
-                        storage.updateTitle(id, row)
-                        //удаляем содержимое материала
-                        storage.deleteParagraphs(id)
+                        row.put(Const.LINK, link)
+                        id = storage.insertTitle(row).toInt()
+                        //обновляем дату изменения списка:
+                        row = ContentValues()
+                        row.put(Const.TIME, System.currentTimeMillis())
+                        storage.updateTitle(1, row)
                     }
-                    bid = id
-                    s = page.nextElem
+                } else { // id найден, значит материал есть
+                    //обновляем заголовок
+                    row.put(Const.TITLE, getTitle(s, storage.name))
+                    //обновляем дату загрузки материала
+                    storage.updateTitle(id, row)
+                    //удаляем содержимое материала
+                    storage.deleteParagraphs(id)
                 }
+                bid = id
+                s = page.nextElem
             }
-            if ((k == 0 || boolArticle) && !isEmpty(s)) {
+            if (!isEmpty(s)) {
                 row = ContentValues()
                 row.put(DataBase.ID, id)
                 row.put(DataBase.PARAGRAPH, s)
@@ -112,8 +93,7 @@ class PageLoader(private val client: NeoClient) : Loader {
 
     private fun downloadDoctrinePage(link: String) {
         var s: String? = link.substring(Const.DOCTRINE.length) //pages
-        val host = if (isSiteCom) NetConst.DOCTRINE_BASE_COM else NetConst.DOCTRINE_BASE
-        val stream = client.getStream("$host$s.txt")
+        val stream = client.getStream("${Urls.DoctrineBase}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val time = br.readLine().toLong()
         var row = ContentValues()
