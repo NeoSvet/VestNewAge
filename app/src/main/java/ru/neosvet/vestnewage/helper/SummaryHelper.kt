@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -57,27 +57,25 @@ class SummaryHelper {
         val file = Lib.getFile(Const.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
-        var s: String? = br.readLine()
-        while (s != null) {
+        br.forEachLine {
             val link = br.readLine()
             br.readLine() //des
             br.readLine() //time
             storage.open(link, true)
             if (!storage.existsPage(link)) {
                 val row = ContentValues()
-                row.put(Const.TITLE, s)
+                row.put(Const.TITLE, it)
                 row.put(Const.LINK, link)
                 storage.insertTitle(row)
                 storage.updateTime()
             }
-            s = br.readLine()
         }
         br.close()
         storage.close()
     }
 
     fun createNotification(text: String, link: String) {
-        val url = if (!link.contains("://")) NetConst.SITE + link else link
+        val url = if (!link.contains("://")) Urls.Site + link else link
         intent.data = Uri.parse(url)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         val piPostpone = notifHelper.getPostponeSummaryNotif(notifId, text, url)
@@ -105,7 +103,7 @@ class SummaryHelper {
     }
 
     fun groupNotification() {
-        intent.data = Uri.parse(NetConst.SITE + Const.RSS)
+        intent.data = Uri.parse(Urls.Site + Const.RSS)
         intent.putExtra(DataBase.ID, notifId)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         notifBuilder = notifHelper.getSummaryNotif(
