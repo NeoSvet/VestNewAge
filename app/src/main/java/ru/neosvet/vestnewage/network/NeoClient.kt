@@ -24,22 +24,7 @@ class NeoClient(
     }
 
     companion object {
-        @JvmStatic
-        val isSiteCom: Boolean
-            get() = if (isCom == null) getCom() else isCom!!
-        private var isCom: Boolean? = null
         private const val PATH = "/cache/file"
-        private const val COM_FILE = "/com"
-
-        private fun getCom(): Boolean =
-            Lib.getFile(COM_FILE).exists().also { isCom = it }
-
-        fun setCom(value: Boolean) {
-            isCom = value
-            val f = Lib.getFile(COM_FILE)
-            if (value) f.createNewFile()
-            else if (f.exists()) f.delete()
-        }
 
         @JvmStatic
         fun createHttpClient(): OkHttpClient {
@@ -57,31 +42,37 @@ class NeoClient(
                     f.delete()
             }
         }
+    }
 
-        fun getSite(): String {
-            val s = (if (isSiteCom) NetConst.SITE_COM else NetConst.SITE).substring(8)
-            return s.substring(0, s.length - 1)
-        }
+    private fun urlsUpdate(url: String) {
+        if (url.contains("urls")) return
+        Urls.update(NeoClient(Type.MAIN))
     }
 
     fun getStream(url: String): BufferedInputStream {
-        val u = if (isSiteCom) url.replace(NetConst.SITE, NetConst.SITE_COM) else url
+        //println("stream for ${url.substring(8)}")
         val response = try {
             val builderRequest = Request.Builder()
-            builderRequest.url(u)
-            if (u.contains(NetConst.SITE))
-                builderRequest.header("Referer", NetConst.SITE)
-            else if (u.contains(NetConst.SITE_COM))
-                builderRequest.header("Referer", NetConst.SITE_COM)
+            builderRequest.url(url)
+            val host = Urls.Host
+            if (url.contains(host))
+                builderRequest.header(NetConst.REFERER, host)
             builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
             val client = createHttpClient()
             client.newCall(builderRequest.build()).execute()
         } catch (e: Exception) {
-            e.printStackTrace()
+            //e.printStackTrace()
+            urlsUpdate(url)
             throw SiteNoResponse()
         }
-        if (response.isSuccessful.not()) throw SiteCode(response.code)
-        if (response.promisesBody().not()) throw SiteNoResponse()
+        if (response.isSuccessful.not()) {
+            urlsUpdate(url)
+            throw SiteCode(response.code)
+        }
+        if (response.promisesBody().not()) {
+            urlsUpdate(url)
+            throw SiteNoResponse()
+        }
         val inStream = response.body.byteStream()
         val max = response.body.contentLength().toInt()
         val file = Lib.getFileP(PATH + type.value)
