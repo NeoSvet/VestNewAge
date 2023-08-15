@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -21,8 +22,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.basic.*
 import ru.neosvet.vestnewage.view.browser.HeadBar
@@ -47,6 +48,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     data class NeoMenu(
         val theme: MenuItem,
+        val numpar: MenuItem,
         val buttons: MenuItem,
         val top: MenuItem,
         val autoreturn: MenuItem,
@@ -67,6 +69,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private var isSearch = false
     private var twoPointers = false
     private var scroll: Job? = null
+    var currentScale: Float = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
     }
@@ -85,7 +88,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private lateinit var binding: BrowserActivityBinding
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
-            scrollY.toFloat() / scale / contentHeight.toFloat()
+            (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
         }
     private val isBigHead: Boolean
         get() {
@@ -95,11 +98,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (toiler.isInit.not())
@@ -116,6 +115,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         restoreState(savedInstanceState)
         setHeadBar()
         stateUtils.runObserve()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     override fun onPause() {
@@ -132,7 +132,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         toiler.cancel()
         scroll?.cancel()
         helper.position = positionOnPage
-        helper.zoom = (binding.content.wvBrowser.scale * 100f).toInt()
+        helper.zoom = (currentScale * 100f).toInt()
         helper.save()
         super.onDestroy()
     }
@@ -201,7 +201,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             scrollTo(0, 0)
             return
         }
-        val pos = (helper.position * scale * contentHeight.toFloat()).toInt()
+        val pos = (helper.position * currentScale * contentHeight.toFloat()).toInt()
         scrollTo(0, pos)
         helper.position = 0f
     }
@@ -245,26 +245,33 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             PromUtils(binding.tvPromTimeHead)
     }
 
-    override fun onBackPressed() {
-        when {
-            snackbar.isShown ->
-                snackbar.hide()
-            status.isVisible -> {
-                toiler.cancel()
-                status.setError(null)
-                bottomUnblocked()
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            when {
+                snackbar.isShown ->
+                    snackbar.hide()
+
+                status.isVisible -> {
+                    toiler.cancel()
+                    status.setError(null)
+                    bottomUnblocked()
+                }
+
+                helper.isFullScreen ->
+                    switchFullScreen(false)
+
+                binding.bottomBar.isScrolledDown -> {
+                    if (isSearch.not())
+                        headBar.show()
+                    binding.bottomBar.performShow()
+                }
+
+                isSearch ->
+                    closeSearch()
+
+                toiler.onBackBrowser().not() ->
+                    finish()
             }
-            helper.isFullScreen ->
-                switchFullScreen(false)
-            binding.bottomBar.isScrolledDown -> {
-                if (isSearch.not())
-                    headBar.show()
-                binding.bottomBar.performShow()
-            }
-            isSearch ->
-                closeSearch()
-            toiler.onBackBrowser().not() ->
-                super.onBackPressed()
         }
     }
 
@@ -286,7 +293,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             } else {
                 isTouch = false
                 with(content.wvBrowser) {
-                    scrollTo(0, (contentHeight * scale).toInt())
+                    scrollTo(0, (contentHeight * currentScale).toInt())
                 }
                 isTouch = false
                 if (isSearch.not()) {
@@ -306,6 +313,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             setCheckItem(menu.top, true)
         if (helper.isAutoReturn)
             setCheckItem(menu.autoreturn, true)
+        if (helper.isNumPar)
+            setCheckItem(menu.numpar, true)
         status.setClick {
             if (toiler.isRun)
                 toiler.cancel()
@@ -316,7 +325,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun initWords() {
-        val funClick = { v: View ->
+        val funClick = { _: View ->
             WordsUtils.showAlert(this) {
                 val main = Intent(this, MainActivity::class.java)
                 main.putExtra(Const.START_SCEEN, false)
@@ -334,7 +343,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
     private fun setContent() = binding.content.run {
         etSearch.requestLayout()
         wvBrowser.settings.builtInZoomControls = true
@@ -343,14 +352,14 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         wvBrowser.settings.allowContentAccess = true
         wvBrowser.settings.allowFileAccess = true
         wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
-        if (helper.zoom > 0)
-            wvBrowser.setInitialScale(helper.zoom)
+        currentScale = helper.zoom / 100f
+        wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
                 isTouch = false
                 if (twoPointers)
-                    wvBrowser.setInitialScale((wvBrowser.scale * 100.0).toInt())
+                    wvBrowser.setInitialScale((currentScale * 100.0).toInt())
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
@@ -434,12 +443,12 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun setNavButton(scrollY: Int) {
-        if (scrollY > 300) {
+        navIsTop = if (scrollY > 300) {
             binding.fabNav.setImageResource(R.drawable.ic_top)
-            navIsTop = true
+            true
         } else {
             binding.fabNav.setImageResource(R.drawable.ic_bottom)
-            navIsTop = false
+            false
         }
     }
 
@@ -464,11 +473,11 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             additionViews = listOf(btnGodWords, tvGodWords, btnFullScreen)
         ) {
             if (helper.link.contains(Const.DOCTRINE))
-                Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+                Urls.openInBrowser(Urls.DoctrineSite)
             else if (menu.refresh.isVisible)
-                Lib.openInApps(NetConst.SITE + helper.link, null)
+                Urls.openInBrowser(Urls.Site + helper.link)
             else
-                Lib.openInApps(NetConst.SITE, null)
+                Urls.openInBrowser(Urls.Site)
         }
         btnFullScreen.setOnClickListener {
             switchFullScreen(true)
@@ -511,7 +520,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     buttons = it.getItem(0),
                     top = it.getItem(1),
                     autoreturn = it.getItem(2),
-                    theme = it.getItem(3),
+                    numpar = it.getItem(3),
+                    theme = it.getItem(4)
                 )
             }
         }
@@ -520,8 +530,10 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             when (it.itemId) {
                 R.id.nav_refresh ->
                     toiler.refresh()
+
                 R.id.nav_share ->
                     ShareDialog.newInstance(helper.link).show(supportFragmentManager, null)
+
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
@@ -529,15 +541,24 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                         1f else 0f
                     setNavVisible(true)
                 }
+
                 R.id.nav_minitop -> {
                     helper.isMiniTop = helper.isMiniTop.not()
                     setCheckItem(it, helper.isMiniTop)
                     headBar.setExpandable(helper.isMiniTop)
                 }
+
                 R.id.nav_autoreturn -> {
                     helper.isAutoReturn = helper.isAutoReturn.not()
                     setCheckItem(it, helper.isAutoReturn)
                 }
+
+                R.id.nav_numpar -> {
+                    helper.isNumPar = helper.isNumPar.not()
+                    setCheckItem(it, helper.isNumPar)
+                    toiler.openPage(true)
+                }
+
                 R.id.nav_search -> with(content) {
                     headBar.hide()
                     pSearch.isVisible = true
@@ -545,6 +566,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     etSearch.post { etSearch.requestFocus() }
                     softKeyboard.show()
                 }
+
                 R.id.nav_marker -> {
                     val des = if (helper.isSearch)
                         getString(R.string.search_for) + " “" + helper.request + "”"
@@ -556,12 +578,16 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                         des
                     )
                 }
+
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
-                    helper.zoom = if (it.itemId == R.id.nav_opt_scale) 0 else 100
+                    helper.zoom = if (it.itemId == R.id.nav_opt_scale)
+                        (resources.displayMetrics.density * 100).toInt()
+                    else 100
                     helper.save()
                     openReader(helper.link, null)
                     finish()
                 }
+
                 R.id.nav_theme -> {
                     helper.isLightTheme = helper.isLightTheme.not()
                     initTheme()
@@ -615,19 +641,26 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                 status.setLoad(true)
                 status.loadText()
             }
+
             NeoState.NoConnected ->
                 noConnected()
+
             is NeoState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
+                menu.numpar.isVisible = helper.link.isPoem
                 menu.refresh.isVisible = state.isOtkr.not()
             }
+
             NeoState.Ready -> {
+                finishLoading()
                 binding.tvNotFound.isVisible = true
                 menu.refresh.isVisible = false
             }
+
             NeoState.Success ->
                 tipFinish.show()
+
             is NeoState.Error ->
                 if (state.isNeedReport)
                     status.setError(state)
@@ -635,6 +668,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     finishLoading()
                     snackbar.show(binding.fabNav, state.message)
                 }
+
             else -> {}
         }
     }

@@ -1,10 +1,7 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
@@ -16,6 +13,7 @@ class BrowserHelper(context: Context) {
         private const val NAVBUTTONS = "navb"
         private const val MITITOP = "minitop"
         private const val AUTORETURN = "autoreturn"
+        private const val NUMPAR = "numpar"
         private const val SCALE = "scale"
     }
 
@@ -26,6 +24,7 @@ class BrowserHelper(context: Context) {
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
     var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
     var isAutoReturn: Boolean = pref.getBoolean(AUTORETURN, false)
+    var isNumPar: Boolean = pref.getBoolean(NUMPAR, false)
     var isDoctrine: Boolean = false
         private set
     var isFullScreen: Boolean = false
@@ -52,6 +51,7 @@ class BrowserHelper(context: Context) {
         editor.putBoolean(NAVBUTTONS, isNavButton)
         editor.putBoolean(MITITOP, isMiniTop)
         editor.putBoolean(AUTORETURN, isAutoReturn)
+        editor.putBoolean(NUMPAR, isNumPar)
         editor.apply()
     }
 

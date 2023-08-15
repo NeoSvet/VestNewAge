@@ -13,7 +13,7 @@ import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -117,6 +117,7 @@ class BrowserToiler : NeoToiler() {
             }
             link = url
         }
+        loadIfNeed = true
         openPage(true)
     }
 
@@ -124,7 +125,6 @@ class BrowserToiler : NeoToiler() {
         cancel()
         scope.launch {
             storage.open(link)
-            loadIfNeed = true
             if (storage.name.contains(".")) {
                 if (storage.isOldBook) loadIfNeed = false
             }
@@ -141,12 +141,9 @@ class BrowserToiler : NeoToiler() {
             val p = if (newPage || !file.exists())
                 generatePage(file)
             else Pair(false, false) //isNeedUpdate, isOtkr
-            var s = file.toString()
-            if (link.contains("#"))
-                s += link.substring(link.indexOf("#"))
             postState(
                 NeoState.Page(
-                    url = FILE + s,
+                    url = FILE + file.toString(),
                     isOtkr = p.second
                 )
             )
@@ -174,6 +171,7 @@ class BrowserToiler : NeoToiler() {
         var isNeedUpdate = false
         var isOtkr = false
         val d: DateUnit
+        var n = 1
         if (cursor.moveToFirst()) {
             val iId = cursor.getColumnIndex(DataBase.ID)
             id = cursor.getInt(iId)
@@ -203,13 +201,22 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
-        val poems = link.contains("poems/")
+        var s: String
+        val poems = link.isPoem
         if (cursor.moveToFirst()) {
             do {
+                s = cursor.getString(0)
                 if (poems) {
-                    bw.write("<p class='poem'")
-                    bw.write(cursor.getString(0).substring(2))
-                } else bw.write(cursor.getString(0))
+                    if (helper.isNumPar && !s.contains("noind")) {
+                        bw.write("<p class='poem'>")
+                        bw.write("$n. ")
+                        n++
+                        bw.write(s.substring(3))
+                    } else {
+                        bw.write("<p class='poem'")
+                        bw.write(s.substring(2))
+                    }
+                } else bw.write(s)
                 bw.write(Const.N)
                 bw.flush()
             } while (cursor.moveToNext())
@@ -235,7 +242,7 @@ class BrowserToiler : NeoToiler() {
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
-            val url = NetConst.SITE + link
+            val url = Urls.Site + link
             bw.write(LINK_FORMAT.format(url, url))
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
