@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.TipActivity
@@ -160,9 +160,9 @@ class HelpToiler : ViewModel(), HelpAdapter.ItemClicker {
             TG_CHANNEL ->
                 Lib.openInApps("https://t.me/+nUS5nlrZsvM3MTEy", null)
             LINK_ON_SITE ->
-                Lib.openInApps(NetConst.WEB_PAGE, null)
+                Lib.openInApps(Urls.WebPage, null)
             CHANGELOG ->
-                Lib.openInApps(NetConst.WEB_PAGE + "changelog.html", null)
+                Lib.openInApps(Urls.WebPage + "changelog.html", null)
             else -> // LINK_ON_GOOGLE or LINK_ON_HUAWEI
                 mstate.value = NeoState.ListState(ListEvent.REMOTE, index)
         }
