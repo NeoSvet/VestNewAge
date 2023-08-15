@@ -12,7 +12,7 @@ import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -43,7 +43,10 @@ class CheckService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
-            stopForeground(true)
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
+                stopForeground(true)
+            else
+                stopForeground(STOP_FOREGROUND_REMOVE)
             return START_NOT_STICKY
         }
         if (isRun)
@@ -68,6 +71,7 @@ class CheckService : LifecycleService() {
 
     private fun startLoad() {
         try {
+            Urls.restore()
             val isNewRss = checkSummary()
             val pref = getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
             val isNewAdd = if (pref.getBoolean(Const.MODE, true)) checkAddition() else false
@@ -97,10 +101,10 @@ class CheckService : LifecycleService() {
     }
 
     private fun checkSummary(): Boolean {
-        val stream = client.getStream(NetConst.SITE + "rss/?" + System.currentTimeMillis())
+        val stream = client.getStream(Urls.Rss)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
-        if (NeoClient.isSiteCom) {
+        if (Urls.isSiteCom) {
             while (!s.contains("pubDate"))
                 s = br.readLine()
         }
@@ -114,18 +118,16 @@ class CheckService : LifecycleService() {
             br.close()
             return false
         }
-        val m = (if (NeoClient.isSiteCom) {
+        val m = (if (Urls.isSiteCom) {
             val sb = StringBuilder()
-            var line: String? = br.readLine()
-            while (line != null) {
-                sb.append(line)
-                line = br.readLine()
+            br.forEachLine {
+                sb.append(it)
             }
             sb.toString()
         } else s).split("<item>")
         br.close()
         val bw = BufferedWriter(FileWriter(file))
-        val site = NeoClient.getSite()
+        val host = Urls.Host
         val unread = UnreadUtils()
         var d: DateUnit
         var title: String
@@ -136,8 +138,8 @@ class CheckService : LifecycleService() {
             a = m[i].indexOf("<link") + 6
             b = m[i].indexOf("</", a)
             link = m[i].substring(a, b)
-            if (link.contains(site))
-                link = link.substring(link.indexOf(site) + site.length + 1)
+            if (link.contains(host))
+                link = link.substring(link.indexOf(host) + host.length + 1)
             if (link.contains("#0")) link = link.replace("#0", "#2")
 
             a = m[i].indexOf("<title") + 7
