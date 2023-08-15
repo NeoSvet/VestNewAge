@@ -16,7 +16,6 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -96,8 +95,12 @@ class LaunchUtils {
             val file = Lib.getFileP("/cache/file")
             if (file.exists()) file.delete()
         }
-        if (ver < 66) {
+        if (ver < 67) {
             val file = Lib.getFileDB(DataBase.ADDITION)
+            if (file.exists()) file.delete()
+        }
+        if (ver < 69) {
+            val file = Lib.getFileDB("07.23")
             if (file.exists()) file.delete()
         }
     }
@@ -189,11 +192,11 @@ class LaunchUtils {
         if (!f.exists()) return
         val list = mutableListOf<String>()
         val br = BufferedReader(FileReader(f))
-        var s: String? = br.readLine()
-        while (s != null && list.size < SearchHelper.REQUESTS_LIMIT) {
-            if (!list.contains(s))
-                list.add(s)
-            s = br.readLine()
+        br.forEachLine {
+            if (!list.contains(it)) {
+                list.add(it)
+                if (list.size == SearchHelper.REQUESTS_LIMIT) return@forEachLine
+            }
         }
         br.close()
         f.delete()
@@ -336,36 +339,31 @@ class LaunchUtils {
         if (intent.getBooleanExtra(Const.ADS, false))
             return InputData(2, Section.SITE)
         val data = intent.data ?: return null
-        var link = data.path ?: return null
+        var link = data.path ?: return null // without host
+        val mLink = link.substring(1).split("/")
         return when {
-            link.contains(Const.RSS) ->
+            link.contains(Const.RSS) -> {
                 if (intent.hasExtra(DataBase.ID)) {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                     clearSummaryNotif(id)
-                    InputData(0, Section.SUMMARY)
-                } else InputData(1, Section.SUMMARY)
-            link.length < 2 || link == "/index.html" ->
-                InputData(0, Section.SITE)
-            link == SiteToiler.NOVOSTI ->
-                InputData(1, Section.SITE)
-            link.contains(Const.HTML) -> {
-                if (link.contains("/tolk")) { //https://www.otkroveniya.info/tolk4/t4-15.09.16.html
-                    val i = link.lastIndexOf(".")
-                    val y = 2000 + link.substring(i - 2, i).toInt()
-                    link = "/print/$y/" + link.substring(i - 8)
                 }
+                InputData(0, Section.SUMMARY)
+            }
+
+            link.length < 2 || link == "/index.html" ->
+                InputData(1, Section.SITE)
+
+            link == "/novosti.html" ->
+                InputData(0, Section.SITE)
+
+            link.contains("/tolkovaniya") || mLink[0] == "year.html" ->
+                InputData(1, Section.BOOK)
+
+            mLink[1].length == 13 -> { //08.02.16.html
                 openReader(link.substring(1), null)
                 InputData(-1, Section.MENU)
             }
-            data.query?.contains("date") == true -> { //http://blagayavest.info/poems/?date=11-3-2017
-                val s = data.query!!.substring(5)
-                val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
-                link = (link.substring(1) + s.substring(0, s.indexOf("-"))
-                        + "." + (if (m.length == 1) "0" else "") + m
-                        + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML)
-                openReader(link, null)
-                InputData(-1, Section.MENU)
-            }
+
             link.contains("-") -> { //https://blagayavest.info/poems/2022-09-17
                 val i = link.lastIndexOf("/") + 3
                 link = Const.POEMS + "/" + link.substring(i + 6, i + 8) + "." +
@@ -373,10 +371,22 @@ class LaunchUtils {
                 openReader(link, null)
                 InputData(-1, Section.MENU)
             }
-            link.contains("/poems") ->
-                InputData(0, Section.BOOK)
-            link.contains("/tolkovaniya") || link.contains("/2016") ->
-                InputData(1, Section.BOOK)
+
+            link.contains("/poems") -> {
+                if (mLink[1] == "year.html") InputData(0, Section.BOOK)
+                else InputData(mLink[1].substring(0, 4).toInt(), Section.BOOK)
+            }
+
+            mLink[1].contains("date") -> { //http://blagayavest.info/poems/?date=11-3-2017
+                val s = mLink[1].substring(5)
+                val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
+                link = (link.substring(1) + s.substring(0, s.indexOf("-"))
+                        + "." + (if (m.length == 1) "0" else "") + m
+                        + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML)
+                openReader(link, null)
+                InputData(-1, Section.MENU)
+            }
+
             else -> null
         }
     }

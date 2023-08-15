@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NeoClient.Companion.isSiteCom
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import java.io.BufferedReader
@@ -151,10 +151,9 @@ class AdsUtils(private val storage: AdsStorage) {
         var index: Byte = 0
         warnIndex = -1
         var isNew = false
-        var s: String? = br.readLine()
-        while (s != null) {
+        br.forEachLine {
             when {
-                s.contains("<e>") -> {
+                it.contains("<e>") -> {
                     mode = when {
                         m[TITLE].contains("<u>") -> AdsStorage.MODE_U
                         m[LINK].isEmpty() -> AdsStorage.MODE_TD
@@ -171,15 +170,14 @@ class AdsUtils(private val storage: AdsStorage) {
                     }
                     m = arrayOf("", "", "")
                 }
-                s.indexOf("<") != 0 -> //multiline des
-                    m[DES] += Const.N + s
-                s.contains("<d>") ->
-                    m[DES] = s.substring(3)
-                s.contains("<l>") ->
-                    m[LINK] = s.substring(3)
-                else -> m[TITLE] = s
+                it.indexOf("<") != 0 -> //multiline des
+                    m[DES] += Const.N + it
+                it.contains("<d>") ->
+                    m[DES] = it.substring(3)
+                it.contains("<l>") ->
+                    m[LINK] = it.substring(3)
+                else -> m[TITLE] = it
             }
-            s = br.readLine()
         }
         storage.deleteItems(titles)
         time = storage.newTime()
@@ -198,10 +196,8 @@ class AdsUtils(private val storage: AdsStorage) {
     fun loadAds(client: NeoClient) {
         isNew = false
         val t = time
-        var s = if (isSiteCom) "http://neosvet.somee.com/vna/ads.txt"
-        else "http://neosvet.ucoz.ru/ads_vna.txt"
-        val br = BufferedReader(InputStreamReader(client.getStream(s)))
-        s = br.readLine()
+        val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevAds)))
+        val s = br.readLine()
         if (s.toLong() > t) {
             if (update(br)) {
                 isNew = true

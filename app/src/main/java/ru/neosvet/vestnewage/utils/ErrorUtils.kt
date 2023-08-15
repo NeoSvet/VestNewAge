@@ -5,6 +5,7 @@ import androidx.work.Data
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoException
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import java.net.SocketException
 import java.net.SocketTimeoutException
@@ -22,14 +23,17 @@ class ErrorUtils(private val throwable: Throwable) {
         message = when {
             throwable.javaClass.simpleName.contains("CancelIsolatedRunner") ->
                 ""
+
             throwable.localizedMessage.isNullOrEmpty() -> {
                 isNeedReport = true
                 App.context.getString(R.string.unknown_error)
             }
+
             throwable is SocketTimeoutException || throwable is SocketException ||
                     throwable is UnknownHostException || throwable is SSLHandshakeException ||
                     throwable is CertificateException ->
                 App.context.getString(R.string.site_no_response)
+
             else -> {
                 isNeedReport = throwable !is NeoException
                 throwable.localizedMessage!!
@@ -63,6 +67,9 @@ class ErrorUtils(private val throwable: Throwable) {
         }
         des.append(Const.N)
         des.append(App.context.getString(R.string.input_data))
+        des.append(Const.N)
+        des.append("COM: ")
+        des.append(Urls.isSiteCom)
         des.append(Const.N)
         val map = data.keyValueMap
         for (key in map.keys) {
