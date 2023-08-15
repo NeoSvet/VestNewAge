@@ -266,7 +266,7 @@ class PageStorage : Closeable {
         val title = if (cursor.moveToFirst())
             cursor.getString(0) else link
         cursor.close()
-        return if (title == link) link
+        return if (title.isEmpty()) link
         else getPageTitle(title, link)
     }
 
