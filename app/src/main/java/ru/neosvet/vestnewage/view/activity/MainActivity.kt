@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
@@ -31,6 +33,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.*
@@ -43,7 +46,6 @@ import ru.neosvet.vestnewage.viewmodel.MainToiler
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import kotlin.math.absoluteValue
-
 
 class MainActivity : AppCompatActivity(), ItemClicker {
     companion object {
@@ -86,9 +88,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS), 1);
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            doCheckPermission()
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
@@ -119,6 +120,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
         }
         if (toiler.isRun) runObservation()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun doCheckPermission() {
+        val n = POST_NOTIFICATIONS
+        if (ContextCompat.checkSelfPermission(this, n) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(this, arrayOf(n), 1)
     }
 
     private fun runObservation() {
@@ -189,10 +198,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     setSection(Section.SUMMARY, false)
                 else
                     setSection(Section.CALENDAR, false)
+
                 R.id.app_bar_home ->
                     setSection(Section.HOME, false)
+
                 R.id.app_bar_search ->
                     setSection(Section.SEARCH, false)
+
                 R.id.app_bar_cabinet ->
                     setSection(Section.CABINET, false)
             }
@@ -226,6 +238,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun initLaunch() {
+        Urls.restore()
         utils = LaunchUtils()
         utils.checkAdapterNewVersion()
         utils.openLink(intent)?.let {
@@ -376,15 +389,18 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.HOME -> {
                 unblocked()
                 fragmentTransaction.replace(R.id.my_fragment, HomeFragment())
                 helper.frMenu?.setSelect(Section.HOME)
             }
+
             Section.NEW -> {
                 fragmentTransaction.replace(R.id.my_fragment, NewFragment())
                 helper.frMenu?.setSelect(Section.NEW)
             }
+
             Section.SUMMARY -> {
                 curFragment = SummaryFragment.newInstance(tab).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
@@ -393,21 +409,26 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 intent.removeExtra(DataBase.ID)
                 utils.clearSummaryNotif(id)
             }
+
             Section.SITE -> {
                 curFragment = SiteFragment.newInstance(tab).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.CALENDAR -> {
                 curFragment = CalendarFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.BOOK -> {
-                curFragment = BookFragment.newInstance(tab, -1).also {
+                curFragment = (if (tab > 2000) BookFragment.newInstance(0, tab)
+                else BookFragment.newInstance(tab, -1)).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.SEARCH -> {
                 val search = when {
                     intent.hasExtra(Const.LINK) -> {
@@ -415,29 +436,35 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                             intent.getStringExtra(Const.LINK), tab
                         )
                     }
+
                     else -> SearchFragment()
                 }
                 curFragment = search
                 fragmentTransaction.replace(R.id.my_fragment, search)
             }
+
             Section.JOURNAL -> {
                 fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
             }
+
             Section.MARKERS -> {
                 curFragment = MarkersFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.CABINET -> {
                 curFragment = CabinetFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.SETTINGS -> {
                 curFragment = SettingsFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
             }
+
             Section.HELP -> {
                 if (helper.isSideMenu)
                     helper.fabAction.isVisible = false
@@ -467,41 +494,52 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
     }
 
-    override fun onBackPressed() {
-        when {
-            snackbar.isShown ->
-                snackbar.hide()
-            status.isCrash -> {
-                status.setError(null)
-                unblocked()
-                curFragment?.resetError()
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            when {
+                snackbar.isShown ->
+                    snackbar.hide()
+
+                status.isCrash -> {
+                    status.setError(null)
+                    unblocked()
+                    curFragment?.resetError()
+                }
+
+                helper.shownActionMenu ->
+                    helper.hideActionMenu()
+
+                curFragment?.onBackPressed() == false ->
+                    return
+
+                helper.bottomAreaIsHide ->
+                    showBottomArea()
+
+                firstSection == Section.NEW -> {
+                    firstSection = helper.getFirstSection()
+                    setSection(firstSection, false)
+                }
+
+                else -> exit()
             }
-            helper.shownActionMenu ->
-                helper.hideActionMenu()
-            curFragment?.onBackPressed() == false ->
-                return
-            helper.bottomAreaIsHide ->
-                showBottomArea()
-            firstSection == Section.NEW -> {
-                firstSection = helper.getFirstSection()
-                setSection(firstSection, false)
-            }
-            else -> exit()
         }
     }
 
     private fun exit() {
         when {
             statusBack == StatusBack.EXIT ->
-                super.onBackPressed()
+                finish()
+
             helper.prevSection != null -> {
                 if (helper.prevSection == Section.SITE)
                     tab = SiteToiler.TAB_SITE
                 setSection(helper.prevSection!!, false)
                 helper.prevSection = null
             }
+
             statusBack == StatusBack.FIRST ->
                 setSection(firstSection, false)
+
             else -> {
                 showToast(getString(R.string.click_for_exit))
                 statusBack = StatusBack.EXIT
@@ -568,11 +606,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 if (state.warnIndex > -1)
                     showWarnAds(state.warnIndex)
             }
+
             is NeoState.ListValue -> {
                 if (frWelcome == null)
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
+
             else -> {}
         }
     }

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -125,7 +125,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         setListEvents(rvSummary, false)
         tvUpdate.setOnClickListener {
             if (toiler.isRss.not())
-                Lib.openInApps(NetConst.TELEGRAM_URL, null)
+                Lib.openInApps(Urls.TelegramUrl, null)
         }
     }
 
@@ -233,7 +233,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             if (item.hasFewLinks())
                 openMultiLink(item, binding!!.rvSummary.getItemView(index))
             else
-                Lib.openInApps(NetConst.TELEGRAM_URL + item.link, null)
+                Lib.openInApps(Urls.TelegramUrl + item.link, null)
         }
     }
 
@@ -249,7 +249,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
             }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            Lib.openInApps(item.intent?.action ?: (NetConst.TELEGRAM_URL + post), null)
+            Lib.openInApps(item.intent?.action ?: (Urls.TelegramUrl + post), null)
             true
         }
         pMenu.show()
@@ -262,7 +262,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
                 item.link, "", item.des.substring(item.des.indexOf(Const.N))
             )
         } else {
-            Lib.copyAddress(NetConst.TELEGRAM_URL + item.link)
+            Lib.copyAddress(Urls.TelegramUrl + item.link)
         }
         return true
     }

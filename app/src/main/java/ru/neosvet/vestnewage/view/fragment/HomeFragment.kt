@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -82,16 +82,20 @@ class HomeFragment : NeoFragment() {
         when (state) {
             is NeoState.HomeList ->
                 adapter.setItems(state.list)
+
             is NeoState.HomeUpdate ->
                 adapter.update(state.item)
+
             is NeoState.ListState -> {
                 if (state.event == ListEvent.RELOAD)
                     adapter.startLoading(state.index)
                 else
                     adapter.finishLoading(state.index)
             }
+
             NeoState.Success ->
                 act?.updateNew()
+
             else -> {}
         }
     }
@@ -102,32 +106,40 @@ class HomeFragment : NeoFragment() {
                 action == HomeHolder.Action.REFRESH -> toiler.refreshSummary()
                 action == HomeHolder.Action.TITLE || toiler.linkSummary.isEmpty() ->
                     act?.setSection(Section.SUMMARY, true)
+
                 action == HomeHolder.Action.SUBTITLE -> openReader(toiler.linkSummary)
             }
+
             HomeItem.Type.ADDITION -> when (action) {
-                HomeHolder.Action.TITLE -> Lib.openInApps(NetConst.TELEGRAM_URL, null)
+                HomeHolder.Action.TITLE -> Lib.openInApps(Urls.TelegramUrl, null)
                 HomeHolder.Action.SUBTITLE -> act?.openAddition()
                 HomeHolder.Action.REFRESH -> toiler.refreshAddition()
             }
+
             HomeItem.Type.CALENDAR -> when {
                 action == HomeHolder.Action.REFRESH -> toiler.refreshCalendar()
                 action == HomeHolder.Action.TITLE || toiler.linkCalendar.isEmpty() ->
                     act?.setSection(Section.CALENDAR, true)
+
                 action == HomeHolder.Action.SUBTITLE -> openReader(toiler.linkCalendar)
             }
+
             HomeItem.Type.NEWS -> when (action) {
                 HomeHolder.Action.REFRESH -> toiler.refreshNews()
                 else -> act?.setSection(Section.SITE, true)
             }
+
             HomeItem.Type.PROM -> {
                 val link = if (action == HomeHolder.Action.SUBTITLE)
                     "Vremya-Posyla.html" else Const.PROM_LINK
                 BrowserActivity.openReader(link, null)
             }
+
             HomeItem.Type.JOURNAL ->
                 if (action == HomeHolder.Action.TITLE || toiler.linkJournal.isEmpty())
                     act?.setSection(Section.JOURNAL, true)
                 else openReader(toiler.linkJournal)
+
             HomeItem.Type.MENU -> {}
         }
     }
@@ -145,6 +157,7 @@ class HomeFragment : NeoFragment() {
                 startEdit()
                 return
             }
+
             HomeMenuHolder.Action.SETTINGS -> Section.SETTINGS
         }
         act?.setSection(section, true)

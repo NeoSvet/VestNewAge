@@ -148,7 +148,7 @@ class DateDialog(
     private fun setCalendar() {
         binding.btnYear.text = date.year.toString()
         adDate.minPos = if (date.year == minYear) minMonth - 1 else -1
-        adDate.maxPos = if (date.year == maxYear) maxMonth - 1 else -1
+        adDate.maxPos = if (date.year == maxYear) maxMonth - 1 else 12
         adDate.selected = date.month - 1
     }
 

@@ -12,25 +12,31 @@ class DateAdapter(
     private val click: View.OnClickListener
 ) : RecyclerView.Adapter<DateAdapter.ViewHolder>() {
     private val data = mutableListOf<String>()
-    var minPos = 0
+    var minPos = -1
         set(value) {
             val i = field
             field = value
             notifyItemChanged(i)
-            if (value > -1)
+            if (value > -1) {
                 notifyItemChanged(value)
+                if (selected < value)
+                    selected = value
+            }
         }
-    var maxPos = 11
+    var maxPos = 12
         set(value) {
             val i = field
             field = value
             notifyItemChanged(i)
-            if (value > -1)
+            if (value < 12) {
                 notifyItemChanged(value)
+                if (selected > value)
+                    selected = value
+            }
         }
     var selected = 0
         set(value) {
-            if (value in minPos..maxPos || minPos == -1) {
+            if (field != value && value in minPos..maxPos) {
                 val i = field
                 field = value
                 notifyItemChanged(i)
@@ -49,12 +55,15 @@ class DateAdapter(
             maxPos, minPos ->
                 if (pos == selected) holder.bg.setBackgroundResource(R.drawable.cell_bg_all)
                 else holder.bg.setBackgroundResource(R.drawable.cell_bg_epi)
+
             selected ->
                 holder.bg.setBackgroundResource(R.drawable.cell_bg_poe)
+
             in (maxPos + 1) until minYear -> {
                 holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
                 holder.bg.isEnabled = false
             }
+
             else ->
                 holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
         }
@@ -70,7 +79,7 @@ class DateAdapter(
 
     fun clear() {
         minPos = -1
-        maxPos = -1
+        maxPos = 12
         data.clear()
     }
 

@@ -376,7 +376,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     private fun removeRequest(index: Int) {
-        adSearch.remove(helper.requests[index])
         helper.requests.removeAt(index)
         adRequest.notifyItemRemoved(index + 1)
     }

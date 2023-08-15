@@ -24,8 +24,8 @@ import okhttp3.Response;
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
 import ru.neosvet.vestnewage.helper.CabinetHelper;
-import ru.neosvet.vestnewage.network.NetConst;
 import ru.neosvet.vestnewage.network.UnsafeClient;
+import ru.neosvet.vestnewage.network.Urls;
 import ru.neosvet.vestnewage.utils.Const;
 import ru.neosvet.vestnewage.view.basic.StatusButton;
 import ru.neosvet.vestnewage.view.dialog.CustomDialog;
@@ -35,6 +35,7 @@ public class CabinetActivity extends AppCompatActivity {
     private StatusButton status;
     private View fabClose;
     private boolean twoPointers = false;
+    private float currentScale = 1f;
 
     public static void openPage(String link) {
         Intent intent = new Intent(App.context, CabinetActivity.class);
@@ -50,7 +51,7 @@ public class CabinetActivity extends AppCompatActivity {
         setContentView(R.layout.cabinet_activity);
         initView();
         status.setLoad(true);
-        wvBrowser.loadUrl(NetConst.SITE_COM + getIntent().getStringExtra(Const.LINK));
+        wvBrowser.loadUrl(Urls.getMainSite() + getIntent().getStringExtra(Const.LINK));
     }
 
     @Override
@@ -79,7 +80,7 @@ public class CabinetActivity extends AppCompatActivity {
                 twoPointers = true;
             } else if (twoPointers) {
                 twoPointers = false;
-                wvBrowser.setInitialScale((int) (wvBrowser.getScale() * 100.0));
+                wvBrowser.setInitialScale((int) (currentScale * 100.0));
             }
             return false;
         });
@@ -90,6 +91,12 @@ public class CabinetActivity extends AppCompatActivity {
 
     private class wvClient extends WebViewClient {
         private static final String SCRIPT = "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';";
+
+        @Override
+        public void onScaleChanged(WebView view, float oldScale, float newScale) {
+            super.onScaleChanged(view, oldScale, newScale);
+            currentScale = newScale;
+        }
 
         @Nullable
         @Override

@@ -70,10 +70,10 @@ class TipActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (!intent.hasExtra(Const.MODE))
-            onBackPressed()
+            finish()
         initTip(getUnit())
         binding.btnOk.setOnClickListener {
-            onBackPressed()
+            finish()
         }
         binding.btnOffAll.setOnClickListener {
             val editor = pref!!.edit()
@@ -88,7 +88,7 @@ class TipActivity : AppCompatActivity() {
             ).setBackgroundTint(getColor(R.color.colorPrimary))
                 .setActionTextColor(getColor(R.color.colorAccentLight))
                 .setAction(android.R.string.ok) {
-                    onBackPressed()
+                    finish()
                 }.show()
         }
     }

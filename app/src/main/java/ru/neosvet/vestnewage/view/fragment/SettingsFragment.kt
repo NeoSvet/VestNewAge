@@ -25,7 +25,7 @@ import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
-import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.CheckStarter
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -90,6 +90,7 @@ class SettingsFragment : NeoFragment() {
         initCheckSection()
         initPromSection()
         initClearSection()
+        initDefaultSection()
         initMessageSection()
         binding?.run {
             rvSettings.layoutManager = GridLayoutManager(
@@ -167,7 +168,7 @@ class SettingsFragment : NeoFragment() {
         list.add(
             CheckItem(
                 title = getString(R.string.use_site_com),
-                isChecked = NeoClient.isSiteCom
+                isChecked = Urls.isSiteCom
             )
         )
         adapter.addItem(SettingsItem.CheckList(
@@ -176,7 +177,7 @@ class SettingsFragment : NeoFragment() {
             list = list,
             onChecked = { index, checked ->
                 if (index == 2) {
-                    NeoClient.setCom(checked)
+                    Urls.setCom(checked)
                     return@CheckList
                 }
                 val name = if (index == 0) {
@@ -346,6 +347,33 @@ class SettingsFragment : NeoFragment() {
         toiler.setAlarm(h, prefProm.getInt(Const.TIME, -1))
     }
 
+    private fun initDefaultSection() {
+        val pack = Uri.parse("package:ru.neosvet.vestnewage")
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            adapter.addItem(SettingsItem.Message(
+                title = getString(R.string.about_default),
+                text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_a),
+                buttonLabel = getString(R.string.set_),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
+                    startActivity(intent)
+                }
+            ))
+            return
+        }
+
+        adapter.addItem(SettingsItem.Message(
+            title = getString(R.string.about_default),
+            text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_b),
+            buttonLabel = getString(R.string.set_),
+            onClick = {
+                val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
+                startActivity(intent)
+            }
+        ))
+    }
+
     private fun initMessageSection() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             adapter.addItem(SettingsItem.Message(
@@ -453,11 +481,13 @@ class SettingsFragment : NeoFragment() {
         when (v) {
             1 ->
                 t.append(resources.getStringArray(R.array.time)[3])
+
             in 5..20 -> {
                 t.append(v)
                 t.append(" ")
                 t.append(resources.getStringArray(R.array.time)[4])
             }
+
             else -> {
                 t.append(v)
                 t.append(" ")

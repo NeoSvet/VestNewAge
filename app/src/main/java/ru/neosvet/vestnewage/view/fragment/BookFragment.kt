@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
-import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -175,6 +175,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         when (state) {
             is NeoState.Book ->
                 setBook(state)
+
             is NeoState.LongValue -> binding?.run {
                 adapter.clear()
                 if (!toiler.isDoctrineTab) {
@@ -189,18 +190,23 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                     }
                 }
             }
+
             is NeoState.ListValue -> binding?.run { //doctrine
                 adapter.setItems(state.list)
                 rvBook.smoothScrollToPosition(0)
                 tvUpdate.text = getString(R.string.link_to_src)
             }
+
             is NeoState.Success ->
                 setStatus(false)
+
             is NeoState.Message ->
                 act?.showToast(state.message)
+
             is NeoState.Rnd -> with(state) {
                 showRndAlert(title, link, msg, place, par)
             }
+
             else -> {}
         }
     }
@@ -225,10 +231,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         bNext.setOnClickListener { openMonth(true) }
         tvDate.setOnClickListener { showDatePicker(toiler.date) }
         tvLink?.setOnClickListener {
-            Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+            Lib.openInApps(Urls.DoctrineSite, null)
         } ?: tvUpdate.setOnClickListener {
             if (toiler.isDoctrineTab)
-                Lib.openInApps(NetConst.DOCTRINE_SITE, null)
+                Lib.openInApps(Urls.DoctrineSite, null)
         }
     }
 
@@ -342,10 +348,13 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         when (title) {
             getString(R.string.refresh) ->
                 startLoad()
+
             getString(R.string.rnd_verse) ->
                 toiler.getRnd(BookToiler.RndType.VERSE)
+
             getString(R.string.rnd_epistle) ->
                 toiler.getRnd(BookToiler.RndType.EPISTLE)
+
             getString(R.string.rnd_poem) ->
                 toiler.getRnd(BookToiler.RndType.POEM)
         }
