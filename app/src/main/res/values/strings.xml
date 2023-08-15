@@ -14,6 +14,7 @@
     <string name="site_code">Ошибка на сайте: %d, попробуйте позже</string>
     <string name="site_no_response">Проблемы с сетью, попробуйте позже</string>
     <string name="site_unavailable">Сайт недоступен</string>
+    <string name="about_no_response">Возможно, вам надо включить или выключить использование зеркала в домене .COM. Или изменился адрес, с которого загружается информация – попробуйте позже. Подробнее написано в «Справке».</string>
     <!--Download-->
     <string name="download_">Скачать…</string>
     <string name="download_alert">Выберите пункты для скачивания:</string>
@@ -138,6 +139,7 @@
     <string name="nav_button">Кнопка вверх/вниз</string>
     <string name="collapsing_top">Верх не разворачивать</string>
     <string name="auto_return_panels">Автовозврат панелей</string>
+    <string name="num_par">Нумерация абзацев</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <!--MarkersFragment-->
@@ -233,6 +235,11 @@
     <string name="set_notif">Настроить сигнал, вибрацию</string>
     <string name="about_manager">Об автозапуске</string>
     <string name="info_manager">На некоторых устройствах присутствует менеджер автозапуска (может называться по другому). Для работы проверки и напоминания необходимо в менеджере разрешить автозапуск для данного приложения.</string>
+    <string name="about_default">Открытие ссылок</string>
+    <string name="set_">Настроить</string>
+    <string name="info_default">Приложение может открывать ссылки на сайты «Благая Весть» и «Откровения людям Нового века». После нажатия на кнопку «Настроить»:</string>
+    <string name="info_default_a">«Открывать по умолчанию» – «Открывать поддерживаемые ссылки» – «Открывать в этом приложении».</string>
+    <string name="info_default_b">Включить «Открывать поддерживаемые ссылки» и добавить ссылки (или выбрать веб-адреса).</string>
     <string name="set_battery">Настроить энергосбережение</string>
     <string name="info_battery">Так же рекомендуется отключить энергосбережение для данного приложения (особенно для Android 9+). И то может быть задержка до 6 минут.</string>
     <string name="default_">По умолчанию</string>
