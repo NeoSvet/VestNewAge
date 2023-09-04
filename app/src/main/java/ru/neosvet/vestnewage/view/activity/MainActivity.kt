@@ -103,7 +103,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         App.context = this
         initLaunch()
         helper = MainHelper(this)
-        helper.initViews()
         super.onCreate(savedInstanceState)
         setBottomPanel()
         initStatusButton()

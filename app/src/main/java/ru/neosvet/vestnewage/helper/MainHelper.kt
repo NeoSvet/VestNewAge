@@ -41,9 +41,9 @@ class MainHelper(private val act: MainActivity) {
 
     var type = ActionType.MENU
         private set
-    lateinit var tipAction: Tip
+    var tipAction: Tip
         private set
-    lateinit var fabAction: FloatingActionButton
+    var fabAction: FloatingActionButton
         private set
     private val adAction = MenuAdapter(this::onActionClick)
     var actionIcon: Int = R.drawable.star
@@ -60,13 +60,13 @@ class MainHelper(private val act: MainActivity) {
         get() = fabAction.isVisible.not() && bottomBar?.isVisible == false
     var frMenu: MenuFragment? = null
     var tvNew: TextView? = null
-    lateinit var pStatus: View
+    var pStatus: View
         private set
-    lateinit var tvPromTimeFloat: TextView
+    var tvPromTimeFloat: TextView
         private set
-    lateinit var tvToast: TextView
+    var tvToast: TextView
         private set
-    lateinit var vsbScrollBar: NeoScrollBar
+    var vsbScrollBar: NeoScrollBar
         private set
 
     val unread = UnreadUtils()
@@ -81,7 +81,7 @@ class MainHelper(private val act: MainActivity) {
     var isSideMenu: Boolean = false
         private set
 
-    fun initViews() {
+    init {
         pStatus = act.findViewById(R.id.pStatus)
         tvToast = act.findViewById(R.id.tvToast)
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
@@ -111,20 +111,20 @@ class MainHelper(private val act: MainActivity) {
             act.findViewById<View>(R.id.btnProm).setOnClickListener {
                 BrowserActivity.openReader(Const.PROM_LINK, null)
             }
-            return
-        }
-        tvTitle = act.findViewById(R.id.tvTitle)
-        bottomBar = act.findViewById(R.id.bottomBar)
-        bottomBar?.setBackgroundResource(R.drawable.panel_bg)
+        } else {
+            tvTitle = act.findViewById(R.id.tvTitle)
+            bottomBar = act.findViewById(R.id.bottomBar)
+            bottomBar?.setBackgroundResource(R.drawable.panel_bg)
 
-        svMain = act.findViewById(R.id.svMain)
-        topBar = act.findViewById(R.id.topBar)
+            svMain = act.findViewById(R.id.svMain)
+            topBar = act.findViewById(R.id.topBar)
 
-        if (ScreenUtils.isLand) {
-            ivHeadBack.setImageResource(R.drawable.head_back_land)
-            val tv = act.findViewById<View>(R.id.tvGodWords)
-            val p = tv.paddingBottom
-            tv.setPadding(p, p, tv.paddingEnd, p)
+            if (ScreenUtils.isLand) {
+                ivHeadBack.setImageResource(R.drawable.head_back_land)
+                val tv = act.findViewById<View>(R.id.tvGodWords)
+                val p = tv.paddingBottom
+                tv.setPadding(p, p, tv.paddingEnd, p)
+            }
         }
     }
 
