@@ -72,12 +72,6 @@ class LaunchUtils {
             showSummaryNotif()
             return
         }
-        if (ver < 60) {
-            resetFirst()
-            renamePrefs()
-            renameBookPref()
-            deleteBrowserFiles()
-        }
         if (ver < 63) checkSearchDates()
         if (ver in 45..46) {
             val storage = AdsStorage()
@@ -218,53 +212,6 @@ class LaunchUtils {
             editor.putBoolean(SearchHelper.INVERT, true)
             editor.apply()
         }
-    }
-
-    private fun resetFirst() {
-        val pref = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
-        val editor = pref.edit()
-        editor.putBoolean(Const.FIRST, true)
-        editor.apply()
-    }
-
-    private fun renameBookPref() {
-        val pref = App.context.getSharedPreferences(BookHelper.TAG, Context.MODE_PRIVATE)
-        val editor = pref.edit()
-        var i = pref.getInt("kat", 0)
-        editor.remove("kat")
-        editor.putInt(Const.POEMS, i)
-        i = pref.getInt("pos", 0)
-        editor.remove("pos")
-        editor.putInt(Const.EPISTLES, i)
-        editor.apply()
-    }
-
-    private fun deleteBrowserFiles() {
-        var f = Lib.getFile(Const.DARK)
-        if (f.exists()) f.delete()
-        f = Lib.getFile(Const.LIGHT)
-        if (f.exists()) f.delete()
-        f = Lib.getFile("/style/style.css")
-        if (f.exists()) f.delete()
-        f = Lib.getFile("/page.html")
-        if (f.exists()) f.delete()
-    }
-
-    private fun renamePrefs() {
-        val p = "/shared_prefs/"
-        val x = ".xml"
-        var f = Lib.getFileP(p + "PromHelper.xml")
-        if (f.exists()) f.delete()
-        f = Lib.getFileP(p + "MainActivity.xml")
-        if (f.exists()) f.renameTo(Lib.getFileP(p + MainHelper.TAG + x))
-        f = Lib.getFileP(p + "BrowserActivity.xml")
-        if (f.exists()) f.renameTo(Lib.getFileP(p + BrowserHelper.TAG + x))
-        f = Lib.getFileP(p + "CabmainFragment.xml")
-        if (f.exists()) f.renameTo(Lib.getFileP(p + CabinetHelper.TAG + x))
-        f = Lib.getFileP(p + "BookFragment.xml")
-        if (f.exists()) f.renameTo(Lib.getFileP(p + BookHelper.TAG + x))
-        f = Lib.getFileP(p + "SearchFragment.xml")
-        if (f.exists()) f.renameTo(Lib.getFileP(p + SearchHelper.TAG + x))
     }
 
     private fun showNotifDownloadAll() {
