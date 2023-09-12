@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
@@ -52,8 +52,8 @@ class AdditionStorage : Closeable {
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
-    fun getList(offset: Int): List<ListItem> {
-        val list = mutableListOf<ListItem>()
+    fun getList(offset: Int): List<BasicItem> {
+        val list = mutableListOf<BasicItem>()
         val cursor = getCursor(offset)
         if (cursor.moveToFirst()) {
             val iID = cursor.getColumnIndex(DataBase.ID)
@@ -64,7 +64,7 @@ class AdditionStorage : Closeable {
             if (max == 0 && offset == 0)
                 max = cursor.getInt(iID)
             do {
-                val item = ListItem(cursor.getString(iTitle), cursor.getInt(iLink).toString())
+                val item = BasicItem(cursor.getString(iTitle), cursor.getInt(iLink).toString())
                 item.addHead(cursor.getInt(iID).toString())
                 item.des = getDate(cursor.getString(iTime)) + "@" + cursor.getString(iDes)
                 if (item.des.contains(LINK))
@@ -103,7 +103,7 @@ class AdditionStorage : Closeable {
         return date.toAlterString()
     }
 
-    private fun addLinks(s: String, item: ListItem) {
+    private fun addLinks(s: String, item: BasicItem) {
         var i = s.indexOf(LINK)
         var n: Int
         while (i > -1) {

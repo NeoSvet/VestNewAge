@@ -99,10 +99,7 @@ class PromUtils(textView: View?) {
             }
         } else { //R.id.tvPromTimeInMenu
             tvPromTime!!.setOnClickListener {
-                openReader(
-                    "Vremya-Posyla.html",
-                    null
-                )
+                openReader(Urls.VREMYA_LINK, null)
             }
         }
     }
@@ -219,7 +216,7 @@ class PromUtils(textView: View?) {
         val sound = pref.getBoolean(SetNotifDialog.SOUND, false)
         val vibration = pref.getBoolean(SetNotifDialog.VIBR, true)
         val intent = Intent(App.context, MainActivity::class.java)
-        intent.data = Uri.parse(Urls.Site + Const.PROM_LINK)
+        intent.data = Uri.parse(Urls.Site + Urls.PROM_LINK)
         val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
         val piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         val notifHelper = NotificationUtils()

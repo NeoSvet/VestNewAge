@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.list
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,20 +12,25 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 
 class HelpAdapter(
-    private val clicker: ItemClicker,
-    private val data: List<HelpItem>
-) :
-    RecyclerView.Adapter<HelpAdapter.ViewHolder>() {
-    interface ItemClicker {
-        fun onItemClick(index: Int)
-    }
+    private val clicker: ((Int) -> Unit)
+) : RecyclerView.Adapter<HelpAdapter.ViewHolder>() {
 
     companion object {
         private const val TYPE_ICON = 0
         private const val TYPE_DETAIL = 1
     }
 
-    fun updateItem(index: Int) {
+    private val data = mutableListOf<HelpItem>()
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setItems(items: List<HelpItem>) {
+        data.clear()
+        data.addAll(items)
+        notifyDataSetChanged()
+    }
+
+    fun update(index: Int, item: HelpItem) {
+        data[index] = item
         notifyItemChanged(index)
     }
 
@@ -59,7 +65,7 @@ class HelpAdapter(
 
         init {
             bgItem.setOnClickListener {
-                clicker.onItemClick(layoutPosition)
+                clicker.invoke(layoutPosition)
             }
         }
 

@@ -14,16 +14,16 @@ import java.util.*
 class SearchEngine(
     private val storage: SearchStorage,
     private val pages: PageStorage,
+    private val helper: SearchHelper,
     private val parent: Parent
 ) {
     interface Parent {
         val strings: SearchStrings
-        val helper: SearchHelper
         suspend fun notifyResult()
         suspend fun notifyPercent(p: Int)
         suspend fun notifyDate(d: DateUnit)
         fun clearLast()
-        suspend fun notifySpecialEvent(e: Long)
+        suspend fun notifyNotFound()
         suspend fun searchFinish()
     }
 
@@ -44,7 +44,6 @@ class SearchEngine(
         private const val lenSelect = 36
         private const val startLetter = 65
         private const val endLetter = 2000
-        const val EVENT_WORDS_NOT_FOUND = 1L
     }
 
     private fun String.isNotLetter(position: Int): Boolean {
@@ -54,15 +53,14 @@ class SearchEngine(
         return b < startLetter || b > endLetter
     }
 
-    var countMatches: Int = 0
+    var countMatches = 0
         private set
+    private var countMaterials = 0
     private var words = mutableListOf<String>()
     var endings: Array<String>? = null
     private var request: SearchRequest? = null
-    var mode: Int = 0
+    var mode = 0
         private set
-    private val helper: SearchHelper
-        get() = parent.helper
     private var isRun = true
 
     fun stop() {
@@ -170,7 +168,7 @@ class SearchEngine(
     }
 
     private suspend fun searchInResultPar() {
-        val items = mutableListOf<ListItem>()
+        val items = mutableListOf<BasicItem>()
         val cursor = storage.getResults(helper.isDesc)
         if (cursor.moveToFirst()) {
             val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
@@ -179,7 +177,7 @@ class SearchEngine(
             do {
                 val d = cursor.getString(iDes)
                 if (d.isNullOrEmpty().not() && d.contains("<")) {
-                    val item = ListItem(cursor.getString(iTitle), cursor.getString(iLink)).apply {
+                    val item = BasicItem(cursor.getString(iTitle), cursor.getString(iLink)).apply {
                         des = Lib.withOutTags(d)
                     }
                     items.add(item)
@@ -219,29 +217,29 @@ class SearchEngine(
         items.clear()
     }
 
-    private fun searchInLink(startId: Int, link: String?): List<BaseItem> {
+    private fun searchInLink(startId: Int, link: String?): List<SearchItem> {
         val list = when {
             link == null ->
                 titleToList(pages.searchLink(helper.request), startId, false)
             link.contains(helper.request) ->
-                listOf(BaseItem(startId, pages.getTitle(link), link))
+                listOf(SearchItem(startId, pages.getTitle(link), link))
             else ->
                 listOf()
         }
-        helper.countMaterials += list.size
+        countMaterials += list.size
         list.forEach {
             it.des = getSelected(it.link, helper.request)
         }
         return list
     }
 
-    private fun simpleSearch(isPar: Boolean, link: String?, startId: Int): List<BaseItem> {
+    private fun simpleSearch(isPar: Boolean, link: String?, startId: Int): List<SearchItem> {
         request?.let { r ->
             if (r is SearchRequest.Advanced) {
                 words.clear()
                 request = null
             } else if (r is SearchRequest.Simple &&
-                !r.equalsS(helper.request, helper.isLetterCase)
+                !r.equals(helper.request, helper.isLetterCase)
             ) request = null
         }
         val r: SearchRequest.Simple
@@ -272,9 +270,9 @@ class SearchEngine(
             } ?: pages.searchTitle(r.operator, r.find)
             titleToList(cursor, startId, true)
         }
-        helper.countMaterials += list.size
+        countMaterials += list.size
         if (isPar) list.forEach {
-            if (it.link.isEmpty()) helper.countMaterials--
+            if (it.link.isEmpty()) countMaterials--
         }
         return list
     }
@@ -301,9 +299,9 @@ class SearchEngine(
         isPar: Boolean,
         link: String?,
         startId: Int
-    ): List<BaseItem> {
+    ): List<SearchItem> {
         request?.let { r ->
-            if (r is SearchRequest.Simple || (r is SearchRequest.Advanced && !r.equalsA(helper)))
+            if (r is SearchRequest.Simple || (r is SearchRequest.Advanced && !r.equals(helper)))
                 request = null
         }
         val name = if (isPar) DataBase.PARAGRAPH else Const.TITLE
@@ -313,7 +311,7 @@ class SearchEngine(
             words = if (helper.isEnding)
                 getWords(s) else removeEnding(getWords(s))
             if (words.isEmpty()) {
-                parent.notifySpecialEvent(EVENT_WORDS_NOT_FOUND)
+                parent.notifyNotFound()
                 return listOf()
             }
             removeDuplicateWords()
@@ -354,7 +352,7 @@ class SearchEngine(
         return filterList(list)
     }
 
-    private fun filterList(list: MutableList<BaseItem>): List<BaseItem> {
+    private fun filterList(list: MutableList<SearchItem>): List<SearchItem> {
         var isEnd = true
         var isPre = true
         var k: Int
@@ -424,13 +422,13 @@ class SearchEngine(
                 n--
             }
         }
-        helper.countMaterials += list.size
+        countMaterials += list.size
         when (mode) {
             MODE_TITLES -> list.forEach {
                 countMatches += calcSelected(it.title)
             }
             else -> list.forEach {
-                if (it.link.isEmpty()) helper.countMaterials--
+                if (it.link.isEmpty()) countMaterials--
                 countMatches += calcSelected(it.des)
             }
         }
@@ -524,7 +522,7 @@ class SearchEngine(
         return sb.toString()
     }
 
-    private fun listToStorage(list: List<BaseItem>) {
+    private fun listToStorage(list: List<SearchItem>) {
         var id = -1
         val des = StringBuilder()
         var row: ContentValues? = null
@@ -553,7 +551,7 @@ class SearchEngine(
         }
     }
 
-    private suspend fun getResultList(startId: Int, link: String?): List<BaseItem> {
+    private suspend fun getResultList(startId: Int, link: String?): List<SearchItem> {
         return when (mode) {
             MODE_TITLES -> {
                 val n = checkTitles(startId)
@@ -579,7 +577,7 @@ class SearchEngine(
         cursor: Cursor,
         startId: Int,
         isSelect: Boolean
-    ): MutableList<BaseItem> {
+    ): MutableList<SearchItem> {
         if (!cursor.moveToFirst()) {
             cursor.close()
             return mutableListOf()
@@ -589,10 +587,10 @@ class SearchEngine(
         var id = -1
         var n = startId - 1
         var add = true
-        val list = mutableListOf<BaseItem>()
+        val list = mutableListOf<SearchItem>()
         do {
             if (id == cursor.getInt(iID) && add) {
-                val item = BaseItem(n, "", "")
+                val item = SearchItem(n, "", "")
                 item.des = if (isSelect)
                     selectWords(cursor.getString(iPar))
                 else
@@ -611,7 +609,7 @@ class SearchEngine(
                     if (add) {
                         val title = pages.getPageTitle(curTitle.getString(iTitle), link)
                         n++
-                        val item = BaseItem(n, title, link)
+                        val item = SearchItem(n, title, link)
                         item.des = if (isSelect)
                             selectWords(cursor.getString(iPar))
                         else
@@ -630,14 +628,14 @@ class SearchEngine(
         cursor: Cursor,
         startId: Int,
         isSelect: Boolean
-    ): MutableList<BaseItem> {
+    ): MutableList<SearchItem> {
         if (!cursor.moveToFirst()) {
             cursor.close()
             return mutableListOf()
         }
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iTitle = cursor.getColumnIndex(Const.TITLE)
-        val list = mutableListOf<BaseItem>()
+        val list = mutableListOf<SearchItem>()
         var add = true
         var id = startId
         do {
@@ -648,7 +646,7 @@ class SearchEngine(
                 add = link.isPoem
             if (add) {
                 val title = pages.getPageTitle(cursor.getString(iTitle), link)
-                val item = BaseItem(id, title, link)
+                val item = SearchItem(id, title, link)
                 if (isSelect)
                     item.title = selectWords(item.title)
                 list.add(item)
@@ -738,8 +736,8 @@ class SearchEngine(
         return i
     }
 
-    suspend fun findInPage(link: String, id: Int): ListItem {
-        var item = ListItem(link, link)
+    suspend fun findInPage(link: String, id: Int): BasicItem {
+        var item = BasicItem(link, link)
         if (mode == MODE_EPISTLES && link.isPoem)
             return item
         if (mode == MODE_POEMS && !link.isPoem)
@@ -748,12 +746,12 @@ class SearchEngine(
         val list = getResultList(id, link)
 
         if (list.isEmpty()) {
-            item = ListItem(pages.getTitle(link), link)
+            item = BasicItem(pages.getTitle(link), link)
             item.des = parent.strings.not_found
         } else {
             listToStorage(list)
             val des = StringBuilder()
-            item = ListItem(list[0].title, link)
+            item = BasicItem(list[0].title, link)
             list.forEach {
                 des.append(it.des)
             }

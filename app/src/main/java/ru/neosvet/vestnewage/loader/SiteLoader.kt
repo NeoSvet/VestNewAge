@@ -1,6 +1,6 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
@@ -43,13 +43,13 @@ class SiteLoader(
         return !patternList.matcher(link).matches()
     }
 
-    fun load(url: String): List<ListItem> {
+    fun load(url: String): List<BasicItem> {
         val list = loadList(url)
         saveList(list)
         return list
     }
 
-    private fun loadList(link: String): List<ListItem> {
+    private fun loadList(link: String): List<BasicItem> {
         val page = PageParser(client)
         val isSite = link == Urls.Site
         val end: String
@@ -68,18 +68,18 @@ class SiteLoader(
         var s: String? = page.currentElem
         var t: String
         var d = StringBuilder()
-        val list = mutableListOf<ListItem>()
-        var item = ListItem("")
+        val list = mutableListOf<BasicItem>()
+        var item = BasicItem("")
         do {
             when {
                 page.isHead -> {
                     if (isSite)
-                        item = ListItem(page.text, true)
+                        item = BasicItem(page.text, true)
                     else {
                         t = d.toString()
-                        if (setDes(item, t).not()) list.add(ListItem(t))
+                        if (setDes(item, t).not()) list.add(BasicItem(t))
                         d = StringBuilder()
-                        item = ListItem(page.text)
+                        item = BasicItem(page.text)
                         addLink(item, "", "@")
                     }
                     list.add(item)
@@ -95,7 +95,7 @@ class SiteLoader(
                         t = page.text
                         if (t.isNotEmpty() && !s.contains("\"#\"")) {
                             if (!s.contains("<")) item.des = s
-                            else item = ListItem(t).also { list.add(it) }
+                            else item = BasicItem(t).also { list.add(it) }
                             page.link?.let { addLink(item, t, it) }
                         }
                     }
@@ -111,7 +111,7 @@ class SiteLoader(
         } while (s != null)
         t = d.toString()
         if (setDes(item, t).not())
-            list.add(ListItem(t))
+            list.add(BasicItem(t))
         page.clear()
         if (isSite && Urls.isSiteCom) {
             var i = list.size - 1
@@ -124,7 +124,7 @@ class SiteLoader(
         return list
     }
 
-    private fun addLink(item: ListItem, head: String, link: String) {
+    private fun addLink(item: BasicItem, head: String, link: String) {
         var url = link
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
             || url.lastIndexOf("/") == url.length - 1
@@ -136,7 +136,7 @@ class SiteLoader(
         item.addLink(head, url)
     }
 
-    private fun setDes(item: ListItem?, d: String): Boolean {
+    private fun setDes(item: BasicItem?, d: String): Boolean {
         if (d.isEmpty())
             return true
         if (item == null)
@@ -147,7 +147,7 @@ class SiteLoader(
         return true
     }
 
-    private fun saveList(list: List<ListItem>) {
+    private fun saveList(list: List<BasicItem>) {
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
         for (i in list.indices) {
             bw.write(list[i].title + Const.N)

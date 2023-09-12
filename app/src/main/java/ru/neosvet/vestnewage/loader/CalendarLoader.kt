@@ -4,7 +4,7 @@ import android.content.ContentValues
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -20,7 +20,7 @@ import java.util.*
 class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private val storage = PageStorage()
     private var date = DateUnit.initToday()
-    private val list = LinkedList<ListItem>()
+    private val list = LinkedList<BasicItem>()
     private var isRun = false
 
     override fun load() {
@@ -68,9 +68,9 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
             i = content.indexOf(">", i) + 1
             val d = content.substring(i, content.indexOf("</a", i))
             if (d.contains("<"))
-                list.add(ListItem(Lib.withOutTags(d)))
+                list.add(BasicItem(Lib.withOutTags(d)))
             else
-                list.add(ListItem(d))
+                list.add(BasicItem(d))
             addLink(link)
             if (link.contains('_'))
                 checkLink(link, '_')
@@ -111,7 +111,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         while (i < names.length() && isRun) {
             val s = names[i].toString()
             jsonI = json.optJSONObject(s)
-            list.add(ListItem(s.substring(s.lastIndexOf("-") + 1)))
+            list.add(BasicItem(s.substring(s.lastIndexOf("-") + 1)))
             if (jsonI == null) { // массив за день (катрен и ещё какой-то текст (послание или статья)
                 d = DateUnit.parse(s)
                 jsonA = json.optJSONArray(s)

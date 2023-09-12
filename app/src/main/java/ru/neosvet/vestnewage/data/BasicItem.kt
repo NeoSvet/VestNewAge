@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.data
 
 import android.util.Pair
 
-class ListItem {
+class BasicItem {
     var title: String
     var des: String = ""
     private val heads = NeoList<String>()
@@ -16,14 +16,6 @@ class ListItem {
 
     constructor(title: String) {
         this.title = title
-    }
-
-    constructor(main: Array<String>) {
-        title = main[0]
-        if (main[1].isNotEmpty())
-            addHead(main[1])
-        addLink(main[2])
-        des = main[3]
     }
 
     constructor(title: String, onlyTitle: Boolean) {
@@ -42,9 +34,6 @@ class ListItem {
             listLinks.reset(true)
             return listLinks
         }
-
-    val main: Array<String>
-        get() = arrayOf(title, head, link, des)
 
     fun hasLink(): Boolean {
         return listLinks.isNotEmpty

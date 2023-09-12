@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.view.list.paging
 
 import androidx.paging.PagingState
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 
@@ -12,11 +12,11 @@ class JournalFactory(
 ) : NeoPaging.Factory() {
     var total = 0
 
-    override fun getRefreshKey(state: PagingState<Int, ListItem>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, BasicItem>): Int? {
         return null
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ListItem> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, BasicItem> {
         val position = params.key ?: offset
         if (position < offset)
             parent.newStartPosition(position)

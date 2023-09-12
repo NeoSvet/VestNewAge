@@ -24,18 +24,25 @@ import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class SearchDialog(
     private val act: Activity,
-    private val parent: Parent
+    private val parent: Parent,
+    private val mode: Int,
+    startInDays: Int,
+    endInDays: Int,
+    optionsIn: List<Boolean>
 ) : Dialog(act), DateDialog.Result {
+    companion object {
+        private const val START_DATE = "sd"
+    }
+
     interface Parent {
-        val modeAdapter: ArrayAdapter<String>
-        val helper: SearchHelper
+        fun putSearchDialogResult(mode: Int, start: DateUnit, end: DateUnit, list: List<Boolean>)
     }
 
     private var dateDialog: DateDialog? = null
     private var isStartDate = true
-    private var start = DateUnit.putDays(parent.helper.start.timeInDays)
-    private var end = DateUnit.putDays(parent.helper.end.timeInDays)
-    private val options = mutableListOf<Boolean>()
+    private var start = DateUnit.putDays(startInDays)
+    private var end = DateUnit.putDays(endInDays)
+    private val options = mutableListOf<Boolean>().also { it.addAll(optionsIn) }
     private lateinit var adapter: CheckAdapter
     private val binding: SearchDialogBinding by lazy {
         SearchDialogBinding.inflate(layoutInflater)
@@ -48,16 +55,19 @@ class SearchDialog(
             params.width = act.resources.getDimension(R.dimen.dialog_width_land).toInt()
             window?.attributes = params
         }
-
         setViews()
-        options.addAll(parent.helper.options)
         initOptions()
     }
 
     private fun setViews() = binding.run {
         bStartRange.text = formatDate(start)
         bEndRange.text = formatDate(end)
-        sMode.adapter = parent.modeAdapter
+        val modeAdapter = ArrayAdapter(
+            act, R.layout.spinner_button,
+            act.resources.getStringArray(R.array.search_mode)
+        )
+        modeAdapter.setDropDownViewResource(R.layout.spinner_item)
+        sMode.adapter = modeAdapter
         sMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onItemSelected(
@@ -81,7 +91,7 @@ class SearchDialog(
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
         }
-        sMode.setSelection(parent.helper.mode)
+        sMode.setSelection(mode)
 
         bStartRange.setOnClickListener {
             showStartDatePicker(start)
@@ -99,11 +109,12 @@ class SearchDialog(
                 }.create().show()
         }
         bOk.setOnClickListener {
-            parent.helper.start = start
-            parent.helper.end = end
-            parent.helper.options.clear()
-            parent.helper.options.addAll(options)
-            parent.helper.savePerformance(sMode.selectedItemPosition)
+            parent.putSearchDialogResult(
+                mode = sMode.selectedItemPosition,
+                start = start,
+                end = end,
+                list = options
+            )
             dismiss()
         }
     }
@@ -130,7 +141,7 @@ class SearchDialog(
             i++
         }
         adapter = CheckAdapter(list, false, this::checkOption)
-        if (parent.helper.isByWords.not())
+        if (options[SearchHelper.I_BY_WORDS].not())
             adapter.sizeCorrector = 3
         val rv = findViewById<RecyclerView>(R.id.rvOptions)
         rv.layoutManager = GridLayoutManager(context, ScreenUtils.span)
@@ -153,7 +164,7 @@ class SearchDialog(
         end = DateUnit.putDays(state.getInt(Const.END))
         val d = state.getInt(Const.DIALOG)
         if (d > 0) {
-            if (state.getBoolean(Const.SELECT))
+            if (state.getBoolean(START_DATE))
                 showStartDatePicker(DateUnit.putDays(d))
             else
                 showEndDatePicker(DateUnit.putDays(d))
@@ -175,7 +186,7 @@ class SearchDialog(
     override fun onSaveInstanceState(): Bundle {
         val state = Bundle()
         state.putInt(Const.DIALOG, dateDialog?.date?.timeInDays ?: 0)
-        state.putBoolean(Const.SELECT, isStartDate)
+        state.putBoolean(START_DATE, isStartDate)
         state.putInt(Const.START, start.timeInDays)
         state.putInt(Const.END, end.timeInDays)
         state.putInt(Const.MODE, binding.sMode.selectedItemPosition)

@@ -32,14 +32,14 @@ class MarkerHelper(private val strings: MarkerStrings) {
     var newPos: Float = 0f
 
     fun updateSel() {
-        if (isPar) {
+        sel = if (isPar) {
             val s = getParList()
-            sel = if (s == null) {
+            if (s == null) {
                 checkedAllPars()
                 getParList() ?: ""
             } else s
         } else
-            sel = String.format(formatPos, pos)
+            String.format(formatPos, pos)
     }
 
     private fun checkedAllPars() {

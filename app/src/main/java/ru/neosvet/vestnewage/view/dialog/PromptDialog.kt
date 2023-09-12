@@ -61,6 +61,7 @@ class PromptDialog : BottomSheetDialogFragment() {
         arguments?.let {
             val message = it.getString(Const.DIALOG) ?: ""
             binding?.tvMessage?.setText(message)
+            arguments = null
         }
         setButtons()
     }

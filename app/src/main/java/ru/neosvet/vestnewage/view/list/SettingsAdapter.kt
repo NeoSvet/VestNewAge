@@ -3,7 +3,11 @@ package ru.neosvet.vestnewage.view.list
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,27 +15,30 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.SettingsItem
 
 class SettingsAdapter(
-    private val visList: MutableList<Boolean>,
     private val twoColumns: Boolean
 ) : RecyclerView.Adapter<SettingsAdapter.ViewHolder>() {
     private val data = mutableListOf<SettingsItem>()
-
-    init {
-        if (twoColumns) {
-            var b: Int
-            for (a in visList.indices step 2) {
-                b = a + 1
-                if (b == visList.size) break
-                if (visList[a])
-                    visList[b] = true
-                else if (visList[b])
-                    visList[a] = true
-            }
-        }
-    }
+    val visible = mutableListOf(true, false, false, false, false, false, false)
 
     fun addItem(item: SettingsItem) {
         data.add(item)
+    }
+
+    fun setVisible(list: List<Boolean>) {
+        if (twoColumns) {
+            var b: Int
+            for (a in list.indices step 2) {
+                b = a + 1
+                visible[a] = list[a]
+                if (b == visible.size) break
+                visible[b] = list[b]
+                if (visible[a])
+                    visible[b] = true
+                else if (visible[b])
+                    visible[a] = true
+            }
+        } else for (i in list.indices)
+            visible[i] = list[i]
     }
 
     override fun getItemViewType(position: Int): Int = position
@@ -40,10 +47,13 @@ class SettingsAdapter(
         val id = when (data[viewType]) {
             is SettingsItem.CheckList ->
                 R.layout.item_set_checklist
+
             is SettingsItem.CheckListButton ->
                 R.layout.item_set_checklistbutton
+
             is SettingsItem.Message ->
                 R.layout.item_set_message
+
             is SettingsItem.Notification ->
                 R.layout.item_set_notification
         }
@@ -57,14 +67,14 @@ class SettingsAdapter(
     override fun getItemCount(): Int = data.size
 
     fun switchPanel(index: Int) {
-        visList[index] = visList[index].not()
+        visible[index] = visible[index].not()
         notifyItemChanged(index)
         if (twoColumns) {
             val i = if (index % 2 == 0)
                 index + 1
             else
                 index - 1
-            visList[i] = visList[i].not()
+            visible[i] = visible[i].not()
             notifyItemChanged(i)
         }
     }
@@ -77,10 +87,13 @@ class SettingsAdapter(
             when (item) {
                 is SettingsItem.CheckList ->
                     initCheckList(item)
+
                 is SettingsItem.CheckListButton ->
                     initCheckListButton(item)
+
                 is SettingsItem.Message ->
                     initMessage(item)
+
                 is SettingsItem.Notification ->
                     initNotification(item)
             }
@@ -94,7 +107,7 @@ class SettingsAdapter(
             tvTitle.text = title
             val index = layoutPosition
             btnTitle.setOnClickListener { switchPanel(index) }
-            if (visList[index]) {
+            if (visible[index]) {
                 panel.isVisible = true
                 imgTitle.setImageResource(R.drawable.minus)
             } else {

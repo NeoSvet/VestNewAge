@@ -37,19 +37,17 @@ enum class TipName {
 class TipActivity : AppCompatActivity() {
     companion object {
         const val TAG = "tip"
-        private var pref: SharedPreferences? = null
+        private val pref: SharedPreferences by lazy {
+            App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
+        }
 
         @JvmStatic
         fun showTipIfNeed(name: TipName) {
-            if (pref == null)
-                pref = App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
-            pref?.let {
-                if (it.getBoolean(name.toString(), true)) {
-                    showTip(name)
-                    val editor = it.edit()
-                    editor.putBoolean(name.toString(), false)
-                    editor.apply()
-                }
+            if (pref.getBoolean(name.toString(), true)) {
+                showTip(name)
+                val editor = pref.edit()
+                editor.putBoolean(name.toString(), false)
+                editor.apply()
             }
         }
 
@@ -76,7 +74,7 @@ class TipActivity : AppCompatActivity() {
             finish()
         }
         binding.btnOffAll.setOnClickListener {
-            val editor = pref!!.edit()
+            val editor = pref.edit()
             TipName.values().forEach {
                 editor.putBoolean(it.toString(), false)
             }
@@ -158,6 +156,7 @@ class TipActivity : AppCompatActivity() {
                 alignV = AlignV.BOTTOM,
                 addArrow = true
             )
+
             TipName.CALENDAR -> TipUnit(
                 message = getString(R.string.tip_calendar),
                 imgId = R.drawable.tip_calendar,
@@ -165,6 +164,7 @@ class TipActivity : AppCompatActivity() {
                 alignV = AlignV.TOP,
                 addArrow = true
             )
+
             TipName.BROWSER_PANEL -> TipUnit(
                 message = getString(R.string.tip_browser),
                 imgId = R.drawable.tip_browser,
@@ -172,6 +172,7 @@ class TipActivity : AppCompatActivity() {
                 alignV = AlignV.BOTTOM,
                 addArrow = false
             )
+
             TipName.BROWSER_FULLSCREEN -> TipUnit(
                 message = getString(R.string.tip_browser2),
                 imgId = R.drawable.tip_browser2,
@@ -179,6 +180,7 @@ class TipActivity : AppCompatActivity() {
                 alignV = AlignV.TOP,
                 addArrow = true
             )
+
             TipName.SEARCH -> TipUnit(
                 message = getString(R.string.tip_search),
                 imgId = R.drawable.tip_search,

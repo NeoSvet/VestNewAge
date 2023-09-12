@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 
 class RecyclerAdapter(
-    private val clicker: (Int, ListItem) -> Unit,
-    private val longClicker: ((Int, ListItem) -> Boolean)? = null
+    private val clicker: (Int, BasicItem) -> Unit,
+    private val longClicker: ((Int, BasicItem) -> Boolean)? = null
 ) : RecyclerView.Adapter<RecyclerHolder>() {
     companion object {
         private const val TYPE_TITLE = 0
@@ -17,10 +17,10 @@ class RecyclerAdapter(
         private const val TYPE_DETAIL = 2
     }
 
-    private val data = mutableListOf<ListItem>()
+    private val data = mutableListOf<BasicItem>()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setItems(items: List<ListItem>) {
+    fun setItems(items: List<BasicItem>) {
         data.clear()
         data.addAll(items)
         notifyDataSetChanged()

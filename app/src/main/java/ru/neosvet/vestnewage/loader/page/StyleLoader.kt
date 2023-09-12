@@ -5,20 +5,21 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.*
 
 class StyleLoader {
     companion object {
+        const val LIGHT = "/style/light.css"
+        const val DARK = "/style/dark.css"
         private const val FONT_STRING =
             "@font-face{font-family:\"MyriadProCondensed\";src: url(\"myriad.ttf\") format(\"truetype\")} "
     }
 
     private val builderRequest = Request.Builder()
     private val client = NeoClient.createHttpClient()
-    private val fLight = Lib.getFileL(Const.LIGHT)
-    private val fDark = Lib.getFileL(Const.DARK)
+    private val fLight = Lib.getFileL(LIGHT)
+    private val fDark = Lib.getFileL(DARK)
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)

@@ -51,13 +51,12 @@ class MenuFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.list_fragment, container, false)
+    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
+        initView(it)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView(view)
         if (iSelect > -1 && isFullScreen.not())
             adapter.select(iSelect)
     }

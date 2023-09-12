@@ -5,12 +5,12 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 
 class RecyclerHolder(
     private val root: View,
-    private val clicker: (Int, ListItem) -> Unit,
-    private val longClicker: ((Int, ListItem) -> Boolean)?
+    private val clicker: (Int, BasicItem) -> Unit,
+    private val longClicker: ((Int, BasicItem) -> Boolean)?
 ) : RecyclerView.ViewHolder(root) {
     private val tvTitle: TextView = root.findViewById(R.id.text_item)
     private val tvTime: TextView? = root.findViewById(R.id.time_item)
@@ -21,7 +21,7 @@ class RecyclerHolder(
         item.setBackgroundResource(R.drawable.item_bg)
     }
 
-    fun setItem(item: ListItem) {
+    fun setItem(item: BasicItem) {
         if (item.title.contains("<"))
             tvTitle.text = Html.fromHtml(item.title).trimEnd()
         else

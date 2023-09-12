@@ -12,7 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
@@ -34,8 +34,8 @@ class WelcomeFragment : BottomSheetDialogFragment() {
     }
 
     private var clicker: ItemClicker? = null
-    val list = mutableListOf<ListItem>()
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    val list = mutableListOf<BasicItem>()
+    private val adapter = RecyclerAdapter(this::onItemClick)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,9 +58,7 @@ class WelcomeFragment : BottomSheetDialogFragment() {
         val rvBottom = view.findViewById(R.id.rvBottom) as RecyclerView
         rvBottom.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBottom.adapter = adapter
-        arguments?.let {
-            parseArguments(it)
-        }
+        arguments?.let { parseArguments(it) }
         adapter.setItems(list)
     }
 
@@ -72,7 +70,7 @@ class WelcomeFragment : BottomSheetDialogFragment() {
 
     private fun parseArguments(args: Bundle) {
         val timeDiff = args.getInt(Const.TIMEDIFF)
-        val item = ListItem(getString(R.string.sync_time))
+        val item = BasicItem(getString(R.string.sync_time))
         item.des = if (timeDiff == 0)
             getString(R.string.matches)
         else
@@ -82,10 +80,10 @@ class WelcomeFragment : BottomSheetDialogFragment() {
             )
         list.add(0, item)
         if (args.getBoolean(Const.ADS))
-            list.add(0, ListItem(getString(R.string.new_dev_ads), Const.ADS))
+            list.add(0, BasicItem(getString(R.string.new_dev_ads), Const.ADS))
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
+    private fun onItemClick(index: Int, item: BasicItem) {
         clicker?.onItemClick(item.link)
         if (item.link == Const.ADS) dismiss()
     }

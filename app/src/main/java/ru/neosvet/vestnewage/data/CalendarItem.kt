@@ -6,8 +6,8 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.utils.Const
 
-class CalendarItem(val num: Int, id_color: Int) {
-    var color = ContextCompat.getColor(App.context, id_color)
+class CalendarItem(val num: Int, idColor: Int) {
+    var color = ContextCompat.getColor(App.context, idColor)
     private val titles = mutableListOf<String>()
     private val links = mutableListOf<String>()
     var isBold = num < 1

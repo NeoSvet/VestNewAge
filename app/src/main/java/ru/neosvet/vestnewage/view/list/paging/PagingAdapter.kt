@@ -11,15 +11,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.view.list.RecyclerHolder
 
 class PagingAdapter(
     private val parent: Parent
-) : PagingDataAdapter<ListItem, RecyclerHolder>(ItemsComparator), NeoPaging.Pager {
+) : PagingDataAdapter<BasicItem, RecyclerHolder>(ItemsComparator), NeoPaging.Pager {
     interface Parent {
-        fun onItemClick(index: Int, item: ListItem)
-        fun onItemLongClick(index: Int, item: ListItem): Boolean
+        fun onItemClick(index: Int, item: BasicItem)
+        fun onItemLongClick(index: Int, item: BasicItem): Boolean
         fun onChangePage(page: Int)
         fun onFinishList()
     }
@@ -119,7 +119,7 @@ class PagingAdapter(
         item?.let { holder.setItem(it) }
     }
 
-    fun update(item: ListItem) {
+    fun update(item: BasicItem) {
         if (itemCount == 0) return
         for (i in 0 until itemCount) {
             getItem(i)?.let {
@@ -133,12 +133,12 @@ class PagingAdapter(
         }
     }
 
-    object ItemsComparator : DiffUtil.ItemCallback<ListItem>() {
-        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+    object ItemsComparator : DiffUtil.ItemCallback<BasicItem>() {
+        override fun areItemsTheSame(oldItem: BasicItem, newItem: BasicItem): Boolean {
             return oldItem.title == newItem.title
         }
 
-        override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+        override fun areContentsTheSame(oldItem: BasicItem, newItem: BasicItem): Boolean {
             return oldItem.des == newItem.des && oldItem.link == newItem.link
         }
     }

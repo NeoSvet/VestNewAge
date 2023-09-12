@@ -10,11 +10,12 @@ import java.io.BufferedWriter
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.InputStreamReader
-import java.lang.Exception
 
 object Urls {
     private var TIME = 1684586127068L
     private const val FILE = "/urls.txt"
+    const val PROM_LINK = "Posyl-na-Edinenie.html"
+    const val VREMYA_LINK = "Vremya-Posyla.html"
 
     private val URL = arrayOf(
         "http://neosvet.ucoz.ru/", "http://neosvet.somee.com/", //URL 0 1

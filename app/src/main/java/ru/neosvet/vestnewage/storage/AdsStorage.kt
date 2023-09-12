@@ -5,7 +5,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import java.io.Closeable
 
@@ -64,7 +64,7 @@ class AdsStorage : Closeable {
         return time
     }
 
-    fun setRead(item: ListItem) {
+    fun setRead(item: BasicItem) {
         val row = ContentValues()
         row.put(Const.UNREAD, 0)
         var t = item.title

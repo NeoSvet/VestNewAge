@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.ContentValues
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
@@ -19,7 +19,7 @@ class AdsUtils(private val storage: AdsStorage) {
         const val DES = 2
         private const val UPDATE = "update"
 
-        fun showDialog(act: Activity, item: ListItem, close: () -> Unit) {
+        fun showDialog(act: Activity, item: BasicItem, close: () -> Unit) {
             if (item.head.isEmpty()) { // only link
                 Lib.openInApps(item.link, null)
                 close.invoke()
@@ -93,8 +93,8 @@ class AdsUtils(private val storage: AdsStorage) {
         return m
     }
 
-    fun loadList(onlyUnread: Boolean): MutableList<ListItem> {
-        val list = mutableListOf<ListItem>()
+    fun loadList(onlyUnread: Boolean): MutableList<BasicItem> {
+        val list = mutableListOf<BasicItem>()
         var ad = ""
         val cursor = if (onlyUnread) {
             ad = App.context.getString(R.string.ad) + ": "
@@ -124,15 +124,15 @@ class AdsUtils(private val storage: AdsStorage) {
                 AdsStorage.MODE_U -> {
                     m = t.toByte()
                     val item = if (m > App.version)
-                        ListItem(ad + App.context.getString(R.string.access_new_version))
+                        BasicItem(ad + App.context.getString(R.string.access_new_version))
                     else
-                        ListItem(ad + App.context.getString(R.string.current_version))
+                        BasicItem(ad + App.context.getString(R.string.current_version))
                     item.addHead(d)
                     item.addLink(UPDATE)
                     list.add(0, item)
                 }
                 else -> {
-                    list.add(0, ListItem(ad + t))
+                    list.add(0, BasicItem(ad + t))
                     if (m != AdsStorage.MODE_TD) list[0].addLink(l)
                     if (m != AdsStorage.MODE_TL) list[0].addHead(d)
                 }

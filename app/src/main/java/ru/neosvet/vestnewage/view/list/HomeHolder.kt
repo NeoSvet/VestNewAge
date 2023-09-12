@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
+import ru.neosvet.vestnewage.data.Section
 
 class HomeHolder(
     root: View,
@@ -26,31 +27,35 @@ class HomeHolder(
     private val ivRefreshBg: ImageView = root.findViewById(R.id.refresh_bg)
 
     fun setItem(item: HomeItem) {
-        tvLine1.text = item.line1
-        if (item.line2.isNotEmpty()) {
-            tvLine2.isVisible = true
-            tvLine2.text = item.line2
-        } else
+        tvLine1.text = item.lines[0]
+        if (item.lines.size == 2) {
             tvLine2.isVisible = false
-        tvLine3.text = item.line3
+            tvLine3.text = item.lines[1]
+        } else {
+            tvLine2.isVisible = true
+            tvLine2.text = item.lines[1]
+            tvLine3.text = item.lines[2]
+        }
         tvLine1.setOnClickListener {
             clicker.invoke(item.type, Action.TITLE)
         }
         tvLine3.setOnClickListener {
             clicker.invoke(item.type, Action.SUBTITLE)
         }
-        if (item.isRefresh) {
+        if (item.hasRefresh) {
             ivRefresh.isVisible = true
             ivRefreshBg.isVisible = true
             ivRefresh.setOnClickListener {
                 clicker.invoke(item.type, Action.REFRESH)
             }
-            if (item.isLoading)
-                ivRefresh.startAnimation(anRotate)
         } else {
             ivRefresh.isVisible = false
             ivRefreshBg.isVisible = false
         }
+    }
+
+    fun startLoading() {
+        ivRefresh.startAnimation(anRotate)
     }
 
     private val anRotate: Animation by lazy {
@@ -73,24 +78,21 @@ class HomeHolder(
 
 class HomeMenuHolder(
     root: View,
-    private val clicker: (Action) -> Unit
+    private val clicker: (Section) -> Unit
 ) : RecyclerView.ViewHolder(root) {
-    enum class Action {
-        BOOK, MARKERS, EDIT, SETTINGS
-    }
 
     init {
         root.findViewById<View>(R.id.book).setOnClickListener {
-            clicker.invoke(Action.BOOK)
+            clicker.invoke(Section.BOOK)
         }
         root.findViewById<View>(R.id.markers).setOnClickListener {
-            clicker.invoke(Action.MARKERS)
+            clicker.invoke(Section.MARKERS)
         }
         root.findViewById<View>(R.id.edit).setOnClickListener {
-            clicker.invoke(Action.EDIT)
+            clicker.invoke(Section.MENU)
         }
         root.findViewById<View>(R.id.settings).setOnClickListener {
-            clicker.invoke(Action.SETTINGS)
+            clicker.invoke(Section.SETTINGS)
         }
     }
 }

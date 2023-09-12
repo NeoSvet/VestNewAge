@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
+import ru.neosvet.vestnewage.data.Section
 
 class HomeAdapter(
     private val onItem: (HomeItem.Type, HomeHolder.Action) -> Unit,
-    private val onMenu: (HomeMenuHolder.Action) -> Unit
+    private val onMenu: (Section) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val data = mutableListOf<HomeItem>()
     var loadingIndex = -1
@@ -31,47 +32,49 @@ class HomeAdapter(
     }
 
     fun startLoading(index: Int) {
+        finishLoading()
         loadingIndex = index
-        data[index].isLoading = true
         notifyItemChanged(index)
     }
 
-    fun finishLoading(index: Int) {
+    fun finishLoading() {
+        if (loadingIndex == -1) return
+        val i = loadingIndex
+        loadingIndex = -1
+        notifyItemChanged(i)
+    }
+
+    fun update(index: Int, item: HomeItem) {
         if (loadingIndex == index) loadingIndex = -1
-        data[index].isLoading = false
+        data[index] = item
         notifyItemChanged(index)
-    }
-
-    fun update(item: HomeItem) {
-        for (i in data.indices) {
-            if (data[i].line1 == item.line1) {
-                if (loadingIndex == i) loadingIndex = -1
-                data.removeAt(i)
-                data.add(i, item)
-                notifyItemChanged(i)
-                return
-            }
-        }
     }
 
     override fun getItemCount(): Int = data.size
 
-    override fun getItemViewType(position: Int): Int =
-        if (data[position].type == HomeItem.Type.MENU) 1 else 0
+    override fun getItemViewType(position: Int): Int = data[position].type.value
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == 0) HomeHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_home, null),
-            onItem
-        )
-        else HomeMenuHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_home_menu, null),
-            onMenu
-        )
+        return when (viewType) {
+            HomeItem.Type.MENU.value -> HomeMenuHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.item_home_menu, null),
+                onMenu
+            )
+
+// TODO  HomeItem.Type.FEED.value ->
+
+            else -> HomeHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.item_home, null),
+                onItem
+            )
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is HomeHolder)
+        if (holder is HomeHolder) {
             holder.setItem(data[position])
+            if (position == loadingIndex)
+                holder.startLoading()
+        }
     }
 }
