@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="cell_size">47dp</dimen>
+    <dimen name="calendar_size">334dp</dimen>
     <dimen name="string_size">34dp</dimen>
     <dimen name="date_table_width">325dp</dimen>
     <dimen name="date_table_height">220dp</dimen>
