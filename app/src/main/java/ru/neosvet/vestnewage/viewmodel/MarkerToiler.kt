@@ -36,6 +36,7 @@ class MarkerToiler : NeoToiler() {
     private var sel: String = ""
     private var cols: String = ""
     private var pos = 0f
+    private var arguments: Intent? = null
     private var posText: String = ""
         get() {
             if (field.isEmpty())
@@ -68,6 +69,34 @@ class MarkerToiler : NeoToiler() {
     }
 
     override suspend fun defaultState() {
+        arguments?.let { intent ->
+            link = intent.getStringExtra(Const.LINK) ?: ""
+            id = intent.getIntExtra(DataBase.ID, -1)
+            if (id == -1) {
+                des = intent.getStringExtra(Const.DESCTRIPTION) ?: ""
+                isPar = true
+                when {
+                    intent.hasExtra(Const.PLACE) -> {
+                        isPar = false
+                        pos = intent.getFloatExtra(Const.PLACE, 0f)
+                    }
+
+                    intent.hasExtra(DataBase.PARAGRAPH) -> {
+                        val par = intent.getIntExtra(DataBase.PARAGRAPH, 0)
+                        sel = if (par == 0)
+                            strings.page_entirely
+                        else par.toString()
+                    }
+
+                    intent.hasExtra(Const.PAGE) ->
+                        sel = intent.getStringExtra(Const.PAGE) ?: strings.page_entirely
+
+                    else ->
+                        sel = strings.page_entirely
+
+                }
+            }
+        }
         preOpen()
     }
 
@@ -76,32 +105,7 @@ class MarkerToiler : NeoToiler() {
     }
 
     fun setArgument(intent: Intent) {
-        link = intent.getStringExtra(Const.LINK) ?: ""
-        id = intent.getIntExtra(DataBase.ID, -1)
-        if (id == -1) {
-            des = intent.getStringExtra(Const.DESCTRIPTION) ?: ""
-            isPar = true
-            when {
-                intent.hasExtra(Const.PLACE) -> {
-                    isPar = false
-                    pos = intent.getFloatExtra(Const.PLACE, 0f)
-                }
-
-                intent.hasExtra(DataBase.PARAGRAPH) -> {
-                    val par = intent.getIntExtra(DataBase.PARAGRAPH, 0)
-                    sel = if (par == 0)
-                        strings.page_entirely
-                    else par.toString()
-                }
-
-                intent.hasExtra(Const.PAGE) ->
-                    sel = intent.getStringExtra(Const.PAGE) ?: strings.page_entirely
-
-                else ->
-                    sel = strings.page_entirely
-
-            }
-        }
+        arguments = intent
     }
 
     private fun preOpen() {
@@ -170,7 +174,7 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    private suspend fun openPage() {
+    private fun openPage() {
         task = Type.OPEN_PAGE
         val storage = PageStorage()
         storage.open(link)
@@ -301,7 +305,7 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    private suspend fun updateMarker(id: Int, marker: ContentValues) {
+    private fun updateMarker(id: Int, marker: ContentValues) {
         task = Type.UPDATE_MARKER
         //обновляем закладку в базе
         storage.updateMarker(id.toString(), marker)
@@ -336,7 +340,7 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    private suspend fun addMarker(marker: ContentValues) {
+    private fun addMarker(marker: ContentValues) {
         task = Type.ADD_MARKER
         //добавляем в базу и получаем id
         val marId = storage.insertMarker(marker)
@@ -430,7 +434,7 @@ class MarkerToiler : NeoToiler() {
             MarkerState.Status(
                 screen = MarkerScreen.POSITION,
                 selection = sel,
-                positionText = posText,
+                positionText = helper.getPosText(pos),
                 position = (pos * 10).toInt()
             )
         )

@@ -275,16 +275,20 @@ class MarkerActivity : AppCompatActivity() {
                         saveMarker()
                 }
 
-                MarkerScreen.PARAGRAPH ->
+                MarkerScreen.PARAGRAPH -> {
                     toiler.saveParList()
+                    hideView(binding.rvList)
+                }
 
-                MarkerScreen.POSITION ->   {
+                MarkerScreen.POSITION -> {
                     toiler.savePosition(newPos)
                     hideView(binding.pPos)
                 }
 
-                MarkerScreen.COLLECTION ->
+                MarkerScreen.COLLECTION -> {
                     toiler.saveColList()
+                    hideView(binding.rvList)
+                }
             }
         }
         bMinus.setOnClickListener {
