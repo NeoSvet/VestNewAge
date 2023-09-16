@@ -60,7 +60,7 @@ class MainToiler : NeoToiler() {
         postState(BasicState.Success)
     }
 
-    private suspend fun loadQuoteCom() {
+    private fun loadQuoteCom() {
         val request: Request = Request.Builder()
             .url(Urls.QuoteCom)
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
@@ -80,7 +80,7 @@ class MainToiler : NeoToiler() {
         WordsUtils.saveGodWords(s)
     }
 
-    private suspend fun loadQuote() {
+    private fun loadQuote() {
         val br = BufferedReader(InputStreamReader(client.getStream(Urls.Quote)))
         var s = br.readLine()
         br.close()
@@ -145,7 +145,7 @@ class MainToiler : NeoToiler() {
             postState(ListState.Primary(list = list))
     }
 
-    private suspend fun synchronizationTime(): Int {
+    private fun synchronizationTime(): Int {
         val builderRequest = Request.Builder()
         builderRequest.url(Urls.Site)
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
