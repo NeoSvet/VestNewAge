@@ -28,7 +28,7 @@ class DateDialog(
     private val binding: DialogDateBinding by lazy {
         DialogDateBinding.inflate(layoutInflater)
     }
-    val date = DateUnit.putDays(date.timeInDays)
+    val date: DateUnit = DateUnit.putDays(date.timeInDays)
     private lateinit var adDate: DateAdapter
     var minYear: Int
     var minMonth: Int
@@ -80,6 +80,7 @@ class DateDialog(
             if (i == date.year)
                 select = adDate.itemCount - 1
         }
+        adDate.maxPos = -1
         adDate.notifyDataSetChanged()
         adDate.selected = select
         binding.run {
