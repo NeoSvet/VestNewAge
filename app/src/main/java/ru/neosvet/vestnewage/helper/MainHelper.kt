@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.view.list.MenuAdapter
 class MainHelper(private val act: MainActivity) {
     companion object {
         const val TAG = "Main"
+        private const val FIRST = "first"
     }
 
     enum class ActionType {
@@ -109,7 +110,7 @@ class MainHelper(private val act: MainActivity) {
         isSideMenu = ScreenUtils.isTabletLand
         if (isSideMenu) {
             act.findViewById<View>(R.id.btnProm).setOnClickListener {
-                BrowserActivity.openReader(Const.PROM_LINK, null)
+                BrowserActivity.openReader(Urls.PROM_LINK, null)
             }
         } else {
             tvTitle = act.findViewById(R.id.tvTitle)
@@ -132,29 +133,28 @@ class MainHelper(private val act: MainActivity) {
     val isFirstRun: Boolean
         get() = isFirst ?: initFirst()
 
-    private fun initFirst(): Boolean {
-        isFirst = pref.getBoolean(Const.FIRST, true)
-        if (isFirst!!) {
+    private fun initFirst() = pref.getBoolean(FIRST, true).also {
+        isFirst = it
+        if (it) {
             val editor = pref.edit()
-            editor.putBoolean(Const.FIRST, false)
+            editor.putBoolean(FIRST, false)
             editor.apply()
         }
-        return isFirst!!
     }
 
     fun getFirstSection(): Section {
-        val startScreen = pref.getInt(Const.START_SCEEN, Const.SCREEN_HOME)
+        val startScreen = pref.getInt(Const.START_SCEEN, Section.HOME.value)
         return when {
-            startScreen == Const.SCREEN_MENU && ScreenUtils.isTablet.not() ->
+            startScreen == Section.MENU.value && ScreenUtils.isTablet.not() ->
                 Section.MENU
 
-            startScreen == Const.SCREEN_HOME ->
+            startScreen == Section.HOME.value ->
                 Section.HOME
 
-            startScreen == Const.SCREEN_SUMMARY ->
+            startScreen == Section.SUMMARY.value ->
                 Section.SUMMARY
 
-            else -> //startScreen == Const.SCREEN_CALENDAR || !isFullMenu ->
+            else -> //startScreen == Section.CALENDAR.value || !isFullMenu ->
                 Section.CALENDAR
         }
     }

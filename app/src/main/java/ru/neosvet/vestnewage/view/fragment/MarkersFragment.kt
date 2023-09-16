@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
@@ -31,26 +32,31 @@ import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.MarkersState
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
     private val adapter: MarkerAdapter by lazy {
-        MarkerAdapter(toiler, this::longClick)
+        MarkerAdapter(toiler::onClick, this::onLongClick)
     }
-
     private val anRotate: Animation by lazy {
         initAnimation()
     }
-    private var isStopRotate = false
+    private var isRotate = false
+    private var isCollections = true
     private var collectResult: Job? = null
     private val toiler: MarkersToiler
         get() = neotoiler as MarkersToiler
     private val markerResult = registerForActivityResult(
         StartActivityForResult()
-    ) { result: ActivityResult -> if (result.resultCode == Activity.RESULT_OK) updateMarkersList() }
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK)
+            toiler.updateMarkersList()
+    }
     private val importResult = registerForActivityResult(
         StartActivityForResult()
     ) { result: ActivityResult ->
@@ -70,7 +76,7 @@ class MarkersFragment : NeoFragment() {
         get() = getString(R.string.markers)
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[MarkersToiler::class.java].apply { init(requireContext()) }
+        ViewModelProvider(this)[MarkersToiler::class.java]
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,7 +89,21 @@ class MarkersFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         setToolbar()
-        restoreState(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val type = childFragmentManager.findFragmentByTag(Const.DIALOG)?.let {
+            if (it is PromptDialog) MarkersState.Type.DELETE
+            else MarkersState.Type.RENAME
+        } ?: MarkersState.Type.NONE
+        toiler.setStatus(
+            MarkersState.Status(
+                isRotate = isRotate,
+                selectedIndex = adapter.selectedIndex,
+                dialog = type
+            )
+        )
+        super.onSaveInstanceState(outState)
     }
 
     private fun setToolbar() {
@@ -100,47 +120,15 @@ class MarkersFragment : NeoFragment() {
     }
 
     override fun onBackPressed(): Boolean {
-        if (toiler.iSel > -1) {
+        if (adapter.selectedIndex > -1) {
             unSelected()
             return false
         }
-        if (toiler.isCollections.not()) {
-            toiler.openColList()
+        if (isCollections.not()) {
+            toiler.openCollectionsList()
             return false
         }
         return true
-    }
-
-    private fun restoreState(state: Bundle?) {
-        if (state == null || toiler.isEmptyState) {
-            toiler.openList()
-            return
-        }
-        toiler.run {
-            restoreList()
-            if (iSel > -1) {
-                goToEdit()
-                lifecycleScope.launch {
-                    delay(150)
-                    binding?.content?.rvMarker?.run {
-                        post { smoothScrollToPosition(iSel) }
-                    }
-                }
-                when (state.getString(Const.DIALOG)) {
-                    Const.STRING -> collectResultDelete()
-                    Const.TITLE -> collectResultRename()
-                }
-            }
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        childFragmentManager.findFragmentByTag(Const.DIALOG)?.let { frag ->
-            val d = if (frag is PromptDialog)
-                Const.STRING else Const.TITLE
-            outState.putString(Const.DIALOG, d)
-        }
-        super.onSaveInstanceState(outState)
     }
 
     private fun initAnimation(): Animation {
@@ -148,7 +136,7 @@ class MarkersFragment : NeoFragment() {
         animation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                if (!isStopRotate) binding?.ivMarker?.startAnimation(anRotate)
+                if (isRotate) binding?.ivMarker?.startAnimation(anRotate)
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -164,11 +152,15 @@ class MarkersFragment : NeoFragment() {
             toiler.saveChange()
             unSelected()
         }
-        bTop.setOnClickListener { toiler.moveToTop() }
-        bBottom.setOnClickListener { toiler.moveToBottom() }
+        bTop.setOnClickListener {
+            toiler.move(adapter.selectedIndex, adapter.selectedIndex - 1)
+        }
+        bBottom.setOnClickListener {
+            toiler.move(adapter.selectedIndex, adapter.selectedIndex + 1)
+        }
         bEdit.setOnClickListener {
-            toiler.selectedItem?.let { item ->
-                if (toiler.isCollections) {
+            adapter.selectedItem?.let { item ->
+                if (isCollections) {
                     renameDialog(item.title)
                 } else {
                     val marker = Intent(requireContext(), MarkerActivity::class.java)
@@ -181,30 +173,20 @@ class MarkersFragment : NeoFragment() {
         bDelete.setOnClickListener { deleteDialog() }
     }
 
-    override fun setStatus(load: Boolean) {
-        if (toiler.workOnFile) {
-            if (load)
-                startRotate()
-            else
-                stopRotate()
-        } else
-            super.setStatus(load)
-    }
-
     private fun startRotate() = binding?.run {
-        isStopRotate = false
+        isRotate = true
         pFileOperation.isVisible = true
         ivMarker.startAnimation(anRotate)
     }
 
     private fun stopRotate() = binding?.run {
-        isStopRotate = true
+        isRotate = false
         pFileOperation.isVisible = false
         ivMarker.clearAnimation()
     }
 
-    private fun deleteDialog() = toiler.selectedItem?.title?.let { title ->
-        binding?.content?.rvMarker?.smoothScrollToPosition(toiler.iSel)
+    private fun deleteDialog() = adapter.selectedItem?.title?.let { title ->
+        binding?.content?.rvMarker?.smoothScrollToPosition(adapter.selectedIndex)
         PromptDialog.newInstance(getString(R.string.format_delete).format(title))
             .show(childFragmentManager, Const.DIALOG)
         collectResultDelete()
@@ -215,13 +197,13 @@ class MarkersFragment : NeoFragment() {
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
                 if (it == PromptResult.Yes)
-                    toiler.deleteSelected()
+                    toiler.delete(adapter.selectedIndex)
             }
         }
     }
 
-    private fun renameDialog(old_name: String) {
-        InputDialog.newInstance(getString(R.string.new_name), old_name)
+    private fun renameDialog(oldName: String) {
+        InputDialog.newInstance(getString(R.string.new_name), oldName)
             .show(childFragmentManager, Const.DIALOG)
         collectResultRename()
     }
@@ -230,35 +212,33 @@ class MarkersFragment : NeoFragment() {
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             InputDialog.result.collect {
-                if (it != null) toiler.renameSelected(it)
+                if (it != null) toiler.rename(adapter.selectedIndex, it)
             }
         }
     }
 
-    private fun longClick(index: Int): Boolean {
-        if (toiler.isCollections.not() || index > 0) {
-            toiler.selected(index)
+    private fun onLongClick(index: Int) {
+        if (isCollections.not() || index > 0) {
+            adapter.selected(index)
             goToEdit()
         }
-        return true
     }
 
     private fun goToEdit() {
-        act?.let {
-            it.lockHead()
-            it.blocked()
+        binding?.content?.pEdit?.let { p ->
+            if (p.isVisible) return
+            act?.let {
+                it.lockHead()
+                it.blocked()
+            }
+            p.isVisible = true
         }
-        adapter.notifyItemChanged(toiler.iSel)
-        binding?.content?.pEdit?.isVisible = true
     }
 
     private fun unSelected() {
-        if (toiler.iSel > -1) {
-            val i = toiler.iSel
-            toiler.selected(-1)
-            adapter.notifyItemChanged(i)
-        }
-        toiler.change = false
+        if (adapter.selectedIndex > -1)
+            adapter.selected(-1)
+        toiler.cancelChange()
         binding?.content?.pEdit?.isVisible = false
         act?.let {
             it.unlockHead()
@@ -282,10 +262,6 @@ class MarkersFragment : NeoFragment() {
         } else importResult.launch(intent)
     }
 
-    private fun updateMarkersList() {
-        toiler.updateMarkersList()
-    }
-
     private fun parseFileResult(data: Intent, isExport: Boolean) {
         data.dataString?.let { file ->
             if (isExport) {
@@ -295,29 +271,89 @@ class MarkersFragment : NeoFragment() {
                 binding?.tvFileOperation?.text = getString(R.string.import_)
                 toiler.startImport(file)
             }
-            setStatus(true)
+            startRotate()
         }
     }
 
     override fun onChangedOtherState(state: NeoState) {
+        act?.hideToast()
         when (state) {
-            is NeoState.Message -> if (toiler.workOnFile)
-                doneExport(state.message)
-            else
+            is BasicState.Message ->
                 act?.showToast(state.message)
-            is NeoState.ListState ->
+
+            is MarkersState.Primary ->
                 updateList(state)
-            NeoState.Ready -> {//import toiler.task==MarkersModel.Type.FILE
-                setStatus(false)
-                toiler.openColList()
+
+            is MarkersState.Status ->
+                restoreStatus(state)
+
+            is ListState.Update<*> ->
+                adapter.update(state.index, state.item as MarkerItem)
+
+            is ListState.Remove ->
+                adapter.remove(state.index, if (isCollections) 1 else 0)
+
+            is ListState.Move ->
+                adapter.notifyItemMoved(state.indexFrom, state.indexTo)
+
+            is MarkersState.FinishExport ->
+                doneExport(state.message)
+
+            MarkersState.FinishImport -> {
+                stopRotate()
+                toiler.openCollectionsList()
                 act?.showToast(getString(R.string.completed))
             }
-            else -> {}
+        }
+    }
+
+    private fun restoreStatus(state: MarkersState.Status) {
+        if (state.selectedIndex > -1)
+            adapter.selected(state.selectedIndex)
+        when (state.dialog) {
+            MarkersState.Type.NONE -> {}
+            MarkersState.Type.RENAME -> collectResultRename()
+            MarkersState.Type.DELETE -> collectResultDelete()
+        }
+        isRotate = state.isRotate
+        if (isRotate) startRotate()
+    }
+
+    private fun updateList(state: MarkersState.Primary) {
+        isCollections = state.isCollections
+        adapter.setItems(state.list)
+
+        if (adapter.selectedIndex == -1)
+            setStatus(false)
+
+        val title: String
+        val span: Int
+        if (isCollections) {
+            act?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+            span = ScreenUtils.span
+            title = state.title
+        } else {
+            act?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            span = 1
+            title = String.format(getString(R.string.format_collection), state.title)
+        }
+        binding?.run {
+            toolbar.title = title
+            content.rvMarker.layoutManager = GridLayoutManager(requireContext(), span)
+        }
+
+        if (adapter.itemCount == 0) {
+            val msg = if (isCollections)
+                getString(R.string.no_markers)
+            else
+                getString(R.string.collection_is_empty)
+            act?.showStaticToast(msg)
+            unSelected()
         }
     }
 
     private fun doneExport(file: String) {
-        setStatus(false)
+        stopRotate()
         if (childFragmentManager.findFragmentByTag(Const.FILE) == null)
             PromptDialog.newInstance(getString(R.string.send_file))
                 .show(childFragmentManager, Const.FILE)
@@ -335,60 +371,25 @@ class MarkersFragment : NeoFragment() {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun updateList(state: NeoState.ListState) = binding?.run {
-        if (toiler.iSel == -1)
-            setStatus(false)
-        if (toiler.isCollections) {
-            act?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            toolbar.title = toiler.title
-        } else {
-            act?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            toolbar.title = String.format(getString(R.string.format_collection), toiler.title)
-        }
-        if (toiler.list.isEmpty()) {
-            adapter.notifyDataSetChanged()
-            val msg = if (toiler.isCollections)
-                getString(R.string.no_markers)
-            else
-                getString(R.string.collection_is_empty)
-            act?.showStaticToast(msg)
-            unSelected()
-        } else {
-            when (state.event) {
-                ListEvent.REMOTE ->
-                    adapter.notifyItemRemoved(state.index)
-                ListEvent.CHANGE ->
-                    adapter.notifyItemChanged(state.index)
-                ListEvent.MOVE ->
-                    adapter.notifyItemMoved(state.index, toiler.iSel)
-                ListEvent.RELOAD -> {
-                    binding?.content?.rvMarker?.layoutManager = GridLayoutManager(
-                        requireContext(),
-                        if (toiler.isCollections) ScreenUtils.span else 1
-                    )
-                    adapter.notifyDataSetChanged()
-                }
-            }
-            act?.hideToast()
-            if (toiler.iSel == -1)
-                unSelected()
-            else
-                adapter.notifyItemChanged(toiler.iSel)
-        }
+    private fun canEdit(): Boolean {
+        val i = if (isCollections) 1 else 0
+        if (adapter.itemCount == i)
+            return false
+        adapter.selected(i)
+        return true
     }
 
     override fun onAction(title: String) {
         when (title) {
             getString(R.string.edit) -> {
-                if (toiler.canEdit())
-                    goToEdit()
-                else
-                    act?.showToast(getString(R.string.nothing_edit))
+                if (canEdit()) goToEdit()
+                else act?.showToast(getString(R.string.nothing_edit))
             }
-            getString(R.string.import_) -> if (toiler.isRun.not())
+
+            getString(R.string.import_) -> if (isBlocked.not())
                 selectFile(false)
-            getString(R.string.export) -> if (toiler.list.isNotEmpty() && toiler.isRun.not())
+
+            getString(R.string.export) -> if (isBlocked.not() && adapter.itemCount > 0)
                 selectFile(true)
         }
     }

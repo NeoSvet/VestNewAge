@@ -7,54 +7,40 @@ import android.database.Cursor
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.BookRnd
+import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.BookState
 import java.util.*
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
-    companion object {
-        const val TAB_POEMS = 0
-        const val TAB_EPISTLES = 1
-        const val TAB_DOCTRINE = 2
-    }
-
-    enum class RndType {
-        POEM, EPISTLE, VERSE
-    }
-
-    var selectedTab: Int = TAB_POEMS
-    val isPoemsTab: Boolean
-        get() = selectedTab == TAB_POEMS
-    val isDoctrineTab: Boolean
-        get() = selectedTab == TAB_DOCTRINE
+    private var selectedTab = BookTab.POEMS
     private lateinit var dPoems: DateUnit
     private lateinit var dEpistles: DateUnit
     private lateinit var strings: BookStrings
     private var helper: BookHelper? = null
-    var isNotInit = true
-        private set
+    private val isPoemsTab: Boolean
+        get() = selectedTab == BookTab.POEMS
     private val isLoadedOtkr
         get() = DateHelper.isLoadedOtkr()
-    var date: DateUnit
+    private val date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
-        set(value) {
-            if (isPoemsTab) dPoems = value
-            else dEpistles = value
-        }
     private val loader: BookLoader by lazy {
         BookLoader(NeoClient(NeoClient.Type.SECTION, this))
     }
@@ -62,7 +48,13 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         MasterLoader(this)
     }
 
-    fun init(context: Context) {
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, BookHelper.TAG)
+        .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
+        .putString(Const.TAB, selectedTab.toString())
+        .build()
+
+    override fun init(context: Context) {
         helper = BookHelper().also {
             it.loadDates()
             dPoems = DateUnit.putDays(it.poemsDays)
@@ -76,82 +68,82 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             try_again = context.getString(R.string.try_again),
             from = context.getString(R.string.from)
         )
-        isNotInit = false
-        openList(true)
+    }
+
+    override suspend fun defaultState() {
+        openList(true, date)
     }
 
     override suspend fun doLoad() {
         currentLoader = loader
         when (selectedTab) {
-            TAB_POEMS -> loader.loadPoemsList(dPoems.year)
-            TAB_EPISTLES -> if (dEpistles.year < 2016) {
+            BookTab.POEMS -> loader.loadPoemsList(dPoems.year)
+            BookTab.EPISTLES -> if (dEpistles.year < 2016) {
                 currentLoader = masterLoader
                 masterLoader.loadMonth(dEpistles.month, dEpistles.year)
             } else loader.loadEpistlesList()
 
-            TAB_DOCTRINE -> {
+            BookTab.DOCTRINE -> {
                 loader.loadDoctrineList()
                 openDoctrine()
                 loader.loadDoctrinePages(this)
-                postState(NeoState.Success)
+                postState(BasicState.Success)
                 return
             }
         }
-        postState(NeoState.Success)
-        openList(false)
+        postState(BasicState.Success)
+        openList(false, date)
     }
 
     override fun onDestroy() {
         helper?.saveDates(dPoems.timeInDays, dEpistles.timeInDays)
     }
 
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, BookHelper.TAG)
-        .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
-        .putBoolean(Const.POEMS, isPoemsTab)
-        .build()
-
     @SuppressLint("Range")
-    fun openList(loadIfNeed: Boolean) {
+    fun openList(loadIfNeed: Boolean, date: DateUnit, tab: Int = -1) {
         this.loadIfNeed = loadIfNeed
+        if (tab != -1)
+            selectedTab = convertTab(tab)
         scope.launch {
-            if (isDoctrineTab) {
+            if (selectedTab == BookTab.DOCTRINE) {
                 openDoctrine()
                 return@launch
             }
-            val d = date
-            if (!existsList(d)) {
+            when (selectedTab) {
+                BookTab.POEMS -> dPoems = date
+                BookTab.EPISTLES -> dEpistles = date
+                else -> {}
+            }
+            if (!existsList(date)) {
                 if (loadIfNeed) {
-                    postState(NeoState.LongValue(0))
+                    postState(BasicState.NotLoaded)
                     reLoad()
                 } else
-                    postState(NeoState.LongValue(1))
+                    postState(BasicState.Empty)
                 return@launch
             }
-            val list = mutableListOf<ListItem>()
-            val calendar = d.calendarString
+            val list = mutableListOf<BasicItem>()
             val storage = PageStorage()
             var t: String
             var s: String
             var cursor: Cursor
-            if (d.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
+            if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
                 //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
                 storage.open("12.04")
                 cursor = storage.getListAll()
                 if (cursor.moveToFirst() && cursor.moveToNext()) {
                     t = cursor.getString(cursor.getColumnIndex(Const.TITLE))
                     s = cursor.getString(cursor.getColumnIndex(Const.LINK))
-                    list.add(ListItem(t, s))
+                    list.add(BasicItem(t, s))
                 }
                 cursor.close()
                 storage.close()
             }
-            storage.open(d.my)
+            storage.open(date.my)
             cursor = storage.getListAll()
             if (cursor.moveToFirst()) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-                postState(NeoState.LongValue(time))
-                if (d.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
+                if (date.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isPoemsTab)
                     cursor.moveToFirst()
@@ -165,20 +157,26 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                         cursor.getString(iTitle)
                     else
                         cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
-                    list.add(ListItem(t, s))
+                    list.add(BasicItem(t, s))
                 } while (cursor.moveToNext())
+                postState(BookState.Primary(time, date, checkPrev(), checkNext(), list))
             }
             cursor.close()
             storage.close()
-            if (list.isNotEmpty()) postState(NeoState.Book(calendar, list))
-            else if (loadIfNeed) {
-                postState(NeoState.LongValue(0))
-                reLoad()
-            } else postState(NeoState.LongValue(1))
+            if (list.isEmpty()) {
+                if (loadIfNeed) {
+                    postState(BookState.Primary(0L, date, false, false, list))
+                    postState(BasicState.NotLoaded)
+                    reLoad()
+                } else {
+                    postState(BookState.Primary(0L, date, checkPrev(), checkNext(), list))
+                    postState(BasicState.Empty)
+                }
+            }
         }
     }
 
-    fun checkNext(): Boolean {
+    private fun checkNext(): Boolean {
         val max = if (isPoemsTab)
             DateUnit.initToday().apply { day = 1 }.timeInDays
         else
@@ -186,7 +184,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         return date.timeInDays < max
     }
 
-    fun checkPrev(): Boolean {
+    private fun checkPrev(): Boolean {
         val d = date
         val days = d.timeInDays
         val min = if (isPoemsTab) {
@@ -209,19 +207,19 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (cursor.count == 1) {
             cursor.close()
             storage.close()
-            postState(NeoState.LongValue(0))
+            postState(BookState.Book(Urls.DoctrineSite, listOf()))
             reLoad()
             return
         }
         val iTitle = cursor.getColumnIndex(Const.TITLE)
         val iLink = cursor.getColumnIndex(Const.LINK)
-        val list = mutableListOf<ListItem>()
+        val list = mutableListOf<BasicItem>()
         while (cursor.moveToNext()) {
             val title = cursor.getString(iTitle)
             val link = cursor.getString(iLink)
-            list.add(ListItem(title, link))
+            list.add(BasicItem(title, link))
         }
-        postState(NeoState.ListValue(list))
+        postState(BookState.Book(Urls.DoctrineSite, list))
         cursor.close()
         storage.close()
     }
@@ -248,7 +246,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     @SuppressLint("Range")
-    fun getRnd(type: RndType) {
+    fun getRnd(type: BookRnd) {
         scope.launch {
             //Определяем диапозон дат:
             val d = DateUnit.initToday()
@@ -256,7 +254,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             var y: Int
             var maxM = d.month
             var maxY = d.year - 2000
-            if (type == RndType.POEM) {
+            if (type == BookRnd.POEM) {
                 m = 2
                 y = 16
             } else {
@@ -267,7 +265,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     m = 1
                     y = 16
                 }
-                if (type == RndType.EPISTLE) {
+                if (type == BookRnd.EPISTLE) {
                     maxM = 9
                     maxY = 16
                 }
@@ -295,17 +293,17 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             var title: String? = null
             //определяем условие отбора в соотвтствии с выбранным пунктом:
             when (type) {
-                RndType.POEM -> {
+                BookRnd.POEM -> {
                     title = strings.rnd_poem
                     curTitle = storage.getList(true)
                 }
 
-                RndType.EPISTLE -> {
+                BookRnd.EPISTLE -> {
                     title = strings.rnd_epistle
                     curTitle = storage.getList(false)
                 }
 
-                RndType.VERSE ->
+                BookRnd.VERSE ->
                     curTitle = storage.getListAll()
             }
             //определяем случайных текст:
@@ -316,12 +314,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             if (!curTitle.moveToPosition(n)) {
                 curTitle.close()
                 storage.close()
-                postState(NeoState.Message(strings.alert_rnd))
+                postState(BasicState.Message(strings.alert_rnd))
                 return@launch
             }
             //если случайный текст найден
             var s = ""
-            if (type == RndType.VERSE) { //случайных стих
+            if (type == BookRnd.VERSE) { //случайных стих
                 val curPar = storage.getParagraphs(curTitle)
                 if (curPar.count > 1) { //если текст скачен
                     g = Random()
@@ -337,7 +335,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 } else s = ""
                 curPar.close()
                 if (s == "") { //случайный стих не найден
-                    postState(NeoState.Message(strings.alert_rnd))
+                    postState(BasicState.Message(strings.alert_rnd))
                     title = strings.rnd_verse
                 }
             } else  // случайный катрен или послание
@@ -355,7 +353,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 msg = s
             }
             postState(
-                NeoState.Rnd(
+                BookState.Rnd(
                     title = title,
                     link = link ?: "",
                     msg = msg,
@@ -382,6 +380,16 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
-        setState(NeoState.Progress(value))
+        setState(BasicState.Progress(value))
+    }
+
+    fun setArgument(tab: Int) {
+        selectedTab = convertTab(tab)
+    }
+
+    private fun convertTab(tab: Int) = when (tab) {
+        BookTab.EPISTLES.value -> BookTab.EPISTLES
+        BookTab.DOCTRINE.value -> BookTab.DOCTRINE
+        else -> BookTab.POEMS
     }
 }

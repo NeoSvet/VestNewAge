@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.SummaryTab
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
@@ -22,21 +23,16 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
 import java.io.FileReader
 
 class SummaryToiler : NeoToiler(), NeoPaging.Parent {
-    companion object {
-        const val TAB_RSS = 0
-        const val TAB_ADD = 1
-    }
-
-    var selectedTab = TAB_RSS
-    val isRss: Boolean
-        get() = selectedTab == TAB_RSS
+    private var selectedTab = SummaryTab.RSS
+    private val isRss: Boolean
+        get() = selectedTab == SummaryTab.RSS
     private var sBack: String = ""
     private var isOpened = false
     private val storage: AdditionStorage by lazy {
@@ -49,22 +45,22 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         AdditionFactory(storage, paging)
     }
     private val client = NeoClient(NeoClient.Type.SECTION)
+    override val isBusy: Boolean
+        get() = isRun
     val isLoading: Boolean
         get() = paging.isPaging
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, SummaryHelper.TAG)
-        .putInt(Const.TAB, selectedTab)
+        .putString(Const.TAB, selectedTab.toString())
         .build()
 
-    fun init(context: Context) {
-        if (sBack.isEmpty())
-            sBack = context.getString(R.string.back)
+    override fun init(context: Context) {
+        sBack = context.getString(R.string.back)
     }
 
-    override fun onDestroy() {
-        if (isOpened)
-            storage.close()
+    override suspend fun defaultState() {
+        openList(true)
     }
 
     override suspend fun doLoad() {
@@ -73,16 +69,18 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             loader.load()
             val summaryHelper = SummaryHelper()
             summaryHelper.updateBook()
-            val list = openRss()
-            postState(NeoState.ListValue(list))
-            if (isRun && isRss)
-                loadPages(list)
+            openRss()
         } else {
             val loader = AdditionLoader(client)
             loader.load(storage, 0)
             openAddition()
-            postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
+            postState(ListState.Paging(storage.max))
         }
+    }
+
+    override fun onDestroy() {
+        if (isOpened)
+            storage.close()
     }
 
     private fun isNeedReload(): Boolean {
@@ -90,31 +88,31 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
-    private suspend fun loadPages(pages: List<ListItem>) {
+    private suspend fun loadPages(pages: List<BasicItem>) {
         val loader = PageLoader(client)
         currentLoader = loader
         var i = 0
         while (i < pages.size && isRun) {
             loader.download(pages[i].link, false)
             i++
-            postState(NeoState.Progress(i.percent(pages.size)))
+            postState(BasicState.Progress(i.percent(pages.size)))
         }
         loader.finish()
         isRun = false
-        postState(NeoState.Success)
+        postState(BasicState.Success)
     }
 
-    fun openList(loadIfNeed: Boolean) {
+    fun openList(loadIfNeed: Boolean, tab: Int = -1) {
         this.loadIfNeed = loadIfNeed
+        if (tab != -1)
+            selectedTab = convertTab(tab)
         scope.launch {
             val isEmpty = if (isRss) {
-                val list = openRss()
-                postState(NeoState.ListValue(list))
-                list.isEmpty()
+                !openRss()
             } else {
                 openAddition()
                 if (storage.max > 0)
-                    postState(NeoState.ListState(ListEvent.RELOAD, storage.max))
+                    postState(ListState.Paging(storage.max))
                 storage.max == 0
             }
 
@@ -130,17 +128,15 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     private fun openAddition() {
         clearPrimaryState()
-        clearLongValue()
         storage.open()
         isOpened = true
         storage.findMax()
     }
 
-    private suspend fun openRss(): List<ListItem> {
-        val list = mutableListOf<ListItem>()
+    private suspend fun openRss(): Boolean {
+        val list = mutableListOf<BasicItem>()
         val now = System.currentTimeMillis()
         val file = Lib.getFile(Const.RSS)
-        postState(NeoState.LongValue(file.lastModified()))
         val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
         var d: String
@@ -150,16 +146,20 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             val time = br.readLine()
             d = DateUnit.getDiffDate(now, time.toLong()) +
                     sBack + Const.N + d
-            list.add(ListItem(title, link).apply {
+            list.add(BasicItem(title, link).apply {
                 des = d
             })
             title = br.readLine()
         }
         br.close()
-        return list
+        postState(ListState.Primary(file.lastModified(), list))
+        if (list.isEmpty())
+            return false
+        if (isRun) loadPages(list)
+        return true
     }
 
-    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<ListItem>> {
+    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<BasicItem>> {
         paging.setPager(pager)
         return paging.run(page)
     }
@@ -169,10 +169,19 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     override suspend fun postFinish() {
         if (storage.max > 0)
-            postState(NeoState.Ready)
+            postState(BasicState.Ready)
     }
 
-    override fun postError(error: NeoState.Error) {
+    override fun postError(error: BasicState.Error) {
         setState(error)
+    }
+
+    fun setArgument(tab: Int) {
+        selectedTab = convertTab(tab)
+    }
+
+    private fun convertTab(tab: Int) = when (tab) {
+        SummaryTab.RSS.value -> SummaryTab.RSS
+        else -> SummaryTab.ADDITION
     }
 }

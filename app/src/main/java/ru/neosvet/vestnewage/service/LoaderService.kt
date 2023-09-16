@@ -26,7 +26,7 @@ import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 class LoaderService : LifecycleService(), LoadHandler {
     companion object {
@@ -130,6 +130,7 @@ class LoaderService : LifecycleService(), LoadHandler {
                 stop()
                 return START_NOT_STICKY
             }
+
             DOWNLOAD_PAGE -> {
                 initStart()
                 intent.getStringExtra(Const.LINK)?.let {
@@ -137,6 +138,7 @@ class LoaderService : LifecycleService(), LoadHandler {
                 }
                 runUpdateNotifTimer()
             }
+
             DOWNLOAD_LIST -> {
                 initStart()
                 intent.getIntArrayExtra(Const.LIST)?.let {
@@ -205,7 +207,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
     }
 
-    private fun finishService(error: NeoState.Error?) {
+    private fun finishService(error: BasicState.Error?) {
         loader.cancel()
         val notifHelper = NotificationUtils()
         val title: String

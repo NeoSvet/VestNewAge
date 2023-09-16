@@ -1,23 +1,39 @@
 package ru.neosvet.vestnewage.viewmodel.basic
 
+import android.content.Context
 import androidx.work.Data
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 abstract class NeoToiler : StateToiler() {
     protected var scope = initScope()
     protected var loadIfNeed = false
     protected var currentLoader: Loader? = null
-    var isRun: Boolean = false
-        protected set
+    protected var isRun: Boolean = false
 
     private fun initScope() = CoroutineScope(Dispatchers.IO
             + CoroutineExceptionHandler { _, throwable ->
         errorHandler(throwable)
     })
+    protected abstract fun getInputData(): Data
+
+    protected abstract fun init(context: Context)
+
+    fun start(context: Context) {
+        if (!isInit) {
+            init(context)
+            isInit = true
+        }
+        scope.launch { restoreState(isRun) }
+    }
 
     override fun onCleared() {
         cancel()
@@ -51,7 +67,7 @@ abstract class NeoToiler : StateToiler() {
         isRun = true
         scope.launch {
             loadIfNeed = false
-            postState(NeoState.Loading)
+            postState(BasicState.Loading)
             doLoad()
             isRun = false
         }
@@ -60,7 +76,7 @@ abstract class NeoToiler : StateToiler() {
     protected fun checkConnect(): Boolean {
         if (OnlineObserver.isOnline.value)
             return true
-        setState(NeoState.NoConnected)
+        setState(BasicState.NoConnected)
         return false
     }
 
@@ -69,7 +85,7 @@ abstract class NeoToiler : StateToiler() {
     protected suspend fun reLoad() {
         if (loadIfNeed && checkConnect()) {
             isRun = true
-            postState(NeoState.Loading)
+            postState(BasicState.Loading)
             loadIfNeed = false
             doLoad()
         }
@@ -78,5 +94,4 @@ abstract class NeoToiler : StateToiler() {
 
     protected open fun onDestroy() {}
 
-    protected abstract fun getInputData(): Data
 }

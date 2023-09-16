@@ -55,6 +55,7 @@ class InputDialog : BottomSheetDialogFragment() {
                 etInput.setText(value)
                 etInput.selectAll()
             }
+            arguments = null
         }
         setViews()
     }

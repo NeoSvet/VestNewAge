@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.view.fragment
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -22,8 +22,10 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.HelpState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class HelpFragment : Fragment(), Observer<NeoState> {
     companion object {
@@ -38,9 +40,7 @@ class HelpFragment : Fragment(), Observer<NeoState> {
     private val toiler: HelpToiler by lazy {
         ViewModelProvider(this)[HelpToiler::class.java]
     }
-    private val adapter: HelpAdapter by lazy {
-        HelpAdapter(toiler, toiler.list)
-    }
+    private val adapter = HelpAdapter(toiler::onItemClick)
     private var act: MainActivity? = null
     private var scroll: ScrollHelper? = null
 
@@ -48,10 +48,8 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.list_fragment, container, false)
-        initView(view)
-        return view
+    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
+        initView(it)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -60,7 +58,11 @@ class HelpFragment : Fragment(), Observer<NeoState> {
             it.title = getString(R.string.help)
             toiler.state.observe(it, this)
         }
-        restoreState(savedInstanceState)
+        if (adapter.itemCount == 0) {
+            val section = arguments?.getInt(Const.TAB) ?: -1
+            toiler.init(requireActivity(), section)
+        } else
+            toiler.restoreList()
     }
 
     override fun onDestroyView() {
@@ -88,31 +90,35 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         }
     }
 
-    private fun restoreState(state: Bundle?) {
-        if (state == null || toiler.list.isEmpty()) {
-            val section = arguments?.getInt(Const.TAB) ?: -1
-            toiler.init(requireActivity(), section)
-        } else {
-            toiler.restore()
-        }
-    }
+    override fun onChanged(value: NeoState) {
+        when (value) {
+            is HelpState.Primary ->
+                adapter.setItems(value.list)
 
-    @SuppressLint("NotifyDataSetChanged")
-    override fun onChanged(value: NeoState) = with(value) {
-        if (this is NeoState.ListState) {
-            when (event) {
-                ListEvent.RELOAD ->
-                    adapter.notifyDataSetChanged()
-                ListEvent.CHANGE ->
-                    adapter.updateItem(index)
-                ListEvent.MOVE ->
+            is ListState.Update<*> ->
+                adapter.update(value.index, value.item as HelpItem)
+
+            is BasicState.Message ->
+                Lib.openInApps(Const.mailto + value.message, null)
+
+            is HelpState.Open -> when (value.type) {
+                HelpState.Type.PRIVACY ->
                     Lib.openInApps(Urls.WebPage + "privacy.html", null)
-                ListEvent.REMOTE -> shareAppLink(
-                    if (this.index == HelpToiler.LINK_ON_GOOGLE)
-                        getString(R.string.url_on_google)
-                    else
-                        getString(R.string.url_on_huawei)
-                )
+
+                HelpState.Type.SITE ->
+                    Lib.openInApps(Urls.WebPage, null)
+
+                HelpState.Type.TELEGRAM ->
+                    Lib.openInApps("https://t.me/+nUS5nlrZsvM3MTEy", null)
+
+                HelpState.Type.CHANGELOG ->
+                    Lib.openInApps(Urls.WebPage + "changelog.html", null)
+
+                HelpState.Type.GOOGLE ->
+                    shareAppLink(getString(R.string.url_on_google))
+
+                HelpState.Type.HUAWEI ->
+                    shareAppLink(getString(R.string.url_on_huawei))
             }
         }
     }

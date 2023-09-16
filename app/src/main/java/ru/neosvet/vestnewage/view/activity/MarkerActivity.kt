@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.MarkerScreen
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -32,7 +33,9 @@ import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkerToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.MarkerState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 @SuppressLint("DefaultLocale")
 class MarkerActivity : AppCompatActivity() {
@@ -87,13 +90,7 @@ class MarkerActivity : AppCompatActivity() {
     }
 
     private val toiler: MarkerToiler by lazy {
-        ViewModelProvider(this)[MarkerToiler::class.java].apply { init(baseContext) }
-    }
-    private val adPar: CheckAdapter by lazy {
-        CheckAdapter(list = helper.parsList, onChecked = helper::checkPars)
-    }
-    private val adCol: CheckAdapter by lazy {
-        CheckAdapter(list = helper.colsList, onChecked = helper::checkCols)
+        ViewModelProvider(this)[MarkerToiler::class.java]
     }
     private lateinit var binding: MarkerActivityBinding
     private val softKeyboard: SoftKeyboard by lazy {
@@ -101,14 +98,16 @@ class MarkerActivity : AppCompatActivity() {
     }
     private val mainLayout: View
         get() = binding.content.root
-    private val helper: MarkerHelper
-        get() = toiler.helper
+
+    private lateinit var helper: MarkerHelper
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
     private var density = 0f
+    private var newPos = 0f
     private var heightDialog = 0
     private var hasError = false
+    private var screen = MarkerScreen.NONE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,25 +116,70 @@ class MarkerActivity : AppCompatActivity() {
         density = resources.displayMetrics.density
         initActivity()
         initContent()
-        restoreState(savedInstanceState)
+        setResult(RESULT_CANCELED)
+        intent?.let {
+            toiler.setArgument(it)
+            intent = null
+        }
+        runObserve()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        binding.run {
+            toiler.setStatus(
+                MarkerState.Status(
+                    screen = screen,
+                    selection = content.tvSel.text.toString(),
+                    positionText = tvPos.text.toString(),
+                    position = sbPos.progress
+                )
+            )
+        }
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun runObserve() {
         lifecycleScope.launch {
             toiler.state.collect {
                 onChangedState(it)
             }
         }
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        toiler.start(this)
     }
 
     private fun onChangedState(state: NeoState) {
         when (state) {
-            NeoState.Success ->
-                showData()
-            NeoState.Ready -> if (helper.title.isEmpty()) {
+            BasicState.NotLoaded -> {
                 hasError = true
                 toast.autoHide = false
                 toast.show(getString(R.string.not_load_page))
-            } else finish()
-            is NeoState.Error -> {
+            }
+
+            is BasicState.Message ->
+                toast.show(state.message)
+
+            BasicState.Ready ->
+                finish()
+
+            is MarkerState.Primary ->
+                showData(state)
+
+            is MarkerState.Text -> when (state.type) {
+                MarkerState.TextType.SEL ->
+                    binding.content.tvSel.text = state.text
+
+                MarkerState.TextType.COL -> {
+                    softKeyboard.hide()
+                    binding.content.etCol.setText("")
+                    binding.content.tvCol.text = state.text
+                }
+            }
+
+            is MarkerState.Status ->
+                restoreStatus(state)
+
+            is BasicState.Error -> {
                 hasError = true
                 val builder = AlertDialog.Builder(this, R.style.NeoDialog)
                     .setTitle(getString(R.string.error))
@@ -150,43 +194,43 @@ class MarkerActivity : AppCompatActivity() {
                     ) { dialog, _ -> dialog.dismiss() }
                 builder.create().show()
             }
-            else -> {}
         }
     }
 
-    @SuppressLint("Range")
-    private fun restoreState(state: Bundle?) {
-        setResult(RESULT_CANCELED)
-        if (state == null) {
-            toiler.open(intent)
-            return
-        }
-        showData()
-        binding.run {
-            when (helper.type) {
-                MarkerHelper.Type.NONE -> Unit
-                MarkerHelper.Type.POS -> {
-                    mainLayout.isVisible = false
-                    pPos.layoutParams.height = heightDialog
-                    pPos.requestLayout()
-                    pPos.isVisible = true
-                    tvPos.text = helper.getPosText(helper.newPos)
-                    sbPos.progress = (helper.newPos * 10).toInt()
-                }
-                MarkerHelper.Type.PAR -> {
-                    rvList.adapter = adPar
-                    mainLayout.isVisible = false
-                    rvList.layoutParams.height = heightDialog
-                    rvList.requestLayout()
-                    rvList.isVisible = true
-                }
-                MarkerHelper.Type.COL -> {
-                    rvList.adapter = adCol
-                    mainLayout.isVisible = false
-                    rvList.layoutParams.height = heightDialog
-                    rvList.requestLayout()
-                    rvList.isVisible = true
-                }
+    private fun restoreStatus(state: MarkerState.Status) = binding.run {
+        screen = state.screen
+        content.tvSel.text = state.selection
+        when (screen) {
+            MarkerScreen.NONE -> {}
+            MarkerScreen.POSITION -> {
+                mainLayout.isVisible = false
+                pPos.layoutParams.height = heightDialog
+                pPos.requestLayout()
+                pPos.isVisible = true
+                tvPos.text = state.positionText
+                sbPos.progress = state.position
+            }
+
+            MarkerScreen.PARAGRAPH -> {
+                rvList.adapter = CheckAdapter(
+                    list = helper.parsList,
+                    onChecked = helper::checkPars
+                )
+                mainLayout.isVisible = false
+                rvList.layoutParams.height = heightDialog
+                rvList.requestLayout()
+                rvList.isVisible = true
+            }
+
+            MarkerScreen.COLLECTION -> {
+                rvList.adapter = CheckAdapter(
+                    list = helper.colsList,
+                    onChecked = helper::checkCols
+                )
+                mainLayout.isVisible = false
+                rvList.layoutParams.height = heightDialog
+                rvList.requestLayout()
+                rvList.isVisible = true
             }
         }
     }
@@ -218,11 +262,11 @@ class MarkerActivity : AppCompatActivity() {
                 finish()
                 return@setOnClickListener
             }
-            when (helper.type) {
-                MarkerHelper.Type.NONE -> {
+            when (screen) {
+                MarkerScreen.NONE -> {
                     if (content.etCol.isFocused) {
                         softKeyboard.hide()
-                        createCol(content.etCol.text.toString())
+                        toiler.createCollection(content.etCol.text.toString())
                         content.etCol.clearFocus()
                     } else if (content.etDes.isFocused) {
                         content.etDes.clearFocus()
@@ -230,12 +274,17 @@ class MarkerActivity : AppCompatActivity() {
                     } else
                         saveMarker()
                 }
-                MarkerHelper.Type.PAR ->
-                    saveSelectedPar()
-                MarkerHelper.Type.POS ->
-                    saveSelectedPos()
-                MarkerHelper.Type.COL ->
-                    saveSelectedCol()
+
+                MarkerScreen.PARAGRAPH ->
+                    toiler.saveParList()
+
+                MarkerScreen.POSITION ->   {
+                    toiler.savePosition(newPos)
+                    hideView(binding.pPos)
+                }
+
+                MarkerScreen.COLLECTION ->
+                    toiler.saveColList()
             }
         }
         bMinus.setOnClickListener {
@@ -262,46 +311,39 @@ class MarkerActivity : AppCompatActivity() {
     private fun initContent() = binding.content.run {
         rPar.setOnClickListener {
             if (hasError) return@setOnClickListener
-            if (rPar.isChecked) {
-                helper.isPar = true
-                helper.updateSel()
-                tvSel.text = helper.sel
-            }
+            if (rPar.isChecked)
+                toiler.select(true)
         }
         rPos.setOnClickListener {
             if (hasError) return@setOnClickListener
-            if (rPos.isChecked) {
-                helper.isPar = false
-                helper.updateSel()
-                tvSel.text = helper.sel
-            }
+            if (rPos.isChecked)
+                toiler.select(false)
         }
         tvSel.setOnClickListener {
             if (hasError) return@setOnClickListener
             binding.run {
-                if (helper.isPar) {
-                    helper.type = MarkerHelper.Type.PAR
-                    rvList.adapter = adPar
+                if (rPar.isChecked) {
+                    screen = MarkerScreen.PARAGRAPH
+                    toiler.openParagraph()
                     showView(rvList)
                 } else {
-                    helper.type = MarkerHelper.Type.POS
-                    sbPos.progress = (helper.pos * 10).toInt()
-                    tvPos.text = helper.posText
+                    screen = MarkerScreen.POSITION
+                    toiler.openPosition()
                     showView(pPos)
                 }
             }
         }
         tvCol.setOnClickListener {
             if (hasError) return@setOnClickListener
-            helper.type = MarkerHelper.Type.COL
-            binding.rvList.adapter = adCol
+            screen = MarkerScreen.COLLECTION
+            toiler.openCollection()
             showView(binding.rvList)
         }
         etCol.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_GO
             ) {
-                if (!hasError) createCol(etCol.text.toString())
+                if (!hasError) toiler.createCollection(etCol.text.toString())
                 return@setOnKeyListener true
             }
             false
@@ -316,19 +358,6 @@ class MarkerActivity : AppCompatActivity() {
         bClearCol.setOnClickListener { etCol.setText("") }
     }
 
-    private fun createCol(title: String) {
-        if (title.isEmpty()) return
-        helper.checkTitleCol(title)?.let {
-            toast.show(it)
-            return@createCol
-        }
-        toiler.addCol(title)
-        softKeyboard.hide()
-        binding.content.etCol.setText("")
-        helper.cols += ", $title"
-        binding.content.tvCol.text = helper.cols
-    }
-
     private fun showView(view: View) {
         softKeyboard.hide()
         mainLayout.isVisible = false
@@ -339,45 +368,14 @@ class MarkerActivity : AppCompatActivity() {
         view.startAnimation(anim)
     }
 
-    private fun saveSelectedCol() {
-        val s = helper.getColList()
-        if (s == null) {
-            toast.show(getString(R.string.need_set_check))
-            return
-        }
-        helper.cols = s
-        binding.content.tvCol.text = s
-        hideView(binding.rvList)
-    }
-
-    private fun saveSelectedPos() {
-        helper.pos = helper.newPos
-        helper.posText = helper.getPosText()
-        helper.updateSel()
-        binding.content.tvSel.text = helper.sel
-        hideView(binding.pPos)
-    }
-
-    private fun saveSelectedPar() {
-        val s = helper.getParList()
-        if (s == null) {
-            toast.show(getString(R.string.need_set_check))
-            return
-        }
-        helper.sel = s
-        binding.content.tvSel.text = s
-        hideView(binding.rvList)
-    }
-
     private fun saveMarker() {
         setResult(RESULT_OK)
         toiler.finish(binding.content.etDes.text.toString())
     }
 
     private fun newProgPos(): String {
-        val f = binding.sbPos.progress / 10f
-        helper.newPos = f
-        return helper.getPosText(f)
+        newPos = binding.sbPos.progress / 10f
+        return helper.getPosText(newPos)
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -386,31 +384,34 @@ class MarkerActivity : AppCompatActivity() {
                 finish()
                 return
             }
-            when (helper.type) {
-                MarkerHelper.Type.NONE ->
+            when (screen) {
+                MarkerScreen.NONE ->
                     finish()
-                MarkerHelper.Type.POS ->
+
+                MarkerScreen.POSITION ->
                     hideView(binding.pPos)
-                MarkerHelper.Type.PAR -> {
+
+                MarkerScreen.PARAGRAPH -> {
                     hideView(binding.rvList)
-                    helper.setParList()
+                    toiler.restoreParList()
                 }
-                MarkerHelper.Type.COL -> {
+
+                MarkerScreen.COLLECTION -> {
                     hideView(binding.rvList)
-                    helper.setColList()
+                    toiler.restoreColList()
                 }
             }
         }
     }
 
     private fun hideView(view: View) {
+        screen = MarkerScreen.NONE
         val anim = ResizeAnim(view, false, 10)
         anim.duration = 600
         anim.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
                 view.isVisible = false
-                helper.type = MarkerHelper.Type.NONE
                 mainLayout.isVisible = true
             }
 
@@ -420,14 +421,15 @@ class MarkerActivity : AppCompatActivity() {
         view.startAnimation(anim)
     }
 
-    private fun showData() = binding.content.run {
-        tvTitle.text = helper.title
-        if (helper.isPar)
+    private fun showData(state: MarkerState.Primary) = binding.content.run {
+        helper = state.helper
+        tvTitle.text = state.title
+        if (state.isPar)
             rPar.isChecked = true
         else
             rPos.isChecked = true
-        tvSel.text = helper.sel
-        etDes.setText(helper.des)
-        tvCol.text = helper.cols
+        tvSel.text = state.sel
+        etDes.setText(state.des)
+        tvCol.text = state.cols
     }
 }

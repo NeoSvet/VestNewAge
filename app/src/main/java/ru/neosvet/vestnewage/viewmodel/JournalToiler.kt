@@ -8,15 +8,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.JournalFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 
 class JournalToiler : NeoToiler(), NeoPaging.Parent {
     private val journal = JournalStorage()
@@ -25,14 +25,17 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     override val factory: JournalFactory by lazy {
         JournalFactory(journal, strings, paging)
     }
+    override val isBusy: Boolean
+        get() = isRun
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false
-    private var isInit = false
 
-    fun init(context: Context) {
-        if (isInit) return
-        isInit = true
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, "journal")
+        .build()
+
+    override fun init(context: Context) {
         strings = JournalStrings(
             format_time_back = context.getString(R.string.format_time_back),
             rnd_poem = context.getString(R.string.rnd_poem),
@@ -41,24 +44,24 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         )
     }
 
+    override suspend fun defaultState() {
+        preparing()
+    }
+
     override fun onCleared() {
         journal.close()
         super.onCleared()
     }
-
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "journal")
-        .build()
 
     fun preparing() {
         viewModelScope.launch {
             val cursor = journal.getAll()
             if (cursor.moveToFirst()) {
                 factory.total = cursor.count
-                postState(NeoState.ListState(ListEvent.RELOAD, cursor.count))
+                postState(ListState.Paging(cursor.count))
             } else {
                 isEmpty = true
-                postState(NeoState.Ready)
+                postState(BasicState.Empty)
             }
             cursor.close()
         }
@@ -68,10 +71,10 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         journal.clear()
         journal.close()
         isEmpty = true
-        setState(NeoState.Ready)
+        setState(BasicState.Empty)
     }
 
-    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<ListItem>> {
+    fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<BasicItem>> {
         paging.setPager(pager)
         return paging.run(page)
     }
@@ -81,10 +84,10 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
 
     override suspend fun postFinish() {
         if (isEmpty.not())
-            postState(NeoState.Success)
+            postState(BasicState.Success)
     }
 
-    override fun postError(error: NeoState.Error) {
+    override fun postError(error: BasicState.Error) {
         setState(error)
     }
 }

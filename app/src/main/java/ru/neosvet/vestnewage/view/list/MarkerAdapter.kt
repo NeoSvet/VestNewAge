@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.list
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,21 +8,55 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerItem
-import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 
 class MarkerAdapter(
-    private val toiler: MarkersToiler,
-    private val longClicker: ((Int) -> Boolean)
+    private val clicker: ((Int) -> Unit),
+    private val selector: ((Int) -> Unit)
 ) : RecyclerView.Adapter<MarkerAdapter.ViewHolder>() {
     companion object {
         private const val TYPE_SIMPLE = 0
         private const val TYPE_DETAIL = 1
     }
 
-    private val data: List<MarkerItem>
-        get() = toiler.list
+    var selectedIndex = -1
+        private set
+    val selectedItem: MarkerItem?
+        get() = if (selectedIndex == -1) null else data[selectedIndex]
+    private val data = mutableListOf<MarkerItem>()
 
     override fun getItemCount(): Int = data.size
+
+    fun selected(index: Int) {
+        val prevSel = selectedIndex
+        selectedIndex = index
+        if (index > -1)
+            notifyItemChanged(index)
+        if (prevSel > -1)
+            notifyItemChanged(prevSel)
+    }
+
+    fun update(index: Int, item: MarkerItem) {
+        data[index] = item
+        notifyItemChanged(index)
+    }
+
+    fun remove(index: Int, minIndex: Int) {
+        data.removeAt(index)
+        val i = when (data.size) {
+            minIndex -> -1
+            selectedIndex -> selectedIndex - 1
+            else -> selectedIndex
+        }
+        if (i != selectedIndex) selected(i)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setItems(items: List<MarkerItem>) {
+        selectedIndex = -1
+        data.clear()
+        data.addAll(items)
+        notifyDataSetChanged()
+    }
 
     override fun getItemViewType(position: Int): Int {
         return if (data[position].des.isEmpty())
@@ -47,19 +82,15 @@ class MarkerAdapter(
 
         init {
             itemBg.setOnClickListener {
-                toiler.run {
-                    val oldSel = iSel
-                    onClick(index)
-                    if (oldSel > -1)
-                        notifyItemChanged(oldSel)
-                    if (iSel > -1)
-                        notifyItemChanged(index)
-                }
+                if (selectedIndex > -1) selector.invoke(index)
+                else clicker(index)
+
             }
             itemBg.setOnLongClickListener {
-                if (toiler.iSel == -1)
-                    longClicker.invoke(index)
-                else false
+                if (selectedIndex == -1) {
+                    selector.invoke(index)
+                    true
+                } else false
             }
         }
 
@@ -67,7 +98,7 @@ class MarkerAdapter(
             this.index = index
             tvTitle.text = data[index].title
             tvDes?.text = data[index].des
-            if (index == toiler.iSel)
+            if (index == selectedIndex)
                 itemBg.setBackgroundResource(R.drawable.select_item_bg)
             else
                 itemBg.setBackgroundResource(R.drawable.item_bg)

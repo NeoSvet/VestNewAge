@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SettingsItem
 import ru.neosvet.vestnewage.databinding.SettingsFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -36,8 +37,10 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.list.SettingsAdapter
 import ru.neosvet.vestnewage.viewmodel.SettingsToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.SettingsState
 
 class SettingsFragment : NeoFragment() {
     companion object {
@@ -67,7 +70,7 @@ class SettingsFragment : NeoFragment() {
     }
     private var stopRotate = false
     private val adapter: SettingsAdapter by lazy {
-        SettingsAdapter(toiler.panels, ScreenUtils.isWide)
+        SettingsAdapter(ScreenUtils.isWide)
     }
 
     override fun initViewModel(): NeoToiler =
@@ -99,13 +102,15 @@ class SettingsFragment : NeoFragment() {
             )
             rvSettings.adapter = adapter
         }
-        savedInstanceState?.let {
-            binding?.pAlarm?.isVisible = it.getBoolean(Const.DIALOG)
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(Const.DIALOG, binding?.pAlarm?.isVisible ?: false)
+        toiler.setStatus(
+            SettingsState.Status(
+                listVisible = adapter.visible,
+                alarmVisible = binding?.pAlarm?.isVisible == true
+            )
+        )
         super.onSaveInstanceState(outState)
     }
 
@@ -115,12 +120,22 @@ class SettingsFragment : NeoFragment() {
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        if (state is NeoState.LongValue) {
-            setStatus(false)
-            val size = state.value / 1048576f //to MegaByte
-            act?.showToast(String.format(getString(R.string.format_freed_size), size))
-            neotoiler.clearLongValue()
+        when (state) {
+
+            is SettingsState.Status ->
+                restoreStatus(state)
+
+            is BasicState.Message -> {
+                setStatus(false)
+                act?.showToast(String.format(getString(R.string.format_freed_size), state.message))
+                neotoiler.clearStates()
+            }
         }
+    }
+
+    private fun restoreStatus(state: SettingsState.Status) {
+        binding?.pAlarm?.isVisible = state.alarmVisible
+        adapter.setVisible(state.listVisible)
     }
 
     override fun setStatus(load: Boolean) {
@@ -194,7 +209,7 @@ class SettingsFragment : NeoFragment() {
 
     private fun initScreenSection() {
         val list = mutableListOf<CheckItem>()
-        var screen = prefMain.getInt(Const.START_SCEEN, Const.SCREEN_CALENDAR)
+        var screen = prefMain.getInt(Const.START_SCEEN, Section.HOME.value)
         if (ScreenUtils.isTablet)
             screen--
         else {
@@ -260,8 +275,10 @@ class SettingsFragment : NeoFragment() {
                 list = list,
                 buttonLabel = getString(R.string.delete),
                 onClick = {
-                    setStatus(true)
-                    toiler.startClear(it)
+                    if (!isBlocked) {
+                        setStatus(true)
+                        toiler.startClear(it)
+                    }
                 }
             )
         )

@@ -3,7 +3,11 @@ package ru.neosvet.vestnewage.view.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.Window
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
@@ -24,17 +27,28 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.*
-import ru.neosvet.vestnewage.view.basic.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.PromUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.utils.WordsUtils
+import ru.neosvet.vestnewage.utils.isPoem
+import ru.neosvet.vestnewage.view.basic.NeoSnackbar
+import ru.neosvet.vestnewage.view.basic.NeoToast
+import ru.neosvet.vestnewage.view.basic.SoftKeyboard
+import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.BrowserState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 
-class BrowserActivity : AppCompatActivity(), StateUtils.Host {
+class BrowserActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -68,24 +82,19 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     private var isScrollTop = false
     private var isSearch = false
     private var twoPointers = false
+    private var isBlocked = false
     private var scroll: Job? = null
     var currentScale: Float = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
     }
-    private val stateUtils: StateUtils by lazy {
-        StateUtils(this, toiler)
-    }
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
     private val snackbar = NeoSnackbar()
-    override val scope: LifecycleCoroutineScope
-        get() = lifecycleScope
     private var connectWatcher: Job? = null
-    private val helper: BrowserHelper
-        get() = toiler.helper
     private lateinit var binding: BrowserActivityBinding
+    private lateinit var helper: BrowserHelper
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
             (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
@@ -101,8 +110,6 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        if (toiler.isInit.not())
-            toiler.init(this)
         initViews()
         if (savedInstanceState != null) // for logo in topBar
             ScreenUtils.init(this)
@@ -112,10 +119,23 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         setContent()
         initWords()
         initTheme()
-        restoreState(savedInstanceState)
-        setHeadBar()
-        stateUtils.runObserve()
+        intent?.getStringExtra(Const.LINK)?.let { link ->
+            val s = intent.getStringExtra(Const.SEARCH)
+            isSearch = s != null
+            toiler.setArgument(link, s)
+            intent = null
+        }
+        runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    private fun runObserve() {
+        lifecycleScope.launch {
+            toiler.state.collect {
+                onChangedState(it)
+            }
+        }
+        toiler.start(this)
     }
 
     override fun onPause() {
@@ -139,44 +159,30 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (isSearch)
-            outState.putString(Const.SEARCH, binding.content.etSearch.text.toString())
+            toiler.setStatus(BrowserState.Status(binding.content.etSearch.text.toString()))
+        else
+            toiler.setStatus(BrowserState.Status(null))
         super.onSaveInstanceState(outState)
     }
 
-    private fun restoreState(state: Bundle?) {
-        stateUtils.restore()
-        binding.ivHeadBack.post {
-            headBar.setExpandable(helper.isMiniTop)
-        }
-        if (state == null || helper.link.isEmpty()) {
-            helper.showTip()
-            val link = intent.getStringExtra(Const.LINK) ?: return
-            toiler.openLink(link, true)
-            intent.getStringExtra(Const.SEARCH)?.let {
-                helper.setSearchString(it)
-                isSearch = true
-            }
-        } else {
-            toiler.openLink(helper.link, true)
-            state.getString(Const.SEARCH)?.let {
-                isSearch = true
-                binding.content.etSearch.setText(it)
-            }
-        }
+    private fun restoreState() {
+        setHeadBar()
         if (helper.isFullScreen) binding.bottomBar.post {
             switchFullScreen(true)
         }
-        if (isSearch) {
-            binding.content.pSearch.isVisible = true
-            headBar.hide()
-        }
-        if (helper.isSearch) {
-            if (helper.searchIndex > -1) {
-                binding.content.etSearch.isEnabled = false
-                binding.content.etSearch.updatePadding(
-                    right = resources.getDimension(R.dimen.def_indent).toInt()
-                )
-                binding.content.etSearch.setText(helper.request)
+         with(binding.content) {
+            if (isSearch) {
+                pSearch.isVisible = true
+                headBar.hide()
+            }
+            if (helper.isSearch) {
+                if (helper.searchIndex > -1) {
+                    etSearch.isEnabled = false
+                    etSearch.updatePadding(
+                        right = resources.getDimension(R.dimen.def_indent).toInt()
+                    )
+                    etSearch.setText(helper.request)
+                }
             }
         }
     }
@@ -316,7 +322,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         if (helper.isNumPar)
             setCheckItem(menu.numpar, true)
         status.setClick {
-            if (toiler.isRun)
+            if (isBlocked)
                 toiler.cancel()
             else
                 status.onClick()
@@ -344,7 +350,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
-    private fun setContent() = binding.content.run {
+    private fun setContent() =  with(binding.content) {
         etSearch.requestLayout()
         wvBrowser.settings.builtInZoomControls = true
         wvBrowser.settings.displayZoomControls = false
@@ -452,8 +458,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         }
     }
 
-    private fun initTheme() = binding.content.run {
-        toiler.lightTheme = helper.isLightTheme
+    private fun initTheme() =  with(binding.content) {
         val context = this@BrowserActivity
         if (helper.isLightTheme) {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.black))
@@ -498,6 +503,9 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun setHeadBar() = binding.run {
+        ivHeadBack.post {
+            headBar.setExpandable(helper.isMiniTop)
+        }
         if (helper.isDoctrine) {
             if (ScreenUtils.isTablet && isBigHead)
                 ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
@@ -559,13 +567,8 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
                     toiler.openPage(true)
                 }
 
-                R.id.nav_search -> with(content) {
-                    headBar.hide()
-                    pSearch.isVisible = true
-                    isSearch = true
-                    etSearch.post { etSearch.requestFocus() }
-                    softKeyboard.show()
-                }
+                R.id.nav_search ->
+                    goSearch()
 
                 R.id.nav_marker -> {
                     val des = if (helper.isSearch)
@@ -597,6 +600,14 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
             }
             return@setOnMenuItemClickListener true
         }
+    }
+
+    private fun goSearch() = with(binding.content) {
+        headBar.hide()
+        pSearch.isVisible = true
+        isSearch = true
+        etSearch.post { etSearch.requestFocus() }
+        softKeyboard.show()
     }
 
     private fun setCheckItem(item: MenuItem, check: Boolean) {
@@ -633,49 +644,61 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
         toiler.openPage(false)
     }
 
-    override fun onChangedState(state: NeoState) {
+    private fun onChangedState(state: NeoState) {
         when (state) {
-            NeoState.Loading -> {
+            BasicState.Loading -> {
+                isBlocked = true
                 bottomBlocked()
                 binding.content.wvBrowser.clearCache(true)
                 status.setLoad(true)
                 status.loadText()
             }
 
-            NeoState.NoConnected ->
+            BasicState.NoConnected ->
                 noConnected()
 
-            is NeoState.Page -> {
+            is BrowserState.Page -> {
                 finishLoading()
                 binding.content.wvBrowser.loadUrl(state.url)
                 menu.numpar.isVisible = helper.link.isPoem
                 menu.refresh.isVisible = state.isOtkr.not()
             }
 
-            NeoState.Ready -> {
+            is BrowserState.Status ->
+                restoreStatus(state)
+
+            is BrowserState.Primary -> {
+                helper = state.helper
+                restoreState()
+            }
+
+            BasicState.Ready -> {
                 finishLoading()
                 binding.tvNotFound.isVisible = true
                 menu.refresh.isVisible = false
             }
 
-            NeoState.Success ->
+            BasicState.Success ->
                 tipFinish.show()
 
-            is NeoState.Error ->
+            is BasicState.Error ->
                 if (state.isNeedReport)
                     status.setError(state)
                 else {
                     finishLoading()
                     snackbar.show(binding.fabNav, state.message)
                 }
-
-            else -> {}
         }
+    }
+
+    private fun restoreStatus(state: BrowserState.Status) = state.search?.let {
+        binding.content.etSearch.setText(it)
+        goSearch()
     }
 
     private fun noConnected() {
         finishLoading()
-        connectWatcher = scope.launch {
+        connectWatcher = lifecycleScope.launch {
             OnlineObserver.isOnline.collect {
                 connectChanged(it)
             }
@@ -685,6 +708,7 @@ class BrowserActivity : AppCompatActivity(), StateUtils.Host {
     }
 
     private fun finishLoading() {
+        isBlocked = false
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)

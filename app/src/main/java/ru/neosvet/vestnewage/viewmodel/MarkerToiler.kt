@@ -9,13 +9,15 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.MarkerScreen
 import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.MarkerState
 
 class MarkerToiler : NeoToiler() {
     enum class Type {
@@ -25,16 +27,33 @@ class MarkerToiler : NeoToiler() {
 
     private val storage = MarkersStorage()
     private lateinit var strings: MarkerStrings
-    private var link: String = ""
-    private var id: Int = -1
-    private var task: Type = Type.NONE
-    private var isInit = false
-    lateinit var helper: MarkerHelper
-        private set
+    private var title = ""
+    private var link = ""
+    private var des = ""
+    private var id = -1
+    private var isPar = true //else - isPos
+    private var task = Type.NONE
+    private var sel: String = ""
+    private var cols: String = ""
+    private var pos = 0f
+    private var posText: String = ""
+        get() {
+            if (field.isEmpty())
+                field = helper.getPosText(pos)
+            return field
+        }
+    private lateinit var helper: MarkerHelper
 
-    fun init(context: Context) {
-        if (isInit) return
-        isInit = true
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, "Marker")
+        .putString(Const.MODE, task.toString())
+        .putString(Const.TITLE, "$id|$title")
+        .putString(Const.LINK, link)
+        .putString(Const.DESCTRIPTION, des)
+        .putString(Const.LIST, "sel{$sel}cols{$cols}posText{$posText}pos{$pos}")
+        .build()
+
+    override fun init(context: Context) {
         strings = MarkerStrings(
             sel_pos = context.getString(R.string.sel_pos),
             sel_par = context.getString(R.string.sel_par),
@@ -42,77 +61,100 @@ class MarkerToiler : NeoToiler() {
             page_entirely = context.getString(R.string.page_entirely),
             unuse_dot = context.getString(R.string.unuse_dot),
             title_already_used = context.getString(R.string.title_already_used),
-            no_collections = context.getString(R.string.no_collections)
+            no_collections = context.getString(R.string.no_collections),
+            need_set_check = context.getString(R.string.need_set_check)
         )
         helper = MarkerHelper(strings)
     }
 
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "Marker")
-        .putString(Const.MODE, task.toString())
-        .putString(Const.TITLE, "$id $link")
-        .putString(Const.DESCTRIPTION, helper.toJson())
-        .build()
+    override suspend fun defaultState() {
+        preOpen()
+    }
 
     override fun onDestroy() {
         storage.close()
     }
 
-    fun open(intent: Intent) {
+    fun setArgument(intent: Intent) {
         link = intent.getStringExtra(Const.LINK) ?: ""
         id = intent.getIntExtra(DataBase.ID, -1)
+        if (id == -1) {
+            des = intent.getStringExtra(Const.DESCTRIPTION) ?: ""
+            isPar = true
+            when {
+                intent.hasExtra(Const.PLACE) -> {
+                    isPar = false
+                    pos = intent.getFloatExtra(Const.PLACE, 0f)
+                }
+
+                intent.hasExtra(DataBase.PARAGRAPH) -> {
+                    val par = intent.getIntExtra(DataBase.PARAGRAPH, 0)
+                    sel = if (par == 0)
+                        strings.page_entirely
+                    else par.toString()
+                }
+
+                intent.hasExtra(Const.PAGE) ->
+                    sel = intent.getStringExtra(Const.PAGE) ?: strings.page_entirely
+
+                else ->
+                    sel = strings.page_entirely
+
+            }
+        }
+    }
+
+    private fun preOpen() {
+        task = Type.OPEN_MARKER
         scope.launch {
-            helper.title = openPage(link)
-            if (helper.title.isEmpty()) {
-                postState(NeoState.Ready)
+            openPage()
+            if (title.isEmpty()) {
+                postState(BasicState.NotLoaded)
                 return@launch
             }
             openCols()
             if (id == -1)
-                newMarker(intent)
+                newMarker()
             else
-                openMarker(id)
-            postState(NeoState.Success)
+                openMarker()
+            postState(
+                MarkerState.Primary(
+                    helper = helper,
+                    title = title,
+                    des = des,
+                    isPar = isPar,
+                    sel = sel,
+                    cols = cols
+                )
+            )
         }
     }
 
-    private fun newMarker(intent: Intent) = helper.run {
+    private fun newMarker() = helper.run {
         task = Type.NEW_MARKER
-        val d = intent.getStringExtra(Const.DESCTRIPTION)
-        des = if (d.isNullOrEmpty()) {
+        if (des.isEmpty()) {
             val date = DateUnit.initNow()
-            date.toString()
-        } else d
+            des = date.toString()
+        }
         cols = strings.sel_col + strings.no_collections
         colsList[0].isChecked = true
         when {
-            intent.hasExtra(Const.PLACE) -> {
-                isPar = false
-                pos = intent.getFloatExtra(Const.PLACE, 0f)
-                updateSel()
-            }
-            intent.hasExtra(DataBase.PARAGRAPH) -> {
-                isPar = true
-                val par = intent.getIntExtra(DataBase.PARAGRAPH, 0)
-                if (par == 0) {
-                    sel = strings.page_entirely
-                    setParList()
-                } else {
-                    parsList[par].isChecked = true
-                    updateSel()
-                }
-            }
-            intent.hasExtra(Const.PAGE) -> {
-                isPar = true
-                intent.getStringExtra(Const.PAGE)?.split(", ")?.forEach { s ->
+            isPar.not() ->
+                updateSelPos()
+
+            sel == strings.page_entirely ->
+                restoreParList()
+
+            sel.contains(", ") -> {
+                sel.split(", ").forEach { s ->
                     parsList[s.toInt()].isChecked = true
                 }
-                updateSel()
+                updateSelPar()
             }
+
             else -> {
-                isPar = true
-                sel = strings.page_entirely
-                setParList()
+                parsList[sel.toInt()].isChecked = true
+                updateSelPar()
             }
         }
     }
@@ -124,38 +166,19 @@ class MarkerToiler : NeoToiler() {
                 updateMarker(id, row)
             else
                 addMarker(row)
-            postState(NeoState.Ready)
+            postState(BasicState.Ready)
         }
     }
 
-    private fun openPage(link: String): String = helper.run { //return title
+    private suspend fun openPage() {
         task = Type.OPEN_PAGE
-        parsList.clear()
-        countPar = 5 // имитация нижнего "колонтитула" страницы
         val storage = PageStorage()
         storage.open(link)
-        content = storage.getContentPage(link, false) ?: ""
+        val s = storage.getContentPage(link, false) ?: ""
         storage.close()
-        if (content.isEmpty()) // страница не загружена...
-            return ""
-        val m = content.split(Const.NN).toTypedArray()
-        var i: Int
-        i = 0
-        while (i < m.size) {
-            parsList.add(
-                CheckItem(
-                    id = i,
-                    title = m[i]
-                )
-            )
-            i++
-        }
-        i = content.indexOf(Const.N)
-        while (i > -1) {
-            countPar++
-            i = content.indexOf(Const.N, i + 1)
-        }
-        m[0]
+        helper.setContent(s)
+        title = if (!s.contains(Const.NN)) ""
+        else s.substring(0, s.indexOf(Const.NN))
     }
 
     private fun openCols() = helper.run {
@@ -177,15 +200,15 @@ class MarkerToiler : NeoToiler() {
         cursor.close()
     }
 
-    private fun openMarker(id: Int) {
+    private fun openMarker() {
         task = Type.OPEN_MARKER
         var cursor = storage.getMarker(id.toString())
         cursor.moveToFirst()
         val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
-        helper.des = cursor.getString(iDes) ?: ""
+        des = cursor.getString(iDes) ?: ""
         val iPlace = cursor.getColumnIndex(Const.PLACE)
         var s = cursor.getString(iPlace) ?: ""
-        helper.setPlace(s)
+        setPlace(s)
         val iCols = cursor.getColumnIndex(DataBase.COLLECTIONS)
         s = cursor.getString(iCols)
         cursor.close()
@@ -201,13 +224,35 @@ class MarkerToiler : NeoToiler() {
             cursor.close()
         }
         b.delete(b.length - 2, b.length)
-        helper.cols = b.toString()
-        helper.setColList()
+        cols = b.toString()
+        restoreColList()
     }
 
-    fun addCol(title: String) {
+    private fun setPlace(s: String) {
+        if (s.contains("%")) {
+            isPar = false
+            pos = s.substring(0, s.length - 1).replace(Const.COMMA, ".").toFloat()
+            posText = helper.getPosText(pos)
+            sel = strings.sel_pos + s
+        } else {
+            isPar = true
+            sel = if (s == "0")
+                strings.page_entirely
+            else
+                strings.sel_par + s.replace(Const.COMMA, ", ")
+            restoreParList()
+        }
+    }
+
+
+    fun createCollection(title: String) {
         task = Type.ADD_COL
         scope.launch {
+            helper.checkTitleCol(title)?.let {
+                postState(BasicState.Message(it))
+                return@launch
+            }
+
             var row: ContentValues
             //освобождаем первую позицию (PLACE) путем смещения всех вперед..
             var cursor = storage.getCollectionsPlace()
@@ -246,10 +291,17 @@ class MarkerToiler : NeoToiler() {
                 )
             }
             cursor.close()
+            cols += ", $title"
+            postState(
+                MarkerState.Text(
+                    type = MarkerState.TextType.COL,
+                    text = cols
+                )
+            )
         }
     }
 
-    private fun updateMarker(id: Int, marker: ContentValues) {
+    private suspend fun updateMarker(id: Int, marker: ContentValues) {
         task = Type.UPDATE_MARKER
         //обновляем закладку в базе
         storage.updateMarker(id.toString(), marker)
@@ -284,7 +336,7 @@ class MarkerToiler : NeoToiler() {
         }
     }
 
-    private fun addMarker(marker: ContentValues) {
+    private suspend fun addMarker(marker: ContentValues) {
         task = Type.ADD_MARKER
         //добавляем в базу и получаем id
         val marId = storage.insertMarker(marker)
@@ -313,12 +365,12 @@ class MarkerToiler : NeoToiler() {
         row.put(Const.LINK, link)
         row.put(Const.DESCTRIPTION, des)
         //определяем место
-        var s = helper.sel
+        var s = sel
         s = if (s.contains(":")) s.substring(s.indexOf(":") + 2)
             .replace(", ", Const.COMMA) else "0"
         row.put(Const.PLACE, s)
         //формулируем список подборок
-        helper.setColList()
+        restoreColList()
         val b = StringBuilder()
         helper.colsList.forEach { item ->
             if (item.isChecked) {
@@ -329,5 +381,127 @@ class MarkerToiler : NeoToiler() {
         b.delete(b.length - 1, b.length)
         row.put(DataBase.COLLECTIONS, b.toString())
         return row
+    }
+
+    fun select(par: Boolean) {
+        isPar = par
+        if (isPar) updateSelPar()
+        else updateSelPos()
+        setState(
+            MarkerState.Text(
+                type = MarkerState.TextType.SEL,
+                text = sel
+            )
+        )
+    }
+
+    fun savePosition(pos: Float) {
+        this.pos = pos
+        posText = helper.getPosText(pos)
+        updateSelPos()
+        setState(
+            MarkerState.Text(
+                type = MarkerState.TextType.SEL,
+                text = sel
+            )
+        )
+    }
+
+    fun openCollection() {
+        setState(
+            MarkerState.Status(
+                screen = MarkerScreen.COLLECTION,
+                selection = sel
+            )
+        )
+    }
+
+    fun openParagraph() {
+        setState(
+            MarkerState.Status(
+                screen = MarkerScreen.PARAGRAPH,
+                selection = sel
+            )
+        )
+    }
+
+    fun openPosition() {
+        setState(
+            MarkerState.Status(
+                screen = MarkerScreen.POSITION,
+                selection = sel,
+                positionText = posText,
+                position = (pos * 10).toInt()
+            )
+        )
+    }
+
+    private fun updateSelPar() {
+        val s = helper.getParString()
+        sel = if (s == null) {
+            helper.checkedAllPars()
+            helper.getParString() ?: ""
+        } else s
+    }
+
+    private fun updateSelPos() {
+        sel = String.format(strings.sel_pos + "%.1f%%", pos)
+    }
+
+    fun restoreParList() {
+        if (sel.contains("№")) {
+            helper.parsList.forEach { item ->
+                item.isChecked = false
+            }
+            val s = sel.substring(sel.indexOf(":") + 2).replace(", ", Const.COMMA)
+            s.split(Const.COMMA).forEach {
+                helper.parsList[it.toInt()].isChecked = true
+            }
+        } else {
+            helper.parsList.forEach { item ->
+                item.isChecked = true
+            }
+        }
+    }
+
+    fun restoreColList() {
+        val s = MarkersStorage.closeList(
+            cols.substring(strings.sel_col.length).replace(", ", Const.COMMA)
+        )
+        var t: String
+        helper.colsList.forEach { item ->
+            t = MarkersStorage.closeList(item.title)
+            item.isChecked = s.contains(t)
+        }
+    }
+
+    fun saveParList() {
+        val s = helper.getParString()
+        if (s == null) {
+            setState(BasicState.Message(strings.need_set_check))
+            return
+        }
+        sel = s
+        setState(
+            MarkerState.Text(
+                type = MarkerState.TextType.SEL,
+                text = sel
+            )
+        )
+    }
+
+    fun saveColList() {
+        val s = helper.getColString()
+        if (s == null) {
+            setState(BasicState.Message(strings.need_set_check))
+            return
+        }
+        cols = s
+        setState(
+            MarkerState.Text(
+                type = MarkerState.TextType.COL,
+                text = cols
+            )
+        )
     }
 }

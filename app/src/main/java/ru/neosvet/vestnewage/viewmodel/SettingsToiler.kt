@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.viewmodel
 
+import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import androidx.work.Data
@@ -10,8 +11,8 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import java.io.File
 import java.util.*
 
@@ -27,13 +28,12 @@ class SettingsToiler : NeoToiler() {
     }
 
     private var size: Long = 0
-    val panels = mutableListOf(true, false, false, false, false, false, false)
+    private var task = ""
     private var currentYear: Int = 0
         get() {
             if (field == 0) field = DateUnit.initToday().year
             return field
         }
-
 
     private val alarmDays: ArrayList<Int> by lazy {
         arrayListOf(
@@ -48,11 +48,17 @@ class SettingsToiler : NeoToiler() {
     }
 
     override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "Settings.Clear")
+        .putString(Const.TASK, "Settings.$task")
         .build()
 
+    override fun init(context: Context) {
+    }
+
+    override suspend fun defaultState() {
+    }
+
     fun startClear(request: List<Int>) {
-        if (isRun) return
+        task = "Clear"
         isRun = true
         scope.launch {
             size = 0
@@ -76,7 +82,7 @@ class SettingsToiler : NeoToiler() {
                         clearBook(currentYear - 1, currentYear)
                 }
             }
-            postState(NeoState.LongValue(size))
+            postState(BasicState.Message(String.format(".2f", size / 1048576f))) //to MegaByte
             isRun = false
         }
     }
@@ -119,6 +125,7 @@ class SettingsToiler : NeoToiler() {
     }
 
     fun setAlarm(h: Int, v: Int) {
+        task = "OnAlarm"
         val d = DateUnit.initNow()
         d.setSeconds(0)
         d.setMinutes(0)
@@ -140,6 +147,7 @@ class SettingsToiler : NeoToiler() {
     }
 
     fun offAlarm() {
+        task = "OffAlarm"
         val intent = Intent(AlarmClock.ACTION_DISMISS_ALARM)
         intent.putExtra(
             AlarmClock.ALARM_SEARCH_MODE_LABEL,

@@ -23,9 +23,10 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.basic.HomeStrings
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.HomeState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
 import java.io.FileReader
 import java.util.zip.CRC32
@@ -36,6 +37,7 @@ class HomeToiler : NeoToiler() {
         private const val INDEX_ADDITION = 1
         private const val INDEX_CALENDAR = 2
         private const val INDEX_NEWS = 3
+        private const val INDEX_JOURNAL = 4
     }
 
     private enum class Task {
@@ -67,30 +69,43 @@ class HomeToiler : NeoToiler() {
         .putString(Const.MODE, task.toString())
         .build()
 
-    fun init(context: Context) {
-        if (task == Task.NONE) {
-            strings = HomeStrings(
-                nothing = context.getString(R.string.nothing),
-                never = context.getString(R.string.never),
-                refreshed = context.getString(R.string.refreshed),
-                today_empty = context.getString(R.string.today_empty),
-                journal = context.getString(R.string.journal),
-                calendar = context.getString(R.string.calendar),
-                summary = context.getString(R.string.summary),
-                news = context.getString(R.string.news),
-                book = context.getString(R.string.book),
-                markers = context.getString(R.string.markers),
-                about_prom_time = context.getString(R.string.about_prom_time),
-                additionally_from_tg = context.getString(R.string.additionally_from_tg),
-                today_msk = context.getString(R.string.today_msk) + " ",
-                back = context.getString(R.string.back),
-                last_post_from = context.getString(R.string.last_post_from),
-                last_readed = context.getString(R.string.last_readed),
-                prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
-                no_changes = context.getString(R.string.no_changes),
-                has_changes = context.getString(R.string.has_changes)
-            )
+    override fun init(context: Context) {
+        strings = HomeStrings(
+            nothing = context.getString(R.string.nothing),
+            never = context.getString(R.string.never),
+            refreshed = context.getString(R.string.refreshed),
+            today_empty = context.getString(R.string.today_empty),
+            journal = context.getString(R.string.journal),
+            calendar = context.getString(R.string.calendar),
+            summary = context.getString(R.string.summary),
+            news = context.getString(R.string.news),
+            book = context.getString(R.string.book),
+            markers = context.getString(R.string.markers),
+            about_prom_time = context.getString(R.string.about_prom_time),
+            additionally_from_tg = context.getString(R.string.additionally_from_tg),
+            today_msk = context.getString(R.string.today_msk) + " ",
+            back = context.getString(R.string.back),
+            last_post_from = context.getString(R.string.last_post_from),
+            last_readed = context.getString(R.string.last_readed),
+            prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
+            no_changes = context.getString(R.string.no_changes),
+            has_changes = context.getString(R.string.has_changes)
+        )
+    }
+
+    override suspend fun defaultState() {
+        openList()
+    }
+
+    override suspend fun doLoad() {
+        when (task) {
+            Task.LOAD_SUMMARY -> loadSummary()
+            Task.LOAD_ADDITION -> loadAddition()
+            Task.LOAD_CALENDAR -> loadCalendar()
+            Task.LOAD_NEWS -> loadNews()
+            else -> return
         }
+        postState(BasicState.Success)
     }
 
     override fun onDestroy() {
@@ -113,22 +128,13 @@ class HomeToiler : NeoToiler() {
             list.add(
                 HomeItem(
                     type = HomeItem.Type.PROM,
-                    isRefresh = false,
-                    line1 = strings.prom_for_soul_unite,
-                    line2 = "",
-                    line3 = strings.about_prom_time
+                    lines = listOf(strings.prom_for_soul_unite, strings.about_prom_time)
                 )
             )
             list.add(
-                HomeItem(
-                    type = HomeItem.Type.MENU,
-                    isRefresh = false,
-                    line1 = "",
-                    line2 = "",
-                    line3 = ""
-                )
+                HomeItem(HomeItem.Type.MENU, listOf())
             )
-            postState(NeoState.HomeList(list))
+            postState(HomeState.Primary(list))
             if (needLoadSummary || needLoadAddition || needLoadCalendar || needLoadNews)
                 refreshOld()
         }
@@ -161,51 +167,40 @@ class HomeToiler : NeoToiler() {
             needLoadNews = false
             delay(100)
         }
-        postState(NeoState.Success)
-    }
-
-    override suspend fun doLoad() {
-        when (task) {
-            Task.LOAD_SUMMARY -> loadSummary()
-            Task.LOAD_ADDITION -> loadAddition()
-            Task.LOAD_CALENDAR -> loadCalendar()
-            Task.LOAD_NEWS -> loadNews()
-            else -> return
-        }
-        postState(NeoState.Success)
+        postState(BasicState.Success)
     }
 
     private suspend fun loadSummary() {
-        postState(NeoState.ListState(ListEvent.RELOAD, INDEX_SUMMARY))
+        postState(HomeState.Loading(INDEX_SUMMARY))
         SummaryLoader(client).load()
         readSummaryLink()
         loadPage(linkSummary)
         clearPrimaryState()
-        postState(NeoState.HomeUpdate(createSummaryItem()))
+        postState(ListState.Update(INDEX_SUMMARY, createSummaryItem()))
     }
 
     private suspend fun loadAddition() {
-        postState(NeoState.ListState(ListEvent.RELOAD, INDEX_ADDITION))
+        postState(HomeState.Loading(INDEX_ADDITION))
         AdditionLoader(client).load()
         clearPrimaryState()
-        postState(NeoState.HomeUpdate(createAdditionItem()))
+        postState(ListState.Update(INDEX_ADDITION, createAdditionItem()))
     }
 
     private suspend fun loadCalendar() {
-        postState(NeoState.ListState(ListEvent.RELOAD, INDEX_CALENDAR))
+        postState(HomeState.Loading(INDEX_CALENDAR))
         CalendarLoader(client).load()
         readCalendarLink()
         loadPage(linkCalendar)
         clearPrimaryState()
-        postState(NeoState.HomeUpdate(createCalendarItem()))
+        postState(ListState.Update(INDEX_CALENDAR, createCalendarItem()))
     }
 
     private suspend fun loadNews() {
-        postState(NeoState.ListState(ListEvent.RELOAD, INDEX_NEWS))
+        postState(HomeState.Loading(INDEX_NEWS))
         val loader = SiteLoader(client, Lib.getFile(SiteToiler.NEWS).toString())
         loader.load(Urls.Ads)
         clearPrimaryState()
-        postState(NeoState.HomeUpdate(createNewsItem()))
+        postState(ListState.Update(INDEX_NEWS, createNewsItem()))
     }
 
     private fun loadPage(link: String) {
@@ -233,10 +228,7 @@ class HomeToiler : NeoToiler() {
         storage.close()
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
-            isRefresh = false,
-            line1 = strings.journal,
-            line2 = strings.last_readed,
-            line3 = title
+            lines = listOf(strings.journal, strings.last_readed, title)
         )
     }
 
@@ -276,12 +268,10 @@ class HomeToiler : NeoToiler() {
             }
         }
         cursor.close()
+        val d = date.toAlterString().substring(7)
         return HomeItem(
             type = HomeItem.Type.CALENDAR,
-            isRefresh = true,
-            line1 = strings.calendar,
-            line2 = strings.today_msk + date.toAlterString().substring(7),
-            line3 = title
+            lines = listOf(strings.calendar, strings.today_msk + d, title)
         )
     }
 
@@ -315,10 +305,7 @@ class HomeToiler : NeoToiler() {
 
         return HomeItem(
             type = HomeItem.Type.SUMMARY,
-            isRefresh = true,
-            line1 = strings.summary,
-            line2 = time + strings.back,
-            line3 = title
+            lines = listOf(strings.summary, time + strings.back, title)
         )
     }
 
@@ -345,10 +332,7 @@ class HomeToiler : NeoToiler() {
 
         return HomeItem(
             type = HomeItem.Type.NEWS,
-            isRefresh = true,
-            line1 = strings.news,
-            line2 = time + strings.back,
-            line3 = title
+            lines = listOf(strings.news, time + strings.back, title)
         )
     }
 
@@ -368,10 +352,7 @@ class HomeToiler : NeoToiler() {
         else strings.last_post_from.format(t)
         return HomeItem(
             type = HomeItem.Type.ADDITION,
-            isRefresh = true,
-            line1 = strings.additionally_from_tg,
-            line2 = time + strings.back,
-            line3 = t
+            lines = listOf(strings.additionally_from_tg, time + strings.back, t)
         )
     }
 
@@ -401,7 +382,7 @@ class HomeToiler : NeoToiler() {
 
     fun updateJournal() {
         scope.launch {
-            postState(NeoState.HomeUpdate(createJournalItem()))
+            postState(ListState.Update(INDEX_JOURNAL, createJournalItem()))
         }
     }
 }

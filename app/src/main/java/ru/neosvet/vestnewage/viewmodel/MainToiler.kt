@@ -7,8 +7,8 @@ import okhttp3.Request
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
@@ -20,22 +20,29 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.WordsUtils
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.MainState
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 class MainToiler : NeoToiler() {
     private lateinit var updatedPage: String
     private var client = NeoClient(NeoClient.Type.MAIN)
-
-    fun init(context: Context) {
-        updatedPage = context.getString(R.string.updated_page)
-    }
+    private var withSplash = true
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, MainHelper.TAG)
         .build()
+
+    override fun init(context: Context) {
+        updatedPage = context.getString(R.string.updated_page)
+    }
+
+    override suspend fun defaultState() {
+        postState(MainState.FirstRun(withSplash))
+    }
 
     override suspend fun doLoad() {
         Urls.update(client)
@@ -48,8 +55,9 @@ class MainToiler : NeoToiler() {
         val ads = AdsUtils(storage)
         ads.loadAds(client)
         storage.close()
-        postState(NeoState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
+        postState(MainState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
         loadNew()
+        postState(BasicState.Success)
     }
 
     private suspend fun loadQuoteCom() {
@@ -113,7 +121,7 @@ class MainToiler : NeoToiler() {
         val storage = PageStorage()
         var cursor: Cursor
         var s = br.readLine()
-        val list = mutableListOf<ListItem>()
+        val list = mutableListOf<BasicItem>()
         while (s != Const.END) {
             time = s.toLong()
             s = br.readLine() //link
@@ -124,7 +132,7 @@ class MainToiler : NeoToiler() {
                 if (time > cursor.getLong(iTime)) {
                     LoaderService.loadPage(s)
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
-                    list.add(ListItem(cursor.getString(iTitle), s).apply {
+                    list.add(BasicItem(cursor.getString(iTitle), s).apply {
                         des = updatedPage
                     })
                 }
@@ -134,7 +142,7 @@ class MainToiler : NeoToiler() {
         }
         br.close()
         if (list.isNotEmpty())
-            postState(NeoState.ListValue(list))
+            postState(ListState.Primary(list = list))
     }
 
     private suspend fun synchronizationTime(): Int {
@@ -148,5 +156,9 @@ class MainToiler : NeoToiler() {
         response.close()
         val timeDevice = DateUnit.initNow().timeInSeconds
         return (timeDevice - timeServer).toInt()
+    }
+
+    fun setArgument(withSplash: Boolean) {
+        this.withSplash = withSplash
     }
 }

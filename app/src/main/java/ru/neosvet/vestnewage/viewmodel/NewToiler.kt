@@ -1,14 +1,20 @@
 package ru.neosvet.vestnewage.viewmodel
 
+import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.AdsStorage
-import ru.neosvet.vestnewage.utils.*
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.NotificationUtils
+import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.File
 
 class NewToiler : NeoToiler() {
@@ -16,28 +22,30 @@ class NewToiler : NeoToiler() {
         NONE, OPEN, CLEAR
     }
 
-    var needOpen: Boolean = true
-    private var isInit = false
+    private var needOpen: Boolean = true
     private val storage = AdsStorage()
     private lateinit var ads: AdsUtils
     private lateinit var poemFrom: String
     private var task = Task.NONE
 
-    fun init() {
-        if (isInit) return
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, "New")
+        .putString(Const.MODE, task.toString())
+        .build()
+
+    override fun init(context: Context) {
         ads = AdsUtils(storage)
-        poemFrom = App.context.getString(R.string.poem) + " " + App.context.getString(R.string.from) + " "
-        isInit = true
+        poemFrom =
+            App.context.getString(R.string.poem) + " " + App.context.getString(R.string.from) + " "
+    }
+
+    override suspend fun defaultState() {
+        openList()
     }
 
     override fun onDestroy() {
         storage.close()
     }
-
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "New")
-        .putString(Const.MODE, task.toString())
-        .build()
 
     fun openList() {
         if (needOpen.not()) return
@@ -45,7 +53,7 @@ class NewToiler : NeoToiler() {
         scope.launch {
             val notifHelper = NotificationUtils()
             notifHelper.cancel(NotificationUtils.NOTIF_SUMMARY)
-            val list = ads.loadList(true) as MutableList
+            val list = ads.loadList(true)
             var t: String
             var s: String
             var n: Int
@@ -64,12 +72,15 @@ class NewToiler : NeoToiler() {
                         t = poemFrom + t
                     if (s.contains("#")) {
                         t = t.replace("#", " (") + ")"
-                        list.add(ListItem(t, s.replace("#", Const.HTML + "#")))
+                        list.add(BasicItem(t, s.replace("#", Const.HTML + "#")))
                     } else
-                        list.add(ListItem(t, s + Const.HTML))
+                        list.add(BasicItem(t, s + Const.HTML))
                 }
             }
-            postState(NeoState.ListValue(list))
+            if (list.isEmpty())
+                postState(BasicState.Empty)
+            else
+                postState(ListState.Primary(list = list))
             needOpen = false
         }
     }
@@ -80,11 +91,11 @@ class NewToiler : NeoToiler() {
             val unread = UnreadUtils()
             unread.clearList()
             unread.setBadge(storage.unreadCount)
-            postState(NeoState.Ready)
+            postState(BasicState.Empty)
         }
     }
 
-    fun readAds(item: ListItem) {
+    fun readAds(item: BasicItem) {
         storage.setRead(item)
     }
 }

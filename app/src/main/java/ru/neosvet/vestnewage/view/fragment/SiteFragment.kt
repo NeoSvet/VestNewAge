@@ -12,8 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.databinding.SiteFragmentBinding
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
@@ -23,8 +24,11 @@ import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.SiteState
 
 class SiteFragment : NeoFragment() {
     companion object {
@@ -43,7 +47,14 @@ class SiteFragment : NeoFragment() {
     private var binding: SiteFragmentBinding? = null
     override val title: String
         get() = getString(R.string.news)
-    private var itemAds: ListItem? = null
+    private var itemAds: BasicItem? = null
+    private var selectedTab = SiteTab.NEWS.value
+    private val isDevTab: Boolean
+        get() = selectedTab == SiteTab.DEV.value
+    private val isNewsTab: Boolean
+        get() = selectedTab == SiteTab.NEWS.value
+    private val isSiteTab: Boolean
+        get() = selectedTab == SiteTab.SITE.value
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,7 +70,12 @@ class SiteFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         initTabs()
-        restoreState(savedInstanceState)
+        arguments?.let {
+            selectedTab = it.getInt(Const.TAB)
+            toiler.setArgument(selectedTab)
+            arguments = null
+        }
+        binding?.tabLayout?.select(selectedTab)
     }
 
     override fun onDestroyView() {
@@ -68,9 +84,12 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        itemAds?.let {
-            outState.putStringArray(Const.ADS, it.main)
-        }
+        toiler.setStatus(
+            SiteState.Status(
+                selectedTab = selectedTab,
+                itemAds = itemAds
+            )
+        )
         super.onSaveInstanceState(outState)
     }
 
@@ -88,31 +107,12 @@ class SiteFragment : NeoFragment() {
         }
     }
 
-    private fun restoreState(state: Bundle?) {
-        if (toiler.isEmptyState) {
-            arguments?.let {
-                toiler.selectedTab = it.getInt(Const.TAB)
-                binding?.tabLayout?.select(toiler.selectedTab)
-            }
-            when (toiler.selectedTab) {
-                SiteToiler.TAB_DEV -> toiler.openAds()
-                else -> toiler.openList(true)
-            }
-        } else state?.getStringArray(Const.ADS)?.let {
-            itemAds = ListItem(it).also { item ->
-                AdsUtils.showDialog(requireActivity(), item, this::closeAds)
-            }
-        }
-    }
-
     private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.news))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.site))
-        if (toiler.selectedTab == SiteToiler.TAB_SITE)
-            tabLayout.select(toiler.selectedTab)
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
-                if (toiler.isDevTab)
+                if (isDevTab)
                     onTabSelected(tab)
             }
 
@@ -120,9 +120,10 @@ class SiteFragment : NeoFragment() {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                toiler.selectedTab = tab.position
+                if (selectedTab == tab.position) return
+                selectedTab = tab.position
                 adapter.clear()
-                toiler.openList(true)
+                toiler.openList(true, selectedTab)
             }
         })
     }
@@ -147,7 +148,7 @@ class SiteFragment : NeoFragment() {
         }
     }
 
-    private fun openMultiLink(links: ListItem, parent: View) {
+    private fun openMultiLink(links: BasicItem, parent: View) {
         val pMenu = PopupMenu(requireContext(), parent)
         links.headsAndLinks().forEach {
             val item = pMenu.menu.add(it.first)
@@ -164,7 +165,7 @@ class SiteFragment : NeoFragment() {
 
     private fun openSingleLink(link: String) {
         if (link == "#" || link == "@") return
-        if (toiler.isSiteTab) {
+        if (isSiteTab) {
             if (link.contains("rss"))
                 act?.setSection(Section.SUMMARY, true)
             else if (link.isPoem)
@@ -178,11 +179,11 @@ class SiteFragment : NeoFragment() {
             openPage(link)
     }
 
-    private fun isAds(index: Int, item: ListItem): Boolean {
+    private fun isAds(index: Int, item: BasicItem): Boolean {
         binding?.run {
-            if (toiler.isDevTab) {
+            if (isDevTab) {
                 if (index == 0) { //back
-                    tabLayout.select(SiteToiler.TAB_NEWS)
+                    tabLayout.select(SiteTab.NEWS.value)
                     return true
                 }
                 item.des = ""
@@ -191,9 +192,9 @@ class SiteFragment : NeoFragment() {
                 adapter.notifyItemChanged(index)
                 return true
             }
-            if (toiler.isNewsTab && index == 0) {
-                toiler.selectedTab = SiteToiler.TAB_DEV
-                toiler.openAds()
+            if (isNewsTab && index == 0) {
+                selectedTab = SiteTab.DEV.value
+                toiler.openList(true, selectedTab)
                 return true
             }
         }
@@ -215,26 +216,41 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        if (state is NeoState.ListValue) {
-            setStatus(false)
-            binding?.run {
-                rvSite.layoutManager = if (toiler.isNewsTab)
-                    GridLayoutManager(requireContext(), 1)
-                else
-                    GridLayoutManager(requireContext(), ScreenUtils.span)
-                if (state.list.isEmpty())
-                    act?.showStaticToast(getString(R.string.empty_site))
-                else
-                    act?.hideToast()
+        when (state) {
+            is BasicState.NotLoaded ->
+                binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
+
+            is SiteState.Status ->
+                restoreStatus(state)
+
+            is ListState.Primary -> {
+                setStatus(false)
+                binding?.run {
+                    setUpdateTime(state.time, tvUpdate)
+                    rvSite.layoutManager = if (isNewsTab)
+                        GridLayoutManager(requireContext(), 1)
+                    else
+                        GridLayoutManager(requireContext(), ScreenUtils.span)
+                    if (state.list.isEmpty())
+                        act?.showStaticToast(getString(R.string.empty_site))
+                    else
+                        act?.hideToast()
+                }
+                adapter.setItems(state.list)
             }
-            adapter.setItems(state.list)
-        } else if (state is NeoState.LongValue) binding?.run {
-            setUpdateTime(state.value, tvUpdate)
         }
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
-        if (toiler.isRun) return
+    private fun restoreStatus(state: SiteState.Status) {
+        selectedTab = state.selectedTab
+        binding?.tabLayout?.select(selectedTab)
+        itemAds = state.itemAds?.also {
+            AdsUtils.showDialog(requireActivity(), it, this::closeAds)
+        }
+    }
+
+    private fun onItemClick(index: Int, item: BasicItem) {
+        if (isBlocked) return
         if (isAds(index, item)) return
         if (item.hasFewLinks())
             openMultiLink(item, binding!!.rvSite.getItemView(index))

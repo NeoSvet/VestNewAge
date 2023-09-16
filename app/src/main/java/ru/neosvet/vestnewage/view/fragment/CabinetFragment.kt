@@ -11,9 +11,9 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
-import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
@@ -22,22 +22,24 @@ import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.CabinetToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.CabinetState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class CabinetFragment : NeoFragment() {
     private var binding: CabinetFragmentBinding? = null
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    private val adapter = RecyclerAdapter(this::onItemClick)
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.login.etPassword)
     }
     private val toiler: CabinetToiler
         get() = neotoiler as CabinetToiler
-    private val helper: CabinetHelper
-        get() = toiler.helper
+    private var screen: CabinetScreen = CabinetScreen.LOGIN
+    private var isReadyLogin = false
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[CabinetToiler::class.java].apply { init(requireContext()) }
+        ViewModelProvider(this)[CabinetToiler::class.java]
 
     override val title: String
         get() = getString(R.string.cabinet)
@@ -53,62 +55,59 @@ class CabinetFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initMain()
         initLogin()
-        restoreState()
     }
 
     override fun onChangedOtherState(state: NeoState) {
         setStatus(false)
         when (state) {
-            is NeoState.Message -> {
+            is BasicState.Message -> {
                 val alert = CustomDialog(act)
                 alert.setTitle(getString(R.string.error))
                 alert.setMessage(state.message)
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
                 alert.show(null)
             }
-            is NeoState.ListValue -> {
-                binding?.run {
-                    if (toiler.screen == CabinetToiler.Screen.LOGIN) {
-                        login.root.isVisible = true
-                        act?.setAction(R.drawable.ic_ok)
-                        rvList.layoutManager = GridLayoutManager(requireContext(), 1)
-                        checkReadyEnter()
-                    } else {
-                        login.root.isVisible = false
-                        act?.setAction(R.drawable.ic_exit)
-                        initLayoutManager()
-                    }
+
+            is CabinetState.Primary -> binding?.run {
+                screen = state.screen
+                if (screen == CabinetScreen.LOGIN) {
+                    login.root.isVisible = true
+                    act?.setAction(R.drawable.ic_ok)
+                    rvList.layoutManager = GridLayoutManager(requireContext(), 1)
+                    checkReadyEnter()
+                } else {
+                    login.root.isVisible = false
+                    act?.setAction(R.drawable.ic_exit)
+                    initLayoutManager()
                 }
                 adapter.setItems(state.list)
             }
-            else -> {}
+
+            is CabinetState.AuthPair -> binding?.login?.run {
+                if (state.login.isNotEmpty()) {
+                    cbRemEmail.isChecked = true
+                    etEmail.setText(state.login)
+                }
+                if (state.password.isNotEmpty()) {
+                    cbRemPassword.isChecked = true
+                    etPassword.setText(state.password)
+                }
+            }
         }
     }
 
     private fun initLayoutManager() {
-        val span = if (toiler.screen == CabinetToiler.Screen.WORDS)
+        val span = if (screen == CabinetScreen.WORDS)
             ScreenUtils.span
         else 1 //CABINET
         binding?.rvList?.layoutManager = GridLayoutManager(requireContext(), span)
     }
 
-    override fun onBackPressed(): Boolean = toiler.onBack()
-
-    private fun restoreState() {
-        if (toiler.isEmptyState) {
-            val p = helper.getAuthPair()
-            binding?.login?.run {
-                if (p.first.isNotEmpty()) {
-                    cbRemEmail.isChecked = true
-                    etEmail.setText(p.first)
-                }
-                if (p.second.isNotEmpty()) {
-                    cbRemPassword.isChecked = true
-                    etPassword.setText(p.second)
-                }
-            }
-            toiler.loginScreen()
-        }
+    override fun onBackPressed() = if (screen == CabinetScreen.LOGIN)
+        true
+    else {
+        toiler.exit()
+        false
     }
 
     private fun initMain() = binding?.run {
@@ -131,7 +130,7 @@ class CabinetFragment : NeoFragment() {
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_GO
             ) {
-                if (toiler.isReadyLogin) subLogin()
+                if (isReadyLogin) subLogin()
                 return@setOnKeyListener true
             }
             false
@@ -148,24 +147,31 @@ class CabinetFragment : NeoFragment() {
         }
     }
 
+    private fun check(email: String, password: String) {
+        isReadyLogin = if (email.length > 5 && password.length > 5) {
+            email.contains("@") && email.contains(".")
+        } else false
+    }
+
     private fun checkReadyEnter() = binding?.login?.run {
-        toiler.check(etEmail.text.toString(), etPassword.text.toString())
-        act?.setAction(if (toiler.isReadyLogin) R.drawable.ic_ok else 0)
+        check(etEmail.text.toString(), etPassword.text.toString())
+        act?.setAction(if (isReadyLogin) R.drawable.ic_ok else 0)
     }
 
     override fun onDestroyView() {
         binding?.login?.run {
-            helper.forget(cbRemEmail.isChecked.not(), cbRemPassword.isChecked.not())
+            toiler.forget(cbRemEmail.isChecked.not(), cbRemPassword.isChecked.not())
         }
         binding = null
         super.onDestroyView()
     }
 
     private fun subLogin() {
-        if (toiler.isRun) return
+        if (isBlocked) return
         if (adapter.itemCount == 1) {
             adapter.clear()
             toiler.loginScreen()
+            return
         }
         binding?.login?.run {
             setStatus(true)
@@ -173,21 +179,21 @@ class CabinetFragment : NeoFragment() {
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
             toiler.login(email, password)
-            if (cbRemEmail.isChecked) {
-                helper.save(email, if (cbRemPassword.isChecked) password else "")
-            }
+            if (cbRemEmail.isChecked)
+                toiler.save(email, if (cbRemPassword.isChecked) password else "")
         }
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
-        if (toiler.isRun) return
-        when (toiler.screen) {
-            CabinetToiler.Screen.LOGIN -> {
+    private fun onItemClick(index: Int, item: BasicItem) {
+        if (isBlocked) return
+        when (screen) {
+            CabinetScreen.LOGIN -> {
                 val s = when (index) {
                     0 -> {
                         Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
                         return
                     }
+
                     1 -> "sendpass.html"
                     2 -> "register.html"
                     3 -> "reginfo.html"
@@ -196,17 +202,20 @@ class CabinetFragment : NeoFragment() {
                 }
                 CabinetActivity.openPage(s)
             }
-            CabinetToiler.Screen.CABINET -> {
+
+            CabinetScreen.CABINET -> {
                 when (index) {
                     0 -> if (item.des == getString(R.string.select_status)) {
                         setStatus(true)
                         toiler.getListWord()
                     } else act?.showToast(getString(R.string.send_unlivable))
+
                     1 -> CabinetActivity.openPage("edinenie/anketa.html")
                     2 -> CabinetActivity.openPage("edinenie/edinomyshlenniki.html")
                 }
             }
-            CabinetToiler.Screen.WORDS -> {
+
+            CabinetScreen.WORDS -> {
                 setStatus(true)
                 toiler.selectWord(index, item.title)
             }
@@ -214,7 +223,7 @@ class CabinetFragment : NeoFragment() {
     }
 
     override fun onAction(title: String) {
-        if (toiler.screen == CabinetToiler.Screen.LOGIN)
+        if (screen == CabinetScreen.LOGIN)
             subLogin()
         else toiler.exit()
     }

@@ -18,10 +18,11 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
 import ru.neosvet.vestnewage.viewmodel.basic.MarkersStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.MarkersState
 import java.io.*
 
 class MarkersToiler : NeoToiler() {
@@ -30,27 +31,29 @@ class MarkersToiler : NeoToiler() {
     }
 
     private val storage = MarkersStorage()
-    var iSel = -1
-        private set
-    var change = false
-    private var sCol: String? = null
     private lateinit var strings: MarkersStrings
     private var task: Type = Type.NONE
-    val list = mutableListOf<MarkerItem>()
-    val title: String
-        get() = if (sCol == null) strings.collections
-        else sCol!!.substring(0, sCol!!.indexOf(Const.N))
-    val workOnFile: Boolean
-        get() = task == Type.FILE
-    val isCollections: Boolean
-        get() = sCol == null
     private var page: String? = null
-    val selectedItem: MarkerItem?
-        get() = if (iSel == -1) null else list[iSel]
-    private var isInit = false
+    private val list = mutableListOf<MarkerItem>()
+    private var change = false
+    private var collectionData = ""
+    private var collectionTitle = ""
+    private var isCollections = true
 
-    fun init(context: Context) {
-        if (isInit) return
+    override fun getInputData(): Data {
+        val builder = Data.Builder()
+            .putString(Const.TASK, "Markers")
+            .putString(Const.MODE, task.toString())
+        if (isCollections)
+            builder.putString(Const.TITLE, strings.collections)
+        else {
+            builder.putString(Const.TITLE, collectionTitle)
+            builder.putString(Const.DESCTRIPTION, collectionData)
+        }
+        return builder.build()
+    }
+
+    override fun init(context: Context) {
         strings = MarkersStrings(
             collections = context.getString(R.string.collections),
             no_collections = context.getString(R.string.no_collections),
@@ -63,7 +66,10 @@ class MarkersToiler : NeoToiler() {
             unuse_dot = context.getString(R.string.unuse_dot),
             cancel_rename = context.getString(R.string.cancel_rename)
         )
-        isInit = true
+    }
+
+    override suspend fun defaultState() {
+        openList()
     }
 
     override suspend fun doLoad() {
@@ -80,11 +86,9 @@ class MarkersToiler : NeoToiler() {
         storage.close()
     }
 
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, "Markers")
-        .putString(Const.MODE, task.toString())
-        .putString(Const.TITLE, sCol)
-        .build()
+    fun cancelChange() {
+        change = false
+    }
 
     fun saveChange() {
         if (change.not()) return
@@ -106,11 +110,7 @@ class MarkersToiler : NeoToiler() {
         val t = s.toString()
         val row = ContentValues()
         row.put(DataBase.MARKERS, t)
-        sCol?.let {
-            val title = it.substring(0, it.indexOf(Const.N))
-            storage.updateCollectionByTitle(title, row)
-            sCol = it.substring(0, it.indexOf(Const.N) + 1) + t
-        }
+        storage.updateCollectionByTitle(collectionTitle, row)
     }
 
     fun startExport(file: String) {
@@ -118,7 +118,7 @@ class MarkersToiler : NeoToiler() {
         isRun = true
         scope.launch {
             doExport(Uri.parse(file))
-            postState(NeoState.Message(file))
+            postState(MarkersState.FinishExport(file))
             isRun = false
         }
     }
@@ -128,7 +128,7 @@ class MarkersToiler : NeoToiler() {
         isRun = true
         scope.launch {
             doImport(Uri.parse(file))
-            postState(NeoState.Ready)
+            postState(MarkersState.FinishImport)
             isRun = false
         }
     }
@@ -138,9 +138,9 @@ class MarkersToiler : NeoToiler() {
         load()
     }
 
-    fun openColList() {
+    fun openCollectionsList() {
         task = Type.LIST
-        sCol = null
+        isCollections = true
         scope.launch {
             list.clear()
             val cursor = storage.getCollections(Const.PLACE)
@@ -163,29 +163,29 @@ class MarkersToiler : NeoToiler() {
                 } while (cursor.moveToNext())
             }
             cursor.close()
-            if (isNull && list.size == 1) {
+            if (isNull && list.size == 1)
                 list.clear()
-                iSel = -1
-            }
-            postState(NeoState.ListState(ListEvent.RELOAD))
+            postState(MarkersState.Primary(strings.collections, list, isCollections))
         }
     }
 
-    private fun openMarList(iCol: Int = -1) {
+    private fun openMarkersList(iCol: Int = -1) {
         task = Type.LIST
-        if (iCol > -1)
-            sCol = list[iCol].title + Const.N + list[iCol].data
+        isCollections = false
+        if (iCol > -1) {
+            collectionTitle = list[iCol].title
+            collectionData = list[iCol].data
+        }
         scope.launch {
             list.clear()
             var iID: Int
             var iPlace: Int
             var iLink: Int
             var iDes: Int
-            val mId: Array<String>
-            var link = sCol!!.substring(sCol!!.indexOf(Const.N) + 1)
-            mId = if (link.contains(Const.COMMA)) {
-                link.split(Const.COMMA).toTypedArray()
-            } else arrayOf(link)
+            var link: String
+            val mId = if (collectionData.contains(Const.COMMA))
+                collectionData.split(Const.COMMA)
+            else listOf(collectionData)
             var cursor: Cursor
             var place: String
             var k = 0
@@ -211,7 +211,7 @@ class MarkersToiler : NeoToiler() {
                 }
                 cursor.close()
             }
-            postState(NeoState.ListState(ListEvent.RELOAD))
+            postState(MarkersState.Primary(collectionTitle, list, isCollections))
         }
     }
 
@@ -312,92 +312,51 @@ class MarkersToiler : NeoToiler() {
     }
 
     fun openList() {
-        iSel = -1
-        if (sCol == null) openColList()
-        else openMarList()
+        if (isCollections) openCollectionsList()
+        else openMarkersList()
     }
 
-    fun restoreList() {
-        setState(NeoState.ListState(ListEvent.RELOAD))
-    }
-
-    fun canEdit(): Boolean {
-        if (list.isEmpty())
-            return false
-        iSel = if (isCollections) {
-            if (list.size == 1)
-                return false
-            1
-        } else 0
-        return true
-    }
-
-    fun deleteSelected() {
+    fun delete(index: Int) {
         scope.launch {
-            val item = list[iSel]
+            val item = list[index]
             val id = item.id.toString()
-            val n: Int
-            if (isCollections) { //удаляем подборку
-                n = 1
+            if (isCollections)
                 storage.deleteCollection(
                     id, MarkersStorage.getList(item.data),
                     strings.no_collections
                 )
-            } else { //удаляем закладку
-                n = 0
-                storage.deleteMarker(id)
-            }
-            val index = iSel
+            else storage.deleteMarker(id)
             list.removeAt(index)
-            if (list.size == n) iSel = -1
-            else if (list.size == iSel) iSel--
-            postState(NeoState.ListState(ListEvent.REMOTE, index))
+            postState(ListState.Remove(index))
         }
     }
 
     fun updateMarkersList() {
-        sCol = sCol!!.substring(0, sCol!!.indexOf(Const.N))
-        val cursor = storage.getMarkersListByTitle(sCol!!)
-        sCol += if (cursor.moveToFirst())
-            Const.N + cursor.getString(0) //список закладок в подборке
-        else Const.N
+        val cursor = storage.getMarkersListByTitle(collectionTitle)
+        collectionData = if (cursor.moveToFirst())
+            cursor.getString(0) //список закладок в подборке
+        else ""
         cursor.close()
-        openMarList()
+        openMarkersList()
     }
 
-    fun moveToTop() {
-        var n = 0
-        if (isCollections) n = 1
-        if (iSel == n)
+    fun move(indexFrom: Int, indexTo: Int) {
+        val n = if (isCollections) 1 else 0
+        if (indexFrom == n || indexTo == list.size)
             return
         task = Type.LIST
         change = true
-        n = iSel - 1
-        val item = list[n]
-        list.removeAt(n)
-        list.add(iSel, item)
-        iSel = n
-        setState(NeoState.ListState(ListEvent.MOVE, n + 1))
+        val item = list[indexTo]
+        list.removeAt(indexTo)
+        list.add(indexFrom, item)
+        setState(ListState.Move(indexFrom, indexTo))
     }
 
-    fun moveToBottom() {
-        if (iSel == list.size - 1)
-            return
-        task = Type.LIST
-        change = true
-        val n = iSel + 1
-        val item = list[n]
-        list.removeAt(n)
-        list.add(iSel, item)
-        iSel = n
-        setState(NeoState.ListState(ListEvent.MOVE, n - 1))
-    }
-
-    fun renameSelected(name: String) {
+    fun rename(index: Int, name: String) {
         var bCancel = name.isEmpty()
         if (!bCancel) {
             if (name.contains(Const.COMMA)) {
-                setState(NeoState.Message(strings.unuse_dot))
+                setState(BasicState.Message(strings.unuse_dot))
                 return
             }
             for (i in 0 until list.size) {
@@ -408,16 +367,16 @@ class MarkersToiler : NeoToiler() {
             }
         }
         if (bCancel) {
-            setState(NeoState.Message(strings.cancel_rename))
+            setState(BasicState.Message(strings.cancel_rename))
             return
         }
         val row = ContentValues()
         row.put(Const.TITLE, name)
-        if (storage.updateCollection(list[iSel].id, row)) {
-            list[iSel].title = name
-            setState(NeoState.ListState(ListEvent.CHANGE, iSel))
+        if (storage.updateCollection(list[index].id, row)) {
+            list[index].title = name
+            setState(ListState.Update(index, list[index]))
         } else
-            setState(NeoState.Message(strings.cancel_rename))
+            setState(BasicState.Message(strings.cancel_rename))
     }
 
     private fun doExport(file: Uri) {
@@ -620,10 +579,6 @@ class MarkersToiler : NeoToiler() {
         return b.toString()
     }
 
-    fun selected(index: Int) {
-        iSel = index
-    }
-
     private fun getPlace(index: Int): String? {
         return if (list[index].place == "0") null
         else list[index].des.let { d ->
@@ -633,16 +588,13 @@ class MarkersToiler : NeoToiler() {
 
     fun onClick(index: Int) {
         if (isRun) return
-        if (iSel > -1) {
-            if (isCollections && index == 0) return // вне подборок
-            selected(index)
-            return
-        }
         when {
             isCollections ->
-                openMarList(index)
+                openMarkersList(index)
+
             list[index].title.contains("/") ->
                 loadPage(index)
+
             else ->
                 BrowserActivity.openReader(list[index].data, getPlace(index))
         }

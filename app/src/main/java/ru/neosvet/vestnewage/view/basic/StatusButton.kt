@@ -12,7 +12,7 @@ import androidx.core.view.isVisible
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 class StatusButton(
     private val context: Context,
@@ -23,7 +23,7 @@ class StatusButton(
     private val tv: TextView = panel.findViewById(R.id.tvStatus)
     private val iv: ImageView = panel.findViewById(R.id.ivStatus)
     private val progBar: ProgressBar? = panel.findViewById(R.id.progStatus)
-    private var error: NeoState.Error? = null
+    private var error: BasicState.Error? = null
     private var stop = true
     var isVisible = false
         private set
@@ -68,7 +68,7 @@ class StatusButton(
         }
     }
 
-    fun setError(error: NeoState.Error?) {
+    fun setError(error: BasicState.Error?) {
         stop = true
         clearAnimation()
         if (error != null) {

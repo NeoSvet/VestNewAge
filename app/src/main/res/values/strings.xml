@@ -80,7 +80,7 @@
     <string name="format_info">Версия приложения: %s (%d)\nВерсия системы: %s (%d)</string>
     <string name="format_time_back">%s назад\n(%s)</string>
     <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
-    <string name="format_freed_size">Освобождено: %.2f МБ</string>
+    <string name="format_freed_size">Освобождено: %s МБ</string>
     <string name="format_delete">Удалить %s?</string>
     <!--NewFragment-->
     <string name="empty_list">Список нового пуст.</string>

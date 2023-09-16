@@ -13,19 +13,18 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.HomeAdapter
 import ru.neosvet.vestnewage.view.list.HomeHolder
-import ru.neosvet.vestnewage.view.list.HomeMenuHolder
 import ru.neosvet.vestnewage.viewmodel.HomeToiler
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.ListEvent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.HomeState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class HomeFragment : NeoFragment() {
     private val adapter = HomeAdapter(this::onItemClick, this::onMenuClick)
@@ -36,7 +35,7 @@ class HomeFragment : NeoFragment() {
     private var openedReader = false
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[HomeToiler::class.java].apply { init(requireContext()) }
+        ViewModelProvider(this)[HomeToiler::class.java]
 
     override fun onDestroyView() {
         act?.unlockHead()
@@ -47,14 +46,11 @@ class HomeFragment : NeoFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.list_fragment, container, false)
-        initView(view)
-        return view
+    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
+        initView(it)
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        toiler.openList()
     }
 
     override fun onResume() {
@@ -75,28 +71,22 @@ class HomeFragment : NeoFragment() {
 
     override fun setStatus(load: Boolean) {
         if (!load && adapter.loadingIndex > -1) //if error
-            toiler.openList()
+            adapter.finishLoading()
     }
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is NeoState.HomeList ->
+            is HomeState.Primary ->
                 adapter.setItems(state.list)
 
-            is NeoState.HomeUpdate ->
-                adapter.update(state.item)
+            is ListState.Update<*> ->
+                adapter.update(state.index, state.item as HomeItem)
 
-            is NeoState.ListState -> {
-                if (state.event == ListEvent.RELOAD)
-                    adapter.startLoading(state.index)
-                else
-                    adapter.finishLoading(state.index)
-            }
+            is HomeState.Loading ->
+                adapter.startLoading(state.index)
 
-            NeoState.Success ->
+            BasicState.Success ->
                 act?.updateNew()
-
-            else -> {}
         }
     }
 
@@ -131,7 +121,7 @@ class HomeFragment : NeoFragment() {
 
             HomeItem.Type.PROM -> {
                 val link = if (action == HomeHolder.Action.SUBTITLE)
-                    "Vremya-Posyla.html" else Const.PROM_LINK
+                    Urls.VREMYA_LINK else Urls.PROM_LINK
                 BrowserActivity.openReader(link, null)
             }
 
@@ -141,6 +131,7 @@ class HomeFragment : NeoFragment() {
                 else openReader(toiler.linkJournal)
 
             HomeItem.Type.MENU -> {}
+            HomeItem.Type.FEED -> TODO()
         }
     }
 
@@ -149,26 +140,15 @@ class HomeFragment : NeoFragment() {
         BrowserActivity.openReader(link, null)
     }
 
-    private fun onMenuClick(action: HomeMenuHolder.Action) {
-        val section = when (action) {
-            HomeMenuHolder.Action.BOOK -> Section.BOOK
-            HomeMenuHolder.Action.MARKERS -> Section.MARKERS
-            HomeMenuHolder.Action.EDIT -> {
-                startEdit()
-                return
-            }
-
-            HomeMenuHolder.Action.SETTINGS -> Section.SETTINGS
-        }
-        act?.setSection(section, true)
+    private fun onMenuClick(section: Section) {
+        if (section == Section.MENU)
+            startEdit()
+        else
+            act?.setSection(section, true)
     }
 
     private fun startEdit() {
         //TODO("Not yet implemented")
-        val file1 = Lib.getFile(SiteToiler.NEWS)
-        file1.delete()
-        val file2 = Lib.getFile(SiteToiler.MAIN)
-        file2.copyTo(file1)
     }
 
     override fun onAction(title: String) {

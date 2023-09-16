@@ -2,47 +2,34 @@ package ru.neosvet.vestnewage.helper
 
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
-import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.utils.Const
 
 class MarkerHelper(private val strings: MarkerStrings) {
-    enum class Type {
-        NONE, PAR, POS, COL
-    }
-
-    private val formatPos: String = strings.sel_pos + "%.1f%%"
-    var type = Type.NONE
+    private var content = ""
+    private var countPar = 0f
     val parsList = mutableListOf<CheckItem>()
     val colsList = mutableListOf<CheckItem>()
-    var content: String = ""
-    var countPar: Int = 0
 
-    var title: String = ""
-    var des: String = ""
-    var isPar: Boolean = true //else - isPos
-    var sel: String = ""
-    var cols: String = ""
-    var posText: String = ""
-        get() {
-            if (field.isEmpty())
-                field = getPosText()
-            return field
+    fun setContent(s: String) {
+        parsList.clear()
+        countPar = 5f // имитация нижнего "колонтитула" страницы
+        content = s
+        if (s.isEmpty())  // страница не загружена...
+            return
+        val m = s.split(Const.NN)
+        var i = 0
+        while (i < m.size) {
+            parsList.add(CheckItem(id = i, title = m[i]))
+            i++
         }
-    var pos: Float = 0f
-    var newPos: Float = 0f
-
-    fun updateSel() {
-        sel = if (isPar) {
-            val s = getParList()
-            if (s == null) {
-                checkedAllPars()
-                getParList() ?: ""
-            } else s
-        } else
-            String.format(formatPos, pos)
+        i = s.indexOf(Const.N)
+        while (i > -1) {
+            countPar++
+            i = s.indexOf(Const.N, i + 1)
+        }
     }
 
-    private fun checkedAllPars() {
+    fun checkedAllPars() {
         parsList.forEach { item ->
             item.isChecked = true
         }
@@ -77,8 +64,8 @@ class MarkerHelper(private val strings: MarkerStrings) {
         return index
     }
 
-    fun getPosText(p: Float = pos): String {
-        var k = (countPar.toFloat() * p / 100f).toInt() + 1
+    fun getPosText(p: Float): String {
+        var k = (countPar * p / 100f).toInt() + 1
         var u: Int
         var i = 0
         do {
@@ -93,7 +80,7 @@ class MarkerHelper(private val strings: MarkerStrings) {
         else content.substring(u).trim()
     }
 
-    fun getParList(): String? {
+    fun getParString(): String? {
         val s = StringBuilder()
         if (parsList[0].isChecked) {
             s.append(strings.page_entirely)
@@ -113,23 +100,7 @@ class MarkerHelper(private val strings: MarkerStrings) {
         return s.toString()
     }
 
-    fun setParList() {
-        if (sel.contains("№")) {
-            parsList.forEach { item ->
-                item.isChecked = false
-            }
-            val s = sel.substring(sel.indexOf(":") + 2).replace(", ", Const.COMMA)
-            s.split(Const.COMMA).forEach {
-                parsList[it.toInt()].isChecked = true
-            }
-        } else {
-            parsList.forEach { item ->
-                item.isChecked = true
-            }
-        }
-    }
-
-    fun getColList(): String? {
+    fun getColString(): String? {
         val s = StringBuilder(strings.sel_col)
         for (i in colsList.indices) {
             if (colsList[i].isChecked) {
@@ -142,33 +113,6 @@ class MarkerHelper(private val strings: MarkerStrings) {
         else null
     }
 
-    fun setColList() {
-        val s = MarkersStorage.closeList(
-            cols.substring(strings.sel_col.length).replace(", ", Const.COMMA)
-        )
-        var t: String
-        colsList.forEach { item ->
-            t = MarkersStorage.closeList(item.title)
-            item.isChecked = s.contains(t)
-        }
-    }
-
-    fun setPlace(s: String) {
-        if (s.contains("%")) {
-            isPar = false
-            pos = s.substring(0, s.length - 1).replace(Const.COMMA, ".").toFloat()
-            posText = getPosText()
-            sel = strings.sel_pos + s
-        } else {
-            isPar = true
-            sel = if (s == "0")
-                strings.page_entirely
-            else
-                strings.sel_par + s.replace(Const.COMMA, ", ")
-            setParList()
-        }
-    }
-
     fun checkTitleCol(title: String): String? {
         if (title.contains(Const.COMMA))
             return strings.unuse_dot
@@ -178,7 +122,4 @@ class MarkerHelper(private val strings: MarkerStrings) {
         }
         return null
     }
-
-    fun toJson(): String =
-        "title{$title}des{$des}isPar{$isPar}sel{$sel}cols{$cols}posText{$posText}pos{$pos}newPos{$newPos}pars{${parsList.size}cols{${colsList.size}"
 }

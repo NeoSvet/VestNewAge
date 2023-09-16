@@ -22,8 +22,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.SearchScreen
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
@@ -43,13 +44,14 @@ import ru.neosvet.vestnewage.view.list.RequestAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SearchToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.SearchState
 
 class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent {
     companion object {
-        private const val SETTINGS = "s"
-        private const val ADDITION = "a"
         private const val LAST_RESULTS = 0
         private const val CLEAR_RESULTS = 1
 
@@ -67,9 +69,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private val toiler: SearchToiler
         get() = neotoiler as SearchToiler
     private var binding: SearchFragmentBinding? = null
-    private val adSearch: ArrayAdapter<String> by lazy {
-        ArrayAdapter(requireContext(), R.layout.spinner_item, helper.getListRequests())
-    }
+    private lateinit var helper: SearchHelper
     private lateinit var adRequest: RequestAdapter
     private val adDefault: RecyclerAdapter by lazy {
         RecyclerAdapter(this::defaultClick)
@@ -77,9 +77,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private val adResult: PagingAdapter by lazy {
         PagingAdapter(this)
     }
-    override lateinit var modeAdapter: ArrayAdapter<String>
-        private set
     private lateinit var resultAdapter: ArrayAdapter<String>
+    private var screen = SearchScreen.EMPTY
 
     private var settings: SearchDialog? = null
     private var jobList: Job? = null
@@ -90,8 +89,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
-    override val helper: SearchHelper
-        get() = toiler.helper
 
     override val title: String
         get() = getString(R.string.search)
@@ -113,19 +110,49 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }.root
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[SearchToiler::class.java].apply { init(requireContext()) }
+        ViewModelProvider(this)[SearchToiler::class.java]
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initSearchBox()
         setViews()
-        initSearchList()
-        restoreState(savedInstanceState)
+        arguments?.let { args ->
+            val mode = args.getInt(Const.MODE, 0)
+            val request = args.getString(Const.STRING) ?: ""
+            toiler.setArguments(mode, request)
+            binding?.run {
+                etSearch.setText(request)
+                etSearch.setSelection(request.length)
+            }
+            arguments = null
+        }
+        if (savedInstanceState == null)
+            TipActivity.showTipIfNeed(TipName.SEARCH)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val i = if (screen == SearchScreen.RESULTS)
+            adResult.firstPosition
+        else -1
+        toiler.setStatus(
+            SearchState.Status(
+                screen = screen,
+                settings = settings?.onSaveInstanceState(),
+                shownAddition = binding?.content?.pAdditionSet?.isVisible == true,
+                firstPosition = i
+            )
+        )
+        super.onSaveInstanceState(outState)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSearchBox() = binding?.run {
+        adRequest = RequestAdapter(
+            requireContext(),
+            this@SearchFragment::selectRequest
+        )
+
         etSearch.threshold = 1
-        etSearch.setAdapter(adSearch)
+        etSearch.setAdapter(adRequest.adapter)
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
@@ -144,13 +171,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         etSearch.doAfterTextChanged {
             bClear.isVisible = it?.isNotEmpty() ?: false
         }
-
-        adRequest = RequestAdapter(
-            helper.requests,
-            this@SearchFragment::selectRequest,
-            this@SearchFragment::removeRequest,
-            this@SearchFragment::clearRequests
-        )
         rvRequests.layoutManager = GridLayoutManager(requireContext(), 1)
         rvRequests.adapter = adRequest
 
@@ -172,7 +192,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     override fun onDestroyView() {
         act?.unlockHead()
-        helper.saveRequest()
+        adRequest.save()
         binding = null
         super.onDestroyView()
     }
@@ -208,71 +228,38 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        settings?.let {
-            outState.putBundle(SETTINGS, it.onSaveInstanceState())
-        }
-        if (toiler.shownResult) binding?.run {
-            outState.putBoolean(ADDITION, content.pAdditionSet.isVisible)
-            firstPosition = adResult.firstPosition
-            outState.putInt(Const.PLACE, firstPosition)
-        }
-        super.onSaveInstanceState(outState)
-    }
-
-    private fun restoreState(state: Bundle?) = binding?.run {
-        if (state == null) {
-            arguments?.let { args ->
-                helper.mode = args.getInt(Const.MODE)
-                helper.request = args.getString(Const.STRING) ?: ""
-            }
-            if (helper.request.isEmpty())
-                TipActivity.showTipIfNeed(TipName.SEARCH)
-            else {
-                etSearch.setText(helper.request)
-                etSearch.setSelection(helper.request.length)
-                startSearch()
-            }
-            return@run
-        }
-        if (toiler.shownResult) {
-            toiler.showLastResult()
-            etSearch.setText(helper.request)
-            etSearch.setSelection(helper.request.length)
-            content.tvLabel.text = helper.label
-            bPanelSwitch.isVisible = true
-            if (state.getBoolean(ADDITION))
-                showAdditionPanel()
-            firstPosition = state.getInt(Const.PLACE, 0)
-        }
-        state.getBundle(SETTINGS)?.let {
-            openSettings()
-            settings?.onRestoreInstanceState(it)
-        }
-        if (toiler.isRun)
-            setStatus(true)
-    }
-
-    private fun initSearchList() = binding?.content?.run {
+    private fun initSearchList(screen: SearchScreen) = binding?.content?.run {
         rvSearch.layoutManager = GridLayoutManager(requireContext(), 1)
-        if (toiler.shownResult) {
-            rvSearch.adapter = adResult
-        } else {
-            if (toiler.existsResults()) {
+        this@SearchFragment.screen = screen
+        when (screen) {
+            SearchScreen.RESULTS ->
+                rvSearch.adapter = adResult
+
+            SearchScreen.EMPTY ->
+                rvSearch.adapter = adDefault
+
+            SearchScreen.DEFAULT -> {
                 val list = listOf(
-                    ListItem(getString(R.string.results_last_search), true),
-                    ListItem(getString(R.string.clear_results_search), true)
+                    BasicItem(getString(R.string.results_last_search), true),
+                    BasicItem(getString(R.string.clear_results_search), true)
                 )
                 adDefault.setItems(list)
+                rvSearch.adapter = adDefault
             }
-            rvSearch.adapter = adDefault
         }
         setListEvents(rvSearch)
     }
 
     private fun openSettings() {
         softKeyboard.hide()
-        settings = SearchDialog(act!!, this).apply {
+        settings = SearchDialog(
+            act = requireActivity(),
+            parent = this,
+            mode = helper.mode,
+            startInDays = helper.start.timeInDays,
+            endInDays = helper.end.timeInDays,
+            optionsIn = helper.options
+        ).apply {
             setOnDismissListener { settings = null }
             show()
         }
@@ -281,11 +268,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
         bStop.setOnClickListener { toiler.cancel() }
-        modeAdapter = ArrayAdapter(
-            requireContext(), R.layout.spinner_button,
-            resources.getStringArray(R.array.search_mode)
-        )
-        modeAdapter.setDropDownViewResource(R.layout.spinner_item)
         resultAdapter = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode_results)
@@ -300,7 +282,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                 showAdditionPanel()
         }
         content.bExport.setOnClickListener {
-            if (toiler.isRun) return@setOnClickListener
+            if (isBlocked) return@setOnClickListener
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             intent.type = "text/html"
             val date = DateUnit.initToday()
@@ -349,90 +331,90 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         } else helper.mode
         val request = etSearch.text.toString().trim()
         adResult.submitData(lifecycle, PagingData.empty())
+        screen = SearchScreen.RESULTS
         content.rvSearch.adapter = adResult
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
         firstPosition = 0
         toiler.startSearch(request, mode)
-        addRequest(request)
+        adRequest.add(request)
     }
 
-    private fun addRequest(r: String) = helper.run {
-        val i = requests.indexOf(r)
-        if (i == 0) return@run
-        if (i > -1) {
-            requests.removeAt(i)
-            adRequest.notifyItemRemoved(i + 1)
-        } else {
-            adSearch.add(r)
-            adSearch.notifyDataSetChanged()
-        }
-        requests.add(0, r)
-        adRequest.notifyItemInserted(1)
-        if (requests.size == SearchHelper.REQUESTS_LIMIT) {
-            requests.removeAt(SearchHelper.REQUESTS_LIMIT - 1)
-            adRequest.notifyItemRemoved(SearchHelper.REQUESTS_LIMIT)
-        }
-    }
-
-    private fun removeRequest(index: Int) {
-        helper.requests.removeAt(index)
-        adRequest.notifyItemRemoved(index + 1)
-    }
-
-    private fun selectRequest(index: Int) {
+    private fun selectRequest(request: String) {
         binding?.etSearch?.let {
-            it.setText(helper.requests[index])
+            it.setText(request)
             it.dismissDropDown()
         }
         hideRequests()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun clearRequests() {
-        adSearch.clear()
-        adSearch.notifyDataSetChanged()
-        helper.clearRequests()
-        adRequest.notifyDataSetChanged()
-    }
-
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is NeoState.Message -> {
-                if (toiler.isExport) //finish export
-                    doneExport(state.message)
-                else
-                    binding?.tvStatus?.text = state.message
-            }
-            is NeoState.ListValue -> { //finish load page
+            is BasicState.Message ->
+                binding?.tvStatus?.text = state.message
+
+            is ListState.Update<*> ->  //finish load page
+                adResult.update(state.item as BasicItem)
+
+            is ListState.Paging ->
+                showResult(state.max)
+
+            is SearchState.Primary ->
+                helper = state.helper
+
+            BasicState.Empty ->
+                noResults()
+
+            BasicState.Success ->
                 setStatus(false)
-                adResult.update(state.list[0])
-            }
-            NeoState.Success -> {
-                if (toiler.isRun)
-                    showResult()
-                else
-                    finishSearch()
-            }
-            NeoState.Ready ->
+
+            is SearchState.Status ->
+                restoreStatus(state)
+
+            BasicState.Ready ->
                 act?.hideToast()
-            is NeoState.LongValue -> { //SpecialEvent
-                if (state.value == SearchEngine.EVENT_WORDS_NOT_FOUND)
-                    act?.showToast(getString(R.string.words_not_found))
-            }
-            else -> {}
+
+            SearchState.Start ->
+                startSearch()
+
+            is SearchState.FinishExport ->
+                doneExport(state.message)
+
+
+            is BasicState.Empty ->
+                act?.showToast(getString(R.string.words_not_found))
         }
     }
 
-    private fun showResult() = binding?.run {
-        bPanelSwitch.isVisible = true
-        if (content.pAdditionSet.isVisible)
-            bPanelSwitch.setImageResource(R.drawable.ic_top)
-        else
-            bPanelSwitch.setImageResource(R.drawable.ic_bottom)
-        content.tvLabel.text = helper.label
-        if (helper.countMaterials > NeoPaging.ON_PAGE) {
-            maxPages = helper.countMaterials / NeoPaging.ON_PAGE - 1
+    private fun restoreStatus(state: SearchState.Status) = binding?.run {
+        initSearchList(state.screen)
+        if (state.firstPosition > -1) {
+            toiler.showLastResult()
+            etSearch.setText(helper.request)
+            etSearch.setSelection(helper.request.length)
+            content.tvLabel.text = helper.label
+            bPanelSwitch.isVisible = true
+            if (state.shownAddition)
+                showAdditionPanel()
+            firstPosition = state.firstPosition //for paging
+        }
+        state.settings?.let {
+            openSettings()
+            settings?.onRestoreInstanceState(it)
+        }
+    }
+
+    private fun showResult(max: Int) {
+        binding?.run {
+            bPanelSwitch.isVisible = true
+            if (content.pAdditionSet.isVisible)
+                bPanelSwitch.setImageResource(R.drawable.ic_top)
+            else
+                bPanelSwitch.setImageResource(R.drawable.ic_bottom)
+            content.tvLabel.text = helper.label
+        }
+        if (max > NeoPaging.ON_PAGE) {
+            maxPages = max / NeoPaging.ON_PAGE - 1
             onChangePage(0)
         }
         if (firstPosition == 0)
@@ -442,6 +424,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             if (firstPosition % NeoPaging.ON_PAGE > 0)
                 adResult.scrollTo(firstPosition)
         }
+        if (maxPages > 0)
+            act?.initScrollBar(maxPages, this::onScroll)
     }
 
     private fun onScroll(value: Int) {
@@ -458,17 +442,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         }
     }
 
-    private fun finishSearch() {
-        setStatus(false)
-        if (helper.countMaterials == 0 && helper.isNeedLoad.not())
-            noResults()
-        else {
-            showResult()
-            if (maxPages > 0)
-                act?.initScrollBar(maxPages, this::onScroll)
-        }
-    }
-
     private fun noResults() {
         adDefault.clear()
         binding?.run {
@@ -479,12 +452,12 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         act?.showStaticToast(getString(R.string.search_no_results))
     }
 
-    private fun defaultClick(index: Int, item: ListItem) {
+    private fun defaultClick(index: Int, item: BasicItem) {
         when (index) {
             LAST_RESULTS -> {
-                helper.loadLastResult()
                 toiler.showLastResult()
                 binding?.run {
+                    screen = SearchScreen.RESULTS
                     content.rvSearch.adapter = adResult
                     content.tvLabel.text = helper.label
                     bPanelSwitch.isVisible = true
@@ -492,35 +465,40 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                     etSearch.setSelection(helper.request.length)
                 }
             }
+
             CLEAR_RESULTS -> {
+                screen = SearchScreen.EMPTY
                 toiler.clearBase()
                 adDefault.clear()
             }
         }
     }
 
-    override fun onItemClick(index: Int, item: ListItem) {
-        when (helper.getType(item)) {
-            SearchHelper.Type.NORMAL -> {
+    override fun onItemClick(index: Int, item: BasicItem) {
+        when (RequestAdapter.getType(item)) {
+            RequestAdapter.Type.NORMAL -> {
                 val s = when {
                     helper.mode == SearchEngine.MODE_TITLES -> null
                     helper.mode == SearchEngine.MODE_LINKS -> null
                     helper.isByWords -> Lib.withOutTags(
                         item.des.substring(0, item.des.length - 4).replace("</p>", Const.NN)
                     )
+
                     else -> helper.request
                 }
                 BrowserActivity.openReader(item.link, s)
             }
-            SearchHelper.Type.LOAD_MONTH ->
+
+            RequestAdapter.Type.LOAD_MONTH ->
                 toiler.loadMonth(item.link)
-            SearchHelper.Type.LOAD_PAGE ->
+
+            RequestAdapter.Type.LOAD_PAGE ->
                 toiler.loadPage(item.link)
         }
     }
 
-    override fun onItemLongClick(index: Int, item: ListItem): Boolean {
-        if (helper.getType(item) != SearchHelper.Type.NORMAL) return true
+    override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
+        if (RequestAdapter.getType(item) != RequestAdapter.Type.NORMAL) return true
         var des = helper.label
         des = getString(R.string.search_for) +
                 des.substring(des.indexOf("“") - 1, des.indexOf(Const.N) - 1)
@@ -570,5 +548,17 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             it.showToast(getString(R.string.finish_list))
             it.unlockHead()
         }
+    }
+
+    override fun putSearchDialogResult(
+        mode: Int,
+        start: DateUnit,
+        end: DateUnit,
+        list: List<Boolean>
+    ) {
+        helper.start = start
+        helper.end = end
+        helper.putOptions(list)
+        helper.savePerformance(mode)
     }
 }

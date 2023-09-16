@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
+import ru.neosvet.vestnewage.view.list.RequestAdapter
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -189,7 +190,7 @@ class LaunchUtils {
         br.forEachLine {
             if (!list.contains(it)) {
                 list.add(it)
-                if (list.size == SearchHelper.REQUESTS_LIMIT) return@forEachLine
+                if (list.size == RequestAdapter.LIMIT) return@forEachLine
             }
         }
         br.close()

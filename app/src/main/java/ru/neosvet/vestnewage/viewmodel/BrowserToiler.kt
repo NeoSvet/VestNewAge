@@ -21,13 +21,14 @@ import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
-import java.util.*
+import java.util.Stack
 
 class BrowserToiler : NeoToiler() {
     companion object {
@@ -42,13 +43,9 @@ class BrowserToiler : NeoToiler() {
 
     private lateinit var strings: BrowserStrings
     private val storage = PageStorage()
-    var lightTheme: Boolean = true
     private val history = Stack<String>()
     private var isRefresh = false
-    var isInit = false
-        private set
-    lateinit var helper: BrowserHelper
-        private set
+    private lateinit var helper: BrowserHelper
     private var link: String
         get() = helper.link
         set(value) {
@@ -64,7 +61,13 @@ class BrowserToiler : NeoToiler() {
     private val dateFromLink: DateUnit
         get() = DateUnit.parse(link.date)
 
-    fun init(context: Context) {
+    override fun getInputData(): Data = Data.Builder()
+        .putString(Const.TASK, BrowserHelper.TAG)
+        .putString(Const.LINK, link)
+        .build()
+
+    override fun init(context: Context) {
+        helper = BrowserHelper(context)
         strings = BrowserStrings(
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
@@ -73,13 +76,11 @@ class BrowserToiler : NeoToiler() {
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next)
         )
-        helper = BrowserHelper(context)
-        isInit = true
     }
 
-    fun refresh() {
-        isRefresh = true
-        load()
+    override suspend fun defaultState() {
+        postState(BrowserState.Primary(helper))
+        if (link.isNotEmpty()) openPage(true)
     }
 
     override suspend fun doLoad() {
@@ -92,14 +93,14 @@ class BrowserToiler : NeoToiler() {
         openPage(true)
     }
 
+    fun refresh() {
+        isRefresh = true
+        load()
+    }
+
     override fun onDestroy() {
         storage.close()
     }
-
-    override fun getInputData(): Data = Data.Builder()
-        .putString(Const.TASK, BrowserHelper.TAG)
-        .putString(Const.LINK, link)
-        .build()
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
@@ -133,7 +134,7 @@ class BrowserToiler : NeoToiler() {
                     isRefresh = false
                     reLoad()
                 } else
-                    postState(NeoState.Ready)
+                    postState(BasicState.Ready)
                 return@launch
             }
             if (!preparingStyle()) return@launch
@@ -142,7 +143,7 @@ class BrowserToiler : NeoToiler() {
                 generatePage(file)
             else Pair(false, false) //isNeedUpdate, isOtkr
             postState(
-                NeoState.Page(
+                BrowserState.Page(
                     url = FILE + file.toString(),
                     isOtkr = p.second
                 )
@@ -254,8 +255,8 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingStyle(): Boolean {
-        val fLight = Lib.getFile(Const.LIGHT)
-        val fDark = Lib.getFile(Const.DARK)
+        val fLight = Lib.getFile(StyleLoader.LIGHT)
+        val fDark = Lib.getFile(StyleLoader.DARK)
         if (!fLight.exists() && !fDark.exists()) { //download style
             storage.close()
             scope.launch {
@@ -266,8 +267,9 @@ class BrowserToiler : NeoToiler() {
         }
         val fStyle = Lib.getFile(STYLE)
         var replace = true
+        val light = helper.isLightTheme
         if (fStyle.exists()) {
-            replace = fDark.exists() && !lightTheme || fLight.exists() && lightTheme
+            replace = fDark.exists() && !light || fLight.exists() && light
             if (replace) {
                 if (fDark.exists())
                     fStyle.renameTo(fLight)
@@ -276,7 +278,7 @@ class BrowserToiler : NeoToiler() {
             }
         }
         if (replace) {
-            if (lightTheme) fLight.renameTo(fStyle) else fDark.renameTo(fStyle)
+            if (light) fLight.renameTo(fStyle) else fDark.renameTo(fStyle)
         }
         preparingFont()
         return true
@@ -320,9 +322,9 @@ class BrowserToiler : NeoToiler() {
     private fun restoreStyle() {
         val fStyle = Lib.getFile(STYLE)
         if (fStyle.exists()) {
-            val fDark = Lib.getFile(Const.DARK)
+            val fDark = Lib.getFile(StyleLoader.DARK)
             if (fDark.exists())
-                fStyle.renameTo(Lib.getFile(Const.LIGHT))
+                fStyle.renameTo(Lib.getFile(StyleLoader.LIGHT))
             else
                 fStyle.renameTo(fDark)
         }
@@ -335,13 +337,13 @@ class BrowserToiler : NeoToiler() {
             return
         }
         if (helper.isDoctrine) {
-            setState(NeoState.Success)
+            setState(BasicState.Success)
             return
         }
         val today = DateUnit.initToday().my
         val d = dateFromLink
         if (d.my == today) {
-            setState(NeoState.Success)
+            setState(BasicState.Success)
             return
         }
         d.changeMonth(1)
@@ -360,13 +362,13 @@ class BrowserToiler : NeoToiler() {
             return
         }
         if (helper.isDoctrine) {
-            setState(NeoState.Success)
+            setState(BasicState.Success)
             return
         }
         val min: String = getMinMY()
         val d = dateFromLink
         if (d.my == min) {
-            setState(NeoState.Success)
+            setState(BasicState.Success)
             return
         }
         d.changeMonth(-1)
@@ -388,5 +390,10 @@ class BrowserToiler : NeoToiler() {
         else
             DateUnit.putDays(DateHelper.MIN_DAYS_NEW_BOOK)
         return d.my
+    }
+
+    fun setArgument(link: String, search: String?) {
+        this.link = link
+        search?.let { helper.setSearchString(it) }
     }
 }

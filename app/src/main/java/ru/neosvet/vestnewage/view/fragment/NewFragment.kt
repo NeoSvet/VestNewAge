@@ -9,16 +9,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.AdsUtils
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.NewToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NewState
 
 class NewFragment : NeoFragment() {
     private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
@@ -26,53 +28,54 @@ class NewFragment : NeoFragment() {
         get() = neotoiler as NewToiler
     override val title: String
         get() = getString(R.string.new_section)
-    private var itemAds: ListItem? = null
+    private var itemAds: BasicItem? = null
+    private var openedReader = false
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[NewToiler::class.java].apply { init() }
+        ViewModelProvider(this)[NewToiler::class.java]
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.list_fragment, container, false)
-        initView(view)
-        return view
+    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
+        initView(it)
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        savedInstanceState?.getStringArray(Const.ADS)?.let {
-                itemAds = ListItem(it)
-                AdsUtils.showDialog(requireActivity(), itemAds!!, this::closeAds)
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        itemAds?.let {
-            outState.putStringArray(Const.ADS, it.main)
-        }
+        toiler.setStatus(NewState.Status(itemAds))
         super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
         super.onResume()
-        toiler.openList()
+        if (openedReader) {
+            openedReader = false
+            toiler.openList()
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is NeoState.Ready ->
+            is BasicState.Empty ->
                 emptyList()
-            is NeoState.ListValue -> {
-                if (state.list.isEmpty())
-                    emptyList()
-                else
-                    adapter.setItems(state.list)
-            }
-            else -> {}
+
+            is ListState.Primary ->
+                adapter.setItems(state.list)
+
+            is NewState.Status ->
+                restoreStatus(state)
         }
         act?.updateNew()
+    }
+
+    private fun restoreStatus(state: NewState.Status) {
+        itemAds = state.itemAds?.also {
+            AdsUtils.showDialog(requireActivity(), it, this::closeAds)
+        }
     }
 
     private fun emptyList() {
@@ -91,12 +94,13 @@ class NewFragment : NeoFragment() {
         setListEvents(rv)
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
+    private fun onItemClick(index: Int, item: BasicItem) {
         if (item.title.contains(getString(R.string.ad))) {
             itemAds = item
             AdsUtils.showDialog(requireActivity(), item, this::closeAds)
         } else if (item.link != "") {
-            toiler.needOpen = true
+            toiler.clearStates()
+            openedReader = true
             openReader(item.link, null)
             act?.updateNew()
         }

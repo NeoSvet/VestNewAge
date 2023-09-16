@@ -14,9 +14,11 @@ import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.BookRnd
+import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.network.Urls
@@ -32,10 +34,13 @@ import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.BookState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class BookFragment : NeoFragment(), DateDialog.Result {
+
     companion object {
         fun newInstance(tab: Int, year: Int): BookFragment {
             val fragment = BookFragment()
@@ -57,6 +62,9 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         get() = getString(R.string.book)
     private var openedReader = false
     private var shownDwnDialog = false
+    private var selectedTab = BookTab.POEMS.value
+    private var date = DateUnit.initToday().apply { day = 1 }
+    private var linkToSrc = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,21 +83,32 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (toiler.isNotInit) {
-            toiler.init(requireContext())
-            arguments?.let {
-                toiler.selectedTab = it.getInt(Const.TAB)
-                val year = it.getInt(Const.YEAR)
-                if (year > 0) {
-                    val d = DateUnit.initToday()
-                    d.year = year
-                    showDatePicker(d)
-                }
-            }
-        }
         setViews()
         initTabs()
-        restoreState(savedInstanceState)
+        arguments?.let {
+            selectedTab = it.getInt(Const.TAB)
+            binding?.tabLayout?.select(selectedTab)
+            checkChangeTab()
+            toiler.setArgument(selectedTab)
+            val year = it.getInt(Const.YEAR)
+            if (year > 0) {
+                val d = DateUnit.initToday()
+                d.year = year
+                showDatePicker(d)
+            }
+            arguments = null
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        toiler.setStatus(
+            BookState.Status(
+                selectedTab = selectedTab,
+                dateDialog = dateDialog?.date,
+                shownDwnDialog = shownDwnDialog
+            )
+        )
+        super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
@@ -100,41 +119,10 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        if (shownDwnDialog)
-            outState.putInt(Const.DIALOG, 0)
-        else dateDialog?.let { d ->
-            outState.putInt(Const.DIALOG, d.date.timeInDays)
-            d.dismiss()
-        }
-        super.onSaveInstanceState(outState)
-    }
-
-    private fun restoreState(state: Bundle?) {
-        if (toiler.isRun.not()) {
-            binding?.run {
-                bPrev.isEnabled = toiler.checkPrev()
-                bNext.isEnabled = toiler.checkNext()
-            }
-            if (state != null) {
-                val t = state.getInt(Const.DIALOG, -1)
-                if (t > 0) {
-                    val d = DateUnit.putDays(t)
-                    showDatePicker(d)
-                } else if (t == 0)
-                    showDownloadDialog()
-            }
-        }
-        binding?.tabLayout?.select(toiler.selectedTab)
-        checkChangeTab()
-    }
-
     private fun initTabs() = binding?.run {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.poems))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.epistles))
         tabLayout.addTab(tabLayout.newTab().setText(R.string.doctrine))
-        if (toiler.isPoemsTab.not())
-            tabLayout.select(toiler.selectedTab)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {
@@ -144,15 +132,16 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             }
 
             override fun onTabSelected(tab: TabLayout.Tab) {
-                toiler.selectedTab = tab.position
-                toiler.openList(true)
+                if (selectedTab == tab.position) return
+                selectedTab = tab.position
+                toiler.openList(true, date, selectedTab)
                 checkChangeTab()
             }
         })
     }
 
     private fun checkChangeTab() = binding?.run {
-        if (toiler.isDoctrineTab) {
+        if (selectedTab == BookTab.DOCTRINE.value) {
             bPrev.isVisible = false
             bNext.isVisible = false
             tvDate.isVisible = false
@@ -173,53 +162,64 @@ class BookFragment : NeoFragment(), DateDialog.Result {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is NeoState.Book ->
-                setBook(state)
-
-            is NeoState.LongValue -> binding?.run {
-                adapter.clear()
-                if (!toiler.isDoctrineTab) {
-                    setUpdateTime(state.value, tvUpdate)
-                    if (state.value < 2L) {
-                        bPrev.isEnabled = true
-                        bNext.isEnabled = false
-                        if (ScreenUtils.isLand)
-                            tvDate.text = toiler.date.calendarString.replace(Const.N, " ")
-                        else
-                            tvDate.text = toiler.date.calendarString
-                    }
-                }
-            }
-
-            is NeoState.ListValue -> binding?.run { //doctrine
-                adapter.setItems(state.list)
-                rvBook.smoothScrollToPosition(0)
-                tvUpdate.text = getString(R.string.link_to_src)
-            }
-
-            is NeoState.Success ->
+            is BasicState.Success ->
                 setStatus(false)
 
-            is NeoState.Message ->
+            is BasicState.Message ->
                 act?.showToast(state.message)
 
-            is NeoState.Rnd -> with(state) {
-                showRndAlert(title, link, msg, place, par)
+            is BasicState.NotLoaded ->
+                binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
+
+            is BasicState.Empty ->
+                binding?.tvUpdate?.text = getString(R.string.empty_list)
+
+            is BookState.Status ->
+                restoreStatus(state)
+
+            is BookState.Primary -> binding?.run {
+                linkToSrc = ""
+                adapter.clear()
+                setUpdateTime(state.time, tvUpdate)
+                date = state.date
+                if (ScreenUtils.isLand)
+                    tvDate.text = date.calendarString.replace(Const.N, " ")
+                else
+                    tvDate.text = date.calendarString
+                bPrev.isEnabled = state.prev
+                bNext.isEnabled = state.next //doctrine
+                adapter.setItems(state.list)
+                rvBook.smoothScrollToPosition(0)
+                if (selectedTab == BookTab.DOCTRINE.value)
+                    tvUpdate.text = getString(R.string.link_to_src)
             }
 
-            else -> {}
+            is BookState.Book -> binding?.run {
+                linkToSrc = state.linkToSrc
+                adapter.clear()
+                adapter.setItems(state.list)
+                if (state.list.isEmpty()) {
+                    tvUpdate.text = getString(R.string.list_no_loaded)
+                    return
+                }
+                tvUpdate.text = getString(R.string.link_to_src)
+                rvBook.smoothScrollToPosition(0)
+            }
+
+            is BookState.Rnd ->
+                showRndAlert(state)
         }
     }
 
-    private fun setBook(state: NeoState.Book) = binding?.run {
-        bPrev.isEnabled = toiler.checkPrev()
-        bNext.isEnabled = toiler.checkNext()
-        if (ScreenUtils.isLand)
-            tvDate.text = state.date.replace(Const.N, " ")
-        else
-            tvDate.text = state.date
-        adapter.setItems(state.list)
-        rvBook.smoothScrollToPosition(0)
+    private fun restoreStatus(state: BookState.Status) {
+        selectedTab = state.selectedTab
+        binding?.tabLayout?.select(selectedTab)
+        checkChangeTab()
+        if (state.shownDwnDialog)
+            showDownloadDialog()
+        state.dateDialog?.let {
+            showDatePicker(it)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -229,12 +229,12 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         setListEvents(rvBook, false)
         bPrev.setOnClickListener { openMonth(false) }
         bNext.setOnClickListener { openMonth(true) }
-        tvDate.setOnClickListener { showDatePicker(toiler.date) }
+        tvDate.setOnClickListener { showDatePicker(date) }
         tvLink?.setOnClickListener {
             Lib.openInApps(Urls.DoctrineSite, null)
         } ?: tvUpdate.setOnClickListener {
-            if (toiler.isDoctrineTab)
-                Lib.openInApps(Urls.DoctrineSite, null)
+            if (linkToSrc.isNotEmpty())
+                Lib.openInApps(linkToSrc, null)
         }
     }
 
@@ -249,17 +249,16 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun openMonth(plus: Boolean) {
-        val d = toiler.date
-        if (!plus && toiler.isPoemsTab.not()) {
-            if (d.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && DateHelper.isLoadedOtkr().not()) {
+        if (!plus && selectedTab != BookTab.POEMS.value) {
+            if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && !DateHelper.isLoadedOtkr()) {
                 showDownloadDialog()
                 return
             }
         }
-        if (plus) d.changeMonth(1)
-        else d.changeMonth(-1)
+        if (plus) date.changeMonth(1)
+        else date.changeMonth(-1)
         blinkDate()
-        toiler.openList(true)
+        toiler.openList(true, date)
     }
 
     private fun blinkDate() = binding?.tvDate?.let {
@@ -291,15 +290,13 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 bNext.isEnabled = false
             } else {
                 tvDate.isEnabled = true
-                bPrev.isEnabled = toiler.checkPrev()
-                bNext.isEnabled = toiler.checkNext()
             }
         }
     }
 
     private fun showDatePicker(d: DateUnit) {
         dateDialog = DateDialog(requireActivity(), d, this).apply {
-            if (toiler.isPoemsTab) {
+            if (selectedTab == BookTab.POEMS.value) {
                 minMonth = 2 //feb
                 minYear = 2016
             } else { //epistles
@@ -312,34 +309,32 @@ class BookFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun putDate(date: DateUnit?) {
-        if (date == null) //cancel
-            return
-        toiler.date = date
-        toiler.openList(true)
+        if (date != null)
+            toiler.openList(true, date)
     }
 
-    private fun showRndAlert(title: String, link: String, msg: String, place: String, par: Int) {
+    private fun showRndAlert(state: BookState.Rnd) {
         alertRnd = CustomDialog(act).apply {
             setTitle(title)
-            setMessage(msg)
+            setMessage(state.msg)
             setLeftButton(getString(R.string.in_markers)) {
                 val marker = Intent(requireContext(), MarkerActivity::class.java)
-                marker.putExtra(Const.LINK, link)
-                marker.putExtra(DataBase.PARAGRAPH, par + 1)
+                marker.putExtra(Const.LINK, state.link)
+                marker.putExtra(DataBase.PARAGRAPH, state.par + 1)
                 startActivity(marker)
                 alertRnd?.dismiss()
             }
             setRightButton(getString(R.string.open)) {
-                openReader(link, place)
+                openReader(state.link, state.place)
                 act?.updateNew()
                 alertRnd?.dismiss()
             }
         }
-        alertRnd?.show { neotoiler.clearStates() }
+        alertRnd?.show { toiler.clearStates() }
     }
 
-    private fun onItemClick(index: Int, item: ListItem) {
-        if (toiler.isRun) return
+    private fun onItemClick(index: Int, item: BasicItem) {
+        if (isBlocked) return
         openedReader = true
         openReader(item.link, null)
     }
@@ -350,17 +345,17 @@ class BookFragment : NeoFragment(), DateDialog.Result {
                 startLoad()
 
             getString(R.string.rnd_verse) ->
-                toiler.getRnd(BookToiler.RndType.VERSE)
+                toiler.getRnd(BookRnd.VERSE)
 
             getString(R.string.rnd_epistle) ->
-                toiler.getRnd(BookToiler.RndType.EPISTLE)
+                toiler.getRnd(BookRnd.EPISTLE)
 
             getString(R.string.rnd_poem) ->
-                toiler.getRnd(BookToiler.RndType.POEM)
+                toiler.getRnd(BookRnd.POEM)
         }
     }
 
-    private fun onItemLongClick(index: Int, item: ListItem): Boolean {
+    private fun onItemLongClick(index: Int, item: BasicItem): Boolean {
         MarkerActivity.addByPar(
             requireContext(),
             item.link, "", ""

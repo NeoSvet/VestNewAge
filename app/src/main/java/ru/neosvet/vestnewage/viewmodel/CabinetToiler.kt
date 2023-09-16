@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import android.os.Build
 import androidx.work.Data
+import kotlinx.coroutines.launch
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,7 +11,8 @@ import okhttp3.RequestBody
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.NeoClient
@@ -19,8 +21,9 @@ import ru.neosvet.vestnewage.network.UnsafeClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.CabinetState
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -34,31 +37,26 @@ class CabinetToiler : NeoToiler() {
     sealed class Action {
         data class Login(val email: String, val password: String) : Action()
         data class Word(val index: Int, val word: String) : Action()
-        object Anketa : Action()
-        object None : Action()
+        data object Anketa : Action()
+        data object None : Action()
     }
 
-    enum class Screen {
-        LOGIN, CABINET, WORDS
-    }
-
-    var isReadyLogin = false
-        private set
-    var screen: Screen = Screen.LOGIN
-        private set
-    lateinit var helper: CabinetHelper
-        private set
+    private var screen: CabinetScreen = CabinetScreen.LOGIN
+    private lateinit var helper: CabinetHelper
     private var action: Action = Action.None
     private lateinit var strings: CabinetStrings
-    private val wordList: MutableList<ListItem> by lazy { mutableListOf() }
-    private val loginList = mutableListOf<ListItem>()
-    private val cabinetList = mutableListOf<ListItem>()
-    private val cabinetItem = ListItem("")
-    private var isInit = false
+    private val wordList: MutableList<BasicItem> by lazy { mutableListOf() }
+    private val loginList = mutableListOf<BasicItem>()
+    private val cabinetList = mutableListOf<BasicItem>()
+    private val cabinetItem = BasicItem("")
 
-    fun init(context: Context) {
-        if (isInit) return
-        isInit = true
+    override fun getInputData() = Data.Builder()
+        .putString(Const.TASK, CabinetHelper.TAG)
+        .putString(Const.LIST, screen.toString())
+        .putString(Const.MODE, action.toString())
+        .build()
+
+    override fun init(context: Context) {
         helper = CabinetHelper(context)
         strings = CabinetStrings(
             selected_status = context.getString(R.string.selected_status),
@@ -71,37 +69,36 @@ class CabinetToiler : NeoToiler() {
         val m = context.resources.getStringArray(R.array.cabinet_main)
         var i = 0
         while (i < m.size) {
-            loginList.add(ListItem(m[i]).apply {
+            loginList.add(BasicItem(m[i]).apply {
                 des = m[i + 1]
             })
             i += 2
         }
         cabinetList.add(cabinetItem)
         for (s in context.resources.getStringArray(R.array.cabinet_enter))
-            cabinetList.add(ListItem(s))
+            cabinetList.add(BasicItem(s))
+    }
+
+    override suspend fun defaultState() {
+        val p = helper.getAuthPair()
+        postState(CabinetState.AuthPair(p.first, p.second))
+        postState(CabinetState.Primary(screen, loginList))
     }
 
     override suspend fun doLoad() {
         when (val a = action) {
             is Action.Login ->
                 doLogin(a.email, a.password)
+
             Action.Anketa ->
                 loadAnketa(true)
+
             is Action.Word ->
                 sendWord(a.index, a.word)
+
             Action.None -> {}
         }
         action = Action.None
-    }
-
-    override fun getInputData(): Data {
-        val m = if (action is Action.Login)
-            "Login" else action.toString()
-        return Data.Builder()
-            .putString(Const.TASK, CabinetHelper.TAG)
-            .putString(Const.LIST, screen.toString())
-            .putString(Const.MODE, m)
-            .build()
     }
 
     fun login(email: String, password: String) {
@@ -120,13 +117,17 @@ class CabinetToiler : NeoToiler() {
     }
 
     fun loginScreen() {
-        screen = Screen.LOGIN
-        setState(NeoState.ListValue(loginList))
+        screen = CabinetScreen.LOGIN
+        scope.launch {
+            postState(CabinetState.Primary(screen, loginList))
+        }
     }
 
     private fun cabinetScreen() {
-        screen = Screen.CABINET
-        setState(NeoState.ListValue(cabinetList))
+        screen = CabinetScreen.CABINET
+        scope.launch {
+            postState(CabinetState.Primary(screen, cabinetList))
+        }
     }
 
     private suspend fun doLogin(email: String, password: String) {
@@ -163,7 +164,7 @@ class CabinetToiler : NeoToiler() {
     }
 
     private suspend fun postError(msg: String) {
-        postState(NeoState.Message(msg))
+        postState(BasicState.Message(msg))
     }
 
     private suspend fun loadCabinet() {
@@ -204,14 +205,17 @@ class CabinetToiler : NeoToiler() {
         when {
             s.isNullOrEmpty() ->
                 postError(strings.anketa_failed)
+
             s.contains(ERROR_BOX) -> // incorrect time s.contains("fd_box") ||
                 return s
+
             s.contains(WORDS_BOX) -> {
                 if (s.contains(SELECTED)) {
                     val i = s.indexOf(SELECTED) + SELECTED.length
                     return s.substring(i, s.indexOf("</", i))
                 } else if (loadWordList) parseListWord(s)
             }
+
             else ->
                 postError(strings.anketa_failed)
         }
@@ -234,9 +238,9 @@ class CabinetToiler : NeoToiler() {
         val m = s.split("</option>")
         wordList.clear()
         for (i in m)
-            wordList.add(ListItem(i))
-        screen = Screen.WORDS
-        postState(NeoState.ListValue(wordList))
+            wordList.add(BasicItem(i))
+        screen = CabinetScreen.WORDS
+        postState(CabinetState.Primary(screen, wordList))
     }
 
     private suspend fun sendWord(index: Int, word: String) {
@@ -268,34 +272,14 @@ class CabinetToiler : NeoToiler() {
     }
 
     fun exit() {
-        helper.clear()
-        loginScreen()
-    }
-
-    fun onBack(): Boolean {
-        when (screen) {
-            Screen.LOGIN ->
-                return true
-            Screen.CABINET ->
-                exit()
-            Screen.WORDS -> {
-                wordList.clear()
-                cabinetScreen()
-            }
+        if (screen == CabinetScreen.CABINET) {
+            helper.clear()
+            loginScreen()
+        } else {
+            wordList.clear()
+            cabinetScreen()
         }
-        return false
     }
-
-//    fun restoreScreen() {
-//        when (screen) {
-//            Screen.LOGIN ->
-//                setState( NeoState.ListValue(loginList))
-//            Screen.CABINET ->
-//                setState( NeoState.ListValue(cabinetList))
-//            Screen.WORDS ->
-//                setState( NeoState.ListValue(wordList))
-//        }
-//    }
 
     private fun createHttpClient(): OkHttpClient =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -303,9 +287,11 @@ class CabinetToiler : NeoToiler() {
         else
             UnsafeClient.createHttpClient()
 
-    fun check(email: String, password: String) {
-        isReadyLogin = if (email.length > 5 && password.length > 5) {
-            email.contains("@") && email.contains(".")
-        } else false
+    fun forget(login: Boolean, password: Boolean) {
+        helper.forget(login, password)
+    }
+
+    fun save(login: String, password: String) {
+        helper.save(login, password)
     }
 }

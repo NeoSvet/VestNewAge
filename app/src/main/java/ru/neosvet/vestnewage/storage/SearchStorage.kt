@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.storage
 import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
@@ -45,8 +45,8 @@ class SearchStorage : Closeable {
         isClosed = false
     }
 
-    suspend fun getList(offset: Int): List<ListItem> {
-        val list = mutableListOf<ListItem>()
+    suspend fun getList(offset: Int): List<BasicItem> {
+        val list = mutableListOf<BasicItem>()
         open()
         val cursor = getResults(isDesc)
         if (cursor.count == 0) {
@@ -60,7 +60,7 @@ class SearchStorage : Closeable {
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
         do {
-            val item = ListItem(cursor.getString(iTitle), cursor.getString(iLink))
+            val item = BasicItem(cursor.getString(iTitle), cursor.getString(iLink))
             cursor.getString(iDes)?.let {
                 item.des = it
             }

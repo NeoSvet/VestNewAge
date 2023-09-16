@@ -9,10 +9,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 class NeoPaging(
     private val parent: Parent,
@@ -23,16 +23,16 @@ class NeoPaging(
         const val ON_PAGE = 15
     }
 
-    abstract class Factory : PagingSource<Int, ListItem>() {
+    abstract class Factory : PagingSource<Int, BasicItem>() {
         internal var offset: Int = 0
     }
 
     interface Parent {
         val factory: Factory
-        val isRun: Boolean
+        val isBusy: Boolean
         val pagingScope: CoroutineScope
         suspend fun postFinish()
-        fun postError(error: NeoState.Error)
+        fun postError(error: BasicState.Error)
     }
 
     interface Pager {
@@ -47,7 +47,7 @@ class NeoPaging(
         this.pager = pager
     }
 
-    fun run(page: Int): Flow<PagingData<ListItem>> {
+    fun run(page: Int): Flow<PagingData<BasicItem>> {
         parent.factory.offset = page * ON_PAGE
         pager?.setPage(page)
         return Pager(
@@ -68,7 +68,7 @@ class NeoPaging(
     }
 
     fun finishPaging() {
-        if (parent.isRun) return
+        if (parent.isBusy) return
         parent.pagingScope.launch {
             delay(300)
             parent.postFinish()

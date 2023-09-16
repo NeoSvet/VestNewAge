@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -20,12 +21,12 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.noHasDate
 import ru.neosvet.vestnewage.utils.percent
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.CalendarState
 
 class CalendarToiler : NeoToiler(), LoadHandlerLite {
-    var date: DateUnit = DateUnit.initToday().apply { day = 1 }
-        private set
+    private var date = DateUnit.initToday().apply { day = 1 }
     private val todayM = date.month
     private val todayY = date.year
     private val calendar = arrayListOf<CalendarItem>()
@@ -37,8 +38,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private val pageLoader: PageLoader by lazy {
         PageLoader(client)
     }
-    var isUpdateUnread = false
-        private set
+    private var isUpdateUnread = false
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
@@ -47,22 +47,35 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         .putBoolean(Const.UNREAD, isUpdateUnread)
         .build()
 
+    override fun init(context: Context) {
+    }
+
+    override suspend fun defaultState() {
+        createField()
+        loadFromStorage()
+        postState(CalendarState.Primary(time, date, checkPrev(), checkNext(), isUpdateUnread, calendar))
+        val storage = PageStorage()
+        storage.open(date.my)
+        val list = storage.getLinksList()
+        storage.close()
+        loadPages(list)
+    }
+
     override suspend fun doLoad() {
         loadIfNeed = false
         val list = loadMonth()
         if (loadFromStorage()) {
-            postState(NeoState.Calendar(date.calendarString, calendar))
-            postState(NeoState.LongValue(time))
+            postState(CalendarState.Primary(time, date, checkPrev(), checkNext(), isUpdateUnread, calendar))
             if (isRun) loadPages(list)
         }
     }
 
-    fun checkNext(): Boolean {
+    private fun checkNext(): Boolean {
         val max = DateUnit.initToday().apply { day = 1 }.timeInDays
         return date.timeInDays < max
     }
 
-    fun checkPrev(): Boolean {
+    private fun checkPrev(): Boolean {
         val days = date.timeInDays
         val min = if (DateHelper.isLoadedOtkr())
             DateHelper.MIN_DAYS_OLD_BOOK
@@ -86,12 +99,12 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         while (i < pages.size && isRun) {
             pageLoader.download(pages[i], false)
             i++
-            postState(NeoState.Progress(i.percent(pages.size)))
+            postState(BasicState.Progress(i.percent(pages.size)))
         }
         pageLoader.finish()
         if (isRun) {
             isRun = false
-            postState(NeoState.Success)
+            postState(BasicState.Success)
         }
     }
 
@@ -120,7 +133,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         return date.month == todayM && date.year == todayY
     }
 
-    fun isNeedReload(): Boolean {
+    private fun isNeedReload(): Boolean {
         val d = DateUnit.initNow()
         val f = Lib.getFileDB(d.my)
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
@@ -137,12 +150,11 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             if (calendar.isEmpty())
                 createField()
             if (loadFromStorage()) {
-                postState(NeoState.Calendar(date.calendarString, calendar))
-                postState(NeoState.LongValue(time))
+                postState(CalendarState.Primary(time, date, checkPrev(), checkNext(), isUpdateUnread, calendar))
+                if (offsetMonth == 0 && isNeedReload()) reLoad()
             } else {
-                postState(NeoState.Calendar(date.calendarString, calendar))
-                postState(NeoState.LongValue(0))
-                isRun = true
+                postState(CalendarState.Primary(0L, date, checkPrev(), checkNext(), isUpdateUnread, calendar))
+                postState(BasicState.NotLoaded)
                 reLoad()
             }
         }
@@ -185,6 +197,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         storage.open(date.my, false)
         val cursor = storage.getListAll()
         var empty = true
+        time = 0L
         if (cursor.moveToFirst()) {
             time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
             if (loadIfNeed && checkTime(time)) {
@@ -266,6 +279,6 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
-        setState(NeoState.Progress(value))
+        setState(BasicState.Progress(value))
     }
 }

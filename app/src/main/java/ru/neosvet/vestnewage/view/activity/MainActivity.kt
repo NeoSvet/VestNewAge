@@ -31,6 +31,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
@@ -43,8 +44,10 @@ import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.*
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.viewmodel.MainToiler
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.MainState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity(), ItemClicker {
@@ -91,6 +94,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             doCheckPermission()
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
+        toiler.setArgument(withSplash)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
         else
@@ -109,16 +113,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         initAnim()
         initWords()
         setFloatProm(helper.isFloatPromTime)
-
-        restoreState(savedInstanceState)
-        if (savedInstanceState == null && withSplash.not()) {
-            finishFlashStar()
-            intent.getStringExtra(Const.SEARCH)?.let {
-                openSearch(it)
-                statusBack = StatusBack.EXIT
-            }
-        }
-        if (toiler.isRun) runObservation()
+        runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
@@ -129,12 +124,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             ActivityCompat.requestPermissions(this, arrayOf(n), 1)
     }
 
-    private fun runObservation() {
+    private fun runObserve() {
         lifecycleScope.launch {
             toiler.state.collect {
                 onChangedState(it)
             }
         }
+        toiler.start(this)
     }
 
     private fun initWords() {
@@ -249,7 +245,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
         if (utils.isNeedLoad) {
             NeoClient.deleteTempFiles()
-            runObservation()
             toiler.load()
         }
     }
@@ -297,43 +292,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
     }
 
-    private fun restoreState(state: Bundle?) {
-        if (state == null) {
-            val intent = intent
-            tab = intent.getIntExtra(Const.TAB, tab)
-            if (helper.isFirstRun)
-                tab = -1
-            else {
-                intent.getStringExtra(Const.CUR_ID)
-                if (firstSection == Section.MENU)
-                    updateNew()
-            }
-            if (intent.getBooleanExtra(Const.DIALOG, false))
-                helper.showDownloadDialog()
-        } else helper.run {
-            showHead()
-            setActionIcon(state.getInt(Const.SELECT))
-            if (state.getBoolean(Const.PANEL))
-                blocked()
-            else
-                unblocked()
-            state.getString(Const.CUR_ID)?.let {
-                curSection = Section.valueOf(it)
-            }
-            if (supportFragmentManager.fragments.isEmpty() ||
-                (helper.isSideMenu && curSection == Section.MENU)
-            ) setSection(firstSection, false)
-            if (isSideMenu) setMenuFragment()
-            else if (curSection != Section.MENU)
-                statusBack = StatusBack.PAGE
-            updateNew()
-            if (curSection == Section.HELP && helper.isSideMenu)
-                helper.fabAction.isVisible = false
-            if (state.getBoolean(Const.DIALOG))
-                helper.showDownloadDialog()
-        }
-    }
-
     override fun onDestroy() {
         toast.destroy()
         super.onDestroy()
@@ -357,10 +315,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onSaveInstanceState(outState: Bundle) {
         jobFinishStar?.cancel()
-        outState.putString(Const.CUR_ID, helper.curSection.toString())
-        outState.putBoolean(Const.PANEL, isBlocked)
-        outState.putBoolean(Const.DIALOG, helper.shownDwnDialog)
-        outState.putInt(Const.SELECT, helper.actionIcon)
+        toiler.setStatus(
+            MainState.Status(
+                curSection = helper.curSection.toString(),
+                isBlocked = isBlocked,
+                shownDwnDialog = helper.shownDwnDialog,
+                actionIcon = helper.actionIcon,
+            )
+        )
         super.onSaveInstanceState(outState)
     }
 
@@ -531,7 +493,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
             helper.prevSection != null -> {
                 if (helper.prevSection == Section.SITE)
-                    tab = SiteToiler.TAB_SITE
+                    tab = SiteTab.SITE.value
                 setSection(helper.prevSection!!, false)
                 helper.prevSection = null
             }
@@ -590,14 +552,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     override fun onItemClick(link: String) {
         if (link.isEmpty()) return
         if (link == Const.ADS) {
-            tab = SiteToiler.TAB_DEV
+            tab = SiteTab.DEV.value
             setSection(Section.SITE, true)
         } else openReader(link, null)
     }
 
     private fun onChangedState(state: NeoState) {
         when (state) {
-            is NeoState.Ads -> {
+            is MainState.Ads -> {
                 utils.updateTime()
                 utils.reInitProm(state.timediff)
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
@@ -606,14 +568,59 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     showWarnAds(state.warnIndex)
             }
 
-            is NeoState.ListValue -> {
+            is MainState.Status ->
+                restoreStatus(state)
+
+            is MainState.FirstRun ->
+                firstRun(state)
+
+            is ListState.Primary -> {
                 if (frWelcome == null)
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
-
-            else -> {}
         }
+    }
+
+    private fun firstRun(state: MainState.FirstRun) {
+        val intent = intent
+        tab = intent.getIntExtra(Const.TAB, tab)
+        if (helper.isFirstRun)
+            tab = -1
+        else {
+            intent.getStringExtra(Const.CUR_ID)
+            if (firstSection == Section.MENU)
+                updateNew()
+        }
+        if (intent.getBooleanExtra(Const.DIALOG, false))
+            helper.showDownloadDialog()
+        if (state.withSplash.not()) {
+            finishFlashStar()
+            intent.getStringExtra(Const.SEARCH)?.let {
+                openSearch(it)
+                statusBack = StatusBack.EXIT
+            }
+        }
+    }
+
+    private fun restoreStatus(state: MainState.Status) = helper.run {
+        showHead()
+        setActionIcon(state.actionIcon)
+        if (state.isBlocked) blocked()
+        else unblocked()
+        curSection = Section.valueOf(state.curSection)
+
+        if (supportFragmentManager.fragments.isEmpty() ||
+            (helper.isSideMenu && curSection == Section.MENU)
+        ) setSection(firstSection, false)
+        if (isSideMenu) setMenuFragment()
+        else if (curSection != Section.MENU)
+            statusBack = StatusBack.PAGE
+        updateNew()
+        if (curSection == Section.HELP && helper.isSideMenu)
+            helper.fabAction.isVisible = false
+        if (state.shownDwnDialog)
+            helper.showDownloadDialog()
     }
 
     fun onAction(title: String) {
@@ -701,7 +708,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
     }
 
-    fun setError(error: NeoState.Error) {
+    fun setError(error: BasicState.Error) {
         if (error.isNeedReport) {
             blocked()
             status.setError(error)

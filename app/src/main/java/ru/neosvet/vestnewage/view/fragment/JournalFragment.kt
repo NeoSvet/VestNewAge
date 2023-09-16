@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -22,8 +22,11 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.JournalState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private val toiler: JournalToiler
@@ -39,7 +42,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private var firstPosition = 0
 
     override fun initViewModel(): NeoToiler =
-        ViewModelProvider(this)[JournalToiler::class.java].apply { init(requireContext()) }
+        ViewModelProvider(this)[JournalToiler::class.java]
 
     override fun onDestroyView() {
         jobList?.cancel()
@@ -50,22 +53,15 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.list_fragment, container, false)
-        initView(view)
-        return view
+    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
+        initView(it)
     }
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            firstPosition = savedInstanceState.getInt(Const.PLACE, 0)
-        }
-        toiler.preparing()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        firstPosition = adapter.firstPosition
-        outState.putInt(Const.PLACE, firstPosition)
+        toiler.setStatus(JournalState.Status(adapter.firstPosition))
         super.onSaveInstanceState(outState)
     }
 
@@ -87,7 +83,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
         }
     }
 
-    override fun onItemClick(index: Int, item: ListItem) {
+    override fun onItemClick(index: Int, item: BasicItem) {
         var s = item.des
         if (s.contains(getString(R.string.rnd_verse))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
@@ -97,7 +93,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
             openReader(item.link, null)
     }
 
-    override fun onItemLongClick(index: Int, item: ListItem): Boolean {
+    override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
         var des = item.des
         var par = ""
         var i = des.indexOf(getString(R.string.rnd_verse))
@@ -134,16 +130,24 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            NeoState.Success ->
+            BasicState.Success ->
                 act?.hideToast()
-            is NeoState.ListState ->
-                openList(state.index)
-            NeoState.Ready -> act?.run {
+
+            is ListState.Paging ->
+                openList(state.max)
+
+            is JournalState.Status ->
+                restoreStatus(state)
+
+            BasicState.Empty -> act?.run {
                 showStaticToast(getString(R.string.empty_journal))
                 setAction(0)
             }
-            else -> {}
         }
+    }
+
+    private fun restoreStatus(state: JournalState.Status) {
+        firstPosition = state.firstPosition
     }
 
     private fun openList(max: Int) {

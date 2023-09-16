@@ -18,17 +18,16 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
-import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.CalendarState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class CalendarFragment : NeoFragment(), DateDialog.Result {
     private val toiler: CalendarToiler
@@ -40,6 +39,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
         get() = getString(R.string.calendar)
     private var openedReader = false
     private var shownDwnDialog = false
+    private var date = DateUnit.initToday().apply { day = 1 }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,7 +55,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         disableUpdateRoot()
         initCalendar()
-        restoreState(savedInstanceState)
     }
 
     override fun onDestroyView() {
@@ -72,32 +71,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (shownDwnDialog)
-            outState.putInt(Const.DIALOG, 0)
-        dateDialog?.let { d ->
-            outState.putInt(Const.DIALOG, d.date.timeInDays)
-            d.dismiss()
-        }
+        toiler.setStatus(
+            CalendarState.Status(
+                dateDialog = dateDialog?.date,
+                shownDwnDialog = shownDwnDialog
+            )
+        )
         super.onSaveInstanceState(outState)
-    }
-
-    private fun restoreState(state: Bundle?) {
-        if (toiler.isEmptyState) {
-            showTip()
-            toiler.openCalendar(0)
-            if (toiler.isNeedReload())
-                startLoad()
-        } else {
-            val d = state?.getInt(Const.DIALOG, -1) ?: -1
-            if (d > 0) {
-                showDatePicker(DateUnit.putDays(d))
-            } else if (d == 0)
-                showDownloadDialog()
-        }
-    }
-
-    private fun showTip() {
-        TipActivity.showTipIfNeed(TipName.CALENDAR)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -107,7 +87,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
         rvCalendar.adapter = adCalendar
         bPrev.setOnClickListener { openMonth(-1) }
         bNext.setOnClickListener { openMonth(1) }
-        tvDate.setOnClickListener { showDatePicker(toiler.date) }
+        tvDate.setOnClickListener { showDatePicker(date) }
     }
 
     private fun openLink(link: String) {
@@ -116,7 +96,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun openMonth(offset: Int) {
-        if (offset < 0 && toiler.date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && !DateHelper.isLoadedOtkr()) {
+        if (offset < 0 && date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && !DateHelper.isLoadedOtkr()) {
             showDownloadDialog()
             return
         }
@@ -148,8 +128,6 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
                 bNext.isEnabled = false
             } else {
                 tvDate.isEnabled = true
-                bPrev.isEnabled = toiler.checkPrev()
-                bNext.isEnabled = toiler.checkNext()
             }
         }
     }
@@ -167,12 +145,13 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     }
 
     private fun onClick(view: View, item: CalendarItem) {
-        if (toiler.isRun) return
+        if (isBlocked) return
         when (item.count) {
             1 -> {
                 openLink(item.getLink(0))
                 return
             }
+
             0 -> return
         }
         val pMenu = PopupMenu(requireContext(), view)
@@ -193,21 +172,37 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        if (toiler.isRun.not())
-            setStatus(false)
         when (state) {
-            is NeoState.Calendar -> binding?.run {
-                if (toiler.isUpdateUnread)
+            is BasicState.Success ->
+                setStatus(false)
+
+            is BasicState.NotLoaded ->
+                binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
+
+            is CalendarState.Status ->
+                restoreStatus(state)
+
+            is CalendarState.Primary -> binding?.run {
+                setStatus(false)
+                date = state.date
+                tvDate.text = date.calendarString
+                bPrev.isEnabled = state.prev
+                bNext.isEnabled = state.next
+                setUpdateTime(state.time, tvUpdate)
+                if (state.isUpdateUnread)
                     act?.updateNew()
-                tvDate.text = state.date
                 adCalendar.setItems(state.list)
                 if (root.isVisible.not())
                     showView(root)
             }
-            is NeoState.LongValue -> binding?.run {
-                setUpdateTime(state.value, tvUpdate)
-            }
-            else -> {}
+        }
+    }
+
+    private fun restoreStatus(state: CalendarState.Status) {
+        if (state.shownDwnDialog)
+            showDownloadDialog()
+        state.dateDialog?.let {
+            showDatePicker(it)
         }
     }
 

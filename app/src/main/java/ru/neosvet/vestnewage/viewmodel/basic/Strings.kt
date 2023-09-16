@@ -79,7 +79,8 @@ data class MarkerStrings(
     val page_entirely: String,
     val unuse_dot: String,
     val title_already_used: String,
-    val no_collections: String
+    val no_collections: String,
+    val need_set_check: String
 )
 
 data class CabinetStrings(

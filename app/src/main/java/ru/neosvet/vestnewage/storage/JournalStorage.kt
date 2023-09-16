@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.ListItem
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.isPoem
@@ -56,8 +56,8 @@ class JournalStorage : Closeable {
         else null
     }
 
-    suspend fun getList(offset: Int, strings: JournalStrings): List<ListItem> {
-        val list = mutableListOf<ListItem>()
+    suspend fun getList(offset: Int, strings: JournalStrings): List<BasicItem> {
+        val list = mutableListOf<BasicItem>()
         val curJ = getAll()
         if (!curJ.moveToFirst() || offset > curJ.count) {
             curJ.close()
@@ -80,7 +80,7 @@ class JournalStorage : Closeable {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 s = cursor.getString(iLink)
-                val item = ListItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
+                val item = BasicItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
                 val t = curJ.getLong(iTime)
                 val d = DateUnit.putMills(t)
                 item.des = String.format(

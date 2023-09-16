@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -41,10 +41,10 @@ class ErrorUtils(private val throwable: Throwable) {
         }
     }
 
-    fun getErrorState(data: Data): NeoState.Error {
+    fun getErrorState(data: Data): BasicState.Error {
         val info = if (isNeedReport)
             getInformation(data) else ""
-        return NeoState.Error(message, info)
+        return BasicState.Error(message, info)
     }
 
     private fun getInformation(data: Data): String {

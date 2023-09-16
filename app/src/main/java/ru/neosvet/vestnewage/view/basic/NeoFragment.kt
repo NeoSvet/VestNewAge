@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
@@ -15,14 +14,14 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
-import ru.neosvet.vestnewage.utils.StateUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.view.list.TouchHelper
-import ru.neosvet.vestnewage.viewmodel.basic.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
-abstract class NeoFragment : Fragment(), StateUtils.Host {
+abstract class NeoFragment : Fragment() {
     @JvmField
     protected var act: MainActivity? = null
     protected val neotoiler: NeoToiler by lazy {
@@ -30,13 +29,8 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     }
     private var scroll: ScrollHelper? = null
     private var root: View? = null
-    private val stateUtils: StateUtils by lazy {
-        StateUtils(this, neotoiler)
-    }
     private var connectWatcher: Job? = null
-
-    override val scope: LifecycleCoroutineScope
-        get() = lifecycleScope
+    protected var isBlocked = false
 
     abstract val title: String
 
@@ -47,9 +41,17 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         root = view
-        stateUtils.runObserve()
         onViewCreated(savedInstanceState)
-        if (neotoiler.isRun) setStatus(true)
+        runObserve()
+    }
+
+    private fun runObserve() {
+        lifecycleScope.launch {
+            neotoiler.state.collect {
+                onChangedState(it)
+            }
+        }
+        neotoiler.start(requireContext())
     }
 
     fun disableUpdateRoot() {
@@ -76,13 +78,8 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
         super.onDestroyView()
     }
 
-    override fun onResume() {
-        super.onResume()
-        stateUtils.restore()
-    }
-
     open fun onBackPressed(): Boolean {
-        if (neotoiler.isRun) {
+        if (isBlocked) {
             onStatusClick()
             return false
         }
@@ -91,29 +88,31 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     open fun onAction(title: String) {}
 
-    abstract fun onChangedOtherState(state: NeoState)
+    protected abstract fun onChangedOtherState(state: NeoState)
 
-    override fun onChangedState(state: NeoState) {
+    private fun onChangedState(state: NeoState) {
         if (isDetached) return
         when (state) {
-            is NeoState.None ->
-                return
-            is NeoState.Progress ->
+            is BasicState.Progress ->
                 act?.status?.setProgress(state.percent)
-            NeoState.Loading ->
+
+            BasicState.Loading ->
                 setStatus(true)
-            NeoState.NoConnected ->
+
+            BasicState.NoConnected ->
                 noConnected()
-            is NeoState.Error -> {
-                if (state.isNeedReport.not()) setStatus(false)
+
+            is BasicState.Error -> {
+                setStatus(false)
                 act?.setError(state)
             }
+
             else -> onChangedOtherState(state)
         }
     }
 
     open fun startLoad() {
-        if (neotoiler.isRun) return
+        if (isBlocked) return
         if (OnlineObserver.isOnline.value.not()) {
             noConnected()
             return
@@ -122,7 +121,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     }
 
     private fun noConnected() {
-        connectWatcher = scope.launch {
+        connectWatcher = lifecycleScope.launch {
             OnlineObserver.isOnline.collect {
                 connectChanged(it)
             }
@@ -143,6 +142,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     }
 
     open fun setStatus(load: Boolean) {
+        isBlocked = load
         act?.run {
             if (load) {
                 blocked()
@@ -157,7 +157,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
     }
 
     fun onStatusClick() {
-        if (neotoiler.isRun) {
+        if (isBlocked) {
             neotoiler.cancel()
             setStatus(false)
         }
@@ -168,6 +168,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
             when (it) {
                 ScrollHelper.Events.SCROLL_END ->
                     act?.hideBottomArea()
+
                 ScrollHelper.Events.SCROLL_START ->
                     act?.showBottomArea()
             }
@@ -176,8 +177,10 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
             when (it) {
                 TouchHelper.Events.LIST_LIMIT ->
                     act?.hideBottomArea()
+
                 TouchHelper.Events.SWIPE_LEFT ->
                     swipeLeft()
+
                 TouchHelper.Events.SWIPE_RIGHT ->
                     swipeRight()
             }
@@ -195,11 +198,7 @@ abstract class NeoFragment : Fragment(), StateUtils.Host {
 
     protected fun setUpdateTime(time: Long, tv: TextView) {
         if (time == 0L) {
-            tv.text = getString(R.string.list_no_loaded)
-            return
-        }
-        if (time == 1L) {
-            tv.text = getString(R.string.list_empty)
+            tv.text = ""
             return
         }
         val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)

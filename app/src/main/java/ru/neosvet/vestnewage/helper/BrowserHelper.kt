@@ -1,10 +1,7 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import android.content.SharedPreferences
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 
 class BrowserHelper(context: Context) {
     companion object {
@@ -17,35 +14,32 @@ class BrowserHelper(context: Context) {
         private const val SCALE = "scale"
     }
 
+    // Options
     private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
-    private val editor: SharedPreferences.Editor = pref.edit()
     var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
     var zoom: Int = pref.getInt(SCALE, 0)
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
     var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
     var isAutoReturn: Boolean = pref.getBoolean(AUTORETURN, false)
     var isNumPar: Boolean = pref.getBoolean(NUMPAR, false)
-    var isDoctrine: Boolean = false
-        private set
-    var isFullScreen: Boolean = false
+
+    // Status
     var link: String = ""
-        set(value) {
-            isDoctrine = value.contains(Const.DOCTRINE)
-            field = value
-        }
     var search: String = ""
-        private set
     var place: List<String> = listOf()
-        private set
     var searchIndex: Int = -1
     var prog: Int = -1
     var isSearch: Boolean = false
-        private set
+    var position: Float = 0f
+    var isFullScreen: Boolean = false
+
+    val isDoctrine: Boolean
+        get() = link.contains(Const.DOCTRINE)
     val request: String
         get() = place[searchIndex].trimEnd()
-    var position: Float = 0f
 
     fun save() {
+        val editor = pref.edit()
         editor.putInt(THEME, if (isLightTheme) 0 else 1)
         editor.putInt(SCALE, zoom)
         editor.putBoolean(NAVBUTTONS, isNavButton)
@@ -96,10 +90,5 @@ class BrowserHelper(context: Context) {
 
     fun downProg() {
         prog--
-    }
-
-    fun showTip() {
-        TipActivity.showTipIfNeed(TipName.BROWSER_FULLSCREEN)
-        TipActivity.showTipIfNeed(TipName.BROWSER_PANEL)
     }
 }
