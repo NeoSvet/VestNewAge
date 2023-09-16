@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.view.fragment
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,25 +8,24 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.HelpAdapter
-import ru.neosvet.vestnewage.view.list.ScrollHelper
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.HelpState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
-class HelpFragment : Fragment(), Observer<NeoState> {
+class HelpFragment : Fragment() {
     companion object {
         fun newInstance(section: Int): HelpFragment =
             HelpFragment().apply {
@@ -40,9 +38,9 @@ class HelpFragment : Fragment(), Observer<NeoState> {
     private val toiler: HelpToiler by lazy {
         ViewModelProvider(this)[HelpToiler::class.java]
     }
-    private val adapter = HelpAdapter(toiler::onItemClick)
-    private var act: MainActivity? = null
-    private var scroll: ScrollHelper? = null
+    private val adapter: HelpAdapter by lazy {
+        HelpAdapter(toiler::onItemClick)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,31 +52,14 @@ class HelpFragment : Fragment(), Observer<NeoState> {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.let {
-            it.title = getString(R.string.help)
-            toiler.state.observe(it, this)
+        activity?.title = getString(R.string.help)
+        val section = arguments?.getInt(Const.TAB) ?: -1
+        lifecycleScope.launch {
+            toiler.state.collect {
+                onChangedState(it)
+            }
         }
-        if (adapter.itemCount == 0) {
-            val section = arguments?.getInt(Const.TAB) ?: -1
-            toiler.init(requireActivity(), section)
-        } else
-            toiler.restoreList()
-    }
-
-    override fun onDestroyView() {
-        scroll?.deAttach()
-        act = null
-        super.onDestroyView()
-    }
-
-    override fun onAttach(context: Context) {
-        act = activity as MainActivity
-        super.onAttach(context)
-    }
-
-    override fun onDetach() {
-        act = null
-        super.onDetach()
+        toiler.start(requireActivity(), section)
     }
 
     private fun initView(container: View) {
@@ -90,18 +71,19 @@ class HelpFragment : Fragment(), Observer<NeoState> {
         }
     }
 
-    override fun onChanged(value: NeoState) {
-        when (value) {
+    private fun onChangedState(state: NeoState) {
+        if (isDetached) return
+        when (state) {
             is HelpState.Primary ->
-                adapter.setItems(value.list)
+                adapter.setItems(state.list)
 
             is ListState.Update<*> ->
-                adapter.update(value.index, value.item as HelpItem)
+                adapter.update(state.index, state.item as HelpItem)
 
             is BasicState.Message ->
-                Lib.openInApps(Const.mailto + value.message, null)
+                Lib.openInApps(Const.mailto + state.message, null)
 
-            is HelpState.Open -> when (value.type) {
+            is HelpState.Open -> when (state.type) {
                 HelpState.Type.PRIVACY ->
                     Lib.openInApps(Urls.WebPage + "privacy.html", null)
 

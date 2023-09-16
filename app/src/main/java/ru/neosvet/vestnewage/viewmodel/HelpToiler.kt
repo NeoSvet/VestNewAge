@@ -2,9 +2,9 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.app.Activity
 import android.os.Build
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
@@ -34,12 +34,12 @@ class HelpToiler : ViewModel() {
         private const val TIP_SEARCH = 3
     }
 
-    private val mstate = MutableLiveData<NeoState>()
-    val state: LiveData<NeoState>
-        get() = mstate
+    private val stateChannel = Channel<NeoState>()
+    val state = stateChannel.receiveAsFlow()
     private lateinit var strings: HelpStrings
     private var feedback = false
     private var tips = false
+    private var isInit = false
     private var verName = ""
     private val list = mutableListOf<HelpItem>()
     private val listFeedback = mutableListOf<HelpItem>()
@@ -49,22 +49,28 @@ class HelpToiler : ViewModel() {
     private val tipIndex: Int
         get() = if (feedback) FEEDBACK_COUNT + TIPS else TIPS
 
-    fun init(act: Activity, section: Int) {
-        verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName
-        strings = HelpStrings(
-            srv_info = act.getString(R.string.srv_info),
-            format_info = act.getString(R.string.format_info),
-            feedback = act.resources.getStringArray(R.array.feedback),
-            tips = act.resources.getStringArray(R.array.tips_sections)
-        )
-        val titles = act.resources.getStringArray(R.array.help_title)
-        val contents = act.resources.getStringArray(R.array.help_content)
-        for (i in titles.indices) {
-            list.add(HelpItem(titles[i], contents[i]))
+    fun start(act: Activity, section: Int) {
+        if (!isInit) {
+            verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName
+            strings = HelpStrings(
+                srv_info = act.getString(R.string.srv_info),
+                format_info = act.getString(R.string.format_info),
+                feedback = act.resources.getStringArray(R.array.feedback),
+                tips = act.resources.getStringArray(R.array.tips_sections)
+            )
+            val titles = act.resources.getStringArray(R.array.help_title)
+            val contents = act.resources.getStringArray(R.array.help_content)
+            for (i in titles.indices) {
+                list.add(HelpItem(titles[i], contents[i]))
+            }
+            if (section > -1) list[section].opened = true
+            isInit = true
         }
-        if (section > -1)
-            list[section].opened = true
         restoreList()
+    }
+
+    private fun restoreList() {
+        stateChannel.trySend(HelpState.Primary(list))
     }
 
     private fun getFeedback(): List<HelpItem> {
@@ -114,10 +120,6 @@ class HelpToiler : ViewModel() {
         return listTips
     }
 
-    fun restoreList() {
-        mstate.value = HelpState.Primary(list)
-    }
-
     fun onItemClick(index: Int) {
         if (feedback && index > FEEDBACK) {
             if (index <= FEEDBACK + FEEDBACK_COUNT) {
@@ -141,36 +143,36 @@ class HelpToiler : ViewModel() {
             return
         }
         if (index == policyIndex) {
-            mstate.value = HelpState.Open(HelpState.Type.PRIVACY)
+            stateChannel.trySend(HelpState.Open(HelpState.Type.PRIVACY))
             return
         }
         list[index].opened = list[index].opened.not()
 
-        mstate.value = ListState.Update(index, list[index])
+        stateChannel.trySend(ListState.Update(index, list[index]))
     }
 
     private fun clickFeedback(index: Int) {
         when (index) {
             WRITE_TO_DEV -> {
                 val msg = strings.srv_info + list[FEEDBACK + CHANGELOG].content
-                mstate.value = BasicState.Message(msg)
+                stateChannel.trySend(BasicState.Message(msg))
             }
 
             TG_CHANNEL ->
-                mstate.value = HelpState.Open(HelpState.Type.TELEGRAM)
+                stateChannel.trySend(HelpState.Open(HelpState.Type.TELEGRAM))
 
             LINK_ON_SITE ->
-                mstate.value = HelpState.Open(HelpState.Type.SITE)
+                stateChannel.trySend(HelpState.Open(HelpState.Type.SITE))
 
             CHANGELOG ->
-                mstate.value = HelpState.Open(HelpState.Type.CHANGELOG)
+                stateChannel.trySend(HelpState.Open(HelpState.Type.CHANGELOG))
 
 
             LINK_ON_GOOGLE ->
-                mstate.value = HelpState.Open(HelpState.Type.GOOGLE)
+                stateChannel.trySend(HelpState.Open(HelpState.Type.GOOGLE))
 
             LINK_ON_HUAWEI ->
-                mstate.value = HelpState.Open(HelpState.Type.HUAWEI)
+                stateChannel.trySend(HelpState.Open(HelpState.Type.HUAWEI))
         }
     }
 
