@@ -232,7 +232,7 @@ class HomeToiler : NeoToiler() {
         )
     }
 
-    private suspend fun readCalendarLink() {
+    private fun readCalendarLink() {
         val date = DateUnit.initNow()
         date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
         storage.open(date.my)
@@ -245,7 +245,7 @@ class HomeToiler : NeoToiler() {
     }
 
     @SuppressLint("Range")
-    private suspend fun createCalendarItem(): HomeItem {
+    private fun createCalendarItem(): HomeItem {
         task = Task.OPEN_CALENDAR
         val date = DateUnit.initNow()
         date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
@@ -275,7 +275,7 @@ class HomeToiler : NeoToiler() {
         )
     }
 
-    private suspend fun readSummaryLink() {
+    private fun readSummaryLink() {
         val file = Lib.getFile(Const.RSS)
         if (file.exists()) {
             val br = BufferedReader(FileReader(file))
@@ -285,7 +285,7 @@ class HomeToiler : NeoToiler() {
         } else linkSummary = ""
     }
 
-    private suspend fun createSummaryItem(): HomeItem {
+    private fun createSummaryItem(): HomeItem {
         task = Task.OPEN_SUMMARY
         val file = Lib.getFile(Const.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
@@ -309,19 +309,22 @@ class HomeToiler : NeoToiler() {
         )
     }
 
-    private suspend fun createNewsItem(): HomeItem {
+    private fun createNewsItem(): HomeItem {
         task = Task.OPEN_NEWS
         val file = Lib.getFile(SiteToiler.NEWS)
         needLoadNews = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
-        val crc32 = CRC32()
-        crc32.update(file.readBytes())
+        val crc = if (file.exists()) {
+            val crc32 = CRC32()
+            crc32.update(file.readBytes())
+            crc32.value
+        } else 0L
         if (newsCRC == 0L)
-            newsCRC = crc32.value
+            newsCRC = crc
         //TODO check dev news?
         val title: String
         val time: String
         if (file.exists()) {
-            title = if (newsCRC == crc32.value) strings.no_changes
+            title = if (newsCRC == crc) strings.no_changes
             else strings.has_changes
             val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
             time = strings.refreshed + diff
@@ -336,7 +339,7 @@ class HomeToiler : NeoToiler() {
         )
     }
 
-    private suspend fun createAdditionItem(): HomeItem {
+    private fun createAdditionItem(): HomeItem {
         task = Task.OPEN_ADDITION
         val file = Lib.getFileDB(DataBase.ADDITION)
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
