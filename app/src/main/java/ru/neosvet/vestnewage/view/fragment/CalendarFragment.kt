@@ -173,21 +173,25 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is BasicState.Success ->
-                setStatus(false)
-
             is BasicState.NotLoaded ->
                 binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
 
             is CalendarState.Status ->
                 restoreStatus(state)
 
-            is CalendarState.Primary -> binding?.run {
+            is CalendarState.Finish -> binding?.run {
                 setStatus(false)
-                date = state.date
-                tvDate.text = date.calendarString
                 bPrev.isEnabled = state.prev
                 bNext.isEnabled = state.next
+            }
+
+            is CalendarState.Primary -> binding?.run {
+                date = state.date
+                tvDate.text = date.calendarString
+                if (!isBlocked) {
+                    bPrev.isEnabled = state.prev
+                    bNext.isEnabled = state.next
+                }
                 setUpdateTime(state.time, tvUpdate)
                 if (state.isUpdateUnread)
                     act?.updateNew()

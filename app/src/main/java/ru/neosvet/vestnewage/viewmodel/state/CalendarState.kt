@@ -12,8 +12,15 @@ sealed class CalendarState: NeoState {
         val isUpdateUnread: Boolean,
         val list: List<CalendarItem>
     ) : PrimaryState
+
     data class Status(
         val dateDialog: DateUnit?,
         val shownDwnDialog: Boolean
     ) : StatusState
+
+    data class Finish(
+        val prev: Boolean,
+        val next: Boolean
+    ) : CalendarState()
+
 }
