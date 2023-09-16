@@ -3,13 +3,16 @@ package ru.neosvet.vestnewage.utils
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.helper.*
+import ru.neosvet.vestnewage.helper.BrowserHelper
+import ru.neosvet.vestnewage.helper.MainHelper
+import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -22,48 +25,39 @@ import java.io.BufferedWriter
 import java.io.FileReader
 import java.io.FileWriter
 
-class LaunchUtils {
+class LaunchUtils(context: Context) {
     companion object {
         private const val START_ID = 900
         private val FLAGS =
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         private const val PREF_NAME = "main"
-        private var ver = -1
     }
 
     data class InputData(val tab: Int, val section: Section)
 
-    private val pref = App.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val pref: SharedPreferences
+    private val settingsIntent: Intent
+    private val previousVer: Int
     private var notifId = START_ID
     private var notifHelper: NotificationUtils? = null
 
     val isNeedLoad: Boolean
         get() = DateUnit.isLongAgo(pref.getLong(Const.TIME, 0))
-    private val settingsIntent: Intent
-        get() {
-            val intent = Intent(App.context, MainActivity::class.java)
-            intent.putExtra(Const.CUR_ID, Section.SETTINGS.toString())
-            return intent
+
+    init {
+        pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        settingsIntent = Intent(context, MainActivity::class.java)
+        settingsIntent.putExtra(Const.CUR_ID, Section.SETTINGS.toString())
+        previousVer = pref.getInt("ver", 0)
+        if (previousVer < App.version) {
+            val editor = pref.edit()
+            editor.putInt("ver", App.version)
+            editor.apply()
         }
-    private val previousVer: Int
-        get() {
-            val prev = pref.getInt("ver", 0)
-            try {
-                if (prev < App.version) {
-                    val editor = pref.edit()
-                    editor.putInt("ver", App.version)
-                    editor.apply()
-                    reInitProm()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return prev
-        }
+    }
 
     fun checkAdapterNewVersion() {
-        if (ver == -1) ver = previousVer
-        if (ver == 0) {
+        if (previousVer == 0) {
             notifHelper = NotificationUtils()
             showNotifTip(
                 App.context.getString(R.string.check_out_settings),
@@ -73,28 +67,28 @@ class LaunchUtils {
             showSummaryNotif()
             return
         }
-        if (ver < 63) checkSearchDates()
-        if (ver in 45..46) {
+        if (previousVer < 63) checkSearchDates()
+        if (previousVer in 45..46) {
             val storage = AdsStorage()
             storage.delete()
             storage.close()
         }
-        if (ver < 64) {
+        if (previousVer < 64) {
             refTips()
             Thread {
                 checkSearchRequests()
                 sortBase()
             }.start()
         }
-        if (ver < 65) {
+        if (previousVer < 65) {
             val file = Lib.getFileP("/cache/file")
             if (file.exists()) file.delete()
         }
-        if (ver < 67) {
+        if (previousVer < 67) {
             val file = Lib.getFileDB(DataBase.ADDITION)
             if (file.exists()) file.delete()
         }
-        if (ver < 69) {
+        if (previousVer < 69) {
             val file = Lib.getFileDB("07.23")
             if (file.exists()) file.delete()
         }
@@ -264,12 +258,6 @@ class LaunchUtils {
             notifBuilder.setFullScreenIntent(piEmpty, false)
         }
         notifHelper!!.notify(START_ID, notifBuilder)
-    }
-
-    private fun reInitProm() {
-        val pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
-        val prom = PromUtils(null)
-        prom.initNotif(pref.getInt(Const.TIME, Const.TURN_OFF))
     }
 
     fun reInitProm(timeDiff: Int) {

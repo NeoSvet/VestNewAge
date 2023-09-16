@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun initLaunch() {
         Urls.restore()
-        utils = LaunchUtils()
+        utils = LaunchUtils(this)
         utils.checkAdapterNewVersion()
         utils.openLink(intent)?.let {
             if (it.tab == -1)
