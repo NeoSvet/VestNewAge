@@ -3,14 +3,18 @@ package ru.neosvet.vestnewage.viewmodel.state
 import ru.neosvet.vestnewage.helper.BrowserHelper
 
 sealed class BrowserState : NeoState {
+    enum class Type {
+        NEW_BOOK, OLD_BOOK, DOCTRINE
+    }
+
     data class Primary(
-        val helper: BrowserHelper
+        val url: String,
+        val link: String,
+        val type: Type
     ) : PrimaryState
+
     data class Status(
+        val helper: BrowserHelper,
         val search: String?
     ) : StatusState
-    data class Page(
-        val url: String,
-        val isOtkr: Boolean = false
-    ) : BrowserState()
 }

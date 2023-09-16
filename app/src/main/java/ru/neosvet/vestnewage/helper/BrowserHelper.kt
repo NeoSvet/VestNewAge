@@ -24,19 +24,20 @@ class BrowserHelper(context: Context) {
     var isNumPar: Boolean = pref.getBoolean(NUMPAR, false)
 
     // Status
-    var link: String = ""
-    var search: String = ""
-    var place: List<String> = listOf()
-    var searchIndex: Int = -1
-    var prog: Int = -1
-    var isSearch: Boolean = false
-    var position: Float = 0f
-    var isFullScreen: Boolean = false
+    var place = listOf<String>()
+    var searchIndex = -1
+    var prog = -1
+    var isSearch = false
+    var position = 0f
+    var isFullScreen = false
 
-    val isDoctrine: Boolean
-        get() = link.contains(Const.DOCTRINE)
     val request: String
         get() = place[searchIndex].trimEnd()
+
+    init {
+        if (zoom < 10)
+            zoom = (context.resources.displayMetrics.density * 100).toInt()
+    }
 
     fun save() {
         val editor = pref.edit()
@@ -50,7 +51,6 @@ class BrowserHelper(context: Context) {
     }
 
     fun setSearchString(s: String) {
-        search = s
         place = if (s.contains(Const.NN))
             s.split(Const.NN)
         else listOf(s)
@@ -60,7 +60,6 @@ class BrowserHelper(context: Context) {
     }
 
     fun clearSearch() {
-        search = ""
         place = listOf()
         searchIndex = -1
         isSearch = false

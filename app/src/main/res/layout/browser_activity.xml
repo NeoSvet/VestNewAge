@@ -11,6 +11,7 @@
         android:background="@android:color/black"
         android:scaleType="matrix"
         android:src="@drawable/head_back"
+        android:visibility="invisible"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -19,6 +20,7 @@
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
         android:src="@drawable/head_front"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintStart_toEndOf="@id/bBack"
         app:layout_constraintTop_toTopOf="@id/ivHeadBack" />

@@ -45,12 +45,10 @@ class BrowserToiler : NeoToiler() {
     private val storage = PageStorage()
     private val history = Stack<String>()
     private var isRefresh = false
-    private lateinit var helper: BrowserHelper
-    private var link: String
-        get() = helper.link
-        set(value) {
-            helper.link = value
-        }
+    private var isDoctrine = false
+    private var isNumPar = false
+    private var isLightTheme = true
+    private var link = ""
     private val pageLoader: PageLoader by lazy {
         PageLoader(NeoClient(NeoClient.Type.SECTION))
     }
@@ -67,7 +65,6 @@ class BrowserToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
-        helper = BrowserHelper(context)
         strings = BrowserStrings(
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
@@ -79,7 +76,6 @@ class BrowserToiler : NeoToiler() {
     }
 
     override suspend fun defaultState() {
-        postState(BrowserState.Primary(helper))
         if (link.isNotEmpty()) openPage(true)
     }
 
@@ -104,9 +100,7 @@ class BrowserToiler : NeoToiler() {
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
-        if (!url.contains(Const.HTML) && !url.contains("http:")
-            && !url.contains(Const.DOCTRINE)
-        ) {
+        if (!url.contains(Const.HTML) && !url.contains("http:") && !isDoctrine) {
             Lib.openInApps(url, null)
             return
         }
@@ -126,9 +120,15 @@ class BrowserToiler : NeoToiler() {
         cancel()
         scope.launch {
             storage.open(link)
+            var type = BrowserState.Type.NEW_BOOK
             if (storage.name.contains(".")) {
-                if (storage.isOldBook) loadIfNeed = false
+                if (storage.isOldBook) {
+                    type = BrowserState.Type.OLD_BOOK
+                    loadIfNeed = false
+                }
             }
+            isDoctrine = storage.isDoctrine
+            if (isDoctrine) type = BrowserState.Type.DOCTRINE
             if (storage.existsPage(link).not()) {
                 if (loadIfNeed) {
                     isRefresh = false
@@ -139,21 +139,21 @@ class BrowserToiler : NeoToiler() {
             }
             if (!preparingStyle()) return@launch
             val file = Lib.getFile(PAGE)
-            val p = if (newPage || !file.exists())
+            val isNeedUpdate = if (newPage || !file.exists())
                 generatePage(file)
-            else Pair(false, false) //isNeedUpdate, isOtkr
+            else false
             postState(
-                BrowserState.Page(
+                BrowserState.Primary(
                     url = FILE + file.toString(),
-                    isOtkr = p.second
+                    link = link,
+                    type = type
                 )
             )
-            if (p.first.not()) { //not isNeedUpdate
-                if (isRefresh.not()) addJournal()
-                return@launch
-            }
-            isRefresh = true
-            reLoad()
+            if (isNeedUpdate) {
+                isRefresh = true
+                reLoad()
+            } else if (isRefresh.not())
+                addJournal()
         }
     }
 
@@ -164,13 +164,12 @@ class BrowserToiler : NeoToiler() {
         return true
     }
 
-    private fun generatePage(file: File): Pair<Boolean, Boolean> { //isNeedUpdate, isOtkr
+    private fun generatePage(file: File): Boolean { //isNeedUpdate
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)
         val id: Int
         var isNeedUpdate = false
-        var isOtkr = false
         val d: DateUnit
         var n = 1
         if (cursor.moveToFirst()) {
@@ -198,7 +197,7 @@ class BrowserToiler : NeoToiler() {
             //заголовка нет - значит нет и страницы
             //сюда никогдане попадет, т.к. выше есть проверка existsPage
             cursor.close()
-            return Pair(isNeedUpdate, isOtkr)
+            return isNeedUpdate
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
@@ -208,7 +207,7 @@ class BrowserToiler : NeoToiler() {
             do {
                 s = cursor.getString(0)
                 if (poems) {
-                    if (helper.isNumPar && !s.contains("noind")) {
+                    if (isNumPar && !s.contains("noind")) {
                         bw.write("<p class='poem'>")
                         bw.write("$n. ")
                         n++
@@ -224,7 +223,7 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         bw.write("<div style='margin-top:20px' class='print2'>\n")
-        if (storage.isBook || helper.isDoctrine) {
+        if (storage.isBook || isDoctrine) {
             bw.write(SCRIPT)
             bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
             bw.write(SCRIPT)
@@ -233,13 +232,12 @@ class BrowserToiler : NeoToiler() {
             bw.write(Const.BR)
             bw.flush()
         }
-        if (helper.isDoctrine) {
+        if (isDoctrine) {
             bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
             bw.write(strings.copyright)
             bw.write(DateUnit.initToday().year.toString() + Const.BR)
             bw.write(strings.edition_of + d.toString())
         } else if (link.contains("print")) { // материалы с сайта Откровений
-            isOtkr = true
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
         } else {
@@ -251,7 +249,7 @@ class BrowserToiler : NeoToiler() {
         }
         bw.write("\n</div></body></html>")
         bw.close()
-        return Pair(isNeedUpdate, isOtkr)
+        return isNeedUpdate
     }
 
     private fun preparingStyle(): Boolean {
@@ -267,9 +265,8 @@ class BrowserToiler : NeoToiler() {
         }
         val fStyle = Lib.getFile(STYLE)
         var replace = true
-        val light = helper.isLightTheme
         if (fStyle.exists()) {
-            replace = fDark.exists() && !light || fLight.exists() && light
+            replace = fDark.exists() && !isLightTheme || fLight.exists() && isLightTheme
             if (replace) {
                 if (fDark.exists())
                     fStyle.renameTo(fLight)
@@ -278,7 +275,7 @@ class BrowserToiler : NeoToiler() {
             }
         }
         if (replace) {
-            if (light) fLight.renameTo(fStyle) else fDark.renameTo(fStyle)
+            if (isLightTheme) fLight.renameTo(fStyle) else fDark.renameTo(fStyle)
         }
         preparingFont()
         return true
@@ -336,7 +333,7 @@ class BrowserToiler : NeoToiler() {
             openLink(it, false)
             return
         }
-        if (helper.isDoctrine) {
+        if (isDoctrine) {
             setState(BasicState.Success)
             return
         }
@@ -361,7 +358,7 @@ class BrowserToiler : NeoToiler() {
             openLink(it, false)
             return
         }
-        if (helper.isDoctrine) {
+        if (isDoctrine) {
             setState(BasicState.Success)
             return
         }
@@ -392,8 +389,9 @@ class BrowserToiler : NeoToiler() {
         return d.my
     }
 
-    fun setArgument(link: String, search: String?) {
+    fun setArgument(link: String, isLightTheme: Boolean, isNumPar: Boolean) {
         this.link = link
-        search?.let { helper.setSearchString(it) }
+        this.isLightTheme = isLightTheme
+        this.isNumPar = isNumPar
     }
 }
