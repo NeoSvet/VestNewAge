@@ -45,7 +45,7 @@ class AdditionFactory(
     private suspend fun openList(position: Int): List<BasicItem> =
         withContext(Dispatchers.IO) {
             val list = storage.getList(position)
-            list.ifEmpty {
+           list.ifEmpty {
                 loader.load(storage, position)
                 storage.getList(position)
             }

@@ -83,6 +83,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         initTabs()
         arguments?.let {
             selectedTab = it.getInt(Const.TAB, 0)
+            binding?.tabLayout?.select(selectedTab)
             toiler.setArgument(selectedTab)
             arguments = null
         }
@@ -118,6 +119,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
                 tabHost.getChildAt(0).isEnabled = false
                 tabHost.getChildAt(1).isEnabled = false
             } else {
+                act?.hideToast()
                 tabHost.getChildAt(0).isEnabled = true
                 tabHost.getChildAt(1).isEnabled = true
             }
@@ -170,6 +172,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onChangedOtherState(state: NeoState) {
+        setStatus(false)
         when (state) {
             is ListState.Primary ->
                 initRss(state)
@@ -195,7 +198,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     private fun initRss(state: ListState.Primary) {
-        setStatus(false)
+        act?.updateNew()
         jobList?.cancel()
         val scroll = adRecycler.itemCount > 0
         adRecycler.setItems(state.list)
@@ -208,13 +211,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     private fun initAddition(max: Int) {
-        setStatus(false)
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
         adPaging.withTime = true
         binding?.rvSummary?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
-        if (firstPosition == -1) {
+        if (firstPosition == -1 || max == 0) {
             firstPosition = 0
             startPaging(0)
         } else if (firstPosition != adPaging.firstPosition) {
@@ -225,8 +227,10 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     private fun onScroll(value: Int) {
-        if (isUserScroll)
+        if (isUserScroll) {
+            firstPosition = value * NeoPaging.ON_PAGE
             startPaging(value)
+        }
     }
 
     private fun startPaging(page: Int) {
@@ -295,11 +299,13 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     }
 
     override fun onFinishList() {
-        if (toiler.isLoading)
-            act?.showStaticToast(getString(R.string.load))
-        else act?.let {
-            it.showToast(getString(R.string.finish_list))
-            it.unlockHead()
+        act?.let {
+            if (toiler.isLoading)
+                it.showStaticToast(getString(R.string.load))
+            else {
+                it.showToast(getString(R.string.finish_list))
+                it.unlockHead()
+            }
         }
     }
 }

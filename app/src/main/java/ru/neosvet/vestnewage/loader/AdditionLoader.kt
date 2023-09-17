@@ -48,22 +48,12 @@ class AdditionLoader(private val client: NeoClient) : Loader {
             maxPost = loadMax()
         }
         if (storage.max == 0) storage.findMax()
-        var n = if (storage.max > 0) storage.max
-        else maxPost - NeoPaging.ON_PAGE
-        if (n == maxPost) {
-            val file = Lib.getFileDB(DataBase.ADDITION)
-            file.setLastModified(System.currentTimeMillis())
-            return
-        }
-        while (n < maxPost) {
-            n++
-            if (storage.hasPost(n).not())
-                storage.insert(loadPost(n))
-        }
-        if (startId >= maxPost || startId == 0) return
-        var end = startId - NeoPaging.ON_PAGE + 1
-        if (end < 1) end = 1
-        for (i in startId downTo end) {
+        if (startId > maxPost) return
+
+        val start = if (startId == 0) maxPost
+        else startId
+        val end = start - NeoPaging.ON_PAGE + 1
+        for (i in start downTo end) {
             if (storage.hasPost(i).not())
                 storage.insert(loadPost(i))
         }

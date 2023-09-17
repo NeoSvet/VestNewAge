@@ -8,9 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.SummaryTab
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
@@ -41,12 +41,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     private val paging: NeoPaging by lazy {
         NeoPaging(this)
     }
-    override val factory: AdditionFactory by lazy {
-        AdditionFactory(storage, paging)
-    }
     private val client = NeoClient(NeoClient.Type.SECTION)
-    override val isBusy: Boolean
-        get() = isRun
+
     val isLoading: Boolean
         get() = paging.isPaging
 
@@ -74,7 +70,6 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             val loader = AdditionLoader(client)
             loader.load(storage, 0)
             openAddition()
-            postState(ListState.Paging(storage.max))
         }
     }
 
@@ -107,14 +102,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         if (tab != -1)
             selectedTab = convertTab(tab)
         scope.launch {
-            val isEmpty = if (isRss) {
-                !openRss()
-            } else {
-                openAddition()
-                if (storage.max > 0)
-                    postState(ListState.Paging(storage.max))
-                storage.max == 0
-            }
+            val isEmpty = if (isRss) !openRss()
+            else !openAddition()
 
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
@@ -126,14 +115,17 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         }
     }
 
-    private fun openAddition() {
+    private suspend fun openAddition(): Boolean {
         clearPrimaryState()
         storage.open()
         isOpened = true
         storage.findMax()
+        postState(ListState.Paging(storage.max))
+        return storage.max != 0
     }
 
     private suspend fun openRss(): Boolean {
+        clearStates()
         val list = mutableListOf<BasicItem>()
         val now = System.currentTimeMillis()
         val file = Lib.getFile(Const.RSS)
@@ -164,6 +156,12 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         return paging.run(page)
     }
 
+    //------begin    NeoPaging.Parent
+    override val factory: AdditionFactory by lazy {
+        AdditionFactory(storage, paging)
+    }
+    override val isBusy: Boolean
+        get() = isRun
     override val pagingScope: CoroutineScope
         get() = viewModelScope
 
@@ -171,8 +169,10 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         if (storage.max > 0)
             postState(BasicState.Ready)
     }
+//------end    NeoPaging.Parent
 
     override fun postError(error: BasicState.Error) {
+        isRun = false
         setState(error)
     }
 
