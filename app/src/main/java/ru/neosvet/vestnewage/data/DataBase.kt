@@ -36,8 +36,6 @@ class DataBase(name: String, write: Boolean = false) :
         names.add(name)
         this.writableDatabase
     } else this.readableDatabase
-    var isReadOnly = !write
-        private set
 
     override fun onCreate(db: SQLiteDatabase) {
         if (databaseName.contains(".")) { // базы данных с материалами
@@ -121,18 +119,15 @@ class DataBase(name: String, write: Boolean = false) :
 
     @Synchronized
     override fun close() {
-        db.close()
-        if (isReadOnly.not()) {
+        if (!db.isReadOnly)
             names.remove(databaseName)
-            isReadOnly = true
-        }
+        db.close()
         super.close()
     }
 
     private fun checkWritable() {
-        if (!isReadOnly || !db.isOpen) return
+        if (!db.isOpen || !db.isReadOnly) return
         if (names.contains(databaseName)) throw NeoException.BaseIsBusy()
-        isReadOnly = false
         names.add(databaseName)
         db.close()
         db = this.writableDatabase
