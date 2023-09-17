@@ -22,11 +22,6 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     private val journal = JournalStorage()
     private lateinit var strings: JournalStrings
     private val paging = NeoPaging(this)
-    override val factory: JournalFactory by lazy {
-        JournalFactory(journal, strings, paging)
-    }
-    override val isBusy: Boolean
-        get() = isRun
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false
@@ -53,8 +48,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         super.onCleared()
     }
 
-    fun preparing() {
-        viewModelScope.launch {
+    private fun preparing() {
+        scope.launch {
             val cursor = journal.getAll()
             if (cursor.moveToFirst()) {
                 factory.total = cursor.count
@@ -79,15 +74,22 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         return paging.run(page)
     }
 
+    //------begin    NeoPaging.Parent
+    override val factory: JournalFactory by lazy {
+        JournalFactory(journal, strings, paging)
+    }
+    override val isBusy: Boolean
+        get() = isRun
     override val pagingScope: CoroutineScope
         get() = viewModelScope
 
     override suspend fun postFinish() {
         if (isEmpty.not())
-            postState(BasicState.Success)
+            postState(BasicState.Ready)
     }
 
     override fun postError(error: BasicState.Error) {
         setState(error)
     }
+//------end    NeoPaging.Parent
 }

@@ -130,7 +130,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            BasicState.Success ->
+            BasicState.Ready ->
                 act?.hideToast()
 
             is ListState.Paging ->
