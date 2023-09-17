@@ -45,9 +45,10 @@ class AdditionFactory(
     private suspend fun openList(position: Int): List<BasicItem> =
         withContext(Dispatchers.IO) {
             val list = storage.getList(position)
-           list.ifEmpty {
+            val max = if (position > NeoPaging.ON_PAGE) NeoPaging.ON_PAGE else position
+            if (list.size < max) {
                 loader.load(storage, position)
                 storage.getList(position)
-            }
+            } else list
         }
 }

@@ -51,6 +51,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         if (startId > maxPost) return
 
         val start = if (startId == 0) maxPost
+        else if (startId < NeoPaging.ON_PAGE) NeoPaging.ON_PAGE
         else startId
         val end = start - NeoPaging.ON_PAGE + 1
         for (i in start downTo end) {
