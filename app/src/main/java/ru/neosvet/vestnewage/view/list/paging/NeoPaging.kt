@@ -83,6 +83,7 @@ class NeoPaging(
         .build()
 
     fun onError(error: Exception) {
+        isPaging = false
         val utils = ErrorUtils(error)
         if (utils.isNotSkip)
             parent.postError(utils.getErrorState(getInputData()))

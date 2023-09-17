@@ -76,6 +76,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     override suspend fun defaultState() {
+        loadIfNeed = true
         if (link.isNotEmpty()) openPage(true)
     }
 

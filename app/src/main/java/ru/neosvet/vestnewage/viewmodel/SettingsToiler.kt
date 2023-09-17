@@ -82,7 +82,7 @@ class SettingsToiler : NeoToiler() {
                         clearBook(currentYear - 1, currentYear)
                 }
             }
-            postState(BasicState.Message(String.format(".2f", size / 1048576f))) //to MegaByte
+            postState(BasicState.Message(String.format("%.2f", size / 1048576f))) //to MegaByte
             isRun = false
         }
     }

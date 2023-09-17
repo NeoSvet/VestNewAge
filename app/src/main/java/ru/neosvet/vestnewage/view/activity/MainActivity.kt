@@ -717,11 +717,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun showStaticToast(msg: String) {
+        if(snackbar.isShown) return
         toast.autoHide = false
         toast.show(msg)
     }
 
     fun showToast(msg: String) {
+        if(snackbar.isShown) return
         toast.autoHide = true
         toast.show(msg)
     }
