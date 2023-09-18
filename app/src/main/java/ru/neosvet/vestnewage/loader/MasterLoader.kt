@@ -213,6 +213,10 @@ class MasterLoader : Loader, LoadHandlerLite {
         val storage = PageStorage()
         storage.open(name, true)
         val time = System.currentTimeMillis()
+        val row = ContentValues()
+        row.put(Const.TIME, System.currentTimeMillis())
+        if (!storage.updateTitle(1, row))
+            storage.insertTitle(row)
         var isTitle = true
         val ids = HashMap<String, Int>()
         var id: Int
