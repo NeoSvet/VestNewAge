@@ -57,9 +57,8 @@ class BookLoader(private val client: NeoClient) : Loader {
         var date2: String
         do {
             a = page.link
-            while (a == null && page.nextItem != null) {
+            while (a == null && page.nextItem != null)
                 a = page.link
-            }
             if (a == null) break
             if (a.length < 19) continue
             date2 = PageStorage.getDatePage(a)
@@ -153,7 +152,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         val iId = cursor.getColumnIndex(DataBase.ID)
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iTime = cursor.getColumnIndex(Const.TIME)
-        while (cursor.moveToNext()) {
+        while (cursor.moveToNext() && isRun) {
             val id = cursor.getInt(iId)
             val link = cursor.getString(iLink)
             time = cursor.getLong(iTime)

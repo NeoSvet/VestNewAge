@@ -52,7 +52,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
         }
     }
 
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private var dateDialog: DateDialog? = null
     private var alertRnd: CustomDialog? = null
     private var binding: BookFragmentBinding? = null
@@ -134,7 +134,7 @@ class BookFragment : NeoFragment(), DateDialog.Result {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 if (selectedTab == tab.position) return
                 selectedTab = tab.position
-                toiler.openList(true, date, selectedTab)
+                toiler.openList(true, null, selectedTab)
                 checkChangeTab()
             }
         })

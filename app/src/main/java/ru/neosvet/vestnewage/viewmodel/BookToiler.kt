@@ -86,7 +86,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             BookTab.DOCTRINE -> {
                 loader.loadDoctrineList()
                 openDoctrine()
-                loader.loadDoctrinePages(this)
+                if (isRun)
+                    loader.loadDoctrinePages(this)
                 postState(BasicState.Success)
                 return
             }
@@ -100,7 +101,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     @SuppressLint("Range")
-    fun openList(loadIfNeed: Boolean, date: DateUnit, tab: Int = -1) {
+    fun openList(loadIfNeed: Boolean, newDate: DateUnit?, tab: Int = -1) {
         this.loadIfNeed = loadIfNeed
         if (tab != -1)
             selectedTab = convertTab(tab)
@@ -109,10 +110,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 openDoctrine()
                 return@launch
             }
-            when (selectedTab) {
-                BookTab.POEMS -> dPoems = date
-                BookTab.EPISTLES -> dEpistles = date
-                else -> {}
+            newDate?.let {
+                when (selectedTab) {
+                    BookTab.POEMS -> dPoems = it
+                    BookTab.EPISTLES -> dEpistles = it
+                    else -> {}
+                }
             }
             if (!existsList(date)) {
                 if (loadIfNeed) {
@@ -153,10 +156,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 do {
                     s = cursor.getString(iLink)
-                    t = if (s.noHasDate)
-                        cursor.getString(iTitle)
-                    else
-                        cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
+                    t = if (s.noHasDate) cursor.getString(iTitle)
+                    else cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
                 } while (cursor.moveToNext())
                 postState(BookState.Primary(time, date, checkPrev(), checkNext(), list))
@@ -380,7 +381,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
-        setState(BasicState.Progress(value))
+        if (isRun) setState(BasicState.Progress(value))
     }
 
     fun setArgument(tab: Int) {
