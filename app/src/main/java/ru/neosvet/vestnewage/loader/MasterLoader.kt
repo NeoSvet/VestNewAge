@@ -152,10 +152,12 @@ class MasterLoader : Loader, LoadHandlerLite {
                 folder = 0
                 "/list.txt"
             }
+
             in 2016..2020 -> {
                 folder = 1
                 "/list_new.txt"
             }
+
             else -> {
                 folder = 2
                 "2/list.txt"
@@ -273,6 +275,7 @@ class MasterLoader : Loader, LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
+        if (!isRun) return
         if (handler != null)
             handler.postMessage("$msg ($value%)")
         else

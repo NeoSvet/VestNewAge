@@ -271,6 +271,6 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override fun postPercent(value: Int) {
-        setState(BasicState.Progress(value))
+        if (isRun) setState(BasicState.Progress(value))
     }
 }

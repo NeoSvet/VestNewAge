@@ -8,7 +8,11 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.work.Data
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -22,7 +26,11 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.ListsUtils
+import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
@@ -293,7 +301,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         val additionLoader = AdditionLoader(client)
         additionLoader.loadAll(object : LoadHandlerLite {
             override fun postPercent(value: Int) {
-                postMessage(getString(R.string.additionally) + " ($value%)")
+                if (isRun) postMessage(getString(R.string.additionally) + " ($value%)")
             }
         })
         upProg()
