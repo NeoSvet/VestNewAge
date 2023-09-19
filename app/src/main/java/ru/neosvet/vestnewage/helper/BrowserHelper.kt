@@ -25,14 +25,13 @@ class BrowserHelper(context: Context) {
 
     // Status
     var place = listOf<String>()
-    var searchIndex = -1
-    var prog = -1
+    var placeIndex = -1
     var isSearch = false
     var position = 0f
     var isFullScreen = false
 
     val request: String
-        get() = place[searchIndex].trimEnd()
+        get() = place[placeIndex].trimEnd()
 
     init {
         if (zoom < 10)
@@ -55,39 +54,32 @@ class BrowserHelper(context: Context) {
             s.split(Const.NN)
         else listOf(s)
         isSearch = true
-        prog = 0
-        searchIndex = 0
+        placeIndex = 0
     }
 
     fun clearSearch() {
         place = listOf()
-        searchIndex = -1
+        placeIndex = -1
         isSearch = false
     }
 
     fun prevSearch(): Boolean {
-        if (searchIndex > -1) {
-            if (--searchIndex == -1)
-                searchIndex = place.size - 1
+        if (placeIndex > -1) {
+            if (place.size < 2) return false
+            if (--placeIndex == -1)
+                placeIndex = place.size - 1
             return true
         }
         return false
     }
 
     fun nextSearch(): Boolean {
-        if (searchIndex > -1) {
-            if (++searchIndex == place.size)
-                searchIndex = 0
+        if (placeIndex > -1) {
+            if (place.size < 2) return false
+            if (++placeIndex == place.size)
+                placeIndex = 0
             return true
         }
         return false
-    }
-
-    fun upProg() {
-        prog++
-    }
-
-    fun downProg() {
-        prog--
     }
 }

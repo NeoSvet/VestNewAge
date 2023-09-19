@@ -91,10 +91,12 @@ class BrowserActivity : AppCompatActivity() {
         NeoToast(binding.tvToast, null)
     }
     private val snackbar = NeoSnackbar()
+    private val unread = UnreadUtils()
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
     private lateinit var helper: BrowserHelper
     private var link = ""
+    private var searchIndex = -1
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
             (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
@@ -110,33 +112,53 @@ class BrowserActivity : AppCompatActivity() {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ScreenUtils.init(this) // for logo in topBar
         initViews()
-        if (savedInstanceState != null) // for logo in topBar
-            ScreenUtils.init(this)
-        intent?.getStringExtra(Const.LINK)?.let { s ->
-            setHelper(BrowserHelper(this))
-            link = s
-            intent.getStringExtra(Const.SEARCH)?.let {
-                isSearch = true
-                helper.setSearchString(it)
-            }
-            changeArguments()
-            intent = null
-        }
         initHeadBar()
         setBottomBar()
         setViews()
         setContent()
         initWords()
-        initTheme()
-        restoreState()
+        if (savedInstanceState == null) initArguments()
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    private fun initArguments() {
+        val h = BrowserHelper(this)
+        intent?.getStringExtra(Const.LINK)?.let { s ->
+            link = s
+            intent.getStringExtra(Const.SEARCH)?.let {
+                isSearch = true
+                h.setSearchString(it)
+                binding.content.etSearch.setText(h.request)
+                // goSearch(false)
+            }
+        }
+        setHelper(h)
+        changeArguments()
     }
 
     private fun setHelper(helper: BrowserHelper) {
         this.helper = helper
         currentScale = helper.zoom / 100f
+        initOptions()
+        if (helper.isFullScreen) binding.bottomBar.post {
+            switchFullScreen(true)
+        } else bottomUnblocked()
+        with(binding.content) {
+            if (isSearch) {
+                pSearch.isVisible = true
+                headBar.hide()
+            }
+            if (helper.isSearch && helper.place.size > 1) {
+                etSearch.isEnabled = false
+                etSearch.updatePadding(
+                    right = resources.getDimension(R.dimen.def_indent).toInt()
+                )
+                bClear.isVisible = false
+            }
+        }
     }
 
     private fun changeArguments() {
@@ -166,57 +188,36 @@ class BrowserActivity : AppCompatActivity() {
         prom.resume()
     }
 
-    override fun onDestroy() {
-        toiler.cancel()
-        scroll?.cancel()
+    override fun onSaveInstanceState(outState: Bundle) {
         helper.position = positionOnPage
         helper.zoom = (currentScale * 100f).toInt()
-        helper.save()
         val s = if (isSearch)
             binding.content.etSearch.text.toString()
         else null
         toiler.setStatus(
             BrowserState.Status(
                 helper = helper,
-                search = s
+                search = s,
+                index = searchIndex
             )
         )
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        helper.save()
+        scroll?.cancel()
         super.onDestroy()
     }
 
-    private fun restoreState() {
-        if (helper.isFullScreen) binding.bottomBar.post {
-            switchFullScreen(true)
-        }
-        with(binding.content) {
-            if (isSearch) {
-                pSearch.isVisible = true
-                headBar.hide()
-            }
-            if (helper.isSearch) {
-                if (helper.searchIndex > -1) {
-                    etSearch.isEnabled = false
-                    etSearch.updatePadding(
-                        right = resources.getDimension(R.dimen.def_indent).toInt()
-                    )
-                    etSearch.setText(helper.request)
-                }
-            }
-        }
-    }
-
     private fun restoreSearch() = helper.run {
-        if (searchIndex < 0)
-            return
-        findRequest()
-        var i = 0
-        if (prog > 0) while (i < prog) {
+        if (placeIndex < 0) return
+        if (helper.isSearch) findRequest()
+        var i = -1
+        val final = searchIndex
+        while (i < final) {
             binding.content.wvBrowser.findNext(true)
             i++
-        }
-        else while (i > prog) {
-            binding.content.wvBrowser.findNext(false)
-            i--
         }
     }
 
@@ -229,7 +230,7 @@ class BrowserActivity : AppCompatActivity() {
     private fun closeSearch() {
         tipFinish.hide()
         with(binding.content) {
-            if (helper.searchIndex > -1) {
+            if (helper.placeIndex > -1) {
                 etSearch.setText("")
                 etSearch.isEnabled = true
                 etSearch.updatePadding(
@@ -323,18 +324,6 @@ class BrowserActivity : AppCompatActivity() {
                 bottomBar.performHide()
             }
         }
-        if (helper.isNavButton)
-            setCheckItem(menu.buttons, true)
-        else {
-            btnFullScreen.alpha = 0f
-            fabNav.setImageResource(R.drawable.ic_fullscreen)
-        }
-        if (helper.isMiniTop)
-            setCheckItem(menu.top, true)
-        if (helper.isAutoReturn)
-            setCheckItem(menu.autoreturn, true)
-        if (helper.isNumPar)
-            setCheckItem(menu.numpar, true)
         status.setClick {
             if (isBlocked)
                 toiler.cancel()
@@ -342,6 +331,23 @@ class BrowserActivity : AppCompatActivity() {
                 status.onClick()
             finishLoading()
         }
+    }
+
+    private fun initOptions() {
+        binding.content.wvBrowser.setInitialScale(helper.zoom)
+        if (helper.isNavButton)
+            setCheckItem(menu.buttons, true)
+        else {
+            binding.btnFullScreen.alpha = 0f
+            binding.fabNav.setImageResource(R.drawable.ic_fullscreen)
+        }
+        if (helper.isMiniTop)
+            setCheckItem(menu.top, true)
+        if (helper.isAutoReturn)
+            setCheckItem(menu.autoreturn, true)
+        if (helper.isNumPar)
+            setCheckItem(menu.numpar, true)
+        initTheme()
     }
 
     private fun initWords() {
@@ -372,13 +378,12 @@ class BrowserActivity : AppCompatActivity() {
         wvBrowser.settings.allowContentAccess = true
         wvBrowser.settings.allowFileAccess = true
         wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
-        wvBrowser.setInitialScale(helper.zoom)
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
                 isTouch = false
                 if (twoPointers)
-                    wvBrowser.setInitialScale((currentScale * 100.0).toInt())
+                    wvBrowser.setInitialScale((currentScale * 100f).toInt())
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
@@ -422,11 +427,8 @@ class BrowserActivity : AppCompatActivity() {
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == EditorInfo.IME_ACTION_SEARCH
             ) {
-                if (etSearch.length() > 0) {
-                    softKeyboard.hide()
-                    helper.setSearchString(etSearch.text.toString())
-                    findRequest()
-                }
+                if (etSearch.length() > 0)
+                    initSearch()
                 return@setOnKeyListener true
             }
             false
@@ -435,23 +437,23 @@ class BrowserActivity : AppCompatActivity() {
             if (helper.prevSearch()) {
                 etSearch.setText(helper.request)
                 findRequest()
-                return@setOnClickListener
+            } else if (etSearch.length() > 0) {
+                initSearch()
+                wvBrowser.findNext(false)
             }
-            softKeyboard.hide()
-            initSearch()
-            helper.downProg()
-            wvBrowser.findNext(false)
         }
         bNext.setOnClickListener {
             if (helper.nextSearch()) {
                 etSearch.setText(helper.request)
                 findRequest()
-                return@setOnClickListener
+            } else if (etSearch.length() > 0) {
+                initSearch()
+                wvBrowser.findNext(true)
             }
-            softKeyboard.hide()
-            initSearch()
-            helper.upProg()
-            wvBrowser.findNext(true)
+        }
+        wvBrowser.setFindListener { activeMatchOrdinal, _, isDoneCounting -> //numberOfMatches
+            if (isDoneCounting)
+                searchIndex = activeMatchOrdinal
         }
         bClose.setOnClickListener { closeSearch() }
         etSearch.doAfterTextChanged {
@@ -585,7 +587,7 @@ class BrowserActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_search ->
-                    goSearch()
+                    goSearch(true)
 
                 R.id.nav_marker -> {
                     val des = if (helper.isSearch)
@@ -617,12 +619,14 @@ class BrowserActivity : AppCompatActivity() {
         }
     }
 
-    private fun goSearch() = with(binding.content) {
+    private fun goSearch(withPreparing: Boolean) = with(binding.content) {
         headBar.hide()
         pSearch.isVisible = true
         isSearch = true
-        etSearch.post { etSearch.requestFocus() }
-        softKeyboard.show()
+        if (withPreparing) {
+            etSearch.post { etSearch.requestFocus() }
+            softKeyboard.show()
+        }
     }
 
     private fun setCheckItem(item: MenuItem, check: Boolean) {
@@ -630,24 +634,22 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     fun onPageFinished(isLocal: Boolean) {
-        if (isLocal) {
-            val unread = UnreadUtils()
+        if (isLocal)
             unread.deleteLink(link)
-        }
         lifecycleScope.launch {
             delay(250)
             binding.content.wvBrowser.post {
-                if (helper.isSearch)
-                    restoreSearch() //TODO fix
-                else
-                    restorePosition()
+                if (helper.isSearch) restoreSearch()
+                else restorePosition()
             }
         }
     }
 
     private fun initSearch() {
-        if (helper.isSearch)
-            findRequest()
+        softKeyboard.hide()
+        if (helper.isSearch) return
+        helper.setSearchString(binding.content.etSearch.text.toString())
+        findRequest()
     }
 
     fun openLink(url: String) {
@@ -704,11 +706,12 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun restoreStatus(state: BrowserState.Status) {
-        setHelper(state.helper)
         state.search?.let {
             binding.content.etSearch.setText(it)
-            goSearch()
+            goSearch(false)
         }
+        searchIndex = state.index
+        setHelper(state.helper)
     }
 
     private fun noConnected() {
@@ -727,8 +730,6 @@ class BrowserActivity : AppCompatActivity() {
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
-        if (!helper.isFullScreen)
-            bottomUnblocked()
     }
 
     private fun connectChanged(connected: Boolean) {
