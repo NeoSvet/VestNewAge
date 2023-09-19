@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private lateinit var helper: MainHelper
-    private var firstSection = Section.CALENDAR
+    private var firstSection = Section.SETTINGS
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
 
@@ -105,8 +105,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         else
             setContentView(R.layout.main_activity)
         App.context = this
-        initLaunch()
         helper = MainHelper(this)
+        initLaunch()
         super.onCreate(savedInstanceState)
         setBottomPanel()
         initStatusButton()
@@ -243,6 +243,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             firstSection = it.section
             return
         }
+        firstSection = helper.getFirstSection()
         if (utils.isNeedLoad) {
             NeoClient.deleteTempFiles()
             toiler.load()
@@ -265,8 +266,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.FIRST
             return
         }
-        if (firstSection == Section.CALENDAR)
-            firstSection = helper.getFirstSection()
         if (helper.startWithNew()) {
             setSection(Section.NEW, false)
             helper.prevSection = firstSection
@@ -717,13 +716,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun showStaticToast(msg: String) {
-        if(snackbar.isShown) return
+        if (snackbar.isShown) return
         toast.autoHide = false
         toast.show(msg)
     }
 
     fun showToast(msg: String) {
-        if(snackbar.isShown) return
+        if (snackbar.isShown) return
         toast.autoHide = true
         toast.show(msg)
     }
