@@ -156,8 +156,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 do {
                     s = cursor.getString(iLink)
-                    t = if (s.noHasDate) cursor.getString(iTitle)
-                    else cursor.getString(iTitle) + " (" + strings.from + " ${s.date})"
+                    t = cursor.getString(iTitle)
+                    if (!s.noHasDate && !t.contains(s.date))
+                        t += " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
                 } while (cursor.moveToNext())
                 postState(BookState.Primary(time, date, checkPrev(), checkNext(), list))

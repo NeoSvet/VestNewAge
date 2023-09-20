@@ -89,7 +89,8 @@ class PageStorage : Closeable {
             val s = link.date
             if (link.isPoem) {
                 s + " " + App.context.getString(R.string.poem) + " " + Const.KV_OPEN + title + Const.KV_CLOSE
-            } else "$s $title"
+            } else if (!title.contains(s)) "$s $title"
+            else title
         }
     }
 
