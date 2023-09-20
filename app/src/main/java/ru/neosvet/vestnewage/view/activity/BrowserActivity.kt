@@ -82,8 +82,8 @@ class BrowserActivity : AppCompatActivity() {
     private var isSearch = false
     private var twoPointers = false
     private var isBlocked = false
-    private var scroll: Job? = null
-    var currentScale: Float = 1f
+    private var jobScroll: Job? = null
+    var currentScale = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
     }
@@ -105,6 +105,10 @@ class BrowserActivity : AppCompatActivity() {
         get() {
             val h = resources.getDimension(R.dimen.head_height) / resources.displayMetrics.density
             return h > 110
+        }
+    private val isEndScroll: Boolean
+        get() = binding.content.wvBrowser.run {
+            scrollY + measuredHeight >= (contentHeight * currentScale).toInt()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,7 +136,6 @@ class BrowserActivity : AppCompatActivity() {
                 isSearch = true
                 h.setSearchString(it)
                 binding.content.etSearch.setText(h.request)
-                // goSearch(false)
             }
         }
         setHelper(h)
@@ -206,7 +209,7 @@ class BrowserActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         helper.save()
-        scroll?.cancel()
+        jobScroll?.cancel()
         super.onDestroy()
     }
 
@@ -284,7 +287,7 @@ class BrowserActivity : AppCompatActivity() {
                 binding.bottomBar.isScrolledDown -> {
                     if (isSearch.not())
                         headBar.show()
-                    binding.bottomBar.performShow()
+                    bottomShow()
                 }
 
                 isSearch ->
@@ -310,7 +313,7 @@ class BrowserActivity : AppCompatActivity() {
                     headBar.unblocked()
                     headBar.expanded()
                 }
-                bottomBar.performShow()
+                bottomShow()
             } else {
                 isTouch = false
                 with(content.wvBrowser) {
@@ -321,7 +324,7 @@ class BrowserActivity : AppCompatActivity() {
                     headBar.hide()
                     headBar.unblocked()
                 }
-                bottomBar.performHide()
+                bottomHide()
             }
         }
         status.setClick {
@@ -389,17 +392,20 @@ class BrowserActivity : AppCompatActivity() {
             }
             if (helper.isFullScreen) return@setOnTouchListener false
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                scroll?.cancel()
+                jobScroll?.cancel()
                 if (isSearch.not() && wvBrowser.scrollY == 0) {
                     isTouch = false
                     if (helper.isAutoReturn && headBar.isExpanded.not()) {
                         headBar.expanded()
-                        scroll = lifecycleScope.launch {
+                        jobScroll = lifecycleScope.launch {
                             delay(250)
                             wvBrowser.post { wvBrowser.scrollTo(0, 0) }
                         }
                     }
-                } else isTouch = true
+                } else {
+                    isTouch = true
+                    if (isEndScroll) bottomHide()
+                }
             }
             return@setOnTouchListener false
         }
@@ -416,9 +422,8 @@ class BrowserActivity : AppCompatActivity() {
                     isTouch = false
                 }
                 if (isScrollTop) {
-                    if (headBar.isHided) binding.bottomBar.performHide()
-                } else
-                    binding.bottomBar.performShow()
+                    if (headBar.isHided) bottomHide()
+                } else bottomShow()
             } else if (isScrollTop != scrollY >= oldScrollY) {
                 isTouch = true
             }
@@ -461,6 +466,18 @@ class BrowserActivity : AppCompatActivity() {
                 bClear.isVisible = it?.isNotEmpty() ?: false
         }
         bClear.setOnClickListener { etSearch.setText("") }
+    }
+
+    private fun bottomHide() {
+        if (helper.isNavButton.not())
+            binding.fabNav.isVisible = false
+        binding.bottomBar.performHide()
+    }
+
+    private fun bottomShow() {
+        if (helper.isNavButton.not())
+            binding.fabNav.isVisible = true
+        binding.bottomBar.performShow()
     }
 
     private fun setNavButton(scrollY: Int) {
@@ -743,21 +760,24 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun bottomBlocked() {
-        binding.bottomBar.isVisible = false
         setNavVisible(false)
+        binding.bottomBar.isVisible = false
     }
 
     private fun bottomUnblocked() {
-        binding.bottomBar.isVisible = true
         setNavVisible(true)
+        binding.bottomBar.isVisible = true
     }
 
     private fun setNavVisible(value: Boolean) = binding.run {
         if (value) {
-            if (helper.isNavButton)
+            if (helper.isNavButton) {
                 setNavButton(content.wvBrowser.scrollY)
-            else
+                fabNav.alpha = 0.5f
+            } else {
                 fabNav.setImageResource(R.drawable.ic_fullscreen)
+                fabNav.alpha = 1f
+            }
         }
         fabNav.isVisible = value
     }
