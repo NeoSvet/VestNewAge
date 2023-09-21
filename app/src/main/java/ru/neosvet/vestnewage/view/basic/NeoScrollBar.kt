@@ -27,8 +27,10 @@ class NeoScrollBar @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     fun init(max: Int, scope: CoroutineScope, onChange: (Int) -> Unit) {
-        isVisible = true
-        moveScrollBar(false)
+        if (!isVisible) {
+            isVisible = true
+            moveScrollBar(false)
+        }
         maxValue = max
         progress = max
         setOnReleaseListener { v ->
@@ -38,15 +40,17 @@ class NeoScrollBar @JvmOverloads constructor(
                 moveScrollBar(true)
             }
         }
-        setOnProgressChangeListener { v ->
+        setOnProgressChangeListener { _ ->
             if (isMoveScrollBar)
                 moveScrollBar(false)
             else
                 isMoveScrollBar = true
         }
-        scope.launch {
-            delay(600)
-            moveScrollBar(true)
+        if (!isRightScroll) {
+            scope.launch {
+                delay(600)
+                moveScrollBar(true)
+            }
         }
     }
 
