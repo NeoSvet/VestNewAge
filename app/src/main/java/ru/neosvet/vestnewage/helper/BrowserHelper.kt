@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.helper
 
 import android.content.Context
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.basic.convertDpi
 
 class BrowserHelper(context: Context) {
     companion object {
@@ -35,7 +36,7 @@ class BrowserHelper(context: Context) {
 
     init {
         if (zoom < 10)
-            zoom = (context.resources.displayMetrics.density * 100).toInt()
+            zoom = context.convertDpi(100)
     }
 
     fun save() {

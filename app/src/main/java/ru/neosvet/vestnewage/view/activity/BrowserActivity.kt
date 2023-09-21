@@ -38,6 +38,8 @@ import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.WebClient
@@ -157,7 +159,7 @@ class BrowserActivity : AppCompatActivity() {
             if (helper.isSearch && helper.place.size > 1) {
                 etSearch.isEnabled = false
                 etSearch.updatePadding(
-                    right = resources.getDimension(R.dimen.def_indent).toInt()
+                    right = fromDpi(R.dimen.def_indent)
                 )
                 bClear.isVisible = false
             }
@@ -617,8 +619,7 @@ class BrowserActivity : AppCompatActivity() {
 
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
                     helper.zoom = if (it.itemId == R.id.nav_opt_scale)
-                        (resources.displayMetrics.density * 100).toInt()
-                    else 100
+                        convertDpi(100) else 100
                     helper.save()
                     openReader(link, null)
                     finish()

@@ -103,7 +103,6 @@ class MarkerActivity : AppCompatActivity() {
     private val toast: NeoToast by lazy {
         NeoToast(binding.tvToast, null)
     }
-    private var density = 0f
     private var newPos = 0f
     private var heightDialog = 0
     private var hasError = false
@@ -113,7 +112,6 @@ class MarkerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = MarkerActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        density = resources.displayMetrics.density
         initActivity()
         initContent()
         setResult(RESULT_CANCELED)
@@ -243,8 +241,9 @@ class MarkerActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val metrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(metrics)
-        heightDialog = metrics.heightPixels -
-                (resources.getInteger(R.integer.top_minus) * density).toInt()
+        val density = resources.displayMetrics.density
+        val topMinus = resources.getInteger(R.integer.top_minus)
+        heightDialog = metrics.heightPixels - (topMinus * density).toInt()
         rvList.layoutManager = GridLayoutManager(this@MarkerActivity, 1)
         sbPos.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {

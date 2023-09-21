@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.view.basic.convertDpi
 import kotlin.math.abs
 
 class TouchHelper(
@@ -30,6 +31,7 @@ class TouchHelper(
             when (direction) {
                 ItemTouchHelper.LEFT ->
                     events.invoke(Events.SWIPE_LEFT)
+
                 ItemTouchHelper.RIGHT ->
                     events.invoke(Events.SWIPE_RIGHT)
             }
@@ -56,7 +58,7 @@ class TouchHelper(
     fun attach(view: RecyclerView) {
         initTouchListener(view)
         if (onlyLimit) return
-        distanceForSwipe = (distanceForSwipe * view.resources.displayMetrics.density).toInt()
+        distanceForSwipe = view.context.convertDpi(distanceForSwipe)
         val helper = ItemTouchHelper(callback)
         helper.attachToRecyclerView(view)
     }
@@ -72,6 +74,7 @@ class TouchHelper(
                     x = event.getX(0).toInt()
                     y = event.getY(0).toInt()
                 }
+
                 MotionEvent.ACTION_UP -> {
                     if (isDown.not()) return@setOnTouchListener false
                     isDown = false
