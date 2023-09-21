@@ -3,16 +3,18 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import android.net.Uri
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SearchScreen
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
@@ -37,11 +39,6 @@ import java.io.OutputStreamWriter
 
 class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHandlerLite {
     private val paging = NeoPaging(this)
-    override val factory: SearchFactory by lazy {
-        SearchFactory(paging)
-    }
-    override val isBusy: Boolean
-        get() = isRun
     val isLoading: Boolean
         get() = paging.isPaging
     override lateinit var strings: SearchStrings
@@ -51,25 +48,25 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     private var loadDate: String? = null
     private var loadLink: String? = null
     private var msgLoad = ""
-    private var jobSearch: Job? = null
 
     private val storage = SearchStorage()
     private lateinit var engine: SearchEngine
-    private var blockedNotify = false
     private var isExport = false
 
     //last:
-    private var lastPercent = 0
-    private var lastCount = 0
-    private var countMaterials = 0
-    private var lastTime: Long = 0
+    private var lastPercent = -1
+    private var lastTimeS = 0L
+    private var lastTimeR = 0L
+    private var isWaitS = false
+    private var isWaitR = false
+    private var jobResults: Job? = null
 
     override fun init(context: Context) {
         helper = SearchHelper(context)
         if (labelMode.isNotEmpty()) { //from argument
-            helper.mode = lastCount
+            helper.mode = lastPercent
             helper.request = labelMode
-            lastCount = 0
+            lastPercent = -1
             labelMode = ""
         }
         engine = SearchEngine(
@@ -98,10 +95,11 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
                 screen = if (existsResults()) SearchScreen.DEFAULT else SearchScreen.EMPTY,
                 settings = null,
                 shownAddition = false,
-                firstPosition = 0
+                firstPosition = -1,
+                selectPosition = 0,
             )
         )
-        if(helper.request.isNotEmpty())
+        if (helper.request.isNotEmpty())
             postState(SearchState.Start)
     }
 
@@ -126,7 +124,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             }
             pageLoader.finish()
             engine.startSearch(date)
-            notifyResult()
             loadDate = null
         }
         loadLink?.let { link ->
@@ -149,7 +146,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     override fun cancel() {
         engine.stop()
-        jobSearch?.cancel()
         super.cancel()
     }
 
@@ -188,6 +184,12 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         return paging.run(page)
     }
 
+    //------begin    NeoPaging.Parent
+    override val factory: SearchFactory by lazy {
+        SearchFactory(paging)
+    }
+    override val isBusy: Boolean
+        get() = isRun
     override val pagingScope: CoroutineScope
         get() = scope
 
@@ -198,6 +200,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     override fun postError(error: BasicState.Error) {
         setState(error)
     }
+//------end    NeoPaging.Parent
 
     fun setEndings(context: Context) {
         if (engine.endings == null)
@@ -219,32 +222,31 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     fun startSearch(request: String, mode: Int) {
         if (isRun) cancel()
         helper.request = request
-        jobSearch = scope.launch {
+        scope.launch {
             isRun = true
             labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
                 strings.search_in_results
             else
                 strings.search_mode[mode]
-            countMaterials = 0
             engine.startSearch(mode)
             isRun = false
-            notifyResult()
         }
     }
 
     fun showLastResult() {
         scope.launch {
-            val cursor = storage.getResults(helper.isDesc)
-            if (cursor.moveToFirst()) {
-                helper.loadLastResult()
-                countMaterials = cursor.count
-                factory.total = countMaterials
-                postState(ListState.Paging(countMaterials))
-            } else {
-                postState(BasicState.Empty)
-            }
-            cursor.close()
+            val count = getResultCount()
+            if (count > 0) helper.loadLastResult()
+            postState(SearchState.Results(count, true))
         }
+    }
+
+    private fun getResultCount(): Int {
+        val cursor = storage.getResults(helper.isDesc)
+        val count = cursor.count
+        cursor.close()
+        factory.total = count
+        return count
     }
 
     private fun dateFromString(date: String): DateUnit {
@@ -253,17 +255,33 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         return DateUnit.putYearMonth(year, month)
     }
 
-    override suspend fun notifyResult() {
-        if (blockedNotify) {
-            blockedNotify = false
-            return
-        }
-        setLabel()
-        factory.total = countMaterials
-        postState(ListState.Paging(countMaterials))
+    override suspend fun searchFinish() {
+        jobResults?.cancel()
+        val count = getResultCount()
+        setLabel(count)
+        helper.saveLastResult()
+        postState(SearchState.Results(count, true))
     }
 
-    private fun setLabel() = helper.run {
+    override suspend fun notifyResult() {
+        setLabel(engine.countMaterials)
+        factory.total = engine.countMaterials
+        if (System.currentTimeMillis() - lastTimeR < 1500) {
+            if (isWaitR) return
+            isWaitR = true
+            jobResults = viewModelScope.launch {
+                delay(1500)
+                postState(SearchState.Results(engine.countMaterials, false))
+                lastTimeR = System.currentTimeMillis()
+                isWaitR = false
+            }
+        } else {
+            postState(SearchState.Results(engine.countMaterials, false))
+            lastTimeR = System.currentTimeMillis()
+        }
+    }
+
+    private fun setLabel(countMaterials: Int) = helper.run {
         label = String.format(
             strings.format_found,
             labelMode.substring(labelMode.indexOf(" ") + 1),
@@ -274,56 +292,61 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         )
     }
 
-    override suspend fun notifyDate(d: DateUnit) {
-        if (blockedNotify) {
-            blockedNotify = false
+    override suspend fun notifyDate(date: DateUnit) {
+        if (System.currentTimeMillis() - lastTimeS < 250) {
+            if (isWaitS) return
+            isWaitS = true
+            viewModelScope.launch {
+                delay(250)
+                postStatus(date)
+                isWaitS = false
+            }
             return
         }
+        postStatus(date)
+    }
+
+    private suspend fun postStatus(date: DateUnit) {
         postState(
             BasicState.Message(
                 String.format(
                     strings.format_search_date,
-                    d.monthString, d.year
+                    date.monthString, date.year
                 )
             )
         )
+        lastTimeS = System.currentTimeMillis()
     }
 
     override fun clearLast() {
         lastPercent = -1
-        lastCount = 0
-        lastTime = 0
+        lastTimeS = 0
+        lastTimeR = 0
     }
 
     override suspend fun notifyNotFound() {
-        //TODO test need?    blockedNotify = true
         postState(BasicState.Empty)
     }
 
-    override suspend fun searchFinish() {
-        postState(BasicState.Success)
-        setLabel()
-        helper.saveLastResult()
+    override suspend fun notifyPercent(percent: Int) {
+        if (lastPercent < percent) {
+            lastPercent = percent
+            if (System.currentTimeMillis() - lastTimeS < 250) {
+                if (isWaitS) return
+                isWaitS = true
+                viewModelScope.launch {
+                    delay(250)
+                    postStatus(percent)
+                    isWaitS = false
+                }
+            } else
+                postStatus(percent)
+        }
     }
 
-    override suspend fun notifyPercent(p: Int) {
-        if (blockedNotify) {
-            blockedNotify = false
-            return
-        }
-        if (lastPercent < p) {
-            lastPercent = p
-            postState(BasicState.Message(String.format(strings.format_search_proc, p)))
-        } else {
-            val now = System.currentTimeMillis()
-            if (countMaterials - lastCount > NeoPaging.ON_PAGE &&
-                now - lastTime > SearchEngine.DELAY_UPDATE
-            ) {
-                lastTime = now
-                notifyResult()
-                lastCount = countMaterials
-            }
-        }
+    private suspend fun postStatus(percent: Int) {
+        postState(BasicState.Message(String.format(strings.format_search_proc, percent)))
+        lastTimeS = System.currentTimeMillis()
     }
 
     private fun existsResults(): Boolean {
@@ -335,7 +358,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     override fun postPercent(value: Int) {
-        setState(BasicState.Message("$msgLoad ($value%)"))
+        if (isRun) setState(BasicState.Message("$msgLoad ($value%)"))
     }
 
     fun clearBase() {
@@ -453,7 +476,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         /* helper here not init:
         helper.mode = mode
         helper.request = request */
-        lastCount = mode
+        lastPercent = mode
         labelMode = request
     }
 }

@@ -334,7 +334,6 @@ class PageStorage : Closeable {
 
     fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
         table = DataBase.PARAGRAPH,
-        column = DataBase.PARAGRAPH,
         selection = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,
         selectionArgs = arrayOf(getPageId(link).toString(), find)
     )

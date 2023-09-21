@@ -7,7 +7,6 @@ import ru.neosvet.vestnewage.data.*
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
-import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings
 import java.util.*
 
@@ -20,15 +19,14 @@ class SearchEngine(
     interface Parent {
         val strings: SearchStrings
         suspend fun notifyResult()
-        suspend fun notifyPercent(p: Int)
-        suspend fun notifyDate(d: DateUnit)
+        suspend fun notifyPercent(percent: Int)
+        suspend fun notifyDate(date: DateUnit)
         fun clearLast()
         suspend fun notifyNotFound()
         suspend fun searchFinish()
     }
 
     companion object {
-        const val DELAY_UPDATE = 1500
         private const val MODE_EPISTLES = 0
         private const val MODE_POEMS = 1
         const val MODE_TITLES = 2
@@ -54,8 +52,10 @@ class SearchEngine(
     }
 
     var countMatches = 0
+    private set
+    var countMaterials = 0
         private set
-    private var countMaterials = 0
+    private var prevMaterials = 0
     private var words = mutableListOf<String>()
     var endings: Array<String>? = null
     private var request: SearchRequest? = null
@@ -71,14 +71,14 @@ class SearchEngine(
         helper.isNeedLoad = false
         this.mode = mode
         countMatches = 0
+        countMaterials = 0
         storage.open()
         isRun = true
-        if (mode == MODE_RESULT_TEXT)
-            searchInResultText()
-        else if (mode == MODE_RESULT_PAR)
-            searchInResultPar()
-        else
-            searchInPages()
+        when (mode) {
+            MODE_RESULT_TEXT -> searchInResultText()
+            MODE_RESULT_PAR -> searchInResultPar()
+            else -> searchInPages()
+        }
         pages.close()
         parent.searchFinish()
     }
@@ -98,6 +98,7 @@ class SearchEngine(
         val list = getResultList(id, null)
         if (list.isEmpty() && checkMonth(id, pages.name))
             return
+        notifyResultIfNeed()
         listToStorage(list)
     }
 
@@ -121,23 +122,20 @@ class SearchEngine(
             finish = end.timeInDays
             DateUnit.putYearMonth(start.year, start.month)
         }
-        var prev = 0
-        var time: Long = 0
+
         while (isRun) {
             parent.notifyDate(d)
             searchList(d.my)
             if (d.timeInDays == finish) break
             d.changeMonth(step)
-            val now = System.currentTimeMillis()
-            if (((countMaterials < NeoPaging.ON_PAGE && countMaterials > prev) ||
-                        countMaterials - prev > NeoPaging.ON_PAGE) && now - time > DELAY_UPDATE
-            ) {
-                time = now
-                parent.notifyResult()
-                prev = countMaterials
-            }
         }
         pages.close()
+    }
+
+    private suspend fun notifyResultIfNeed() {
+        if (prevMaterials == countMaterials) return
+        parent.notifyResult()
+        prevMaterials = countMaterials
     }
 
     private suspend fun searchInResultText() {
@@ -155,6 +153,7 @@ class SearchEngine(
         parent.clearLast()
         var n = 1
         for (i in links.indices) {
+            if (!isRun) break
             pages.open(links[i])
             val list = getResultList(n, links[i])
             if (list.isNotEmpty()) {
@@ -195,6 +194,7 @@ class SearchEngine(
         var n = 1
         var u: Int
         for (i in items.indices) {
+            if (!isRun) break
             val item = items[i]
             pages.open(item.link)
             val list = getResultList(n, item.link).toMutableList()
@@ -205,6 +205,7 @@ class SearchEngine(
                     list[u].des = list[u + 1].des
                     list.removeAt(u + 1)
                 }
+
                 else -> list.removeAt(u)
             }
             if (list.isNotEmpty()) {
@@ -217,12 +218,14 @@ class SearchEngine(
         items.clear()
     }
 
-    private fun searchInLink(startId: Int, link: String?): List<SearchItem> {
+    private suspend fun searchInLink(startId: Int, link: String?): List<SearchItem> {
         val list = when {
             link == null ->
                 titleToList(pages.searchLink(helper.request), startId, false)
+
             link.contains(helper.request) ->
                 listOf(SearchItem(startId, pages.getTitle(link), link))
+
             else ->
                 listOf()
         }
@@ -230,10 +233,15 @@ class SearchEngine(
         list.forEach {
             it.des = getSelected(it.link, helper.request)
         }
+        notifyResultIfNeed()
         return list
     }
 
-    private fun simpleSearch(isPar: Boolean, link: String?, startId: Int): List<SearchItem> {
+    private suspend fun simpleSearch(
+        isPar: Boolean,
+        link: String?,
+        startId: Int
+    ): List<SearchItem> {
         request?.let { r ->
             if (r is SearchRequest.Advanced) {
                 words.clear()
@@ -274,6 +282,7 @@ class SearchEngine(
         if (isPar) list.forEach {
             if (it.link.isEmpty()) countMaterials--
         }
+        notifyResultIfNeed()
         return list
     }
 
@@ -352,7 +361,7 @@ class SearchEngine(
         return filterList(list)
     }
 
-    private fun filterList(list: MutableList<SearchItem>): List<SearchItem> {
+    private suspend fun filterList(list: MutableList<SearchItem>): List<SearchItem> {
         var isEnd = true
         var isPre = true
         var k: Int
@@ -408,10 +417,12 @@ class SearchEngine(
                     list[n].string = sb.toString()
                     n++
                 }
+
                 n + 1 < list.size && id == list[n + 1].id -> {
                     list[n].des = list[n + 1].des
                     list.removeAt(n + 1)
                 }
+
                 else -> list.removeAt(n)
             }
         }
@@ -427,11 +438,13 @@ class SearchEngine(
             MODE_TITLES -> list.forEach {
                 countMatches += calcSelected(it.title)
             }
+
             else -> list.forEach {
                 if (it.link.isEmpty()) countMaterials--
                 countMatches += calcSelected(it.des)
             }
         }
+        notifyResultIfNeed()
         return list
     }
 
@@ -560,6 +573,7 @@ class SearchEngine(
                 else
                     simpleSearch(false, link, n)
             }
+
             MODE_LINKS -> searchInLink(startId, link)
             else -> { //везде: 3 или 5 (по всем материалам или в Посланиях и Катренах)
                 //фильтрация по 0 и 1 будет позже

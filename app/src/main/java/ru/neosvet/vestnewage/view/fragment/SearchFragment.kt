@@ -14,12 +14,14 @@ import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -82,10 +84,13 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     private var settings: SearchDialog? = null
     private var jobList: Job? = null
+    private var jobScroll: Job? = null
     private var isUserScroll = true
     private var collectResult: Job? = null
     private var maxPages = 0
     private var firstPosition = 0
+    private var selectPosition = 0
+    private var isNeedPaging = true
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
     }
@@ -130,15 +135,16 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        val i = if (screen == SearchScreen.RESULTS)
-            adResult.firstPosition
-        else -1
+        val i = if (screen == SearchScreen.RESULTS) {
+            if (selectPosition > 0) firstPosition else adResult.firstPosition
+        } else -1
         toiler.setStatus(
             SearchState.Status(
                 screen = screen,
                 settings = settings?.onSaveInstanceState(),
                 shownAddition = binding?.content?.pAdditionSet?.isVisible == true,
-                firstPosition = i
+                firstPosition = i,
+                selectPosition = selectPosition
             )
         )
         super.onSaveInstanceState(outState)
@@ -208,9 +214,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun setStatus(load: Boolean) {
+        super.setStatus(false)
         binding?.run {
             if (load) {
                 act?.let {
+                    moveExportButton(true)
                     it.initScrollBar(0, null)
                     it.lockHead()
                     it.blocked()
@@ -225,6 +233,13 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                 pStatus.isVisible = false
                 etSearch.isEnabled = true
             }
+        }
+    }
+
+    private fun moveExportButton(reset: Boolean) {
+        binding?.content?.bExport?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            rightMargin = if (reset) resources.getDimension(R.dimen.def_indent).toInt()
+            else resources.getDimension(R.dimen.double_indent).toInt()
         }
     }
 
@@ -336,6 +351,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
         firstPosition = 0
+        selectPosition = 0
         toiler.startSearch(request, mode)
         adRequest.add(request)
     }
@@ -356,14 +372,17 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             is ListState.Update<*> ->  //finish load page
                 adResult.update(state.item as BasicItem)
 
-            is ListState.Paging ->
-                showResult(state.max)
+            is SearchState.Results -> {
+                if (state.max == 0) noResults()
+                else {
+                    showResult(state.max)
+                    if (state.finish)
+                        setStatus(false)
+                }
+            }
 
             is SearchState.Primary ->
                 helper = state.helper
-
-            BasicState.Empty ->
-                noResults()
 
             BasicState.Success ->
                 setStatus(false)
@@ -381,7 +400,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                 doneExport(state.message)
 
 
-            is BasicState.Empty ->
+            BasicState.Empty ->
                 act?.showToast(getString(R.string.words_not_found))
         }
     }
@@ -391,12 +410,13 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         if (state.firstPosition > -1) {
             toiler.showLastResult()
             etSearch.setText(helper.request)
-            etSearch.setSelection(helper.request.length)
+            etSearch.setSelection(etSearch.length())
             content.tvLabel.text = helper.label
             bPanelSwitch.isVisible = true
             if (state.shownAddition)
                 showAdditionPanel()
             firstPosition = state.firstPosition //for paging
+            selectPosition = state.selectPosition //for paging
         }
         state.settings?.let {
             openSettings()
@@ -417,15 +437,24 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             maxPages = max / NeoPaging.ON_PAGE - 1
             onChangePage(0)
         }
-        if (firstPosition == 0)
-            startPaging(0)
-        else {
-            startPaging(firstPosition / NeoPaging.ON_PAGE)
-            if (firstPosition % NeoPaging.ON_PAGE > 0)
-                adResult.scrollTo(firstPosition)
-        }
-        if (maxPages > 0)
+        if (maxPages > 0) {
+            moveExportButton(false)
             act?.initScrollBar(maxPages, this::onScroll)
+        }
+        if (!isNeedPaging) return
+        isNeedPaging = !toiler.isLoading
+        if (firstPosition == 0) startPaging(0)
+        else startPaging(firstPosition / NeoPaging.ON_PAGE)
+        if (selectPosition > 0) binding?.content?.rvSearch?.let {
+            jobScroll?.cancel()
+            jobScroll = lifecycleScope.launch {
+                delay(200)
+                it.post {
+                    it.scrollToPosition(selectPosition + adResult.firstPosition - firstPosition)
+                    selectPosition = 0
+                }
+            }
+        }
     }
 
     private fun onScroll(value: Int) {
@@ -462,7 +491,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                     content.tvLabel.text = helper.label
                     bPanelSwitch.isVisible = true
                     etSearch.setText(helper.request)
-                    etSearch.setSelection(helper.request.length)
+                    etSearch.setSelection(etSearch.length())
                 }
             }
 
@@ -475,6 +504,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
+        firstPosition = adResult.firstPosition
+        selectPosition = index
         when (RequestAdapter.getType(item)) {
             RequestAdapter.Type.NORMAL -> {
                 val s = when {
@@ -489,8 +520,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                 BrowserActivity.openReader(item.link, s)
             }
 
-            RequestAdapter.Type.LOAD_MONTH ->
+            RequestAdapter.Type.LOAD_MONTH -> {
+                isNeedPaging = true
                 toiler.loadMonth(item.link)
+            }
 
             RequestAdapter.Type.LOAD_PAGE ->
                 toiler.loadPage(item.link)
@@ -542,8 +575,9 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onFinishList() {
+        isNeedPaging = true
         if (toiler.isLoading)
-            act?.showToast(getString(R.string.search_continue))
+            act?.showToast(getString(R.string.wait))
         else act?.let {
             it.showToast(getString(R.string.finish_list))
             it.unlockHead()

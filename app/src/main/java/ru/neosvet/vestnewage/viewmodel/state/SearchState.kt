@@ -15,10 +15,16 @@ sealed class SearchState : NeoState {
         val screen: SearchScreen,
         val settings: Bundle?,
         val shownAddition: Boolean,
-        val firstPosition: Int
+        val firstPosition: Int,
+        val selectPosition: Int
     ) : StatusState
 
     data class FinishExport(
         val message: String
+    ) : SearchState()
+
+    data class Results(
+        val max: Int,
+        val finish: Boolean
     ) : SearchState()
 }

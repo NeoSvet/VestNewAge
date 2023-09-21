@@ -30,9 +30,9 @@ class SearchHelper(context: Context) {
     var isNeedLoad = false
     var start: DateUnit
     var end: DateUnit
-    var mode: Int = 0
-    var label: String = ""
-    var request: String = ""
+    var mode = 0
+    var label = ""
+    var request = ""
     private val _options = mutableListOf<Boolean>()
     val options: List<Boolean>
         get() = _options

@@ -73,7 +73,7 @@
     <!--Formats-->
     <string name="format_load">Загрузка: %s</string>
     <string name="format_search_date">Поиск: %s %d</string>
-    <string name="format_search_proc">Поиск %d%%</string>
+    <string name="format_search_proc">Поиск в результатах %d%%</string>
     <string name="format_found">Вы искали %s “%s”.\nНайдено %d соответствий в %d материалах.\nПараметры поиска: %s</string>
     <string name="format_page_no_loaded">Страница %s не загружена.</string>
     <string name="format_month_no_loaded">%s %d не загружен.</string>
@@ -294,7 +294,7 @@
     <string name="copy">Скопировать</string>
     <string name="link_on_app">Ссылка на приложение</string>
     <!--SearchFragment-->
-    <string name="search_continue">Поиск продолжается</string>
+    <string name="wait">Подождите</string>
     <string name="not_found">Не найдено</string>
     <string name="clear_list">Очистить список</string>
     <string name="explanations">Пояснения</string>
