@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!-- Base application theme. -->
     <style name="Theme.StartTheme" parent="Theme.SplashScreen">
@@ -99,9 +99,9 @@
 
     <style name="ItemBG" parent="Label">
         <item name="android:layout_marginStart">@dimen/def_indent</item>
-        <item name="android:layout_marginTop">@dimen/half_indent</item>
+        <item name="android:layout_marginTop">@dimen/quarter_indent</item>
         <item name="android:layout_marginEnd">@dimen/def_indent</item>
-        <item name="android:layout_marginBottom">@dimen/half_indent</item>
+        <item name="android:layout_marginBottom">@dimen/quarter_indent</item>
         <item name="android:paddingTop">@dimen/half_indent</item>
         <item name="android:paddingBottom">@dimen/half_indent</item>
     </style>
@@ -111,6 +111,7 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/item_bg</item>
         <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_marginTop">@dimen/half_indent</item>
         <item name="android:paddingStart">@dimen/def_indent</item>
         <item name="android:paddingEnd">@dimen/def_indent</item>
         <item name="android:paddingTop">@dimen/half_indent</item>
