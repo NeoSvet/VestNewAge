@@ -6,10 +6,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.view.list.RecyclerHolder
@@ -39,34 +35,8 @@ class PagingAdapter(
     val firstPosition: Int
         get() = startPage * NeoPaging.ON_PAGE + manager.findFirstVisibleItemPosition()
 
-    private val heightItem: Int
-        get() {
-            return recyclerView.findViewHolderForAdapterPosition(
-                manager.findFirstVisibleItemPosition()
-            )?.itemView?.height ?: 70
-        }
-
     override fun setPage(page: Int) {
         startPage = page
-    }
-
-    fun scrollTo(position: Int) {
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(300)
-            var p = firstPosition
-            while (p < position) {
-                p = heightItem
-                if (!recyclerView.canScrollVertically(p)) return@launch
-                recyclerView.scrollBy(0, p)
-                p = firstPosition
-            }
-            while (p > position) {
-                p = -heightItem
-                if (!recyclerView.canScrollVertically(p)) return@launch
-                recyclerView.scrollBy(0, p)
-                p = firstPosition
-            }
-        }
     }
 
     private val scroller = object : RecyclerView.OnScrollListener() {

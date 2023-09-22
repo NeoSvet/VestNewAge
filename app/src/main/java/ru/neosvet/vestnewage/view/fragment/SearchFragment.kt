@@ -21,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -84,12 +83,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     private var settings: SearchDialog? = null
     private var jobList: Job? = null
-    private var jobScroll: Job? = null
     private var isUserScroll = true
     private var collectResult: Job? = null
     private var maxPages = 0
     private var firstPosition = 0
-    private var selectPosition = 0
     private var isNeedPaging = true
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.pSearch)
@@ -136,15 +133,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     override fun onSaveInstanceState(outState: Bundle) {
         val i = if (screen == SearchScreen.RESULTS) {
-            if (selectPosition > 0) firstPosition else adResult.firstPosition
+            adResult.firstPosition
         } else -1
         toiler.setStatus(
             SearchState.Status(
                 screen = screen,
                 settings = settings?.onSaveInstanceState(),
                 shownAddition = binding?.content?.pAdditionSet?.isVisible == true,
-                firstPosition = i,
-                selectPosition = selectPosition
+                firstPosition = i
             )
         )
         super.onSaveInstanceState(outState)
@@ -351,7 +347,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
         firstPosition = 0
-        selectPosition = 0
         toiler.startSearch(request, mode)
         adRequest.add(request)
     }
@@ -416,7 +411,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             if (state.shownAddition)
                 showAdditionPanel()
             firstPosition = state.firstPosition //for paging
-            selectPosition = state.selectPosition //for paging
         }
         state.settings?.let {
             openSettings()
@@ -445,16 +439,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         isNeedPaging = !toiler.isLoading
         if (firstPosition == 0) startPaging(0)
         else startPaging(firstPosition / NeoPaging.ON_PAGE)
-        if (selectPosition > 0) binding?.content?.rvSearch?.let {
-            jobScroll?.cancel()
-            jobScroll = lifecycleScope.launch {
-                delay(200)
-                it.post {
-                    it.scrollToPosition(selectPosition + adResult.firstPosition - firstPosition)
-                    selectPosition = 0
-                }
-            }
-        }
     }
 
     private fun onScroll(value: Int) {
@@ -504,8 +488,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
-        firstPosition = adResult.firstPosition
-        selectPosition = index
+        firstPosition = index + adResult.firstPosition
         when (RequestAdapter.getType(item)) {
             RequestAdapter.Type.NORMAL -> {
                 val s = when {

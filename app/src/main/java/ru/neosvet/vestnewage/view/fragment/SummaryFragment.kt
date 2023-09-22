@@ -216,14 +216,10 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         adPaging.withTime = true
         binding?.rvSummary?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
-        if (firstPosition == -1 || max == 0) {
+        if (firstPosition < 1) {
             firstPosition = 0
             startPaging(0)
-        } else if (firstPosition != adPaging.firstPosition) {
-            startPaging(firstPosition / NeoPaging.ON_PAGE)
-            if (firstPosition % NeoPaging.ON_PAGE > 0)
-                adPaging.scrollTo(firstPosition)
-        }
+        } else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
     private fun onScroll(value: Int) {

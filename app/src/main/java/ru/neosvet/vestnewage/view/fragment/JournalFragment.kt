@@ -153,13 +153,8 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private fun openList(max: Int) {
         if (max > NeoPaging.ON_PAGE)
             act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
-        if (firstPosition == 0)
-            startPaging(0)
-        else {
-            startPaging(firstPosition / NeoPaging.ON_PAGE)
-            if (firstPosition % NeoPaging.ON_PAGE > 0)
-                adapter.scrollTo(firstPosition)
-        }
+        if (firstPosition == 0) startPaging(0)
+        else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
     private fun onScroll(value: Int) {

@@ -15,8 +15,7 @@ sealed class SearchState : NeoState {
         val screen: SearchScreen,
         val settings: Bundle?,
         val shownAddition: Boolean,
-        val firstPosition: Int,
-        val selectPosition: Int
+        val firstPosition: Int
     ) : StatusState
 
     data class FinishExport(

@@ -95,8 +95,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
                 screen = if (existsResults()) SearchScreen.DEFAULT else SearchScreen.EMPTY,
                 settings = null,
                 shownAddition = false,
-                firstPosition = -1,
-                selectPosition = 0,
+                firstPosition = -1
             )
         )
         if (helper.request.isNotEmpty())
