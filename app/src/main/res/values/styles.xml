@@ -98,9 +98,9 @@
     </style>
 
     <style name="ItemBG" parent="Label">
-        <item name="android:layout_marginStart">@dimen/def_indent</item>
+        <item name="android:layout_marginStart">@dimen/half_indent</item>
         <item name="android:layout_marginTop">@dimen/quarter_indent</item>
-        <item name="android:layout_marginEnd">@dimen/def_indent</item>
+        <item name="android:layout_marginEnd">@dimen/half_indent</item>
         <item name="android:layout_marginBottom">@dimen/quarter_indent</item>
         <item name="android:paddingTop">@dimen/half_indent</item>
         <item name="android:paddingBottom">@dimen/half_indent</item>
