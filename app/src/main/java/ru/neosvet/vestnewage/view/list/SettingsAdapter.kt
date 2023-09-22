@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.list
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,21 +25,23 @@ class SettingsAdapter(
         data.add(item)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setVisible(list: List<Boolean>) {
         if (twoColumns) {
-            var b: Int
-            for (a in list.indices step 2) {
-                b = a + 1
-                visible[a] = list[a]
-                if (b == visible.size) break
-                visible[b] = list[b]
-                if (visible[a])
-                    visible[b] = true
-                else if (visible[b])
-                    visible[a] = true
+            var next = true
+            for (i in list.indices) {
+                if (next) {
+                    visible[i] = list[i]
+                    if (visible[i]) {
+                        changeVisible(i)
+                        next = i % 2 != 0
+                    }
+                }
+                else next = true
             }
         } else for (i in list.indices)
             visible[i] = list[i]
+        notifyDataSetChanged()
     }
 
     override fun getItemViewType(position: Int): Int = position
@@ -69,12 +72,15 @@ class SettingsAdapter(
     fun switchPanel(index: Int) {
         visible[index] = visible[index].not()
         notifyItemChanged(index)
-        if (twoColumns) {
-            val i = if (index % 2 == 0)
-                index + 1
-            else
-                index - 1
-            visible[i] = visible[i].not()
+        if (twoColumns)
+            changeVisible(index)
+    }
+
+    private fun changeVisible(index: Int) {
+        val i = if (index % 2 == 0)
+            index + 1 else index - 1
+        if (i < visible.size) {
+            visible[i] = visible[index]
             notifyItemChanged(i)
         }
     }

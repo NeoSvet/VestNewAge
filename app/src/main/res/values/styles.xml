@@ -69,11 +69,11 @@
     <style name="CheckedTextView" parent="Label">
         <item name="android:paddingStart">@dimen/def_indent</item>
         <item name="android:paddingEnd">@dimen/def_indent</item>
-        <item name="android:paddingTop">@dimen/half_indent</item>
-        <item name="android:paddingBottom">@dimen/half_indent</item>
-        <item name="android:layout_marginStart">@dimen/def_indent</item>
-        <item name="android:layout_marginEnd">@dimen/def_indent</item>
-        <item name="android:layout_marginTop">@dimen/def_indent</item>
+        <item name="android:paddingTop">@dimen/def_indent</item>
+        <item name="android:paddingBottom">@dimen/def_indent</item>
+        <item name="android:layout_marginStart">@dimen/half_indent</item>
+        <item name="android:layout_marginEnd">@dimen/half_indent</item>
+        <item name="android:layout_marginTop">@dimen/half_indent</item>
         <item name="android:background">@drawable/press</item>
     </style>
 
