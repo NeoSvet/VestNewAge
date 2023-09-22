@@ -4,13 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="@dimen/def_indent"
-    android:paddingVertical="@dimen/half_indent">
+    android:paddingVertical="@dimen/quarter_indent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/item_norm"
-        android:padding="@dimen/half_indent">
+        android:background="@drawable/item_norm">
 
         <View
             android:layout_width="match_parent"
@@ -24,28 +23,34 @@
             android:id="@+id/line1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
             android:background="@drawable/press"
             android:padding="@dimen/def_indent"
             app:layout_constraintEnd_toStartOf="@id/refresh"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="@dimen/def_indent"
+            app:layout_constraintBottom_toBottomOf="@id/line1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageButton
             android:id="@+id/refresh_bg"
-            android:layout_width="@dimen/cell_size"
-            android:layout_height="@dimen/cell_size"
-            android:layout_marginEnd="@dimen/half_indent"
-            android:background="@drawable/button"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/home_gradient"
             android:contentDescription="@string/refresh"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/refresh"
-            android:layout_width="@dimen/cell_size"
-            android:layout_height="@dimen/cell_size"
-            android:layout_marginEnd="@dimen/half_indent"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:background="@drawable/button_transparent"
             android:contentDescription="@string/refresh"
             android:padding="@dimen/def_indent"

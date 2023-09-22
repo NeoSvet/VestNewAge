@@ -39,7 +39,7 @@ data class HomeStrings(
     val news: String,
     val book: String,
     val markers: String,
-    val about_prom_time: String,
+    val precept_human_future: String,
     val additionally_from_tg: String,
     val today_msk: String,
     val back: String,

@@ -5,12 +5,16 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.fromDpi
 
 class HomeHolder(
     root: View,
@@ -20,6 +24,7 @@ class HomeHolder(
         TITLE, SUBTITLE, REFRESH
     }
 
+    private val ivIcon: ImageView = root.findViewById(R.id.icon)
     private val tvLine1: TextView = root.findViewById(R.id.line1)
     private val tvLine2: TextView = root.findViewById(R.id.line2)
     private val tvLine3: TextView = root.findViewById(R.id.line3)
@@ -27,6 +32,25 @@ class HomeHolder(
     private val ivRefreshBg: ImageView = root.findViewById(R.id.refresh_bg)
 
     fun setItem(item: HomeItem) {
+        val icon = when (item.type) {
+            HomeItem.Type.SUMMARY -> R.drawable.ic_summary
+            HomeItem.Type.NEWS -> R.drawable.ic_site
+            HomeItem.Type.CALENDAR -> R.drawable.ic_calendar
+            HomeItem.Type.JOURNAL -> R.drawable.ic_journal
+            else -> -1
+        }
+        if (icon == -1) {
+            ivIcon.isVisible = false
+            tvLine1.updatePadding(
+                left = tvLine1.context.fromDpi(R.dimen.def_indent)
+            )
+        } else {
+            ivIcon.isVisible = true
+            tvLine1.updatePadding(
+                left = tvLine1.context.convertDpi(50)
+            )
+            ivIcon.setImageDrawable(ContextCompat.getDrawable(ivIcon.context, icon))
+        }
         tvLine1.text = item.lines[0]
         if (item.lines.size == 2) {
             tvLine2.isVisible = false

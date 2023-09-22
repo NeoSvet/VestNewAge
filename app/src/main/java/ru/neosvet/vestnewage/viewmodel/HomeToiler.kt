@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.work.Data
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -33,11 +32,11 @@ import java.util.zip.CRC32
 
 class HomeToiler : NeoToiler() {
     companion object {
-        private const val INDEX_SUMMARY = 0
+        private const val INDEX_SUMMARY = 4
         private const val INDEX_ADDITION = 1
-        private const val INDEX_CALENDAR = 2
-        private const val INDEX_NEWS = 3
-        private const val INDEX_JOURNAL = 4
+        private const val INDEX_CALENDAR = 0
+        private const val INDEX_NEWS = 2
+        private const val INDEX_JOURNAL = 5
     }
 
     private enum class Task {
@@ -81,7 +80,7 @@ class HomeToiler : NeoToiler() {
             news = context.getString(R.string.news),
             book = context.getString(R.string.book),
             markers = context.getString(R.string.markers),
-            about_prom_time = context.getString(R.string.about_prom_time),
+            precept_human_future = context.getString(R.string.precept_human_future),
             additionally_from_tg = context.getString(R.string.additionally_from_tg),
             today_msk = context.getString(R.string.today_msk) + " ",
             back = context.getString(R.string.back),
@@ -119,53 +118,47 @@ class HomeToiler : NeoToiler() {
             linkCalendar = ""
             linkJournal = ""
             val list = mutableListOf<HomeItem>()
-            list.add(createSummaryItem())
-            list.add(createAdditionItem())
             list.add(createCalendarItem())
+            list.add(createAdditionItem())
             list.add(createNewsItem())
+            list.add(HomeItem(HomeItem.Type.MENU, listOf()))
+            list.add(createSummaryItem())
             list.add(createJournalItem())
             task = Task.OPEN_OTHER
             list.add(
                 HomeItem(
-                    type = HomeItem.Type.PROM,
-                    lines = listOf(strings.prom_for_soul_unite, strings.about_prom_time)
+                    type = HomeItem.Type.INFO,
+                    lines = listOf(strings.prom_for_soul_unite, strings.precept_human_future)
                 )
-            )
-            list.add(
-                HomeItem(HomeItem.Type.MENU, listOf())
             )
             postState(HomeState.Primary(list))
             if (needLoadSummary || needLoadAddition || needLoadCalendar || needLoadNews)
-                refreshOld()
+                refreshNeed()
         }
     }
 
-    private suspend fun refreshOld() {
+    private suspend fun refreshNeed() {
         if (isRun || !OnlineObserver.isOnline.value) return
         isRun = true
-        if (needLoadSummary) {
-            task = Task.LOAD_SUMMARY
-            loadSummary()
-            needLoadSummary = false
-            delay(100)
+        if (needLoadCalendar) {
+            task = Task.LOAD_CALENDAR
+            loadCalendar()
+            needLoadCalendar = false
         }
         if (needLoadAddition) {
             task = Task.LOAD_ADDITION
             loadAddition()
             needLoadAddition = false
-            delay(100)
-        }
-        if (needLoadCalendar) {
-            task = Task.LOAD_CALENDAR
-            loadCalendar()
-            needLoadCalendar = false
-            delay(100)
         }
         if (needLoadNews) {
             task = Task.LOAD_NEWS
             loadNews()
             needLoadNews = false
-            delay(100)
+        }
+        if (needLoadSummary) {
+            task = Task.LOAD_SUMMARY
+            loadSummary()
+            needLoadSummary = false
         }
         postState(BasicState.Success)
     }
@@ -210,26 +203,37 @@ class HomeToiler : NeoToiler() {
         loader.finish()
     }
 
-    @SuppressLint("Range")
     private suspend fun createJournalItem(): HomeItem {
         task = Task.OPEN_JOURNAL
-        val journal = JournalStorage()
-        var title = strings.nothing
-        journal.getLastId()?.let { id ->
-            val m = id.split('&')
-            storage.open(m[0])
-            val cursor = storage.getPageById(m[1])
-            if (cursor.moveToFirst()) {
-                title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
-                linkJournal = cursor.getString(cursor.getColumnIndex(Const.LINK))
-            }
-            cursor.close()
-        }
+        var title = getJournalTitle()
+        while (title == null)
+            title = getJournalTitle()
         storage.close()
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
             lines = listOf(strings.journal, strings.last_readed, title)
         )
+    }
+
+    @SuppressLint("Range")
+    private suspend fun getJournalTitle(): String? {
+        val journal = JournalStorage()
+        var r: String? = strings.nothing
+        journal.getLastId()?.let { id ->
+            val m = id.split('&')
+            storage.open(m[0])
+            val cursor = storage.getPageById(m[1])
+            if (cursor.moveToFirst()) {
+                r = cursor.getString(cursor.getColumnIndex(Const.TITLE))
+                linkJournal = cursor.getString(cursor.getColumnIndex(Const.LINK))
+            } else {
+                r = null
+                journal.delete(id)
+            }
+            cursor.close()
+        }
+        journal.close()
+        return r
     }
 
     private fun readCalendarLink() {
@@ -297,7 +301,7 @@ class HomeToiler : NeoToiler() {
             linkSummary = br.readLine() ?: ""
             br.close()
             val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            time = strings.refreshed + diff
+            time = strings.refreshed + diff + strings.back
         } else {
             title = strings.nothing
             time = strings.never
@@ -305,7 +309,7 @@ class HomeToiler : NeoToiler() {
 
         return HomeItem(
             type = HomeItem.Type.SUMMARY,
-            lines = listOf(strings.summary, time + strings.back, title)
+            lines = listOf(strings.summary, time, title)
         )
     }
 
@@ -327,7 +331,7 @@ class HomeToiler : NeoToiler() {
             title = if (newsCRC == crc) strings.no_changes
             else strings.has_changes
             val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            time = strings.refreshed + diff
+            time = strings.refreshed + diff + strings.back
         } else {
             title = strings.nothing
             time = strings.never
@@ -335,7 +339,7 @@ class HomeToiler : NeoToiler() {
 
         return HomeItem(
             type = HomeItem.Type.NEWS,
-            lines = listOf(strings.news, time + strings.back, title)
+            lines = listOf(strings.news, time, title)
         )
     }
 
@@ -345,7 +349,7 @@ class HomeToiler : NeoToiler() {
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
         val time = if (file.exists()) {
             val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            strings.refreshed + diff
+            strings.refreshed + diff + strings.back
         } else strings.never
         val addition = AdditionStorage()
         addition.open()
@@ -355,7 +359,7 @@ class HomeToiler : NeoToiler() {
         else strings.last_post_from.format(t)
         return HomeItem(
             type = HomeItem.Type.ADDITION,
-            lines = listOf(strings.additionally_from_tg, time + strings.back, t)
+            lines = listOf(strings.additionally_from_tg, time, t)
         )
     }
 

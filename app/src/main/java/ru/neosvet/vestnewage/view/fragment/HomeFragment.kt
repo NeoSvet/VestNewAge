@@ -53,10 +53,17 @@ class HomeFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        toiler.setStatus(HomeState.Status(openedReader))
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onResume() {
         super.onResume()
-        if (openedReader)
+        if (openedReader) {
             toiler.updateJournal()
+            openedReader = false
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -84,6 +91,9 @@ class HomeFragment : NeoFragment() {
 
             is HomeState.Loading ->
                 adapter.startLoading(state.index)
+
+            is HomeState.Status -> if (state.openedReader)
+                toiler.updateJournal()
 
             BasicState.Success ->
                 act?.updateNew()
@@ -119,10 +129,10 @@ class HomeFragment : NeoFragment() {
                 else -> act?.setSection(Section.SITE, true)
             }
 
-            HomeItem.Type.PROM -> {
+            HomeItem.Type.INFO -> {
                 val link = if (action == HomeHolder.Action.SUBTITLE)
-                    Urls.VREMYA_LINK else Urls.PROM_LINK
-                BrowserActivity.openReader(link, null)
+                    Urls.PRECEPT_LINK else Urls.PROM_LINK
+                openReader(link)
             }
 
             HomeItem.Type.JOURNAL ->
@@ -141,14 +151,12 @@ class HomeFragment : NeoFragment() {
     }
 
     private fun onMenuClick(section: Section) {
-        if (section == Section.MENU)
-            startEdit()
-        else
-            act?.setSection(section, true)
+        if (section == Section.MENU) startEdit()
+        else act?.setSection(section, true)
     }
 
     private fun startEdit() {
-        //TODO("Not yet implemented")
+        //TODO ("Not yet implemented")
     }
 
     override fun onAction(title: String) {

@@ -16,6 +16,7 @@ object Urls {
     private const val FILE = "/urls.txt"
     const val PROM_LINK = "Posyl-na-Edinenie.html"
     const val VREMYA_LINK = "Vremya-Posyla.html"
+    const val PRECEPT_LINK = "doctrine:174-179"
 
     private val URL = arrayOf(
         "http://neosvet.ucoz.ru/", "http://neosvet.somee.com/", //URL 0 1
