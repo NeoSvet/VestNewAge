@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage.loader.page
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
@@ -92,6 +93,13 @@ class PageLoader(private val client: NeoClient) : Loader {
     }
 
     private fun downloadDoctrinePage(link: String) {
+        var id = storage.getPageId(link)
+        if (id == -1) {
+            val loader = BookLoader(client)
+            loader.loadDoctrineList()
+            id = storage.getPageId(link)
+        } else storage.deleteParagraphs(id)
+
         var s: String? = link.substring(Const.DOCTRINE.length) //pages
         val stream = client.getStream("${Urls.DoctrineBase}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
@@ -99,8 +107,6 @@ class PageLoader(private val client: NeoClient) : Loader {
         var row = ContentValues()
         row.put(Const.TIME, time)
         storage.updateTitle(link, row)
-        val id = storage.getPageId(link)
-        storage.deleteParagraphs(id)
         s = br.readLine()
         while (s != null) {
             row = ContentValues()
