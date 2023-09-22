@@ -10,7 +10,6 @@ class JournalFactory(
     private val strings: JournalStrings,
     private val parent: NeoPaging
 ) : NeoPaging.Factory() {
-    var total = 0
 
     override fun getRefreshKey(state: PagingState<Int, BasicItem>): Int? {
         return null

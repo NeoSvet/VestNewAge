@@ -215,7 +215,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         adPaging = PagingAdapter(this)
         adPaging.withTime = true
         binding?.rvSummary?.adapter = adPaging
-        act?.initScrollBar(max / NeoPaging.ON_PAGE, this::onScroll)
+        act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this::onScroll)
         if (firstPosition < 1) {
             firstPosition = 0
             startPaging(0)

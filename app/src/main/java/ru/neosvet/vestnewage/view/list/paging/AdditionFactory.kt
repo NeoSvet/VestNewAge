@@ -27,13 +27,13 @@ class AdditionFactory(
         offset = position
         parent.startPaging()
         return try {
-            val list = openList(storage.max - position)
+            val list = openList(total - position)
             val next = position + NeoPaging.ON_PAGE
             parent.finishPaging()
             LoadResult.Page(
                 data = list,
                 prevKey = if (position == 0) null else position - NeoPaging.ON_PAGE,
-                nextKey = if (next >= storage.max) null else next
+                nextKey = if (next >= total) null else next
             )
         } catch (exception: Exception) {
             exception.printStackTrace()

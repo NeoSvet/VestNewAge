@@ -8,7 +8,6 @@ class SearchFactory(
     private val parent: NeoPaging
 ) : NeoPaging.Factory() {
     private val storage = SearchStorage()
-    var total = 0
 
     fun destroy() {
         storage.close()

@@ -427,10 +427,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
                 bPanelSwitch.setImageResource(R.drawable.ic_bottom)
             content.tvLabel.text = helper.label
         }
-        if (max > NeoPaging.ON_PAGE) {
-            maxPages = max / NeoPaging.ON_PAGE - 1
-            onChangePage(0)
-        }
+        if (max > NeoPaging.ON_PAGE)
+            maxPages = max / NeoPaging.ON_PAGE + 1
         if (maxPages > 0) {
             moveExportButton(false)
             act?.initScrollBar(maxPages, this::onScroll)
@@ -442,8 +440,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
     }
 
     private fun onScroll(value: Int) {
-        if (isUserScroll)
+        if (isUserScroll) {
+            firstPosition = value * NeoPaging.ON_PAGE
             startPaging(value)
+        }
     }
 
     private fun startPaging(page: Int) {

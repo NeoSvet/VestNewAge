@@ -120,6 +120,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         storage.open()
         isOpened = true
         storage.findMax()
+        factory.total = storage.max
         postState(ListState.Paging(storage.max))
         return storage.max != 0
     }

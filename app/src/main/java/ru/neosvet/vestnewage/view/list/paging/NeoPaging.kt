@@ -25,6 +25,7 @@ class NeoPaging(
 
     abstract class Factory : PagingSource<Int, BasicItem>() {
         internal var offset: Int = 0
+        var total: Int = 0
     }
 
     interface Parent {
@@ -48,7 +49,10 @@ class NeoPaging(
     }
 
     fun run(page: Int): Flow<PagingData<BasicItem>> {
-        parent.factory.offset = page * ON_PAGE
+        val p = page * ON_PAGE
+        if (p >= parent.factory.total)
+            parent.factory.offset = parent.factory.total - 1
+        else parent.factory.offset = p
         pager?.setPage(page)
         return Pager(
             config = PagingConfig(
