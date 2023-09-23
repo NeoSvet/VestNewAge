@@ -14,6 +14,12 @@ class NeoScrollBar @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : VerticalSeekBar(context, attrs, defStyleAttr) {
+
+    interface Host {
+        fun onScrolled(value: Int)
+        fun onPreviewScroll(value: Int)
+    }
+
     private var isRightScroll = false
     private var isEndScrollAnim = true
     private var isMoveScrollBar = true
@@ -26,7 +32,7 @@ class NeoScrollBar @JvmOverloads constructor(
         }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun init(max: Int, scope: CoroutineScope, onChange: (Int) -> Unit) {
+    fun init(max: Int, scope: CoroutineScope, host: Host) {
         if (!isVisible) {
             isVisible = true
             moveScrollBar(false)
@@ -34,13 +40,14 @@ class NeoScrollBar @JvmOverloads constructor(
         maxValue = max
         progress = max
         setOnReleaseListener { v ->
-            onChange.invoke(max - v)
+            host.onScrolled(max - v)
             scope.launch {
                 delay(900)
                 moveScrollBar(true)
             }
         }
-        setOnProgressChangeListener { _ ->
+        setOnProgressChangeListener { v ->
+            host.onPreviewScroll(max - v)
             if (isMoveScrollBar)
                 moveScrollBar(false)
             else

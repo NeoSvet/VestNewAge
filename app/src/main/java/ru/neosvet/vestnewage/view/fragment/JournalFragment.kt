@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
@@ -28,7 +29,7 @@ import ru.neosvet.vestnewage.viewmodel.state.JournalState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
-class JournalFragment : NeoFragment(), PagingAdapter.Parent {
+class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private val toiler: JournalToiler
         get() = neotoiler as JournalToiler
     private val adapter: PagingAdapter by lazy {
@@ -40,6 +41,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
     private var jobList: Job? = null
     private var isUserScroll = true
     private var firstPosition = 0
+    private lateinit var rvList: RecyclerView
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[JournalToiler::class.java]
@@ -67,20 +69,21 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initView(container: View) {
-        val rv = container.findViewById(R.id.rvList) as RecyclerView
-        rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rv.adapter = adapter
-        setListEvents(rv)
+        rvList = container.findViewById(R.id.rvList) as RecyclerView
+        rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rvList.adapter = adapter
+        setListEvents(rvList)
     }
 
     private fun startPaging(page: Int) {
         jobList?.cancel()
-        onChangePage(page)
+        rvList.adapter = null
         jobList = lifecycleScope.launch {
             toiler.paging(page, adapter).collect {
                 adapter.submitData(lifecycle, it)
             }
         }
+        rvList.adapter = adapter
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
@@ -130,6 +133,9 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
+            is BasicState.Message ->
+                act?.showScrollTip(state.message)
+
             BasicState.Ready ->
                 act?.hideToast()
 
@@ -152,16 +158,21 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent {
 
     private fun openList(max: Int) {
         if (max > NeoPaging.ON_PAGE)
-            act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this::onScroll)
+            act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
         if (firstPosition == 0) startPaging(0)
         else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
-    private fun onScroll(value: Int) {
+    override fun onScrolled(value: Int) {
         if (isUserScroll) {
             firstPosition = value * NeoPaging.ON_PAGE
             startPaging(value)
         }
+    }
+
+    override fun onPreviewScroll(value: Int) {
+        if (isUserScroll)
+            toiler.getTimeOn(value * NeoPaging.ON_PAGE)
     }
 
     override fun onAction(title: String) {

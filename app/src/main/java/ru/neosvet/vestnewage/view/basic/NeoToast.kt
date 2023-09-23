@@ -10,6 +10,7 @@ class NeoToast(
 ) {
     private var isShow = false
     var autoHide = true
+    var timeHide = 2700L
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -34,7 +35,7 @@ class NeoToast(
     private fun runAutoHide() {
         job?.cancel()
         job = scope.launch {
-            delay(2700)
+            delay(timeHide)
             if (isShow) view.post {
                 hideAnimated()
             }

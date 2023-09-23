@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -19,12 +20,13 @@ import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 
 class JournalToiler : NeoToiler(), NeoPaging.Parent {
-    private val journal = JournalStorage()
+    private val storage = JournalStorage()
     private lateinit var strings: JournalStrings
     private val paging = NeoPaging(this)
     val isLoading: Boolean
         get() = paging.isPaging
     var isEmpty = false
+    private var jobTime: Job? = null
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "journal")
@@ -33,6 +35,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     override fun init(context: Context) {
         strings = JournalStrings(
             format_time_back = context.getString(R.string.format_time_back),
+            back = context.getString(R.string.back),
             rnd_poem = context.getString(R.string.rnd_poem),
             rnd_epistle = context.getString(R.string.rnd_epistle),
             rnd_verse = context.getString(R.string.rnd_verse)
@@ -44,13 +47,13 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     override fun onCleared() {
-        journal.close()
+        storage.close()
         super.onCleared()
     }
 
     private fun preparing() {
         scope.launch {
-            val cursor = journal.getAll()
+            val cursor = storage.getAll()
             if (cursor.moveToFirst()) {
                 factory.total = cursor.count
                 postState(ListState.Paging(cursor.count))
@@ -63,8 +66,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     fun clear() {
-        journal.clear()
-        journal.close()
+        storage.clear()
+        storage.close()
         isEmpty = true
         setState(BasicState.Empty)
     }
@@ -76,7 +79,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
 
     //------begin    NeoPaging.Parent
     override val factory: JournalFactory by lazy {
-        JournalFactory(journal, strings, paging)
+        JournalFactory(storage, strings, paging)
     }
     override val isBusy: Boolean
         get() = isRun
@@ -92,4 +95,13 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         setState(error)
     }
 //------end    NeoPaging.Parent
+
+    fun getTimeOn(position: Int) {
+        jobTime?.cancel()
+        jobTime = scope.launch {
+            val time = storage.getTimeBack(position)
+            if (time.isEmpty()) postState(BasicState.Message(time))
+            else postState(BasicState.Message(time + strings.back))
+        }
+    }
 }

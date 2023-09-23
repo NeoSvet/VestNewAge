@@ -2,8 +2,8 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
@@ -53,8 +53,10 @@ class SearchStorage : Closeable {
             cursor.close()
             return list
         }
-        if (!cursor.moveToPosition(offset))
+        if (!cursor.moveToPosition(offset)) {
+            cursor.close()
             return list
+        }
 
         val iTitle = cursor.getColumnIndex(Const.TITLE)
         val iLink = cursor.getColumnIndex(Const.LINK)
@@ -80,6 +82,20 @@ class SearchStorage : Closeable {
         val r = if (cursor.moveToFirst())
             cursor.getInt(0)
         else -1
+        cursor.close()
+        return r
+    }
+
+    fun getTitle(position: Int): String {
+        val cursor = getResults(isDesc)
+        if (cursor.count == 0) {
+            cursor.close()
+            return ""
+        }
+        val r = if (cursor.moveToPosition(position)) {
+            val iTitle = cursor.getColumnIndex(Const.TITLE)
+            cursor.getString(iTitle)
+        } else ""
         cursor.close()
         return r
     }

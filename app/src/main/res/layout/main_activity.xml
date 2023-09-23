@@ -165,6 +165,17 @@
         android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvScroll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="70dp"
+        android:background="@drawable/field"
+        android:gravity="center"
+        android:padding="@dimen/def_indent"
+        android:visibility="gone" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvToast"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

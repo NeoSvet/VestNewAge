@@ -60,6 +60,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     private var isWaitS = false
     private var isWaitR = false
     private var jobResults: Job? = null
+    private var jobTitle: Job? = null
 
     override fun init(context: Context) {
         helper = SearchHelper(context)
@@ -477,5 +478,13 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         helper.request = request */
         lastPercent = mode
         labelMode = request
+    }
+
+    fun getTitleOn(position: Int) {
+        jobTitle?.cancel()
+        jobTitle = scope.launch {
+            val title = storage.getTitle(position)
+            postState(BasicState.Message(title))
+        }
     }
 }

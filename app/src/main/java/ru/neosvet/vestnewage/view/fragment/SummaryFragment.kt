@@ -25,6 +25,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
@@ -37,7 +38,7 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.state.SummaryState
 
-class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
+class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     companion object {
         fun newInstance(tab: Int): SummaryFragment =
             SummaryFragment().apply {
@@ -174,6 +175,9 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
     override fun onChangedOtherState(state: NeoState) {
         setStatus(false)
         when (state) {
+            is BasicState.Message ->
+                act?.showScrollTip(state.message)
+
             is ListState.Primary ->
                 initRss(state)
 
@@ -215,27 +219,34 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent {
         adPaging = PagingAdapter(this)
         adPaging.withTime = true
         binding?.rvSummary?.adapter = adPaging
-        act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this::onScroll)
+        act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
         if (firstPosition < 1) {
             firstPosition = 0
             startPaging(0)
         } else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
-    private fun onScroll(value: Int) {
+    override fun onScrolled(value: Int) {
         if (isUserScroll) {
             firstPosition = value * NeoPaging.ON_PAGE
             startPaging(value)
         }
     }
 
+    override fun onPreviewScroll(value: Int) {
+        if (isUserScroll)
+            toiler.getTimeOn(value * NeoPaging.ON_PAGE)
+    }
+
     private fun startPaging(page: Int) {
         jobList?.cancel()
+        binding?.rvSummary?.adapter = null
         jobList = lifecycleScope.launch {
             toiler.paging(page, adPaging).collect {
                 adPaging.submitData(lifecycle, it)
             }
         }
+        binding?.rvSummary?.adapter = adPaging
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {

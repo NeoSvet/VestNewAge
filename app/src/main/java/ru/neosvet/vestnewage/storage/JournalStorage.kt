@@ -2,16 +2,16 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
 import java.io.Closeable
-import java.util.*
+import java.util.LinkedList
 
 class JournalStorage : Closeable {
     companion object {
@@ -129,5 +129,18 @@ class JournalStorage : Closeable {
             i--
         }
         cursor.close()
+    }
+
+    fun getTimeBack(position: Int): String {
+        val cursor = getAll()
+        if (!cursor.moveToFirst() || position > cursor.count) {
+            cursor.close()
+            return ""
+        }
+        cursor.moveToPosition(position)
+        val iTime = cursor.getColumnIndex(Const.TIME)
+        val t = cursor.getLong(iTime)
+        cursor.close()
+        return DateUnit.getDiffDate(System.currentTimeMillis(), t)
     }
 }

@@ -146,4 +146,23 @@ class AdditionStorage : Closeable {
         cursor.close()
         return result
     }
+
+    fun getTime(position: Int): String {
+        val offset = max - position
+        val cursor = db.query(
+            table = DataBase.ADDITION,
+            groupBy = DataBase.ID,
+            having = if (offset == 0) null
+            else "${DataBase.ID} = $offset",
+            orderBy = DataBase.ID + LIMIT + "1"
+        )
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return ""
+        }
+        val iTime = cursor.getColumnIndex(Const.TIME)
+        val time = getDate(cursor.getString(iTime))
+        cursor.close()
+        return time
+    }
 }

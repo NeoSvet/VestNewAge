@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
@@ -51,7 +52,7 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.state.SearchState
 
-class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent {
+class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent, NeoScrollBar.Host {
     companion object {
         private const val LAST_RESULTS = 0
         private const val CLEAR_RESULTS = 1
@@ -361,8 +362,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
 
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is BasicState.Message ->
-                binding?.tvStatus?.text = state.message
+            is BasicState.Message -> binding?.run {
+                if (pStatus.isVisible) tvStatus.text = state.message
+                else act?.showScrollTip(state.message)
+            }
 
             is ListState.Update<*> ->  //finish load page
                 adResult.update(state.item as BasicItem)
@@ -431,7 +434,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
             maxPages = max / NeoPaging.ON_PAGE + 1
         if (maxPages > 0) {
             moveExportButton(false)
-            act?.initScrollBar(maxPages, this::onScroll)
+            act?.initScrollBar(maxPages, this)
         }
         if (!isNeedPaging) return
         isNeedPaging = !toiler.isLoading
@@ -439,20 +442,27 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent 
         else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
-    private fun onScroll(value: Int) {
+    override fun onScrolled(value: Int) {
         if (isUserScroll) {
             firstPosition = value * NeoPaging.ON_PAGE
             startPaging(value)
         }
     }
 
-    private fun startPaging(page: Int) {
+    override fun onPreviewScroll(value: Int) {
+        if (isUserScroll)
+            toiler.getTitleOn(value * NeoPaging.ON_PAGE)
+    }
+
+    private fun startPaging(page: Int) = binding?.content?.run {
         jobList?.cancel()
+        rvSearch.adapter = null
         jobList = lifecycleScope.launch {
             toiler.paging(page, adResult).collect {
                 adResult.submitData(lifecycle, it)
             }
         }
+        rvSearch.adapter = adResult
     }
 
     private fun noResults() {

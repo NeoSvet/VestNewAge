@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.work.Data
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -42,6 +43,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         NeoPaging(this)
     }
     private val client = NeoClient(NeoClient.Type.SECTION)
+    private var jobTime: Job? = null
 
     val isLoading: Boolean
         get() = paging.isPaging
@@ -184,5 +186,13 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     private fun convertTab(tab: Int) = when (tab) {
         SummaryTab.RSS.value -> SummaryTab.RSS
         else -> SummaryTab.ADDITION
+    }
+
+    fun getTimeOn(position: Int) {
+        jobTime?.cancel()
+        jobTime = scope.launch {
+            val time = storage.getTime(position)
+            postState(BasicState.Message(time))
+        }
     }
 }

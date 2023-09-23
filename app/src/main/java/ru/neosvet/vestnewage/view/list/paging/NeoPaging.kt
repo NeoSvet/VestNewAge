@@ -20,7 +20,7 @@ class NeoPaging(
     private val distance: Int = 3
 ) {
     companion object {
-        const val ON_PAGE = 15
+        const val ON_PAGE = 16
     }
 
     abstract class Factory : PagingSource<Int, BasicItem>() {
@@ -43,6 +43,8 @@ class NeoPaging(
     var isPaging = false
         private set
     private var pager: Pager? = null
+
+    private var timeFinish = 0L
 
     fun setPager(pager: Pager) {
         this.pager = pager
@@ -73,11 +75,15 @@ class NeoPaging(
 
     fun finishPaging() {
         if (parent.isBusy) return
-        parent.pagingScope.launch {
+        val now = System.currentTimeMillis()
+        if (now - timeFinish < 200) {
+            isPaging = false
+        } else parent.pagingScope.launch {
             delay(300)
             parent.postFinish()
             isPaging = false
         }
+        timeFinish = now
     }
 
     private fun getInputData(): Data = Data.Builder()

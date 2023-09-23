@@ -86,6 +86,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack = StatusBack.PAGE
         }
     }
+    private val toastScroll: NeoToast by lazy {
+        NeoToast(helper.tvScroll, null).apply {
+            timeHide = 1000L
+        }
+    }
 
     val newId: Int
         get() = helper.newId
@@ -736,11 +741,16 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun initScrollBar(max: Int, onChange: ((Int) -> Unit)?) {
-        helper.vsbScrollBar.isVisible = onChange?.let { event ->
+    fun initScrollBar(max: Int, host: NeoScrollBar.Host?) {
+        helper.vsbScrollBar.isVisible = host?.let { event ->
             helper.vsbScrollBar.init(max, lifecycleScope, event)
             true
         } ?: false
+    }
+
+    fun showScrollTip(msg: String) {
+        if (msg.isEmpty()) toastScroll.hide()
+        else toastScroll.show(msg)
     }
 
     fun setScrollBar(value: Int) {

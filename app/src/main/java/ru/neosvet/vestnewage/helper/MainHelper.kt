@@ -67,6 +67,8 @@ class MainHelper(private val act: MainActivity) {
         private set
     var tvToast: TextView
         private set
+    var tvScroll: TextView
+        private set
     var vsbScrollBar: NeoScrollBar
         private set
 
@@ -85,6 +87,7 @@ class MainHelper(private val act: MainActivity) {
     init {
         pStatus = act.findViewById(R.id.pStatus)
         tvToast = act.findViewById(R.id.tvToast)
+        tvScroll = act.findViewById(R.id.tvScroll)
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
         fabAction = act.findViewById(R.id.fabAction)
         vsbScrollBar = act.findViewById(R.id.vsbScrollBar)
