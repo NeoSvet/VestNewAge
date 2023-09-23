@@ -35,7 +35,7 @@ class CabinetFragment : NeoFragment() {
     }
     private val toiler: CabinetToiler
         get() = neotoiler as CabinetToiler
-    private var screen: CabinetScreen = CabinetScreen.LOGIN
+    private var screen = CabinetScreen.LOGIN
     private var isReadyLogin = false
 
     override fun initViewModel(): NeoToiler =
@@ -77,7 +77,9 @@ class CabinetFragment : NeoFragment() {
                     checkReadyEnter()
                 } else {
                     login.root.isVisible = false
-                    act?.setAction(R.drawable.ic_exit)
+                    if (screen == CabinetScreen.CABINET)
+                        act?.setAction(R.drawable.ic_exit)
+                    else act?.setAction(R.drawable.ic_close)
                     initLayoutManager()
                 }
                 adapter.setItems(state.list)

@@ -12,5 +12,5 @@ sealed class CabinetState: NeoState {
     data class AuthPair(
         val login: String,
         val password: String
-    ) : FirstState
+    ) : CabinetState()
 }

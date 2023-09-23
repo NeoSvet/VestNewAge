@@ -236,9 +236,7 @@ class CabinetToiler : NeoToiler() {
         var s = words.substring(words.indexOf("-<") + 10, words.indexOf("</select>") - 9)
         s = s.replace("<option>", "")
         val m = s.split("</option>")
-        wordList.clear()
-        for (i in m)
-            wordList.add(BasicItem(i))
+        for (i in m) wordList.add(BasicItem(i))
         screen = CabinetScreen.WORDS
         postState(CabinetState.Primary(screen, wordList))
     }
