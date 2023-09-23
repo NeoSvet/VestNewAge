@@ -33,6 +33,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.utils.isPoem
+import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
@@ -77,6 +78,7 @@ class BrowserActivity : AppCompatActivity() {
     private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
+    private var animButton: BottomAnim? = null
     private var navIsTop = false
     private lateinit var tipFinish: Tip
     private var isTouch = true
@@ -342,10 +344,7 @@ class BrowserActivity : AppCompatActivity() {
         binding.content.wvBrowser.setInitialScale(helper.zoom)
         if (helper.isNavButton)
             setCheckItem(menu.buttons, true)
-        else {
-            binding.btnFullScreen.alpha = 0f
-            binding.fabNav.setImageResource(R.drawable.ic_fullscreen)
-        }
+        switchNavButton()
         if (helper.isMiniTop)
             setCheckItem(menu.top, true)
         if (helper.isAutoReturn)
@@ -471,14 +470,12 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun bottomHide() {
-        if (helper.isNavButton.not())
-            binding.fabNav.isVisible = false
+        animButton?.hide()
         binding.bottomBar.performHide()
     }
 
     private fun bottomShow() {
-        if (helper.isNavButton.not())
-            binding.fabNav.isVisible = true
+        animButton?.show()
         binding.bottomBar.performShow()
     }
 
@@ -526,11 +523,9 @@ class BrowserActivity : AppCompatActivity() {
     private fun switchFullScreen(value: Boolean) {
         helper.isFullScreen = value
         if (value) {
-            setNavVisible(false)
             headBar.hide()
             bottomBlocked()
         } else {
-            setNavVisible(true)
             headBar.show()
             bottomUnblocked()
         }
@@ -582,9 +577,7 @@ class BrowserActivity : AppCompatActivity() {
                 R.id.nav_buttons -> {
                     helper.isNavButton = helper.isNavButton.not()
                     setCheckItem(it, helper.isNavButton)
-                    btnFullScreen.alpha = if (helper.isNavButton)
-                        1f else 0f
-                    setNavVisible(true)
+                    switchNavButton()
                 }
 
                 R.id.nav_minitop -> {
@@ -634,6 +627,22 @@ class BrowserActivity : AppCompatActivity() {
                 }
             }
             return@setOnMenuItemClickListener true
+        }
+    }
+
+    private fun switchNavButton() = binding.run{
+        if(helper.isNavButton) {
+            btnFullScreen.isVisible = btnGodWords.isVisible
+            btnFullScreen.tag = null
+            animButton = null
+            setNavButton(content.wvBrowser.scrollY)
+            fabNav.alpha = 0.5f
+        } else {
+            btnFullScreen.isVisible = false
+            btnFullScreen.tag = "v"
+            animButton = BottomAnim(binding.fabNav)
+            fabNav.setImageResource(R.drawable.ic_fullscreen)
+            fabNav.alpha = 1f
         }
     }
 
@@ -761,25 +770,12 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun bottomBlocked() {
-        setNavVisible(false)
+        binding.fabNav.isVisible = false
         binding.bottomBar.isVisible = false
     }
 
     private fun bottomUnblocked() {
-        setNavVisible(true)
+        binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
-    }
-
-    private fun setNavVisible(value: Boolean) = binding.run {
-        if (value) {
-            if (helper.isNavButton) {
-                setNavButton(content.wvBrowser.scrollY)
-                fabNav.alpha = 0.5f
-            } else {
-                fabNav.setImageResource(R.drawable.ic_fullscreen)
-                fabNav.alpha = 1f
-            }
-        }
-        fabNav.isVisible = value
     }
 }

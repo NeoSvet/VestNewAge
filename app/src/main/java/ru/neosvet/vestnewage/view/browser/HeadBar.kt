@@ -68,7 +68,7 @@ class HeadBar(
                 if (isFristAnim.not()) return
                 isFristAnim = false
                 for (v in additionViews)
-                    v.isVisible = true
+                    v.isVisible = v.tag == null
             }
 
             override fun onAnimationEnd(animation: Animation) {}
@@ -94,15 +94,17 @@ class HeadBar(
                 mainView.isVisible = false
                 State.GONE
             }
+
             expandedH ->
                 State.EXPANDED
+
             else ->
                 State.COLLAPSED
         }
         if (state == State.EXPANDED) {
             isFristAnim = true
             for (v in additionViews)
-                v.startAnimation(anShow)
+                if (v.tag == null) v.startAnimation(anShow)
         }
         unblocked()
     }
@@ -114,7 +116,7 @@ class HeadBar(
         if (h != expandedH) {
             isFristAnim = true
             for (v in additionViews)
-                v.startAnimation(anHide)
+                if (v.tag == null) v.startAnimation(anHide)
         }
         val i = mainView.height
         val v = h - i
@@ -144,8 +146,10 @@ class HeadBar(
         when (state) {
             State.EXPANDED ->
                 if (isTop && y > collapseDistance) changeHeight(collapsedH)
+
             State.COLLAPSED ->
                 if (isTop && y > goneDistance) changeHeight(goneH)
+
             State.GONE -> if (isTop.not()) {
                 mainView.isVisible = true
                 changeHeight(collapsedH)
