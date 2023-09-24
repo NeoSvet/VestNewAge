@@ -21,6 +21,10 @@ class SettingsAdapter(
     private val data = mutableListOf<SettingsItem>()
     val visible = mutableListOf(true, false, false, false, false, false, false)
 
+    init {
+        if (twoColumns) visible[1] = true
+    }
+
     fun addItem(item: SettingsItem) {
         data.add(item)
     }
