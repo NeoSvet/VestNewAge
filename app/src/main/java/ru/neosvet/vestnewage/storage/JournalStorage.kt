@@ -15,7 +15,7 @@ import java.util.LinkedList
 
 class JournalStorage : Closeable {
     companion object {
-        private const val LIMIT = 150
+        private const val LIMIT = 208
     }
 
     private val db = DataBase(DataBase.JOURNAL)
