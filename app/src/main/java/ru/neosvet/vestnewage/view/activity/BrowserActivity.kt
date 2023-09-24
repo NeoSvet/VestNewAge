@@ -157,6 +157,7 @@ class BrowserActivity : AppCompatActivity() {
             if (isSearch) {
                 pSearch.isVisible = true
                 headBar.hide()
+                bottomBlocked()
             }
             if (helper.isSearch && helper.place.size > 1) {
                 etSearch.isEnabled = false
@@ -250,8 +251,8 @@ class BrowserActivity : AppCompatActivity() {
         isSearch = false
         softKeyboard.hide()
         helper.clearSearch()
-        if (helper.isFullScreen.not())
-            headBar.show()
+        headBar.show()
+        bottomUnblocked()
     }
 
     private fun findRequest() {
@@ -475,6 +476,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun bottomShow() {
+        if (isSearch) return
         animButton?.show()
         binding.bottomBar.performShow()
     }
@@ -545,6 +547,7 @@ class BrowserActivity : AppCompatActivity() {
             ivHeadBack.setImageResource(R.drawable.head_back_tablet)
         else if (ScreenUtils.isLand)
             ivHeadBack.setImageResource(R.drawable.head_back_land)
+        if (headBar.isHided) return@run
         ivHeadBack.isVisible = true
         ivHeadFront.isVisible = true
         ivHeadBack.post {
@@ -630,8 +633,8 @@ class BrowserActivity : AppCompatActivity() {
         }
     }
 
-    private fun switchNavButton() = binding.run{
-        if(helper.isNavButton) {
+    private fun switchNavButton() = binding.run {
+        if (helper.isNavButton) {
             btnFullScreen.isVisible = btnGodWords.isVisible
             btnFullScreen.tag = null
             animButton = null
@@ -648,6 +651,7 @@ class BrowserActivity : AppCompatActivity() {
 
     private fun goSearch(withPreparing: Boolean) = with(binding.content) {
         headBar.hide()
+        bottomBlocked()
         pSearch.isVisible = true
         isSearch = true
         if (withPreparing) {
@@ -775,6 +779,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun bottomUnblocked() {
+        if (isSearch) return
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
     }
