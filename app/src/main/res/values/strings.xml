@@ -145,7 +145,7 @@
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
-    <string name="edit">Редактировать</string>
+    <string name="edit">Изменить</string>
     <string name="send_file">Отправить файл?</string>
     <string name="not_load_page">Страница не загружена</string>
     <string name="format_collection">Подборка: %s</string>
