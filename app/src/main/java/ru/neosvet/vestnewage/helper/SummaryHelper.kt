@@ -47,7 +47,7 @@ class SummaryHelper {
         }
     }
 
-    private val notifHelper = NotificationUtils()
+    private val notifUtils = NotificationUtils()
     private val intent = Intent(App.context, MainActivity::class.java)
     private val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
     private var notifId = NotificationUtils.NOTIF_SUMMARY + 1
@@ -78,10 +78,10 @@ class SummaryHelper {
         val url = if (!link.contains("://")) Urls.Site + link else link
         intent.data = Uri.parse(url)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
-        val piPostpone = notifHelper.getPostponeSummaryNotif(notifId, text, url)
+        val piPostpone = notifUtils.getPostponeSummaryNotif(notifId, text, url)
         val title = if (link == Const.RSS) App.context.getString(R.string.app_name)
         else App.context.getString(R.string.site_name)
-        notifBuilder = notifHelper.getNotification(
+        notifBuilder = notifUtils.getNotification(
             title, text,
             NotificationUtils.CHANNEL_SUMMARY
         ).also {
@@ -98,7 +98,7 @@ class SummaryHelper {
     }
 
     fun showNotification() = notifBuilder?.let {
-        notifHelper.notify(notifId, it)
+        notifUtils.notify(notifId, it)
         notifId++
     }
 
@@ -106,7 +106,7 @@ class SummaryHelper {
         intent.data = Uri.parse(Urls.Site + Const.RSS)
         intent.putExtra(DataBase.ID, notifId)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
-        notifBuilder = notifHelper.getSummaryNotif(
+        notifBuilder = notifUtils.getSummaryNotif(
             App.context.getString(R.string.appeared_new_some),
             NotificationUtils.CHANNEL_SUMMARY
         ).also {

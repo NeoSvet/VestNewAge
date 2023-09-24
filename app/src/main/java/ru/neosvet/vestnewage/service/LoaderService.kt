@@ -217,7 +217,7 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun finishService(error: BasicState.Error?) {
         loader.cancel()
-        val notifHelper = NotificationUtils()
+        val notifUtils = NotificationUtils()
         val title: String
         val main: Intent
         val msg: String
@@ -239,7 +239,7 @@ class LoaderService : LifecycleService(), LoadHandler {
         }
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
         val piEmpty = PendingIntent.getActivity(this, 0, Intent(), FLAGS)
-        notif = notifHelper.getNotification(title, msg, NotificationUtils.CHANNEL_TIPS)
+        notif = notifUtils.getNotification(title, msg, NotificationUtils.CHANNEL_TIPS)
             .setContentIntent(piMain)
             .setFullScreenIntent(piEmpty, true)
         manager.notify(FINAL_ID, notif.build())
@@ -248,13 +248,13 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun initNotif() {
         manager.cancel(FINAL_ID)
-        val notifHelper = NotificationUtils()
+        val notifUtils = NotificationUtils()
         val main = Intent(this, MainActivity::class.java)
         val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
         val iStop = Intent(this, LoaderService::class.java)
         iStop.putExtra(Const.MODE, STOP)
         val piStop = PendingIntent.getService(this, 0, iStop, FLAGS)
-        notif = notifHelper.getNotification(
+        notif = notifUtils.getNotification(
             getString(R.string.load),
             getString(R.string.start),
             NotificationUtils.CHANNEL_MUTE

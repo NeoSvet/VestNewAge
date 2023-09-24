@@ -219,12 +219,12 @@ class PromUtils(textView: View?) {
         intent.data = Uri.parse(Urls.Site + Urls.PROM_LINK)
         val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
         val piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
-        val notifHelper = NotificationUtils()
+        val notifUtils = NotificationUtils()
         var msg = getPromText()
         if (msg == null) //text.contains("-")
             msg = App.context.getString(R.string.prom)
-        val piCancel = notifHelper.cancelPromNotif
-        val notifBuilder = notifHelper.getNotification(
+        val piCancel = notifUtils.cancelPromNotif
+        val notifBuilder = notifUtils.getNotification(
             App.context.getString(R.string.prom_for_soul_unite),
             msg, NotificationUtils.CHANNEL_PROM
         )
@@ -245,7 +245,7 @@ class PromUtils(textView: View?) {
             }
             if (vibration) notifBuilder.setVibrate(longArrayOf(500, 1500))
         }
-        notifHelper.notify(NotificationUtils.NOTIF_PROM, notifBuilder)
+        notifUtils.notify(NotificationUtils.NOTIF_PROM, notifBuilder)
         initNotif(p)
     }
 

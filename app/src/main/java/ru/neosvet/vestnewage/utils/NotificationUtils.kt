@@ -35,6 +35,7 @@ class NotificationUtils : ContextWrapper(App.context) {
             am.cancel(pi)
             if (time == Const.TURN_OFF.toLong()) return
             am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi)
+        //TODO Error:(37, 13) When scheduling exact alarms, apps should explicitly call `AlarmManager#canScheduleExactAlarms` or handle `SecurityException`s
         }
     }
 
@@ -175,11 +176,11 @@ class NotificationUtils : ContextWrapper(App.context) {
     class Result : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val mode = intent.getIntExtra(MODE, -1)
-            val notifHelper = NotificationUtils()
+            val notifUtils = NotificationUtils()
             if (mode == ID_ACCEPT) {
-                notifHelper.cancel(NOTIF_PROM)
+                notifUtils.cancel(NOTIF_PROM)
             } else if (mode == ID_SUMMARY_POSTPONE) {
-                notifHelper.cancel(intent.getIntExtra(DataBase.ID, 0))
+                notifUtils.cancel(intent.getIntExtra(DataBase.ID, 0))
                 val des = intent.getStringExtra(Const.DESCTRIPTION)
                 val link = intent.getStringExtra(Const.LINK)
                 if (des == null || link == null) return

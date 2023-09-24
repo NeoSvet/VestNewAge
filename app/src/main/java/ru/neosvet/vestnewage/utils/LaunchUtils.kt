@@ -39,7 +39,7 @@ class LaunchUtils(context: Context) {
     private val settingsIntent: Intent
     private val previousVer: Int
     private var notifId = START_ID
-    private var notifHelper: NotificationUtils? = null
+    private var notifUtils: NotificationUtils? = null
 
     val isNeedLoad: Boolean
         get() = DateUnit.isLongAgo(pref.getLong(Const.TIME, 0))
@@ -58,7 +58,7 @@ class LaunchUtils(context: Context) {
 
     fun checkAdapterNewVersion() {
         if (previousVer == 0) {
-            notifHelper = NotificationUtils()
+            notifUtils = NotificationUtils()
             showNotifTip(
                 App.context.getString(R.string.check_out_settings),
                 App.context.getString(R.string.example_periodic_check), settingsIntent
@@ -227,7 +227,7 @@ class LaunchUtils(context: Context) {
 
     private fun showNotifTip(title: String, msg: String, intent: Intent) {
         val piStart = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
-        val notifBuilder = notifHelper!!.getNotification(
+        val notifBuilder = notifUtils!!.getNotification(
             title, msg, NotificationUtils.CHANNEL_TIPS
         )
         notifBuilder.setContentIntent(piStart)
@@ -237,12 +237,12 @@ class LaunchUtils(context: Context) {
             notifBuilder.setFullScreenIntent(piEmpty, false)
         }
         notifBuilder.setSound(null)
-        notifHelper!!.notify(++notifId, notifBuilder)
+        notifUtils!!.notify(++notifId, notifBuilder)
     }
 
     private fun showSummaryNotif() {
         if (notifId - START_ID < 2) return  //notifications < 2, summary is not need
-        val notifBuilder = notifHelper!!.getSummaryNotif(
+        val notifBuilder = notifUtils!!.getSummaryNotif(
             App.context.getString(R.string.tips),
             NotificationUtils.CHANNEL_TIPS
         )
@@ -257,7 +257,7 @@ class LaunchUtils(context: Context) {
             val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
             notifBuilder.setFullScreenIntent(piEmpty, false)
         }
-        notifHelper!!.notify(START_ID, notifBuilder)
+        notifUtils!!.notify(START_ID, notifBuilder)
     }
 
     fun reInitProm(timeDiff: Int) {

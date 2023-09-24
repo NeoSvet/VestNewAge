@@ -51,8 +51,8 @@ class NewToiler : NeoToiler() {
         if (needOpen.not()) return
         task = Task.OPEN
         scope.launch {
-            val notifHelper = NotificationUtils()
-            notifHelper.cancel(NotificationUtils.NOTIF_SUMMARY)
+            val notifUtils = NotificationUtils()
+            notifUtils.cancel(NotificationUtils.NOTIF_SUMMARY)
             val list = ads.loadList(true)
             var t: String
             var s: String
