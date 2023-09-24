@@ -76,7 +76,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     private val adDefault: RecyclerAdapter by lazy {
         RecyclerAdapter(this::defaultClick)
     }
-    private val adResult: PagingAdapter by lazy {
+    private val adPaging: PagingAdapter by lazy {
         PagingAdapter(this)
     }
     private lateinit var resultAdapter: ArrayAdapter<String>
@@ -134,7 +134,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
     override fun onSaveInstanceState(outState: Bundle) {
         val i = if (screen == SearchScreen.RESULTS) {
-            adResult.firstPosition
+            adPaging.firstPosition
         } else -1
         toiler.setStatus(
             SearchState.Status(
@@ -245,7 +245,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         this@SearchFragment.screen = screen
         when (screen) {
             SearchScreen.RESULTS ->
-                rvSearch.adapter = adResult
+                rvSearch.adapter = adPaging
 
             SearchScreen.EMPTY ->
                 rvSearch.adapter = adDefault
@@ -342,9 +342,9 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
             else SearchEngine.MODE_RESULT_PAR
         } else helper.mode
         val request = etSearch.text.toString().trim()
-        adResult.submitData(lifecycle, PagingData.empty())
+        adPaging.submitData(lifecycle, PagingData.empty())
         screen = SearchScreen.RESULTS
-        content.rvSearch.adapter = adResult
+        content.rvSearch.adapter = adPaging
         if (!helper.isEnding)
             toiler.setEndings(requireContext())
         firstPosition = 0
@@ -368,7 +368,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
             }
 
             is ListState.Update<*> ->  //finish load page
-                adResult.update(state.item as BasicItem)
+                adPaging.update(state.item as BasicItem)
 
             is SearchState.Results -> {
                 if (state.max == 0) noResults()
@@ -458,11 +458,11 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         jobList?.cancel()
         rvSearch.adapter = null
         jobList = lifecycleScope.launch {
-            toiler.paging(page, adResult).collect {
-                adResult.submitData(lifecycle, it)
+            toiler.paging(page, adPaging).collect {
+                adPaging.submitData(lifecycle, it)
             }
         }
-        rvSearch.adapter = adResult
+        rvSearch.adapter = adPaging
     }
 
     private fun noResults() {
@@ -481,7 +481,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 toiler.showLastResult()
                 binding?.run {
                     screen = SearchScreen.RESULTS
-                    content.rvSearch.adapter = adResult
+                    content.rvSearch.adapter = adPaging
                     content.tvLabel.text = helper.label
                     bPanelSwitch.isVisible = true
                     etSearch.setText(helper.request)
@@ -498,7 +498,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
-        firstPosition = index + adResult.firstPosition
         when (RequestAdapter.getType(item)) {
             RequestAdapter.Type.NORMAL -> {
                 val s = when {
@@ -567,13 +566,14 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         isUserScroll = true
     }
 
-    override fun onFinishList() {
+    override fun onFinishList(endList: Boolean) {
         isNeedPaging = true
         if (toiler.isLoading)
             act?.showToast(getString(R.string.wait))
         else act?.let {
             it.showToast(getString(R.string.finish_list))
-            it.unlockHead()
+            if (endList) act?.setScrollBar(-1)
+            else it.unlockHead()
         }
     }
 

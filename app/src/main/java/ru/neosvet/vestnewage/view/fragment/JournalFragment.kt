@@ -32,7 +32,7 @@ import ru.neosvet.vestnewage.viewmodel.state.NeoState
 class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private val toiler: JournalToiler
         get() = neotoiler as JournalToiler
-    private val adapter: PagingAdapter by lazy {
+    private val adPaging: PagingAdapter by lazy {
         PagingAdapter(this)
     }
 
@@ -63,7 +63,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        toiler.setStatus(JournalState.Status(adapter.firstPosition))
+        toiler.setStatus(JournalState.Status(adPaging.firstPosition))
         super.onSaveInstanceState(outState)
     }
 
@@ -71,7 +71,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun initView(container: View) {
         rvList = container.findViewById(R.id.rvList) as RecyclerView
         rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rvList.adapter = adapter
+        rvList.adapter = adPaging
         setListEvents(rvList)
     }
 
@@ -79,11 +79,11 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         jobList?.cancel()
         rvList.adapter = null
         jobList = lifecycleScope.launch {
-            toiler.paging(page, adapter).collect {
-                adapter.submitData(lifecycle, it)
+            toiler.paging(page, adPaging).collect {
+                adPaging.submitData(lifecycle, it)
             }
         }
-        rvList.adapter = adapter
+        rvList.adapter = adPaging
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
@@ -122,12 +122,13 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         isUserScroll = true
     }
 
-    override fun onFinishList() {
+    override fun onFinishList(endList: Boolean) {
         if (toiler.isLoading)
             act?.showToast(getString(R.string.load))
         else act?.let {
             it.showToast(getString(R.string.finish_list))
-            it.unlockHead()
+            if (endList) act?.setScrollBar(-1)
+            else it.unlockHead()
         }
     }
 
@@ -177,6 +178,6 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun onAction(title: String) {
         toiler.clear()
-        adapter.submitData(lifecycle, PagingData.empty())
+        adPaging.submitData(lifecycle, PagingData.empty())
     }
 }

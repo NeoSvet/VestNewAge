@@ -305,13 +305,14 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         isUserScroll = true
     }
 
-    override fun onFinishList() {
+    override fun onFinishList(endList: Boolean) {
         act?.let {
             if (toiler.isLoading)
                 it.showStaticToast(getString(R.string.load))
             else {
                 it.showToast(getString(R.string.finish_list))
-                it.unlockHead()
+                if (endList) act?.setScrollBar(-1)
+                else it.unlockHead()
             }
         }
     }

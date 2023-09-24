@@ -754,7 +754,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun setScrollBar(value: Int) {
-        helper.vsbScrollBar.value = value
+        if (value == -1)
+            helper.vsbScrollBar.value = helper.vsbScrollBar.maxValue
+        else helper.vsbScrollBar.value = value
     }
 
     fun openAddition() {

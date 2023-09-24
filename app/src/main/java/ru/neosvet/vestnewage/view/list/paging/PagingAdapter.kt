@@ -17,7 +17,7 @@ class PagingAdapter(
         fun onItemClick(index: Int, item: BasicItem)
         fun onItemLongClick(index: Int, item: BasicItem): Boolean
         fun onChangePage(page: Int)
-        fun onFinishList()
+        fun onFinishList(endList: Boolean)
     }
 
     companion object {
@@ -27,7 +27,6 @@ class PagingAdapter(
 
     var withTime = false //for addition 16.11.2022 14:02
     private var startPage = 0
-    private var isFirst = true
     private var prevPage = 0
     private lateinit var recyclerView: RecyclerView
     private lateinit var manager: GridLayoutManager
@@ -48,6 +47,12 @@ class PagingAdapter(
                 prevPage = page
                 parent.onChangePage(page)
             }
+            if (!recyclerView.canScrollVertically(1)) {
+                parent.onFinishList(true)
+                recyclerView.smoothScrollToPosition(itemCount - 1)
+                prevPage = -1
+            } else if (!recyclerView.canScrollVertically(-1))
+                parent.onFinishList(false)
         }
     }
 
@@ -80,13 +85,7 @@ class PagingAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerHolder, position: Int) {
-        val item = getItem(position)
-        when {
-            isFirst -> isFirst = false
-            position == 0 -> parent.onFinishList()
-            position == itemCount - 1 -> parent.onFinishList()
-        }
-        item?.let { holder.setItem(it) }
+        getItem(position)?.let { holder.setItem(it) }
     }
 
     fun update(item: BasicItem) {
@@ -105,7 +104,9 @@ class PagingAdapter(
 
     object ItemsComparator : DiffUtil.ItemCallback<BasicItem>() {
         override fun areItemsTheSame(oldItem: BasicItem, newItem: BasicItem): Boolean {
-            return oldItem.title == newItem.title
+            return if (oldItem.head.isEmpty())
+                oldItem.title == newItem.title
+            else oldItem.head == newItem.head
         }
 
         override fun areContentsTheSame(oldItem: BasicItem, newItem: BasicItem): Boolean {

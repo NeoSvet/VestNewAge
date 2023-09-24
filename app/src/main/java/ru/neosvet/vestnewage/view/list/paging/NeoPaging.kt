@@ -52,9 +52,8 @@ class NeoPaging(
 
     fun run(page: Int): Flow<PagingData<BasicItem>> {
         val p = page * ON_PAGE
-        if (p >= parent.factory.total)
-            parent.factory.offset = parent.factory.total - 1
-        else parent.factory.offset = p
+        parent.factory.offset = if (p >= parent.factory.total)
+            parent.factory.total - 1 else p
         pager?.setPage(page)
         return Pager(
             config = PagingConfig(
