@@ -343,6 +343,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         statusBack = StatusBack.PAGE
         setMenu(section, savePrev)
         status.setError(null)
+        if (isBlocked) unblocked()
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         curFragment = null
         helper.checkNew()
