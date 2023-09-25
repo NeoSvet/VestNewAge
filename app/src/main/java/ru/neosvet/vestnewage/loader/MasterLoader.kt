@@ -94,7 +94,7 @@ class MasterLoader : Loader, LoadHandlerLite {
 
     fun loadDoctrine() {
         isRun = true
-        msg = App.context.getString(R.string.doctrine)
+        msg = App.context.getString(R.string.doctrine_creator)
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadDoctrineList()

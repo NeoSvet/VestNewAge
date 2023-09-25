@@ -19,7 +19,6 @@
     <string name="download_">Скачать…</string>
     <string name="download_alert">Выберите пункты для скачивания:</string>
     <string name="summary_site">Сводка и объявления</string>
-    <string name="doctrine_creator">Доктрина Создателя</string>
     <string name="otkroveniya_year">Откровения (2004 год)</string>
     <string name="format_tolkovaniya_year">Толкования за 20%02d год</string>
     <string name="book_2016">Послания и Катрены за 2016 год</string>
@@ -83,7 +82,7 @@
     <string name="format_freed_size">Освобождено: %s МБ</string>
     <string name="format_delete">Удалить %s?</string>
     <!--NewFragment-->
-    <string name="empty_list">Список нового пуст.</string>
+    <string name="empty_list">Список пуст.</string>
     <!--SummaryFragment-->
     <string name="new_in_additionally">Новое в Сводке-Дополнительном</string>
     <string name="additionally">Дополнительно</string>
@@ -103,9 +102,9 @@
     <string name="updated_page">Страница обновлена</string>
     <string name="welcome_back">С возвращением!</string>
     <!--BookFragment-->
-    <string name="doctrine">Доктрина</string>
     <string name="epistles">Послания</string>
     <string name="poems">Катрены</string>
+    <string name="doctrine_creator">Доктрина Создателя</string>
     <string name="link_to_src">Ссылка на источник</string>
     <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
