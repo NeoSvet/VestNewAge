@@ -37,9 +37,6 @@
     <string name="warning">Внимание:</string>
     <string name="select_all">Выбрать всё</string>
     <string name="reset_all">Сбросить всё</string>
-    <!--AdsUtils-->
-    <string name="back_title">Назад</string>
-    <string name="back_des">К объявлениям сайта</string>
     <!--LaunchUtils-->
     <string name="downloads_all_title">Скачайте все Катрены!</string>
     <string name="downloads_all_msg">Нажмите, чтобы выбрать что скачать.</string>
@@ -90,8 +87,6 @@
     <!--CalendarFragment-->
     <string name="ad">Объявление</string>
     <string name="poem">Катрен</string>
-    <string name="to_prev_month">На предыдущий месяц</string>
-    <string name="to_next_month">На следующий месяц</string>
     <!--DevAds-->
     <string name="new_dev_ads">Новые объявления от разработчика</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
@@ -184,6 +179,13 @@
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
     <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <!--Tabs-->
+    <string name="to_prev_tab">К предыдущей вкладке</string>
+    <string name="to_next_tab">К следующей вкладке</string>
+    <string name="to_prev_year">К предыдущему году</string>
+    <string name="to_next_year">К следующему году</string>
+    <string name="to_prev_month">К предыдущему месяцу</string>
+    <string name="to_next_month">К следующему месяцу</string>
     <!--Страница-->
     <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>

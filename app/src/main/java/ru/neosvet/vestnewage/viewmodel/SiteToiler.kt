@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -15,7 +15,6 @@ import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
-import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
@@ -29,8 +28,8 @@ class SiteToiler : NeoToiler() {
         const val END = "<end>"
     }
 
-    private lateinit var strings: SiteStrings
     private var selectedTab = SiteTab.NEWS
+    private var novosti = ""
     private val file: File
         get() = Lib.getFile(if (selectedTab == SiteTab.NEWS) NEWS else MAIN)
     private val client = NeoClient(NeoClient.Type.SECTION)
@@ -52,12 +51,7 @@ class SiteToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
-        strings = SiteStrings(
-            news_dev = context.getString(R.string.news_dev),
-            novosti = context.getString(R.string.novosti),
-            back_title = context.getString(R.string.back_title),
-            back_des = context.getString(R.string.back_des)
-        )
+        novosti = context.getString(R.string.novosti)
     }
 
     override suspend fun defaultState() {
@@ -78,14 +72,18 @@ class SiteToiler : NeoToiler() {
     private suspend fun loadList() {
         val loader = SiteLoader(client, file.toString())
         val list = loader.load(url) as MutableList
-        list.add(0, getFirstItem())
+        if (selectedTab == SiteTab.SITE)
+            list.add(0, getNovosti())
         postState(ListState.Primary(file.lastModified(), list))
+    }
+
+    private fun getNovosti(): BasicItem {
+        return BasicItem(novosti).apply { addLink(Urls.News) }
     }
 
     private suspend fun loadAds(reload: Boolean) {
         if (reload) ads.loadAds(client)
         val list = ads.loadList(false)
-        list.add(0, getFirstItem())
         postState(ListState.Primary(ads.time, list))
     }
 
@@ -109,8 +107,9 @@ class SiteToiler : NeoToiler() {
             return
         }
         val list = mutableListOf<BasicItem>()
-        list.add(getFirstItem())
-        var i = 1
+        if (selectedTab == SiteTab.SITE)
+            list.add(getNovosti())
+        var i = 0
         var d: String?
         var l: String
         var h: String
@@ -144,13 +143,6 @@ class SiteToiler : NeoToiler() {
             reLoad()
         }
     }
-
-    private fun getFirstItem(): BasicItem =
-        when (selectedTab) {
-            SiteTab.NEWS -> BasicItem(strings.news_dev).apply { addLink("") }
-            SiteTab.SITE -> BasicItem(strings.novosti).apply { addLink(Urls.News) }
-            else -> BasicItem(strings.back_title).apply { des = strings.back_des } //DEV
-        }
 
     fun readAds(item: BasicItem) {
         storage.setRead(item)

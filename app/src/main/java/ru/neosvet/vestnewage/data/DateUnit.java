@@ -17,7 +17,6 @@ import java.util.Locale;
 
 import ru.neosvet.vestnewage.App;
 import ru.neosvet.vestnewage.R;
-import ru.neosvet.vestnewage.utils.Const;
 
 public class DateUnit {
     public static final byte MONDAY = 1, SUNDAY = 0;
@@ -134,7 +133,7 @@ public class DateUnit {
     }
 
     public String getCalendarString() {
-        return getMonthString() + Const.N + date.getYear();
+        return getMonthString() + " " + date.getYear();
     }
 
     public String getMY() {

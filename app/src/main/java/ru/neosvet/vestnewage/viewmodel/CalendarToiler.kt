@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Point
 import androidx.work.Data
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,7 +16,6 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.noHasDate
@@ -37,7 +37,13 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private val pageLoader: PageLoader by lazy {
         PageLoader(client)
     }
+    private val today = DateUnit.initToday()
+    private val months = mutableListOf<String>()
+    private val years = mutableListOf<String>()
     private var isUpdateUnread = false
+    private var minYear = 0
+    private val minMonth: Int
+        get() = if (date.year == 2004) 8 else 1
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Calendar")
@@ -47,6 +53,12 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         .build()
 
     override fun init(context: Context) {
+        context.resources.getStringArray(R.array.months).forEach {
+            months.add(it)
+        }
+        minYear = if (DateHelper.isLoadedOtkr()) 2004 else 2016
+        for (i in minYear..today.year)
+            years.add(i.toString())
     }
 
     override suspend fun defaultState() {
@@ -59,14 +71,16 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     private suspend fun postPrimary() {
+        val point = Point(date.year - minYear, date.month - minMonth)
         postState(
             CalendarState.Primary(
-                time,
-                date,
-                checkPrev(),
-                checkNext(),
-                isUpdateUnread,
-                calendar
+                time = time,
+                label = date.calendarString,
+                selected = point,
+                years = years,
+                months = getMonths(),
+                isUpdateUnread = isUpdateUnread,
+                list = calendar
             )
         )
     }
@@ -75,30 +89,23 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         loadIfNeed = false
         val list = loadMonth()
         if (loadFromStorage()) {
-            val p = checkPrev()
-            val n = checkNext()
-            postState(CalendarState.Primary(time, date, p, n, isUpdateUnread, calendar))
+            postPrimary()
             if (isRun) loadPages(list)
-            postState(CalendarState.Finish(p, n))
-        } else
-            postState(CalendarState.Finish(checkPrev(), checkNext()))
+        }
+        postState(BasicState.Success)
     }
 
-    private fun checkNext(): Boolean {
-        val max = DateUnit.initToday().apply { day = 1 }.timeInDays
-        return date.timeInDays < max
+    private fun getMonthsList(min: Int = 0, max: Int = 11): List<String> {
+        val list = mutableListOf<String>()
+        for (i in min..max)
+            list.add(months[i])
+        return list
     }
 
-    private fun checkPrev(): Boolean {
-        val days = date.timeInDays
-        val min = if (DateHelper.isLoadedOtkr())
-            DateHelper.MIN_DAYS_OLD_BOOK
-        else if (days == DateHelper.MIN_DAYS_NEW_BOOK) {
-            // доступна для того, чтобы предложить скачать Послания за 2004-2015
-            return !LoaderService.isRun
-        } else
-            DateHelper.MIN_DAYS_NEW_BOOK
-        return days > min
+    private fun getMonths(): List<String> = when (date.year) {
+        2004 -> getMonthsList(min = 7)
+        today.year -> getMonthsList(max = today.month - 1)
+        else -> months
     }
 
     private suspend fun loadPages(pages: List<String>) {
@@ -131,23 +138,24 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         return loader.getLinkList()
     }
 
-    fun changeDate(newDate: DateUnit) {
-        if (isRun) return
-        date = newDate
-        calendar.clear()
-        openCalendar(0)
-    }
-
     private fun isCurMonth(): Boolean {
         return date.month == todayM && date.year == todayY
     }
 
-    fun openCalendar(offsetMonth: Int) {
+    fun openList(month: Int = -1, year: Int = -1) {
         isUpdateUnread = false
         loadIfNeed = true
         scope.launch {
-            if (offsetMonth != 0) {
-                date.changeMonth(offsetMonth)
+            if (month != -1 || year != -1) {
+                when (month) {
+                    -1 -> {}
+                    -2 -> date.changeMonth(1)
+                    -3 -> date.changeMonth(-1)
+                    else -> date.month = month + minMonth
+                }
+                if (year > -1) date.year = year + minYear
+                if (date.timeInDays > today.timeInDays) date.month = today.month
+                if (date.timeInDays < DateHelper.MIN_DAYS_OLD_BOOK) date.month = 8
                 calendar.clear()
             }
             if (calendar.isEmpty())

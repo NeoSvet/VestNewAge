@@ -1,63 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:gravity="top|center"
-    android:orientation="vertical"
-    android:padding="@dimen/calendar_margin_top"
-    android:visibility="gone">
+    android:paddingHorizontal="@dimen/quarter_indent"
+    android:paddingTop="@dimen/quarter_indent"
+    android:paddingBottom="@dimen/content_margin_bottom">
 
     <LinearLayout
-        android:id="@+id/pDate"
-        android:layout_width="@dimen/calendar_size"
+        android:id="@+id/p_year"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginVertical="@dimen/quarter_indent"
+        android:background="@drawable/card_bg"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/bPrev"
-            android:layout_width="@dimen/calendar_button"
-            android:layout_height="@dimen/calendar_button"
-            android:background="@drawable/button"
+            android:id="@+id/btn_prev_year"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/press"
+            android:contentDescription="@string/to_prev_year"
+            android:scaleType="fitXY"
+            android:src="@drawable/left" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?attr/colorAccent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_year"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="0dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?attr/colorAccent" />
+
+        <ImageButton
+            android:id="@+id/btn_next_year"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/press"
+            android:contentDescription="@string/to_next_year"
+            android:scaleType="fitXY"
+            android:src="@drawable/right" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/p_month"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/quarter_indent"
+        android:background="@drawable/card_bg"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/p_year">
+
+        <ImageButton
+            android:id="@+id/btn_prev_month"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/press"
             android:contentDescription="@string/to_prev_month"
             android:scaleType="fitXY"
             android:src="@drawable/left" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvDate"
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?attr/colorAccent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_month"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/half_indent"
-            android:layout_marginEnd="@dimen/half_indent"
             android:layout_weight="1"
-            android:background="@drawable/card_bg"
-            android:gravity="center"
-            android:textStyle="bold" />
+            android:padding="0dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?attr/colorAccent" />
 
         <ImageButton
-            android:id="@+id/bNext"
-            android:layout_width="@dimen/calendar_button"
-            android:layout_height="@dimen/calendar_button"
-            android:background="@drawable/button"
+            android:id="@+id/btn_next_month"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/press"
             android:contentDescription="@string/to_next_month"
             android:scaleType="fitXY"
             android:src="@drawable/right" />
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvUpdate"
+        android:id="@+id/tv_update"
         style="@style/UpdateLabel"
-        android:layout_width="@dimen/calendar_size"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
-        android:layout_marginTop="@dimen/calendar_margin_top"
-        android:layout_marginEnd="0dp" />
+        android:layout_marginTop="@dimen/quarter_indent"
+        android:layout_marginEnd="0dp"
+        app:layout_constraintEnd_toEndOf="@id/rv_calendar"
+        app:layout_constraintStart_toStartOf="@id/rv_calendar"
+        app:layout_constraintTop_toBottomOf="@id/p_month" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCalendar"
-        android:layout_width="@dimen/calendar_size"
+        android:id="@+id/rv_calendar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/calendar_margin_top"
+        android:layout_marginTop="@dimen/half_indent"
         android:layout_marginBottom="@dimen/bottom_bar_height"
         android:background="@drawable/field_trans"
-        android:padding="3dp" />
-</LinearLayout>
+        android:padding="3dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_update" />
+</androidx.constraintlayout.widget.ConstraintLayout>

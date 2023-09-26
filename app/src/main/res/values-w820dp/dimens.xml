@@ -5,10 +5,7 @@
     <!-- tablet land -->
     <dimen name="cell_size">65dp</dimen>
     <dimen name="cell_font">40dp</dimen>
-    <dimen name="calendar_size">461dp</dimen>
     <dimen name="string_size">36dp</dimen>
-    <dimen name="calendar_button">70dp</dimen>
-    <dimen name="calendar_margin_top">8dp</dimen>
     <dimen name="margin_top">65dp</dimen>
     <integer name="top_minus">100</integer>
     <integer name="screen_mode">3</integer>

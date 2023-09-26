@@ -21,13 +21,6 @@ data class BrowserStrings(
     val toNext: String
 )
 
-data class SiteStrings(
-    val news_dev: String,
-    val novosti: String,
-    val back_title: String,
-    val back_des: String
-)
-
 data class HomeStrings(
     val nothing: String,
     val never: String,

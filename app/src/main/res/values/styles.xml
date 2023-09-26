@@ -99,7 +99,6 @@
 
     <style name="ItemBG" parent="Label">
         <item name="android:layout_marginStart">@dimen/half_indent</item>
-        <item name="android:layout_marginTop">@dimen/quarter_indent</item>
         <item name="android:layout_marginEnd">@dimen/half_indent</item>
         <item name="android:layout_marginBottom">@dimen/quarter_indent</item>
         <item name="android:paddingTop">@dimen/half_indent</item>
@@ -107,15 +106,12 @@
     </style>
 
     <style name="UpdateLabel" parent="ItemBG">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/item_bg</item>
         <item name="android:layout_marginBottom">0dp</item>
-        <item name="android:layout_marginTop">@dimen/half_indent</item>
-        <item name="android:paddingStart">@dimen/def_indent</item>
-        <item name="android:paddingEnd">@dimen/def_indent</item>
-        <item name="android:paddingTop">@dimen/half_indent</item>
-        <item name="android:paddingBottom">@dimen/half_indent</item>
+        <item name="android:layout_marginTop">@dimen/quarter_indent</item>
+        <item name="android:padding">@dimen/quarter_indent</item>
     </style>
 
     <style name="TextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">

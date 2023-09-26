@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Point
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
@@ -19,7 +20,6 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.*
@@ -47,11 +47,24 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private val masterLoader: MasterLoader by lazy {
         MasterLoader(this)
     }
+    private val today = DateUnit.initToday()
+    private val months = mutableListOf<String>()
+    private val yearsP = mutableListOf<String>()
+    private val yearsE = mutableListOf<String>()
+    private var startYear = 0
+    private val minYear: Int
+        get() = if (isPoemsTab || !isLoadedOtkr) 2016 else 2004
+
+    private val minMonth: Int
+        get() = if (isPoemsTab && dPoems.year == 2016) 2
+        else if (!isPoemsTab && dEpistles.year == 2004) 8
+        else 1
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, BookHelper.TAG)
         .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
         .putString(Const.TAB, selectedTab.toString())
+        .putString("Date", date.toAlterString())
         .build()
 
     override fun init(context: Context) {
@@ -68,10 +81,22 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             try_again = context.getString(R.string.try_again),
             from = context.getString(R.string.from)
         )
+        context.resources.getStringArray(R.array.months).forEach {
+            months.add(it)
+        }
+        for (i in 2016..today.year)
+            yearsP.add(i.toString())
+        val m = if (isLoadedOtkr) 2004 else 2016
+        for (i in m..2016)
+            yearsE.add(i.toString())
+        if (startYear > 0) date.run {
+            year = startYear
+            month = 1
+        }
     }
 
     override suspend fun defaultState() {
-        openList(true, date)
+        openList(true)
     }
 
     override suspend fun doLoad() {
@@ -93,7 +118,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
         }
         postState(BasicState.Success)
-        openList(false, date)
+        openList(false)
     }
 
     override fun onDestroy() {
@@ -101,7 +126,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     @SuppressLint("Range")
-    fun openList(loadIfNeed: Boolean, newDate: DateUnit?, tab: Int = -1) {
+    fun openList(loadIfNeed: Boolean = true, month: Int = -1, year: Int = -1, tab: Int = -1) {
         this.loadIfNeed = loadIfNeed
         if (tab != -1)
             selectedTab = convertTab(tab)
@@ -110,19 +135,24 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 openDoctrine()
                 return@launch
             }
-            newDate?.let {
-                when (selectedTab) {
-                    BookTab.POEMS -> dPoems = it
-                    BookTab.EPISTLES -> dEpistles = it
-                    else -> {}
-                }
+            val d = date
+            when (month) {
+                -1 -> {}
+                -2 -> d.changeMonth(1)
+                -3 -> d.changeMonth(-1)
+                else -> d.month = month + minMonth
             }
-            if (!existsList(date)) {
+            if (year > -1) d.year = year + minYear
+            if (isPoemsTab) {
+                if (d.timeInDays > today.timeInDays) d.month = today.month
+                else if (d.timeInDays < DateHelper.MIN_DAYS_POEMS) d.month = 2
+            } else if (d.timeInDays > DateHelper.MAX_DAYS_BOOK) d.month = 9
+            else if (d.timeInDays < DateHelper.MIN_DAYS_OLD_BOOK) d.month = 8
+            if (!existsList(d)) {
                 if (loadIfNeed) {
                     postState(BasicState.NotLoaded)
                     reLoad()
-                } else
-                    postState(BasicState.Empty)
+                } else postState(BasicState.Empty)
                 return@launch
             }
             val list = mutableListOf<BasicItem>()
@@ -161,45 +191,55 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                         t += " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
                 } while (cursor.moveToNext())
-                postState(BookState.Primary(time, date, checkPrev(), checkNext(), list))
+                postPrimary(time, list)
             }
             cursor.close()
             storage.close()
             if (list.isEmpty()) {
+                postPrimary(0L, list)
                 if (loadIfNeed) {
-                    postState(BookState.Primary(0L, date, false, false, list))
                     postState(BasicState.NotLoaded)
                     reLoad()
-                } else {
-                    postState(BookState.Primary(0L, date, checkPrev(), checkNext(), list))
+                } else
                     postState(BasicState.Empty)
-                }
             }
         }
     }
 
-    private fun checkNext(): Boolean {
-        val max = if (isPoemsTab)
-            DateUnit.initToday().apply { day = 1 }.timeInDays
-        else
-            DateHelper.MAX_DAYS_BOOK
-        return date.timeInDays < max
+    private suspend fun postPrimary(time: Long, list: List<BasicItem>) {
+        val point = Point(date.year - minYear, date.month - minMonth)
+        postState(
+            BookState.Primary(
+                time = time,
+                label = date.calendarString,
+                selected = point,
+                years = getYears(),
+                months = getMonths(),
+                list = list
+            )
+        )
     }
 
-    private fun checkPrev(): Boolean {
-        val d = date
-        val days = d.timeInDays
-        val min = if (isPoemsTab) {
-            DateHelper.MIN_DAYS_POEMS
-        } else if (isLoadedOtkr)
-            DateHelper.MIN_DAYS_OLD_BOOK
-        else if (days == DateHelper.MIN_DAYS_NEW_BOOK) {
-            // доступна для того, чтобы предложить скачать Послания за 2004-2015
-            return !LoaderService.isRun
-        } else
-            DateHelper.MIN_DAYS_NEW_BOOK
-        return days > min
+    private fun getMonthsList(min: Int = 0, max: Int = 11): List<String> {
+        val list = mutableListOf<String>()
+        for (i in min..max)
+            list.add(months[i])
+        return list
     }
+
+    private fun getMonths(): List<String> =
+        if (isPoemsTab) when (dPoems.year) {
+            2016 -> getMonthsList(min = 1)
+            today.year -> getMonthsList(max = today.month - 1)
+            else -> months
+        } else when (dEpistles.year) {
+            2016 -> getMonthsList(max = 8)
+            2004 -> getMonthsList(min = 7)
+            else -> months
+        }
+
+    private fun getYears(): List<String> =
+        if (isPoemsTab) yearsP else yearsE
 
     private suspend fun openDoctrine() {
         val storage = PageStorage()
@@ -385,8 +425,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (isRun) setState(BasicState.Progress(value))
     }
 
-    fun setArgument(tab: Int) {
+    fun setArgument(tab: Int, year: Int) {
         selectedTab = convertTab(tab)
+        startYear = year
     }
 
     private fun convertTab(tab: Int) = when (tab) {

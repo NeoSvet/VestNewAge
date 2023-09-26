@@ -1,10 +1,7 @@
 <resources>
     <dimen name="cell_size">37dp</dimen>
     <dimen name="cell_font">19dp</dimen>
-    <dimen name="calendar_size">265dp</dimen>
     <dimen name="string_size">29dp</dimen>
-    <dimen name="calendar_button">45dp</dimen>
-    <dimen name="calendar_margin_top">3dp</dimen>
     <dimen name="margin_side">85dp</dimen>
     <dimen name="margin_top">48dp</dimen>
     <integer name="top_minus">90</integer>

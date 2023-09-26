@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.fragment
 
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,37 +10,35 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
+import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.dialog.DateDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
+import ru.neosvet.vestnewage.view.list.TabAdapter
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.CalendarState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
-class CalendarFragment : NeoFragment(), DateDialog.Result {
+class CalendarFragment : NeoFragment() {
     private val toiler: CalendarToiler
         get() = neotoiler as CalendarToiler
     private var binding: CalendarFragmentBinding? = null
-    private val adCalendar = CalendarAdapter(this::onClick)
-    private var dateDialog: DateDialog? = null
+    private val adapter = CalendarAdapter(this::onClick)
     override val title: String
         get() = getString(R.string.calendar)
     private var openedReader = false
     private var shownDwnDialog = false
-    private var date = DateUnit.initToday().apply { day = 1 }
+    private lateinit var yearAdapter: TabAdapter
+    private lateinit var monthAdapter: TabAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,6 +53,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         disableUpdateRoot()
+        initDatePicker()
         initCalendar()
     }
 
@@ -73,21 +73,30 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             CalendarState.Status(
-                dateDialog = dateDialog?.date,
                 shownDwnDialog = shownDwnDialog
             )
         )
         super.onSaveInstanceState(outState)
     }
 
+    private fun initDatePicker() = binding?.run {
+        monthAdapter = TabAdapter(null, null, !ScreenUtils.isLand) {
+            toiler.openList(month = it)
+        }
+        rvMonth.adapter = monthAdapter
+        yearAdapter = TabAdapter(btnPrevYear, btnNextYear, !ScreenUtils.isLand) {
+            toiler.openList(year = it)
+        }
+        rvYear.adapter = yearAdapter
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun initCalendar() = binding?.run {
         val layoutManager = GridLayoutManager(requireContext(), 7)
         rvCalendar.layoutManager = layoutManager
-        rvCalendar.adapter = adCalendar
-        bPrev.setOnClickListener { openMonth(-1) }
-        bNext.setOnClickListener { openMonth(1) }
-        tvDate.setOnClickListener { showDatePicker(date) }
+        rvCalendar.adapter = adapter
+        btnPrevMonth.setOnClickListener { openMonth(false) }
+        btnNextMonth.setOnClickListener { openMonth(true) }
     }
 
     private fun openLink(link: String) {
@@ -95,20 +104,27 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
         BrowserActivity.openReader(link, null)
     }
 
-    private fun openMonth(offset: Int) {
-        if (offset < 0 && date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && !DateHelper.isLoadedOtkr()) {
-            showDownloadDialog()
-            return
-        }
-        toiler.cancel()
-        binding?.tvDate?.let {
-            it.setBackgroundResource(R.drawable.selected)
-            lifecycleScope.launch {
-                delay(300)
-                it.post { it.setBackgroundResource(R.drawable.card_bg) }
+    private fun openMonth(plus: Boolean) {
+        if (isBlocked) return
+        binding?.run {
+            val month = rvMonth.adapter as TabAdapter
+            val year = rvYear.adapter as TabAdapter
+            if (plus) {
+                val maxMonth = month.itemCount - 1
+                val maxYear = year.itemCount - 1
+                if (month.selected == maxMonth && year.selected == maxYear) {
+                    toiler.openList(month = 0)
+                    return
+                }
+            } else if (month.selected == 0 && year.selected == 0) {
+                if (!DateHelper.isLoadedOtkr() && !LoaderService.isRun)
+                    showDownloadDialog()
+                else toiler.openList(month = month.itemCount - 1)
+                return
             }
         }
-        toiler.openCalendar(offset)
+        if (plus) toiler.openList(month = -2)
+        else toiler.openList(month = -3)
     }
 
     private fun showDownloadDialog() {
@@ -121,27 +137,8 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
 
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
-        binding?.run {
-            if (load) {
-                tvDate.isEnabled = false
-                bPrev.isEnabled = false
-                bNext.isEnabled = false
-            } else {
-                tvDate.isEnabled = true
-            }
-        }
-    }
-
-    private fun showDatePicker(d: DateUnit) {
-        dateDialog = DateDialog(requireActivity(), d, this).apply {
-            setOnDismissListener { dateDialog = null }
-            show()
-        }
-    }
-
-    override fun putDate(date: DateUnit?) {
-        if (date != null)
-            toiler.changeDate(date)
+        yearAdapter.isBlocked = isBlocked
+        monthAdapter.isBlocked = isBlocked
     }
 
     private fun onClick(view: View, item: CalendarItem) {
@@ -171,6 +168,7 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
         pMenu.show()
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is BasicState.NotLoaded ->
@@ -179,25 +177,21 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
             is CalendarState.Status ->
                 restoreStatus(state)
 
-            is CalendarState.Finish -> binding?.run {
+            BasicState.Success ->
                 setStatus(false)
-                bPrev.isEnabled = state.prev
-                bNext.isEnabled = state.next
-            }
 
             is CalendarState.Primary -> binding?.run {
-                date = state.date
-                tvDate.text = date.calendarString
-                if (!isBlocked) {
-                    bPrev.isEnabled = state.prev
-                    bNext.isEnabled = state.next
-                }
                 setUpdateTime(state.time, tvUpdate)
+                tvUpdate.text = state.label + ". " + tvUpdate.text
+                adapter.setItems(state.list)
+                if (rvCalendar.isVisible.not())
+                    showView(rvCalendar)
+                monthAdapter.setItems(state.months)
+                monthAdapter.select(state.selected.y)
+                yearAdapter.setItems(state.years)
+                yearAdapter.select(state.selected.x)
                 if (state.isUpdateUnread)
                     act?.updateNew()
-                adCalendar.setItems(state.list)
-                if (root.isVisible.not())
-                    showView(root)
             }
         }
     }
@@ -205,15 +199,24 @@ class CalendarFragment : NeoFragment(), DateDialog.Result {
     private fun restoreStatus(state: CalendarState.Status) {
         if (state.shownDwnDialog)
             showDownloadDialog()
-        state.dateDialog?.let {
-            showDatePicker(it)
-        }
     }
 
     private fun showView(view: View) {
         view.isVisible = true
         view.alpha = 0f
         view.animate()
+            .setListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {}
+                override fun onAnimationEnd(animation: Animator) {
+                    binding?.run {
+                        rvYear.smoothScrollToPosition(yearAdapter.selected)
+                        rvMonth.smoothScrollToPosition(monthAdapter.selected)
+                    }
+                }
+
+                override fun onAnimationCancel(animation: Animator) {}
+                override fun onAnimationRepeat(animation: Animator) {}
+            })
             .alpha(1f)
             .setDuration(225)
             .start()

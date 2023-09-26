@@ -10,15 +10,15 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.SummaryTab
-import ru.neosvet.vestnewage.databinding.SummaryFragmentBinding
+import ru.neosvet.vestnewage.databinding.TabFragmentBinding
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
@@ -28,8 +28,8 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.getItemView
-import ru.neosvet.vestnewage.view.basic.select
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.TabAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
@@ -49,8 +49,8 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             }
     }
 
-    private var binding: SummaryFragmentBinding? = null
-    private val adRecycler = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private var binding: TabFragmentBinding? = null
+    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
     private lateinit var adPaging: PagingAdapter
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler
@@ -60,7 +60,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private var openedReader = false
     private var isUserScroll = true
     private var firstPosition = -1
-    private var selectedTab = SummaryTab.RSS.value
+    private lateinit var tabAdapter: TabAdapter
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[SummaryToiler::class.java]
@@ -76,7 +76,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = SummaryFragmentBinding.inflate(inflater, container, false).also {
+    ) = TabFragmentBinding.inflate(inflater, container, false).also {
         binding = it
     }.root
 
@@ -84,20 +84,20 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         setViews()
         initTabs()
         arguments?.let {
-            selectedTab = it.getInt(Const.TAB, 0)
-            binding?.tabLayout?.select(selectedTab)
-            toiler.setArgument(selectedTab)
+            val tab = it.getInt(Const.TAB, 0)
+            tabAdapter.select(tab)
+            toiler.setArgument(tab)
             arguments = null
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        firstPosition = if (selectedTab == SummaryTab.ADDITION.value)
+        firstPosition = if (tabAdapter.selected == SummaryTab.ADDITION.value)
             adPaging.firstPosition
         else -1
         toiler.setStatus(
             SummaryState.Status(
-                selectedTab = selectedTab,
+                selectedTab = tabAdapter.selected,
                 firstPosition = firstPosition
             )
         )
@@ -114,67 +114,54 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
-        binding?.run {
-            val tabHost = tabLayout.getChildAt(0) as ViewGroup
-            if (load) {
-                act?.initScrollBar(0, null)
-                tabHost.getChildAt(0).isEnabled = false
-                tabHost.getChildAt(1).isEnabled = false
-            } else {
-                act?.hideToast()
-                tabHost.getChildAt(0).isEnabled = true
-                tabHost.getChildAt(1).isEnabled = true
-            }
-        }
+        tabAdapter.isBlocked = isBlocked
+        if (load) act?.initScrollBar(0, null)
+        else act?.hideToast()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        rvSummary.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        setListEvents(rvSummary, false)
+        rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        setListEvents(rvList, false)
         tvUpdate.setOnClickListener {
-            if (selectedTab == SummaryTab.ADDITION.value)
+            if (tabAdapter.selected == SummaryTab.ADDITION.value)
                 Lib.openInApps(Urls.TelegramUrl, null)
         }
     }
 
     override fun swipeLeft() {
         binding?.run {
-            val t = tabLayout.selectedTabPosition
-            if (t < 1) tabLayout.select(t + 1)
+            val t = tabAdapter.selected
+            if (t < 1) tabAdapter.select(t + 1)
         }
     }
 
     override fun swipeRight() {
         binding?.run {
-            val t = tabLayout.selectedTabPosition
-            if (t > 0) tabLayout.select(t - 1)
+            val t = tabAdapter.selected
+            if (t > 0) tabAdapter.select(t - 1)
         }
     }
 
     private fun initTabs() = binding?.run {
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.summary))
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.additionally))
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                if (selectedTab == tab.position) return
-                selectedTab = tab.position
-                if (selectedTab == SummaryTab.RSS.value) {
-                    act?.initScrollBar(0, null)
-                    act?.unlockHead()
-                }
-                adRecycler.clear()
-                toiler.openList(true, selectedTab)
-            }
-        })
+        val tabs = listOf(
+            getString(R.string.summary),
+            getString(R.string.additionally)
+        )
+        tabAdapter = TabAdapter(btnPrevTab, btnNextTab, true) {
+            rvTab.isEnabled = false
+            if (it == SummaryTab.RSS.value) {
+                adPaging.submitData(lifecycle, PagingData.empty())
+                act?.initScrollBar(0, null)
+                act?.unlockHead()
+            } else adapter.clear()
+            toiler.openList(true, tabAdapter.selected)
+        }
+        tabAdapter.setItems(tabs)
+        rvTab.adapter = tabAdapter
     }
 
     override fun onChangedOtherState(state: NeoState) {
-        setStatus(false)
         when (state) {
             is BasicState.Message ->
                 act?.showScrollTip(state.message)
@@ -189,7 +176,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 restoreStatus(state)
 
             BasicState.Success ->
-                act?.updateNew()
+                setStatus(false)
 
             BasicState.Ready ->
                 act?.hideToast()
@@ -197,34 +184,35 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     private fun restoreStatus(state: SummaryState.Status) {
-        selectedTab = state.selectedTab
         firstPosition = state.firstPosition
-        binding?.tabLayout?.select(selectedTab)
+        tabAdapter.select(state.selectedTab)
     }
 
     private fun initRss(state: ListState.Primary) {
         act?.updateNew()
         jobList?.cancel()
-        val scroll = adRecycler.itemCount > 0
-        adRecycler.setItems(state.list)
+        val scroll = adapter.itemCount > 0
+        adapter.setItems(state.list)
         binding?.run {
             setUpdateTime(state.time, tvUpdate)
-            rvSummary.adapter = adRecycler
+            rvList.adapter = adapter
             if (scroll)
-                rvSummary.smoothScrollToPosition(0)
+                rvList.smoothScrollToPosition(0)
         }
+        setStatus(false)
     }
 
     private fun initAddition(max: Int) {
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
         adPaging.withTime = true
-        binding?.rvSummary?.adapter = adPaging
+        binding?.rvList?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
         if (firstPosition < 1) {
             firstPosition = 0
             startPaging(0)
         } else startPaging(firstPosition / NeoPaging.ON_PAGE)
+        setStatus(false)
     }
 
     override fun onScrolled(value: Int) {
@@ -241,7 +229,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     private fun startPaging(page: Int) {
         jobList?.cancel()
-        binding?.rvSummary?.adapter = null
+        binding?.rvList?.adapter = null
         jobList = lifecycleScope.launch {
             toiler.paging(page, adPaging).collect {
                 adPaging.submitData(lifecycle, it)
@@ -249,19 +237,19 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         }
         lifecycleScope.launch {
             delay(50)
-            binding?.rvSummary?.adapter = adPaging
+            binding?.rvList?.adapter = adPaging
         }
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
         if (isBlocked) return
-        if (selectedTab == SummaryTab.RSS.value) {
+        if (tabAdapter.selected == SummaryTab.RSS.value) {
             openedReader = true
             openReader(item.link, null)
         } else {
             firstPosition = index
             if (item.hasFewLinks())
-                openMultiLink(item, binding!!.rvSummary.getItemView(index))
+                openMultiLink(item, binding!!.rvList.getItemView(index))
             else
                 Lib.openInApps(Urls.TelegramUrl + item.link, null)
         }
@@ -286,7 +274,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
-        if (selectedTab == SummaryTab.RSS.value) {
+        if (tabAdapter.selected == SummaryTab.RSS.value) {
             MarkerActivity.addByPar(
                 requireContext(),
                 item.link, "", item.des.substring(item.des.indexOf(Const.N))
