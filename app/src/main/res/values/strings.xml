@@ -167,6 +167,7 @@
     <!--SiteFragment-->
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
+    <string name="image">[изображение]</string>
     <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->
     <string name="anketa_failed">Анкета загружена неверно</string>

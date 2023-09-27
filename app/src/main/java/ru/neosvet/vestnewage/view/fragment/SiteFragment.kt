@@ -137,7 +137,10 @@ class SiteFragment : NeoFragment() {
     private fun openMultiLink(links: BasicItem, parent: View) {
         val pMenu = PopupMenu(requireContext(), parent)
         links.headsAndLinks().forEach {
-            val item = pMenu.menu.add(it.first)
+            val caption = if(it.second.contains(".jpg"))
+                getString(R.string.image) + it.first
+            else it.first
+            val item = pMenu.menu.add(caption)
             item.intent = Intent().apply { this.action = it.second }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
