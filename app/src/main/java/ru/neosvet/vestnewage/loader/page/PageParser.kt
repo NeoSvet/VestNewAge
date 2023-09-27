@@ -141,7 +141,7 @@ class PageParser(private val client: NeoClient) {
                     elem.par = elem.par.replace("..", "").replace("&#x2B;", "+")
                     if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
                         elem.par = Urls.Site + elem.par.substring(1)
-                    if (elem.html.isEmpty()) {
+                    if (elem.html.isEmpty() && !elem.par.contains(".jpg")) {
                         s = elem.par.substring(elem.par.lastIndexOf("/") + 1)
                         if (s.contains("?")) s = s.substring(0, s.indexOf("?"))
                         elem.html = s
@@ -149,7 +149,8 @@ class PageParser(private val client: NeoClient) {
                 }
 
                 Const.IMAGE -> {
-                    elem.par = s.substring(n).replace("=\"/", "=\"http://blagayavest.info/")
+                    elem.par = s.substring(n + 1).replace("=\"/", "=\"http://blagayavest.info/")
+                    elem.end = true
                 }
 
                 Const.FRAME -> {
