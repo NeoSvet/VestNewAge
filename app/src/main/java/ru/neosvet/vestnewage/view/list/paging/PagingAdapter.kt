@@ -49,7 +49,8 @@ class PagingAdapter(
             }
             if (!recyclerView.canScrollVertically(1)) {
                 parent.onFinishList(true)
-                recyclerView.smoothScrollToPosition(itemCount - 1)
+                if (itemCount > 0)
+                    recyclerView.smoothScrollToPosition(itemCount - 1)
                 prevPage = -1
             } else if (!recyclerView.canScrollVertically(-1))
                 parent.onFinishList(false)
