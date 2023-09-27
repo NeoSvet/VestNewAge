@@ -119,16 +119,18 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun swipeLeft() {
-        binding?.run {
-            val t = tabAdapter.selected
-            if (t < 1) tabAdapter.select(t + 1)
+        val t = tabAdapter.selected
+        if (t < 2) {
+            tabAdapter.select(t + 1)
+            toiler.openList(true, tabAdapter.selected)
         }
     }
 
     override fun swipeRight() {
-        binding?.run {
-            val t = tabAdapter.selected
-            if (t > 0) tabAdapter.select(t - 1)
+        val t = tabAdapter.selected
+        if (t > 0) {
+            tabAdapter.select(t - 1)
+            toiler.openList(true, tabAdapter.selected)
         }
     }
 
