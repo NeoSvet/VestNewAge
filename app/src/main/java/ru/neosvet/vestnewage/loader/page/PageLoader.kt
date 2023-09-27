@@ -47,8 +47,10 @@ class PageLoader(private val client: NeoClient) : Loader {
         var id = 0
         var bid = 0
         var s: String? = page.currentElem
+        var wasHead = false
         do {
-            if (page.isHead) {
+            if (page.isHead && (!wasHead || !storage.isArticle)) {
+                wasHead = true
                 id = storage.getPageId(link)
                 row = ContentValues()
                 row.put(Const.TIME, System.currentTimeMillis())

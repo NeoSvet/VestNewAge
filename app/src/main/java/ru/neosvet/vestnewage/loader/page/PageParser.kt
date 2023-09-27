@@ -178,7 +178,7 @@ class PageParser(private val client: NeoClient) {
                                 elem.par = s
                                 wasNoind = true
                             }
-                        }
+                        } else elem.par = s
                     }
                     if (s.contains(Const.STYLE)) {
                         n = s.indexOf(Const.STYLE)
