@@ -7,95 +7,23 @@
     android:paddingTop="@dimen/quarter_indent"
     android:paddingBottom="@dimen/content_margin_bottom">
 
-    <LinearLayout
+    <ru.neosvet.vestnewage.view.basic.NeoTab
         android:id="@+id/p_year"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/half_indent"
         android:layout_marginVertical="@dimen/quarter_indent"
-        android:background="@drawable/card_bg"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/btn_prev_year"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/press"
-            android:contentDescription="@string/to_prev_year"
-            android:scaleType="fitXY"
-            android:src="@drawable/left" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="?attr/colorAccent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_year"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="0dp" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="?attr/colorAccent" />
-
-        <ImageButton
-            android:id="@+id/btn_next_year"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/press"
-            android:contentDescription="@string/to_next_year"
-            android:scaleType="fitXY"
-            android:src="@drawable/right" />
-    </LinearLayout>
-
-    <LinearLayout
+    <ru.neosvet.vestnewage.view.basic.NeoTab
         android:id="@+id/p_month"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/half_indent"
         android:layout_marginVertical="@dimen/quarter_indent"
-        android:background="@drawable/card_bg"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/p_year">
-
-        <ImageButton
-            android:id="@+id/btn_prev_month"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/press"
-            android:contentDescription="@string/to_prev_month"
-            android:scaleType="fitXY"
-            android:src="@drawable/left" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="?attr/colorAccent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_month"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="0dp" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="?attr/colorAccent" />
-
-        <ImageButton
-            android:id="@+id/btn_next_month"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/press"
-            android:contentDescription="@string/to_next_month"
-            android:scaleType="fitXY"
-            android:src="@drawable/right" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/p_year" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_update"

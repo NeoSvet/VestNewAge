@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -21,7 +22,6 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
-import ru.neosvet.vestnewage.view.list.TabAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -47,13 +47,6 @@ class SiteFragment : NeoFragment() {
     override val title: String
         get() = getString(R.string.news)
     private var itemAds: BasicItem? = null
-    private lateinit var tabAdapter: TabAdapter
-    private val isDevTab: Boolean
-        get() = tabAdapter.selected == SiteTab.DEV.value
-    private val isNewsTab: Boolean
-        get() = tabAdapter.selected == SiteTab.NEWS.value
-    private val isSiteTab: Boolean
-        get() = tabAdapter.selected == SiteTab.SITE.value
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,13 +61,11 @@ class SiteFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
-        initTabs()
-        arguments?.let {
-            val tab = it.getInt(Const.TAB, 0)
-            tabAdapter.select(tab)
-            toiler.setArgument(tab)
-            arguments = null
-        }
+        val tab = if (savedInstanceState == null)
+            arguments?.getInt(Const.TAB, 0) ?: 0
+        else 0
+        toiler.setArgument(tab)
+        initTabs(tab)
     }
 
     override fun onDestroyView() {
@@ -85,7 +76,7 @@ class SiteFragment : NeoFragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             SiteState.Status(
-                selectedTab = tabAdapter.selected,
+                selectedTab = binding?.pTab?.selectedIndex ?: 0,
                 itemAds = itemAds
             )
         )
@@ -94,22 +85,21 @@ class SiteFragment : NeoFragment() {
 
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
-        tabAdapter.isBlocked = isBlocked
+        binding?.pTab?.isBlocked = isBlocked
     }
 
-    private fun initTabs() = binding?.run {
+    private fun initTabs(tab: Int) = binding?.run {
         val tabs = listOf(
             getString(R.string.news),
             getString(R.string.site),
             getString(R.string.news_dev)
         )
-        tabAdapter = TabAdapter(btnPrevTab, btnNextTab, true) {
-            rvTab.isEnabled = false
+        pTab.setOnChangeListener {
             adapter.clear()
             toiler.openList(true, it)
         }
-        tabAdapter.setItems(tabs)
-        rvTab.adapter = tabAdapter
+        pTab.setItems(tabs, tab)
+        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -119,25 +109,23 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun swipeLeft() {
-        val t = tabAdapter.selected
-        if (t < 2) {
-            tabAdapter.select(t + 1)
-            toiler.openList(true, tabAdapter.selected)
+        binding?.pTab?.let {
+            it.change(true)
+            toiler.openList(true, it.selectedIndex)
         }
     }
 
     override fun swipeRight() {
-        val t = tabAdapter.selected
-        if (t > 0) {
-            tabAdapter.select(t - 1)
-            toiler.openList(true, tabAdapter.selected)
+        binding?.pTab?.let {
+            it.change(false)
+            toiler.openList(true, it.selectedIndex)
         }
     }
 
     private fun openMultiLink(links: BasicItem, parent: View) {
         val pMenu = PopupMenu(requireContext(), parent)
         links.headsAndLinks().forEach {
-            val caption = if(it.second.contains(".jpg"))
+            val caption = if (it.second.contains(".jpg"))
                 getString(R.string.image) + it.first
             else it.first
             val item = pMenu.menu.add(caption)
@@ -188,8 +176,8 @@ class SiteFragment : NeoFragment() {
             is ListState.Primary -> {
                 binding?.run {
                     setUpdateTime(state.time, tvUpdate)
-                    rvList.layoutManager =
-                        GridLayoutManager(requireContext(), if (isNewsTab) 1 else ScreenUtils.span)
+                    val span = if (pTab.selectedStart) 1 else ScreenUtils.span
+                    rvList.layoutManager = GridLayoutManager(requireContext(), span)
                     if (state.list.isEmpty())
                         act?.showStaticToast(getString(R.string.empty_site))
                     else act?.hideToast()
@@ -201,7 +189,7 @@ class SiteFragment : NeoFragment() {
     }
 
     private fun restoreStatus(state: SiteState.Status) {
-        tabAdapter.select(state.selectedTab)
+        binding?.pTab?.selectedIndex = state.selectedTab
         itemAds = state.itemAds?.also {
             AdsUtils.showDialog(requireActivity(), it, this::closeAds)
         }
@@ -209,23 +197,25 @@ class SiteFragment : NeoFragment() {
 
     private fun onItemClick(index: Int, item: BasicItem) {
         if (isBlocked) return
-        when {
-            isNewsTab -> if (item.link.length > 1) {
-                if (item.link.contains(":"))
-                    openMultiLink(item, binding!!.rvList.getItemView(index))
-                else openPage(item.link)
-            }
+        binding?.run {
+            when (pTab.selectedIndex) {
+                SiteTab.NEWS.value -> if (item.link.length > 1) {
+                    if (item.link.contains(":"))
+                        openMultiLink(item, rvList.getItemView(index))
+                    else openPage(item.link)
+                }
 
-            isSiteTab -> if (item.hasFewLinks())
-                openMultiLink(item, binding!!.rvList.getItemView(index))
-            else if (item.des.isNotEmpty()) openPage(item.link)
-            else openSingleLink(item.link)
+                SiteTab.SITE.value -> if (item.hasFewLinks())
+                    openMultiLink(item, rvList.getItemView(index))
+                else if (item.des.isNotEmpty()) openPage(item.link)
+                else openSingleLink(item.link)
 
-            isDevTab -> {
-                item.des = ""
-                itemAds = item
-                AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
-                adapter.notifyItemChanged(index)
+                SiteTab.DEV.value -> {
+                    item.des = ""
+                    itemAds = item
+                    AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
+                    adapter.notifyItemChanged(index)
+                }
             }
         }
     }

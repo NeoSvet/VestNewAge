@@ -29,7 +29,6 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
-import ru.neosvet.vestnewage.view.list.TabAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
@@ -60,7 +59,6 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private var openedReader = false
     private var isUserScroll = true
     private var firstPosition = -1
-    private lateinit var tabAdapter: TabAdapter
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[SummaryToiler::class.java]
@@ -82,22 +80,21 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
-        initTabs()
-        arguments?.let {
-            val tab = it.getInt(Const.TAB, 0)
-            tabAdapter.select(tab)
-            toiler.setArgument(tab)
-            arguments = null
-        }
+        val tab = if (savedInstanceState == null)
+            arguments?.getInt(Const.TAB, 0) ?: 0
+        else 0
+        toiler.setArgument(tab)
+        initTabs(tab)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        firstPosition = if (tabAdapter.selected == SummaryTab.ADDITION.value)
+        val tab = binding?.pTab?.selectedIndex ?: 0
+        firstPosition = if (tab == SummaryTab.ADDITION.value)
             adPaging.firstPosition
         else -1
         toiler.setStatus(
             SummaryState.Status(
-                selectedTab = tabAdapter.selected,
+                selectedTab = tab,
                 firstPosition = firstPosition
             )
         )
@@ -114,7 +111,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
-        tabAdapter.isBlocked = isBlocked
+        binding?.pTab?.isBlocked = isBlocked
         if (load) act?.initScrollBar(0, null)
         else act?.hideToast()
     }
@@ -124,43 +121,40 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         setListEvents(rvList, false)
         tvUpdate.setOnClickListener {
-            if (tabAdapter.selected == SummaryTab.ADDITION.value)
+            if (pTab.selectedIndex == SummaryTab.ADDITION.value)
                 Lib.openInApps(Urls.TelegramUrl, null)
         }
     }
 
     override fun swipeLeft() {
-        val t = tabAdapter.selected
-        if (t < 1) {
-            tabAdapter.select(t + 1)
-            toiler.openList(true, tabAdapter.selected)
+        binding?.pTab?.let {
+            it.change(true)
+            toiler.openList(true, it.selectedIndex)
         }
     }
 
     override fun swipeRight() {
-        val t = tabAdapter.selected
-        if (t > 0) {
-            tabAdapter.select(t - 1)
-            toiler.openList(true, tabAdapter.selected)
+        binding?.pTab?.let {
+            it.change(false)
+            toiler.openList(true, it.selectedIndex)
         }
     }
 
-    private fun initTabs() = binding?.run {
+    private fun initTabs(tab: Int) = binding?.run {
         val tabs = listOf(
             getString(R.string.summary),
             getString(R.string.additionally)
         )
-        tabAdapter = TabAdapter(btnPrevTab, btnNextTab, true) {
-            rvTab.isEnabled = false
+        pTab.setOnChangeListener {
             if (it == SummaryTab.RSS.value) {
                 adPaging.submitData(lifecycle, PagingData.empty())
                 act?.initScrollBar(0, null)
                 act?.unlockHead()
             } else adapter.clear()
-            toiler.openList(true, tabAdapter.selected)
+            toiler.openList(true, pTab.selectedIndex)
         }
-        tabAdapter.setItems(tabs)
-        rvTab.adapter = tabAdapter
+        pTab.setItems(tabs, tab)
+        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -187,7 +181,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     private fun restoreStatus(state: SummaryState.Status) {
         firstPosition = state.firstPosition
-        tabAdapter.select(state.selectedTab)
+        binding?.pTab?.selectedIndex = state.selectedTab
     }
 
     private fun initRss(state: ListState.Primary) {
@@ -245,15 +239,17 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun onItemClick(index: Int, item: BasicItem) {
         if (isBlocked) return
-        if (tabAdapter.selected == SummaryTab.RSS.value) {
-            openedReader = true
-            openReader(item.link, null)
-        } else {
-            firstPosition = index
-            if (item.hasFewLinks())
-                openMultiLink(item, binding!!.rvList.getItemView(index))
-            else
-                Lib.openInApps(Urls.TelegramUrl + item.link, null)
+        binding?.run {
+            if (pTab.selectedStart) {
+                openedReader = true
+                openReader(item.link, null)
+            } else {
+                firstPosition = index
+                if (item.hasFewLinks())
+                    openMultiLink(item, rvList.getItemView(index))
+                else
+                    Lib.openInApps(Urls.TelegramUrl + item.link, null)
+            }
         }
     }
 
@@ -276,7 +272,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
-        if (tabAdapter.selected == SummaryTab.RSS.value) {
+        if (binding?.pTab?.selectedStart == true) {
             MarkerActivity.addByPar(
                 requireContext(),
                 item.link, "", item.des.substring(item.des.indexOf(Const.N))

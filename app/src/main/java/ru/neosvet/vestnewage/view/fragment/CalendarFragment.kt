@@ -16,12 +16,10 @@ import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
-import ru.neosvet.vestnewage.view.list.TabAdapter
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -37,8 +35,6 @@ class CalendarFragment : NeoFragment() {
         get() = getString(R.string.calendar)
     private var openedReader = false
     private var shownDwnDialog = false
-    private lateinit var yearAdapter: TabAdapter
-    private lateinit var monthAdapter: TabAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,7 +49,6 @@ class CalendarFragment : NeoFragment() {
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
         disableUpdateRoot()
-        initDatePicker()
         initCalendar()
     }
 
@@ -79,24 +74,21 @@ class CalendarFragment : NeoFragment() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun initDatePicker() = binding?.run {
-        monthAdapter = TabAdapter(null, null, !ScreenUtils.isLand) {
-            toiler.openList(month = it)
-        }
-        rvMonth.adapter = monthAdapter
-        yearAdapter = TabAdapter(btnPrevYear, btnNextYear, !ScreenUtils.isLand) {
-            toiler.openList(year = it)
-        }
-        rvYear.adapter = yearAdapter
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun initCalendar() = binding?.run {
         val layoutManager = GridLayoutManager(requireContext(), 7)
         rvCalendar.layoutManager = layoutManager
         rvCalendar.adapter = adapter
-        btnPrevMonth.setOnClickListener { openMonth(false) }
-        btnNextMonth.setOnClickListener { openMonth(true) }
+        pYear.setOnChangeListener {
+            toiler.openList(year = it)
+        }
+        pMonth.setOnChangeListener {
+            toiler.openList(month = it)
+        }
+        pMonth.btnPrev.setOnClickListener { openMonth(false) }
+        pMonth.btnNext.setOnClickListener { openMonth(true) }
+        pMonth.setDescription(getString(R.string.to_prev_month), getString(R.string.to_next_month))
+        pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
     }
 
     private fun openLink(link: String) {
@@ -107,19 +99,15 @@ class CalendarFragment : NeoFragment() {
     private fun openMonth(plus: Boolean) {
         if (isBlocked) return
         binding?.run {
-            val month = rvMonth.adapter as TabAdapter
-            val year = rvYear.adapter as TabAdapter
             if (plus) {
-                val maxMonth = month.itemCount - 1
-                val maxYear = year.itemCount - 1
-                if (month.selected == maxMonth && year.selected == maxYear) {
+                if (pMonth.selectedEnd && pYear.selectedEnd) {
                     toiler.openList(month = 0)
                     return
                 }
-            } else if (month.selected == 0 && year.selected == 0) {
+            } else if (pMonth.selectedStart && pYear.selectedStart) {
                 if (!DateHelper.isLoadedOtkr() && !LoaderService.isRun)
                     showDownloadDialog()
-                else toiler.openList(month = month.itemCount - 1)
+                else toiler.openList(month = pMonth.count - 1)
                 return
             }
         }
@@ -137,8 +125,10 @@ class CalendarFragment : NeoFragment() {
 
     override fun setStatus(load: Boolean) {
         super.setStatus(load)
-        yearAdapter.isBlocked = isBlocked
-        monthAdapter.isBlocked = isBlocked
+        binding?.run {
+            pYear.isBlocked = isBlocked
+            pMonth.isBlocked = isBlocked
+        }
     }
 
     private fun onClick(view: View, item: CalendarItem) {
@@ -186,10 +176,8 @@ class CalendarFragment : NeoFragment() {
                 adapter.setItems(state.list)
                 if (rvCalendar.isVisible.not())
                     showView(rvCalendar)
-                monthAdapter.setItems(state.months)
-                monthAdapter.select(state.selected.y)
-                yearAdapter.setItems(state.years)
-                yearAdapter.select(state.selected.x)
+                pMonth.setItems(state.months, state.selected.y)
+                pYear.setItems(state.years, state.selected.x)
                 if (state.isUpdateUnread)
                     act?.updateNew()
             }
@@ -209,8 +197,8 @@ class CalendarFragment : NeoFragment() {
                 override fun onAnimationStart(animation: Animator) {}
                 override fun onAnimationEnd(animation: Animator) {
                     binding?.run {
-                        rvYear.smoothScrollToPosition(yearAdapter.selected)
-                        rvMonth.smoothScrollToPosition(monthAdapter.selected)
+                        pYear.rvTab.smoothScrollToPosition(pYear.selectedIndex)
+                        pMonth.rvTab.smoothScrollToPosition(pMonth.selectedIndex)
                     }
                 }
 
