@@ -107,12 +107,16 @@ class SiteToiler : NeoToiler() {
             return
         }
         val list = mutableListOf<BasicItem>()
-        if (selectedTab == SiteTab.SITE)
-            list.add(getNovosti())
         var i = 0
+        val isNews = selectedTab == SiteTab.NEWS
+        if (!isNews) {
+            list.add(getNovosti())
+            i = 1
+        }
         var d: String?
         var l: String
         var h: String
+        var n: Int
         val br = BufferedReader(FileReader(f))
         var t: String? = br.readLine()
         while (t != null) {
@@ -131,6 +135,9 @@ class SiteToiler : NeoToiler() {
                         list[i].addLink(h, l)
                         l = br.readLine()
                     }
+                } else if (isNews && l.length > 1) {
+                    n = d.indexOf(">", d.indexOf(l)) + 1
+                    list[i].addLink(d.substring(n, d.indexOf("<", n)), l)
                 } else list[i].addLink("", l)
             }
             i++

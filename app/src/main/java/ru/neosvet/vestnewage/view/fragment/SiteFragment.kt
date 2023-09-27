@@ -150,19 +150,14 @@ class SiteFragment : NeoFragment() {
     }
 
     private fun openSingleLink(link: String) {
-        if (link == "#" || link == "@") return
-        if (isSiteTab) {
-            if (link.contains("rss"))
-                act?.setSection(Section.SUMMARY, true)
-            else if (link.isPoem)
-                act?.openBook(link, true)
-            else if (link.contains("tolkovaniya") || link.contains("2016"))
-                act?.openBook(link, false)
-            else if (link.contains("files"))
-                Lib.openInApps(link, null)
-            else openPage(link)
-        } else
-            openPage(link)
+        if (link == "#") return
+        if (link.contains("rss"))
+            act?.setSection(Section.SUMMARY, true)
+        else if (link.isPoem)
+            act?.openBook(link, true)
+        else if (link.contains("tolkovaniya") || link.contains("2016"))
+            act?.openBook(link, false)
+        else openPage(link)
     }
 
     private fun closeAds() = itemAds?.let {
@@ -171,12 +166,12 @@ class SiteFragment : NeoFragment() {
     }
 
     private fun openPage(url: String) {
-        if (url.contains("http") || url.contains("mailto")) {
-            if (url.contains(Urls.Site)) Lib.openInApps(url, getString(R.string.to_load))
-            else Lib.openInApps(url, null)
-        } else if (url.contains(".jp") || url.contains(".mp")) {
-            Lib.openInApps(Urls.Site + url, null)
-        } else openReader(url, null)
+        when {
+            url.contains("mailto") -> Lib.openInApps(url, null)
+            url.contains("http") -> Urls.openInBrowser(url)
+            url.contains(".jp") || url.contains(".mp") -> Urls.openInBrowser(Urls.Site + url)
+            else -> openReader(url, null)
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -211,17 +206,25 @@ class SiteFragment : NeoFragment() {
 
     private fun onItemClick(index: Int, item: BasicItem) {
         if (isBlocked) return
-        if (isDevTab) {
-            item.des = ""
-            itemAds = item
-            AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
-            adapter.notifyItemChanged(index)
-            return
+        when {
+            isNewsTab -> if (item.link.length > 1) {
+                if (item.link.contains(":"))
+                    openMultiLink(item, binding!!.rvList.getItemView(index))
+                else openPage(item.link)
+            }
+
+            isSiteTab -> if (item.hasFewLinks())
+                openMultiLink(item, binding!!.rvList.getItemView(index))
+            else if (item.des.isNotEmpty()) openPage(item.link)
+            else openSingleLink(item.link)
+
+            isDevTab -> {
+                item.des = ""
+                itemAds = item
+                AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
+                adapter.notifyItemChanged(index)
+            }
         }
-        if (item.hasFewLinks())
-            openMultiLink(item, binding!!.rvList.getItemView(index))
-        else
-            openSingleLink(item.link)
     }
 
     override fun onAction(title: String) {
