@@ -7,7 +7,11 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import java.io.*
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileOutputStream
+import java.io.FileReader
+import java.io.OutputStreamWriter
 import java.util.regex.Pattern
 
 class SiteLoader(
@@ -101,6 +105,7 @@ class SiteLoader(
                     }
                 }
 
+                page.isImage -> {}
                 page.isSimple -> d.append(s)
                 else -> {
                     page.link?.let { addLink(item, page.text, it) }
@@ -126,9 +131,7 @@ class SiteLoader(
 
     private fun addLink(item: BasicItem, head: String, link: String) {
         var url = link
-        if (url.contains("files") || url.contains(".mp3") || url.contains(".wma")
-            || url.lastIndexOf("/") == url.length - 1
-        )
+        if (url.contains("files") || url.contains(".mp3") || url.contains(".wma"))
             url = Urls.Site + url.substring(1)
         if (url.indexOf("/") == 0) url = url.substring(1)
         if (item.link == "@")
