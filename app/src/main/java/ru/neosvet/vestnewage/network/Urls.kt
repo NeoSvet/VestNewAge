@@ -200,6 +200,7 @@ object Urls {
         }
     }
 
+    @JvmStatic
     fun openInBrowser(url: String) {
         val emptyBrowserIntent = Intent(Intent.ACTION_VIEW)
         emptyBrowserIntent.data = Uri.fromParts("http", "", null)

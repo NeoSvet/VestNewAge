@@ -4,6 +4,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import ru.neosvet.vestnewage.network.Urls;
 import ru.neosvet.vestnewage.utils.Lib;
 import ru.neosvet.vestnewage.view.activity.BrowserActivity;
 
@@ -36,7 +37,10 @@ public class WebClient extends WebViewClient {
             act.openLink(getUrl(url));
             return true;
         }
-        if (url.contains("http") || url.contains("mailto")) {
+        if (url.contains("http")) {
+            act.onBack();
+            Urls.openInBrowser(url);
+        } else if (url.contains("mailto")) {
             act.onBack();
             Lib.openInApps(url, null);
         } else
