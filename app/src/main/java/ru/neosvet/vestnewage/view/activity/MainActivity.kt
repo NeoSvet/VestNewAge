@@ -704,10 +704,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.svMain?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
             behavior = AppBarLayout.ScrollingViewBehavior()
         }
-        helper.topBar?.let {
-            it.setExpanded(true)
-            it.isVisible = true
-        }
+        helper.topBar?.isVisible = true
     }
 
     fun setError(error: BasicState.Error) {

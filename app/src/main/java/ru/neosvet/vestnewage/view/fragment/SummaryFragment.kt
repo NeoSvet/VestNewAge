@@ -144,7 +144,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 act?.initScrollBar(0, null)
                 act?.unlockHead()
             }
-            toiler.openList(true, pTab.selectedIndex)
+            toiler.openList(true, it)
         }
         pTab.setItems(tabs, tab)
         if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)

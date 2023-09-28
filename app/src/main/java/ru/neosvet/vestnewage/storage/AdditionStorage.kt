@@ -4,9 +4,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
@@ -80,7 +80,9 @@ class AdditionStorage : Closeable {
         val cursor = getCursor(0)
         val t = if (cursor.moveToFirst()) {
             val iTime = cursor.getColumnIndex(Const.TIME)
-            getDate(cursor.getString(iTime))
+            if (iTime > -1)
+                getDate(cursor.getString(iTime))
+            else ""
         } else ""
         cursor.close()
         return t
