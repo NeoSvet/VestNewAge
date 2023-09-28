@@ -1,7 +1,7 @@
 <resources>
     <dimen name="def_indent">10dp</dimen>
     <dimen name="half_indent">5dp</dimen>
-    <dimen name="quarter_indent">2.5dp</dimen>
+    <dimen name="quarter_indent">3dp</dimen>
     <dimen name="double_indent">20dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="cell_font">26dp</dimen>
