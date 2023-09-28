@@ -31,10 +31,8 @@
         android:id="@+id/tvGodWords"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/half_indent"
-        android:paddingTop="@dimen/half_indent"
-        android:paddingEnd="45dp"
-        android:paddingBottom="@dimen/half_indent"
+        android:paddingHorizontal="@dimen/def_indent"
+        android:paddingVertical="@dimen/half_indent"
         android:shadowColor="@android:color/black"
         android:shadowDx="3"
         android:shadowDy="3"
@@ -44,44 +42,17 @@
         app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
         app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
 
-    <ImageButton
-        android:id="@+id/btnGodWords"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="@dimen/half_indent"
-        android:layout_marginEnd="@dimen/half_indent"
-        android:background="@drawable/button"
-        android:src="@drawable/more"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
-        app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
-
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvPromTimeHead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/half_indent"
-        android:layout_marginBottom="@dimen/half_indent"
+        android:paddingHorizontal="@dimen/def_indent"
+        android:paddingVertical="@dimen/half_indent"
         android:shadowColor="@android:color/black"
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
-        app:layout_constraintEnd_toStartOf="@id/btnProm" />
-
-    <ImageButton
-        android:id="@+id/btnProm"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="@dimen/half_indent"
-        android:layout_marginEnd="@dimen/half_indent"
-        android:layout_marginBottom="@dimen/half_indent"
-        android:background="@drawable/button"
-        android:contentDescription="@string/text_prom"
-        android:padding="@dimen/half_indent"
-        android:scaleType="fitStart"
-        android:src="@drawable/little_star"
         app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintEnd_toEndOf="@id/ivHeadBack" />
 

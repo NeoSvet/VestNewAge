@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.View
 import android.view.Window
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
@@ -356,17 +355,16 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun initWords() {
-        val funClick = { _: View ->
-            WordsUtils.showAlert(this) {
-                val main = Intent(this, MainActivity::class.java)
-                main.putExtra(Const.START_SCEEN, false)
-                main.putExtra(Const.SEARCH, it)
-                startActivity(main)
-            }
-        }
         binding.run {
-            btnGodWords.setOnClickListener(funClick)
-            tvGodWords.setOnClickListener(funClick)
+            tvGodWords.setOnClickListener {
+                val context = this@BrowserActivity
+                WordsUtils.showAlert(context) {
+                    val main = Intent(context, MainActivity::class.java)
+                    main.putExtra(Const.START_SCEEN, false)
+                    main.putExtra(Const.SEARCH, it)
+                    startActivity(main)
+                }
+            }
             if (ScreenUtils.isLand) {
                 val p = tvGodWords.paddingBottom
                 tvGodWords.setPadding(p, p, tvGodWords.paddingEnd, p)
@@ -508,7 +506,7 @@ class BrowserActivity : AppCompatActivity() {
         headBar = HeadBar(
             mainView = ivHeadBack,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
-            additionViews = listOf(btnGodWords, tvGodWords, btnFullScreen)
+            additionViews = listOf(tvGodWords, btnFullScreen)
         ) {
             if (link.contains(Const.DOCTRINE))
                 Urls.openInBrowser(Urls.DoctrineSite)
@@ -635,7 +633,7 @@ class BrowserActivity : AppCompatActivity() {
 
     private fun switchNavButton() = binding.run {
         if (helper.isNavButton) {
-            btnFullScreen.isVisible = btnGodWords.isVisible
+            btnFullScreen.isVisible = tvGodWords.isVisible
             btnFullScreen.tag = null
             animButton = null
             setNavButton(content.wvBrowser.scrollY)

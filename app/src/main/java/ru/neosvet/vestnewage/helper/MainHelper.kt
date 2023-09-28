@@ -20,7 +20,6 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
-import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
@@ -111,11 +110,7 @@ class MainHelper(private val act: MainActivity) {
         }
 
         isSideMenu = ScreenUtils.isTabletLand
-        if (isSideMenu) {
-            act.findViewById<View>(R.id.btnProm).setOnClickListener {
-                BrowserActivity.openReader(Urls.PROM_LINK, null)
-            }
-        } else {
+        if (!isSideMenu) {
             tvTitle = act.findViewById(R.id.tvTitle)
             bottomBar = act.findViewById(R.id.bottomBar)
             bottomBar?.setBackgroundResource(R.drawable.panel_bg)
@@ -123,12 +118,8 @@ class MainHelper(private val act: MainActivity) {
             svMain = act.findViewById(R.id.svMain)
             topBar = act.findViewById(R.id.topBar)
 
-            if (ScreenUtils.isLand) {
+            if (ScreenUtils.isLand)
                 ivHeadBack.setImageResource(R.drawable.head_back_land)
-                val tv = act.findViewById<View>(R.id.tvGodWords)
-                val p = tv.paddingBottom
-                tv.setPadding(p, p, tv.paddingEnd, p)
-            }
         }
     }
 

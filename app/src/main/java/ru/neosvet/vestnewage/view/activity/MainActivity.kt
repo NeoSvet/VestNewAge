@@ -139,11 +139,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun initWords() {
-        val funClick = { v: View ->
+        findViewById<View>(R.id.tvGodWords).setOnClickListener {
             WordsUtils.showAlert(this, this::openSearch)
         }
-        findViewById<View>(R.id.btnGodWords).setOnClickListener(funClick)
-        findViewById<View>(R.id.tvGodWords).setOnClickListener(funClick)
     }
 
     private fun openSearch(s: String) {
@@ -284,7 +282,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             findViewById<View>(R.id.ivHeadBack).isVisible = true
             findViewById<View>(R.id.ivHeadFront).isVisible = true
             findViewById<View>(R.id.tvGodWords).isVisible = true
-            findViewById<View>(R.id.btnGodWords).isVisible = true
             findViewById<View>(R.id.tvPromTimeHead).isVisible = true
         } else helper.topBar!!.isVisible = true
     }
