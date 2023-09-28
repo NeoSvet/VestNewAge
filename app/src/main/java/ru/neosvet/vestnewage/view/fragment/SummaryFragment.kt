@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -127,17 +126,11 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun swipeLeft() {
-        binding?.pTab?.let {
-            it.change(true)
-            toiler.openList(true, it.selectedIndex)
-        }
+        binding?.pTab?.change(true)
     }
 
     override fun swipeRight() {
-        binding?.pTab?.let {
-            it.change(false)
-            toiler.openList(true, it.selectedIndex)
-        }
+        binding?.pTab?.change(false)
     }
 
     private fun initTabs(tab: Int) = binding?.run {
@@ -146,11 +139,11 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             getString(R.string.additionally)
         )
         pTab.setOnChangeListener {
+            rvList.adapter = null
             if (it == SummaryTab.RSS.value) {
-                adPaging.submitData(lifecycle, PagingData.empty())
                 act?.initScrollBar(0, null)
                 act?.unlockHead()
-            } else adapter.clear()
+            }
             toiler.openList(true, pTab.selectedIndex)
         }
         pTab.setItems(tabs, tab)

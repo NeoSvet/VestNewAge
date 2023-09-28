@@ -109,17 +109,11 @@ class SiteFragment : NeoFragment() {
     }
 
     override fun swipeLeft() {
-        binding?.pTab?.let {
-            it.change(true)
-            toiler.openList(true, it.selectedIndex)
-        }
+        binding?.pTab?.change(true)
     }
 
     override fun swipeRight() {
-        binding?.pTab?.let {
-            it.change(false)
-            toiler.openList(true, it.selectedIndex)
-        }
+        binding?.pTab?.change(false)
     }
 
     private fun openMultiLink(links: BasicItem, parent: View) {

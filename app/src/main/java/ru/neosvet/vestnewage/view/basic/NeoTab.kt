@@ -43,6 +43,7 @@ class NeoTab @JvmOverloads constructor(
         get() = selectedIndex == adapter.itemCount - 1
     val count: Int
         get() = adapter.itemCount
+    private var timeChange = 0L
 
     init {
         init(context, attrs)
@@ -127,9 +128,13 @@ class NeoTab @JvmOverloads constructor(
     }
 
     fun change(plus: Boolean) {
+        val now = System.currentTimeMillis()
+        if (now - timeChange < 500) return
+        timeChange = now
         val i = selectedIndex + if (plus) 1 else -1
         selectedIndex = if (i < 0) count - 1
         else if (i == count) 0 else i
+        onOutSelect?.invoke(selectedIndex)
     }
 
     fun fixWidth(m: Float) {
