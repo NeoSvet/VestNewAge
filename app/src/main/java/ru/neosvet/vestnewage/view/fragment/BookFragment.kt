@@ -9,6 +9,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
@@ -179,6 +181,8 @@ class BookFragment : NeoFragment() {
                 else tvUpdate.text = state.label + ". " + tvUpdate.text
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
+                pMonth.fixWidth(1.3f)
+                pYear.fixWidth(1f)
                 adapter.setItems(state.list)
                 rvBook.smoothScrollToPosition(0)
                 if (pTab.selectedIndex == BookTab.DOCTRINE.value)

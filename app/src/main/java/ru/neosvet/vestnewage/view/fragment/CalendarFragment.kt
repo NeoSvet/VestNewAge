@@ -178,6 +178,8 @@ class CalendarFragment : NeoFragment() {
                     showView(rvCalendar)
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
+                pMonth.fixWidth(1.3f)
+                pYear.fixWidth(1f)
                 if (state.isUpdateUnread)
                     act?.updateNew()
             }

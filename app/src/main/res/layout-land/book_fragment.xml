@@ -28,7 +28,7 @@
 
     <ru.neosvet.vestnewage.view.basic.NeoTab
         android:id="@+id/p_year"
-        android:layout_width="80dp"
+        android:layout_width="100dp"
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/half_indent"
         android:layout_marginVertical="@dimen/quarter_indent"
@@ -39,7 +39,7 @@
 
     <ru.neosvet.vestnewage.view.basic.NeoTab
         android:id="@+id/p_month"
-        android:layout_width="100dp"
+        android:layout_width="113dp"
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/half_indent"
         android:layout_marginVertical="@dimen/quarter_indent"
