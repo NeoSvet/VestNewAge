@@ -16,6 +16,7 @@ class TouchHelper(
     enum class Events {
         SWIPE_LEFT, SWIPE_RIGHT, LIST_LIMIT
     }
+    private var timeEvent = 0L
 
     private val callback = object : ItemTouchHelper.SimpleCallback(
         0,
@@ -28,6 +29,9 @@ class TouchHelper(
         ): Boolean = false
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val now = System.currentTimeMillis()
+            if (now - timeEvent < 500) return
+            timeEvent = now
             when (direction) {
                 ItemTouchHelper.LEFT ->
                     events.invoke(Events.SWIPE_LEFT)
@@ -91,6 +95,9 @@ class TouchHelper(
                         return@setOnTouchListener false
                     }
                     if (onlyLimit) return@setOnTouchListener false
+                    val now = System.currentTimeMillis()
+                    if (now - timeEvent < 500) return@setOnTouchListener false
+                    timeEvent = now
                     if (rX > distanceForSwipe && rX > rY) {
                         if (x > x2) // next
                             events.invoke(Events.SWIPE_LEFT)
