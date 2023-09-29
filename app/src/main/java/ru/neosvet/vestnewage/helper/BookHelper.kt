@@ -2,17 +2,16 @@ package ru.neosvet.vestnewage.helper
 
 import android.content.Context
 import android.content.SharedPreferences
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
 
-class BookHelper {
+class BookHelper(context: Context) {
     companion object {
         const val TAG = "Book"
     }
 
     private val pref: SharedPreferences by lazy {
-        App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
+        context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     }
     var poemsDays: Int = DateHelper.MIN_DAYS_POEMS
         private set

@@ -68,7 +68,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         .build()
 
     override fun init(context: Context) {
-        helper = BookHelper().also {
+        helper = BookHelper(context).also {
             it.loadDates()
             dPoems = DateUnit.putDays(it.poemsDays)
             dEpistles = DateUnit.putDays(it.epistlesDays)
