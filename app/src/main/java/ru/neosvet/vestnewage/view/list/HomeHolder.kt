@@ -104,18 +104,16 @@ class HomeHolder(
 
 class HomeMenuHolder(
     private val root: View,
-    menu: List<Section>,
-    private val clicker: (Section) -> Unit
+    private val clicker: (Int, Section) -> Unit
 ) : RecyclerView.ViewHolder(root) {
+    private val mIds = listOf(
+        listOf(R.id.item1, R.id.icon1, R.id.title1),
+        listOf(R.id.item2, R.id.icon2, R.id.title2),
+        listOf(R.id.item3, R.id.icon3, R.id.title3),
+        listOf(R.id.item4, R.id.icon4, R.id.title4)
+    )
 
-    init {
-        setItem(menu[0], R.id.item1, R.id.icon1, R.id.title1)
-        setItem(menu[1], R.id.item2, R.id.icon2, R.id.title2)
-        setItem(menu[2], R.id.item3, R.id.icon3, R.id.title3)
-        setItem(menu[3], R.id.item4, R.id.icon4, R.id.title4)
-    }
-
-    private fun setItem(section: Section, item: Int, icon: Int, title: Int) {
+    fun setCell(index: Int, section: Section) {
         val i: Int
         val t: Int
         when (section) {
@@ -159,7 +157,7 @@ class HomeMenuHolder(
                 t = R.string.cabinet
             }
 
-            Section.MENU -> {
+            Section.HOME -> {
                 i = R.drawable.ic_edit
                 t = R.string.edit
             }
@@ -176,12 +174,14 @@ class HomeMenuHolder(
 
             else -> return  //Section.NEW, Section.HOME
         }
-        val iv = root.findViewById(icon) as ImageView
-        val tv = root.findViewById(title) as TextView
+
+        val mId = mIds[index]
+        val iv = root.findViewById(mId[1]) as ImageView
+        val tv = root.findViewById(mId[2]) as TextView
         iv.setImageDrawable(ContextCompat.getDrawable(iv.context, i))
         tv.text = tv.context.getString(t)
-        root.findViewById<View>(item).setOnClickListener {
-            clicker.invoke(section)
+        root.findViewById<View>(mId[0]).setOnClickListener {
+            clicker.invoke(index, section)
         }
     }
 }

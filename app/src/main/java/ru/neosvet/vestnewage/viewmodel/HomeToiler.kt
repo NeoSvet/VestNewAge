@@ -8,6 +8,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
+import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
@@ -76,6 +77,22 @@ class HomeToiler : NeoToiler() {
     private val indexInfo: Int
         get() = items.indexOf(HomeItem.Type.INFO)
     private var isEditor = false
+    private lateinit var listTitle: List<String>
+    private val listSection: List<Section> by lazy {
+        listOf(
+            Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
+            Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
+            Section.CABINET, Section.SETTINGS, Section.HELP
+        )
+    }
+    private val listIcon: List<Int> by lazy {
+        listOf(
+            R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site,
+            R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
+            R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
+        )
+    }
+    private var editIndex = -1
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Home")
@@ -105,6 +122,14 @@ class HomeToiler : NeoToiler() {
             no_changes = context.getString(R.string.no_changes),
             has_changes = context.getString(R.string.has_changes)
         )
+        listTitle = listOf(
+            context.getString(R.string.edit), context.getString(R.string.summary),
+            context.getString(R.string.news), context.getString(R.string.calendar),
+            context.getString(R.string.book), context.getString(R.string.search),
+            context.getString(R.string.markers), context.getString(R.string.journal),
+            context.getString(R.string.cabinet), context.getString(R.string.settings),
+            context.getString(R.string.help)
+        )
         loadItems()
     }
 
@@ -121,6 +146,7 @@ class HomeToiler : NeoToiler() {
     }
 
     fun save() {
+        helper.saveMenu(false, menu)
         helper.saveItems(items)
         openList(false)
     }
@@ -226,7 +252,7 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun loadItems() {
-        menu.addAll(listOf(Section.BOOK, Section.MARKERS, Section.MENU, Section.SETTINGS))
+        menu.addAll(helper.loadMenu(false))
         items.addAll(helper.loadItems())
     }
 
@@ -533,5 +559,23 @@ class HomeToiler : NeoToiler() {
                 hiddenItems.add(n + 1, item)
             }
         }
+    }
+
+    fun editMenu(index: Int) {
+        editIndex = index
+        val list = mutableListOf<MenuItem>()
+        for (i in listSection.indices) {
+            val item = MenuItem(listIcon[i], listTitle[i])
+            if (menu[index] == listSection[i]) item.isSelect = true
+            list.add(item)
+        }
+        setState(HomeState.Menu(list))
+    }
+
+    fun editMenuItem(newTitle: String) {
+        val index = listTitle.indexOf(newTitle)
+        menu[editIndex] = listSection[index]
+        setState(HomeState.ChangeMenuItem(editIndex, menu[editIndex]))
+        clearStates()
     }
 }

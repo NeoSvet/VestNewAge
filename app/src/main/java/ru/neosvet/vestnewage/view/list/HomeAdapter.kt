@@ -11,11 +11,11 @@ class HomeAdapter(
     private val events: Events,
     val isEditor: Boolean,
     private val items: MutableList<HomeItem>,
-    private val menu: List<Section>
+    private val menu: MutableList<Section>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     interface Events {
         fun onItemClick(type: HomeItem.Type, action: HomeHolder.Action)
-        fun onMenuClick(section: Section)
+        fun onMenuClick(index: Int, section: Section)
         fun onItemMove(holder: RecyclerView.ViewHolder)
     }
 
@@ -50,7 +50,7 @@ class HomeAdapter(
         return when (viewType) {
             HomeItem.Type.MENU.value -> HomeMenuHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_home_menu, null),
-                menu, events::onMenuClick
+                events::onMenuClick
             )
 
             HomeItem.Type.DIV.value -> EmptyHolder(
@@ -72,12 +72,22 @@ class HomeAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is HomeHolder) {
-            holder.setItem(items[position])
-            if (position == loadingIndex)
-                holder.startLoading()
-        } else if (holder is HomeEditHolder) {
-            holder.setItem(items[position])
+        when (holder) {
+            is HomeHolder -> {
+                holder.setItem(items[position])
+                if (position == loadingIndex)
+                    holder.startLoading()
+            }
+
+            is HomeEditHolder ->
+                holder.setItem(items[position])
+
+            is HomeMenuHolder -> {
+                holder.setCell(0, menu[0])
+                holder.setCell(1, menu[1])
+                holder.setCell(2, menu[2])
+                holder.setCell(3, menu[3])
+            }
         }
     }
 
@@ -93,5 +103,14 @@ class HomeAdapter(
         items.removeAt(index)
         items.add(index + 1, item)
         notifyItemMoved(index, index + 1)
+    }
+
+    fun changeMenu(index: Int, section: Section) {
+        menu[index] = section
+        for (i in items.indices)
+            if (items[i].type == HomeItem.Type.MENU) {
+                notifyItemChanged(i)
+                return
+            }
     }
 }

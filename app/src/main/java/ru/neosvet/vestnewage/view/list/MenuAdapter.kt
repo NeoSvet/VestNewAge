@@ -14,6 +14,10 @@ class MenuAdapter(
 ) : RecyclerView.Adapter<MenuAdapter.Holder>() {
     private val data = mutableListOf<MenuItem>()
 
+    fun setItems(list: List<MenuItem>) {
+        data.addAll(list)
+    }
+
     fun addItem(image: Int, title: String) {
         data.add(MenuItem(image, title))
     }

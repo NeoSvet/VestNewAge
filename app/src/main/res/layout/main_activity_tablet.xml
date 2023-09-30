@@ -175,8 +175,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/field"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
+        android:paddingHorizontal="@dimen/quarter_indent"
+        android:paddingVertical="6dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

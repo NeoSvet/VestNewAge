@@ -7,9 +7,9 @@
     <LinearLayout
         android:id="@+id/item_bg"
         style="@style/ItemBG"
-        android:layout_marginHorizontal="@dimen/half_indent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginHorizontal="@dimen/half_indent"
         android:orientation="horizontal"
         android:paddingStart="@dimen/def_indent">
 
@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:minHeight="30dp"
-            android:paddingStart="15dp" />
+            android:paddingStart="15dp"
+            android:paddingEnd="@dimen/def_indent" />
     </LinearLayout>
 </LinearLayout>

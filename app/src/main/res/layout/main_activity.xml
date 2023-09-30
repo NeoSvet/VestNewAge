@@ -177,8 +177,8 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/field"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
+        android:paddingHorizontal="@dimen/quarter_indent"
+        android:paddingVertical="6dp"
         android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
