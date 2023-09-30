@@ -8,6 +8,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
+import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
@@ -31,13 +33,6 @@ import java.io.FileReader
 import java.util.zip.CRC32
 
 class HomeToiler : NeoToiler() {
-    companion object {
-        private const val INDEX_SUMMARY = 4
-        private const val INDEX_ADDITION = 1
-        private const val INDEX_CALENDAR = 0
-        private const val INDEX_NEWS = 2
-        private const val INDEX_JOURNAL = 5
-    }
 
     private enum class Task {
         NONE, OPEN_SUMMARY, OPEN_ADDITION, OPEN_CALENDAR, OPEN_JOURNAL,
@@ -62,6 +57,25 @@ class HomeToiler : NeoToiler() {
     private var needLoadNews = false
     private var needLoadAddition = false
     private var newsCRC = 0L
+    private lateinit var helper: HomeHelper
+    private val items = mutableListOf<HomeItem.Type>()
+    private val hiddenItems = mutableListOf<HomeItem.Type>()
+    private val menu = mutableListOf<Section>()
+    private val indexSummary: Int
+        get() = items.indexOf(HomeItem.Type.SUMMARY)
+    private val indexAddition: Int
+        get() = items.indexOf(HomeItem.Type.ADDITION)
+    private val indexCalendar: Int
+        get() = items.indexOf(HomeItem.Type.CALENDAR)
+    private val indexNews: Int
+        get() = items.indexOf(HomeItem.Type.NEWS)
+    private val indexJournal: Int
+        get() = items.indexOf(HomeItem.Type.JOURNAL)
+    private val indexMenu: Int
+        get() = items.indexOf(HomeItem.Type.MENU)
+    private val indexInfo: Int
+        get() = items.indexOf(HomeItem.Type.INFO)
+    private var isEditor = false
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Home")
@@ -69,6 +83,7 @@ class HomeToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
+        helper = HomeHelper(context)
         strings = HomeStrings(
             nothing = context.getString(R.string.nothing),
             never = context.getString(R.string.never),
@@ -90,10 +105,28 @@ class HomeToiler : NeoToiler() {
             no_changes = context.getString(R.string.no_changes),
             has_changes = context.getString(R.string.has_changes)
         )
+        loadItems()
     }
 
     override suspend fun defaultState() {
-        openList()
+        openList(isEditor)
+    }
+
+    fun restore() {
+        items.clear()
+        menu.clear()
+        hiddenItems.clear()
+        loadItems()
+        openList(false)
+    }
+
+    fun save() {
+        helper.saveItems(items)
+        openList(false)
+    }
+
+    fun edit() {
+        openList(true)
     }
 
     override suspend fun doLoad() {
@@ -111,30 +144,59 @@ class HomeToiler : NeoToiler() {
         storage.close()
     }
 
-    fun openList() {
+    private fun openList(isEditor: Boolean) {
         loadIfNeed = task == Task.NONE
+        this.isEditor = isEditor
         scope.launch {
             linkSummary = ""
             linkCalendar = ""
             linkJournal = ""
             val list = mutableListOf<HomeItem>()
-            list.add(createCalendarItem())
-            list.add(createAdditionItem())
-            list.add(createNewsItem())
-            list.add(HomeItem(HomeItem.Type.MENU, listOf()))
-            list.add(createSummaryItem())
-            list.add(createJournalItem())
-            task = Task.OPEN_OTHER
-            list.add(
-                HomeItem(
-                    type = HomeItem.Type.INFO,
-                    lines = listOf(strings.prom_for_soul_unite, strings.precept_human_future)
-                )
-            )
-            postState(HomeState.Primary(list))
+            list.addAll(getHomeList(items))
+            if (isEditor) {
+                initHiddenItems()
+                list.addAll(getHomeList(hiddenItems))
+            }
+            postState(HomeState.Primary(isEditor, list, menu))
             if (needLoadSummary || needLoadAddition || needLoadCalendar || needLoadNews)
                 refreshNeed()
         }
+    }
+
+    private suspend fun getHomeList(items: List<HomeItem.Type>): List<HomeItem> {
+        val list = mutableListOf<HomeItem>()
+        items.forEach {
+            val item = when (it) {
+                HomeItem.Type.CALENDAR -> createCalendarItem()
+                HomeItem.Type.NEWS -> createNewsItem()
+                HomeItem.Type.ADDITION -> createAdditionItem()
+                HomeItem.Type.JOURNAL -> createJournalItem()
+                HomeItem.Type.SUMMARY -> createSummaryItem()
+                HomeItem.Type.INFO -> createInfoItem()
+                else -> HomeItem(it, listOf())
+            }
+            list.add(item)
+        }
+        return list
+    }
+
+    private fun initHiddenItems() {
+        if (hiddenItems.isNotEmpty()) return
+        hiddenItems.add(HomeItem.Type.DIV)
+        if (indexMenu == -1)
+            hiddenItems.add(HomeItem.Type.MENU)
+        if (indexCalendar == -1)
+            hiddenItems.add(HomeItem.Type.CALENDAR)
+        if (indexAddition == -1)
+            hiddenItems.add(HomeItem.Type.ADDITION)
+        if (indexSummary == -1)
+            hiddenItems.add(HomeItem.Type.SUMMARY)
+        if (indexNews == -1)
+            hiddenItems.add(HomeItem.Type.NEWS)
+        if (indexJournal == -1)
+            hiddenItems.add(HomeItem.Type.JOURNAL)
+        if (indexInfo == -1)
+            hiddenItems.add(HomeItem.Type.INFO)
     }
 
     private suspend fun refreshNeed() {
@@ -163,37 +225,50 @@ class HomeToiler : NeoToiler() {
         postState(BasicState.Success)
     }
 
+    private fun loadItems() {
+        menu.addAll(listOf(Section.BOOK, Section.MARKERS, Section.MENU, Section.SETTINGS))
+        items.addAll(helper.loadItems())
+    }
+
     private suspend fun loadSummary() {
-        postState(HomeState.Loading(INDEX_SUMMARY))
+        val i = indexSummary
+        if (i == -1) return
+        postState(HomeState.Loading(i))
         SummaryLoader(client).load()
         readSummaryLink()
         loadPage(linkSummary)
         clearPrimaryState()
-        postState(ListState.Update(INDEX_SUMMARY, createSummaryItem()))
+        postState(ListState.Update(i, createSummaryItem()))
     }
 
     private suspend fun loadAddition() {
-        postState(HomeState.Loading(INDEX_ADDITION))
+        val i = indexAddition
+        if (i == -1) return
+        postState(HomeState.Loading(i))
         AdditionLoader(client).load()
         clearPrimaryState()
-        postState(ListState.Update(INDEX_ADDITION, createAdditionItem()))
+        postState(ListState.Update(i, createAdditionItem()))
     }
 
     private suspend fun loadCalendar() {
-        postState(HomeState.Loading(INDEX_CALENDAR))
+        val i = indexCalendar
+        if (i == -1) return
+        postState(HomeState.Loading(i))
         CalendarLoader(client).load()
         readCalendarLink()
         loadPage(linkCalendar)
         clearPrimaryState()
-        postState(ListState.Update(INDEX_CALENDAR, createCalendarItem()))
+        postState(ListState.Update(i, createCalendarItem()))
     }
 
     private suspend fun loadNews() {
-        postState(HomeState.Loading(INDEX_NEWS))
+        val i = indexNews
+        if (i == -1) return
+        postState(HomeState.Loading(i))
         val loader = SiteLoader(client, Lib.getFile(SiteToiler.NEWS).toString())
         loader.load(Urls.Ads)
         clearPrimaryState()
-        postState(ListState.Update(INDEX_NEWS, createNewsItem()))
+        postState(ListState.Update(i, createNewsItem()))
     }
 
     private fun loadPage(link: String) {
@@ -204,6 +279,8 @@ class HomeToiler : NeoToiler() {
     }
 
     private suspend fun createJournalItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.JOURNAL, listOf(strings.journal))
         task = Task.OPEN_JOURNAL
         var title = getJournalTitle()
         while (title == null)
@@ -250,6 +327,8 @@ class HomeToiler : NeoToiler() {
 
     @SuppressLint("Range")
     private fun createCalendarItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.CALENDAR, listOf(strings.calendar))
         task = Task.OPEN_CALENDAR
         val date = DateUnit.initNow()
         date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
@@ -290,6 +369,8 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun createSummaryItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.SUMMARY, listOf(strings.summary))
         task = Task.OPEN_SUMMARY
         val file = Lib.getFile(Const.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
@@ -314,6 +395,8 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun createNewsItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.NEWS, listOf(strings.news))
         task = Task.OPEN_NEWS
         val file = Lib.getFile(SiteToiler.NEWS)
         needLoadNews = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
@@ -344,6 +427,8 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun createAdditionItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.ADDITION, listOf(strings.additionally_from_tg))
         task = Task.OPEN_ADDITION
         val file = Lib.getFileDB(DataBase.ADDITION)
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
@@ -360,6 +445,16 @@ class HomeToiler : NeoToiler() {
         return HomeItem(
             type = HomeItem.Type.ADDITION,
             lines = listOf(strings.additionally_from_tg, time, t)
+        )
+    }
+
+    private fun createInfoItem(): HomeItem {
+        if (isEditor)
+            return HomeItem(HomeItem.Type.INFO, listOf(strings.prom_for_soul_unite))
+        task = Task.OPEN_OTHER
+        return HomeItem(
+            type = HomeItem.Type.INFO,
+            lines = listOf(strings.prom_for_soul_unite, strings.precept_human_future)
         )
     }
 
@@ -389,7 +484,54 @@ class HomeToiler : NeoToiler() {
 
     fun updateJournal() {
         scope.launch {
-            postState(ListState.Update(INDEX_JOURNAL, createJournalItem()))
+            postState(ListState.Update(indexJournal, createJournalItem()))
+        }
+    }
+
+    fun moveUp(index: Int) {
+        when {
+            index == items.size + 1 -> {
+                val item = hiddenItems[1]
+                hiddenItems.removeAt(1)
+                items.add(item)
+            }
+
+            index > items.size -> {
+                val n = index - items.size
+                val item = hiddenItems[n - 1]
+                hiddenItems.removeAt(n - 1)
+                hiddenItems.add(n, item)
+            }
+
+            else -> {
+                val n = index - 1
+                val item = items[n]
+                items.removeAt(n)
+                items.add(index, item)
+            }
+        }
+    }
+
+    fun moveDown(index: Int) {
+        when {
+            index == items.size - 1 -> {
+                val item = items[index]
+                items.removeAt(index)
+                hiddenItems.add(1, item)
+            }
+
+            index < items.size -> {
+                val item = items[index]
+                items.removeAt(index)
+                items.add(index + 1, item)
+            }
+
+            else -> {
+                val n = index - items.size
+                val item = hiddenItems[n]
+                hiddenItems.removeAt(n)
+                hiddenItems.add(n + 1, item)
+            }
         }
     }
 }

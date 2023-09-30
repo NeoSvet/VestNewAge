@@ -21,7 +21,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
-            android:id="@+id/book"
+            android:id="@+id/item1"
             style="@style/ItemBG"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -30,27 +30,27 @@
             android:orientation="horizontal"
             android:paddingVertical="@dimen/def_indent"
             android:paddingStart="@dimen/def_indent"
-            app:layout_constraintEnd_toStartOf="@id/markers"
+            app:layout_constraintEnd_toStartOf="@id/item2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
+                android:id="@+id/icon1"
                 android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_book" />
+                android:layout_height="30dp" />
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:maxLines="1"
                 android:minHeight="30dp"
-                android:paddingStart="@dimen/def_indent"
-                android:text="@string/book" />
+                android:paddingStart="@dimen/def_indent" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/markers"
+            android:id="@+id/item2"
             style="@style/ItemBG"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -60,26 +60,26 @@
             android:paddingVertical="@dimen/def_indent"
             android:paddingStart="@dimen/def_indent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/book"
+            app:layout_constraintStart_toEndOf="@id/item1"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
+                android:id="@+id/icon2"
                 android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_marker" />
+                android:layout_height="30dp" />
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:maxLines="1"
                 android:minHeight="30dp"
-                android:paddingStart="@dimen/def_indent"
-                android:text="@string/markers" />
+                android:paddingStart="@dimen/def_indent" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/edit"
+            android:id="@+id/item3"
             style="@style/ItemBG"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -88,27 +88,27 @@
             android:orientation="horizontal"
             android:paddingVertical="@dimen/def_indent"
             android:paddingStart="@dimen/def_indent"
-            app:layout_constraintEnd_toStartOf="@id/settings"
+            app:layout_constraintEnd_toStartOf="@id/item4"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/book">
+            app:layout_constraintTop_toBottomOf="@id/item1">
 
             <ImageView
+                android:id="@+id/icon3"
                 android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_edit" />
+                android:layout_height="30dp" />
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:maxLines="1"
                 android:minHeight="30dp"
-                android:paddingStart="@dimen/def_indent"
-                android:text="@string/edit" />
+                android:paddingStart="@dimen/def_indent" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/settings"
+            android:id="@+id/item4"
             style="@style/ItemBG"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -118,22 +118,22 @@
             android:paddingVertical="@dimen/def_indent"
             android:paddingStart="@dimen/def_indent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/edit"
-            app:layout_constraintTop_toBottomOf="@id/markers">
+            app:layout_constraintStart_toEndOf="@id/item3"
+            app:layout_constraintTop_toBottomOf="@id/item2">
 
             <ImageView
+                android:id="@+id/icon4"
                 android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_settings" />
+                android:layout_height="30dp" />
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:maxLines="1"
                 android:minHeight="30dp"
-                android:paddingStart="@dimen/def_indent"
-                android:text="@string/settings" />
+                android:paddingStart="@dimen/def_indent" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

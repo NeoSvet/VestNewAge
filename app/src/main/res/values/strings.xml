@@ -287,6 +287,7 @@
     <string name="precept_human_future">Заповеди Человека Будущего</string>
     <string name="no_changes">Изменений нет</string>
     <string name="has_changes">Есть изменения!</string>
+    <string name="hidden_items">Скрытые элементы:</string>
     <!--HelpFragment-->
     <string name="title_app">Приложение «Весть Века»</string>
     <string name="url_on_google">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>

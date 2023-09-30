@@ -6,7 +6,7 @@ data class HomeItem(
 ) {
     enum class Type(val value: Int) {
         SUMMARY(0), NEWS(1), ADDITION(2), CALENDAR(3),
-        INFO(4), JOURNAL(5), MENU(6), FEED(7)
+        INFO(4), JOURNAL(5), MENU(6), DIV(7)
     }
 
     val hasRefresh: Boolean

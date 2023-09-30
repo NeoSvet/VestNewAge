@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.view.list
 
+import android.annotation.SuppressLint
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -101,22 +103,122 @@ class HomeHolder(
 }
 
 class HomeMenuHolder(
-    root: View,
+    private val root: View,
+    menu: List<Section>,
     private val clicker: (Section) -> Unit
 ) : RecyclerView.ViewHolder(root) {
 
     init {
-        root.findViewById<View>(R.id.book).setOnClickListener {
-            clicker.invoke(Section.BOOK)
+        setItem(menu[0], R.id.item1, R.id.icon1, R.id.title1)
+        setItem(menu[1], R.id.item2, R.id.icon2, R.id.title2)
+        setItem(menu[2], R.id.item3, R.id.icon3, R.id.title3)
+        setItem(menu[3], R.id.item4, R.id.icon4, R.id.title4)
+    }
+
+    private fun setItem(section: Section, item: Int, icon: Int, title: Int) {
+        val i: Int
+        val t: Int
+        when (section) {
+            Section.CALENDAR -> {
+                i = R.drawable.ic_calendar
+                t = R.string.calendar
+            }
+
+            Section.SUMMARY -> {
+                i = R.drawable.ic_summary
+                t = R.string.summary
+            }
+
+            Section.BOOK -> {
+                i = R.drawable.ic_book
+                t = R.string.book
+            }
+
+            Section.SITE -> {
+                i = R.drawable.ic_site
+                t = R.string.news
+            }
+
+            Section.SEARCH -> {
+                i = R.drawable.ic_search
+                t = R.string.search
+            }
+
+            Section.MARKERS -> {
+                i = R.drawable.ic_marker
+                t = R.string.markers
+            }
+
+            Section.JOURNAL -> {
+                i = R.drawable.ic_journal
+                t = R.string.journal
+            }
+
+            Section.CABINET -> {
+                i = R.drawable.ic_cabinet
+                t = R.string.cabinet
+            }
+
+            Section.MENU -> {
+                i = R.drawable.ic_edit
+                t = R.string.edit
+            }
+
+            Section.SETTINGS -> {
+                i = R.drawable.ic_settings
+                t = R.string.settings
+            }
+
+            Section.HELP -> {
+                i = R.drawable.ic_help
+                t = R.string.help
+            }
+
+            else -> return  //Section.NEW, Section.HOME
         }
-        root.findViewById<View>(R.id.markers).setOnClickListener {
-            clicker.invoke(Section.MARKERS)
+        val iv = root.findViewById(icon) as ImageView
+        val tv = root.findViewById(title) as TextView
+        iv.setImageDrawable(ContextCompat.getDrawable(iv.context, i))
+        tv.text = tv.context.getString(t)
+        root.findViewById<View>(item).setOnClickListener {
+            clicker.invoke(section)
         }
-        root.findViewById<View>(R.id.edit).setOnClickListener {
-            clicker.invoke(Section.MENU)
+    }
+}
+
+class EmptyHolder(root: View) : RecyclerView.ViewHolder(root)
+
+class HomeEditHolder(
+    root: View,
+    private val mover: (RecyclerView.ViewHolder) -> Unit
+) : RecyclerView.ViewHolder(root) {
+    private val ivIcon: ImageView = root.findViewById(R.id.icon)
+    private val tvTitle: TextView = root.findViewById(R.id.title)
+    private val ivMove: View = root.findViewById(R.id.move)
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun setItem(item: HomeItem) {
+        val icon = when (item.type) {
+            HomeItem.Type.SUMMARY -> R.drawable.ic_summary
+            HomeItem.Type.NEWS -> R.drawable.ic_site
+            HomeItem.Type.CALENDAR -> R.drawable.ic_calendar
+            HomeItem.Type.JOURNAL -> R.drawable.ic_journal
+            else -> -1
         }
-        root.findViewById<View>(R.id.settings).setOnClickListener {
-            clicker.invoke(Section.SETTINGS)
+        if (icon == -1) {
+            ivIcon.isVisible = false
+        } else {
+            ivIcon.isVisible = true
+            ivIcon.setImageDrawable(ContextCompat.getDrawable(ivIcon.context, icon))
+        }
+        tvTitle.text = item.lines[0]
+
+        ivMove.setOnTouchListener { _, event: MotionEvent ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                mover.invoke(this)
+                return@setOnTouchListener false
+            }
+            return@setOnTouchListener true
         }
     }
 }

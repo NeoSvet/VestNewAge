@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.HomeAdapter
 import ru.neosvet.vestnewage.view.list.HomeHolder
+import ru.neosvet.vestnewage.view.list.MoveHelper
 import ru.neosvet.vestnewage.viewmodel.HomeToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -26,13 +27,25 @@ import ru.neosvet.vestnewage.viewmodel.state.HomeState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
-class HomeFragment : NeoFragment() {
-    private val adapter = HomeAdapter(this::onItemClick, this::onMenuClick)
+class HomeFragment : NeoFragment(), HomeAdapter.Events {
+    private lateinit var adapter: HomeAdapter
     private val toiler: HomeToiler
         get() = neotoiler as HomeToiler
     override val title: String
         get() = getString(R.string.home_screen)
     private var openedReader = false
+    private val mover: MoveHelper by lazy {
+        MoveHelper { i, up ->
+            if (up) {
+                adapter.moveUp(i)
+                toiler.moveUp(i)
+            } else {
+                adapter.moveDown(i)
+                toiler.moveDown(i)
+            }
+        }
+    }
+    private lateinit var rvList: RecyclerView
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[HomeToiler::class.java]
@@ -68,10 +81,8 @@ class HomeFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initView(container: View) {
-        val rv = container.findViewById(R.id.rvList) as RecyclerView
-        rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rv.adapter = adapter
-        rv.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        rvList = container.findViewById(R.id.rvList) as RecyclerView
+        rvList.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
         }
     }
@@ -84,7 +95,7 @@ class HomeFragment : NeoFragment() {
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is HomeState.Primary ->
-                adapter.setItems(state.list)
+                initPrimary(state)
 
             is ListState.Update<*> ->
                 adapter.update(state.index, state.item as HomeItem)
@@ -100,7 +111,24 @@ class HomeFragment : NeoFragment() {
         }
     }
 
-    fun onItemClick(type: HomeItem.Type, action: HomeHolder.Action) {
+    private fun initPrimary(state: HomeState.Primary) {
+        if (state.isEditor) {
+            act?.setAction(R.drawable.ic_ok)
+            mover.attach(rvList)
+            rvList.layoutManager = GridLayoutManager(requireContext(), 1)
+        } else {
+            act?.setAction(R.drawable.star)
+            mover.detach()
+            rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        }
+        adapter = HomeAdapter(
+            events = this, isEditor = state.isEditor,
+            items = state.list, menu = state.menu
+        )
+        rvList.adapter = adapter
+    }
+
+    override fun onItemClick(type: HomeItem.Type, action: HomeHolder.Action) {
         when (type) {
             HomeItem.Type.SUMMARY -> when {
                 action == HomeHolder.Action.REFRESH -> toiler.refreshSummary()
@@ -140,9 +168,12 @@ class HomeFragment : NeoFragment() {
                     act?.setSection(Section.JOURNAL, true)
                 else openReader(toiler.linkJournal)
 
-            HomeItem.Type.MENU -> {}
-            HomeItem.Type.FEED -> TODO()
+            else -> {} //HomeItem.Type.MENU, HomeItem.Type.DIV
         }
+    }
+
+    override fun onItemMove(holder: RecyclerView.ViewHolder) {
+        mover.startMove(holder)
     }
 
     private fun openReader(link: String) {
@@ -150,16 +181,23 @@ class HomeFragment : NeoFragment() {
         BrowserActivity.openReader(link, null)
     }
 
-    private fun onMenuClick(section: Section) {
-        if (section == Section.MENU) startEdit()
+    override fun onMenuClick(section: Section) {
+        if (adapter.isEditor) {
+            // TODO edit menu
+            return
+        }
+        if (section == Section.MENU) toiler.edit()
         else act?.setSection(section, true)
     }
 
-    private fun startEdit() {
-        //TODO ("Not yet implemented")
+    override fun onAction(title: String) {
+        if (title == getString(R.string.edit))
+            toiler.edit()
+        else toiler.save()
     }
 
-    override fun onAction(title: String) {
-        startEdit()
-    }
+    override fun onBackPressed() = if (adapter.isEditor) {
+        toiler.restore()
+        false
+    } else true
 }
