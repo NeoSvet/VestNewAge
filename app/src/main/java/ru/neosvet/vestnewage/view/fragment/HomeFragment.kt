@@ -142,8 +142,14 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         } else {
             act?.setAction(R.drawable.star)
             mover.detach()
-            rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-            adapter.isTall = ScreenUtils.span == 2
+            if (ScreenUtils.span == 2) {
+                rvList.layoutManager = GridLayoutManager(requireContext(), 2)
+                val i = state.list.indexOfFirst {
+                    it.type == HomeItem.Type.MENU
+                } + 1
+                adapter.isTall = i < state.list.size || i % 2 == 0
+            } else
+                rvList.layoutManager = GridLayoutManager(requireContext(), 1)
         }
         rvList.adapter = adapter
     }
