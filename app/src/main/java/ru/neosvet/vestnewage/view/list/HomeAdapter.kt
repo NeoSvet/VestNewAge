@@ -21,6 +21,7 @@ class HomeAdapter(
 
     var loadingIndex = -1
         private set
+    var isTall = false
 
     fun startLoading(index: Int) {
         if (isEditor) return
@@ -49,7 +50,9 @@ class HomeAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             HomeItem.Type.MENU.value -> HomeMenuHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_home_menu, null),
+                LayoutInflater.from(parent.context).inflate(
+                    if (isTall) R.layout.item_home_menu_tall else R.layout.item_home_menu, null
+                ),
                 events::onMenuClick
             )
 

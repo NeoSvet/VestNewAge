@@ -131,6 +131,10 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     private fun initPrimary(state: HomeState.Primary) {
+        adapter = HomeAdapter(
+            events = this, isEditor = state.isEditor,
+            items = state.list, menu = state.menu
+        )
         if (state.isEditor) {
             act?.setAction(R.drawable.ic_ok)
             mover.attach(rvList)
@@ -139,11 +143,8 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             act?.setAction(R.drawable.star)
             mover.detach()
             rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+            adapter.isTall = ScreenUtils.span == 2
         }
-        adapter = HomeAdapter(
-            events = this, isEditor = state.isEditor,
-            items = state.list, menu = state.menu
-        )
         rvList.adapter = adapter
     }
 

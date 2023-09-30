@@ -54,14 +54,8 @@ class HomeHolder(
             ivIcon.setImageDrawable(ContextCompat.getDrawable(ivIcon.context, icon))
         }
         tvLine1.text = item.lines[0]
-        if (item.lines.size == 2) {
-            tvLine2.isVisible = false
-            tvLine3.text = item.lines[1]
-        } else {
-            tvLine2.isVisible = true
-            tvLine2.text = item.lines[1]
-            tvLine3.text = item.lines[2]
-        }
+        tvLine2.text = item.lines[1]
+        tvLine3.text = item.lines[2]
         tvLine1.setOnClickListener {
             clicker.invoke(item.type, Action.TITLE)
         }

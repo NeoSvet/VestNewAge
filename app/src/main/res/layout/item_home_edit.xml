@@ -26,9 +26,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/def_indent"
+            android:ellipsize="end"
             android:lines="1"
-            app:layout_constraintEnd_toStartOf="@id/move"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/move"
             app:layout_constraintStart_toEndOf="@id/icon"
             app:layout_constraintTop_toTopOf="parent" />
 

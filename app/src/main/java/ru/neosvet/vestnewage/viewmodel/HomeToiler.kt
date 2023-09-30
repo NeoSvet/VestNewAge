@@ -120,7 +120,8 @@ class HomeToiler : NeoToiler() {
             last_readed = context.getString(R.string.last_readed),
             prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
             no_changes = context.getString(R.string.no_changes),
-            has_changes = context.getString(R.string.has_changes)
+            has_changes = context.getString(R.string.has_changes),
+            information = context.getString(R.string.information)
         )
         listTitle = listOf(
             context.getString(R.string.edit), context.getString(R.string.summary),
@@ -476,11 +477,14 @@ class HomeToiler : NeoToiler() {
 
     private fun createInfoItem(): HomeItem {
         if (isEditor)
-            return HomeItem(HomeItem.Type.INFO, listOf(strings.prom_for_soul_unite))
+            return HomeItem(HomeItem.Type.INFO, listOf(strings.information))
         task = Task.OPEN_OTHER
         return HomeItem(
             type = HomeItem.Type.INFO,
-            lines = listOf(strings.prom_for_soul_unite, strings.precept_human_future)
+            lines = listOf(
+                strings.prom_for_soul_unite, strings.information,
+                strings.precept_human_future
+            )
         )
     }
 

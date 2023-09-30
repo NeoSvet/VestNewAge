@@ -40,7 +40,8 @@ data class HomeStrings(
     val last_readed: String,
     val prom_for_soul_unite: String,
     val has_changes: String,
-    val no_changes: String
+    val no_changes: String,
+    val information: String
 )
 
 data class BookStrings(
