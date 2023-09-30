@@ -123,7 +123,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         val adapter = MenuAdapter { _, item ->
             if (!item.isSelect)
                 toiler.editMenuItem(item.title)
-            rvMenu.isVisible = false
+            closeEditMenu()
         }
         adapter.setItems(list)
         rvMenu.adapter = adapter
