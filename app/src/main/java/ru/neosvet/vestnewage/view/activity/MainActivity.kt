@@ -784,14 +784,18 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         isEditor = true
     }
 
+    fun finishEditMenu() {
+        isEditor = false
+        loadMenu()
+    }
+
     fun changeMenu(index: Int, item: MenuItem) = helper.bottomBar?.let { bar ->
         val bottomItem = bar.menu.getItem(index + 1)
         bottomItem.title = item.title
         bottomItem.icon = ContextCompat.getDrawable(this, item.image)
     }
 
-    fun loadMenu() = helper.bottomBar?.let { bar ->
-        isEditor = false
+    private fun loadMenu() = helper.bottomBar?.let { bar ->
         val home = HomeHelper(this).apply { isMain = true }
         var i = 1
         helper.setBottomMenu(home.loadMenu(true))

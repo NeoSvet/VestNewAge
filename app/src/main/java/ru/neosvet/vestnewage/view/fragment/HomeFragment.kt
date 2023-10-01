@@ -226,7 +226,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             title == getString(R.string.edit) -> toiler.edit()
             else -> {
                 toiler.save()
-                act?.loadMenu()
+                act?.finishEditMenu()
             }
         }
     }
@@ -241,7 +241,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             rvMenu.isVisible -> closeEditMenu()
             adapter.isEditor -> {
                 toiler.restore()
-                act?.loadMenu()
+                act?.finishEditMenu()
             }
 
             else -> return true
