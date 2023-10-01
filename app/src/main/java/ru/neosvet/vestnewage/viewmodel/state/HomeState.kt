@@ -4,7 +4,7 @@ import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 
-sealed class HomeState: NeoState {
+sealed class HomeState : NeoState {
     data class Primary(
         val isEditor: Boolean,
         val list: MutableList<HomeItem>,
@@ -16,13 +16,19 @@ sealed class HomeState: NeoState {
     ) : StatusState
 
     data class Menu(
+        val isMain: Boolean,
         val list: List<MenuItem>
     ) : FirstState
 
-    data class ChangeMenuItem(
+    data class ChangeHomeItem(
         val index: Int,
         val section: Section
     ) : HomeState()
+
+    data class ChangeMainItem(
+        val index: Int,
+        val item: MenuItem
+    ) : SecondState
 
     data class Loading(
         val index: Int

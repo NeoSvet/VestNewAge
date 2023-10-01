@@ -30,8 +30,10 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SiteTab
+import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var prom: PromUtils? = null
     private var tab = 0
     private var isBlocked = false
+    private var isEditor = false
     private var statusBack = StatusBack.EXIT
 
     private lateinit var utils: LaunchUtils
@@ -167,12 +170,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun setBottomPanel() = helper.bottomBar?.let { bar ->
-        val isSummary = helper.getFirstSection() == Section.SUMMARY
-        if (isSummary) {
-            val item = bar.menu.getItem(1)
-            item.title = getString(R.string.summary)
-            item.icon = ContextCompat.getDrawable(this, R.drawable.ic_summary)
-        }
+        loadMenu()
         val menuView = bar.menu.getItem(0).actionView as ActionMenuView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             menuView.tooltipText = getString(R.string.menu)
@@ -187,26 +185,46 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 true
             } else false
         }
-
         bar.setOnMenuItemClickListener {
-            when (it.itemId) {
-//                R.id.app_bar_menu ->
-//                    setSection(Section.MENU, false)
-                R.id.app_bar_start -> if (isSummary)
-                    setSection(Section.SUMMARY, false)
-                else
-                    setSection(Section.CALENDAR, false)
-
-                R.id.app_bar_home ->
-                    setSection(Section.HOME, false)
-
-                R.id.app_bar_search ->
-                    setSection(Section.SEARCH, false)
-
-                R.id.app_bar_cabinet ->
-                    setSection(Section.CABINET, false)
-            }
+            if (isEditor) editMenu(it.itemId)
+            else openMenu(it.itemId)
             return@setOnMenuItemClickListener true
+        }
+    }
+
+    private fun editMenu(itemId: Int) = curFragment?.let {
+        if (it !is HomeFragment) {
+            openMenu(itemId)
+            return@let
+        }
+        when (itemId) {
+            R.id.bottom_item1 ->
+                it.editMainMenu(0)
+
+            R.id.bottom_item2 ->
+                it.editMainMenu(1)
+
+            R.id.bottom_item3 ->
+                it.editMainMenu(2)
+
+            R.id.bottom_item4 ->
+                it.editMainMenu(3)
+        }
+    }
+
+    private fun openMenu(itemId: Int) {
+        when (itemId) {
+            R.id.bottom_item1 ->
+                setSection(helper.bottomMenu[0], false)
+
+            R.id.bottom_item2 ->
+                setSection(helper.bottomMenu[1], false)
+
+            R.id.bottom_item3 ->
+                setSection(helper.bottomMenu[2], false)
+
+            R.id.bottom_item4 ->
+                setSection(helper.bottomMenu[3], false)
         }
     }
 
@@ -320,6 +338,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             MainState.Status(
                 curSection = helper.curSection.toString(),
                 isBlocked = isBlocked,
+                isEditor = isEditor,
                 shownDwnDialog = helper.shownDwnDialog,
                 actionIcon = helper.actionIcon,
             )
@@ -623,6 +642,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             helper.fabAction.isVisible = false
         if (state.shownDwnDialog)
             helper.showDownloadDialog()
+        if (state.isEditor)
+            startEditMenu()
     }
 
     fun onAction(title: String) {
@@ -757,5 +778,31 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     fun openAddition() {
         tab = 1
         setSection(Section.SUMMARY, true)
+    }
+
+    fun startEditMenu() {
+        isEditor = true
+    }
+
+    fun changeMenu(index: Int, item: MenuItem) = helper.bottomBar?.let { bar ->
+        val bottomItem = bar.menu.getItem(index + 1)
+        bottomItem.title = item.title
+        bottomItem.icon = ContextCompat.getDrawable(this, item.image)
+    }
+
+    fun loadMenu() = helper.bottomBar?.let { bar ->
+        isEditor = false
+        val home = HomeHelper(this).apply { isMain = true }
+        var i = 1
+        helper.setBottomMenu(home.loadMenu(true))
+        helper.bottomMenu.forEach {
+            val item = bar.menu.getItem(i)
+            val m = if (it == Section.HOME)
+                MenuItem(R.drawable.ic_home, getString(R.string.home_screen))
+            else home.getItem(it)
+            item.title = m.title
+            item.icon = ContextCompat.getDrawable(this, m.image)
+            i++
+        }
     }
 }

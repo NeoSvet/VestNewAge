@@ -14,7 +14,8 @@ sealed class MainState : NeoState {
     data class Status(
         val curSection: String,
         val isBlocked: Boolean,
+        val isEditor: Boolean,
         val shownDwnDialog: Boolean,
-        val actionIcon: Int,
+        val actionIcon: Int
     ) : StatusState
 }

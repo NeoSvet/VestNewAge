@@ -75,6 +75,7 @@ class MainHelper(private val act: MainActivity) {
     var countNew: Int = 0
     var curSection = Section.SETTINGS
     var prevSection: Section? = null
+    val bottomMenu = mutableListOf<Section>()
     val newId: Int
         get() = unread.getNewId(countNew)
     private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
@@ -295,5 +296,10 @@ class MainHelper(private val act: MainActivity) {
 
     private fun showTip() {
         TipActivity.showTipIfNeed(TipName.MAIN_STAR)
+    }
+
+    fun setBottomMenu(menu: List<Section>) {
+        bottomMenu.clear()
+        bottomMenu.addAll(menu)
     }
 }

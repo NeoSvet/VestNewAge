@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 
@@ -108,72 +109,12 @@ class HomeMenuHolder(
     )
 
     fun setCell(index: Int, section: Section) {
-        val i: Int
-        val t: Int
-        when (section) {
-            Section.CALENDAR -> {
-                i = R.drawable.ic_calendar
-                t = R.string.calendar
-            }
-
-            Section.SUMMARY -> {
-                i = R.drawable.ic_summary
-                t = R.string.summary
-            }
-
-            Section.BOOK -> {
-                i = R.drawable.ic_book
-                t = R.string.book
-            }
-
-            Section.SITE -> {
-                i = R.drawable.ic_site
-                t = R.string.news
-            }
-
-            Section.SEARCH -> {
-                i = R.drawable.ic_search
-                t = R.string.search
-            }
-
-            Section.MARKERS -> {
-                i = R.drawable.ic_marker
-                t = R.string.markers
-            }
-
-            Section.JOURNAL -> {
-                i = R.drawable.ic_journal
-                t = R.string.journal
-            }
-
-            Section.CABINET -> {
-                i = R.drawable.ic_cabinet
-                t = R.string.cabinet
-            }
-
-            Section.HOME -> {
-                i = R.drawable.ic_edit
-                t = R.string.edit
-            }
-
-            Section.SETTINGS -> {
-                i = R.drawable.ic_settings
-                t = R.string.settings
-            }
-
-            Section.HELP -> {
-                i = R.drawable.ic_help
-                t = R.string.help
-            }
-
-            else -> return  //Section.NEW, Section.HOME
-        }
-
+        val point = HomeHelper.getSectionPoint(section, false)
         val mId = mIds[index]
         val iv = root.findViewById(mId[1]) as ImageView
         val tv = root.findViewById(mId[2]) as TextView
-        iv.setImageDrawable(ContextCompat.getDrawable(iv.context, i))
-        tv.text = tv.context.getString(t)
+        iv.setImageDrawable(ContextCompat.getDrawable(iv.context, point.x))
+        tv.text = tv.context.getString(point.y)
         root.findViewById<View>(mId[0]).setOnClickListener {
             clicker.invoke(index, section)
         }

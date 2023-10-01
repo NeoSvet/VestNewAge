@@ -1,7 +1,10 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
+import android.graphics.Point
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
+import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -13,6 +16,106 @@ class HomeHelper(private val context: Context) {
         private const val MAIN_MENU = "mainmenu.dat"
         private const val HOME_MENU = "homemenu.dat"
         private const val HOME_ITEMS = "homeitems.dat"
+
+        fun getSectionPoint(section: Section, isMain: Boolean): Point {
+            val i: Int
+            val t: Int
+            when (section) {
+                Section.CALENDAR -> {
+                    i = R.drawable.ic_calendar
+                    t = R.string.calendar
+                }
+
+                Section.SUMMARY -> {
+                    i = R.drawable.ic_summary
+                    t = R.string.summary
+                }
+
+                Section.BOOK -> {
+                    i = R.drawable.ic_book
+                    t = R.string.book
+                }
+
+                Section.SITE -> {
+                    i = R.drawable.ic_site
+                    t = R.string.news
+                }
+
+                Section.SEARCH -> {
+                    i = R.drawable.ic_search
+                    t = R.string.search
+                }
+
+                Section.MARKERS -> {
+                    i = R.drawable.ic_marker
+                    t = R.string.markers
+                }
+
+                Section.JOURNAL -> {
+                    i = R.drawable.ic_journal
+                    t = R.string.journal
+                }
+
+                Section.CABINET -> {
+                    i = R.drawable.ic_cabinet
+                    t = R.string.cabinet
+                }
+
+                Section.HOME -> if (isMain) {
+                    i = R.drawable.ic_home
+                    t = R.string.home_screen
+                } else {
+                    i = R.drawable.ic_edit
+                    t = R.string.edit
+                }
+
+                Section.SETTINGS -> {
+                    i = R.drawable.ic_settings
+                    t = R.string.settings
+                }
+
+                Section.HELP -> {
+                    i = R.drawable.ic_help
+                    t = R.string.help
+                }
+
+                else -> { //Section.NEW, Section.MENU
+                    i = -1
+                    t = -1
+                }
+            }
+            return Point(i, t)
+        }
+    }
+
+    private val listTitle = listOf(
+        context.getString(R.string.edit), context.getString(R.string.summary),
+        context.getString(R.string.news), context.getString(R.string.calendar),
+        context.getString(R.string.book), context.getString(R.string.search),
+        context.getString(R.string.markers), context.getString(R.string.journal),
+        context.getString(R.string.cabinet), context.getString(R.string.settings),
+        context.getString(R.string.help)
+    )
+    private val listSection: List<Section> by lazy {
+        listOf(
+            Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
+            Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
+            Section.CABINET, Section.SETTINGS, Section.HELP
+        )
+    }
+    private val listIcon: List<Int> by lazy {
+        listOf(
+            R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site,
+            R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
+            R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
+        )
+    }
+    var isMain = false
+    private val alterTitle = context.getString(R.string.home_screen)
+
+    fun getItem(section: Section): MenuItem {
+        val point = getSectionPoint(section, isMain)
+        return MenuItem(point.x, context.getString(point.y))
     }
 
     fun loadMenu(isMain: Boolean): List<Section> {
@@ -112,4 +215,21 @@ class HomeHelper(private val context: Context) {
         }
         stream.close()
     }
+
+    fun getMenuList(selectSection: Section): List<MenuItem> {
+        val list = mutableListOf<MenuItem>()
+        for (i in listSection.indices) {
+            val item = if (isMain && i == 0)
+                MenuItem(R.drawable.ic_home, alterTitle)
+            else MenuItem(listIcon[i], listTitle[i])
+            if (selectSection == listSection[i]) item.isSelect = true
+            list.add(item)
+        }
+        return list
+    }
+
+    fun getSectionByTitle(title: String): Section =
+        if (title == alterTitle)
+            listSection[0] else
+            listSection[listTitle.indexOf(title)]
 }

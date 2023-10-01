@@ -3,32 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/app_bar_menu"
+        android:id="@+id/bottom_menu"
         android:icon="@drawable/ic_menu"
         android:title="@string/menu"
         app:actionLayout="@layout/menu_item_layout"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/app_bar_start"
+        android:id="@+id/bottom_item1"
         android:icon="@drawable/ic_calendar"
         android:title="@string/calendar"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/app_bar_home"
+        android:id="@+id/bottom_item2"
         android:icon="@drawable/ic_home"
         android:title="@string/home_screen"
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/app_bar_search"
+        android:id="@+id/bottom_item3"
         android:icon="@drawable/ic_search"
         android:title="@string/search"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/app_bar_cabinet"
+        android:id="@+id/bottom_item4"
         android:icon="@drawable/ic_cabinet"
         android:title="@string/cabinet"
         app:showAsAction="always" />

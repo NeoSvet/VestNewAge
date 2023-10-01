@@ -111,8 +111,11 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             is HomeState.Menu ->
                 initMenuEdit(state.list)
 
-            is HomeState.ChangeMenuItem ->
+            is HomeState.ChangeHomeItem ->
                 adapter.changeMenu(state.index, state.section)
+
+            is HomeState.ChangeMainItem ->
+                act?.changeMenu(state.index, state.item)
 
             BasicState.Success ->
                 act?.updateNew()
@@ -136,6 +139,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             items = state.list, menu = state.menu
         )
         if (state.isEditor) {
+            act?.startEditMenu()
             act?.setAction(R.drawable.ic_ok)
             mover.attach(rvList)
             rvList.layoutManager = GridLayoutManager(requireContext(), 1)
@@ -209,7 +213,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
 
     override fun onMenuClick(index: Int, section: Section) {
         if (adapter.isEditor) {
-            toiler.editMenu(index)
+            toiler.editMenu(index, false)
             return
         }
         if (section == Section.HOME) toiler.edit()
@@ -220,7 +224,10 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         when {
             rvMenu.isVisible -> closeEditMenu()
             title == getString(R.string.edit) -> toiler.edit()
-            else -> toiler.save()
+            else -> {
+                toiler.save()
+                act?.loadMenu()
+            }
         }
     }
 
@@ -232,9 +239,17 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     override fun onBackPressed(): Boolean {
         when {
             rvMenu.isVisible -> closeEditMenu()
-            adapter.isEditor -> toiler.restore()
+            adapter.isEditor -> {
+                toiler.restore()
+                act?.loadMenu()
+            }
+
             else -> return true
         }
         return false
+    }
+
+    fun editMainMenu(index: Int) {
+        toiler.editMenu(index, true)
     }
 }

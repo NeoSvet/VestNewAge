@@ -8,7 +8,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
-import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
@@ -61,7 +60,8 @@ class HomeToiler : NeoToiler() {
     private lateinit var helper: HomeHelper
     private val items = mutableListOf<HomeItem.Type>()
     private val hiddenItems = mutableListOf<HomeItem.Type>()
-    private val menu = mutableListOf<Section>()
+    private val homeMenu = mutableListOf<Section>()
+    private val mainMenu = mutableListOf<Section>()
     private val indexSummary: Int
         get() = items.indexOf(HomeItem.Type.SUMMARY)
     private val indexAddition: Int
@@ -77,21 +77,6 @@ class HomeToiler : NeoToiler() {
     private val indexInfo: Int
         get() = items.indexOf(HomeItem.Type.INFO)
     private var isEditor = false
-    private lateinit var listTitle: List<String>
-    private val listSection: List<Section> by lazy {
-        listOf(
-            Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
-            Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
-            Section.CABINET, Section.SETTINGS, Section.HELP
-        )
-    }
-    private val listIcon: List<Int> by lazy {
-        listOf(
-            R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site,
-            R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
-            R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
-        )
-    }
     private var editIndex = -1
 
     override fun getInputData(): Data = Data.Builder()
@@ -123,14 +108,6 @@ class HomeToiler : NeoToiler() {
             has_changes = context.getString(R.string.has_changes),
             information = context.getString(R.string.information)
         )
-        listTitle = listOf(
-            context.getString(R.string.edit), context.getString(R.string.summary),
-            context.getString(R.string.news), context.getString(R.string.calendar),
-            context.getString(R.string.book), context.getString(R.string.search),
-            context.getString(R.string.markers), context.getString(R.string.journal),
-            context.getString(R.string.cabinet), context.getString(R.string.settings),
-            context.getString(R.string.help)
-        )
         loadItems()
     }
 
@@ -139,15 +116,20 @@ class HomeToiler : NeoToiler() {
     }
 
     fun restore() {
+        clearStates()
         items.clear()
-        menu.clear()
+        mainMenu.clear()
+        homeMenu.clear()
         hiddenItems.clear()
         loadItems()
         openList(false)
     }
 
     fun save() {
-        helper.saveMenu(false, menu)
+        clearStates()
+        if (mainMenu.isNotEmpty())
+            helper.saveMenu(true, mainMenu)
+        helper.saveMenu(false, homeMenu)
         helper.saveItems(items)
         openList(false)
     }
@@ -184,7 +166,7 @@ class HomeToiler : NeoToiler() {
                 initHiddenItems()
                 list.addAll(getHomeList(hiddenItems))
             }
-            postState(HomeState.Primary(isEditor, list, menu))
+            postState(HomeState.Primary(isEditor, list, homeMenu))
             if (needLoadSummary || needLoadAddition || needLoadCalendar || needLoadNews)
                 refreshNeed()
         }
@@ -253,7 +235,7 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun loadItems() {
-        menu.addAll(helper.loadMenu(false))
+        homeMenu.addAll(helper.loadMenu(false))
         items.addAll(helper.loadItems())
     }
 
@@ -565,21 +547,26 @@ class HomeToiler : NeoToiler() {
         }
     }
 
-    fun editMenu(index: Int) {
+    fun editMenu(index: Int, isMain: Boolean) {
+        helper.isMain = isMain
         editIndex = index
-        val list = mutableListOf<MenuItem>()
-        for (i in listSection.indices) {
-            val item = MenuItem(listIcon[i], listTitle[i])
-            if (menu[index] == listSection[i]) item.isSelect = true
-            list.add(item)
-        }
-        setState(HomeState.Menu(list))
+        val list = if (isMain) {
+            if (mainMenu.isEmpty())
+                mainMenu.addAll(helper.loadMenu(true))
+            helper.getMenuList(mainMenu[index])
+        } else helper.getMenuList(homeMenu[index])
+        setState(HomeState.Menu(isMain, list))
     }
 
     fun editMenuItem(newTitle: String) {
-        val index = listTitle.indexOf(newTitle)
-        menu[editIndex] = listSection[index]
-        setState(HomeState.ChangeMenuItem(editIndex, menu[editIndex]))
-        clearStates()
+        val item = helper.getSectionByTitle(newTitle)
+        if (helper.isMain) {
+            mainMenu[editIndex] = item
+            setState(HomeState.ChangeMainItem(editIndex, helper.getItem(item)))
+        } else {
+            homeMenu[editIndex] = item
+            setState(HomeState.ChangeHomeItem(editIndex, item))
+            clearStates()
+        }
     }
 }
