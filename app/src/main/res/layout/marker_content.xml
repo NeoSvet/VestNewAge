@@ -18,7 +18,7 @@
             style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/def_indent"
+            android:layout_margin="@dimen/half_indent"
             android:background="@drawable/card_bg"
             android:paddingStart="@dimen/def_indent"
             android:paddingEnd="@dimen/def_indent"
@@ -29,9 +29,10 @@
             style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_indent"
             android:background="@drawable/card_bg"
-            android:paddingStart="@dimen/def_indent"
-            android:paddingEnd="@dimen/def_indent"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/half_indent"
             app:layout_constraintTop_toBottomOf="@id/tvTitle"
             app:selectionRequired="true"
             app:singleSelection="true">
@@ -39,17 +40,13 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/rPar"
                 style="@style/ButtonCheck"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/paragraph" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/rPos"
                 style="@style/ButtonCheck"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/position" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -59,6 +56,7 @@
             style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_indent"
             android:background="@drawable/card_bg"
             android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tgPlace" />
@@ -128,6 +126,7 @@
             style="@style/ItemBG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_indent"
             android:background="@drawable/card_bg"
             android:padding="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/tilCol" />

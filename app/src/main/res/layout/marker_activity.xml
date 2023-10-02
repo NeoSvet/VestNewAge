@@ -31,10 +31,8 @@
         android:layout_marginTop="@dimen/margin_top"
         android:layout_marginEnd="@dimen/margin_side"
         android:background="@drawable/field_trans"
-        android:paddingStart="3dp"
-        android:paddingTop="3dp"
-        android:paddingEnd="3dp"
-        android:paddingBottom="@dimen/def_indent"
+        android:paddingHorizontal="@dimen/quarter_indent"
+        android:paddingVertical="@dimen/double_indent"
         android:visibility="gone" />
 
     <RelativeLayout

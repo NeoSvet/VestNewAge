@@ -115,10 +115,7 @@
     </style>
 
     <style name="TextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:layout_marginStart">@dimen/def_indent</item>
-        <item name="android:layout_marginTop">@dimen/half_indent</item>
-        <item name="android:layout_marginEnd">@dimen/def_indent</item>
-        <item name="android:layout_marginBottom">@dimen/half_indent</item>
+        <item name="android:layout_margin">@dimen/half_indent</item>
         <item name="android:padding">@dimen/half_indent</item>
         <item name="hintTextColor">@color/colorAccentLight</item>
         <item name="boxStrokeColor">@color/box_stroke</item>
@@ -151,7 +148,10 @@
         <item name="android:background"></item> <!-- во избежание ошибки java.lang.IllegalStateException: Attempted to get ShapeAppearanceModel from a MaterialButton which has an overwritten background.-->
         <item name="backgroundTint">@color/checkbutton_bg</item>
         <item name="strokeWidth">2dp</item>
-        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="android:layout_width">150dp</item>
+        <item name="android:padding">@dimen/half_indent</item>
+        <item name="strokeColor">?attr/colorAccent</item>
+        <item name="cornerRadius">5dp</item>
         <item name="android:textAllCaps">false</item>
     </style>
 
