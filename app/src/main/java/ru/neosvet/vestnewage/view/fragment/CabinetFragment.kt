@@ -53,8 +53,16 @@ class CabinetFragment : NeoFragment() {
     }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        setToolbar()
         initMain()
         initLogin()
+    }
+
+    private fun setToolbar() = binding?.run {
+        act?.setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -70,12 +78,17 @@ class CabinetFragment : NeoFragment() {
 
             is CabinetState.Primary -> binding?.run {
                 screen = state.screen
+                if (screen == CabinetScreen.WORDS)
+                    toolbar.title = getString(R.string.select_status)
+                else toolbar.title = getString(R.string.cabinet_title)
                 if (screen == CabinetScreen.LOGIN) {
+                    act?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     login.root.isVisible = true
                     act?.setAction(R.drawable.ic_ok)
                     rvList.layoutManager = GridLayoutManager(requireContext(), 1)
                     checkReadyEnter()
                 } else {
+                    act?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
                     login.root.isVisible = false
                     if (screen == CabinetScreen.CABINET)
                         act?.setAction(R.drawable.ic_exit)

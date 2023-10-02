@@ -179,7 +179,7 @@
     <string name="password">Пароль</string>
     <string name="remember_email">запомнить email</string>
     <string name="remember_password">запомнить пароль</string>
-    <string name="cabinet_title">Вход в личный кабинет сайта «Откровения людям Нового века»</string>
+    <string name="cabinet_title">Личный кабинет участника Движения</string>
     <!--Tabs-->
     <string name="to_prev_tab">К предыдущей вкладке</string>
     <string name="to_next_tab">К следующей вкладке</string>
