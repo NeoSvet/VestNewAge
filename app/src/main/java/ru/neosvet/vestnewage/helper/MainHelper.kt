@@ -114,7 +114,7 @@ class MainHelper(private val act: MainActivity) {
         if (!isSideMenu) {
             tvTitle = act.findViewById(R.id.tvTitle)
             bottomBar = act.findViewById(R.id.bottomBar)
-            bottomBar?.setBackgroundResource(R.drawable.panel_bg)
+            bottomBar?.setBackgroundResource(R.drawable.bottombar_bg)
 
             svMain = act.findViewById(R.id.svMain)
             topBar = act.findViewById(R.id.topBar)

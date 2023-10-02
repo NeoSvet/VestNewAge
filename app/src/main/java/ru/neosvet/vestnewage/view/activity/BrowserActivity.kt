@@ -566,7 +566,7 @@ class BrowserActivity : AppCompatActivity() {
                 )
             }
         }
-        bottomBar.setBackgroundResource(R.drawable.panel_bg)
+        bottomBar.setBackgroundResource(R.drawable.bottombar_bg)
         bottomBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.nav_refresh ->

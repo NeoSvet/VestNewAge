@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -32,11 +31,11 @@ import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
-import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.MarkersState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class MarkersFragment : NeoFragment() {
     private var binding: MarkersFragmentBinding? = null
@@ -106,9 +105,9 @@ class MarkersFragment : NeoFragment() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun setToolbar() {
-        act?.setSupportActionBar(binding?.toolbar)
-        binding?.toolbar?.setNavigationOnClickListener {
+    private fun setToolbar() = binding?.run {
+        act?.setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
     }
