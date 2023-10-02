@@ -56,15 +56,16 @@ class SiteLoader(
     private fun loadList(link: String): List<BasicItem> {
         val page = PageParser(client)
         val isSite = link == Urls.Site
+        val isCom = Urls.isSiteCom
         val end: String
         if (isSite) {
             page.load(link, "")
-            end = if (Urls.isSiteCom) "bgimage" else "<button"
+            end = if (isCom) "bgimage" else "<button"
         } else {
-            end = if (Urls.isSiteCom) "print2" else "<button"
+            end = if (isCom) "print2" else "<button"
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            if (Urls.isSiteCom) {
+            if (isCom) {
                 page.load(url, "")
                 page.nextItem
             } else page.load(url, "razdel")
@@ -106,9 +107,14 @@ class SiteLoader(
                 }
 
                 page.isImage -> {}
-                page.isSimple -> d.append(s)
+                page.isSimple ->
+                    d.append(s)
+
                 else -> {
-                    page.link?.let { addLink(item, page.text, it) }
+                    if (isCom && s != null)
+                        s = s.replace(" class='c0'", "").replace("  ", " ")
+                            .replace("\"/print/", "\"")
+                    page.link?.let { addLink(item, page.text, it.replace("/print/", "")) }
                     d.append(s)
                 }
             }
@@ -118,7 +124,7 @@ class SiteLoader(
         if (setDes(item, t).not())
             list.add(BasicItem(t))
         page.clear()
-        if (isSite && Urls.isSiteCom) {
+        if (isSite && isCom) {
             var i = list.size - 1
             while (i > 1) {
                 if (i in 17..24 || i in 11..13 || (i in 2..6 && i != 4))
