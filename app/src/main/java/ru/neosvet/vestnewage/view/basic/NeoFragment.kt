@@ -20,6 +20,8 @@ import ru.neosvet.vestnewage.view.list.TouchHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
+import java.util.Timer
+import kotlin.concurrent.timer
 
 abstract class NeoFragment : Fragment() {
     @JvmField
@@ -31,6 +33,8 @@ abstract class NeoFragment : Fragment() {
     private var root: View? = null
     private var connectWatcher: Job? = null
     protected var isBlocked = false
+    private var timer: Timer? = null
+    private var timeUpdate = 0L
 
     abstract val title: String
 
@@ -197,12 +201,28 @@ abstract class NeoFragment : Fragment() {
     }
 
     protected fun setUpdateTime(time: Long, tv: TextView) {
+        timeUpdate = time
+        timer?.cancel()
         if (time == 0L) {
             tv.text = ""
             return
         }
-        val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
-        val s = getString(R.string.loaded) + diff + getString(R.string.back)
-        tv.text = s
+        startTimer(DateUnit.detectPeriod(time), tv)
+    }
+
+    private fun startTimer(period: Long, tv: TextView) {
+        timer = timer(period = period) {
+            tv.post {
+                val diff = DateUnit.getDiffDate(System.currentTimeMillis(), timeUpdate)
+                val s = getString(R.string.loaded) + diff + getString(R.string.back)
+                tv.text = s
+            }
+
+            val p = DateUnit.detectPeriod(timeUpdate)
+            if (p != period) {
+                timer?.cancel()
+                startTimer(p, tv)
+            }
+        }
     }
 }
