@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.noHasDate
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -147,6 +148,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         loadIfNeed = true
         scope.launch {
             if (month != -1 || year != -1) {
+                val days = date.timeInDays
                 when (month) {
                     -1 -> {}
                     -2 -> date.changeMonth(1)
@@ -156,16 +158,22 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                 if (year > -1) date.year = year + minYear
                 if (date.timeInDays > today.timeInDays) date.month = today.month
                 if (date.timeInDays < DateHelper.MIN_DAYS_OLD_BOOK) date.month = 8
+                if (days == date.timeInDays) {
+                    postState(BasicState.Ready)
+                    return@launch
+                }
                 calendar.clear()
             }
             if (calendar.isEmpty())
                 createField()
-            if (loadFromStorage()) {
-                postPrimary()
-            } else {
+            if (!Lib.getFileDB(date.my).exists()) {
                 postPrimary()
                 postState(BasicState.NotLoaded)
-                reLoad()
+                if (loadIfNeed) reLoad()
+            } else {
+                val isEmpty = !loadFromStorage()
+                postPrimary()
+                if(isEmpty) postState(BasicState.Empty)
             }
         }
     }

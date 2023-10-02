@@ -135,24 +135,29 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 openDoctrine()
                 return@launch
             }
-            val d = date
-            when (month) {
-                -1 -> {}
-                -2 -> d.changeMonth(1)
-                -3 -> d.changeMonth(-1)
-                else -> d.month = month + minMonth
+            if (month != -1 || year != -1) {
+                val d = date
+                val days = d.timeInDays
+                when (month) {
+                    -1 -> {}
+                    -2 -> d.changeMonth(1)
+                    -3 -> d.changeMonth(-1)
+                    else -> d.month = month + minMonth
+                }
+                if (year > -1) d.year = year + minYear
+                if (isPoemsTab) {
+                    if (d.timeInDays > today.timeInDays) d.month = today.month
+                    else if (d.timeInDays < DateHelper.MIN_DAYS_POEMS) d.month = 2
+                } else if (d.timeInDays > DateHelper.MAX_DAYS_BOOK) d.month = 9
+                else if (d.timeInDays < DateHelper.MIN_DAYS_OLD_BOOK) d.month = 8
+                if (tab == -1 && days == d.timeInDays) {
+                    postState(BasicState.Ready)
+                    return@launch
+                }
             }
-            if (year > -1) d.year = year + minYear
-            if (isPoemsTab) {
-                if (d.timeInDays > today.timeInDays) d.month = today.month
-                else if (d.timeInDays < DateHelper.MIN_DAYS_POEMS) d.month = 2
-            } else if (d.timeInDays > DateHelper.MAX_DAYS_BOOK) d.month = 9
-            else if (d.timeInDays < DateHelper.MIN_DAYS_OLD_BOOK) d.month = 8
-            if (!existsList(d)) {
-                if (loadIfNeed) {
-                    postState(BasicState.NotLoaded)
-                    reLoad()
-                } else postState(BasicState.Empty)
+            if (!Lib.getFileDB(date.my).exists()) {
+                postPrimary(0L, listOf())
+                if (loadIfNeed) reLoad()
                 return@launch
             }
             val list = mutableListOf<BasicItem>()
@@ -180,29 +185,22 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     cursor.close()
                     cursor = storage.getList(isPoemsTab)
                     cursor.moveToFirst()
-                } else  // в случае списков с сайта Откровений надо просто перейти к следующей записи
-                    cursor.moveToNext()
+                }
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 val iLink = cursor.getColumnIndex(Const.LINK)
-                do {
+                while (cursor.moveToNext()) {
                     s = cursor.getString(iLink)
                     t = cursor.getString(iTitle)
                     if (!s.noHasDate && !t.contains(s.date))
                         t += " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
-                } while (cursor.moveToNext())
+                }
                 postPrimary(time, list)
-            }
+            } else postPrimary(0L, list)
             cursor.close()
             storage.close()
-            if (list.isEmpty()) {
-                postPrimary(0L, list)
-                if (loadIfNeed) {
-                    postState(BasicState.NotLoaded)
-                    reLoad()
-                } else
-                    postState(BasicState.Empty)
-            }
+            if (list.isEmpty() && loadIfNeed)
+                reLoad()
         }
     }
 
@@ -264,27 +262,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         postState(BookState.Book(Urls.DoctrineSite, list))
         cursor.close()
         storage.close()
-    }
-
-    private fun existsList(d: DateUnit): Boolean {
-        val storage = PageStorage()
-        storage.open(d.my)
-        val cursor = storage.getLinks()
-        var s: String
-        if (cursor.moveToFirst()) {
-            // первую запись пропускаем, т.к. там дата изменения списка
-            while (cursor.moveToNext()) {
-                s = cursor.getString(0)
-                if (s.isPoem == isPoemsTab) {
-                    cursor.close()
-                    storage.close()
-                    return true
-                }
-            }
-        }
-        cursor.close()
-        storage.close()
-        return false
     }
 
     @SuppressLint("Range")

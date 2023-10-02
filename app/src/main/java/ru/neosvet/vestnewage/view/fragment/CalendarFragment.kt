@@ -99,15 +99,10 @@ class CalendarFragment : NeoFragment() {
     private fun openMonth(plus: Boolean) {
         if (isBlocked) return
         binding?.run {
-            if (plus) {
-                if (pMonth.selectedEnd && pYear.selectedEnd) {
-                    toiler.openList(month = 0)
-                    return
-                }
-            } else if (pMonth.selectedStart && pYear.selectedStart) {
-                if (!DateHelper.isLoadedOtkr() && !LoaderService.isRun)
-                    showDownloadDialog()
-                else toiler.openList(month = pMonth.count - 1)
+            if (!plus && pMonth.selectedStart && pYear.selectedStart
+                && !DateHelper.isLoadedOtkr() && !LoaderService.isRun
+            ) {
+                showDownloadDialog()
                 return
             }
         }
@@ -162,7 +157,7 @@ class CalendarFragment : NeoFragment() {
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
             is BasicState.NotLoaded ->
-                binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
+                act?.showStaticToast(getString(R.string.list_no_loaded))
 
             is CalendarState.Status ->
                 restoreStatus(state)
@@ -170,7 +165,14 @@ class CalendarFragment : NeoFragment() {
             BasicState.Success ->
                 setStatus(false)
 
+            BasicState.Ready ->
+                act?.showToast(getString(R.string.finish_list))
+
+            BasicState.Empty ->
+                act?.showStaticToast(getString(R.string.empty_list))
+
             is CalendarState.Primary -> binding?.run {
+                act?.hideToast()
                 setUpdateTime(state.time, tvUpdate)
                 tvUpdate.text = state.label + ". " + tvUpdate.text
                 adapter.setItems(state.list)

@@ -9,8 +9,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
@@ -160,31 +158,32 @@ class BookFragment : NeoFragment() {
             is BasicState.Message ->
                 act?.showToast(state.message)
 
-            is BasicState.NotLoaded -> {
-                adapter.clear()
-                binding?.tvUpdate?.text = getString(R.string.list_no_loaded)
-            }
-
-            is BasicState.Empty -> {
-                adapter.clear()
-                binding?.tvUpdate?.text = getString(R.string.empty_list)
-            }
+            BasicState.Ready ->
+                act?.showToast(getString(R.string.finish_list))
 
             is BookState.Status ->
                 restoreStatus(state)
 
             is BookState.Primary -> binding?.run {
+                act?.hideToast()
                 linkToSrc = ""
                 adapter.clear()
-                setUpdateTime(state.time, tvUpdate)
+                if (state.time == 0L) {
+                    tvUpdate.text = ""
+                    act?.showStaticToast(getString(R.string.list_no_loaded))
+                } else setUpdateTime(state.time, tvUpdate)
                 if (ScreenUtils.isLand) tvUpdate.text = state.label + Const.N + tvUpdate.text
                 else tvUpdate.text = state.label + ". " + tvUpdate.text
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
                 pMonth.fixWidth(1.3f)
                 pYear.fixWidth(1f)
-                adapter.setItems(state.list)
-                rvBook.smoothScrollToPosition(0)
+                if (state.list.isEmpty() && state.time > 0L)
+                    act?.showStaticToast(getString(R.string.empty_list))
+                else {
+                    adapter.setItems(state.list)
+                    rvBook.smoothScrollToPosition(0)
+                }
                 if (pTab.selectedIndex == BookTab.DOCTRINE.value)
                     tvUpdate.text = getString(R.string.link_to_src)
             }
@@ -235,16 +234,11 @@ class BookFragment : NeoFragment() {
     private fun openMonth(plus: Boolean) {
         if (isBlocked) return
         binding?.run {
-            if (plus) {
-                if (pMonth.selectedEnd && pYear.selectedEnd) {
-                    toiler.openList(month = 0)
-                    return
-                }
-            } else if (pMonth.selectedStart && pYear.selectedStart) {
-                if (pTab.selectedIndex == BookTab.EPISTLES.value &&
-                    !DateHelper.isLoadedOtkr() && !LoaderService.isRun
-                ) showDownloadDialog()
-                else toiler.openList(month = pMonth.count - 1)
+            if (pTab.selectedIndex == BookTab.EPISTLES.value &&
+                !plus && pMonth.selectedStart && pYear.selectedStart &&
+                !DateHelper.isLoadedOtkr() && !LoaderService.isRun
+            ) {
+                showDownloadDialog()
                 return
             }
         }
