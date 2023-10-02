@@ -384,22 +384,25 @@ class HomeToiler : NeoToiler() {
         val file = Lib.getFile(Const.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
         val title: String
-        val time: String
+        val time: Long
+        val des: String
         if (file.exists()) {
             val br = BufferedReader(FileReader(file))
             title = br.readLine() ?: strings.nothing
             linkSummary = br.readLine() ?: ""
             br.close()
-            val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            time = strings.refreshed + diff + strings.back
+            time = file.lastModified()
+            des = strings.refreshed + HomeItem.PLACE_TIME + strings.back
         } else {
+            time = 0L
             title = strings.nothing
-            time = strings.never
+            des = strings.never
         }
 
         return HomeItem(
             type = HomeItem.Type.SUMMARY,
-            lines = listOf(strings.summary, time, title)
+            time = time,
+            lines = listOf(strings.summary, des, title)
         )
     }
 
@@ -418,20 +421,23 @@ class HomeToiler : NeoToiler() {
             newsCRC = crc
         //TODO check dev news?
         val title: String
-        val time: String
+        val time: Long
+        val des: String
         if (file.exists()) {
             title = if (newsCRC == crc) strings.no_changes
             else strings.has_changes
-            val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            time = strings.refreshed + diff + strings.back
+            time = file.lastModified()
+            des = strings.refreshed + HomeItem.PLACE_TIME + strings.back
         } else {
             title = strings.nothing
-            time = strings.never
+            time = 0L
+            des = strings.never
         }
 
         return HomeItem(
             type = HomeItem.Type.NEWS,
-            lines = listOf(strings.news, time, title)
+            time = time,
+            lines = listOf(strings.news, des, title)
         )
     }
 
@@ -441,10 +447,15 @@ class HomeToiler : NeoToiler() {
         task = Task.OPEN_ADDITION
         val file = Lib.getFileDB(DataBase.ADDITION)
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
-        val time = if (file.exists()) {
-            val diff = DateUnit.getDiffDate(System.currentTimeMillis(), file.lastModified())
-            strings.refreshed + diff + strings.back
-        } else strings.never
+        val time: Long
+        val des: String
+        if (file.exists()) {
+            time = file.lastModified()
+            des = strings.refreshed + HomeItem.PLACE_TIME + strings.back
+        } else {
+            time = 0L
+            des = strings.never
+        }
         val addition = AdditionStorage()
         addition.open()
         var t = addition.getLastDate()
@@ -453,7 +464,8 @@ class HomeToiler : NeoToiler() {
         else strings.last_post_from.format(t)
         return HomeItem(
             type = HomeItem.Type.ADDITION,
-            lines = listOf(strings.additionally_from_tg, time, t)
+            time = time,
+            lines = listOf(strings.additionally_from_tg, des, t)
         )
     }
 

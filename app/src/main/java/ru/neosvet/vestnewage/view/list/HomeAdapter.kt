@@ -1,11 +1,15 @@
 package ru.neosvet.vestnewage.view.list
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
+import java.util.Timer
+import kotlin.concurrent.timer
 
 class HomeAdapter(
     private val events: Events,
@@ -22,6 +26,73 @@ class HomeAdapter(
     var loadingIndex = -1
         private set
     var isTall = false
+    private var needTimer = !isEditor
+    private var timer: Timer? = null
+    private var view: RecyclerView? = null
+
+    init {
+        restoreTimer()
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        view = recyclerView
+    }
+
+    fun restoreTimer() {
+        if (!needTimer) return
+        val period = detectPeriod()
+        if (needTimer)
+            startTimer(period)
+    }
+
+    fun stopTimer() {
+        timer?.cancel()
+    }
+
+    private fun clearTimer() {
+        timer?.cancel()
+        timer = null
+    }
+
+    private fun startTimer(period: Long) {
+        val delay = if (timer == null) period else 0L
+        timer = timer(initialDelay = delay, period = period) {
+            for (i in items.indices) {
+                if (items[i].time > 0)
+                    view?.post { notifyItemChanged(i) }
+            }
+            val p = detectPeriod()
+            if (p != period) {
+                clearTimer()
+                if (needTimer) startTimer(p)
+            }
+        }
+    }
+
+    private fun detectPeriod(): Long {
+        if (isEditor) return 0L
+        var time = 0L
+        items.forEach {
+            if (it.time > time) time = it.time
+        }
+        if (time == 0L) {
+            needTimer = false
+            return 0L
+        }
+        needTimer = true
+        val diff = System.currentTimeMillis() - time
+        return when {
+            diff < DateUnit.MIN_IN_MILLS ->
+                10 * DateUnit.SEC_IN_MILLS.toLong()
+
+            diff < DateUnit.HOUR_IN_MILLS ->
+                DateUnit.MIN_IN_MILLS.toLong()
+
+            else ->
+                15 * DateUnit.MIN_IN_MILLS.toLong()
+        }
+    }
 
     fun startLoading(index: Int) {
         if (isEditor) return
@@ -35,6 +106,8 @@ class HomeAdapter(
         val i = loadingIndex
         loadingIndex = -1
         notifyItemChanged(i)
+        clearTimer()
+        restoreTimer()
     }
 
     fun update(index: Int, item: HomeItem) {

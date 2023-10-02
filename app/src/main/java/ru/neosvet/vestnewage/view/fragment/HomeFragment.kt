@@ -36,6 +36,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     override val title: String
         get() = getString(R.string.home_screen)
     private var openedReader = false
+    private var initAdapter = false
     private val mover: MoveHelper by lazy {
         MoveHelper { i, up ->
             if (up) {
@@ -80,6 +81,13 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             toiler.updateJournal()
             openedReader = false
         }
+        if (initAdapter)
+            adapter.restoreTimer()
+    }
+
+    override fun onPause() {
+        adapter.stopTimer()
+        super.onPause()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -134,10 +142,12 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     private fun initPrimary(state: HomeState.Primary) {
+        if(initAdapter) adapter.stopTimer()
         adapter = HomeAdapter(
             events = this, isEditor = state.isEditor,
             items = state.list, menu = state.menu
         )
+        initAdapter = true
         if (state.isEditor) {
             act?.startEditMenu()
             act?.setAction(R.drawable.ic_ok)
