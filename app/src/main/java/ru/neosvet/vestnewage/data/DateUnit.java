@@ -192,6 +192,15 @@ public class DateUnit {
         return s;
     }
 
+    public static long detectPeriod(long time) {
+        int diff = (int) (System.currentTimeMillis() - time);
+        if (diff < DateUnit.MIN_IN_MILLS)
+            return 10 * DateUnit.SEC_IN_MILLS;
+        if (diff < DateUnit.HOUR_IN_MILLS)
+            return DateUnit.MIN_IN_MILLS;
+        return 15 * DateUnit.MIN_IN_MILLS;
+    }
+
     @NonNull
     public String toTimeString() {
         if (time == null)

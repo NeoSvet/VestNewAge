@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.view.list
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
@@ -81,17 +80,7 @@ class HomeAdapter(
             return 0L
         }
         needTimer = true
-        val diff = System.currentTimeMillis() - time
-        return when {
-            diff < DateUnit.MIN_IN_MILLS ->
-                10 * DateUnit.SEC_IN_MILLS.toLong()
-
-            diff < DateUnit.HOUR_IN_MILLS ->
-                DateUnit.MIN_IN_MILLS.toLong()
-
-            else ->
-                15 * DateUnit.MIN_IN_MILLS.toLong()
-        }
+        return DateUnit.detectPeriod(time)
     }
 
     fun startLoading(index: Int) {
