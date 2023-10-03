@@ -284,8 +284,8 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun loadBasic() {
         val listsUtils = ListsUtils()
-        val summaryLoader = SummaryLoader(client)
         if (listsUtils.summaryIsOld()) {
+            val summaryLoader = SummaryLoader(client)
             summaryLoader.updateUnread = false
             summaryLoader.load()
         }

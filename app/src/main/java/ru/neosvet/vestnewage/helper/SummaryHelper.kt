@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -25,7 +26,7 @@ import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import java.io.BufferedReader
 import java.io.FileReader
 
-class SummaryHelper {
+class SummaryHelper : LinksProvider {
 
     companion object {
         const val TAG = "Summary"
@@ -47,11 +48,24 @@ class SummaryHelper {
         }
     }
 
-    private val notifUtils = NotificationUtils()
-    private val intent = Intent(App.context, MainActivity::class.java)
-    private val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
-    private var notifId = NotificationUtils.NOTIF_SUMMARY + 1
-    private var notifBuilder: NotificationCompat.Builder? = null
+    private lateinit var notifUtils: NotificationUtils
+    private lateinit var intent: Intent
+    private lateinit var piEmpty: PendingIntent
+    private var notifId = 0
+    private lateinit var notifBuilder: NotificationCompat.Builder
+
+    override fun getLinkList(): List<String> {
+        val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
+        val list = mutableListOf<String>()
+        while (br.readLine() != null) { //title
+            val link = br.readLine() //link
+            list.add(link)
+            br.readLine() //des
+            br.readLine() //time
+        }
+        br.close()
+        return list
+    }
 
     fun updateBook() {
         val file = Lib.getFile(Const.RSS)
@@ -62,16 +76,23 @@ class SummaryHelper {
             br.readLine() //des
             br.readLine() //time
             storage.open(link, true)
+            storage.updateTime()
             if (!storage.existsPage(link)) {
                 val row = ContentValues()
                 row.put(Const.TITLE, it)
                 row.put(Const.LINK, link)
                 storage.insertTitle(row)
-                storage.updateTime()
             }
         }
         br.close()
         storage.close()
+    }
+
+    fun preparingNotification() {
+        notifUtils = NotificationUtils()
+        intent = Intent(App.context, MainActivity::class.java)
+        piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
+        notifId = NotificationUtils.NOTIF_SUMMARY + 1
     }
 
     fun createNotification(text: String, link: String) {
@@ -94,11 +115,11 @@ class SummaryHelper {
     }
 
     fun muteNotification() {
-        notifBuilder?.setChannelId(NotificationUtils.CHANNEL_MUTE)
+        notifBuilder.setChannelId(NotificationUtils.CHANNEL_MUTE)
     }
 
-    fun showNotification() = notifBuilder?.let {
-        notifUtils.notify(notifId, it)
+    fun showNotification() {
+        notifUtils.notify(notifId, notifBuilder)
         notifId++
     }
 
@@ -117,10 +138,10 @@ class SummaryHelper {
         }
     }
 
-    fun singleNotification(text: String) = notifBuilder?.run {
-        setContentText(text)
+    fun singleNotification(text: String) {
+        notifBuilder.setContentText(text)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            setFullScreenIntent(piEmpty, true)
+            notifBuilder.setFullScreenIntent(piEmpty, true)
     }
 
     fun setPreferences() {
@@ -128,7 +149,7 @@ class SummaryHelper {
         val pref = App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
         val sound = pref.getBoolean(SetNotifDialog.SOUND, false)
         val vibration = pref.getBoolean(SetNotifDialog.VIBR, true)
-        notifBuilder?.run {
+        notifBuilder.run {
             setLights(Color.GREEN, DateUnit.SEC_IN_MILLS, DateUnit.SEC_IN_MILLS)
             if (sound) {
                 val uri = pref.getString(SetNotifDialog.URI, null)
@@ -145,9 +166,10 @@ class SummaryHelper {
             val des = intent.getStringExtra(Const.DESCTRIPTION)
             val link = intent.getStringExtra(Const.LINK)
             if (des == null || link == null) return
-            val summaryHelper = SummaryHelper()
-            summaryHelper.createNotification(des, link)
-            summaryHelper.showNotification()
+            val helper = SummaryHelper()
+            helper.preparingNotification()
+            helper.createNotification(des, link)
+            helper.showNotification()
         }
     }
 }

@@ -5,6 +5,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -79,7 +80,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = true
         msg = App.context.getString(R.string.summary)
         handler?.postMessage(msg)
-        loadPages(SummaryLoader(client).getLinkList())
+        loadPages(SummaryHelper().getLinkList())
         isRun = false
     }
 

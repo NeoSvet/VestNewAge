@@ -118,13 +118,7 @@ class CheckService : LifecycleService() {
             br.close()
             return false
         }
-        val m = (if (Urls.isSiteCom) {
-            val sb = StringBuilder()
-            br.forEachLine {
-                sb.append(it)
-            }
-            sb.toString()
-        } else s).split("<item>")
+        val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
@@ -180,6 +174,7 @@ class CheckService : LifecycleService() {
 
     private fun existsUpdates() {
         val helper = SummaryHelper()
+        helper.preparingNotification()
         val several = list.size > 1
         if (several || list.first().second != Const.RSS)
             helper.updateBook()

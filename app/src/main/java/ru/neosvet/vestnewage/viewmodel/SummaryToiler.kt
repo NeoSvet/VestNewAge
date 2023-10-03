@@ -65,8 +65,6 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         if (isRss) {
             val loader = SummaryLoader(client)
             loader.load()
-            val summaryHelper = SummaryHelper()
-            summaryHelper.updateBook()
             openRss()
         } else {
             val loader = AdditionLoader(client)
