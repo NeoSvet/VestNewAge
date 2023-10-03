@@ -184,17 +184,16 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 if (date.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isPoemsTab)
-                    cursor.moveToFirst()
-                }
+                } else cursor.moveToNext()
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 val iLink = cursor.getColumnIndex(Const.LINK)
-                while (cursor.moveToNext()) {
+                do {
                     s = cursor.getString(iLink)
                     t = cursor.getString(iTitle)
                     if (!s.noHasDate && !t.contains(s.date))
                         t += " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
-                }
+                } while (cursor.moveToNext())
                 postPrimary(time, list)
             } else postPrimary(0L, list)
             cursor.close()
