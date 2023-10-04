@@ -51,7 +51,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private val months = mutableListOf<String>()
     private val yearsP = mutableListOf<String>()
     private val yearsE = mutableListOf<String>()
-    private var startYear = 0
+    private var startTab = -1
+    private var startYear = -1
     private val minYear: Int
         get() = if (isPoemsTab || !isLoadedOtkr) 2016 else 2004
 
@@ -89,14 +90,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val m = if (isLoadedOtkr) 2004 else 2016
         for (i in m..2016)
             yearsE.add(i.toString())
-        if (startYear > 0) date.run {
-            year = startYear
-            month = 1
-        }
     }
 
     override suspend fun defaultState() {
-        openList(true)
+        if (startYear > -1)
+            openList(true, tab = startTab, month = 0, year = startYear)
+        else openList(true)
     }
 
     override suspend fun doLoad() {
@@ -184,6 +183,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 if (date.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку
                     cursor.close()
                     cursor = storage.getList(isPoemsTab)
+                    cursor.moveToFirst()
                 } else cursor.moveToNext()
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 val iLink = cursor.getColumnIndex(Const.LINK)
@@ -402,8 +402,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun setArgument(tab: Int, year: Int) {
-        selectedTab = convertTab(tab)
-        startYear = year
+        startTab = tab
+        if (tab == 1) selectedTab = BookTab.EPISTLES
+        if (year > 2000) startYear = year - minYear
     }
 
     private fun convertTab(tab: Int) = when (tab) {

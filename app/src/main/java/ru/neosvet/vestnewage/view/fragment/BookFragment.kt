@@ -78,12 +78,10 @@ class BookFragment : NeoFragment() {
     override fun onViewCreated(savedInstanceState: Bundle?) {
         setViews()
         var tab = 0
-        if (savedInstanceState == null) {
-            arguments?.let {
-                tab = it.getInt(Const.TAB)
-                val year = it.getInt(Const.YEAR, 0)
-                toiler.setArgument(tab, year)
-            }
+        if (savedInstanceState == null) arguments?.let {
+            tab = it.getInt(Const.TAB)
+            val year = it.getInt(Const.YEAR, 0)
+            toiler.setArgument(tab, year)
         }
         initTabs(tab)
     }
