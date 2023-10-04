@@ -118,18 +118,18 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     override fun onViewCreated(savedInstanceState: Bundle?) {
         initSearchBox()
         setViews()
-        arguments?.let { args ->
-            val mode = args.getInt(Const.MODE, 0)
-            val request = args.getString(Const.STRING) ?: ""
-            toiler.setArguments(mode, request)
-            binding?.run {
-                etSearch.setText(request)
-                etSearch.setSelection(request.length)
+        if (savedInstanceState == null) {
+            arguments?.let { args ->
+                val mode = args.getInt(Const.MODE, 0)
+                val request = args.getString(Const.STRING) ?: ""
+                toiler.setArguments(mode, request)
+                binding?.run {
+                    etSearch.setText(request)
+                    etSearch.setSelection(request.length)
+                }
             }
-            arguments = null
-        }
-        if (savedInstanceState == null)
             TipActivity.showTipIfNeed(TipName.SEARCH)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

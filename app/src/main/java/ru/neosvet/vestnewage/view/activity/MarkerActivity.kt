@@ -115,9 +115,8 @@ class MarkerActivity : AppCompatActivity() {
         initActivity()
         initContent()
         setResult(RESULT_CANCELED)
-        intent?.let {
+        if (savedInstanceState == null) intent?.let {
             toiler.setArgument(it)
-            intent = null
         }
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)

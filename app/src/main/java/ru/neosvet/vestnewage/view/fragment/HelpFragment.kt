@@ -53,7 +53,8 @@ class HelpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         activity?.title = getString(R.string.help)
-        val section = arguments?.getInt(Const.TAB) ?: -1
+        val section = if (savedInstanceState == null)
+            arguments?.getInt(Const.TAB) ?: -1 else -1
         lifecycleScope.launch {
             toiler.state.collect {
                 onChangedState(it)
