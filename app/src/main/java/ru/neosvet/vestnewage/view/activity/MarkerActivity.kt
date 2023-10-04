@@ -129,6 +129,7 @@ class MarkerActivity : AppCompatActivity() {
                     screen = screen,
                     selection = content.tvSel.text.toString(),
                     positionText = tvPos.text.toString(),
+                    collectionText = content.tvCol.text.toString(),
                     position = sbPos.progress
                 )
             )
@@ -197,6 +198,8 @@ class MarkerActivity : AppCompatActivity() {
     private fun restoreStatus(state: MarkerState.Status) = binding.run {
         screen = state.screen
         content.tvSel.text = state.selection
+        if (state.collectionText.isNotEmpty())
+            content.tvCol.text = state.collectionText
         when (screen) {
             MarkerScreen.NONE -> {}
             MarkerScreen.POSITION -> {
@@ -235,7 +238,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun initActivity() = binding.run {
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
-            finish()
+            onBackPressed()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val metrics = DisplayMetrics()

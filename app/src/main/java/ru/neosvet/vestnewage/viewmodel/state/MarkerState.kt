@@ -17,6 +17,7 @@ sealed class MarkerState : NeoState {
         val screen: MarkerScreen,
         val selection: String,
         val positionText: String = "",
+        val collectionText: String = "",
         val position: Int = -1
     ) : StatusState
 
