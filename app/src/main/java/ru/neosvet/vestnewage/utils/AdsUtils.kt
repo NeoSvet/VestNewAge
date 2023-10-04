@@ -8,11 +8,12 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevAds
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class AdsUtils(private val storage: AdsStorage) {
+class AdsUtils(private val storage: DevAds) {
     companion object {
         const val TITLE = 0
         const val LINK = 1
@@ -33,6 +34,7 @@ class AdsUtils(private val storage: AdsStorage) {
             when {
                 item.link.isEmpty() -> // only des
                     alert.setRightButton(App.context.getString(android.R.string.ok)) { alert.dismiss() }
+
                 item.link == UPDATE -> {
                     alert.setLeftButton("Google Play") {
                         Lib.openInApps(App.context.getString(R.string.url_on_google), null)
@@ -43,6 +45,7 @@ class AdsUtils(private val storage: AdsStorage) {
                         alert.dismiss()
                     }
                 }
+
                 else -> {
                     alert.setRightButton(App.context.getString(R.string.open_link)) {
                         Lib.openInApps(item.link, null)
@@ -63,11 +66,8 @@ class AdsUtils(private val storage: AdsStorage) {
 
     var time: Long = -1L
         get() {
-            if (field == -1L) {
-                val cursor = storage.getTime()
-                field = if (cursor.moveToFirst()) cursor.getString(0).toLong() else 0
-                cursor.close()
-            }
+            if (field == -1L)
+                field = storage.getTime()
             return field
         }
         private set
@@ -131,6 +131,7 @@ class AdsUtils(private val storage: AdsStorage) {
                     item.addLink(UPDATE)
                     list.add(0, item)
                 }
+
                 else -> {
                     list.add(0, BasicItem(ad + t))
                     if (m != AdsStorage.MODE_TD) list[0].addLink(l)
@@ -170,12 +171,16 @@ class AdsUtils(private val storage: AdsStorage) {
                     }
                     m = arrayOf("", "", "")
                 }
+
                 it.indexOf("<") != 0 -> //multiline des
                     m[DES] += Const.N + it
+
                 it.contains("<d>") ->
                     m[DES] = it.substring(3)
+
                 it.contains("<l>") ->
                     m[LINK] = it.substring(3)
+
                 else -> m[TITLE] = it
             }
         }

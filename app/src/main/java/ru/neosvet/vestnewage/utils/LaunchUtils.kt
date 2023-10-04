@@ -13,7 +13,6 @@ import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SearchHelper
-import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -68,11 +67,6 @@ class LaunchUtils(context: Context) {
             return
         }
         if (previousVer < 63) checkSearchDates()
-        if (previousVer in 45..46) {
-            val storage = AdsStorage()
-            storage.delete()
-            storage.close()
-        }
         if (previousVer < 64) {
             refTips()
             Thread {
@@ -91,6 +85,13 @@ class LaunchUtils(context: Context) {
         if (previousVer < 69) {
             val file = Lib.getFileDB("07.23")
             if (file.exists()) file.delete()
+        }
+        if (previousVer < 71) {
+            listOf(
+                Lib.getFileDB("devads"), Lib.getFileDB("devads-journal"), Lib.getFileS("news")
+            ).forEach {
+                if (it.exists()) it.delete()
+            }
         }
     }
 

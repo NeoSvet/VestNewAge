@@ -173,7 +173,7 @@ class SiteFragment : NeoFragment() {
                     val span = if (pTab.selectedStart) 1 else ScreenUtils.span
                     rvList.layoutManager = GridLayoutManager(requireContext(), span)
                     if (state.list.isEmpty())
-                        act?.showStaticToast(getString(R.string.empty_site))
+                        act?.showStaticToast(getString(R.string.list_empty))
                     else act?.hideToast()
                 }
                 adapter.setItems(state.list)

@@ -88,6 +88,11 @@ public class DateUnit {
             fDate = DateTimeFormatter
                     .ofPattern("dd.MM.yyyy HH:mm")
                     .withLocale(Locale.US);
+        } else if (s.length() == 14) {
+            offset = true;
+            fDate = DateTimeFormatter
+                    .ofPattern("dd.MM.yy HH:mm")
+                    .withLocale(Locale.US);
         } else if (s.contains("-")) { //2020-03-25T00:00:00+03:00
             s = s.substring(0, s.length() - 6).replace("T", " ");
             fDate = DateTimeFormatter
@@ -226,6 +231,12 @@ public class DateUnit {
         }
         dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
         return dateTime.format(formatter);
+    }
+
+    @NonNull
+    public String toDateString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault());
+        return date.format(formatter);
     }
 
     @NonNull

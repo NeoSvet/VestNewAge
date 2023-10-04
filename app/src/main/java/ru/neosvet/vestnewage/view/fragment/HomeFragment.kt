@@ -142,7 +142,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     private fun initPrimary(state: HomeState.Primary) {
-        if(initAdapter) adapter.stopTimer()
+        if (initAdapter) adapter.stopTimer()
         adapter = HomeAdapter(
             events = this, isEditor = state.isEditor,
             items = state.list, menu = state.menu
@@ -180,7 +180,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
 
             HomeItem.Type.ADDITION -> when (action) {
                 HomeHolder.Action.TITLE -> Lib.openInApps(Urls.TelegramUrl, null)
-                HomeHolder.Action.SUBTITLE -> act?.openAddition()
+                HomeHolder.Action.SUBTITLE -> act?.setSection(Section.SUMMARY, true, 1)
                 HomeHolder.Action.REFRESH -> toiler.refreshAddition()
             }
 
@@ -194,7 +194,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
 
             HomeItem.Type.NEWS -> when (action) {
                 HomeHolder.Action.REFRESH -> toiler.refreshNews()
-                else -> act?.setSection(Section.SITE, true)
+                else -> act?.setSection(Section.SITE, true, toiler.tabNews)
             }
 
             HomeItem.Type.INFO -> {

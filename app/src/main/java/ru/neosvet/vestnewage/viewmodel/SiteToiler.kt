@@ -18,36 +18,22 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
-import java.io.File
 import java.io.FileReader
 
 class SiteToiler : NeoToiler() {
     companion object {
         const val MAIN = "/main"
-        const val NEWS = "/news"
         const val END = "<end>"
     }
 
     private var selectedTab = SiteTab.NEWS
     private var novosti = ""
-    private val file: File
-        get() = Lib.getFile(if (selectedTab == SiteTab.NEWS) NEWS else MAIN)
     private val client = NeoClient(NeoClient.Type.SECTION)
-    private val url: String
-        get() = if (selectedTab == SiteTab.SITE)
-            Urls.Site
-        else Urls.Ads
-    private val storage: AdsStorage by lazy {
-        AdsStorage()
-    }
-    private val ads: AdsUtils by lazy {
-        AdsUtils(storage)
-    }
+    private val storage = AdsStorage()
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Site")
         .putString(Const.TAB, selectedTab.toString())
-        .putString(Const.LINK, url)
         .build()
 
     override fun init(context: Context) {
@@ -60,9 +46,8 @@ class SiteToiler : NeoToiler() {
 
     override suspend fun doLoad() {
         if (selectedTab == SiteTab.DEV)
-            loadAds(true)
-        else
-            loadList()
+            openAds(true)
+        else loadList()
     }
 
     override fun onDestroy() {
@@ -70,18 +55,23 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun loadList() {
-        val loader = SiteLoader(client, file.toString())
+        val loader = SiteLoader(client, storage)
+        val url = if (selectedTab == SiteTab.SITE)
+            Urls.Site else Urls.Ads
         val list = loader.load(url) as MutableList
-        if (selectedTab == SiteTab.SITE)
+        val time = if (selectedTab == SiteTab.SITE) {
             list.add(0, getNovosti())
-        postState(ListState.Primary(file.lastModified(), list))
+            Lib.getFile(MAIN).lastModified()
+        } else storage.site.getTime()
+        postState(ListState.Primary(time, list))
     }
 
     private fun getNovosti(): BasicItem {
         return BasicItem(novosti).apply { addLink(Urls.News) }
     }
 
-    private suspend fun loadAds(reload: Boolean) {
+    private suspend fun openAds(reload: Boolean) {
+        val ads = AdsUtils(storage.dev)
         if (reload) ads.loadAds(client)
         val list = ads.loadList(false)
         postState(ListState.Primary(ads.time, list))
@@ -92,63 +82,88 @@ class SiteToiler : NeoToiler() {
         if (tab != -1)
             selectedTab = convertTab(tab)
         scope.launch {
-            if (selectedTab == SiteTab.DEV)
-                loadAds(false)
-            else
-                openFile()
+            when (selectedTab) {
+                SiteTab.NEWS -> openNews()
+                SiteTab.SITE -> openSite()
+                SiteTab.DEV -> openAds(false)
+            }
         }
     }
 
-    private suspend fun openFile() {
-        val f = file
+    private suspend fun openNews() {
+        val cursor = storage.site.getAll()
+        val list = mutableListOf<BasicItem>()
+        var time = 0L
+        var line: String? = null
+        if (cursor.moveToFirst()) {
+            val iTitle = cursor.getColumnIndex(Const.TITLE)
+            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            val iTime = cursor.getColumnIndex(Const.TIME)
+            time = cursor.getLong(iTime)
+            while (cursor.moveToNext()) {
+                val link = cursor.getString(iLink)
+                val item = BasicItem(cursor.getString(iTitle))
+                item.des = cursor.getString(iDes)
+                if (link.contains(Const.N)) {
+                    link.lines().forEach { s ->
+                        if (line != null) line?.let {
+                            item.addLink(s, it)
+                            line = null
+                        } else line = s
+                    }
+                } else if (link.isNotEmpty())
+                    item.addLink(link)
+                list.add(item)
+            }
+        }
+        cursor.close()
+
+        postState(ListState.Primary(time, list))
+        if (loadIfNeed && (list.isEmpty() || DateUnit.isLongAgo(time)))
+            reLoad()
+    }
+
+    private suspend fun openSite() {
+        val f = Lib.getFile(MAIN)
         if (f.exists().not()) {
             postState(BasicState.NotLoaded)
             reLoad()
             return
         }
         val list = mutableListOf<BasicItem>()
-        var i = 0
-        val isNews = selectedTab == SiteTab.NEWS
-        if (!isNews) {
-            list.add(getNovosti())
-            i = 1
-        }
+        list.add(getNovosti())
         var d: String?
         var l: String
         var h: String
-        var n: Int
         val br = BufferedReader(FileReader(f))
         var t: String? = br.readLine()
         while (t != null) {
             d = br.readLine()
             l = br.readLine()
             h = if (l != END) br.readLine() else END
+            val item: BasicItem
             if (l == "#") {
-                list.add(BasicItem(t, true))
+                item = BasicItem(t, true)
             } else {
-                list.add(BasicItem(t).apply { des = d })
+                item = BasicItem(t).apply { des = d }
                 if (h != END) {
-                    list[i].addLink(h, l)
+                    item.addLink(h, l)
                     l = br.readLine()
                     while (l != END) {
                         h = br.readLine()
-                        list[i].addLink(h, l)
+                        item.addLink(h, l)
                         l = br.readLine()
                     }
-                } else if (isNews && l.length > 1) {
-                    n = d.indexOf(">", d.indexOf(l)) + 1
-                    list[i].addLink(d.substring(n, d.indexOf("<", n)), l)
-                } else list[i].addLink("", l)
+                } else item.addLink("", l)
             }
-            i++
+            list.add(item)
             t = br.readLine()
         }
         br.close()
         postState(ListState.Primary(f.lastModified(), list))
-
-        if (loadIfNeed && DateUnit.isLongAgo(f.lastModified())) {
+        if (loadIfNeed && (list.size < 2 || DateUnit.isLongAgo(f.lastModified())))
             reLoad()
-        }
     }
 
     fun readAds(item: BasicItem) {

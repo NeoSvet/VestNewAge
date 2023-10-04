@@ -52,7 +52,7 @@ class MainToiler : NeoToiler() {
             loadQuote()
         val timeDiff = synchronizationTime()
         val storage = AdsStorage()
-        val ads = AdsUtils(storage)
+        val ads = AdsUtils(storage.dev)
         ads.loadAds(client)
         storage.close()
         postState(MainState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))

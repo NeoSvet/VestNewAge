@@ -5,6 +5,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.helper.SiteHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
@@ -17,7 +18,6 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.percent
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -88,8 +88,8 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = true
         msg = App.context.getString(R.string.news)
         handler?.postMessage(msg)
-        val loader = SiteLoader(client, Lib.getFile(SiteToiler.MAIN).toString())
-        loadPages(loader.getLinkList())
+        val helper = SiteHelper()
+        loadPages(helper.getLinkList())
         isRun = false
     }
 

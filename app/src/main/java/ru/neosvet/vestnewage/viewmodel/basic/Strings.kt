@@ -26,6 +26,8 @@ data class HomeStrings(
     val never: String,
     val refreshed: String,
     val today_empty: String,
+    val today: String,
+    val yesterday: String,
     val journal: String,
     val calendar: String,
     val summary: String,
@@ -39,8 +41,9 @@ data class HomeStrings(
     val last_post_from: String,
     val last_readed: String,
     val prom_for_soul_unite: String,
-    val has_changes: String,
-    val no_changes: String,
+    val new_dev_ads: String,
+    val last: String,
+    val from: String,
     val information: String
 )
 

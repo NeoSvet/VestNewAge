@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.AdsStorage
@@ -34,9 +33,9 @@ class NewToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
-        ads = AdsUtils(storage)
+        ads = AdsUtils(storage.dev)
         poemFrom =
-            App.context.getString(R.string.poem) + " " + App.context.getString(R.string.from) + " "
+            context.getString(R.string.poem) + " " + context.getString(R.string.from) + " "
     }
 
     override suspend fun defaultState() {
@@ -58,7 +57,7 @@ class NewToiler : NeoToiler() {
             var s: String
             var n: Int
             val unread = UnreadUtils()
-            unread.setBadge(storage.unreadCount)
+            unread.setBadge(storage.dev.unreadCount)
             if (unread.lastModified() > 0) {
                 val links = unread.list
                 for (i in links.size - 1 downTo 0) {
@@ -90,12 +89,12 @@ class NewToiler : NeoToiler() {
         scope.launch {
             val unread = UnreadUtils()
             unread.clearList()
-            unread.setBadge(storage.unreadCount)
+            unread.setBadge(0)
             postState(BasicState.Empty)
         }
     }
 
     fun readAds(item: BasicItem) {
-        storage.setRead(item)
+        storage.dev.setRead(item)
     }
 }

@@ -9,6 +9,7 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.CalendarLoader
@@ -19,6 +20,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -30,7 +32,6 @@ import ru.neosvet.vestnewage.viewmodel.state.HomeState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
 import java.io.FileReader
-import java.util.zip.CRC32
 
 class HomeToiler : NeoToiler() {
 
@@ -46,8 +47,13 @@ class HomeToiler : NeoToiler() {
         private set
     var linkJournal: String = ""
         private set
+    var tabNews = SiteTab.NEWS.value
+        private set
     private val storage: PageStorage by lazy {
         PageStorage()
+    }
+    private val adsStorage: AdsStorage by lazy {
+        AdsStorage()
     }
     private var task = Task.NONE
     private lateinit var strings: HomeStrings
@@ -56,7 +62,6 @@ class HomeToiler : NeoToiler() {
     private var needLoadSummary = false
     private var needLoadNews = false
     private var needLoadAddition = false
-    private var newsCRC = 0L
     private lateinit var helper: HomeHelper
     private val items = mutableListOf<HomeItem.Type>()
     private val hiddenItems = mutableListOf<HomeItem.Type>()
@@ -91,6 +96,8 @@ class HomeToiler : NeoToiler() {
             never = context.getString(R.string.never),
             refreshed = context.getString(R.string.refreshed),
             today_empty = context.getString(R.string.today_empty),
+            today = context.getString(R.string.today),
+            yesterday = context.resources.getStringArray(R.array.post_days)[0],
             journal = context.getString(R.string.journal),
             calendar = context.getString(R.string.calendar),
             summary = context.getString(R.string.summary),
@@ -104,8 +111,9 @@ class HomeToiler : NeoToiler() {
             last_post_from = context.getString(R.string.last_post_from),
             last_readed = context.getString(R.string.last_readed),
             prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
-            no_changes = context.getString(R.string.no_changes),
-            has_changes = context.getString(R.string.has_changes),
+            new_dev_ads = context.getString(R.string.new_dev_ads),
+            last = context.getString(R.string.last),
+            from = context.getString(R.string.from),
             information = context.getString(R.string.information)
         )
         loadItems()
@@ -150,6 +158,7 @@ class HomeToiler : NeoToiler() {
     }
 
     override fun onDestroy() {
+        adsStorage.close()
         storage.close()
     }
 
@@ -274,7 +283,7 @@ class HomeToiler : NeoToiler() {
         val i = indexNews
         if (i == -1) return
         postState(HomeState.Loading(i))
-        val loader = SiteLoader(client, Lib.getFile(SiteToiler.NEWS).toString())
+        val loader = SiteLoader(client, adsStorage)
         loader.load(Urls.Ads)
         clearPrimaryState()
         postState(ListState.Update(i, createNewsItem()))
@@ -410,33 +419,46 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.NEWS, listOf(strings.news))
         task = Task.OPEN_NEWS
-        val file = Lib.getFile(SiteToiler.NEWS)
-        needLoadNews = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
-        val crc = if (file.exists()) {
-            val crc32 = CRC32()
-            crc32.update(file.readBytes())
-            crc32.value
-        } else 0L
-        if (newsCRC == 0L)
-            newsCRC = crc
-        //TODO check dev news?
-        val title: String
-        val time: Long
-        val des: String
-        if (file.exists()) {
-            title = if (newsCRC == crc) strings.no_changes
-            else strings.has_changes
-            time = file.lastModified()
-            des = strings.refreshed + HomeItem.PLACE_TIME + strings.back
-        } else {
-            title = strings.nothing
-            time = 0L
-            des = strings.never
+        val cursor = adsStorage.site.getAll()
+        var timeItem = 0L
+        var timeUpdate = 0L
+        if (cursor.moveToFirst()) {
+            val iTime = cursor.getColumnIndex(Const.TIME)
+            timeUpdate = cursor.getLong(iTime)
+            if (cursor.moveToNext()) {
+                timeItem = cursor.getLong(iTime)
+            }
         }
+        cursor.close()
+        needLoadNews = loadIfNeed && DateUnit.isLongAgo(timeUpdate)
+
+        var title = strings.nothing
+        if (timeItem > 0L) {
+            val today = DateUnit.initToday().timeInSeconds
+            val diff = today - timeItem / DateUnit.SEC_IN_MILLS
+            title = strings.last + when {
+                diff < 0 -> strings.today + "!"
+                diff < DateUnit.DAY_IN_SEC -> strings.yesterday
+                else -> {
+                    val date = DateUnit.putMills(timeItem)
+                    strings.from + " " + date.toDateString()
+                }
+            }
+        }
+        tabNews = SiteTab.NEWS.value
+        if (title == strings.nothing || !title.contains(strings.today)) {
+            val count = adsStorage.dev.unreadCount
+            if (count > 0) {
+                tabNews = SiteTab.DEV.value
+                title = strings.new_dev_ads
+            }
+        }
+        val des = if (timeUpdate == 0L) strings.never
+        else strings.refreshed + HomeItem.PLACE_TIME + strings.back
 
         return HomeItem(
             type = HomeItem.Type.NEWS,
-            time = time,
+            time = timeUpdate,
             lines = listOf(strings.news, des, title)
         )
     }

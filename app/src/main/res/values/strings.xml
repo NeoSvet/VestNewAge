@@ -168,7 +168,6 @@
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
     <string name="image">[изображение]</string>
-    <string name="empty_site">Данный раздел сайта пуст.</string>
     <!--CabmainFragment-->
     <string name="anketa_failed">Анкета загружена неверно</string>
     <string name="send_status">Передать ощущение</string>
@@ -279,14 +278,14 @@
     <string name="additionally_from_tg">Дополнительно из Телеграма</string>
     <string name="today_msk">Сегодня по Москве</string>
     <string name="today_empty">За сегодня ещё ничего нет</string>
+    <string name="today">сегодня</string>
     <string name="last_post_from">Сообщение от %s</string>
     <string name="last_readed">В прошлый раз читали:</string>
     <string name="nothing">ничего…</string>
     <string name="never">Никогда…</string>
     <string name="refreshed">Обновлено&#160;</string>
     <string name="precept_human_future">Заповеди Человека Будущего</string>
-    <string name="no_changes">Изменений нет</string>
-    <string name="has_changes">Есть изменения!</string>
+    <string name="last">Последнее&#160;</string>
     <string name="hidden_items">Скрытые элементы:</string>
     <string name="information">Информация</string>
     <!--HelpFragment-->

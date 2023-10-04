@@ -551,7 +551,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun showWarnAds(warn: Int) {
         val storage = AdsStorage()
-        val ads = AdsUtils(storage)
+        val ads = AdsUtils(storage.dev)
         val item = ads.getItem(warn)
         storage.close()
         if (item[AdsUtils.TITLE].isEmpty()) return

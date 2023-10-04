@@ -63,14 +63,30 @@ class DataBase(name: String, write: Boolean = false) :
                         + Const.LINK + " text primary key,"
                         + Const.TIME + " integer);"
             )
-            AdsStorage.NAME -> db.execSQL(
-                "create table if not exists " + AdsStorage.NAME + " ("
-                        + Const.MODE + " integer,"
-                        + Const.UNREAD + " integer default 1,"
-                        + Const.TITLE + " text,"
-                        + Const.LINK + " text,"
-                        + Const.DESCTRIPTION + " text);"
-            )
+
+            AdsStorage.NAME -> {
+                db.execSQL(
+                    "create table " + AdsStorage.NAME + " ("
+                            + ID + " integer primary key,"
+                            + Const.LINK + " text,"
+                            + Const.TITLE + " text,"
+                            + Const.DESCTRIPTION + " text,"
+                            + Const.TIME + " integer);"
+                )
+                val row = ContentValues()
+                row.put(ID, 1)
+                row.put(Const.TIME, 0)
+                db.insert(AdsStorage.NAME, null, row)
+                db.execSQL(
+                    "create table if not exists " + AdsStorage.DEV_NAME + " ("
+                            + Const.MODE + " integer,"
+                            + Const.UNREAD + " integer default 1,"
+                            + Const.TITLE + " text,"
+                            + Const.LINK + " text,"
+                            + Const.DESCTRIPTION + " text);"
+                )
+            }
+
             Const.SEARCH -> db.execSQL(
                 "create table if not exists " + Const.SEARCH + " ("
                         + Const.LINK + " text primary key,"
@@ -78,11 +94,13 @@ class DataBase(name: String, write: Boolean = false) :
                         + ID + " integer," //number for sorting
                         + Const.DESCTRIPTION + " text);"
             )
+
             JOURNAL -> db.execSQL(
                 "create table if not exists " + JOURNAL + " ("
                         + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
                         + Const.TIME + " integer);"
             )
+
             ADDITION -> db.execSQL(
                 "create table if not exists " + ADDITION + " ("
                         + ID + " integer primary key," //number post on site
@@ -91,6 +109,7 @@ class DataBase(name: String, write: Boolean = false) :
                         + Const.TIME + " text,"
                         + Const.DESCTRIPTION + " text);"
             )
+
             MARKERS -> {
                 db.execSQL(
                     "create table " + MARKERS + " ("

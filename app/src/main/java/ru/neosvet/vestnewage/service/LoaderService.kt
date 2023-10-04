@@ -26,14 +26,13 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ListsUtils
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoToast
-import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 class LoaderService : LifecycleService(), LoadHandler {
@@ -326,17 +325,14 @@ class LoaderService : LifecycleService(), LoadHandler {
             Urls.Site,
             Urls.Ads
         )
-        val file = arrayOf(
-            Lib.getFile(SiteToiler.MAIN).toString(),
-            Lib.getFile(SiteToiler.NEWS).toString()
-        )
-        var loader: SiteLoader
         var i = 0
+        val storage = AdsStorage()
+        val loader = SiteLoader(client, storage)
         while (i < url.size && isRun) {
-            loader = SiteLoader(client, file[i])
             loader.load(url[i])
             i++
         }
+        storage.close()
     }
 
     override fun setMax(value: Int) {

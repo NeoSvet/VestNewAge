@@ -89,7 +89,7 @@ class UnreadUtils {
             if (cursor.moveToFirst()) k = cursor.count
             cursor.close()
             val storage = AdsStorage()
-            k += storage.unreadCount
+            k += storage.dev.unreadCount
             storage.close()
             close()
             return k
@@ -130,7 +130,7 @@ class UnreadUtils {
 
     fun setBadge() {
         val storage = AdsStorage()
-        setBadge(storage.unreadCount)
+        setBadge(storage.dev.unreadCount)
         storage.close()
     }
 

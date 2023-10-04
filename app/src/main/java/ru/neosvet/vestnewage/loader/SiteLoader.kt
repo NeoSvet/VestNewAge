@@ -1,55 +1,30 @@
 package ru.neosvet.vestnewage.loader
 
+import android.content.ContentValues
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.loader.basic.LinksProvider
+import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.noHasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
-import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileOutputStream
-import java.io.FileReader
 import java.io.OutputStreamWriter
-import java.util.regex.Pattern
 
 class SiteLoader(
     private val client: NeoClient,
-    private val file: String
-) : LinksProvider {
-    private val patternList: Pattern by lazy {
-        Pattern.compile("\\d{4}\\.html")
-    }
-
-    override fun getLinkList(): List<String> {
-        val list = mutableListOf<String>()
-        if (file.contains(SiteToiler.NEWS))
-            return list
-        list.add(Urls.News)
-        val br = BufferedReader(FileReader(file))
-        br.forEachLine {
-            if (isNeedLoad(it)) {
-                if (it.contains("@"))
-                    list.add(it.substring(9))
-                else list.add(it)
-            }
-        }
-        br.close()
-        return list
-    }
-
-    private fun isNeedLoad(link: String): Boolean {
-        if (!link.contains(Const.HTML))
-            return false
-        if (link.contains("tolkovaniya") || link.contains("/") && link.length < 18)
-            return false
-        return !patternList.matcher(link).matches()
-    }
-
+    private val storage: AdsStorage
+) {
     fun load(url: String): List<BasicItem> {
         val list = loadList(url)
-        saveList(list)
+        if (url == Urls.Site)
+            saveToFile(list)
+        else saveToStorage(list)
         return list
     }
 
@@ -75,8 +50,9 @@ class SiteLoader(
         var d = StringBuilder()
         val list = mutableListOf<BasicItem>()
         var item = BasicItem("")
+        var prevLink = ""
         do {
-            when {
+            if (s != null) when {
                 page.isHead -> {
                     if (isSite)
                         item = BasicItem(page.text, true)
@@ -91,7 +67,7 @@ class SiteLoader(
                 }
 
                 isSite -> {
-                    if (s == null || s.contains(end)) break
+                    if (s.contains(end)) break
                     if (page.link?.contains("javascript") == true) {
                         page.nextItem //DisableEnableUnread("true")
                         page.nextItem //DisableEnableUnread("false")
@@ -106,15 +82,30 @@ class SiteLoader(
                     }
                 }
 
-                page.isImage -> {}
-                page.isSimple ->
+                page.isImage -> {
+                    val p = parseImage(s)
+                    if (p.second == prevLink) prevLink = ""
+                    addLink(item, p.first, p.second)
+                    d.append("<a href='" + p.second + "'>" + p.first + "</a><br>")
+                }
+
+                page.isSimple && s.indexOf("</") != 0 -> {
                     d.append(s)
+                    if (prevLink.isNotEmpty()) {
+                        addLink(item, s, prevLink)
+                        prevLink = ""
+                    }
+                }
 
                 else -> {
-                    if (isCom && s != null)
-                        s = s.replace(" class='c0'", "").replace("  ", " ")
-                            .replace("\"/print/", "\"")
-                    page.link?.let { addLink(item, page.text, it.replace("/print/", "")) }
+                    s = s.replace(" class='c0'", "").replace("  ", " ").replace("\"/print/", "\"")
+                    page.link?.let {
+                        prevLink = it.replace("/print", "")
+                        if (page.text.isNotEmpty()) {
+                            addLink(item, page.text, prevLink)
+                            prevLink = ""
+                        }
+                    }
                     d.append(s)
                 }
             }
@@ -135,13 +126,25 @@ class SiteLoader(
         return list
     }
 
+    private fun parseImage(s: String): Pair<String, String> {
+        val t = when {
+            s.contains("title") -> "title"
+            s.contains("alt") -> "alt"
+            else -> "/"
+        }
+        var i = s.lastIndexOf(t) + if (t.length == 1) 1 else t.length + 2
+        val title = s.substring(i, s.indexOf("\"", i))
+        i = s.indexOf("src") + 5
+        val url = s.substring(i, s.indexOf("\"", i))
+        return Pair(title, url)
+    }
+
     private fun addLink(item: BasicItem, head: String, link: String) {
         var url = link
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma"))
             url = Urls.Site + url.substring(1)
         if (url.indexOf("/") == 0) url = url.substring(1)
-        if (item.link == "@")
-            item.clear()
+        if (item.link == "@") item.clear()
         item.addLink(head, url)
     }
 
@@ -156,25 +159,88 @@ class SiteLoader(
         return true
     }
 
-    private fun saveList(list: List<BasicItem>) {
+    private fun saveToFile(list: List<BasicItem>) {
+        val file = Lib.getFile(SiteToiler.MAIN)
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
-        for (i in list.indices) {
-            bw.write(list[i].title + Const.N)
-            bw.write(list[i].des + Const.N)
+        list.forEach { item ->
+            bw.write(item.title + Const.N)
+            bw.write(item.des + Const.N)
             when {
-                list[i].hasFewLinks() -> {
-                    list[i].headsAndLinks().forEach {
-                        bw.write(it.second + Const.N)
-                        bw.write(it.first + Const.N)
-                    }
-                }
-
-                list[i].hasLink() -> bw.write(list[i].link + Const.N)
+                item.hasLink() -> bw.write(item.link + Const.N)
                 else -> bw.write("@" + Const.N)
             }
             bw.write(SiteToiler.END + Const.N)
             bw.flush()
         }
         bw.close()
+    }
+
+    private fun saveToStorage(list: List<BasicItem>) {
+        var i: Int
+        var d: String
+        val ads = storage.site
+        ads.clear()
+        ads.insertTime()
+        val now = DateUnit.initNow()
+        var prevTime = now.timeInMills
+        var date: DateUnit
+        var time: Long
+        var id = 2
+        list.forEach { item ->
+            val row = ContentValues()
+            row.put(DataBase.ID, id)
+            id++
+            row.put(Const.TITLE, item.title)
+            row.put(Const.DESCTRIPTION, item.des)
+            i = item.des.lastIndexOf("<p")
+            date = DateUnit.putMills(prevTime)
+            if (i > -1 && item.des.length - i > 10) {
+                i += 3
+                d = item.des.substring(i, i + 10)
+                if (!d.noHasDate) {
+                    if (d.contains("<")) {
+                        i = d.indexOf("<")
+                        d = d.substring(0, i)
+                    }
+                    date = DateUnit.parse("$d 12:00")
+                }
+            }
+            time = if (date.timeInDays == now.timeInDays)
+                now.timeInMills else date.timeInMills
+            if (time == prevTime)
+                time -= 30 * DateUnit.MIN_IN_MILLS
+            prevTime = time
+            row.put(Const.TIME, time)
+            when {
+                item.hasFewLinks() -> {
+                    val sb = StringBuilder()
+                    item.headsAndLinks().forEach {
+                        sb.appendLine(it.second)
+                        if (it.first.isNullOrEmpty())
+                            sb.appendLine(getHeadFromUrl(it.second))
+                        else sb.appendLine(it.first)
+                    }
+                    sb.delete(sb.length - 1, sb.length)
+                    row.put(Const.LINK, sb.toString())
+                }
+
+                item.link.contains(":") ->
+                    row.put(Const.LINK, item.link + Const.N + item.head)
+
+                else ->
+                    row.put(Const.LINK, item.link) //item.hasLink() or empty
+            }
+            ads.insert(row)
+        }
+    }
+
+    private fun getHeadFromUrl(url: String) = when {
+        url.contains("/") ->
+            url.substring(url.lastIndexOf("/") + 1)
+
+        url.contains(":") ->
+            url.substring(url.lastIndexOf(":") + 1)
+
+        else -> url
     }
 }
