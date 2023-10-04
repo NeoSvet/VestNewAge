@@ -9,27 +9,17 @@
     android:paddingTop="?attr/actionBarSize"
     tools:showIn="@layout/marker_activity">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvTitle"
-        style="@style/ItemBG"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/half_indent"
-        android:background="@drawable/item_bg"
-        android:paddingStart="@dimen/def_indent"
-        android:paddingEnd="@dimen/def_indent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/tgPlace"
         style="@style/ItemBG"
-        android:layout_width="match_parent"
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/half_indent"
         android:background="@drawable/item_bg"
         android:gravity="center_horizontal"
         android:padding="@dimen/half_indent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:selectionRequired="true"
         app:singleSelection="true">
 
@@ -50,17 +40,19 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSel"
         style="@style/ItemBG"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/half_indent"
         android:background="@drawable/card_bg"
         android:padding="@dimen/def_indent"
-        app:layout_constraintTop_toBottomOf="@id/tgPlace" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tgPlace"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilDes"
         style="@style/TextInputStyle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/item_bg"
         android:hint="@string/desctription"
@@ -68,6 +60,8 @@
         android:paddingTop="@dimen/half_indent"
         android:paddingEnd="@dimen/def_indent"
         android:paddingBottom="@dimen/def_indent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tgPlace"
         app:layout_constraintTop_toBottomOf="@id/tvSel">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -93,7 +87,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilCol"
         style="@style/TextInputStyle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/item_bg"
         android:hint="@string/add_col"
@@ -101,7 +95,9 @@
         android:paddingTop="@dimen/half_indent"
         android:paddingEnd="@dimen/def_indent"
         android:paddingBottom="@dimen/def_indent"
-        app:layout_constraintTop_toBottomOf="@id/tilDes">
+        app:layout_constraintEnd_toStartOf="@id/tilDes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tgPlace">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCol"

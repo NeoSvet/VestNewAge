@@ -425,7 +425,9 @@ class MarkerActivity : AppCompatActivity() {
 
     private fun showData(state: MarkerState.Primary) = binding.content.run {
         helper = state.helper
-        tvTitle.text = state.title
+        if (tvTitle == null)
+            supportActionBar?.title = getString(R.string.marker) + ": " + state.title
+        else tvTitle.text = state.title
         if (state.isPar)
             rPar.isChecked = true
         else
