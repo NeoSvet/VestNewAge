@@ -49,12 +49,8 @@ class HomeToiler : NeoToiler() {
         private set
     var tabNews = SiteTab.NEWS.value
         private set
-    private val storage: PageStorage by lazy {
-        PageStorage()
-    }
-    private val adsStorage: AdsStorage by lazy {
-        AdsStorage()
-    }
+    private var pageStorage: PageStorage? = null
+    private var adsStorage: AdsStorage? = null
     private var task = Task.NONE
     private lateinit var strings: HomeStrings
     private val client = NeoClient(NeoClient.Type.SECTION)
@@ -158,8 +154,8 @@ class HomeToiler : NeoToiler() {
     }
 
     override fun onDestroy() {
-        adsStorage.close()
-        storage.close()
+        pageStorage?.close()
+        adsStorage?.close()
     }
 
     private fun openList(isEditor: Boolean) {
@@ -279,11 +275,24 @@ class HomeToiler : NeoToiler() {
         postState(ListState.Update(i, createCalendarItem()))
     }
 
+    private fun getAds(): AdsStorage {
+        if (adsStorage == null)
+            adsStorage = AdsStorage()
+        return adsStorage!!
+    }
+
+    private fun getPage(date: String): PageStorage {
+        if (pageStorage == null)
+            pageStorage = PageStorage()
+        pageStorage?.open(date)
+        return pageStorage!!
+    }
+
     private suspend fun loadNews() {
         val i = indexNews
         if (i == -1) return
         postState(HomeState.Loading(i))
-        val loader = SiteLoader(client, adsStorage)
+        val loader = SiteLoader(client, getAds())
         loader.load(Urls.Ads)
         clearPrimaryState()
         postState(ListState.Update(i, createNewsItem()))
@@ -303,7 +312,6 @@ class HomeToiler : NeoToiler() {
         var title = getJournalTitle()
         while (title == null)
             title = getJournalTitle()
-        storage.close()
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
             lines = listOf(strings.journal, strings.last_readed, title)
@@ -316,8 +324,7 @@ class HomeToiler : NeoToiler() {
         var r: String? = strings.nothing
         journal.getLastId()?.let { id ->
             val m = id.split('&')
-            storage.open(m[0])
-            val cursor = storage.getPageById(m[1])
+            val cursor = getPage(m[0]).getPageById(m[1])
             if (cursor.moveToFirst()) {
                 r = cursor.getString(cursor.getColumnIndex(Const.TITLE))
                 linkJournal = cursor.getString(cursor.getColumnIndex(Const.LINK))
@@ -334,9 +341,8 @@ class HomeToiler : NeoToiler() {
     private fun readCalendarLink() {
         val date = DateUnit.initNow()
         date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
-        storage.open(date.my)
         val today = date.toAlterString().substring(7).removeRange(6, 8)
-        val cursor = storage.searchLink(today)
+        val cursor = getPage(date.my).searchLink(today)
         linkCalendar = if (cursor.moveToFirst())
             cursor.getString(1)
         else ""
@@ -350,8 +356,7 @@ class HomeToiler : NeoToiler() {
         task = Task.OPEN_CALENDAR
         val date = DateUnit.initNow()
         date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
-        storage.open(date.my)
-        val cursor = storage.getListAll()
+        val cursor = getPage(date.my).getListAll()
         var title = strings.today_empty
         if (cursor.moveToFirst()) {
             val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
@@ -419,7 +424,7 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.NEWS, listOf(strings.news))
         task = Task.OPEN_NEWS
-        val cursor = adsStorage.site.getAll()
+        val cursor = getAds().site.getAll()
         var timeItem = 0L
         var timeUpdate = 0L
         if (cursor.moveToFirst()) {
@@ -447,7 +452,7 @@ class HomeToiler : NeoToiler() {
         }
         tabNews = SiteTab.NEWS.value
         if (title == strings.nothing || !title.contains(strings.today)) {
-            val count = adsStorage.dev.unreadCount
+            val count = getAds().dev.unreadCount
             if (count > 0) {
                 tabNews = SiteTab.DEV.value
                 title = strings.new_dev_ads
