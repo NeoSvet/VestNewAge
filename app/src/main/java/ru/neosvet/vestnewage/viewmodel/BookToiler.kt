@@ -190,7 +190,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 do {
                     s = cursor.getString(iLink)
                     t = cursor.getString(iTitle)
-                    if (!s.noHasDate && !t.contains(s.date))
+                    if (s.hasDate && !t.contains(s.date))
                         t += " (" + strings.from + " ${s.date})"
                     list.add(BasicItem(t, s))
                 } while (cursor.moveToNext())

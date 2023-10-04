@@ -15,5 +15,5 @@ val String.date: String
         return this.substring(i, i + 8)
     }
 
-val String.noHasDate: Boolean
-    get() = !patternDate.matcher(this).find()
+val String.hasDate: Boolean
+    get() = patternDate.matcher(this).find()

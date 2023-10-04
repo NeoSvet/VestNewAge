@@ -33,7 +33,7 @@ class PageStorage : Closeable {
                 } else if (s.contains("-")) { ///2005/01-02.08.05.html
                     s = s.substring(s.indexOf("-") + 4, s.lastIndexOf("."))
                 } else { //http://blagayavest.info/poems/11.03.17.html
-                    s = if (s.noHasDate) DataBase.ARTICLES else s.date.substring(3)
+                    s = if (s.hasDate) s.date.substring(3) else DataBase.ARTICLES
                 }
                 s
             }
@@ -83,7 +83,7 @@ class PageStorage : Closeable {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle || isDoctrine || link.noHasDate || title == link) {
+        return if (isArticle || isDoctrine || !link.hasDate || title == link) {
             title
         } else {
             val s = link.date

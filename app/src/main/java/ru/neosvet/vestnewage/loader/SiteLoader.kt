@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
-import ru.neosvet.vestnewage.utils.noHasDate
+import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedWriter
 import java.io.FileOutputStream
@@ -197,7 +197,7 @@ class SiteLoader(
             if (i > -1 && item.des.length - i > 10) {
                 i += 3
                 d = item.des.substring(i, i + 10)
-                if (!d.noHasDate) {
+                if (d.hasDate) {
                     if (d.contains("<")) {
                         i = d.indexOf("<")
                         d = d.substring(0, i)
