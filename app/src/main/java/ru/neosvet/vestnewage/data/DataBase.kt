@@ -27,6 +27,7 @@ class DataBase(name: String, write: Boolean = false) :
         const val ARTICLES = "00.00"
         const val DOCTRINE = "00.01"
         const val EMPTY_BASE_SIZE = 24576L
+        private const val CREATE_TABLE = "create table if not exists "
         private val names: MutableSet<String> = LinkedHashSet()
         fun isBusy(name: String): Boolean = names.contains(name)
     }
@@ -40,7 +41,7 @@ class DataBase(name: String, write: Boolean = false) :
     override fun onCreate(db: SQLiteDatabase) {
         if (databaseName.contains(".")) { // базы данных с материалами
             db.execSQL(
-                "create table " + Const.TITLE + " ("
+                CREATE_TABLE + Const.TITLE + " ("
                         + ID + " integer primary key autoincrement," //id Const.TITLE
                         + Const.LINK + " text,"
                         + Const.TITLE + " text,"
@@ -51,7 +52,7 @@ class DataBase(name: String, write: Boolean = false) :
             row.put(Const.TIME, 0)
             db.insert(Const.TITLE, null, row)
             db.execSQL(
-                "create table " + PARAGRAPH + " ("
+                CREATE_TABLE + PARAGRAPH + " ("
                         + ID + " integer," //id Const.TITLE
                         + PARAGRAPH + " text);"
             )
@@ -59,14 +60,14 @@ class DataBase(name: String, write: Boolean = false) :
         }
         when (databaseName) {
             UnreadUtils.NAME -> db.execSQL(
-                "create table if not exists " + UnreadUtils.NAME + " ("
+                CREATE_TABLE + UnreadUtils.NAME + " ("
                         + Const.LINK + " text primary key,"
                         + Const.TIME + " integer);"
             )
 
             AdsStorage.NAME -> {
                 db.execSQL(
-                    "create table " + AdsStorage.NAME + " ("
+                    CREATE_TABLE + AdsStorage.NAME + " ("
                             + ID + " integer primary key,"
                             + Const.LINK + " text,"
                             + Const.TITLE + " text,"
@@ -78,7 +79,7 @@ class DataBase(name: String, write: Boolean = false) :
                 row.put(Const.TIME, 0)
                 db.insert(AdsStorage.NAME, null, row)
                 db.execSQL(
-                    "create table if not exists " + AdsStorage.DEV_NAME + " ("
+                    CREATE_TABLE + AdsStorage.DEV_NAME + " ("
                             + Const.MODE + " integer,"
                             + Const.UNREAD + " integer default 1,"
                             + Const.TITLE + " text,"
@@ -88,7 +89,7 @@ class DataBase(name: String, write: Boolean = false) :
             }
 
             Const.SEARCH -> db.execSQL(
-                "create table if not exists " + Const.SEARCH + " ("
+                CREATE_TABLE + Const.SEARCH + " ("
                         + Const.LINK + " text primary key,"
                         + Const.TITLE + " text,"
                         + ID + " integer," //number for sorting
@@ -96,13 +97,13 @@ class DataBase(name: String, write: Boolean = false) :
             )
 
             JOURNAL -> db.execSQL(
-                "create table if not exists " + JOURNAL + " ("
+                CREATE_TABLE + JOURNAL + " ("
                         + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
                         + Const.TIME + " integer);"
             )
 
             ADDITION -> db.execSQL(
-                "create table if not exists " + ADDITION + " ("
+                CREATE_TABLE + ADDITION + " ("
                         + ID + " integer primary key," //number post on site
                         + Const.LINK + " integer," //number post in Telegram
                         + Const.TITLE + " text,"
@@ -112,7 +113,7 @@ class DataBase(name: String, write: Boolean = false) :
 
             MARKERS -> {
                 db.execSQL(
-                    "create table " + MARKERS + " ("
+                    CREATE_TABLE + MARKERS + " ("
                             + ID + " integer primary key autoincrement," //id закладки
                             + Const.LINK + " text," //ссылка на материал
                             + COLLECTIONS + " text," //список id подборок, в которые включен материал
@@ -120,7 +121,7 @@ class DataBase(name: String, write: Boolean = false) :
                             + Const.PLACE + " text);"
                 ) //место в материале
                 db.execSQL(
-                    "create table " + COLLECTIONS + " ("
+                    CREATE_TABLE + COLLECTIONS + " ("
                             + ID + " integer primary key autoincrement," //id подборок
                             + MARKERS + " text," //список id закладок
                             + Const.PLACE + " integer," //место подборки в списке подоборок
