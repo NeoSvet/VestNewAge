@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     lateinit var status: StatusButton
         private set
     private var prom: PromUtils? = null
-    private var tab = 0
+    private var firstTab = 0
     private var isBlocked = false
     private var isEditor = false
     private var statusBack = StatusBack.EXIT
@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         utils.openLink(intent)?.let {
             if (it.tab == -1)
                 exit()
-            tab = it.tab
+            firstTab = it.tab
             firstSection = it.section
             return
         }
@@ -352,7 +352,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     @SuppressLint("NonConstantResourceId")
-    fun setSection(section: Section, savePrev: Boolean) {
+    fun setSection(section: Section, savePrev: Boolean, tab: Int = firstTab) {
         if (section == helper.curSection) return
         helper.vsbScrollBar.isVisible = false
         toast.hide()
@@ -457,7 +457,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
         }
-        tab = 0
+        firstTab = 0
         if (supportFragmentManager.isDestroyed.not())
             fragmentTransaction.commit()
     }
@@ -512,10 +512,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack == StatusBack.EXIT ->
                 finish()
 
-            helper.prevSection != null -> {
-                if (helper.prevSection == Section.SITE)
-                    tab = SiteTab.SITE.value
-                setSection(helper.prevSection!!, false)
+            helper.prevSection != null -> helper.prevSection?.let {
+                if (it == Section.SITE)
+                    setSection(it, false, SiteTab.SITE.value)
+                else setSection(it, false)
                 helper.prevSection = null
             }
 
@@ -535,10 +535,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun openBook(link: String, isPoems: Boolean) {
-        tab = if (isPoems) 0 else 1
+        firstTab = if (isPoems) 0 else 1
         val year = helper.getYear(link)
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-        curFragment = BookFragment.newInstance(tab, year).also {
+        curFragment = BookFragment.newInstance(firstTab, year).also {
             fragmentTransaction.replace(R.id.my_fragment, it)
             fragmentTransaction.commit()
         }
@@ -573,7 +573,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     override fun onItemClick(link: String) {
         if (link.isEmpty()) return
         if (link == Const.ADS) {
-            tab = SiteTab.DEV.value
+            firstTab = SiteTab.DEV.value
             setSection(Section.SITE, true)
         } else openReader(link, null)
     }
@@ -605,9 +605,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun firstRun(state: MainState.FirstRun) {
         val intent = intent
-        tab = intent.getIntExtra(Const.TAB, tab)
+        firstTab = intent.getIntExtra(Const.TAB, 0)
         if (helper.isFirstRun)
-            tab = -1
+            firstTab = -1
         else {
             intent.getStringExtra(Const.CUR_ID)
             if (firstSection == Section.MENU)
@@ -773,11 +773,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         if (value == -1)
             helper.vsbScrollBar.value = helper.vsbScrollBar.maxValue
         else helper.vsbScrollBar.value = value
-    }
-
-    fun openAddition() {
-        tab = 1
-        setSection(Section.SUMMARY, true)
     }
 
     fun startEditMenu() {
