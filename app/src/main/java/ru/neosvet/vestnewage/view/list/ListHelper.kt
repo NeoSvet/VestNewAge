@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import kotlin.math.abs
 
-class TouchHelper(
+class ListHelper(
     private val onlyLimit: Boolean = false,
     private val events: (Events) -> Unit
 ) {

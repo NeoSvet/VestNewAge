@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.ScrollHelper
-import ru.neosvet.vestnewage.view.list.TouchHelper
+import ru.neosvet.vestnewage.view.list.ListHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
@@ -177,19 +177,19 @@ abstract class NeoFragment : Fragment() {
                     act?.showBottomArea()
             }
         }.apply { attach(list) }
-        val touch = TouchHelper(onlyLimit) {
+        val helper = ListHelper(onlyLimit) {
             when (it) {
-                TouchHelper.Events.LIST_LIMIT ->
+                ListHelper.Events.LIST_LIMIT ->
                     act?.hideBottomArea()
 
-                TouchHelper.Events.SWIPE_LEFT ->
+                ListHelper.Events.SWIPE_LEFT ->
                     swipeLeft()
 
-                TouchHelper.Events.SWIPE_RIGHT ->
+                ListHelper.Events.SWIPE_RIGHT ->
                     swipeRight()
             }
         }
-        touch.attach(list)
+        helper.attach(list)
     }
 
     open fun swipeLeft() {}
