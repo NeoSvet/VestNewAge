@@ -125,13 +125,26 @@ class EmptyHolder(root: View) : RecyclerView.ViewHolder(root)
 
 class HomeEditHolder(
     root: View,
-    private val mover: (RecyclerView.ViewHolder) -> Unit
+    mover: (RecyclerView.ViewHolder) -> Unit
 ) : RecyclerView.ViewHolder(root) {
     private val ivIcon: ImageView = root.findViewById(R.id.icon)
     private val tvTitle: TextView = root.findViewById(R.id.title)
-    private val ivMove: View = root.findViewById(R.id.move)
+
+    init {
+        initTouch(root.findViewById(R.id.move), mover)
+    }
 
     @SuppressLint("ClickableViewAccessibility")
+    private fun initTouch(ivMove: View, mover: (RecyclerView.ViewHolder) -> Unit) {
+        ivMove.setOnTouchListener { _, event: MotionEvent ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                mover.invoke(this)
+                return@setOnTouchListener false
+            }
+            return@setOnTouchListener true
+        }
+    }
+
     fun setItem(item: HomeItem) {
         val icon = when (item.type) {
             HomeItem.Type.SUMMARY -> R.drawable.ic_summary
@@ -147,13 +160,5 @@ class HomeEditHolder(
             ivIcon.setImageDrawable(ContextCompat.getDrawable(ivIcon.context, icon))
         }
         tvTitle.text = item.lines[0]
-
-        ivMove.setOnTouchListener { _, event: MotionEvent ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                mover.invoke(this)
-                return@setOnTouchListener false
-            }
-            return@setOnTouchListener true
-        }
     }
 }
