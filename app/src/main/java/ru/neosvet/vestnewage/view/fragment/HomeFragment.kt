@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.HomeAdapter
 import ru.neosvet.vestnewage.view.list.HomeHolder
 import ru.neosvet.vestnewage.view.list.MenuAdapter
-import ru.neosvet.vestnewage.view.list.MoveHelper
+import ru.neosvet.vestnewage.view.list.HomeListHelper
 import ru.neosvet.vestnewage.viewmodel.HomeToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -37,8 +37,8 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         get() = getString(R.string.home_screen)
     private var openedReader = false
     private var initAdapter = false
-    private val mover: MoveHelper by lazy {
-        MoveHelper { i, up ->
+    private val listHelper: HomeListHelper by lazy {
+        HomeListHelper { i, up ->
             if (up) {
                 adapter.moveUp(i)
                 toiler.moveUp(i)
@@ -151,11 +151,11 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         if (state.isEditor) {
             act?.startEditMenu()
             act?.setAction(R.drawable.ic_ok)
-            mover.attach(rvList)
+            listHelper.attach(rvList)
             rvList.layoutManager = GridLayoutManager(requireContext(), 1)
         } else {
             act?.setAction(R.drawable.star)
-            mover.detach()
+            listHelper.detach()
             if (ScreenUtils.span == 2) {
                 rvList.layoutManager = GridLayoutManager(requireContext(), 2)
                 val i = state.list.indexOfFirst {
@@ -213,7 +213,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     override fun onItemMove(holder: RecyclerView.ViewHolder) {
-        mover.startMove(holder)
+        listHelper.startMove(holder)
     }
 
     private fun openReader(link: String) {

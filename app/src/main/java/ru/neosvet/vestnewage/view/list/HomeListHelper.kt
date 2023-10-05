@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.view.list
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class MoveHelper(
+class HomeListHelper(
     private val events: (Int, Boolean) -> Unit
 ) {
 
