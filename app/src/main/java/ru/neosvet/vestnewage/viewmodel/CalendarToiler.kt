@@ -167,13 +167,13 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             if (calendar.isEmpty())
                 createField()
             if (!Lib.getFileDB(date.my).exists()) {
+                time = 0L
                 postPrimary()
-                postState(BasicState.NotLoaded)
                 if (loadIfNeed) reLoad()
             } else {
                 val isEmpty = !loadFromStorage()
                 postPrimary()
-                if(isEmpty) postState(BasicState.Empty)
+                if (isEmpty) postState(BasicState.Empty)
             }
         }
     }

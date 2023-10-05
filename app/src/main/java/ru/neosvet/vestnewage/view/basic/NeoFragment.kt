@@ -209,10 +209,11 @@ abstract class NeoFragment : Fragment() {
         timeUpdate = time
         timer?.cancel()
         if (time == 0L) {
-            tv.text = ""
+            tv.text = label
             return
         }
-        startTimer(DateUnit.detectPeriod(time), tv)
+        val format = label + getString(R.string.loaded) + "%s" + getString(R.string.back)
+        startTimer(DateUnit.detectPeriod(time), tv, format)
     }
 
     private fun startTimer(period: Long, tv: TextView, format: String) {
@@ -225,7 +226,7 @@ abstract class NeoFragment : Fragment() {
             val p = DateUnit.detectPeriod(timeUpdate)
             if (p != period) {
                 timer?.cancel()
-                startTimer(p, tv)
+                startTimer(p, tv, format)
             }
         }
     }

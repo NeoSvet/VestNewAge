@@ -167,11 +167,12 @@ class BookFragment : NeoFragment() {
                 linkToSrc = ""
                 adapter.clear()
                 if (state.time == 0L) {
-                    tvUpdate.text = ""
+                    tvUpdate.text = state.label
                     act?.showStaticToast(getString(R.string.list_no_loaded))
-                } else setUpdateTime(state.time, tvUpdate)
-                if (ScreenUtils.isLand) tvUpdate.text = state.label + Const.N + tvUpdate.text
-                else tvUpdate.text = state.label + ". " + tvUpdate.text
+                } else {
+                    val label = state.label + if (ScreenUtils.isLand) Const.N else ". "
+                    setUpdateTime(state.time, tvUpdate, label)
+                }
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
                 pMonth.fixWidth(1.3f)

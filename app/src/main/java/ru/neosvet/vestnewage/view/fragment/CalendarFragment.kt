@@ -156,9 +156,6 @@ class CalendarFragment : NeoFragment() {
     @SuppressLint("SetTextI18n")
     override fun onChangedOtherState(state: NeoState) {
         when (state) {
-            is BasicState.NotLoaded ->
-                act?.showStaticToast(getString(R.string.list_no_loaded))
-
             is CalendarState.Status ->
                 restoreStatus(state)
 
@@ -173,8 +170,11 @@ class CalendarFragment : NeoFragment() {
 
             is CalendarState.Primary -> binding?.run {
                 act?.hideToast()
-                setUpdateTime(state.time, tvUpdate)
-                tvUpdate.text = state.label + ". " + tvUpdate.text
+                if (state.time == 0L) {
+                    tvUpdate.text = state.label
+                    act?.showStaticToast(getString(R.string.list_no_loaded))
+                } else
+                    setUpdateTime(state.time, tvUpdate, state.label + ". ")
                 adapter.setItems(state.list)
                 if (rvCalendar.isVisible.not())
                     showView(rvCalendar)
