@@ -127,6 +127,6 @@
         android:layout_margin="@dimen/half_indent"
         android:background="@drawable/card_bg"
         android:padding="@dimen/def_indent"
-        app:layout_constraintTop_toBottomOf="@id/tilCol" />
+        app:layout_constraintTop_toBottomOf="@id/tilDes" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
