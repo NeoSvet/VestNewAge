@@ -55,8 +55,7 @@ class HomeAdapter(
     }
 
     private fun startTimer(period: Long) {
-        val delay = if (timer == null) period else 0L
-        timer = timer(initialDelay = delay, period = period) {
+        timer = timer(initialDelay = period, period = period) {
             for (i in items.indices) {
                 if (items[i].time > 0)
                     view?.post { notifyItemChanged(i) }
@@ -103,6 +102,10 @@ class HomeAdapter(
         if (loadingIndex == index) loadingIndex = -1
         items[index] = item
         notifyItemChanged(index)
+        if (item.time > 0L) {
+            stopTimer()
+            startTimer((10 * DateUnit.SEC_IN_MILLS).toLong())
+        }
     }
 
     override fun getItemCount(): Int = items.size

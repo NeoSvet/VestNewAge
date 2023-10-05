@@ -200,7 +200,12 @@ abstract class NeoFragment : Fragment() {
         neotoiler.clearStates()
     }
 
-    protected fun setUpdateTime(time: Long, tv: TextView) {
+    override fun onPause() {
+        timer?.cancel()
+        super.onPause()
+    }
+
+    protected fun setUpdateTime(time: Long, tv: TextView, label: String = "") {
         timeUpdate = time
         timer?.cancel()
         if (time == 0L) {
@@ -210,12 +215,11 @@ abstract class NeoFragment : Fragment() {
         startTimer(DateUnit.detectPeriod(time), tv)
     }
 
-    private fun startTimer(period: Long, tv: TextView) {
+    private fun startTimer(period: Long, tv: TextView, format: String) {
         timer = timer(period = period) {
             tv.post {
                 val diff = DateUnit.getDiffDate(System.currentTimeMillis(), timeUpdate)
-                val s = getString(R.string.loaded) + diff + getString(R.string.back)
-                tv.text = s
+                tv.text = format.format(diff)
             }
 
             val p = DateUnit.detectPeriod(timeUpdate)

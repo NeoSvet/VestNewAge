@@ -6,7 +6,7 @@ data class HomeItem(
     val time: Long = 0L
 ) {
     companion object {
-        const val PLACE_TIME = "{0}"
+        const val PLACE_TIME = "%s"
     }
 
     enum class Type(val value: Int) {
@@ -21,6 +21,6 @@ data class HomeItem(
         get() = if (time == 0L || !lines[1].contains(PLACE_TIME)) null
         else {
             val diff = DateUnit.getDiffDate(System.currentTimeMillis(), time)
-            lines[1].replace(PLACE_TIME, diff)
+            lines[1].format(diff)
         }
 }
