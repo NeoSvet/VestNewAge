@@ -47,7 +47,7 @@ class TabAdapter(
 
         fun setItem(caption: String) {
             tv.text = caption
-            val index = absoluteAdapterPosition
+            val index = layoutPosition
             if (index == selected)
                 tv.background = ContextCompat.getDrawable(tv.context, R.drawable.selected_tab)
             else tv.setBackgroundColor(
