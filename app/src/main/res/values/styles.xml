@@ -87,7 +87,7 @@
         <item name="android:gravity">center_vertical|center_horizontal</item>
     </style>
 
-    <style name="NeoDialog" parent="@android:style/Theme.Holo.Dialog.NoActionBar">
+    <style name="NeoDialog" parent="@android:style/Theme.Material.Dialog.NoActionBar">
         <item name="android:buttonStyle">@style/Label</item>
         <!--buttons color-->
         <item name="colorPrimary">@color/colorAccentLight</item>
