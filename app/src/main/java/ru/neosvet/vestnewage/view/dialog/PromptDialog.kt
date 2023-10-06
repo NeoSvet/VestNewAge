@@ -14,9 +14,9 @@ import ru.neosvet.vestnewage.databinding.PromptDialogBinding
 import ru.neosvet.vestnewage.utils.Const
 
 sealed class PromptResult {
-    object Yes : PromptResult()
-    object No : PromptResult()
-    object Cancel : PromptResult()
+    data object Yes : PromptResult()
+    data object No : PromptResult()
+    data object Cancel : PromptResult()
 }
 
 class PromptDialog : BottomSheetDialogFragment() {
@@ -60,8 +60,7 @@ class PromptDialog : BottomSheetDialogFragment() {
         }
         arguments?.let {
             val message = it.getString(Const.DIALOG) ?: ""
-            binding?.tvMessage?.setText(message)
-            arguments = null
+            binding?.tvMessage?.text = message
         }
         setButtons()
     }
