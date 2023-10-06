@@ -15,8 +15,7 @@
             android:id="@+id/text_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
+            android:paddingHorizontal="@dimen/def_indent"
             android:textColor="@color/colorAccentLight" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -24,8 +23,7 @@
             style="@style/Des"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp" />
+            android:paddingHorizontal="@dimen/def_indent" />
 
     </LinearLayout>
 </LinearLayout>
