@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.view.activity
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
@@ -49,6 +51,7 @@ import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
+
 class BrowserActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
@@ -56,7 +59,7 @@ class BrowserActivity : AppCompatActivity() {
             val intent = Intent(App.context, BrowserActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.putExtra(Const.LINK, link)
-            if (search != null) intent.putExtra(Const.SEARCH, search)
+            if (!search.isNullOrEmpty()) intent.putExtra(Const.SEARCH, search)
             App.context.startActivity(intent)
         }
     }
@@ -80,12 +83,9 @@ class BrowserActivity : AppCompatActivity() {
     private var animButton: BottomAnim? = null
     private var navIsTop = false
     private lateinit var tipFinish: Tip
-    private var isTouch = true
-    private var isScrollTop = false
     private var isSearch = false
     private var twoPointers = false
     private var isBlocked = false
-    private var jobScroll: Job? = null
     var currentScale = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
@@ -100,6 +100,8 @@ class BrowserActivity : AppCompatActivity() {
     private lateinit var helper: BrowserHelper
     private var link = ""
     private var searchIndex = -1
+    private var lastScroll = 0
+
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
             (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
@@ -111,7 +113,7 @@ class BrowserActivity : AppCompatActivity() {
         }
     private val isEndScroll: Boolean
         get() = binding.content.wvBrowser.run {
-            scrollY + measuredHeight >= (contentHeight * currentScale).toInt()
+            scrollY + measuredHeight >= (contentHeight * currentScale).toInt() - 20
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -205,15 +207,22 @@ class BrowserActivity : AppCompatActivity() {
             BrowserState.Status(
                 helper = helper,
                 search = s,
-                index = searchIndex
+                index = searchIndex,
+                head = getHeadStatus(),
+                bottom = !binding.bottomBar.isScrolledDown
             )
         )
         super.onSaveInstanceState(outState)
     }
 
+    private fun getHeadStatus(): Byte = when {
+        headBar.isHided -> 0
+        headBar.isExpanded -> 2
+        else -> 1
+    }
+
     override fun onDestroy() {
         helper.save()
-        jobScroll?.cancel()
         super.onDestroy()
     }
 
@@ -279,6 +288,9 @@ class BrowserActivity : AppCompatActivity() {
                 snackbar.isShown ->
                     snackbar.hide()
 
+                isSearch ->
+                    closeSearch()
+
                 status.isVisible -> {
                     toiler.cancel()
                     status.setError(null)
@@ -294,9 +306,6 @@ class BrowserActivity : AppCompatActivity() {
                     bottomShow()
                 }
 
-                isSearch ->
-                    closeSearch()
-
                 toiler.onBackBrowser().not() ->
                     finish()
             }
@@ -304,7 +313,15 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun setViews() = binding.run {
-        bBack.setOnClickListener { finish() }
+        bBack.setOnClickListener {
+            val m = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val act = m.appTasks[0].taskInfo.baseActivity
+            if (act == null || act.shortClassName.contains(localClassName)) {
+                val intent = Intent(this@BrowserActivity, MainActivity::class.java)
+                startActivity(intent)
+            }
+            finish()
+        }
         fabNav.setOnClickListener {
             if (helper.isNavButton.not()) {
                 switchFullScreen(true)
@@ -318,17 +335,17 @@ class BrowserActivity : AppCompatActivity() {
                     headBar.expanded()
                 }
                 bottomShow()
+                setNavButton(0)
             } else {
-                isTouch = false
                 with(content.wvBrowser) {
                     scrollTo(0, (contentHeight * currentScale).toInt())
                 }
-                isTouch = false
                 if (isSearch.not()) {
                     headBar.hide()
                     headBar.unblocked()
                 }
                 bottomHide()
+                setNavButton(500)
             }
         }
         status.setClick {
@@ -384,49 +401,24 @@ class BrowserActivity : AppCompatActivity() {
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
-                isTouch = false
                 if (twoPointers)
                     wvBrowser.setInitialScale((currentScale * 100f).toInt())
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
-            if (helper.isFullScreen) return@setOnTouchListener false
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                jobScroll?.cancel()
-                if (isSearch.not() && wvBrowser.scrollY == 0) {
-                    isTouch = false
-                    if (helper.isAutoReturn && headBar.isExpanded.not()) {
-                        headBar.expanded()
-                        jobScroll = lifecycleScope.launch {
-                            delay(250)
-                            wvBrowser.post { wvBrowser.scrollTo(0, 0) }
-                        }
-                    }
-                } else {
-                    isTouch = true
-                    if (isEndScroll) bottomHide()
+            if (helper.isFullScreen || isSearch)
+                return@setOnTouchListener false
+
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN ->
+                    lastScroll = wvBrowser.scrollY
+
+                MotionEvent.ACTION_MOVE -> {
+                    scrollEvent()
+                    lastScroll = wvBrowser.scrollY
                 }
             }
             return@setOnTouchListener false
-        }
-
-        wvBrowser.setOnScrollChangeListener { _, _, scrollY: Int, _, oldScrollY: Int ->
-            if (helper.isNavButton)
-                setNavButton(scrollY)
-            if (helper.isFullScreen) return@setOnScrollChangeListener
-            if (isTouch) {
-                isScrollTop = scrollY >= oldScrollY
-                if (isScrollTop.not()) if (helper.isAutoReturn.not())
-                    return@setOnScrollChangeListener
-                if (isSearch || headBar.onScrollHost(scrollY, oldScrollY)) {
-                    isTouch = false
-                }
-                if (isScrollTop) {
-                    if (headBar.isHided) bottomHide()
-                } else bottomShow()
-            } else if (isScrollTop != scrollY >= oldScrollY) {
-                isTouch = true
-            }
         }
         etSearch.setOnKeyListener { _, keyCode: Int, keyEvent: KeyEvent ->
             if (keyEvent.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
@@ -466,6 +458,22 @@ class BrowserActivity : AppCompatActivity() {
                 bClear.isVisible = it?.isNotEmpty() ?: false
         }
         bClear.setOnClickListener { etSearch.setText("") }
+    }
+
+    private fun scrollEvent() {
+        val scrollY = binding.content.wvBrowser.scrollY
+        if (helper.isNavButton)
+            setNavButton(scrollY)
+        val isScrollTop = scrollY <= lastScroll
+        if (scrollY == 0) {
+            if (helper.isAutoReturn && !helper.isMiniTop && isScrollTop)
+                headBar.expanded()
+        } else {
+            if (isEndScroll) bottomHide()
+            else if (isScrollTop && helper.isAutoReturn) bottomShow()
+        }
+        if (!headBar.isHided || helper.isAutoReturn)
+            headBar.onScrollHost(scrollY, lastScroll)
     }
 
     private fun bottomHide() {
@@ -508,12 +516,11 @@ class BrowserActivity : AppCompatActivity() {
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
             additionViews = listOf(tvGodWords, btnFullScreen)
         ) {
-            if (link.contains(Const.DOCTRINE))
-                Urls.openInBrowser(Urls.DoctrineSite)
-            else if (menu.refresh.isVisible)
-                Urls.openInBrowser(Urls.Site + link)
-            else
-                Urls.openInBrowser(Urls.Site)
+            when {
+                link.contains(Const.DOCTRINE) -> Urls.openInBrowser(Urls.DoctrineSite)
+                menu.refresh.isVisible -> Urls.openInBrowser(Urls.Site + link)
+                else -> Urls.openInBrowser(Urls.Site)
+            }
         }
         btnFullScreen.setOnClickListener {
             switchFullScreen(true)
@@ -569,8 +576,10 @@ class BrowserActivity : AppCompatActivity() {
         bottomBar.setBackgroundResource(R.drawable.bottombar_bg)
         bottomBar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.nav_refresh ->
+                R.id.nav_refresh -> {
+                    helper.position = positionOnPage
                     toiler.refresh()
+                }
 
                 R.id.nav_share ->
                     ShareDialog.newInstance(link).show(supportFragmentManager, null)
@@ -668,8 +677,7 @@ class BrowserActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(250)
             binding.content.wvBrowser.post {
-                if (helper.isSearch) restoreSearch()
-                else restorePosition()
+                restorePosition()
             }
         }
     }
@@ -741,6 +749,15 @@ class BrowserActivity : AppCompatActivity() {
         }
         searchIndex = state.index
         setHelper(state.helper)
+        if (!state.bottom)
+            bottomHide()
+        when (state.head) {
+            0.toByte() -> headBar.hide()
+            1.toByte() -> binding.ivHeadBack.post {
+                headBar.setExpandable(true)
+                headBar.setExpandable(false)
+            }
+        }
     }
 
     private fun noConnected() {
@@ -759,6 +776,7 @@ class BrowserActivity : AppCompatActivity() {
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
+        if (!helper.isFullScreen) bottomUnblocked()
     }
 
     private fun connectChanged(connected: Boolean) {
