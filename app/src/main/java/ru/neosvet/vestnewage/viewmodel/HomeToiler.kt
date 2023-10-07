@@ -534,6 +534,7 @@ class HomeToiler : NeoToiler() {
     }
 
     fun updateJournal() {
+        if (indexJournal == -1) return
         scope.launch {
             postState(ListState.Update(indexJournal, createJournalItem()))
         }
