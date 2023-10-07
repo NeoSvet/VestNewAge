@@ -333,6 +333,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(Const.LIST, helper.isSideMenu)
+        outState.putString(Const.MODE, helper.curSection.toString())
         jobFinishStar?.cancel()
         toiler.setStatus(
             MainState.Status(
@@ -344,6 +346,23 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             )
         )
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) { //for support DeX
+        val isSizeMenu = savedInstanceState.getBoolean(Const.LIST)
+        val sec = savedInstanceState.getString(Const.MODE)?.let {
+            Section.valueOf(it)
+        } ?: Section.HOME
+        if (helper.isSideMenu && !isSizeMenu) {
+            showHead()
+            setSection(sec, false)
+            updateNew()
+        } else if (!ScreenUtils.isTablet && isSizeMenu) {
+            showHead()
+            setSection(sec, false)
+            helper.bottomBar?.isVisible = true
+        }
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
     fun setFrMenu(frMenu: MenuFragment) {
@@ -632,16 +651,16 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         curSection = Section.valueOf(state.curSection)
 
         if (supportFragmentManager.fragments.isEmpty() ||
-            (helper.isSideMenu && curSection == Section.MENU)
+            (isSideMenu && curSection == Section.MENU)
         ) setSection(firstSection, false)
         if (isSideMenu) setMenuFragment()
         else if (curSection != Section.MENU)
             statusBack = StatusBack.PAGE
         updateNew()
-        if (curSection == Section.HELP && helper.isSideMenu)
-            helper.fabAction.isVisible = false
+        if (curSection == Section.HELP && isSideMenu)
+            fabAction.isVisible = false
         if (state.shownDwnDialog)
-            helper.showDownloadDialog()
+            showDownloadDialog()
         if (state.isEditor)
             startEditMenu()
     }
