@@ -6,7 +6,8 @@ sealed class MarkersState : NeoState {
     data class Primary(
         val title: String,
         val list: List<MarkerItem>,
-        val isCollections: Boolean
+        val isCollections: Boolean,
+        val isEditor: Boolean = false
     ) : PrimaryState
 
     enum class Type {
@@ -15,7 +16,7 @@ sealed class MarkersState : NeoState {
 
     data class Status(
         val isRotate: Boolean,
-        val selectedIndex: Int,
+        val showIndex: Int,
         val dialog: Type
     ) : StatusState
 

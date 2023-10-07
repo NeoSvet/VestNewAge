@@ -5,5 +5,6 @@ data class MarkerItem(
     var title: String,
     var data: String,
     var des: String = "",
+    var text: String = "",
     var place: String? = null
 )

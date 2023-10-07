@@ -27,13 +27,13 @@ import java.io.*
 
 class MarkersToiler : NeoToiler() {
     enum class Type {
-        NONE, LIST, PAGE, FILE
+        NONE, COL, MAR, MOVE, SAVE, LOAD, EXPORT, IMPORT
     }
 
     private val storage = MarkersStorage()
     private lateinit var strings: MarkersStrings
     private var task: Type = Type.NONE
-    private var page: String? = null
+    private var loadIndex = -1
     private val list = mutableListOf<MarkerItem>()
     private var change = false
     private var collectionData = ""
@@ -49,6 +49,8 @@ class MarkersToiler : NeoToiler() {
         else {
             builder.putString(Const.TITLE, collectionTitle)
             builder.putString(Const.DESCTRIPTION, collectionData)
+            if (loadIndex > -1)
+                builder.putString(Const.LINK, list[loadIndex].data)
         }
         return builder.build()
     }
@@ -73,48 +75,66 @@ class MarkersToiler : NeoToiler() {
     }
 
     override suspend fun doLoad() {
-        page?.let { link ->
-            task = Type.PAGE
-            val loader = PageLoader(NeoClient(NeoClient.Type.SECTION))
-            loader.download(link, true)
-            page = null
-            openList()
+        if (loadIndex == -1) return
+        task = Type.LOAD
+        val index = loadIndex
+        val loader = PageLoader(NeoClient(NeoClient.Type.SECTION))
+        loader.download(list[index].data, true)
+        postState(BasicState.Ready)
+        loadIndex = -1
+        val id = list[index].id.toString()
+        getMarker(id)?.let {
+            list[index] = it
+            postState(ListState.Update(index, list[index]))
+            return
         }
+        list.removeAt(index)
+        postState(ListState.Remove(index))
     }
 
     override fun onDestroy() {
         storage.close()
     }
 
-    fun cancelChange() {
-        change = false
+    fun restore() {
+        if (change) {
+            change = false
+            openList()
+        } else setState(MarkersState.Primary(strings.collections, list, isCollections))
     }
 
-    fun saveChange() {
-        if (change.not()) return
-        change = false
-        if (isCollections) {
-            for (i in 1 until list.size) {
-                val row = ContentValues()
-                row.put(Const.PLACE, i)
-                storage.updateCollection(list[i].id, row)
-            }
+    fun save() {
+        if (!change) {
+            setState(MarkersState.Primary(strings.collections, list, isCollections))
             return
         }
-        val s = StringBuilder()
-        for (element in list) {
-            s.append(element.id)
-            s.append(Const.COMMA)
+        task = Type.SAVE
+        change = false
+        scope.launch {
+            if (isCollections) {
+                for (i in 1 until list.size) {
+                    val row = ContentValues()
+                    row.put(Const.PLACE, i)
+                    storage.updateCollection(list[i].id, row)
+                }
+            } else {
+                val s = StringBuilder()
+                for (element in list) {
+                    s.append(element.id)
+                    s.append(Const.COMMA)
+                }
+                s.delete(s.length - 1, s.length)
+                val t = s.toString()
+                val row = ContentValues()
+                row.put(DataBase.MARKERS, t)
+                storage.updateCollectionByTitle(collectionTitle, row)
+            }
+            postState(MarkersState.Primary(strings.collections, list, isCollections))
         }
-        s.delete(s.length - 1, s.length)
-        val t = s.toString()
-        val row = ContentValues()
-        row.put(DataBase.MARKERS, t)
-        storage.updateCollectionByTitle(collectionTitle, row)
     }
 
-    fun startExport(file: String) {
-        task = Type.FILE
+    fun export(file: String) {
+        task = Type.EXPORT
         isRun = true
         scope.launch {
             doExport(Uri.parse(file))
@@ -123,8 +143,8 @@ class MarkersToiler : NeoToiler() {
         }
     }
 
-    fun startImport(file: String) {
-        task = Type.FILE
+    fun import(file: String) {
+        task = Type.IMPORT
         isRun = true
         scope.launch {
             doImport(Uri.parse(file))
@@ -133,13 +153,13 @@ class MarkersToiler : NeoToiler() {
         }
     }
 
-    private fun loadPage(index: Int) {
-        page = list[index].data
+    fun loadPage(index: Int) {
+        loadIndex = index
         load()
     }
 
     fun openCollectionsList() {
-        task = Type.LIST
+        task = Type.COL
         isCollections = true
         scope.launch {
             list.clear()
@@ -169,8 +189,8 @@ class MarkersToiler : NeoToiler() {
         }
     }
 
-    private fun openMarkersList(iCol: Int = -1) {
-        task = Type.LIST
+    fun openMarkersList(iCol: Int = -1) {
+        task = Type.MAR
         isCollections = false
         if (iCol > -1) {
             collectionTitle = list[iCol].title
@@ -178,79 +198,75 @@ class MarkersToiler : NeoToiler() {
         }
         scope.launch {
             list.clear()
-            var iID: Int
-            var iPlace: Int
-            var iLink: Int
-            var iDes: Int
-            var link: String
             val mId = if (collectionData.contains(Const.COMMA))
                 collectionData.split(Const.COMMA)
             else listOf(collectionData)
-            var cursor: Cursor
-            var place: String
-            var k = 0
             for (s in mId) {
-                cursor = storage.getMarker(s)
-                if (cursor.moveToFirst()) {
-                    iID = cursor.getColumnIndex(DataBase.ID)
-                    iPlace = cursor.getColumnIndex(Const.PLACE)
-                    iLink = cursor.getColumnIndex(Const.LINK)
-                    iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
-                    link = cursor.getString(iLink)
-                    place = cursor.getString(iPlace)
-                    val item = MarkerItem(
-                        id = cursor.getInt(iID),
-                        title = getTitle(link),
-                        data = link
-                    )
-                    item.place = place
-                    item.des = if (cursor.getString(iDes).isEmpty()) getPlace(link, place)
-                    else cursor.getString(iDes) + Const.N + getPlace(link, place)
-                    k++
-                    list.add(item)
-                }
-                cursor.close()
+                getMarker(s)?.let { list.add(it) }
             }
             postState(MarkersState.Primary(collectionTitle, list, isCollections))
         }
     }
 
+    private fun getMarker(id: String): MarkerItem? {
+        val cursor = storage.getMarker(id)
+        val item = if (cursor.moveToFirst()) {
+            val iID = cursor.getColumnIndex(DataBase.ID)
+            val iPlace = cursor.getColumnIndex(Const.PLACE)
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val link = cursor.getString(iLink)
+            val place = cursor.getString(iPlace)
+            MarkerItem(
+                id = cursor.getInt(iID),
+                title = getTitle(link),
+                data = link
+            ).also {
+                it.place = place
+                it.des = cursor.getString(iDes).trim()
+                val p = getPlace(link, place)
+                it.des += Const.N + p.first
+                it.text = p.second
+            }
+        } else null
+        cursor.close()
+        return item
+    }
+
     @SuppressLint("Range")
-    private fun getPlace(link: String, place: String): String {
-        if (place == "0") return strings.page_entirely
+    private fun getPlace(link: String, place: String): Pair<String, String> {
+        if (place == "0") return Pair(strings.page_entirely, "")
+        val storage = PageStorage()
+        storage.open(link)
         try {
-            val storage = PageStorage()
-            storage.open(link)
+            val p: String
             val s = if (place.contains("%")) { //позиция
+                p = strings.pos_n + place.replace(".", Const.COMMA)
                 storage.getContentPage(link, false)?.let {
                     parsePosition(place, it)
-                } ?: strings.not_load_page
+                }
             } else { //абзацы
+                p = strings.par_n + place.replace(Const.COMMA, ", ")
                 val cursor = storage.getPage(link)
                 if (cursor.moveToFirst()) {
                     var i = cursor.getColumnIndex(DataBase.ID)
                     i = cursor.getInt(i)
-                    parseParagraphs(place, storage.getParagraphs(i)) ?: strings.not_load_page
-                } else
-                    strings.not_load_page
+                    parseParagraphs(place, storage.getParagraphs(i))
+                } else null
             }
             storage.close()
-            if (s.isNotEmpty()) return s
+            s?.let { return Pair(p, it) }
         } catch (ex: Exception) {
+            storage.close()
             ex.printStackTrace()
         }
-        return if (place.contains("%"))
-            strings.sel_pos + place
-        else
-            strings.sel_par + MarkersStorage.openList(place).replace(Const.COMMA, ", ")
+        val p = if (place.contains("%")) strings.sel_pos + place
+        else strings.sel_par + MarkersStorage.openList(place).replace(Const.COMMA, ", ")
+        return Pair(p, "")
     }
 
     private fun parseParagraphs(place: String, curPar: Cursor): String? {
         val b = StringBuilder()
-        b.append(strings.par_n)
-        b.append(place.replace(Const.COMMA, ", "))
-        b.append(":")
-        b.append(Const.N)
         val p = MarkersStorage.closeList(place)
         var i = 1
         if (curPar.moveToFirst()) {
@@ -271,7 +287,7 @@ class MarkersToiler : NeoToiler() {
         return b.toString()
     }
 
-    private fun parsePosition(p: String, page: String): String {
+    private fun parsePosition(place: String, page: String): String {
         val b = StringBuilder()
         b.append(Const.N)
         b.append(page)
@@ -281,7 +297,7 @@ class MarkersToiler : NeoToiler() {
             k++
             i = b.indexOf(Const.N, i + 1)
         }
-        val f = p.substring(0, p.length - 1).replace(Const.COMMA, ".").toFloat() / 100f
+        val f = place.substring(0, place.length - 1).replace(Const.COMMA, ".").toFloat() / 100f
         k = (k.toFloat() * f).toInt() + 1
         i = 0
         var u: Int
@@ -299,7 +315,6 @@ class MarkersToiler : NeoToiler() {
             if (b.substring(i - 1, i) == Const.N) i--
             b.delete(i - 1, b.length)
         }
-        b.insert(0, strings.pos_n + p.replace(".", Const.COMMA) + ":" + Const.N)
         return b.toString()
     }
 
@@ -331,42 +346,51 @@ class MarkersToiler : NeoToiler() {
         }
     }
 
-    fun updateMarkersList() {
-        val cursor = storage.getMarkersListByTitle(collectionTitle)
-        collectionData = if (cursor.moveToFirst())
-            cursor.getString(0) //список закладок в подборке
-        else ""
-        cursor.close()
-        openMarkersList()
+    fun updateMarker(index: Int) {
+        scope.launch {
+            val colCursor = storage.getMarkersListByTitle(collectionTitle)
+            collectionData = if (colCursor.moveToFirst())
+                colCursor.getString(0) //список закладок в подборке
+            else ""
+            colCursor.close()
+            val id = list[index].id.toString()
+            if ((collectionData + Const.COMMA).contains(id + Const.COMMA))
+                getMarker(id)?.let {
+                    list[index] = it
+                    postState(ListState.Update(index, list[index]))
+                    return@launch
+                }
+            list.removeAt(index)
+            postState(ListState.Remove(index))
+        }
     }
 
-    fun move(indexFrom: Int, indexTo: Int) {
-        val n = if (isCollections) 1 else 0
-        if (indexFrom == n || indexTo == list.size)
-            return
-        task = Type.LIST
+    fun move(fromIndex: Int, toIndex: Int) {
+        val n = if (isCollections) 0 else -1
+        if (fromIndex == n || toIndex == list.size) return
+        task = Type.MOVE
         change = true
-        val item = list[indexTo]
-        list.removeAt(indexTo)
-        list.add(indexFrom, item)
-        setState(ListState.Move(indexFrom, indexTo))
+        val item = list[toIndex]
+        list.removeAt(toIndex)
+        list.add(fromIndex, item)
+        setState(ListState.Move(fromIndex, toIndex))
     }
 
     fun rename(index: Int, name: String) {
-        var bCancel = name.isEmpty()
-        if (!bCancel) {
+        var isCancel = name.isEmpty()
+        if (!isCancel) {
             if (name.contains(Const.COMMA)) {
                 setState(BasicState.Message(strings.unuse_dot))
                 return
             }
             for (i in 0 until list.size) {
                 if (name == list[i].title) {
-                    bCancel = true
+                    isCancel = true
                     break
                 }
             }
         }
-        if (bCancel) {
+        if (isCancel) {
             setState(BasicState.Message(strings.cancel_rename))
             return
         }
@@ -579,24 +603,11 @@ class MarkersToiler : NeoToiler() {
         return b.toString()
     }
 
-    private fun getPlace(index: Int): String? {
-        return if (list[index].place == "0") null
-        else list[index].des.let { d ->
-            d.substring(d.indexOf(Const.N, d.indexOf(Const.N) + 1) + 1)
-        }
+    fun edit() {
+        setState(MarkersState.Primary(strings.collections, list, isCollections, true))
     }
 
-    fun onClick(index: Int) {
-        if (isRun) return
-        when {
-            isCollections ->
-                openMarkersList(index)
-
-            list[index].title.contains("/") ->
-                loadPage(index)
-
-            else ->
-                BrowserActivity.openReader(list[index].data, getPlace(index))
-        }
+    fun openPage(index: Int) {
+        BrowserActivity.openReader(list[index].data, list[index].text)
     }
 }

@@ -14,7 +14,7 @@ class MarkersStorage : Closeable {
         }
 
         fun openList(list: String?): String {
-            if (list != null && list.isNotEmpty()) {
+            if (!list.isNullOrEmpty()) {
                 var s = list.trimStart().trimEnd()
                 if (s.lastIndexOf(Const.COMMA) == s.length - 1)
                     s = s.substring(0, s.length - 1)
