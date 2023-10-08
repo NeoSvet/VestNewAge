@@ -1,8 +1,13 @@
 package ru.neosvet.vestnewage.network
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.utils.Lib
 import java.io.BufferedReader
@@ -208,5 +213,31 @@ object Urls {
         targetIntent.data = Uri.parse(url)
         targetIntent.selector = emptyBrowserIntent
         App.context.startActivity(targetIntent)
+    }
+
+    @JvmStatic
+    fun openInApps(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            App.context.startActivity(intent)
+        } catch (e: java.lang.Exception) {
+            var s = url.substring(url.indexOf(":") + 1)
+            if (s.indexOf("/") == 0) s = s.substring(2)
+            copyAddress(s)
+        }
+    }
+
+    @JvmStatic
+    fun copyAddress(txt: String?) {
+        val clipboard = App.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(App.context.getString(R.string.app_name), txt)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(
+            App.context,
+            App.context.getString(R.string.address_copied),
+            Toast.LENGTH_LONG
+        ).show()
     }
 }

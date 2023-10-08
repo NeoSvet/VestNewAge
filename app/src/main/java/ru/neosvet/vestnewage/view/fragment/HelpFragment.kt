@@ -17,7 +17,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -82,20 +81,20 @@ class HelpFragment : Fragment() {
                 adapter.update(state.index, state.item as HelpItem)
 
             is BasicState.Message ->
-                Lib.openInApps(Const.mailto + state.message, null)
+                Urls.openInApps(Const.mailto + state.message)
 
             is HelpState.Open -> when (state.type) {
                 HelpState.Type.PRIVACY ->
-                    Lib.openInApps(Urls.WebPage + "privacy.html", null)
+                    Urls.openInApps(Urls.WebPage + "privacy.html")
 
                 HelpState.Type.SITE ->
-                    Lib.openInApps(Urls.WebPage, null)
+                    Urls.openInApps(Urls.WebPage)
 
                 HelpState.Type.TELEGRAM ->
-                    Lib.openInApps("https://t.me/+nUS5nlrZsvM3MTEy", null)
+                    Urls.openInApps("https://t.me/+nUS5nlrZsvM3MTEy")
 
                 HelpState.Type.CHANGELOG ->
-                    Lib.openInApps(Urls.WebPage + "changelog.html", null)
+                    Urls.openInApps(Urls.WebPage + "changelog.html")
 
                 HelpState.Type.GOOGLE ->
                     shareAppLink(getString(R.string.url_on_google))
@@ -122,12 +121,12 @@ class HelpFragment : Fragment() {
             .setNeutralButton(
                 getString(R.string.copy)
             ) { _, _ ->
-                Lib.copyAddress(link)
+                Urls.copyAddress(link)
             }
             .setNegativeButton(
                 getString(R.string.open)
             ) { _, _ ->
-                Lib.openInApps(link, null)
+                Urls.openInApps(link)
             }
         builder.create().show()
     }

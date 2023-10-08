@@ -22,7 +22,7 @@ class AdsUtils(private val storage: DevAds) {
 
         fun showDialog(act: Activity, item: BasicItem, close: () -> Unit) {
             if (item.head.isEmpty()) { // only link
-                Lib.openInApps(item.link, null)
+                Urls.openInApps(item.link)
                 close.invoke()
                 return
             }
@@ -37,18 +37,18 @@ class AdsUtils(private val storage: DevAds) {
 
                 item.link == UPDATE -> {
                     alert.setLeftButton("Google Play") {
-                        Lib.openInApps(App.context.getString(R.string.url_on_google), null)
+                        Urls.openInApps(App.context.getString(R.string.url_on_google))
                         alert.dismiss()
                     }
                     alert.setRightButton("AppGallery") {
-                        Lib.openInApps(App.context.getString(R.string.url_on_huawei), null)
+                        Urls.openInApps(App.context.getString(R.string.url_on_huawei))
                         alert.dismiss()
                     }
                 }
 
                 else -> {
                     alert.setRightButton(App.context.getString(R.string.open_link)) {
-                        Lib.openInApps(item.link, null)
+                        Urls.openInApps(item.link)
                         alert.dismiss()
                     }
                 }

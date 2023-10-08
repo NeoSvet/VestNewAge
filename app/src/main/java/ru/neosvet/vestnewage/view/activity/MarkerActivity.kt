@@ -25,9 +25,9 @@ import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.MarkerScreen
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
@@ -186,7 +186,7 @@ class MarkerActivity : AppCompatActivity() {
                     .setPositiveButton(
                         getString(R.string.send)
                     ) { _, _ ->
-                        Lib.openInApps(Const.mailto + state.information, null)
+                        Urls.openInApps(Const.mailto + state.information)
                     }
                     .setNegativeButton(
                         getString(android.R.string.cancel)

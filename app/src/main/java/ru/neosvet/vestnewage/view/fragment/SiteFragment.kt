@@ -152,7 +152,7 @@ class SiteFragment : NeoFragment() {
 
     private fun openPage(url: String) {
         when {
-            url.contains("mailto") -> Lib.openInApps(url, null)
+            url.contains("mailto") -> Urls.openInApps(url)
             url.contains("http") -> Urls.openInBrowser(url)
             url.contains(".jp") || url.contains(".mp") -> Urls.openInBrowser(Urls.Site + url)
             else -> openReader(url, null)

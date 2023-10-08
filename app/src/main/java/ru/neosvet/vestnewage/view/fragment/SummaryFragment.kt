@@ -20,7 +20,6 @@ import ru.neosvet.vestnewage.data.SummaryTab
 import ru.neosvet.vestnewage.databinding.TabFragmentBinding
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
@@ -121,7 +120,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         setListEvents(rvList, false)
         tvUpdate.setOnClickListener {
             if (pTab.selectedIndex == SummaryTab.ADDITION.value)
-                Lib.openInApps(Urls.TelegramUrl, null)
+                Urls.openInApps(Urls.TelegramUrl)
         }
     }
 
@@ -241,7 +240,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 if (item.hasFewLinks())
                     openMultiLink(item, rvList.getItemView(index))
                 else
-                    Lib.openInApps(Urls.TelegramUrl + item.link, null)
+                    Urls.openInApps(Urls.TelegramUrl + item.link)
             }
         }
     }
@@ -258,7 +257,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             }
         }
         pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            Lib.openInApps(item.intent?.action ?: (Urls.TelegramUrl + post), null)
+            Urls.openInApps(item.intent?.action ?: (Urls.TelegramUrl + post))
             true
         }
         pMenu.show()
@@ -271,7 +270,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 item.link, "", item.des.substring(item.des.indexOf(Const.N))
             )
         } else {
-            Lib.copyAddress(Urls.TelegramUrl + item.link)
+            Urls.copyAddress(Urls.TelegramUrl + item.link)
         }
         return true
     }

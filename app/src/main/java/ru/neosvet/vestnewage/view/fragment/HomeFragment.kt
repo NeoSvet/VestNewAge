@@ -14,7 +14,6 @@ import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -179,7 +178,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             }
 
             HomeItem.Type.ADDITION -> when (action) {
-                HomeHolder.Action.TITLE -> Lib.openInApps(Urls.TelegramUrl, null)
+                HomeHolder.Action.TITLE -> Urls.openInApps(Urls.TelegramUrl)
                 HomeHolder.Action.SUBTITLE -> act?.setSection(Section.SUMMARY, true, 1)
                 HomeHolder.Action.REFRESH -> toiler.refreshAddition()
             }

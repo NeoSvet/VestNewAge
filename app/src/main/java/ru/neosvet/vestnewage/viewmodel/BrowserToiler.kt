@@ -102,7 +102,7 @@ class BrowserToiler : NeoToiler() {
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
         if (!url.contains(Const.HTML) && !url.contains("http:") && !isDoctrine) {
-            Lib.openInApps(url, null)
+            Urls.openInApps(url)
             return
         }
         if (link != url && !url.contains(PAGE)) {
@@ -298,7 +298,7 @@ class BrowserToiler : NeoToiler() {
         }
     }
 
-    private suspend fun addJournal() {
+    private fun addJournal() {
         val row = ContentValues()
         row.put(Const.TIME, System.currentTimeMillis())
         val id = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)

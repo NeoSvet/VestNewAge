@@ -14,7 +14,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
@@ -205,7 +205,7 @@ class CabinetFragment : NeoFragment() {
             CabinetScreen.LOGIN -> {
                 val s = when (index) {
                     0 -> {
-                        Lib.openInApps("http://neosvet.ucoz.ru/vna/vpn.html", null)
+                        Urls.openInApps("http://neosvet.ucoz.ru/vna/vpn.html")
                         return
                     }
 

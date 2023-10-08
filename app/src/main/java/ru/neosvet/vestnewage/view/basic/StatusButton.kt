@@ -10,8 +10,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 
 class StatusButton(
@@ -104,7 +104,7 @@ class StatusButton(
                 .setTitle(context.getString(R.string.error))
                 .setMessage(it.message)
                 .setPositiveButton(context.getString(R.string.send))
-                { _, _ -> Lib.openInApps(Const.mailto + it.information, null) }
+                { _, _ -> Urls.openInApps(Const.mailto + it.information) }
                 .setNegativeButton(context.getString(android.R.string.cancel))
                 { _, _ -> setError(null) }
                 .setOnDismissListener { setError(null) }

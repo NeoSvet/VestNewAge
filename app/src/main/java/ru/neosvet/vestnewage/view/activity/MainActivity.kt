@@ -583,7 +583,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             .setOnDismissListener { showWelcome() }
         if (item[AdsUtils.LINK].isNotEmpty()) {
             builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
-                Lib.openInApps(item[AdsUtils.LINK], null)
+                Urls.openInApps(item[AdsUtils.LINK])
             }
         }
         builder.create().show()

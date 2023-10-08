@@ -16,9 +16,9 @@ import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
@@ -218,7 +218,7 @@ class BookFragment : NeoFragment() {
         setListEvents(rvBook, false)
         tvUpdate.setOnClickListener {
             if (linkToSrc.isNotEmpty())
-                Lib.openInApps(linkToSrc, null)
+                Urls.openInApps(linkToSrc)
         }
     }
 
