@@ -345,7 +345,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     if (y > 13 || y == 13 && m > 7) n-- //исключаем подпись
                     n = g.nextInt(n)
                     if (curPar.moveToPosition(n)) { //если случайный стих найден
-                        s = Lib.withOutTags(curPar.getString(0))
+                        s = curPar.getString(0).fromHTML
                     } else {
                         s = ""
                         n = -1

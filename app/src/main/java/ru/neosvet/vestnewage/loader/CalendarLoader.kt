@@ -11,8 +11,8 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.utils.fromHTML
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.*
@@ -68,7 +68,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
             i = content.indexOf(">", i) + 1
             val d = content.substring(i, content.indexOf("</a", i))
             if (d.contains("<"))
-                list.add(BasicItem(Lib.withOutTags(d)))
+                list.add(BasicItem(d.fromHTML))
             else
                 list.add(BasicItem(d))
             addLink(link)

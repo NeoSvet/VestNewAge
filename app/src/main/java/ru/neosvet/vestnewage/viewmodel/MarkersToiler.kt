@@ -17,6 +17,7 @@ import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.viewmodel.basic.MarkersStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -272,7 +273,7 @@ class MarkersToiler : NeoToiler() {
         if (curPar.moveToFirst()) {
             do {
                 if (p.contains(MarkersStorage.closeList(i.toString()))) {
-                    b.append(Lib.withOutTags(curPar.getString(0)))
+                    b.append(curPar.getString(0).fromHTML)
                     b.append(Const.N)
                     b.append(Const.N)
                 }

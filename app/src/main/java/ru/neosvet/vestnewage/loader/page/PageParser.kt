@@ -1,12 +1,11 @@
 package ru.neosvet.vestnewage.loader.page
 
-import androidx.core.text.HtmlCompat
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.fromHTML
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -207,8 +206,7 @@ class PageParser(private val client: NeoClient) {
     }
 
     private fun convertUrl(url: String) = url.replace("..", "").let {
-        if (it.contains("&"))
-            HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+        if (it.contains("&")) it.fromHTML
         else it
     }
 
@@ -251,7 +249,7 @@ class PageParser(private val client: NeoClient) {
     val link: String?
         get() = if (content.isNotEmpty && content.current().tag == Const.LINK) content.current().par else null
     val text: String
-        get() = Lib.withOutTags(content.current().html)
+        get() = content.current().html.fromHTML
     val isHead: Boolean
         get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.HEAD) == 0 else false
     val isImage: Boolean

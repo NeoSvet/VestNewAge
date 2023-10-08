@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
@@ -45,7 +45,7 @@ class JournalStorage : Closeable {
     override fun close() =
         db.close()
 
-    suspend fun getLastId(): String? {
+    fun getLastId(): String? {
         val cursor = db.query(
             table = DataBase.JOURNAL,
             column = DataBase.ID,
@@ -56,7 +56,7 @@ class JournalStorage : Closeable {
         else null
     }
 
-    suspend fun getList(offset: Int, strings: JournalStrings): List<BasicItem> {
+    fun getList(offset: Int, strings: JournalStrings): List<BasicItem> {
         val list = mutableListOf<BasicItem>()
         val curJ = getAll()
         if (!curJ.moveToFirst() || offset > curJ.count) {
@@ -98,9 +98,7 @@ class JournalStorage : Closeable {
                         cursor = storage.getParagraphs(id[1])
                         s = strings.rnd_verse
                         if (cursor.moveToPosition(id[2].toInt()))
-                            s += ":" + Const.N + Lib.withOutTags(
-                                cursor.getString(0)
-                            )
+                            s += ":" + Const.N + cursor.getString(0).fromHTML
                     }
                     item.des = item.des + Const.N + s
                 }
@@ -119,7 +117,7 @@ class JournalStorage : Closeable {
         return list
     }
 
-    suspend fun checkLimit() {
+    fun checkLimit() {
         val cursor = getIds()
         var i = cursor.count
         cursor.moveToFirst()

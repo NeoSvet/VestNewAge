@@ -28,6 +28,7 @@ import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
@@ -65,7 +66,7 @@ class MarkerActivity : AppCompatActivity() {
         }
 
         private fun parToNumList(link: String, par: String): String {
-            val p = if (par.contains("<")) Lib.withOutTags(par) else par
+            val p = if (par.contains("<")) par.fromHTML else par
             val storage = PageStorage()
             storage.open(link)
             val cursor = storage.getParagraphs(storage.getPageId(link))
@@ -73,7 +74,7 @@ class MarkerActivity : AppCompatActivity() {
             if (cursor.moveToFirst()) {
                 var n = 1
                 do {
-                    val t = Lib.withOutTags(cursor.getString(0))
+                    val t = cursor.getString(0).fromHTML
                     if (p.contains(t)) {
                         s.append(n)
                         s.append(", ")

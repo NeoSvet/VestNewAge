@@ -1,6 +1,6 @@
 package ru.neosvet.vestnewage.loader.page
 
-import android.text.Html
+import ru.neosvet.vestnewage.utils.fromHTML
 
 class HTMLElem {
     var tag: String? = null
@@ -10,7 +10,7 @@ class HTMLElem {
     var html = ""
         set(value) {
             field = if (value.contains("&")) //"&#x"
-                Html.fromHtml(value).toString()
+                value.fromHTML
             else if (tag == Const.LINK)
                 value.trim { it <= ' ' } else value
         }

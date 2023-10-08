@@ -29,8 +29,8 @@ import ru.neosvet.vestnewage.data.SearchScreen
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.utils.SearchEngine
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
@@ -503,9 +503,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 val s = when {
                     helper.mode == SearchEngine.MODE_TITLES -> null
                     helper.mode == SearchEngine.MODE_LINKS -> null
-                    helper.isByWords -> Lib.withOutTags(
-                        item.des.substring(0, item.des.length - 4).replace("</p>", Const.NN)
-                    )
+                    helper.isByWords -> item.des.substring(0, item.des.length - 4)
+                        .replace("</p>", Const.NN).fromHTML
 
                     else -> helper.request
                 }

@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.fromHTML
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -121,7 +121,7 @@ class PageLoader(private val client: NeoClient) : Loader {
     }
 
     private fun isEmpty(s: String?): Boolean {
-        return Lib.withOutTags(s).isEmpty()
+        return s?.fromHTML.isNullOrEmpty()
     }
 
     private fun checkRequests() {
@@ -141,7 +141,8 @@ class PageLoader(private val client: NeoClient) : Loader {
     }
 
     private fun getTitle(line: String?, name: String): String {
-        var s = Lib.withOutTags(line).replace(".20", ".")
+        if (line == null) return ""
+        var s = line.fromHTML.replace(".20", ".")
         if (s.contains(name)) {
             s = s.substring(9)
             if (s.contains(Const.KV_OPEN))

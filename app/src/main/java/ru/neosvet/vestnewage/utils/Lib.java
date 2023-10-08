@@ -66,8 +66,4 @@ public class Lib {
         clipboard.setPrimaryClip(clip);
         Toast.makeText(App.context, App.context.getString(R.string.address_copied), Toast.LENGTH_LONG).show();
     }
-
-    public static String withOutTags(String s) {
-        return android.text.Html.fromHtml(s).toString().trim();
-    }
 }

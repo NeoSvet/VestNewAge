@@ -230,7 +230,7 @@ class PageStorage : Closeable {
         )
         if (cursor.moveToFirst()) {
             do {
-                content.append(Lib.withOutTags(cursor.getString(0)))
+                content.append(cursor.getString(0).fromHTML)
                 content.append(Const.N)
                 content.append(Const.N)
             } while (cursor.moveToNext())

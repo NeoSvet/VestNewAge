@@ -1,8 +1,8 @@
 package ru.neosvet.vestnewage.view.list
 
-import android.text.Html
 import android.view.View
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -21,22 +21,22 @@ class RecyclerHolder(
         item.setBackgroundResource(R.drawable.item_bg)
     }
 
+    val String.fromHTML: CharSequence
+        get() = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY).trimEnd()
+
     fun setItem(item: BasicItem) {
-        if (item.title.contains("<"))
-            tvTitle.text = Html.fromHtml(item.title).trimEnd()
-        else
-            tvTitle.text = item.title
+        tvTitle.text = if (item.title.contains("<"))
+            item.title.fromHTML else item.title
+
         val des = tvTime?.let { //for addition
             val i = item.des.indexOf("@")
             it.text = item.des.substring(0, i)
             item.des.substring(i + 1)
         } ?: item.des
-        tvDes?.let {
-            if (des.contains("<"))
-                it.text = Html.fromHtml(des).trimEnd()
-            else
-                it.text = des
-        }
+
+        tvDes?.text = if (des.contains("<"))
+            des.fromHTML else des
+
         root.setOnClickListener {
             clicker.invoke(layoutPosition, item)
         }

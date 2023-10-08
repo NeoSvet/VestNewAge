@@ -177,7 +177,7 @@ class SearchEngine(
                 val d = cursor.getString(iDes)
                 if (d.isNullOrEmpty().not() && d.contains("<")) {
                     val item = BasicItem(cursor.getString(iTitle), cursor.getString(iLink)).apply {
-                        des = Lib.withOutTags(d)
+                        des = d.fromHTML
                     }
                     items.add(item)
                 }
@@ -200,7 +200,7 @@ class SearchEngine(
             val list = getResultList(n, item.link).toMutableList()
             u = 0
             while (u < list.size) when {
-                item.des.contains(Lib.withOutTags(list[u].des)) -> u++
+                item.des.contains(list[u].des.fromHTML) -> u++
                 u + 1 < list.size && list[u].id == list[u + 1].id -> {
                     list[u].des = list[u + 1].des
                     list.removeAt(u + 1)
