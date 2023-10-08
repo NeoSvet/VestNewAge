@@ -26,7 +26,6 @@ data class HomeStrings(
     val never: String,
     val refreshed: String,
     val today_empty: String,
-    val today: String,
     val yesterday: String,
     val journal: String,
     val calendar: String,
@@ -44,6 +43,7 @@ data class HomeStrings(
     val new_dev_ads: String,
     val last: String,
     val from: String,
+    val new_today: String,
     val information: String
 )
 

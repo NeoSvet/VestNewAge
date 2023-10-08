@@ -92,7 +92,6 @@ class HomeToiler : NeoToiler() {
             never = context.getString(R.string.never),
             refreshed = context.getString(R.string.refreshed),
             today_empty = context.getString(R.string.today_empty),
-            today = context.getString(R.string.today),
             yesterday = context.resources.getStringArray(R.array.post_days)[0],
             journal = context.getString(R.string.journal),
             calendar = context.getString(R.string.calendar),
@@ -109,7 +108,8 @@ class HomeToiler : NeoToiler() {
             prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
             new_dev_ads = context.getString(R.string.new_dev_ads),
             last = context.getString(R.string.last),
-            from = context.getString(R.string.from),
+            from = context.getString(R.string.from) + " ",
+            new_today = context.getString(R.string.new_today),
             information = context.getString(R.string.information)
         )
         loadItems()
@@ -441,17 +441,17 @@ class HomeToiler : NeoToiler() {
         if (timeItem > 0L) {
             val today = DateUnit.initToday().timeInSeconds
             val diff = today - timeItem / DateUnit.SEC_IN_MILLS
-            title = strings.last + when {
-                diff < 0 -> strings.today + "!"
-                diff < DateUnit.DAY_IN_SEC -> strings.yesterday
+            title = when {
+                diff < 0 -> strings.new_today
+                diff < DateUnit.DAY_IN_SEC -> strings.last + strings.yesterday
                 else -> {
                     val date = DateUnit.putMills(timeItem)
-                    strings.from + " " + date.toDateString()
+                    strings.last + strings.from + date.toDateString()
                 }
             }
         }
         tabNews = SiteTab.NEWS.value
-        if (title == strings.nothing || !title.contains(strings.today)) {
+        if (title == strings.nothing || title != strings.new_today) {
             val count = getAds().dev.unreadCount
             if (count > 0) {
                 tabNews = SiteTab.DEV.value

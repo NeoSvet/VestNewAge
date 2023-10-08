@@ -278,7 +278,6 @@
     <string name="additionally_from_tg">Дополнительно из Телеграма</string>
     <string name="today_msk">Сегодня по Москве</string>
     <string name="today_empty">За сегодня ещё ничего нет</string>
-    <string name="today">сегодня</string>
     <string name="last_post_from">Сообщение от %s</string>
     <string name="last_readed">В прошлый раз читали:</string>
     <string name="nothing">ничего…</string>
@@ -286,6 +285,7 @@
     <string name="refreshed">Обновлено&#160;</string>
     <string name="precept_human_future">Заповеди Человека Будущего</string>
     <string name="last">Последнее&#160;</string>
+    <string name="new_today">Новое сегодня!</string>
     <string name="hidden_items">Скрытые элементы:</string>
     <string name="information">Информация</string>
     <string name="move">Передвинуть</string>
