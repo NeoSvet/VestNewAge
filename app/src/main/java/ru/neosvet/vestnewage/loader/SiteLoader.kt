@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedWriter
@@ -159,7 +159,7 @@ class SiteLoader(
     }
 
     private fun saveToFile(list: List<BasicItem>) {
-        val file = Lib.getFile(SiteToiler.MAIN)
+        val file = Files.getFile(SiteToiler.MAIN)
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
         list.forEach { item ->
             bw.write(item.title + Const.N)

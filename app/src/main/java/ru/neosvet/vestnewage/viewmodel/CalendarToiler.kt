@@ -18,7 +18,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -166,7 +166,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             }
             if (calendar.isEmpty())
                 createField()
-            if (!Lib.getFileDB(date.my).exists()) {
+            if (!Files.getFileDB(date.my).exists()) {
                 time = 0L
                 postPrimary()
                 if (loadIfNeed) reLoad()

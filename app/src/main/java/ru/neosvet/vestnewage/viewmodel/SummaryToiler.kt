@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
@@ -79,7 +79,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun isNeedReload(): Boolean {
-        val f = if (isRss) Lib.getFile(Const.RSS) else Lib.getFileDB(DataBase.ADDITION)
+        val f = if (isRss) Files.getFile(Const.RSS) else Files.getFileDB(DataBase.ADDITION)
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
@@ -108,7 +108,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
                 if (isRss.not()) {
-                    val f = Lib.getFileDB(DataBase.ADDITION)
+                    val f = Files.getFileDB(DataBase.ADDITION)
                     f.setLastModified(System.currentTimeMillis())
                 }
             }
@@ -129,7 +129,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         clearStates()
         val list = mutableListOf<BasicItem>()
         val now = System.currentTimeMillis()
-        val file = Lib.getFile(Const.RSS)
+        val file = Files.getFile(Const.RSS)
         val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
         var d: String

@@ -75,20 +75,20 @@ class LaunchUtils(context: Context) {
             }.start()
         }
         if (previousVer < 65) {
-            val file = Lib.getFileP("/cache/file")
+            val file = Files.getFileP("/cache/file")
             if (file.exists()) file.delete()
         }
         if (previousVer < 67) {
-            val file = Lib.getFileDB(DataBase.ADDITION)
+            val file = Files.getFileDB(DataBase.ADDITION)
             if (file.exists()) file.delete()
         }
         if (previousVer < 69) {
-            val file = Lib.getFileDB("07.23")
+            val file = Files.getFileDB("07.23")
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
             listOf(
-                Lib.getFileDB("devads"), Lib.getFileDB("devads-journal"), Lib.getFileS("news")
+                Files.getFileDB("devads"), Files.getFileDB("devads-journal"), Files.getFileS("news")
             ).forEach {
                 if (it.exists()) it.delete()
             }
@@ -102,7 +102,7 @@ class LaunchUtils(context: Context) {
         var p = App.context.getSharedPreferences(name, Context.MODE_PRIVATE)
         if (!p.getBoolean(TipActivity.TAG, true))
             editor.putBoolean(TipName.CALENDAR.toString(), false)
-        val f = Lib.getFileP("/shared_prefs/$name.xml")
+        val f = Files.getFileP("/shared_prefs/$name.xml")
         f.delete()
 
         p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
@@ -127,7 +127,7 @@ class LaunchUtils(context: Context) {
             d = DateUnit.putYearMonth(2017, 1)
             var n: Int
             while (d.timeInDays < max) {
-                if (Lib.getFileDB(d.my).exists()) {
+                if (Files.getFileDB(d.my).exists()) {
                     storage.open(d.my)
                     val cursor = storage.getListAll()
                     if (cursor.moveToFirst()) {
@@ -178,7 +178,7 @@ class LaunchUtils(context: Context) {
     }
 
     private fun checkSearchRequests() {
-        val f = Lib.getFileS(Const.SEARCH)
+        val f = Files.getFileS(Const.SEARCH)
         if (!f.exists()) return
         val list = mutableListOf<String>()
         val br = BufferedReader(FileReader(f))

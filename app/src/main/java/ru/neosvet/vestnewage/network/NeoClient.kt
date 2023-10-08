@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException.SiteCode
 import ru.neosvet.vestnewage.data.NeoException.SiteNoResponse
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedInputStream
 import java.io.FileInputStream
@@ -36,7 +36,7 @@ class NeoClient(
         }
 
         fun deleteTempFiles() {
-            val d = Lib.getFileP("/cache")
+            val d = Files.getFileP("/cache")
             d.listFiles()?.forEach { f ->
                 if (f.isFile && DateUnit.isLongAgo(f.lastModified()))
                     f.delete()
@@ -75,7 +75,7 @@ class NeoClient(
         }
         val inStream = response.body.byteStream()
         val max = response.body.contentLength().toInt()
-        val file = Lib.getFileP(PATH + type.value)
+        val file = Files.getFileP(PATH + type.value)
         if (file.exists()) file.delete()
         val outStream = FileOutputStream(file)
         val buffer = ByteArray(1024)

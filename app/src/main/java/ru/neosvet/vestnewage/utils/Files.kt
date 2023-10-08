@@ -1,35 +1,29 @@
-package ru.neosvet.vestnewage.utils;
+package ru.neosvet.vestnewage.utils
 
-import java.io.File;
+import ru.neosvet.vestnewage.App
+import java.io.File
 
-import ru.neosvet.vestnewage.App;
-
-public class Lib {
-//    public static void LOG(String msg) {
-//        Log.d("neotag", msg);
-//    }
-
-    public static File getFile(String name) {
-        return new File(App.context.getFilesDir() + name);
+object Files {
+    fun getFile(name: String): File {
+        return File(App.context.filesDir.toString() + name)
     }
 
-    public static File getFileS(String name) {
-        return new File(App.context.getFilesDir() + File.separator + name);
+    fun getFileS(name: String): File {
+        return File(App.context.filesDir.toString() + File.separator + name)
     }
 
-    public static File getFileP(String name) {
-        return new File(App.context.getFilesDir().getParent() + name);
+    fun getFileP(name: String): File {
+        return File(App.context.filesDir.parent!! + name)
     }
 
-    public static File getFileDB(String name) {
-        return getFileP("/databases/" + name);
+    fun getFileDB(name: String): File {
+        return getFileP("/databases/$name")
     }
 
-    public static File getFileL(String link) {
-        File file = getFile(link.substring(0, link.lastIndexOf("/")));
-        if (!file.exists())
-            file.mkdirs();
-        file = getFile(link);
-        return file;
+    fun getFileL(link: String): File {
+        var file = getFile(link.substring(0, link.lastIndexOf("/")))
+        if (!file.exists()) file.mkdirs()
+        file = getFile(link)
+        return file
     }
 }

@@ -154,7 +154,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     return@launch
                 }
             }
-            if (!Lib.getFileDB(date.my).exists()) {
+            if (!Files.getFileDB(date.my).exists()) {
                 postPrimary(0L, listOf())
                 if (loadIfNeed) reLoad()
                 return@launch
@@ -290,7 +290,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             var n = (maxY - y) * 12 + maxM - m
             if (maxY > 16) { //проверка на существование текущего месяца
-                val f = Lib.getFileDB(d.my)
+                val f = Files.getFileDB(d.my)
                 if (!f.exists()) n--
             }
             //определяем случайный месяц:

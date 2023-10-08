@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
@@ -139,7 +139,7 @@ class BrowserToiler : NeoToiler() {
                 return@launch
             }
             if (!preparingStyle()) return@launch
-            val file = Lib.getFile(PAGE)
+            val file = Files.getFile(PAGE)
             val isNeedUpdate = if (newPage || !file.exists())
                 generatePage(file)
             else false
@@ -254,8 +254,8 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingStyle(): Boolean {
-        val fLight = Lib.getFile(StyleLoader.LIGHT)
-        val fDark = Lib.getFile(StyleLoader.DARK)
+        val fLight = Files.getFile(StyleLoader.LIGHT)
+        val fDark = Files.getFile(StyleLoader.DARK)
         if (!fLight.exists() && !fDark.exists()) { //download style
             storage.close()
             scope.launch {
@@ -264,7 +264,7 @@ class BrowserToiler : NeoToiler() {
             }
             return false
         }
-        val fStyle = Lib.getFile(STYLE)
+        val fStyle = Files.getFile(STYLE)
         var replace = true
         if (fStyle.exists()) {
             replace = fDark.exists() && !isLightTheme || fLight.exists() && isLightTheme
@@ -283,7 +283,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingFont() {
-        val font = Lib.getFile(FONT)
+        val font = Files.getFile(FONT)
         if (font.exists().not()) {
             val inStream = App.context.resources.openRawResource(R.font.myriad)
             val outStream = FileOutputStream(font)
@@ -312,17 +312,17 @@ class BrowserToiler : NeoToiler() {
             dbJournal.close()
         } catch (e: Exception) {
             dbJournal.close()
-            val file = Lib.getFileDB(DataBase.JOURNAL)
+            val file = Files.getFileDB(DataBase.JOURNAL)
             file.delete()
         }
     }
 
     private fun restoreStyle() {
-        val fStyle = Lib.getFile(STYLE)
+        val fStyle = Files.getFile(STYLE)
         if (fStyle.exists()) {
-            val fDark = Lib.getFile(StyleLoader.DARK)
+            val fDark = Files.getFile(StyleLoader.DARK)
             if (fDark.exists())
-                fStyle.renameTo(Lib.getFile(StyleLoader.LIGHT))
+                fStyle.renameTo(Files.getFile(StyleLoader.LIGHT))
             else
                 fStyle.renameTo(fDark)
         }

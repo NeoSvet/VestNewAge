@@ -9,7 +9,7 @@ import android.widget.Toast
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoException
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -53,11 +53,11 @@ object Urls {
     private const val COM_FILE = "/com"
 
     private fun getCom(): Boolean =
-        Lib.getFile(COM_FILE).exists().also { isCom = it }
+        Files.getFile(COM_FILE).exists().also { isCom = it }
 
     fun setCom(value: Boolean) {
         isCom = value
-        val f = Lib.getFile(COM_FILE)
+        val f = Files.getFile(COM_FILE)
         if (value) f.createNewFile()
         else if (f.exists()) f.delete()
     }
@@ -153,7 +153,7 @@ object Urls {
     }
 
     fun restore() {
-        val file = Lib.getFile(FILE)
+        val file = Files.getFile(FILE)
         if (file.exists().not()) return
         val br = BufferedReader(FileReader(file))
         var i = -1
@@ -191,7 +191,7 @@ object Urls {
             }
             br.close()
             stream.close()
-            val file = Lib.getFile(FILE)
+            val file = Files.getFile(FILE)
             if (file.exists()) file.delete()
             val wr = BufferedWriter(FileWriter(file))
             wr.appendLine(TIME.toString())

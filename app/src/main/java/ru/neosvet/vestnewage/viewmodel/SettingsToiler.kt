@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import java.io.File
@@ -65,7 +65,7 @@ class SettingsToiler : NeoToiler() {
             request.forEach {
                 when (it) {
                     CLEAR_CACHE ->
-                        clearFolder(Lib.getFileP("/cache"))
+                        clearFolder(Files.getFileP("/cache"))
                     CLEAR_MARKERS ->
                         deleteFile(DataBase.MARKERS)
                     CLEAR_ART_AND_ADD -> {
@@ -92,11 +92,11 @@ class SettingsToiler : NeoToiler() {
         val max = DateUnit.putYearMonth(endYear + 1, 1).timeInDays
         var f: File
         while (d.timeInDays < max) {
-            f = Lib.getFileDB(d.my)
+            f = Files.getFileDB(d.my)
             if (f.exists()) {
                 size += f.length()
                 f.delete()
-                f = Lib.getFileDB(d.my + "-journal")
+                f = Files.getFileDB(d.my + "-journal")
                 if (f.exists()) {
                     size += f.length()
                     f.delete()
@@ -107,7 +107,7 @@ class SettingsToiler : NeoToiler() {
     }
 
     private fun deleteFile(name: String) {
-        val f = Lib.getFileDB(name)
+        val f = Files.getFileDB(name)
         if (f.exists()) {
             size += f.length()
             f.delete()

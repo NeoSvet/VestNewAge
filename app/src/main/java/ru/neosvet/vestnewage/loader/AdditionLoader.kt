@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.BufferedReader
@@ -51,7 +51,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         if (startId > maxPost) return
 
         val start = if (startId == 0) {
-            val file = Lib.getFileDB(DataBase.ADDITION)
+            val file = Files.getFileDB(DataBase.ADDITION)
             file.setLastModified(System.currentTimeMillis())
             maxPost
         } else if (startId < NeoPaging.ON_PAGE) NeoPaging.ON_PAGE
@@ -91,7 +91,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
     }
 
     private fun loadChanges(storage: AdditionStorage) {
-        val baseTime = Lib.getFileDB(DataBase.ADDITION).lastModified()
+        val baseTime = Files.getFileDB(DataBase.ADDITION).lastModified()
         val stream = client.getStream("${Urls.Addition}changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         br.forEachLine {

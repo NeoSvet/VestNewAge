@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -41,7 +41,7 @@ class RequestAdapter(
     private val items = mutableListOf<String>()
 
     init {
-        val f = Lib.getFileS(Const.SEARCH)
+        val f = Files.getFileS(Const.SEARCH)
         adapter = ArrayAdapter<String>(context, R.layout.spinner_item)
         if (f.exists() && items.isEmpty()) {
             val br = BufferedReader(FileReader(f))
@@ -99,7 +99,7 @@ class RequestAdapter(
     }
 
     fun save() {
-        val f = Lib.getFileS(Const.SEARCH)
+        val f = Files.getFileS(Const.SEARCH)
         f.delete()
         val bw = BufferedWriter(FileWriter(f))
         items.forEach {
@@ -113,7 +113,7 @@ class RequestAdapter(
         adapter.clear()
         items.clear()
         notifyDataSetChanged()
-        val f = Lib.getFileS(Const.SEARCH)
+        val f = Files.getFileS(Const.SEARCH)
         if (f.exists()) f.delete()
     }
 

@@ -6,7 +6,7 @@ import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -29,13 +29,13 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         }
         var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
-        val file = Lib.getFile(Const.RSS)
+        val file = Files.getFile(Const.RSS)
         val secFile = if (file.exists())
             DateUnit.putMills(file.lastModified()).timeInSeconds
         else 0L
         val needUpdate = secFile < secList
 
-        val bw = BufferedWriter(FileWriter(Lib.getFile(Const.RSS)))
+        val bw = BufferedWriter(FileWriter(Files.getFile(Const.RSS)))
         val now = DateUnit.initNow()
         val unread = if (updateUnread) UnreadUtils() else null
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")

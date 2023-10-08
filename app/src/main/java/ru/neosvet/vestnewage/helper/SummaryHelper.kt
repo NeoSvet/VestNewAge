@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
@@ -68,7 +68,7 @@ class SummaryHelper : LinksProvider {
     }
 
     fun updateBook() {
-        val file = Lib.getFile(Const.RSS)
+        val file = Files.getFile(Const.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
         br.forEachLine {

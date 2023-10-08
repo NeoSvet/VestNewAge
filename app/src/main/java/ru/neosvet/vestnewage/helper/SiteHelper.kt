@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.helper
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
 import java.io.FileReader
@@ -25,7 +25,7 @@ class SiteHelper : LinksProvider {
     override fun getLinkList(): List<String> {
         val list = mutableListOf<String>()
         list.add(Urls.News)
-        val file = Lib.getFile(SiteToiler.MAIN)
+        val file = Files.getFile(SiteToiler.MAIN)
         val br = BufferedReader(FileReader(file))
         br.forEachLine {
             if (isNeedLoad(it)) {

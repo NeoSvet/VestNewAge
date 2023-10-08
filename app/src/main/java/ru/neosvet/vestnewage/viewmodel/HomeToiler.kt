@@ -24,7 +24,7 @@ import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.viewmodel.basic.HomeStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -382,7 +382,7 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun readSummaryLink() {
-        val file = Lib.getFile(Const.RSS)
+        val file = Files.getFile(Const.RSS)
         if (file.exists()) {
             val br = BufferedReader(FileReader(file))
             br.readLine() //title
@@ -395,7 +395,7 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.SUMMARY, listOf(strings.summary))
         task = Task.OPEN_SUMMARY
-        val file = Lib.getFile(Const.RSS)
+        val file = Files.getFile(Const.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
         val title: String
         val time: Long
@@ -472,7 +472,7 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.ADDITION, listOf(strings.additionally_from_tg))
         task = Task.OPEN_ADDITION
-        val file = Lib.getFileDB(DataBase.ADDITION)
+        val file = Files.getFileDB(DataBase.ADDITION)
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
         val time: Long
         val des: String

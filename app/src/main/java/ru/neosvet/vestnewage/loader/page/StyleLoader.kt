@@ -5,7 +5,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import java.io.*
 
 class StyleLoader {
@@ -18,8 +18,8 @@ class StyleLoader {
 
     private val builderRequest = Request.Builder()
     private val client = NeoClient.createHttpClient()
-    private val fLight = Lib.getFileL(LIGHT)
-    private val fDark = Lib.getFileL(DARK)
+    private val fLight = Files.getFileL(LIGHT)
+    private val fDark = Files.getFileL(DARK)
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)

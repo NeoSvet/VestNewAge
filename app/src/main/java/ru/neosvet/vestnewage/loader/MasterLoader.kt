@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
 import java.io.File
@@ -117,7 +117,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         val url = findUrl(d)
         if (url != null) {
-            val f = Lib.getFileDB(d.my)
+            val f = Files.getFileDB(d.my)
             if (!f.exists() || f.length() <= DataBase.EMPTY_BASE_SIZE)
                 loadBase(url + d.my)
         } else
@@ -191,7 +191,7 @@ class MasterLoader : Loader, LoadHandlerLite {
             isDelete = it.contains("delete")
             if (isDelete.not())
                 list.add(name)
-            f = Lib.getFileDB(name)
+            f = Files.getFileDB(name)
             if (f.exists()) {
                 l = it.substring(it.lastIndexOf(" ") + 1).toLong()
                 if (isDelete) {

@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.viewmodel.basic.MarkersStrings
@@ -502,7 +502,7 @@ class MarkersToiler : NeoToiler() {
         //изменение id в подборках
         inputStream = App.context.contentResolver.openInputStream(file)
         br = BufferedReader(InputStreamReader(inputStream, Const.ENCODING), 1000)
-        val f = Lib.getFileS(DataBase.MARKERS)
+        val f = Files.getFileS(DataBase.MARKERS)
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(f), Const.ENCODING))
         s = br.readLine()
         while (s != null) {

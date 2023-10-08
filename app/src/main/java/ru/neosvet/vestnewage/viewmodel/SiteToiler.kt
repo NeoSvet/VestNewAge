@@ -13,7 +13,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.Lib
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -146,7 +146,7 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun openSite() {
-        val f = Lib.getFile(MAIN)
+        val f = Files.getFile(MAIN)
         if (f.exists().not()) {
             postState(BasicState.NotLoaded)
             reLoad()
