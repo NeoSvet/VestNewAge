@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.loader.page
 
+import androidx.core.text.HtmlCompat
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoList
@@ -135,10 +136,9 @@ class PageParser(private val client: NeoClient) {
                     n = s.indexOf("href") + 6
                     if (n == 5) continue
                     if (s.contains("\""))
-                        elem.par = s.substring(n, s.indexOf("\"", n))
+                        elem.par = convertUrl(s.substring(n, s.indexOf("\"", n)))
                     else
-                        elem.par = s.substring(n, s.indexOf("'", n))
-                    elem.par = elem.par.replace("..", "").replace("&#x2B;", "+")
+                        elem.par = convertUrl(s.substring(n, s.indexOf("'", n)))
                     if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
                         elem.par = Urls.Site + elem.par.substring(1)
                     if (elem.html.isEmpty() && !elem.par.contains(".jpg")) {
@@ -149,7 +149,8 @@ class PageParser(private val client: NeoClient) {
                 }
 
                 Const.IMAGE -> {
-                    elem.par = s.substring(n + 1).replace("=\"/", "=\"http://blagayavest.info/")
+                    elem.par = convertUrl(s.substring(n + 1))
+                        .replace("=\"/", "=\"" + Urls.Site)
                     elem.end = true
                 }
 
@@ -203,6 +204,12 @@ class PageParser(private val client: NeoClient) {
             i++
         }
         content.reset(false)
+    }
+
+    private fun convertUrl(url: String) = url.replace("..", "").let {
+        if (it.contains("&"))
+            HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+        else it
     }
 
     fun clear() {

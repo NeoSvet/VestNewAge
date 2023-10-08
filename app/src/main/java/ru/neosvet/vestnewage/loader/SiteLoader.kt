@@ -20,12 +20,11 @@ class SiteLoader(
     private val client: NeoClient,
     private val storage: AdsStorage
 ) {
-    fun load(url: String): List<BasicItem> {
+    fun load(url: String) {
         val list = loadList(url)
         if (url == Urls.Site)
             saveToFile(list)
         else saveToStorage(list)
-        return list
     }
 
     private fun loadList(link: String): List<BasicItem> {

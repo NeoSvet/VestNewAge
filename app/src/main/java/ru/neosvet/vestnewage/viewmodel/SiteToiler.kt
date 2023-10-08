@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Lib
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
+import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedReader
@@ -27,7 +28,7 @@ class SiteToiler : NeoToiler() {
     }
 
     private var selectedTab = SiteTab.NEWS
-    private var novosti = ""
+    private lateinit var strings: SiteStrings
     private val client = NeoClient(NeoClient.Type.SECTION)
     private val storage = AdsStorage()
 
@@ -37,7 +38,11 @@ class SiteToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
-        novosti = context.getString(R.string.novosti)
+        strings = SiteStrings(
+            novosti = context.getString(R.string.novosti),
+            timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
+            path = context.getString(R.string.The_Path_of_the_impulse)
+        )
     }
 
     override suspend fun defaultState() {
@@ -54,20 +59,16 @@ class SiteToiler : NeoToiler() {
         storage.close()
     }
 
-    private suspend fun loadList() {
+    private fun loadList() {
         val loader = SiteLoader(client, storage)
         val url = if (selectedTab == SiteTab.SITE)
             Urls.Site else Urls.Ads
-        val list = loader.load(url) as MutableList
-        val time = if (selectedTab == SiteTab.SITE) {
-            list.add(0, getNovosti())
-            Lib.getFile(MAIN).lastModified()
-        } else storage.site.getTime()
-        postState(ListState.Primary(time, list))
+        loader.load(url)
+        openList(false)
     }
 
     private fun getNovosti(): BasicItem {
-        return BasicItem(novosti).apply { addLink(Urls.News) }
+        return BasicItem(strings.novosti).apply { addLink(Urls.News) }
     }
 
     private suspend fun openAds(reload: Boolean) {
@@ -104,11 +105,11 @@ class SiteToiler : NeoToiler() {
             while (cursor.moveToNext()) {
                 val link = cursor.getString(iLink)
                 val item = BasicItem(cursor.getString(iTitle))
-                item.des = cursor.getString(iDes)
+                item.des = fixDes(cursor.getString(iDes))
                 if (link.contains(Const.N)) {
                     link.lines().forEach { s ->
                         if (line != null) line?.let {
-                            item.addLink(s, it)
+                            item.addLink(fixHead(s), it)
                             line = null
                         } else line = s
                     }
@@ -122,6 +123,26 @@ class SiteToiler : NeoToiler() {
         postState(ListState.Primary(time, list))
         if (loadIfNeed && (list.isEmpty() || DateUnit.isLongAgo(time)))
             reLoad()
+    }
+
+    private fun fixDes(s: String) = if (s.contains("the_impulse")) {
+        s.replace(
+            ">3-The_Path_of_the_impulse.jpg<",
+            ">" + strings.path + "<"
+        ).replace(
+            ">2-Timekeeping_Spiritual_Wave+.jpg<",
+            ">" + strings.timekeeping + "<"
+        )
+    } else s
+
+    private fun fixHead(s: String) = when {
+        s.contains("the_impulse") ->
+            s.replace("3-The_Path_of_the_impulse.jpg", strings.path)
+
+        s.contains("Spiritual_Wave") ->
+            s.replace("2-Timekeeping_Spiritual_Wave+.jpg", strings.timekeeping)
+
+        else -> s
     }
 
     private suspend fun openSite() {

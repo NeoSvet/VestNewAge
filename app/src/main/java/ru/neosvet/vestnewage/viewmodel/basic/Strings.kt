@@ -21,6 +21,12 @@ data class BrowserStrings(
     val toNext: String
 )
 
+data class SiteStrings(
+    val novosti: String,
+    val timekeeping: String,
+    val path: String
+)
+
 data class HomeStrings(
     val nothing: String,
     val never: String,
