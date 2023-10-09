@@ -8,11 +8,14 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View
 import android.view.Window
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.ActionMenuView
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
@@ -103,6 +106,7 @@ class BrowserActivity : AppCompatActivity() {
     private var searchIndex = -1
     private var lastScroll = 0
     private var positionForRestore = 0f
+    private var bottomX = 0
 
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
@@ -565,6 +569,7 @@ class BrowserActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setBottomBar() = binding.run {
         bottomBar.menu.let { main ->
             main.getItem(0).subMenu?.let {
@@ -644,6 +649,24 @@ class BrowserActivity : AppCompatActivity() {
                 }
             }
             return@setOnMenuItemClickListener true
+        }
+        val listener = View.OnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_UP -> {
+                    val x = event.getX(0).toInt()
+                    if (bottomX > x) toiler.nextPage()
+                    else toiler.prevPage()
+                }
+
+                MotionEvent.ACTION_DOWN ->
+                    bottomX = event.getX(0).toInt()
+            }
+            false
+        }
+        bottomBar.setOnTouchListener(listener)
+        val m = bottomBar.getChildAt(0) as ActionMenuView
+        m.children.forEach {
+            it.setOnTouchListener(listener)
         }
     }
 
