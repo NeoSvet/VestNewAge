@@ -760,6 +760,9 @@ class BrowserActivity : AppCompatActivity() {
             BasicState.Success ->
                 tipFinish.show()
 
+            BasicState.NotLoaded ->
+                toast.show(getString(R.string.not_load_month))
+
             is BasicState.Error ->
                 if (state.isNeedReport)
                     status.setError(state)
@@ -771,6 +774,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun setPrimary(state: BrowserState.Primary) {
+        if (link != state.link) helper.position = 0f
         positionForRestore = state.position
         finishLoading()
         setHeadBar(state.type == BrowserState.Type.DOCTRINE)

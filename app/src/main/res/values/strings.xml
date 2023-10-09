@@ -137,6 +137,7 @@
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
     <string name="go_to_last_place">Перейти к прошлому месту?</string>
+    <string name="not_load_month">Месяц не загружен</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>

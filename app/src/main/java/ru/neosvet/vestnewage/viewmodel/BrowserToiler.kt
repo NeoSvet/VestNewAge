@@ -47,6 +47,7 @@ class BrowserToiler : NeoToiler() {
     private var isRefresh = false
     private var isDoctrine = false
     private var isNumPar = false
+    private var withOutPosition = false
     private var isLightTheme = true
     private var link = ""
     private var idPage = ""
@@ -58,7 +59,12 @@ class BrowserToiler : NeoToiler() {
     }
 
     private val dateFromLink: DateUnit
-        get() = DateUnit.parse(link.date)
+        get() = if (link.contains("predislovie")) when {
+            link.contains("2009") -> DateUnit.putYearMonth(2009, 1)
+            link.contains("2004") -> DateUnit.putYearMonth(2004, 12)
+            else -> DateUnit.putYearMonth(2004, 8)
+        } else DateUnit.parse(link.date)
+
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, BrowserHelper.TAG)
@@ -150,6 +156,10 @@ class BrowserToiler : NeoToiler() {
                 reLoad()
             } else if (isRefresh.not())
                 p = addJournal()
+            if (withOutPosition) {
+                p = 0f
+                withOutPosition = false
+            }
             postState(
                 BrowserState.Primary(
                     url = FILE + file.toString(),
@@ -334,6 +344,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     fun nextPage() {
+        withOutPosition = true
         storage.open(link)
         storage.getNextPage(link)?.let {
             openLink(it, false)
@@ -343,9 +354,8 @@ class BrowserToiler : NeoToiler() {
             setState(BasicState.Success)
             return
         }
-        val today = DateUnit.initToday().my
         val d = dateFromLink
-        if (d.my == today) {
+        if (d.my == DateUnit.initToday().my) {
             setState(BasicState.Success)
             return
         }
@@ -355,10 +365,12 @@ class BrowserToiler : NeoToiler() {
         if (cursor.moveToFirst()) {
             val iLink = cursor.getColumnIndex(Const.LINK)
             openLink(cursor.getString(iLink), false)
-        }
+        } else setState(BasicState.NotLoaded)
+        cursor.close()
     }
 
     fun prevPage() {
+        withOutPosition = true
         storage.open(link)
         storage.getPrevPage(link)?.let {
             openLink(it, false)
@@ -368,9 +380,8 @@ class BrowserToiler : NeoToiler() {
             setState(BasicState.Success)
             return
         }
-        val min: String = getMinMY()
         val d = dateFromLink
-        if (d.my == min) {
+        if (d.my == getMinMY()) {
             setState(BasicState.Success)
             return
         }
@@ -380,7 +391,8 @@ class BrowserToiler : NeoToiler() {
         if (cursor.moveToLast()) {
             val iLink = cursor.getColumnIndex(Const.LINK)
             openLink(cursor.getString(iLink), false)
-        }
+        } else setState(BasicState.NotLoaded)
+        cursor.close()
     }
 
     private fun getMinMY(): String {
@@ -390,8 +402,7 @@ class BrowserToiler : NeoToiler() {
         }
         val d = if (DateHelper.isLoadedOtkr())
             DateUnit.putDays(DateHelper.MIN_DAYS_OLD_BOOK)
-        else
-            DateUnit.putDays(DateHelper.MIN_DAYS_NEW_BOOK)
+        else DateUnit.putDays(DateHelper.MIN_DAYS_NEW_BOOK)
         return d.my
     }
 

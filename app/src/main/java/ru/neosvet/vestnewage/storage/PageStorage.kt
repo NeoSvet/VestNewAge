@@ -148,10 +148,12 @@ class PageStorage : Closeable {
             s = cursor.getString(iLink)
             if (s == link) break
         } while (cursor.moveToNext())
-        if (cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             s = cursor.getString(iLink)
-            cursor.close()
-            return s
+            if (s != link) {
+                cursor.close()
+                return s
+            }
         }
         cursor.close()
         return null
