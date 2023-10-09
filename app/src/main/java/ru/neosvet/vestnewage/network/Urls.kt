@@ -19,6 +19,7 @@ import java.io.InputStreamReader
 object Urls {
     private var TIME = 1684586127068L
     private const val FILE = "/urls.txt"
+    const val PRED_LINK = "/2004/predislovie.html"
     const val PROM_LINK = "Posyl-na-Edinenie.html"
     const val VREMYA_LINK = "Vremya-Posyla.html"
     const val PRECEPT_LINK = "doctrine:174-179"

@@ -59,7 +59,8 @@ data class BookStrings(
     val rnd_verse: String,
     val alert_rnd: String,
     val try_again: String,
-    val from: String
+    val from: String,
+    val pred_tolk: String
 )
 
 data class MarkersStrings(

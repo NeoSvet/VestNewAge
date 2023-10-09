@@ -107,6 +107,7 @@
     <string name="try_again">Попробуйте ещё раз</string>
     <string name="alert_rnd">Скачайте все материалы, прежде чем пользоваться этой функцией!</string>
     <string name="open">Открыть</string>
+    <string name="pred_tolk">Предисловие Всевышнего к Толкованиям</string>
     <!--TipActivity-->
     <string name="off_all_tips">Отключить все подсказки</string>
     <string name="look_tips_in_help">Посмотреть подсказки можно в Справке</string>

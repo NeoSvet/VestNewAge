@@ -16,6 +16,7 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -212,6 +213,8 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private fun loadFromStorage(): Boolean {
         for (i in 0 until calendar.size)
             calendar[i].clear()
+        if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && DateHelper.isLoadedOtkr().not())
+            calendar[getIndexByDay(1)].addLink(Urls.PRED_LINK)
         val storage = PageStorage()
         storage.open(date.my, false)
         val cursor = storage.getListAll()

@@ -80,7 +80,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             rnd_verse = context.getString(R.string.rnd_verse),
             alert_rnd = context.getString(R.string.alert_rnd),
             try_again = context.getString(R.string.try_again),
-            from = context.getString(R.string.from)
+            from = context.getString(R.string.from),
+            pred_tolk = context.getString(R.string.pred_tolk)
         )
         context.resources.getStringArray(R.array.months).forEach {
             months.add(it)
@@ -160,24 +161,13 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 return@launch
             }
             val list = mutableListOf<BasicItem>()
+            if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not())
+                list.add(BasicItem(strings.pred_tolk, Urls.PRED_LINK))
             val storage = PageStorage()
             var t: String
             var s: String
-            var cursor: Cursor
-            if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not()) {
-                //добавить в список "Предисловие к Толкованиям" /2004/predislovie.html
-                storage.open("12.04")
-                cursor = storage.getListAll()
-                if (cursor.moveToFirst() && cursor.moveToNext()) {
-                    t = cursor.getString(cursor.getColumnIndex(Const.TITLE))
-                    s = cursor.getString(cursor.getColumnIndex(Const.LINK))
-                    list.add(BasicItem(t, s))
-                }
-                cursor.close()
-                storage.close()
-            }
             storage.open(date.my)
-            cursor = storage.getListAll()
+            var cursor = storage.getListAll()
             if (cursor.moveToFirst()) {
                 val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
                 if (date.year > 2015) { //списки скаченные с сайта Откровений не надо открывать с фильтром - там и так всё по порядку

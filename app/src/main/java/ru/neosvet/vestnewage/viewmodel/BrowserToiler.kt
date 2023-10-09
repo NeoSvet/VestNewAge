@@ -124,7 +124,7 @@ class BrowserToiler : NeoToiler() {
             if (storage.name.contains(".")) {
                 if (storage.isOldBook) {
                     type = BrowserState.Type.OLD_BOOK
-                    loadIfNeed = false
+                    loadIfNeed = link == Urls.PRED_LINK
                 }
             }
             isDoctrine = storage.isDoctrine
