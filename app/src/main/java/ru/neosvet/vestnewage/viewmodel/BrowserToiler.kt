@@ -49,6 +49,7 @@ class BrowserToiler : NeoToiler() {
     private var isNumPar = false
     private var isLightTheme = true
     private var link = ""
+    private var idPage = ""
     private val pageLoader: PageLoader by lazy {
         PageLoader(NeoClient(NeoClient.Type.SECTION))
     }
@@ -143,18 +144,20 @@ class BrowserToiler : NeoToiler() {
             val isNeedUpdate = if (newPage || !file.exists())
                 generatePage(file)
             else false
-            postState(
-                BrowserState.Primary(
-                    url = FILE + file.toString(),
-                    link = link,
-                    type = type
-                )
-            )
+            var p = 0f
             if (isNeedUpdate) {
                 isRefresh = true
                 reLoad()
             } else if (isRefresh.not())
-                addJournal()
+                p = addJournal()
+            postState(
+                BrowserState.Primary(
+                    url = FILE + file.toString(),
+                    link = link,
+                    position = p,
+                    type = type
+                )
+            )
         }
     }
 
@@ -196,7 +199,7 @@ class BrowserToiler : NeoToiler() {
             bw.flush()
         } else {
             //заголовка нет - значит нет и страницы
-            //сюда никогдане попадет, т.к. выше есть проверка existsPage
+            //сюда никогда не попадет, т.к. выше есть проверка existsPage
             cursor.close()
             return isNeedUpdate
         }
@@ -298,23 +301,26 @@ class BrowserToiler : NeoToiler() {
         }
     }
 
-    private fun addJournal() {
+    private fun addJournal(): Float {
         val row = ContentValues()
         row.put(Const.TIME, System.currentTimeMillis())
-        val id = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)
+        idPage = PageStorage.getDatePage(link) + Const.AND + storage.getPageId(link)
         val dbJournal = JournalStorage()
         try {
-            if (!dbJournal.update(id, row)) {
-                row.put(DataBase.ID, id)
+            val position = dbJournal.getPlace(idPage)
+            if (!dbJournal.update(idPage, row)) {
+                row.put(DataBase.ID, idPage)
                 dbJournal.insert(row)
             }
             dbJournal.checkLimit()
             dbJournal.close()
+            return position
         } catch (e: Exception) {
             dbJournal.close()
             val file = Files.getFileDB(DataBase.JOURNAL)
             file.delete()
         }
+        return 0f
     }
 
     private fun restoreStyle() {
@@ -323,8 +329,7 @@ class BrowserToiler : NeoToiler() {
             val fDark = Files.getFile(StyleLoader.DARK)
             if (fDark.exists())
                 fStyle.renameTo(Files.getFile(StyleLoader.LIGHT))
-            else
-                fStyle.renameTo(fDark)
+            else fStyle.renameTo(fDark)
         }
     }
 
@@ -394,5 +399,13 @@ class BrowserToiler : NeoToiler() {
         this.link = link
         this.isLightTheme = isLightTheme
         this.isNumPar = isNumPar
+    }
+
+    fun savePosition(positionOnPage: Float) {
+        val dbJournal = JournalStorage()
+        val row = ContentValues()
+        row.put(Const.PLACE, positionOnPage)
+        dbJournal.update(idPage, row)
+        dbJournal.close()
     }
 }

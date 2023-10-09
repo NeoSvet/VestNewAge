@@ -99,6 +99,7 @@ class DataBase(name: String, write: Boolean = false) :
             JOURNAL -> db.execSQL(
                 CREATE_TABLE + JOURNAL + " ("
                         + ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
+                        + Const.PLACE + " real,"
                         + Const.TIME + " integer);"
             )
 

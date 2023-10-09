@@ -10,6 +10,7 @@ sealed class BrowserState : NeoState {
     data class Primary(
         val url: String,
         val link: String,
+        val position: Float,
         val type: Type
     ) : PrimaryState
 

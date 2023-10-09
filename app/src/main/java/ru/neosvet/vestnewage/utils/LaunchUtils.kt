@@ -88,7 +88,8 @@ class LaunchUtils(context: Context) {
         }
         if (previousVer < 71) {
             listOf(
-                Files.getFileDB("devads"), Files.getFileDB("devads-journal"), Files.getFileS("news")
+                Files.getFileDB(DataBase.JOURNAL), Files.getFileDB("devads"),
+                Files.getFileDB("devads-journal"), Files.getFileS("news")
             ).forEach {
                 if (it.exists()) it.delete()
             }

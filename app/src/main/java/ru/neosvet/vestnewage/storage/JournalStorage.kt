@@ -26,7 +26,7 @@ class JournalStorage : Closeable {
     fun insert(row: ContentValues) =
         db.insert(DataBase.JOURNAL, row)
 
-    fun getIds(): Cursor = db.query(
+    private fun getIds(): Cursor = db.query(
         table = DataBase.JOURNAL,
         column = DataBase.ID
     )
@@ -69,6 +69,7 @@ class JournalStorage : Closeable {
         var cursor: Cursor
         val iTime = curJ.getColumnIndex(Const.TIME)
         val iID = curJ.getColumnIndex(DataBase.ID)
+        val iPlace = curJ.getColumnIndex(Const.PLACE)
         var i = 0
         var s: String
         val now = System.currentTimeMillis()
@@ -82,10 +83,11 @@ class JournalStorage : Closeable {
                 s = cursor.getString(iLink)
                 val item = BasicItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
                 val t = curJ.getLong(iTime)
+                val p = curJ.getFloat(iPlace)
                 val d = DateUnit.putMills(t)
                 item.des = String.format(
-                    strings.format_time_back,
-                    DateUnit.getDiffDate(now, t), d
+                    strings.format_journal,
+                    DateUnit.getDiffDate(now, t), p, d
                 )
                 if (id.size == 3) { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
@@ -140,5 +142,19 @@ class JournalStorage : Closeable {
         val t = cursor.getLong(iTime)
         cursor.close()
         return DateUnit.getDiffDate(System.currentTimeMillis(), t)
+    }
+
+    fun getPlace(id: String): Float {
+        val cursor = db.query(
+            table = DataBase.JOURNAL,
+            selection = DataBase.ID + DataBase.Q,
+            selectionArgs = arrayOf(id)
+        )
+        val r = if (cursor.moveToFirst()) {
+            val i = cursor.getColumnIndex(Const.PLACE)
+            cursor.getFloat(i)
+        } else 0f
+        cursor.close()
+        return r
     }
 }

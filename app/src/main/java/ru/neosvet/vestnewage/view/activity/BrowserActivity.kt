@@ -101,6 +101,7 @@ class BrowserActivity : AppCompatActivity() {
     private var link = ""
     private var searchIndex = -1
     private var lastScroll = 0
+    private var positionForRestore = 0f
 
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
@@ -189,6 +190,7 @@ class BrowserActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        toiler.savePosition(positionOnPage)
         prom.stop()
     }
 
@@ -690,11 +692,15 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     fun openLink(url: String) {
+        positionForRestore = 0f
+        helper.position = 0f
         helper.clearSearch()
         toiler.openLink(url, true)
     }
 
     fun onBack() {
+        positionForRestore = 0f
+        helper.position = 0f
         toiler.openPage(false)
     }
 
@@ -711,14 +717,8 @@ class BrowserActivity : AppCompatActivity() {
             BasicState.NoConnected ->
                 noConnected()
 
-            is BrowserState.Primary -> {
-                finishLoading()
-                setHeadBar(state.type == BrowserState.Type.DOCTRINE)
-                link = state.link
-                binding.content.wvBrowser.loadUrl(state.url)
-                menu.numpar.isVisible = link.isPoem
-                menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
-            }
+            is BrowserState.Primary ->
+                setPrimary(state)
 
             is BrowserState.Status ->
                 restoreStatus(state)
@@ -740,6 +740,26 @@ class BrowserActivity : AppCompatActivity() {
                     snackbar.show(binding.fabNav, state.message)
                 }
         }
+    }
+
+    private fun setPrimary(state: BrowserState.Primary) {
+        positionForRestore = state.position
+        finishLoading()
+        setHeadBar(state.type == BrowserState.Type.DOCTRINE)
+        link = state.link
+        binding.content.wvBrowser.loadUrl(state.url)
+        menu.numpar.isVisible = link.isPoem
+        menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+        if (positionForRestore > 0f) snackbar.show(
+            view = binding.fabNav,
+            msg = getString(R.string.go_to_last_place),
+            event = this::restoreLastPosition
+        )
+    }
+
+    private fun restoreLastPosition() {
+        helper.position = positionForRestore
+        restorePosition()
     }
 
     private fun restoreStatus(state: BrowserState.Status) {

@@ -102,7 +102,7 @@ data class HelpStrings(
 )
 
 data class JournalStrings(
-    val format_time_back: String,
+    val format_journal: String,
     val back: String,
     val rnd_poem: String,
     val rnd_epistle: String,

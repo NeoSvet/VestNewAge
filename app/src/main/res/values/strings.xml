@@ -74,7 +74,7 @@
     <string name="format_page_no_loaded">Страница %s не загружена.</string>
     <string name="format_month_no_loaded">%s %d не загружен.</string>
     <string name="format_info">Версия приложения: %s (%d)\nВерсия системы: %s (%d)</string>
-    <string name="format_time_back">%s назад\n(%s)</string>
+    <string name="format_journal">%s назад на позиции %.1f%%\n(%s)</string>
     <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
     <string name="format_freed_size">Освобождено: %s МБ</string>
     <string name="format_delete">Удалить %s?</string>
@@ -136,6 +136,7 @@
     <string name="num_par">Нумерация абзацев</string>
     <string name="light_theme">Светлое оформление</string>
     <string name="dark_theme">Темное оформление</string>
+    <string name="go_to_last_place">Перейти к прошлому месту?</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
