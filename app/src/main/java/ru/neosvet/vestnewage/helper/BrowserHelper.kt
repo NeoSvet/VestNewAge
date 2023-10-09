@@ -29,7 +29,6 @@ class BrowserHelper(context: Context) {
     var placeIndex = -1
     var isSearch = false
     var position = 0f
-    var isFullScreen = false
 
     val request: String
         get() = place[placeIndex].trimEnd()

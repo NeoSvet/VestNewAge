@@ -16,6 +16,7 @@ sealed class BrowserState : NeoState {
 
     data class Status(
         val helper: BrowserHelper,
+        val fullscreen: Boolean,
         val search: String?,
         val index: Int,
         val head: Byte,

@@ -86,6 +86,7 @@ class BrowserActivity : AppCompatActivity() {
     private var isSearch = false
     private var twoPointers = false
     private var isBlocked = false
+    private var isFullScreen = false
     var currentScale = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
@@ -152,9 +153,6 @@ class BrowserActivity : AppCompatActivity() {
         this.helper = helper
         currentScale = helper.zoom / 100f
         initOptions()
-        if (helper.isFullScreen) binding.bottomBar.post {
-            switchFullScreen(true)
-        } else bottomUnblocked()
         with(binding.content) {
             if (isSearch) {
                 pSearch.isVisible = true
@@ -208,6 +206,7 @@ class BrowserActivity : AppCompatActivity() {
         toiler.setStatus(
             BrowserState.Status(
                 helper = helper,
+                fullscreen = isFullScreen,
                 search = s,
                 index = searchIndex,
                 head = getHeadStatus(),
@@ -228,14 +227,18 @@ class BrowserActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun restoreSearch() = helper.run {
-        if (placeIndex < 0) return
+    private fun restoreSearch() {
+        if (helper.placeIndex < 0) return
         if (helper.isSearch) findRequest()
-        var i = -1
-        val final = searchIndex
-        while (i < final) {
-            binding.content.wvBrowser.findNext(true)
-            i++
+        lifecycleScope.launch {
+            val final = searchIndex
+            searchIndex = 0
+            while (searchIndex < final) {
+                binding.content.wvBrowser.post {
+                    binding.content.wvBrowser.findNext(true)
+                }
+                delay(50)
+            }
         }
     }
 
@@ -299,7 +302,7 @@ class BrowserActivity : AppCompatActivity() {
                     bottomUnblocked()
                 }
 
-                helper.isFullScreen ->
+                isFullScreen ->
                     switchFullScreen(false)
 
                 binding.bottomBar.isScrolledDown -> {
@@ -408,7 +411,7 @@ class BrowserActivity : AppCompatActivity() {
                 twoPointers = twoPointers.not()
                 return@setOnTouchListener false
             }
-            if (helper.isFullScreen || isSearch)
+            if (isFullScreen || isSearch)
                 return@setOnTouchListener false
 
             when (event.actionMasked) {
@@ -530,7 +533,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun switchFullScreen(value: Boolean) {
-        helper.isFullScreen = value
+        isFullScreen = value
         if (value) {
             headBar.hide()
             bottomBlocked()
@@ -604,6 +607,7 @@ class BrowserActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_numpar -> {
+                    helper.position = positionOnPage
                     helper.isNumPar = helper.isNumPar.not()
                     setCheckItem(it, helper.isNumPar)
                     changeArguments()
@@ -631,6 +635,7 @@ class BrowserActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_theme -> {
+                    helper.position = positionOnPage
                     helper.isLightTheme = helper.isLightTheme.not()
                     initTheme()
                     content.wvBrowser.clearCache(true)
@@ -746,7 +751,6 @@ class BrowserActivity : AppCompatActivity() {
         positionForRestore = state.position
         finishLoading()
         setHeadBar(state.type == BrowserState.Type.DOCTRINE)
-        link = state.link
         binding.content.wvBrowser.loadUrl(state.url)
         menu.numpar.isVisible = link.isPoem
         menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
@@ -755,6 +759,7 @@ class BrowserActivity : AppCompatActivity() {
             msg = getString(R.string.go_to_last_place),
             event = this::restoreLastPosition
         )
+        link = state.link
     }
 
     private fun restoreLastPosition() {
@@ -768,7 +773,12 @@ class BrowserActivity : AppCompatActivity() {
             goSearch(false)
         }
         searchIndex = state.index
+        isFullScreen = state.fullscreen
         setHelper(state.helper)
+        restoreSearch()
+        if (isFullScreen) binding.bottomBar.post {
+            switchFullScreen(true)
+        } else bottomUnblocked()
         if (!state.bottom)
             bottomHide()
         when (state.head) {
@@ -796,7 +806,7 @@ class BrowserActivity : AppCompatActivity() {
         binding.tvNotFound.isVisible = false
         if (status.isVisible)
             status.setLoad(false)
-        if (!helper.isFullScreen) bottomUnblocked()
+        if (!isFullScreen) bottomUnblocked()
     }
 
     private fun connectChanged(connected: Boolean) {
