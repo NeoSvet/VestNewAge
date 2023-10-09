@@ -18,7 +18,7 @@ import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.utils.date
+import ru.neosvet.vestnewage.utils.dateFromLink
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -57,14 +57,6 @@ class BrowserToiler : NeoToiler() {
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()
     }
-
-    private val dateFromLink: DateUnit
-        get() = if (link.contains("predislovie")) when {
-            link.contains("2009") -> DateUnit.putYearMonth(2009, 1)
-            link.contains("2004") -> DateUnit.putYearMonth(2004, 12)
-            else -> DateUnit.putYearMonth(2004, 8)
-        } else DateUnit.parse(link.date)
-
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, BrowserHelper.TAG)
@@ -354,7 +346,7 @@ class BrowserToiler : NeoToiler() {
             setState(BasicState.Success)
             return
         }
-        val d = dateFromLink
+        val d = link.dateFromLink
         if (d.my == DateUnit.initToday().my) {
             setState(BasicState.Success)
             return
@@ -380,7 +372,7 @@ class BrowserToiler : NeoToiler() {
             setState(BasicState.Success)
             return
         }
-        val d = dateFromLink
+        val d = link.dateFromLink
         if (d.my == getMinMY()) {
             setState(BasicState.Success)
             return

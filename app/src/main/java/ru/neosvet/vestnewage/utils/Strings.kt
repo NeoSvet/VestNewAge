@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.utils
 
 import androidx.core.text.HtmlCompat
+import ru.neosvet.vestnewage.data.DateUnit
 import java.util.regex.Pattern
 
 private val patternDate = Pattern.compile("\\d{2}\\.\\d{2}.\\d{2}")
@@ -15,6 +16,13 @@ val String.date: String
         val i = m.start()
         return this.substring(i, i + 8)
     }
+
+val String.dateFromLink: DateUnit
+    get() = if (contains("predislovie")) when {
+        contains("2009") -> DateUnit.putYearMonth(2009, 1).apply { day = 1 }
+        contains("2004") -> DateUnit.putYearMonth(2004, 12).apply { day = 31 }
+        else -> DateUnit.putYearMonth(2004, 8).apply { day = 26 }
+    } else DateUnit.parse(date)
 
 val String.hasDate: Boolean
     get() = patternDate.matcher(this).find()
