@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.utils.dateFromLink
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -229,16 +230,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
                 if (link.contains("@")) {
                     i = link.substring(0, 2).toInt()
                     link = link.substring(9)
-                } else if (link.contains("predislovie")) {
-                    i = when {
-                        link.contains("2009") -> 1
-                        link.contains("2004") -> 31
-                        else -> 26
-                    }
-                } else {
-                    i = link.lastIndexOf("/") + 1
-                    i = link.substring(i, i + 2).toInt()
-                }
+                } else i = link.dateFromLink.day
                 i = getIndexByDay(i)
                 if (i == -1) continue
                 calendar[i].addLink(link)
@@ -260,14 +252,10 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     }
 
     private fun getIndexByDay(d: Int): Int {
-        var begin = false
-        for (i in calendar.indices) {
-            if (calendar[i].num == 1) {
-                if (begin) return -1
-                begin = true
-            }
-            if (begin && calendar[i].num == d)
-                return i
+        var i = d + 6
+        while (i < calendar.size) {
+            if (calendar[i].num == d) return i
+            i++
         }
         return -1
     }
