@@ -11,7 +11,7 @@ class NeoSnackbar {
     val isShown: Boolean
         get() = snackbar?.isShown == true
 
-    fun show(view: View, msg: String) {
+    fun show(view: View, msg: String, event: (() -> Unit)? = null) {
         val context = view.context
         snackbar = Snackbar.make(
             view, msg,
@@ -22,6 +22,7 @@ class NeoSnackbar {
             .setAction(android.R.string.ok) {
                 if (msg == context.getString(R.string.site_no_response))
                     showAboutNoResponse(context)
+                else event?.invoke()
                 hide()
             }
         snackbar?.show()
