@@ -6,6 +6,7 @@ import android.database.Cursor
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.*
 import java.io.Closeable
 import java.util.regex.Pattern
@@ -14,28 +15,17 @@ class PageStorage : Closeable {
     companion object {
         @JvmStatic
         fun getDatePage(link: String): String {
-            return if (link.contains(Const.DOCTRINE))
-                DataBase.DOCTRINE
-            else if (!link.contains("/") || link.contains("press"))
-                DataBase.ARTICLES
-            else if (link.contains("pred")) {
-                when {
-                    link.contains("2004") -> "12.04"
-                    link.contains("2009") -> "01.09"
-                    else -> "08.04"
+            return when {
+                link.contains(Const.DOCTRINE) -> DataBase.DOCTRINE
+                !link.contains("/") || link.contains("press") -> DataBase.ARTICLES
+                link.contains("pred") || link.hasDate ->
+                    link.dateFromLink.my
+
+                else -> {
+                    if (link.contains("-")) { //https://blagayavest.info/poems/2017-03-08
+                        DateUnit.parse(link.substring(link.lastIndexOf("/") + 1)).my
+                    } else DataBase.ARTICLES
                 }
-            } else {
-                var s = link
-                if (s.contains("=")) { //http://blagayavest.info/poems/?date=11-3-2017
-                    s = s.substring(s.indexOf("-") + 1)
-                    if (s.length == 6) s = "0$s"
-                    s = s.replace("-20", ".")
-                } else if (s.contains("-")) { ///2005/01-02.08.05.html
-                    s = s.substring(s.indexOf("-") + 4, s.lastIndexOf("."))
-                } else { //http://blagayavest.info/poems/11.03.17.html
-                    s = if (s.hasDate) s.date.substring(3) else DataBase.ARTICLES
-                }
-                s
             }
         }
     }
