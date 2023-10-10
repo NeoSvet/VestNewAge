@@ -52,6 +52,7 @@ import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
+import kotlin.math.abs
 
 
 class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
@@ -652,7 +653,8 @@ class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
             when (event.actionMasked) {
                 MotionEvent.ACTION_UP -> {
                     val x = event.getX(0).toInt()
-                    changePage(bottomX > x)
+                    if (abs(bottomX - x) > 40)
+                        changePage(bottomX > x)
                 }
 
                 MotionEvent.ACTION_DOWN ->
