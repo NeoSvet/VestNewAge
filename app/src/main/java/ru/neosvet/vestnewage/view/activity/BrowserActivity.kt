@@ -553,8 +553,7 @@ class BrowserActivity : AppCompatActivity() {
                 ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
             else if (ScreenUtils.isLand)
                 ivHeadBack.setImageResource(R.drawable.head_back_land_d)
-            else
-                ivHeadBack.setImageResource(R.drawable.head_back_d)
+            else ivHeadBack.setImageResource(R.drawable.head_back_d)
             ivHeadFront.setImageResource(R.drawable.head_front_d)
         } else if (ScreenUtils.isTablet && isBigHead)
             ivHeadBack.setImageResource(R.drawable.head_back_tablet)
@@ -653,6 +652,7 @@ class BrowserActivity : AppCompatActivity() {
             when (event.actionMasked) {
                 MotionEvent.ACTION_UP -> {
                     val x = event.getX(0).toInt()
+                    toiler.savePosition(positionOnPage)
                     if (bottomX > x) toiler.nextPage()
                     else toiler.prevPage()
                 }
@@ -721,6 +721,7 @@ class BrowserActivity : AppCompatActivity() {
     fun openLink(url: String) {
         positionForRestore = 0f
         helper.clearSearch()
+        toiler.savePosition(positionOnPage)
         toiler.openLink(url, true)
     }
 
@@ -752,10 +753,13 @@ class BrowserActivity : AppCompatActivity() {
                 finishLoading()
                 binding.tvNotFound.isVisible = true
                 menu.refresh.isVisible = false
+                toiler.clearStates()
             }
 
-            BasicState.Success ->
+            BasicState.Success -> {
                 toast.show(getString(R.string.tip_end_list))
+                toiler.clearStates()
+            }
 
             BasicState.NotLoaded ->
                 toast.show(getString(R.string.not_load_month))
