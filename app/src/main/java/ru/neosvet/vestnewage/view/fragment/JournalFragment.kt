@@ -32,7 +32,7 @@ import ru.neosvet.vestnewage.viewmodel.state.NeoState
 class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private val toiler: JournalToiler
         get() = neotoiler as JournalToiler
-    private val adPaging: PagingAdapter by lazy {
+    private val adapter: PagingAdapter by lazy {
         PagingAdapter(this)
     }
 
@@ -40,7 +40,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         get() = getString(R.string.journal)
     private var jobList: Job? = null
     private var isUserScroll = true
-    private var firstPosition = 0
+    private var firstPosition = -1
     private lateinit var rvList: RecyclerView
 
     override fun initViewModel(): NeoToiler =
@@ -63,7 +63,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        toiler.setStatus(JournalState.Status(adPaging.firstPosition))
+        toiler.setStatus(JournalState.Status(adapter.firstPosition))
         super.onSaveInstanceState(outState)
     }
 
@@ -71,29 +71,36 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun initView(container: View) {
         rvList = container.findViewById(R.id.rvList) as RecyclerView
         rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rvList.adapter = adPaging
+        rvList.adapter = adapter
         setListEvents(rvList)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (adapter.itemCount == 0 && firstPosition > -1)
+            startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
     private fun startPaging(page: Int) {
         jobList?.cancel()
         rvList.adapter = null
         jobList = lifecycleScope.launch {
-            toiler.paging(page, adPaging).collect {
-                adPaging.submitData(lifecycle, it)
+            toiler.paging(page, adapter).collect {
+                adapter.submitData(lifecycle, it)
             }
         }
-        rvList.adapter = adPaging
+        rvList.adapter = adapter
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
         var s = item.des
+        firstPosition = adapter.firstPosition
+        adapter.submitData(lifecycle, PagingData.empty())
         if (s.contains(getString(R.string.rnd_verse))) {
             val i = s.indexOf(Const.N, s.indexOf(getString(R.string.rnd_verse))) + 1
             s = s.substring(i)
             openReader(item.link, s)
-        } else
-            openReader(item.link, null)
+        } else openReader(item.link, null)
     }
 
     override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
@@ -160,7 +167,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun openList(max: Int) {
         if (max > NeoPaging.ON_PAGE)
             act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
-        if (firstPosition == 0) startPaging(0)
+        if (firstPosition < 1) startPaging(0)
         else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
@@ -178,6 +185,6 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun onAction(title: String) {
         toiler.clear()
-        adPaging.submitData(lifecycle, PagingData.empty())
+        adapter.submitData(lifecycle, PagingData.empty())
     }
 }
