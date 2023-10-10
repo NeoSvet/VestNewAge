@@ -54,7 +54,7 @@ import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 
-class BrowserActivity : AppCompatActivity() {
+class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -405,7 +405,7 @@ class BrowserActivity : AppCompatActivity() {
         wvBrowser.settings.javaScriptEnabled = true
         wvBrowser.settings.allowContentAccess = true
         wvBrowser.settings.allowFileAccess = true
-        wvBrowser.addJavascriptInterface(NeoInterface(toiler), "NeoInterface")
+        wvBrowser.addJavascriptInterface(NeoInterface(this@BrowserActivity), "NeoInterface")
         wvBrowser.webViewClient = WebClient(this@BrowserActivity)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
@@ -652,9 +652,7 @@ class BrowserActivity : AppCompatActivity() {
             when (event.actionMasked) {
                 MotionEvent.ACTION_UP -> {
                     val x = event.getX(0).toInt()
-                    toiler.savePosition(positionOnPage)
-                    if (bottomX > x) toiler.nextPage()
-                    else toiler.prevPage()
+                    changePage(bottomX > x)
                 }
 
                 MotionEvent.ACTION_DOWN ->
@@ -859,5 +857,13 @@ class BrowserActivity : AppCompatActivity() {
         if (isSearch) return
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
+    }
+
+    override fun changePage(next: Boolean) {
+        binding.content.wvBrowser.post {
+            toiler.savePosition(positionOnPage)
+        }
+        if (next) toiler.nextPage()
+        else toiler.prevPage()
     }
 }

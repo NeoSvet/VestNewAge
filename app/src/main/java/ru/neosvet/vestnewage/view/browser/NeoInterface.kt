@@ -1,16 +1,19 @@
 package ru.neosvet.vestnewage.view.browser
 
 import android.webkit.JavascriptInterface
-import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 
-class NeoInterface(private val browser: BrowserToiler) {
+class NeoInterface(private val parent: Parent) {
+
+    interface Parent {
+        fun changePage(next: Boolean)
+    }
     @JavascriptInterface
     fun NextPage() {
-        browser.nextPage()
+        parent.changePage(true)
     }
 
     @JavascriptInterface
     fun PrevPage() {
-        browser.prevPage()
+        parent.changePage(false)
     }
 }
