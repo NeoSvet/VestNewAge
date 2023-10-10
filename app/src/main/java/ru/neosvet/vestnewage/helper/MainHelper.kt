@@ -206,9 +206,6 @@ class MainHelper(private val act: MainActivity) {
             Section.NEW ->
                 setActionIcon(R.drawable.ic_clear)
 
-            Section.JOURNAL ->
-                setActionIcon(R.drawable.ic_clear)
-
             Section.SUMMARY ->
                 setActionIcon(R.drawable.ic_refresh)
 
