@@ -1,10 +1,9 @@
 package ru.neosvet.vestnewage.loader
 
-import android.content.ContentValues
 import org.json.JSONArray
 import org.json.JSONObject
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
@@ -15,7 +14,7 @@ import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.utils.fromHTML
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.*
+import java.util.LinkedList
 
 class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private val storage = PageStorage()
@@ -52,10 +51,8 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         br.close()
         stream.close()
         if (s.length < 20) return
-        if (Urls.isSiteCom)
-            parseHtml(s)
-        else
-            parseJson(s)
+        if (Urls.isSiteCom) parseHtml(s)
+        else parseJson(s)
         if (isRun) listToStorage(updateUnread)
     }
 
@@ -67,10 +64,8 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
             val link = content.substring(i, content.indexOf("\"", i))
             i = content.indexOf(">", i) + 1
             val d = content.substring(i, content.indexOf("</a", i))
-            if (d.contains("<"))
-                list.add(BasicItem(d.fromHTML))
-            else
-                list.add(BasicItem(d))
+            if (d.contains("<")) list.add(BasicItem(d.fromHTML))
+            else list.add(BasicItem(d))
             addLink(link)
             if (link.contains('_'))
                 checkLink(link, '_')
@@ -156,31 +151,17 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
                 }
                 links.sort()
                 links.forEach { link ->
-                    linkToStorage(link)
+                    storage.putLink(link)
                     unread?.addLink(link, date)
                 }
                 links.clear()
             } else {
-                linkToStorage(item.link)
+                storage.putLink(item.link)
                 unread?.addLink(item.link, date)
             }
         }
         storage.close()
         unread?.setBadge()
-    }
-
-    private fun linkToStorage(link: String) {
-        val row = ContentValues()
-        row.put(Const.LINK, link)
-        // пытаемся обновить запись:
-        if (!storage.updateTitle(link, row)) {
-            // обновить не получилось, добавляем:
-            if (link.contains("@"))
-                row.put(Const.TITLE, link.substring(9))
-            else
-                row.put(Const.TITLE, link)
-            storage.insertTitle(row)
-        }
     }
 
     private fun addLink(link: String) = list.last().let { item ->

@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.loader
 
-import android.content.ContentValues
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
@@ -132,7 +131,7 @@ class MasterLoader : Loader, LoadHandlerLite {
             lastYear = d.year
         }
         val storage = PageStorage()
-        storage.open(d.my, false)
+        storage.open(d.my)
         val list = storage.getLinksList()
         storage.close()
         loadPages(list)
@@ -214,14 +213,11 @@ class MasterLoader : Loader, LoadHandlerLite {
         val storage = PageStorage()
         storage.open(name, true)
         val time = System.currentTimeMillis()
-        val row = ContentValues()
-        row.put(Const.TIME, System.currentTimeMillis())
-        if (!storage.updateTitle(1, row))
-            storage.insertTitle(row)
+        storage.updateTime()
         var isTitle = true
         val ids = HashMap<String, Int>()
         var id: Int
-        var v: String
+        var title: String
         var n = 2
         var s: String? = br.readLine()
         while (s != null && isRun) {
@@ -229,39 +225,20 @@ class MasterLoader : Loader, LoadHandlerLite {
                 isTitle = false
                 s = br.readLine()
             }
-            v = br.readLine()
+            title = br.readLine()
             s?.let {
                 if (isTitle) {
-                    id = storage.getPageId(it)
-                    if (id == -1)
-                        id = storage.insertTitle(getRow(it, v, time)).toInt()
-                    else
-                        storage.updateTitle(it, getRow(it, v, time))
+                    id = storage.putTitle(title, it, time)
                     ids[n.toString()] = id
                     n++
                 } else ids[it]?.let { id ->
-                    storage.insertParagraph(getRow(id, v))
+                    storage.insertParagraph(id, title)
                 }
             }
             s = br.readLine()
         }
         br.close()
         storage.close()
-    }
-
-    private fun getRow(link: String, title: String, time: Long): ContentValues {
-        val row = ContentValues()
-        row.put(Const.LINK, link)
-        row.put(Const.TITLE, title)
-        row.put(Const.TIME, time)
-        return row
-    }
-
-    private fun getRow(id: Int, par: String): ContentValues {
-        val row = ContentValues()
-        row.put(DataBase.ID, id)
-        row.put(DataBase.PARAGRAPH, par)
-        return row
     }
 
     private fun loadPages(list: List<String>) {

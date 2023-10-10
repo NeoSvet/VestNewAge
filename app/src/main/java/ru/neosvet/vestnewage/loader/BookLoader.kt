@@ -1,6 +1,5 @@
 package ru.neosvet.vestnewage.loader
 
-import android.content.ContentValues
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
@@ -87,21 +86,9 @@ class BookLoader(private val client: NeoClient) : Loader {
         val list = storage.getLinksList()
             .filter { link -> link.isPoem == isPoem && !links.contains(link) }
         if (list.isNotEmpty()) storage.deletePages(list)
-        //fill in storage:
-        var row = ContentValues()
-        row.put(Const.TIME, System.currentTimeMillis())
-        if (!storage.updateTitle(1, row))
-            storage.insertTitle(row)
-        for (i in 0 until title.size) {
-            row = ContentValues()
-            row.put(Const.TITLE, title[i])
-            // пытаемся обновить запись:
-            if (!storage.updateTitle(links[i], row)) {
-                // обновить не получилось, добавляем:
-                row.put(Const.LINK, links[i])
-                storage.insertTitle(row)
-            }
-        }
+        storage.updateTime()
+        for (i in 0 until title.size)
+            storage.putTitle(title[i], links[i])
         storage.close()
         title.clear()
         links.clear()
@@ -123,14 +110,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         while (link != null) {
             val title = br.readLine()
             link = Const.DOCTRINE + link
-            val row = ContentValues()
-            row.put(Const.LINK, link)
-            row.put(Const.TITLE, title)
-            row.put(Const.TIME, 0)
-            if (storage.getPageId(link) == -1)
-                storage.insertTitle(row).toInt()
-            else
-                storage.updateTitle(link, row)
+            storage.putTitle(title, link)
             if (isRun.not()) break
             link = br.readLine()
         }
@@ -160,20 +140,14 @@ class BookLoader(private val client: NeoClient) : Loader {
             val stream = clientDoctrine.getStream("$host$s.txt")
             val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
             s = br.readLine() //time
-            if (s != null && s.toLong() != time) {
-                time = s.toLong()
+            if (time != s.toLong().apply { time = this }) {
                 storage.deleteParagraphs(id)
                 s = br.readLine()
                 while (s != null) {
-                    val row = ContentValues()
-                    row.put(DataBase.ID, id)
-                    row.put(DataBase.PARAGRAPH, s)
-                    storage.insertParagraph(row)
+                    storage.insertParagraph(id, s)
                     s = br.readLine()
                 }
-                val row = ContentValues()
-                row.put(Const.TIME, time)
-                storage.updateTitle(link, row)
+                storage.updateTime(link, time)
             }
             br.close()
             handler?.let {

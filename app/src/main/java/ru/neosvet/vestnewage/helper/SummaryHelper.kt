@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.helper
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -71,18 +70,17 @@ class SummaryHelper : LinksProvider {
         val file = Files.getFile(Const.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
+        var prevName = ""
         br.forEachLine {
             val link = br.readLine()
             br.readLine() //des
             br.readLine() //time
             storage.open(link, true)
-            storage.updateTime()
-            if (!storage.existsPage(link)) {
-                val row = ContentValues()
-                row.put(Const.TITLE, it)
-                row.put(Const.LINK, link)
-                storage.insertTitle(row)
+            if (storage.name != prevName) {
+                storage.updateTime()
+                prevName = storage.name
             }
+            storage.putTitle(it, link)
         }
         br.close()
         storage.close()

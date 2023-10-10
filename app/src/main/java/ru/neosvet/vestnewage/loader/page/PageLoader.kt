@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.loader.page
 
-import android.content.ContentValues
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -31,9 +29,9 @@ class PageLoader(private val client: NeoClient) : Loader {
         isFinish = false
         // если singlePage=true, значит страницу страницу перезагружаем, а счетчики обрабатываем
         storage.open(link, true)
-        if (!singlePage && storage.existsPage(link)) {
+        val exists = storage.existsPage(link)
+        if (!singlePage && exists)
             return false
-        }
         if (storage.isDoctrine) {
             downloadDoctrinePage(link)
             if (singlePage) storage.close()
@@ -43,49 +41,20 @@ class PageLoader(private val client: NeoClient) : Loader {
         val page = PageParser(client)
         page.load(Urls.Page + link, "")
         if (singlePage) storage.deleteParagraphs(storage.getPageId(link))
-        var row: ContentValues
         var id = 0
-        var bid = 0
         var s: String? = page.currentElem
         var wasHead = false
+        val time = System.currentTimeMillis()
         do {
             if (page.isHead && (!wasHead || !storage.isArticle)) {
                 wasHead = true
-                id = storage.getPageId(link)
-                row = ContentValues()
-                row.put(Const.TIME, System.currentTimeMillis())
-                if (id == -1) { // id не найден, материала нет - добавляем
-                    if (link.contains("#")) {
-                        id = bid
-                        row = ContentValues()
-                        row.put(DataBase.ID, id)
-                        row.put(DataBase.PARAGRAPH, s)
-                        storage.insertParagraph(row)
-                    } else {
-                        row.put(Const.TITLE, getTitle(s, storage.name))
-                        row.put(Const.LINK, link)
-                        id = storage.insertTitle(row).toInt()
-                        //обновляем дату изменения списка:
-                        row = ContentValues()
-                        row.put(Const.TIME, System.currentTimeMillis())
-                        storage.updateTitle(1, row)
-                    }
-                } else { // id найден, значит материал есть
-                    //обновляем заголовок
-                    row.put(Const.TITLE, getTitle(s, storage.name))
-                    //обновляем дату загрузки материала
-                    storage.updateTitle(id, row)
-                    //удаляем содержимое материала
-                    storage.deleteParagraphs(id)
-                }
-                bid = id
+                id = storage.putTitle(getTitle(s, storage.name), link, time)
+                if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }
-            if (!isEmpty(s)) {
-                row = ContentValues()
-                row.put(DataBase.ID, id)
-                row.put(DataBase.PARAGRAPH, s)
-                storage.insertParagraph(row)
+            s?.let {
+                if (it.fromHTML.isNotEmpty())
+                    storage.insertParagraph(id, it)
             }
             s = page.nextElem
         } while (s != null)
@@ -105,23 +74,13 @@ class PageLoader(private val client: NeoClient) : Loader {
         var s: String? = link.substring(Const.DOCTRINE.length) //pages
         val stream = client.getStream("${Urls.DoctrineBase}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
-        val time = br.readLine().toLong()
-        var row = ContentValues()
-        row.put(Const.TIME, time)
-        storage.updateTitle(link, row)
+        storage.updateTime(link, br.readLine().toLong())
         s = br.readLine()
         while (s != null) {
-            row = ContentValues()
-            row.put(DataBase.ID, id)
-            row.put(DataBase.PARAGRAPH, s)
-            storage.insertParagraph(row)
+            storage.insertParagraph(id, s)
             s = br.readLine()
         }
         br.close()
-    }
-
-    private fun isEmpty(s: String?): Boolean {
-        return s?.fromHTML.isNullOrEmpty()
     }
 
     private fun checkRequests() {

@@ -66,10 +66,19 @@ class PageStorage : Closeable {
     }
 
     fun updateTime() {
-        val row = ContentValues()
-        row.put(Const.TIME, System.currentTimeMillis())
-        if (!updateTitle(1, row))
-            insertTitle(row)
+        val cv = ContentValues()
+        cv.put(Const.TIME, System.currentTimeMillis())
+        if (db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, "1") == 0)
+            insertTitle(cv)
+    }
+
+    fun updateTime(link: String, time: Long) {
+        val cv = ContentValues()
+        cv.put(Const.TIME, time)
+        if (db.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) == 0) {
+            cv.put(Const.LINK, link)
+            insertTitle(cv)
+        }
     }
 
     fun getPageTitle(title: String, link: String): String {
@@ -282,25 +291,63 @@ class PageStorage : Closeable {
         )
     }
 
-    fun insertTitle(cv: ContentValues) =
+    fun putTitle(title: String, link: String, time: Long): Int {
+        val cv = ContentValues()
+        cv.put(Const.TITLE, title)
+        cv.put(Const.TIME, time)
+        return if (updateTitle(link, cv)) getPageId(link)
+        else {
+            cv.put(Const.LINK, link)
+            db.insert(Const.TITLE, cv).toInt()
+        }
+    }
+
+    fun putTitle(title: String, link: String) {
+        val cv = ContentValues()
+        cv.put(Const.TITLE, title)
+        if (!updateTitle(link, cv)) {
+            cv.put(Const.LINK, link)
+            cv.put(Const.TIME, 0)
+            db.insert(Const.TITLE, cv)
+        }
+    }
+
+    fun putLink(link: String) {
+        val cursor = db.query(
+            table = Const.TITLE,
+            column = DataBase.ID,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = link
+        )
+        if (!cursor.moveToFirst()) {
+            val cv = ContentValues()
+            cv.put(Const.LINK, link)
+            cv.put(Const.TIME, 0)
+            db.insert(Const.TITLE, cv)
+        }
+        cursor.close()
+    }
+
+    private fun insertTitle(cv: ContentValues) =
         db.insert(Const.TITLE, cv)
 
-    fun insertParagraph(cv: ContentValues) =
+    fun insertParagraph(pageId: Int, par: String) {
+        val cv = ContentValues()
+        cv.put(DataBase.ID, pageId)
+        cv.put(DataBase.PARAGRAPH, par)
         db.insert(DataBase.PARAGRAPH, cv)
+    }
 
-    fun updateTitle(id: Int, cv: ContentValues): Boolean =
-        db.update(Const.TITLE, cv, DataBase.ID + DataBase.Q, id.toString()) > 0
-
-    fun updateTitle(link: String, cv: ContentValues): Boolean =
+    private fun updateTitle(link: String, cv: ContentValues): Boolean =
         db.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) > 0
 
-    fun deleteTitle(pageId: Int) =
+    private fun deleteTitle(pageId: Int) =
         db.delete(Const.TITLE, DataBase.ID + DataBase.Q, pageId.toString())
 
     fun deleteParagraphs(pageId: Int) =
         db.delete(DataBase.PARAGRAPH, DataBase.ID + DataBase.Q, pageId.toString())
 
-    fun getLinks(): Cursor = db.query(
+    private fun getLinks(): Cursor = db.query(
         table = Const.TITLE,
         column = Const.LINK
     )
@@ -360,8 +407,8 @@ class PageStorage : Closeable {
         isClosed = true
     }
 
-    fun deletePages(list: List<String>) {
-        list.forEach {
+    fun deletePages(links: List<String>) {
+        links.forEach {
             val id = getPageId(it)
             deleteTitle(id)
             deleteParagraphs(id)
