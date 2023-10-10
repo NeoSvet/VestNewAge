@@ -24,7 +24,7 @@ import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
-import ru.neosvet.vestnewage.view.basic.Tip
+import ru.neosvet.vestnewage.view.basic.NeoTip
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.fragment.MenuFragment
 import ru.neosvet.vestnewage.view.list.MenuAdapter
@@ -41,7 +41,7 @@ class MainHelper(private val act: MainActivity) {
 
     var type = ActionType.MENU
         private set
-    var tipAction: Tip
+    var tipAction: NeoTip
         private set
     var fabAction: FloatingActionButton
         private set
@@ -92,7 +92,7 @@ class MainHelper(private val act: MainActivity) {
         fabAction = act.findViewById(R.id.fabAction)
         vsbScrollBar = act.findViewById(R.id.vsbScrollBar)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
-        tipAction = Tip(act, rvAction)
+        tipAction = NeoTip(act, rvAction)
         tipAction.autoHide = false
         rvAction.layoutManager = GridLayoutManager(act, 1)
         rvAction.adapter = adAction
@@ -221,7 +221,9 @@ class MainHelper(private val act: MainActivity) {
     }
 
     private fun onActionClick(index: Int, item: MenuItem) {
-        hideActionMenu()
+        act.unblocked()
+        tipAction.hideAnim()
+        shownActionMenu = false
         if (index == 0) {
             showDownloadDialog()
             return

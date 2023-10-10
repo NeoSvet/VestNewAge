@@ -7,7 +7,7 @@ import android.view.animation.AnimationUtils
 import kotlinx.coroutines.*
 import ru.neosvet.vestnewage.R
 
-class Tip(context: Context?, private val view: View) {
+class NeoTip(context: Context, private val view: View) {
     var isShow = false
         private set
     var autoHide = true
@@ -52,5 +52,12 @@ class Tip(context: Context?, private val view: View) {
         view.clearAnimation()
         view.visibility = View.GONE
         isShow = false
+    }
+
+    fun hideAnim() {
+        if (!isShow) return
+        job?.cancel()
+        view.clearAnimation()
+        view.startAnimation(anHide)
     }
 }
