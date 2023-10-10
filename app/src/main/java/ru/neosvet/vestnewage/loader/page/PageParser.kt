@@ -11,6 +11,18 @@ import java.io.InputStreamReader
 
 class PageParser(private val client: NeoClient) {
     private val content = NeoList<HTMLElem>()
+    val nextItem: String?
+        get() = if (!content.hasNext()) null else content.next().code
+    val link: String?
+        get() = if (content.isNotEmpty && content.current().tag == Const.LINK) content.current().par else null
+    val text: String
+        get() = content.current().html.fromHTML
+    val isHead: Boolean
+        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.HEAD) == 0 else false
+    val isImage: Boolean
+        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.IMAGE) == 0 else false
+    val isSimple: Boolean
+        get() = content.current().let { it.tag == Const.TEXT || (it.start.not() && it.end) }
 
     fun load(url: String, startString: String) {
         var start = startString
@@ -243,17 +255,4 @@ class PageParser(private val client: NeoClient) {
         }
         return s.toString()
     }
-
-    val nextItem: String?
-        get() = if (!content.hasNext()) null else content.next().code
-    val link: String?
-        get() = if (content.isNotEmpty && content.current().tag == Const.LINK) content.current().par else null
-    val text: String
-        get() = content.current().html.fromHTML
-    val isHead: Boolean
-        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.HEAD) == 0 else false
-    val isImage: Boolean
-        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.IMAGE) == 0 else false
-    val isSimple: Boolean
-        get() = content.current().let { it.tag == Const.TEXT || (it.start.not() && it.end) }
 }
