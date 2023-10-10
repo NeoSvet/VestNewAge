@@ -216,7 +216,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && DateHelper.isLoadedOtkr().not())
             calendar[getIndexByDay(1)].addLink(Urls.PRED_LINK)
         val storage = PageStorage()
-        storage.open(date.my, false)
+        storage.open(date.my)
         val cursor = storage.getListAll()
         var empty = true
         time = 0L
@@ -228,13 +228,9 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             var title: String
             var link: String
             while (cursor.moveToNext()) {
-                title = cursor.getString(iTitle)
                 link = cursor.getString(iLink)
-                if (link.contains("@")) {
-                    i = link.substring(0, 2).toInt()
-                    link = link.substring(9)
-                } else i = link.dateFromLink.day
-                i = getIndexByDay(i)
+                title = cursor.getString(iTitle) ?: link
+                i = getIndexByDay(link.dateFromLink.day)
                 if (i == -1) continue
                 calendar[i].addLink(link)
                 if (storage.existsPage(link)) {
