@@ -127,8 +127,8 @@ class BookFragment : NeoFragment() {
         pMonth.btnPrev.setOnClickListener { openMonth(false) }
         pMonth.btnNext.setOnClickListener { openMonth(true) }
         if (ScreenUtils.isLand) {
-            setListEvents(pYear.rvTab, true)
-            setListEvents(pMonth.rvTab, true)
+            setListEvents(pYear.rvTab)
+            setListEvents(pMonth.rvTab)
         }
         pMonth.setDescription(getString(R.string.to_prev_month), getString(R.string.to_next_month))
         pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
@@ -264,7 +264,7 @@ class BookFragment : NeoFragment() {
 
     private fun showRndAlert(state: BookState.Rnd) {
         alertRnd = CustomDialog(act).apply {
-            setTitle(title)
+            setTitle(getString(R.string.rnd))
             setMessage(state.msg)
             setLeftButton(getString(R.string.in_markers)) {
                 val marker = Intent(requireContext(), MarkerActivity::class.java)
