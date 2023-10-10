@@ -42,7 +42,6 @@ import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
-import ru.neosvet.vestnewage.view.basic.Tip
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.browser.HeadBar
@@ -85,7 +84,6 @@ class BrowserActivity : AppCompatActivity() {
     private lateinit var menu: NeoMenu
     private var animButton: BottomAnim? = null
     private var navIsTop = false
-    private lateinit var tipFinish: Tip
     private var isSearch = false
     private var twoPointers = false
     private var isBlocked = false
@@ -253,7 +251,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun closeSearch() {
-        tipFinish.hide()
+        toast.hide()
         with(binding.content) {
             if (helper.placeIndex > -1) {
                 etSearch.setText("")
@@ -281,7 +279,6 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        tipFinish = Tip(this, binding.tvFinish)
         status = StatusButton(this, binding.pStatus)
 
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
@@ -758,7 +755,7 @@ class BrowserActivity : AppCompatActivity() {
             }
 
             BasicState.Success ->
-                tipFinish.show()
+                toast.show(getString(R.string.tip_end_list))
 
             BasicState.NotLoaded ->
                 toast.show(getString(R.string.not_load_month))
@@ -774,6 +771,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun setPrimary(state: BrowserState.Primary) {
+        toast.hide()
         if (link != state.link) helper.position = 0f
         positionForRestore = state.position
         finishLoading()
