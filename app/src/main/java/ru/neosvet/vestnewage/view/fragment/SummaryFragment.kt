@@ -215,9 +215,9 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             toiler.getTimeOn(value * NeoPaging.ON_PAGE)
     }
 
-    private fun startPaging(page: Int) {
+    private fun startPaging(page: Int) = binding?.run {
         jobList?.cancel()
-        binding?.rvList?.adapter = null
+        rvList.adapter = null
         jobList = lifecycleScope.launch {
             toiler.paging(page, adPaging).collect {
                 adPaging.submitData(lifecycle, it)
@@ -225,7 +225,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         }
         lifecycleScope.launch {
             delay(50)
-            binding?.rvList?.adapter = adPaging
+            rvList.adapter = adPaging
         }
     }
 
