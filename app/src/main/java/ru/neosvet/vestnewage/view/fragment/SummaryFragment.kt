@@ -26,6 +26,7 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.getItemView
+import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.view.list.RecyclerAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
@@ -168,6 +169,15 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
             BasicState.Ready ->
                 act?.hideToast()
+
+            is ListState.Update<*> -> {
+                val item = state.item as BasicItem
+                ShareDialog.newInstance(
+                    link = item.link,
+                    title = item.title,
+                    content = item.des
+                ).show(childFragmentManager, null)
+            }
         }
     }
 
@@ -269,9 +279,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 requireContext(),
                 item.link, "", item.des.substring(item.des.indexOf(Const.N))
             )
-        } else {
-            Urls.copyAddress(Urls.TelegramUrl + item.link)
-        }
+        } else toiler.shareItem(item.head)
         return true
     }
 

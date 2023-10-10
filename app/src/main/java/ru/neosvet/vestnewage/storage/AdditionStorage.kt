@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
-import android.database.Cursor
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -44,12 +43,18 @@ class AdditionStorage : Closeable {
     fun delete(id: Int) =
         db.delete(DataBase.ADDITION, DataBase.ID + DataBase.Q, id.toString())
 
-    private fun getCursor(offset: Int): Cursor = db.query(
+    private fun getCursor(offset: Int) = db.query(
         table = DataBase.ADDITION,
         groupBy = DataBase.ID,
         having = if (offset == 0) null
         else "${DataBase.ID} < ${offset + 1} AND ${DataBase.ID} > ${offset - NeoPaging.ON_PAGE}",
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
+    )
+
+    fun getItem(id: String) = db.query(
+        table = DataBase.ADDITION,
+        selection = DataBase.ID + DataBase.Q,
+        selectionArg = id
     )
 
     fun getList(offset: Int): List<BasicItem> {

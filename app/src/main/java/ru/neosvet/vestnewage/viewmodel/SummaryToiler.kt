@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -18,9 +19,11 @@ import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.utils.percent
 import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
@@ -191,6 +194,40 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         jobTime = scope.launch {
             val time = storage.getTime(position)
             postState(BasicState.Message(time))
+        }
+    }
+
+    @SuppressLint("Range")
+    fun shareItem(id: String) {
+        scope.launch {
+            val cursor = storage.getItem(id)
+            if (cursor.moveToFirst()) {
+                var date = cursor.getString(cursor.getColumnIndex(Const.TIME))
+                date = date.substring(0, 10).replace(".20", ".")
+                val title = cursor.getString(cursor.getColumnIndex(Const.TITLE)) + " ($date)"
+                val link = cursor.getInt(cursor.getColumnIndex(Const.LINK)).toString()
+                var d = cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION))
+                if (d.indexOf(date) == 0) d = d.substring(d.indexOf(Const.N) + 1)
+                if (d.contains("<a")) {
+                    var i = d.indexOf("<a")
+                    var n: Int
+                    var u: Int
+                    var s: String
+                    while (i > -1) {
+                        i += 9
+                        n = d.indexOf(">", i) + 1
+                        u = d.indexOf("</a", n)
+                        s = d.substring(i, n - 2)
+                        d = d.substring(0, i - 9) + d.substring(n, u) +
+                                ": $s" + d.substring(u + 4)
+                        i = d.indexOf("<a")
+                    }
+                }
+                if (d.contains("<")) d = d.fromHTML
+                val item = BasicItem(title, Urls.TelegramUrl + link).apply { des = d }
+                postState(ListState.Update(0, item))
+            }
+            cursor.close()
         }
     }
 }

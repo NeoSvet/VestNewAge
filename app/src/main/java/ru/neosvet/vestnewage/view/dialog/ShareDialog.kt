@@ -28,12 +28,19 @@ import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class ShareDialog : BottomSheetDialogFragment() {
     companion object {
-        fun newInstance(link: String) = ShareDialog().apply {
-            arguments = Bundle().apply { putString(Const.LINK, link) }
-        }
+        fun newInstance(link: String, title: String = "", content: String = "") =
+            ShareDialog().apply {
+                arguments = Bundle().apply {
+                    putString(Const.LINK, link)
+                    putString(Const.TITLE, title)
+                    putString(Const.DESCTRIPTION, content)
+                }
+            }
     }
 
     private var link = ""
+    private var title = ""
+    private var content = ""
     private lateinit var adapter: CheckAdapter
     private var binding: ShareDialogBinding? = null
     private var options = BooleanArray(1)
@@ -64,6 +71,8 @@ class ShareDialog : BottomSheetDialogFragment() {
         }
         arguments?.let {
             link = it.getString(Const.LINK) ?: ""
+            title = it.getString(Const.TITLE) ?: ""
+            content = it.getString(Const.DESCTRIPTION) ?: ""
         }
         options = savedInstanceState?.getBooleanArray(Const.SEARCH)
             ?: BooleanArray(3) { i -> i % 2 != 1 }
@@ -99,9 +108,21 @@ class ShareDialog : BottomSheetDialogFragment() {
     }
 
     private fun getContent(): String {
+        val sb = StringBuilder()
+        if (content.isNotEmpty()) { // if(link.contains(Urls.TelegramUrl)) ?
+            if (selectedTitle) {
+                sb.append(title)
+                sb.append(Const.N)
+            }
+            if (selectedContent) {
+                sb.append(content)
+                sb.append(Const.NN)
+            }
+            if (selectedLink) sb.append(link)
+            return sb.toString().trimEnd()
+        }
         val storage = PageStorage()
         storage.open(link)
-        val sb = StringBuilder()
         if (selectedTitle || selectedContent) {
             sb.append(storage.getContentPage(link, !selectedContent))
             sb.append(if (selectedContent) Const.NN else Const.N)
