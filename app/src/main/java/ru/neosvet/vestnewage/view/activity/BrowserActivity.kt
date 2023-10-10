@@ -105,6 +105,7 @@ class BrowserActivity : AppCompatActivity() {
     private var lastScroll = 0
     private var positionForRestore = 0f
     private var bottomX = 0
+    private var position = 0f
 
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
@@ -200,7 +201,6 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        helper.position = positionOnPage
         helper.zoom = (currentScale * 100f).toInt()
         val s = if (isSearch)
             binding.content.etSearch.text.toString()
@@ -209,6 +209,7 @@ class BrowserActivity : AppCompatActivity() {
             BrowserState.Status(
                 helper = helper,
                 fullscreen = isFullScreen,
+                position = positionOnPage,
                 search = s,
                 index = searchIndex,
                 head = getHeadStatus(),
@@ -245,9 +246,10 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun restorePosition() = binding.content.wvBrowser.run {
-        if (helper.position == 0f) return
-        val pos = (helper.position / 100f * currentScale * contentHeight.toFloat()).toInt()
-        scrollTo(0, pos)
+        if (position > 0f) {
+            val pos = (position / 100f * currentScale * contentHeight.toFloat()).toInt()
+            scrollTo(0, pos)
+        }
     }
 
     private fun closeSearch() {
@@ -584,7 +586,7 @@ class BrowserActivity : AppCompatActivity() {
         bottomBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.nav_refresh -> {
-                    helper.position = positionOnPage
+                    position = positionOnPage
                     toiler.refresh()
                 }
 
@@ -609,7 +611,7 @@ class BrowserActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_numpar -> {
-                    helper.position = positionOnPage
+                    position = positionOnPage
                     helper.isNumPar = helper.isNumPar.not()
                     setCheckItem(it, helper.isNumPar)
                     changeArguments()
@@ -637,7 +639,7 @@ class BrowserActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_theme -> {
-                    helper.position = positionOnPage
+                    position = positionOnPage
                     helper.isLightTheme = helper.isLightTheme.not()
                     initTheme()
                     content.wvBrowser.clearCache(true)
@@ -718,14 +720,12 @@ class BrowserActivity : AppCompatActivity() {
 
     fun openLink(url: String) {
         positionForRestore = 0f
-        helper.position = 0f
         helper.clearSearch()
         toiler.openLink(url, true)
     }
 
     fun onBack() {
         positionForRestore = 0f
-        helper.position = 0f
         toiler.openPage(false)
     }
 
@@ -772,7 +772,8 @@ class BrowserActivity : AppCompatActivity() {
 
     private fun setPrimary(state: BrowserState.Primary) {
         toast.hide()
-        if (link != state.link) helper.position = 0f
+        if (link.isNotEmpty() && link != state.link)
+            position = -1f
         positionForRestore = state.position
         finishLoading()
         setHeadBar(state.type == BrowserState.Type.DOCTRINE)
@@ -788,7 +789,7 @@ class BrowserActivity : AppCompatActivity() {
     }
 
     private fun restoreLastPosition() {
-        helper.position = positionForRestore
+        position = positionForRestore
         restorePosition()
     }
 
@@ -799,6 +800,7 @@ class BrowserActivity : AppCompatActivity() {
         }
         searchIndex = state.index
         isFullScreen = state.fullscreen
+        if (position == 0f) position = state.position
         setHelper(state.helper)
         restoreSearch()
         if (isFullScreen) binding.bottomBar.post {

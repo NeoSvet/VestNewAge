@@ -28,7 +28,6 @@ class BrowserHelper(context: Context) {
     var place = listOf<String>()
     var placeIndex = -1
     var isSearch = false
-    var position = 0f
 
     val request: String
         get() = place[placeIndex].trimEnd()
