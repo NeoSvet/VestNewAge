@@ -30,6 +30,7 @@
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingTop="@dimen/quarter_indent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/p_tab" />
 
