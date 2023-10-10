@@ -34,7 +34,8 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
 
     override fun init(context: Context) {
         strings = JournalStrings(
-            format_journal = context.getString(R.string.format_journal),
+            format_opened = context.getString(R.string.format_opened),
+            format_rnd = context.getString(R.string.format_rnd),
             back = context.getString(R.string.back),
             rnd_poem = context.getString(R.string.rnd_poem),
             rnd_epistle = context.getString(R.string.rnd_epistle),
@@ -43,7 +44,7 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     override suspend fun defaultState() {
-        preparing()
+        openList(0)
     }
 
     override fun onCleared() {
@@ -51,9 +52,11 @@ class JournalToiler : NeoToiler(), NeoPaging.Parent {
         super.onCleared()
     }
 
-    private fun preparing() {
+    fun openList(tab: Int) {
         scope.launch {
-            val cursor = storage.getAll()
+            storage.filter = if (tab == 1) JournalStorage.Type.RND
+            else JournalStorage.Type.OPENED
+            val cursor = storage.getCursor()
             if (cursor.moveToFirst()) {
                 factory.total = cursor.count
                 postState(ListState.Paging(cursor.count))

@@ -1,19 +1,18 @@
 package ru.neosvet.vestnewage.view.fragment
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.databinding.TabFragmentBinding
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -41,7 +40,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private var jobList: Job? = null
     private var isUserScroll = true
     private var firstPosition = -1
-    private lateinit var rvList: RecyclerView
+    private var binding: TabFragmentBinding? = null
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[JournalToiler::class.java]
@@ -55,24 +54,29 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.list_fragment, container, false).also {
-        initView(it)
-    }
+    ) = TabFragmentBinding.inflate(inflater, container, false).also {
+        binding = it
+    }.root
 
     override fun onViewCreated(savedInstanceState: Bundle?) {
+        binding?.run {
+            rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+            rvList.adapter = adapter
+            setListEvents(rvList)
+            tvUpdate.isVisible = false
+        }
+        if (savedInstanceState == null)
+            initTabs(0)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        toiler.setStatus(JournalState.Status(adapter.firstPosition))
+        toiler.setStatus(
+            JournalState.Status(
+                firstPosition = adapter.firstPosition,
+                tab = binding?.pTab?.selectedIndex ?: 0
+            )
+        )
         super.onSaveInstanceState(outState)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun initView(container: View) {
-        rvList = container.findViewById(R.id.rvList) as RecyclerView
-        rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rvList.adapter = adapter
-        setListEvents(rvList)
     }
 
     override fun onResume() {
@@ -81,7 +85,20 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             startPaging(firstPosition / NeoPaging.ON_PAGE)
     }
 
-    private fun startPaging(page: Int) {
+    private fun initTabs(tab: Int) = binding?.run {
+        val tabs = listOf(
+            getString(R.string.opened),
+            getString(R.string.rnd)
+        )
+        pTab.setOnChangeListener {
+            rvList.adapter = null
+            toiler.openList(it)
+        }
+        pTab.setItems(tabs, tab)
+        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
+    }
+
+    private fun startPaging(page: Int) = binding?.run {
         jobList?.cancel()
         rvList.adapter = null
         jobList = lifecycleScope.launch {
@@ -154,7 +171,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 restoreStatus(state)
 
             BasicState.Empty -> act?.run {
-                showStaticToast(getString(R.string.empty_journal))
+                showStaticToast(getString(R.string.list_empty))
                 setAction(0)
             }
         }
@@ -162,11 +179,16 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     private fun restoreStatus(state: JournalState.Status) {
         firstPosition = state.firstPosition
+        initTabs(state.tab)
     }
 
     private fun openList(max: Int) {
-        if (max > NeoPaging.ON_PAGE)
-            act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
+        act?.let {
+            it.setAction(R.drawable.ic_clear)
+            if (max > NeoPaging.ON_PAGE)
+                it.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
+            else it.initScrollBar(0, null)
+        }
         if (firstPosition < 1) startPaging(0)
         else startPaging(firstPosition / NeoPaging.ON_PAGE)
     }

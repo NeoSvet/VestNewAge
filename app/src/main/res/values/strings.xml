@@ -74,7 +74,8 @@
     <string name="format_page_no_loaded">Страница %s не загружена.</string>
     <string name="format_month_no_loaded">%s %d не загружен.</string>
     <string name="format_info">Версия приложения: %s (%d)\nВерсия системы: %s (%d)</string>
-    <string name="format_journal">%s назад на позиции %.1f%%\n(%s)</string>
+    <string name="format_opened">%s назад на позиции %.1f%%\n(%s)</string>
+    <string name="format_rnd">%s назад\n(%s)\n%s</string>
     <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
     <string name="format_freed_size">Освобождено: %s МБ</string>
     <string name="format_delete">Удалить %s?</string>
@@ -251,9 +252,10 @@
     <string name="default_">По умолчанию</string>
     <string name="select">Выбрать</string>
     <!--JournalFragment-->
-    <string name="empty_journal">Журнал пуст.\nТут будут открываемые материалы.</string>
     <string name="finish_list">Список закончился</string>
     <string name="clearing">Очистка</string>
+    <string name="opened">Открытые</string>
+    <string name="rnd">«Случайные»</string>
     <!--Посыл-->
     <string name="to_prom">До Посыла</string>
     <string name="prom">Посыл</string>

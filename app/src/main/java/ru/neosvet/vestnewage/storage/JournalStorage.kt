@@ -16,9 +16,15 @@ import java.util.LinkedList
 class JournalStorage : Closeable {
     companion object {
         private const val LIMIT = 208
+        private const val FILTER = "%&%&%"
+    }
+
+    enum class Type {
+        ALL, OPENED, RND
     }
 
     private val db = DataBase(DataBase.JOURNAL)
+    var filter = Type.ALL
 
     fun update(id: String, row: ContentValues): Boolean =
         db.update(DataBase.JOURNAL, row, DataBase.ID + DataBase.Q, id) > 0
@@ -26,15 +32,26 @@ class JournalStorage : Closeable {
     fun insert(row: ContentValues) =
         db.insert(DataBase.JOURNAL, row)
 
-    private fun getIds(): Cursor = db.query(
-        table = DataBase.JOURNAL,
-        column = DataBase.ID
-    )
+    fun getCursor(): Cursor = when (filter) {
+        Type.ALL -> db.query(
+            table = DataBase.JOURNAL,
+            orderBy = Const.TIME + DataBase.DESC
+        )
 
-    fun getAll(): Cursor = db.query(
-        table = DataBase.JOURNAL,
-        orderBy = Const.TIME + DataBase.DESC
-    )
+        Type.OPENED -> db.query(
+            table = DataBase.JOURNAL,
+            selection = DataBase.ID + " NOT" + DataBase.LIKE,
+            selectionArg = FILTER,
+            orderBy = Const.TIME + DataBase.DESC
+        )
+
+        Type.RND -> db.query(
+            table = DataBase.JOURNAL,
+            selection = DataBase.ID + DataBase.LIKE,
+            selectionArg = FILTER,
+            orderBy = Const.TIME + DataBase.DESC
+        )
+    }
 
     fun delete(id: String) =
         db.delete(DataBase.JOURNAL, DataBase.ID + DataBase.Q, id)
@@ -58,7 +75,7 @@ class JournalStorage : Closeable {
 
     fun getList(offset: Int, strings: JournalStrings): List<BasicItem> {
         val list = mutableListOf<BasicItem>()
-        val curJ = getAll()
+        val curJ = getCursor()
         if (!curJ.moveToFirst() || offset > curJ.count) {
             curJ.close()
             return list
@@ -83,18 +100,17 @@ class JournalStorage : Closeable {
                 s = cursor.getString(iLink)
                 val item = BasicItem(storage.getPageTitle(cursor.getString(iTitle), s), s)
                 val t = curJ.getLong(iTime)
-                val p = curJ.getFloat(iPlace)
                 val d = DateUnit.putMills(t)
-                item.des = String.format(
-                    strings.format_journal,
-                    DateUnit.getDiffDate(now, t), p, d
-                )
-                if (id.size == 3) { //случайные
+                if (id.size == 2) {
+                    val p = curJ.getFloat(iPlace)
+                    item.des = String.format(
+                        strings.format_opened,
+                        DateUnit.getDiffDate(now, t), p, d
+                    )
+                } else { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
-                        s = if (s.isPoem)
-                            strings.rnd_poem
-                        else
-                            strings.rnd_epistle
+                        s = if (s.isPoem) strings.rnd_poem
+                        else strings.rnd_epistle
                     } else { //случаный стих
                         cursor.close()
                         cursor = storage.getParagraphs(id[1])
@@ -102,7 +118,10 @@ class JournalStorage : Closeable {
                         if (cursor.moveToPosition(id[2].toInt()))
                             s += ":" + Const.N + cursor.getString(0).fromHTML
                     }
-                    item.des = item.des + Const.N + s
+                    item.des = String.format(
+                        strings.format_rnd,
+                        DateUnit.getDiffDate(now, t), d, s
+                    )
                 }
                 list.add(item)
                 i++
@@ -120,19 +139,20 @@ class JournalStorage : Closeable {
     }
 
     fun checkLimit() {
-        val cursor = getIds()
+        val cursor = getCursor()
         var i = cursor.count
-        cursor.moveToFirst()
+        cursor.moveToLast()
+        val iID = cursor.getColumnIndex(DataBase.ID)
         while (i > LIMIT) {
-            delete(cursor.getString(0))
-            cursor.moveToNext()
+            delete(cursor.getString(iID))
+            cursor.moveToPrevious()
             i--
         }
         cursor.close()
     }
 
     fun getTimeBack(position: Int): String {
-        val cursor = getAll()
+        val cursor = getCursor()
         if (!cursor.moveToFirst() || position > cursor.count) {
             cursor.close()
             return ""
