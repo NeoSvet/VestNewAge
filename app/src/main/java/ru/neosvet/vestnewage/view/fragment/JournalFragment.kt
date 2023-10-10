@@ -62,7 +62,7 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         binding?.run {
             rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
             rvList.adapter = adapter
-            setListEvents(rvList)
+            setListEvents(rvList, false)
             tvUpdate.isVisible = false
         }
         if (savedInstanceState == null)
@@ -91,11 +91,21 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             getString(R.string.rnd)
         )
         pTab.setOnChangeListener {
+            firstPosition = 0
             rvList.adapter = null
+            adapter.submitData(lifecycle, PagingData.empty())
             toiler.openList(it)
         }
         pTab.setItems(tabs, tab)
         if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
+    }
+
+    override fun swipeLeft() {
+        binding?.pTab?.change(true)
+    }
+
+    override fun swipeRight() {
+        binding?.pTab?.change(false)
     }
 
     private fun startPaging(page: Int) = binding?.run {
