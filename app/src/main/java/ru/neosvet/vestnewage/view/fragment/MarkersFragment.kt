@@ -364,12 +364,13 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
         }
         binding?.run {
             toolbar.title = title
-            rvList.layoutManager = GridLayoutManager(requireContext(), span)
             rvList.adapter = adapter
             if (state.isEditor) {
+                rvList.layoutManager = GridLayoutManager(requireContext(), 1)
                 act?.setAction(R.drawable.ic_ok)
                 getListHelper().attach(rvList, if (isCollections) 0 else -1)
             } else {
+                rvList.layoutManager = GridLayoutManager(requireContext(), span)
                 act?.setAction(R.drawable.star)
                 listHelper?.detach()
             }
