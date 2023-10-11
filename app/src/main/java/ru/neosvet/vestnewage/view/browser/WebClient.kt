@@ -1,55 +1,57 @@
-package ru.neosvet.vestnewage.view.browser;
+package ru.neosvet.vestnewage.view.browser
 
-import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import ru.neosvet.vestnewage.network.Urls.openInApps
+import ru.neosvet.vestnewage.network.Urls.openInBrowser
 
-import ru.neosvet.vestnewage.network.Urls;
-import ru.neosvet.vestnewage.view.activity.BrowserActivity;
+class WebClient(
+    private val parent: Parent,
+    private val packageName: String
+) : WebViewClient() {
 
-public class WebClient extends WebViewClient {
-    private final String files = "file";
-    private final BrowserActivity act;
-
-    public WebClient(BrowserActivity act) {
-        this.act = act;
+    interface Parent {
+        fun openLink(link: String)
+        fun onBack()
+        fun onPageFinished(isLocal: Boolean)
+        fun setScale(scale: Float)
     }
 
-    @Override
-    public void onScaleChanged(WebView view, float oldScale, float newScale) {
-        super.onScaleChanged(view, oldScale, newScale);
-        act.setCurrentScale(newScale);
+    companion object {
+        private const val FILES = "file"
     }
 
-    private String getUrl(String url) {
-        if (url.contains(act.getPackageName())) // страница во внутренем хранилище
-            url = url.substring(url.indexOf("age") + 10);
-        else
-            url = url.substring(url.indexOf(files) + 8);
-        return url;
+    override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
+        super.onScaleChanged(view, oldScale, newScale)
+        parent.setScale(newScale)
     }
 
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        view.setVisibility(View.GONE);
-        if (url.contains(files)) {
-            act.openLink(getUrl(url));
-            return true;
+    private fun getLink(url: String) =
+        if (url.contains(packageName)) // страница во внутренем хранилище
+            url.substring(url.indexOf("age") + 10)
+        else url.substring(url.indexOf(FILES) + 8)
+
+    @Deprecated("Deprecated in Java")
+    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+//for API 23, shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) from 24+
+        view.visibility = View.GONE
+        if (url.contains(FILES)) {
+            parent.openLink(getLink(url))
+            return true
         }
         if (url.contains("http")) {
-            act.onBack();
-            Urls.openInBrowser(url);
+            parent.onBack()
+            openInBrowser(url)
         } else if (url.contains("mailto")) {
-            act.onBack();
-            Urls.openInApps(url);
-        } else
-            act.openLink(url);
-//        super.shouldOverrideUrlLoading(view, url);
-        return true;
+            parent.onBack()
+            openInApps(url)
+        } else parent.openLink(url)
+        return true
     }
 
-    public void onPageFinished(WebView view, String url) {
-        view.setVisibility(View.VISIBLE);
-        act.onPageFinished(url.contains(files));
+    override fun onPageFinished(view: WebView, url: String) {
+        view.visibility = View.VISIBLE
+        parent.onPageFinished(url.contains(FILES))
     }
 }

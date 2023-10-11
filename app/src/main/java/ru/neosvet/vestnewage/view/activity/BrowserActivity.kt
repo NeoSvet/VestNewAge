@@ -55,7 +55,7 @@ import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.abs
 
 
-class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
+class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Parent {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -89,7 +89,7 @@ class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
     private var twoPointers = false
     private var isBlocked = false
     private var isFullScreen = false
-    var currentScale = 1f
+    private var currentScale = 1f
     private val toiler: BrowserToiler by lazy {
         ViewModelProvider(this)[BrowserToiler::class.java]
     }
@@ -406,8 +406,9 @@ class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
         wvBrowser.settings.javaScriptEnabled = true
         wvBrowser.settings.allowContentAccess = true
         wvBrowser.settings.allowFileAccess = true
-        wvBrowser.addJavascriptInterface(NeoInterface(this@BrowserActivity), "NeoInterface")
-        wvBrowser.webViewClient = WebClient(this@BrowserActivity)
+        val act = this@BrowserActivity
+        wvBrowser.addJavascriptInterface(NeoInterface(act), "NeoInterface")
+        wvBrowser.webViewClient = WebClient(act, act.packageName)
         wvBrowser.setOnTouchListener { _, event ->
             if (event.pointerCount == 2) {
                 if (twoPointers)
@@ -700,7 +701,26 @@ class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
         item.setIcon(if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple)
     }
 
-    fun onPageFinished(isLocal: Boolean) {
+    private fun initSearch() {
+        softKeyboard.hide()
+        if (helper.isSearch) return
+        helper.setSearchString(binding.content.etSearch.text.toString())
+        findRequest()
+    }
+
+    override fun openLink(link: String) {
+        positionForRestore = 0f
+        helper.clearSearch()
+        toiler.savePosition(positionOnPage)
+        toiler.openLink(link, true)
+    }
+
+    override fun onBack() {
+        positionForRestore = 0f
+        toiler.openPage(false)
+    }
+
+    override fun onPageFinished(isLocal: Boolean) {
         if (isLocal)
             unread.deleteLink(link)
         lifecycleScope.launch {
@@ -711,23 +731,8 @@ class BrowserActivity : AppCompatActivity(), NeoInterface.Parent {
         }
     }
 
-    private fun initSearch() {
-        softKeyboard.hide()
-        if (helper.isSearch) return
-        helper.setSearchString(binding.content.etSearch.text.toString())
-        findRequest()
-    }
-
-    fun openLink(url: String) {
-        positionForRestore = 0f
-        helper.clearSearch()
-        toiler.savePosition(positionOnPage)
-        toiler.openLink(url, true)
-    }
-
-    fun onBack() {
-        positionForRestore = 0f
-        toiler.openPage(false)
+    override fun setScale(scale: Float) {
+        currentScale = scale
     }
 
     private fun onChangedState(state: NeoState) {
