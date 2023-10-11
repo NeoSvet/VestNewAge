@@ -174,15 +174,16 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
                 buttonParameters = SwipeButton.Parameters(
                     size = ctx.fromDpi(R.dimen.double_indent),
                     padding = ctx.fromDpi(R.dimen.quarter_indent),
-                    radius = ctx.fromDpi(R.dimen.half_indent).toFloat()
+                    radius = ctx.fromDpi(R.dimen.half_indent).toFloat(),
+                    alpha = ContextCompat.getColor(ctx, android.R.color.transparent)
                 ),
                 leftButton = SwipeButton(
-                    ContextCompat.getDrawable(ctx, R.drawable.ic_clear),
-                    ContextCompat.getColor(ctx, android.R.color.holo_red_dark)
-                ),
-                rightButton = SwipeButton(
                     ContextCompat.getDrawable(ctx, R.drawable.ic_edit),
                     ContextCompat.getColor(ctx, android.R.color.holo_green_dark)
+                ),
+                rightButton = SwipeButton(
+                    ContextCompat.getDrawable(ctx, R.drawable.ic_clear),
+                    ContextCompat.getColor(ctx, android.R.color.holo_red_dark)
                 )
             )
         }.also { listHelper = it }
