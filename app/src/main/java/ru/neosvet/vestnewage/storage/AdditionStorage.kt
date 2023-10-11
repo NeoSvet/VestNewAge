@@ -1,12 +1,15 @@
 package ru.neosvet.vestnewage.storage
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import java.io.Closeable
 
@@ -51,11 +54,44 @@ class AdditionStorage : Closeable {
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
-    fun getItem(id: String) = db.query(
-        table = DataBase.ADDITION,
-        selection = DataBase.ID + DataBase.Q,
-        selectionArg = id
-    )
+    @SuppressLint("Range")
+    fun getItem(id: String, withDate: Boolean): BasicItem? {
+        val cursor = db.query(
+            table = DataBase.ADDITION,
+            selection = DataBase.ID + DataBase.Q,
+            selectionArg = id
+        )
+        val item = if (cursor.moveToFirst()) {
+            var date = cursor.getString(cursor.getColumnIndex(Const.TIME))
+            val title = if (withDate) {
+                date = date.substring(0, 10).replace(".20", ".")
+                cursor.getString(cursor.getColumnIndex(Const.TITLE)) + " ($date)"
+            } else cursor.getString(cursor.getColumnIndex(Const.TITLE))
+            val link = cursor.getInt(cursor.getColumnIndex(Const.LINK)).toString()
+            var d = cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION))
+            if (withDate && d.indexOf(date) == 0)
+                d = d.substring(d.indexOf(Const.N) + 1)
+            if (d.contains("<a")) {
+                var i = d.indexOf("<a")
+                var n: Int
+                var u: Int
+                var s: String
+                while (i > -1) {
+                    i += 9
+                    n = d.indexOf(">", i) + 1
+                    u = d.indexOf("</a", n)
+                    s = d.substring(i, n - 2)
+                    d = d.substring(0, i - 9) + d.substring(n, u) +
+                            ": $s" + d.substring(u + 4)
+                    i = d.indexOf("<a")
+                }
+            }
+            if (d.contains("<")) d = d.fromHTML
+            BasicItem(title, Urls.TelegramUrl + link).apply { des = d }
+        } else null
+        cursor.close()
+        return item
+    }
 
     fun getList(offset: Int): List<BasicItem> {
         val list = mutableListOf<BasicItem>()
