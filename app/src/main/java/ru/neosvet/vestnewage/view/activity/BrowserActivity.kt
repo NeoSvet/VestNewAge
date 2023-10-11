@@ -42,6 +42,7 @@ import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.basic.Y
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.browser.HeadBar
@@ -309,9 +310,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 isFullScreen ->
                     switchFullScreen(false)
 
-                binding.bottomBar.isScrolledDown -> {
-                    if (isSearch.not())
-                        headBar.show()
+                binding.bottomBar.Y > 50 -> {
+                    if (isSearch.not()) headBar.show()
                     bottomShow()
                 }
 
