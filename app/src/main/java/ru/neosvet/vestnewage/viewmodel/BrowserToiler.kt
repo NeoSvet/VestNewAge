@@ -19,12 +19,15 @@ import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.dateFromLink
+import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BrowserState
+import java.io.BufferedOutputStream
 import java.io.BufferedWriter
+import java.io.DataOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
@@ -171,6 +174,12 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun generatePage(file: File): Boolean { //isNeedUpdate
+        if (link.hasDate) {
+            val output = App.context.openFileOutput(Const.DATE_FILE, Context.MODE_PRIVATE)
+            val stream = DataOutputStream(BufferedOutputStream(output))
+            stream.writeInt(link.dateFromLink.timeInDays)
+            stream.close()
+        }
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
         var cursor = storage.getPage(link)

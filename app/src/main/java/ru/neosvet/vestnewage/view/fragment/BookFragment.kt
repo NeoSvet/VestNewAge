@@ -101,6 +101,7 @@ class BookFragment : NeoFragment() {
         if (openedReader) {
             openedReader = false
             act?.updateNew()
+            toiler.checkNewDate()
         }
     }
 

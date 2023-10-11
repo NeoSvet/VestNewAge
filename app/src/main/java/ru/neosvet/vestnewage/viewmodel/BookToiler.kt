@@ -7,6 +7,7 @@ import android.database.Cursor
 import android.graphics.Point
 import androidx.work.Data
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
@@ -27,6 +28,8 @@ import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BookState
+import java.io.BufferedInputStream
+import java.io.DataInputStream
 import java.util.*
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
@@ -401,5 +404,24 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         BookTab.EPISTLES.value -> BookTab.EPISTLES
         BookTab.DOCTRINE.value -> BookTab.DOCTRINE
         else -> BookTab.POEMS
+    }
+
+    fun checkNewDate() {
+        scope.launch {
+            val file = Files.getFileS(Const.DATE_FILE)
+            if (file.exists()) {
+                val stream = DataInputStream(
+                    BufferedInputStream(App.context.openFileInput(file.name))
+                )
+                val d = DateUnit.putDays(stream.readInt())
+                stream.close()
+                if (d.month != date.month || d.year != date.year) {
+                    openList(
+                        month = d.month - minMonth,
+                        year = d.year - minYear
+                    )
+                }
+            }
+        }
     }
 }
