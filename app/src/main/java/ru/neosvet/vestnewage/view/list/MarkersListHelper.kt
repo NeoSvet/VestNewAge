@@ -2,14 +2,17 @@ package ru.neosvet.vestnewage.view.list
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+
 
 class MarkersListHelper(
     private val events: Events,
@@ -17,12 +20,16 @@ class MarkersListHelper(
     private val leftButton: SwipeButton,
     private val rightButton: SwipeButton
 ) {
-    private var exceptionIndex = -1
-    private lateinit var recyclerView: RecyclerView
-
     interface Events {
         fun onMove(fromIndex: Int, toIndex: Int)
         fun onSwipe(index: Int, toLeft: Boolean)
+    }
+
+    private var exceptionIndex = -1
+    private lateinit var recyclerView: RecyclerView
+
+    init {
+        rightButton.isLeftButton = false
     }
 
     private val callback = object : ItemTouchHelper.SimpleCallback(
@@ -90,40 +97,33 @@ class MarkersListHelper(
             viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float,
             actionState: Int, isCurrentlyActive: Boolean
         ) {
-            var x = dX
             if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                 val itemView = viewHolder.itemView
                 val width = itemView.width.toFloat()
-                val size = if (width > 600) 300f else width / 2
 
-                x = when {
-                    x < 0 -> {
+                when {
+                    dX < 0 -> {
                         swipedPos = viewHolder.layoutPosition
-                        drawButton(c, itemView, width - size, width)
-                        -size
+                        drawButton(c, itemView, width + dX, width, false)
                     }
 
-                    x > 0 -> {
+                    dX > 0 -> {
                         swipedPos = viewHolder.layoutPosition
-                        drawButton(c, itemView, 0f, size)
-                        size
+                        drawButton(c, itemView, 0f, dX, true)
                     }
 
-                    else -> {
-                        swipedPos = -1
-                        0f
-                    }
+                    else -> swipedPos = -1
                 }
             }
 
             super.onChildDraw(
-                c, recyclerView, viewHolder, x, dY, actionState, isCurrentlyActive
+                c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive
             )
         }
     }
 
-    private fun drawButton(c: Canvas, itemView: View, a: Float, b: Float) {
-        val button = if (a == 0f) rightButton else leftButton
+    private fun drawButton(c: Canvas, itemView: View, a: Float, b: Float, isLeftButton: Boolean) {
+        val button = if (isLeftButton) leftButton else rightButton
         button.onDraw(
             c, RectF(a, itemView.top.toFloat(), b, itemView.bottom.toFloat()), buttonParameters
         )
@@ -153,23 +153,39 @@ class SwipeButton(
     data class Parameters(
         val size: Int,
         val padding: Int,
-        val radius: Float
+        val radius: Float,
+        val alpha: Int
     )
 
     private var image: Bitmap? = null
+    var isLeftButton = true
 
     fun onDraw(c: Canvas, rect: RectF, param: Parameters) {
         if (image == null) image = icon?.toBitmap(param.size, param.size)
-        val p = Paint()
-        p.color = color
+
         val n = param.padding + param.padding
-        val left = if (rect.left == 0f) rect.left + n
+        val left = if (isLeftButton) rect.left + n
         else rect.left - n
-        val right = if (rect.left == 0f) rect.right + n
+        val right = if (isLeftButton) rect.right + n
         else rect.right - n
         val newRect = RectF(
             left, rect.top, right, rect.bottom - param.padding
         )
+
+        val half = newRect.height() / 2
+        val gradient = if (isLeftButton) LinearGradient(
+            newRect.width() / 2, half,
+            newRect.width(), half,
+            color, param.alpha, Shader.TileMode.CLAMP
+        ) else LinearGradient(
+            newRect.left, half,
+            newRect.right - newRect.width() / 2, half,
+            param.alpha, color, Shader.TileMode.CLAMP
+        )
+        val p = Paint()
+        p.isDither = true
+        p.shader = gradient
+
         if (param.radius == 0f) c.drawRect(newRect, p)
         else c.drawRoundRect(newRect, param.radius, param.radius, p)
         val r = Rect()
