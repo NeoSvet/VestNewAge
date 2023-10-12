@@ -410,6 +410,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         wvBrowser.addJavascriptInterface(NeoInterface(act), "NeoInterface")
         wvBrowser.webViewClient = WebClient(act, act.packageName)
         wvBrowser.setOnTouchListener { _, event ->
+            if(snackbar.isShown) snackbar.hide()
             if (event.pointerCount == 2) {
                 if (twoPointers)
                     wvBrowser.setInitialScale((currentScale * 100f).toInt())
