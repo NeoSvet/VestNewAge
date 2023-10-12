@@ -27,6 +27,17 @@ data class SiteStrings(
     val path: String
 )
 
+data class DevStrings(
+    val ad: String,
+    val ok: String,
+    val url_on_google: String,
+    val url_on_huawei: String,
+    val open_link: String,
+    val new_section: String,
+    val access_new_version: String,
+    val current_version: String
+)
+
 data class HomeStrings(
     val nothing: String,
     val never: String,

@@ -6,7 +6,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.UnreadUtils
 
@@ -65,9 +66,9 @@ class DataBase(name: String, write: Boolean = false) :
                         + Const.TIME + " integer);"
             )
 
-            AdsStorage.NAME -> {
+            NewsStorage.NAME -> {
                 db.execSQL(
-                    CREATE_TABLE + AdsStorage.NAME + " ("
+                    CREATE_TABLE + NewsStorage.NAME + " ("
                             + ID + " integer primary key,"
                             + Const.LINK + " text,"
                             + Const.TITLE + " text,"
@@ -77,9 +78,9 @@ class DataBase(name: String, write: Boolean = false) :
                 val row = ContentValues()
                 row.put(ID, 1)
                 row.put(Const.TIME, 0)
-                db.insert(AdsStorage.NAME, null, row)
+                db.insert(NewsStorage.NAME, null, row)
                 db.execSQL(
-                    CREATE_TABLE + AdsStorage.DEV_NAME + " ("
+                    CREATE_TABLE + DevStorage.NAME + " ("
                             + Const.MODE + " integer,"
                             + Const.UNREAD + " integer default 1,"
                             + Const.TITLE + " text,"

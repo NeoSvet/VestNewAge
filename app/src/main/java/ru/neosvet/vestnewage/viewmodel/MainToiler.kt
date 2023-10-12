@@ -11,13 +11,12 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
+import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -46,16 +45,12 @@ class MainToiler : NeoToiler() {
 
     override suspend fun doLoad() {
         Urls.update(client)
-        if (Urls.isSiteCom)
-            loadQuoteCom()
-        else
-            loadQuote()
+        if (Urls.isSiteCom) loadQuoteCom()
+        else loadQuote()
         val timeDiff = synchronizationTime()
-        val storage = AdsStorage()
-        val ads = AdsUtils(storage.dev)
-        ads.loadAds(client)
-        storage.close()
-        postState(MainState.Ads(ads.hasNew(), ads.warnIndex, timeDiff))
+        val loader = SiteLoader(client)
+        val hasNew = loader.loadDevAds()
+        postState(MainState.Ads(hasNew, loader.warnIndex, timeDiff))
         loadNew()
         postState(BasicState.Success)
     }

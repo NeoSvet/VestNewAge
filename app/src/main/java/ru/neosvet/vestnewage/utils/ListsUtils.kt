@@ -1,7 +1,7 @@
 package ru.neosvet.vestnewage.utils
 
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 
 class ListsUtils {
@@ -19,7 +19,7 @@ class ListsUtils {
         if (!file.exists()) return true
         var time = file.lastModified() / DateUnit.SEC_IN_MILLS
         if (timeNow - time > DateUnit.DAY_IN_SEC) return true
-        val storage = AdsStorage().site
+        val storage = NewsStorage()
         time = storage.getTime() / DateUnit.SEC_IN_MILLS
         storage.close()
         return timeNow - time > DateUnit.DAY_IN_SEC

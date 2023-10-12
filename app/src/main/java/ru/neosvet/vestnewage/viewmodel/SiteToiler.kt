@@ -10,7 +10,8 @@ import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -30,7 +31,9 @@ class SiteToiler : NeoToiler() {
     private var selectedTab = SiteTab.NEWS
     private lateinit var strings: SiteStrings
     private val client = NeoClient(NeoClient.Type.SECTION)
-    private val storage = AdsStorage()
+    private val newsStorage = NewsStorage()
+    private val devStorage = DevStorage()
+    private lateinit var ads: AdsUtils
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Site")
@@ -43,6 +46,7 @@ class SiteToiler : NeoToiler() {
             timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
             path = context.getString(R.string.The_Path_of_the_impulse)
         )
+        ads = AdsUtils(devStorage, context)
     }
 
     override suspend fun defaultState() {
@@ -50,32 +54,27 @@ class SiteToiler : NeoToiler() {
     }
 
     override suspend fun doLoad() {
-        if (selectedTab == SiteTab.DEV)
-            openAds(true)
-        else loadList()
+        val loader = SiteLoader(client)
+        when (selectedTab) {
+            SiteTab.NEWS -> loader.loadAds()
+            SiteTab.SITE -> loader.loadSite()
+            SiteTab.DEV -> loader.loadDevAds()
+        }
+        openList(false)
     }
 
     override fun onDestroy() {
-        storage.close()
-    }
-
-    private fun loadList() {
-        val loader = SiteLoader(client, storage)
-        val url = if (selectedTab == SiteTab.SITE)
-            Urls.Site else Urls.Ads
-        loader.load(url)
-        openList(false)
+        newsStorage.close()
+        devStorage.close()
     }
 
     private fun getNovosti(): BasicItem {
         return BasicItem(strings.novosti).apply { addLink(Urls.News) }
     }
 
-    private suspend fun openAds(reload: Boolean) {
-        val ads = AdsUtils(storage.dev)
-        if (reload) ads.loadAds(client)
-        val list = ads.loadList(false)
-        postState(ListState.Primary(ads.time, list))
+    private suspend fun openAds() {
+        val list = ads.getFullList()
+        postState(ListState.Primary(devStorage.getTime(), list))
     }
 
     fun openList(loadIfNeed: Boolean, tab: Int = -1) {
@@ -86,13 +85,13 @@ class SiteToiler : NeoToiler() {
             when (selectedTab) {
                 SiteTab.NEWS -> openNews()
                 SiteTab.SITE -> openSite()
-                SiteTab.DEV -> openAds(false)
+                SiteTab.DEV -> openAds()
             }
         }
     }
 
     private suspend fun openNews() {
-        val cursor = storage.site.getAll()
+        val cursor = newsStorage.getAll()
         val list = mutableListOf<BasicItem>()
         var time = 0L
         var line: String? = null
@@ -164,9 +163,9 @@ class SiteToiler : NeoToiler() {
             l = br.readLine()
             h = if (l != END) br.readLine() else END
             val item: BasicItem
-            if (l == "#") {
+            if (l == "#")
                 item = BasicItem(t, true)
-            } else {
+            else {
                 item = BasicItem(t).apply { des = d }
                 if (h != END) {
                     item.addLink(h, l)
@@ -187,8 +186,9 @@ class SiteToiler : NeoToiler() {
             reLoad()
     }
 
-    fun readAds(item: BasicItem) {
-        storage.setRead(item)
+    fun markAsRead(item: BasicItem) {
+        item.title = item.title.substring(item.title.indexOf(" ") + 1)
+        devStorage.setRead(item.title, item.des)
     }
 
     fun setArgument(tab: Int) {

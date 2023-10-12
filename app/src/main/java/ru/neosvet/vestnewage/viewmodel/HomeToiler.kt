@@ -18,9 +18,9 @@ import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
-import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -50,7 +50,6 @@ class HomeToiler : NeoToiler() {
     var tabNews = SiteTab.NEWS.value
         private set
     private var pageStorage: PageStorage? = null
-    private var adsStorage: AdsStorage? = null
     private var task = Task.NONE
     private lateinit var strings: HomeStrings
     private val client = NeoClient(NeoClient.Type.SECTION)
@@ -155,7 +154,6 @@ class HomeToiler : NeoToiler() {
 
     override fun onDestroy() {
         pageStorage?.close()
-        adsStorage?.close()
     }
 
     private fun openList(isEditor: Boolean) {
@@ -275,12 +273,6 @@ class HomeToiler : NeoToiler() {
         postState(ListState.Update(i, createCalendarItem()))
     }
 
-    private fun getAds(): AdsStorage {
-        if (adsStorage == null)
-            adsStorage = AdsStorage()
-        return adsStorage!!
-    }
-
     private fun getPage(date: String): PageStorage {
         if (pageStorage == null)
             pageStorage = PageStorage()
@@ -292,8 +284,8 @@ class HomeToiler : NeoToiler() {
         val i = indexNews
         if (i == -1) return
         postState(HomeState.Loading(i))
-        val loader = SiteLoader(client, getAds())
-        loader.load(Urls.Ads)
+        val loader = SiteLoader(client)
+        loader.loadAds()
         clearPrimaryState()
         postState(ListState.Update(i, createNewsItem()))
     }
@@ -301,11 +293,11 @@ class HomeToiler : NeoToiler() {
     private fun loadPage(link: String) {
         if (link.isEmpty()) return
         val loader = PageLoader(client)
-        loader.download(link, false)
+        loader.download(link, true)
         loader.finish()
     }
 
-    private suspend fun createJournalItem(): HomeItem {
+    private fun createJournalItem(): HomeItem {
         if (isEditor)
             return HomeItem(HomeItem.Type.JOURNAL, listOf(strings.journal))
         task = Task.OPEN_JOURNAL
@@ -319,7 +311,7 @@ class HomeToiler : NeoToiler() {
     }
 
     @SuppressLint("Range")
-    private suspend fun getJournalTitle(): String? {
+    private fun getJournalTitle(): String? {
         val journal = JournalStorage()
         var r: String? = strings.nothing
         journal.getLastId()?.let { id ->
@@ -424,7 +416,8 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.NEWS, listOf(strings.news))
         task = Task.OPEN_NEWS
-        val cursor = getAds().site.getAll()
+        val storage = NewsStorage()
+        val cursor = storage.getAll()
         var timeItem = 0L
         var timeUpdate = 0L
         if (cursor.moveToFirst()) {
@@ -435,6 +428,7 @@ class HomeToiler : NeoToiler() {
             }
         }
         cursor.close()
+        storage.close()
         needLoadNews = loadIfNeed && DateUnit.isLongAgo(timeUpdate)
 
         var title = strings.nothing
@@ -452,11 +446,12 @@ class HomeToiler : NeoToiler() {
         }
         tabNews = SiteTab.NEWS.value
         if (title == strings.nothing || title != strings.new_today) {
-            val count = getAds().dev.unreadCount
-            if (count > 0) {
+            val dev = DevStorage()
+            if (dev.unreadCount > 0) {
                 tabNews = SiteTab.DEV.value
                 title = strings.new_dev_ads
             }
+            dev.close()
         }
         val des = if (timeUpdate == 0L) strings.never
         else strings.refreshed + HomeItem.PLACE_TIME + strings.back

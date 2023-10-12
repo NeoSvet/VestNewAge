@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -30,6 +31,9 @@ class NewFragment : NeoFragment() {
         get() = getString(R.string.new_section)
     private var itemAds: BasicItem? = null
     private var openedReader = false
+    private val ads: AdsUtils by lazy {
+        AdsUtils(DevStorage(), requireContext())
+    }
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[NewToiler::class.java]
@@ -74,7 +78,7 @@ class NewFragment : NeoFragment() {
 
     private fun restoreStatus(state: NewState.Status) {
         itemAds = state.itemAds?.also {
-            AdsUtils.showDialog(requireActivity(), it, this::closeAds)
+            ads.showDialog(requireActivity(), it, this::closeAds)
         }
     }
 
@@ -97,7 +101,7 @@ class NewFragment : NeoFragment() {
     private fun onItemClick(index: Int, item: BasicItem) {
         if (item.title.contains(getString(R.string.ad))) {
             itemAds = item
-            AdsUtils.showDialog(requireActivity(), item, this::closeAds)
+            ads.showDialog(requireActivity(), item, this::closeAds)
         } else if (item.link != "") {
             toiler.clearStates()
             openedReader = true
@@ -111,7 +115,7 @@ class NewFragment : NeoFragment() {
     }
 
     private fun closeAds() = itemAds?.let {
-        toiler.readAds(it)
+        toiler.markAsRead(it)
         itemAds = null
     }
 }

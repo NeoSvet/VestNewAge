@@ -4,27 +4,109 @@ import android.content.ContentValues
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
+import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileOutputStream
+import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class SiteLoader(
-    private val client: NeoClient,
-    private val storage: AdsStorage
+    private val client: NeoClient
 ) {
-    fun load(url: String) {
-        val list = loadList(url)
-        if (url == Urls.Site)
-            saveToFile(list)
-        else saveToStorage(list)
+    private val storage: DevStorage by lazy {
+        DevStorage()
+    }
+    private var time = -1L
+    var warnIndex = -1
+        private set
+
+    fun loadSite() {
+        val list = loadList(Urls.Site)
+        val file = Files.getFile(SiteToiler.MAIN)
+        val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
+        list.forEach { item ->
+            bw.write(item.title + Const.N)
+            bw.write(item.des + Const.N)
+            when {
+                item.hasLink() -> bw.write(item.link + Const.N)
+                else -> bw.write("@" + Const.N)
+            }
+            bw.write(SiteToiler.END + Const.N)
+            bw.flush()
+        }
+        bw.close()
+    }
+
+    fun loadAds() {
+        val list = loadList(Urls.Ads)
+        var i: Int
+        var d: String
+        val storage = NewsStorage()
+        storage.clear()
+        storage.insertTime()
+        val now = DateUnit.initNow()
+        var prevTime = now.timeInMills
+        var date: DateUnit
+        var time: Long
+        var id = 2
+        list.forEach { item ->
+            val row = ContentValues()
+            row.put(DataBase.ID, id)
+            id++
+            row.put(Const.TITLE, item.title)
+            row.put(Const.DESCTRIPTION, item.des)
+            i = item.des.lastIndexOf("<p")
+            date = DateUnit.putMills(prevTime)
+            if (i > -1 && item.des.length - i > 10) {
+                i += 3
+                d = item.des.substring(i, i + 10)
+                if (d.hasDate) {
+                    if (d.contains("<")) {
+                        i = d.indexOf("<")
+                        d = d.substring(0, i)
+                    }
+                    date = DateUnit.parse("$d 12:00")
+                }
+            }
+            time = if (date.timeInDays == now.timeInDays)
+                now.timeInMills else date.timeInMills
+            if (time == prevTime)
+                time -= 30 * DateUnit.MIN_IN_MILLS
+            prevTime = time
+            row.put(Const.TIME, time)
+            when {
+                item.hasFewLinks() -> {
+                    val sb = StringBuilder()
+                    item.headsAndLinks().forEach {
+                        sb.appendLine(it.second)
+                        if (it.first.isNullOrEmpty())
+                            sb.appendLine(getHeadFromUrl(it.second))
+                        else sb.appendLine(it.first)
+                    }
+                    sb.delete(sb.length - 1, sb.length)
+                    row.put(Const.LINK, sb.toString())
+                }
+
+                item.link.contains(":") ->
+                    row.put(Const.LINK, item.link + Const.N + item.head)
+
+                else -> //item.hasLink() or empty
+                    row.put(Const.LINK, item.link)
+            }
+            storage.insert(row)
+        }
+        storage.close()
     }
 
     private fun loadList(link: String): List<BasicItem> {
@@ -158,81 +240,6 @@ class SiteLoader(
         return true
     }
 
-    private fun saveToFile(list: List<BasicItem>) {
-        val file = Files.getFile(SiteToiler.MAIN)
-        val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
-        list.forEach { item ->
-            bw.write(item.title + Const.N)
-            bw.write(item.des + Const.N)
-            when {
-                item.hasLink() -> bw.write(item.link + Const.N)
-                else -> bw.write("@" + Const.N)
-            }
-            bw.write(SiteToiler.END + Const.N)
-            bw.flush()
-        }
-        bw.close()
-    }
-
-    private fun saveToStorage(list: List<BasicItem>) {
-        var i: Int
-        var d: String
-        val ads = storage.site
-        ads.clear()
-        ads.insertTime()
-        val now = DateUnit.initNow()
-        var prevTime = now.timeInMills
-        var date: DateUnit
-        var time: Long
-        var id = 2
-        list.forEach { item ->
-            val row = ContentValues()
-            row.put(DataBase.ID, id)
-            id++
-            row.put(Const.TITLE, item.title)
-            row.put(Const.DESCTRIPTION, item.des)
-            i = item.des.lastIndexOf("<p")
-            date = DateUnit.putMills(prevTime)
-            if (i > -1 && item.des.length - i > 10) {
-                i += 3
-                d = item.des.substring(i, i + 10)
-                if (d.hasDate) {
-                    if (d.contains("<")) {
-                        i = d.indexOf("<")
-                        d = d.substring(0, i)
-                    }
-                    date = DateUnit.parse("$d 12:00")
-                }
-            }
-            time = if (date.timeInDays == now.timeInDays)
-                now.timeInMills else date.timeInMills
-            if (time == prevTime)
-                time -= 30 * DateUnit.MIN_IN_MILLS
-            prevTime = time
-            row.put(Const.TIME, time)
-            when {
-                item.hasFewLinks() -> {
-                    val sb = StringBuilder()
-                    item.headsAndLinks().forEach {
-                        sb.appendLine(it.second)
-                        if (it.first.isNullOrEmpty())
-                            sb.appendLine(getHeadFromUrl(it.second))
-                        else sb.appendLine(it.first)
-                    }
-                    sb.delete(sb.length - 1, sb.length)
-                    row.put(Const.LINK, sb.toString())
-                }
-
-                item.link.contains(":") ->
-                    row.put(Const.LINK, item.link + Const.N + item.head)
-
-                else ->
-                    row.put(Const.LINK, item.link) //item.hasLink() or empty
-            }
-            ads.insert(row)
-        }
-    }
-
     private fun getHeadFromUrl(url: String) = when {
         url.contains("/") ->
             url.substring(url.lastIndexOf("/") + 1)
@@ -241,5 +248,76 @@ class SiteLoader(
             url.substring(url.lastIndexOf(":") + 1)
 
         else -> url
+    }
+
+    fun loadDevAds(): Boolean {
+        if (time == -1L)
+            time = storage.getTime()
+        val t = time
+        var hasNew = false
+        val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevAds)))
+        val s = br.readLine()
+        if (s.toLong() > t) {
+            time = s.toLong()
+            if (update(br)) {
+                hasNew = true
+                val unread = UnreadUtils()
+                unread.setBadge(storage.unreadCount)
+            }
+        } else time = storage.newTime()
+        br.close()
+        return hasNew
+    }
+
+    private fun update(br: BufferedReader): Boolean {
+        val titles = mutableListOf<String>()
+        var mode: Int
+        var index = 0
+        var hasNew = false
+        var item = SimpleItem("", "", "")
+        br.forEachLine {
+            when {
+                it.contains("<e>") -> {
+                    mode = when {
+                        item.title.contains("<u>") -> DevStorage.TYPE_UPDATE
+                        item.link.isEmpty() -> DevStorage.TYPE_DES
+                        item.des.isEmpty() -> DevStorage.TYPE_LINK
+                        else -> DevStorage.TYPE_ALL
+                    }
+                    if (item.title.contains("<w>")) warnIndex = index
+                    index++
+                    item.title = item.title.substring(3)
+                    titles.add(item.title)
+                    if (!storage.existsTitle(item.title)) {
+                        hasNew = true
+                        addRow(mode, item)
+                    }
+                    item = SimpleItem("", "", "")
+                }
+
+                it.indexOf("<") != 0 -> //multiline des
+                    item.des += Const.N + it
+
+                it.contains("<d>") ->
+                    item.des = it.substring(3)
+
+                it.contains("<l>") ->
+                    item.link = it.substring(3)
+
+                else -> item.title = it
+            }
+        }
+        storage.deleteItems(titles)
+        storage.newTime()
+        return hasNew
+    }
+
+    private fun addRow(mode: Int, item: SimpleItem) {
+        val row = ContentValues()
+        row.put(Const.MODE, mode)
+        row.put(Const.TITLE, item.title)
+        row.put(Const.DESCTRIPTION, item.des)
+        row.put(Const.LINK, item.link)
+        storage.insert(row)
     }
 }

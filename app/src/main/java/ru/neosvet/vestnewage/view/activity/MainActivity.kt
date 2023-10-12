@@ -38,7 +38,7 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.*
@@ -569,24 +569,24 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun showWarnAds(warn: Int) {
-        val storage = AdsStorage()
-        val ads = AdsUtils(storage.dev)
-        val item = ads.getItem(warn)
-        storage.close()
-        if (item[AdsUtils.TITLE].isEmpty()) return
-        val builder = AlertDialog.Builder(this, R.style.NeoDialog)
-            .setTitle(getString(R.string.warning) + " " + item[AdsUtils.TITLE])
-            .setMessage(item[AdsUtils.DES])
-            .setNegativeButton(getString(android.R.string.ok)) { dialog: DialogInterface, _ ->
-                dialog.dismiss()
+        val storage = DevStorage()
+        val ads = AdsUtils(storage, this)
+        ads.getItem(warn)?.let { item ->
+            val builder = AlertDialog.Builder(this, R.style.NeoDialog)
+                .setTitle(getString(R.string.warning) + " " + item.title)
+                .setMessage(item.des)
+                .setNegativeButton(getString(android.R.string.ok)) { dialog: DialogInterface, _ ->
+                    dialog.dismiss()
+                }
+                .setOnDismissListener { showWelcome() }
+            if (item.link.isNotEmpty()) {
+                builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
+                    Urls.openInApps(item.link)
+                }
             }
-            .setOnDismissListener { showWelcome() }
-        if (item[AdsUtils.LINK].isNotEmpty()) {
-            builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
-                Urls.openInApps(item[AdsUtils.LINK])
-            }
+            builder.create().show()
         }
-        builder.create().show()
+        storage.close()
     }
 
     override fun onItemClick(link: String) {

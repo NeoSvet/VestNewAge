@@ -5,7 +5,7 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -22,7 +22,7 @@ class NewToiler : NeoToiler() {
     }
 
     private var needOpen: Boolean = true
-    private val storage = AdsStorage()
+    private val storage = DevStorage()
     private lateinit var ads: AdsUtils
     private lateinit var poemFrom: String
     private var task = Task.NONE
@@ -33,7 +33,7 @@ class NewToiler : NeoToiler() {
         .build()
 
     override fun init(context: Context) {
-        ads = AdsUtils(storage.dev)
+        ads = AdsUtils(storage, context)
         poemFrom =
             context.getString(R.string.poem) + " " + context.getString(R.string.from) + " "
     }
@@ -52,12 +52,12 @@ class NewToiler : NeoToiler() {
         scope.launch {
             val notifUtils = NotificationUtils()
             notifUtils.cancel(NotificationUtils.NOTIF_SUMMARY)
-            val list = ads.loadList(true)
+            val list = ads.getUnreadList()
             var t: String
             var s: String
             var n: Int
             val unread = UnreadUtils()
-            unread.setBadge(storage.dev.unreadCount)
+            unread.setBadge(storage.unreadCount)
             if (unread.lastModified() > 0) {
                 val links = unread.list
                 for (i in links.size - 1 downTo 0) {
@@ -94,7 +94,9 @@ class NewToiler : NeoToiler() {
         }
     }
 
-    fun readAds(item: BasicItem) {
-        storage.dev.setRead(item)
+    fun markAsRead(item: BasicItem) {
+        var t = item.title
+        t = t.substring(t.indexOf(" ") + 1)
+        storage.setRead(t, item.head)
     }
 }

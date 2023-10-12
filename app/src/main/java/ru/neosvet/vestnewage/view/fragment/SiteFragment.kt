@@ -46,7 +46,6 @@ class SiteFragment : NeoFragment() {
     private var binding: TabFragmentBinding? = null
     override val title: String
         get() = getString(R.string.news)
-    private var itemAds: BasicItem? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,8 +75,7 @@ class SiteFragment : NeoFragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             SiteState.Status(
-                selectedTab = binding?.pTab?.selectedIndex ?: 0,
-                itemAds = itemAds
+                selectedTab = binding?.pTab?.selectedIndex ?: 0
             )
         )
         super.onSaveInstanceState(outState)
@@ -145,11 +143,6 @@ class SiteFragment : NeoFragment() {
         else openPage(link)
     }
 
-    private fun closeAds() = itemAds?.let {
-        toiler.readAds(it)
-        itemAds = null
-    }
-
     private fun openPage(url: String) {
         when {
             url.contains("mailto") -> Urls.openInApps(url)
@@ -184,9 +177,6 @@ class SiteFragment : NeoFragment() {
 
     private fun restoreStatus(state: SiteState.Status) {
         binding?.pTab?.selectedIndex = state.selectedTab
-        itemAds = state.itemAds?.also {
-            AdsUtils.showDialog(requireActivity(), it, this::closeAds)
-        }
     }
 
     private fun onItemClick(index: Int, item: BasicItem) {
@@ -205,9 +195,11 @@ class SiteFragment : NeoFragment() {
                 else openSingleLink(item.link)
 
                 SiteTab.DEV.value -> {
-                    item.des = ""
-                    itemAds = item
-                    AdsUtils.showDialog(requireActivity(), item, this@SiteFragment::closeAds)
+                    if (item.hasFewLinks())
+                        openMultiLink(item, rvList.getItemView(index))
+                    else if (item.link.isNotEmpty()) openPage(item.link)
+                    if (item.title.contains(getString(R.string.new_section)))
+                        toiler.markAsRead(item)
                     adapter.notifyItemChanged(index)
                 }
             }

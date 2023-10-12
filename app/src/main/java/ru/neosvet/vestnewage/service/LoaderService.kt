@@ -25,8 +25,6 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.AdsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
 import ru.neosvet.vestnewage.utils.ListsUtils
@@ -321,18 +319,9 @@ class LoaderService : LifecycleService(), LoadHandler {
     }
 
     private fun loadSiteSection() {
-        val url = arrayOf(
-            Urls.Site,
-            Urls.Ads
-        )
-        var i = 0
-        val storage = AdsStorage()
-        val loader = SiteLoader(client, storage)
-        while (i < url.size && isRun) {
-            loader.load(url[i])
-            i++
-        }
-        storage.close()
+        val loader = SiteLoader(client)
+        loader.loadAds()
+        if (isRun) loader.loadSite()
     }
 
     override fun setMax(value: Int) {

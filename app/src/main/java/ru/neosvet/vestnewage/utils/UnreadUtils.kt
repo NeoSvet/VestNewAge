@@ -7,7 +7,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.storage.AdsStorage
+import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 
 class UnreadUtils {
@@ -88,8 +88,8 @@ class UnreadUtils {
             var k = 0
             if (cursor.moveToFirst()) k = cursor.count
             cursor.close()
-            val storage = AdsStorage()
-            k += storage.dev.unreadCount
+            val storage = DevStorage()
+            k += storage.unreadCount
             storage.close()
             close()
             return k
@@ -129,19 +129,19 @@ class UnreadUtils {
     }
 
     fun setBadge() {
-        val storage = AdsStorage()
-        setBadge(storage.dev.unreadCount)
+        val storage = DevStorage()
+        setBadge(storage.unreadCount)
         storage.close()
     }
 
-    fun setBadge(count_ads: Int) {
+    fun setBadge(countAds: Int) {
         open()
         val cursor = db.query(
             table = NAME,
             selection = Const.TIME + " > ?",
             selectionArg = "0"
         )
-        val k = count_ads + cursor.count
+        val k = countAds + cursor.count
         if (k == 0) ShortcutBadger.removeCount(App.context)
         else ShortcutBadger.applyCount(App.context, k)
         cursor.close()
