@@ -209,6 +209,9 @@ class MainHelper(private val act: MainActivity) {
             Section.SUMMARY ->
                 setActionIcon(R.drawable.ic_refresh)
 
+            Section.SITE ->
+                setActionIcon(R.drawable.ic_refresh)
+
             Section.SEARCH ->
                 setActionIcon(R.drawable.ic_settings)
 
