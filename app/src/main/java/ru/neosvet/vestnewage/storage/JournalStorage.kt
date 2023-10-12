@@ -168,7 +168,7 @@ class JournalStorage : Closeable {
         val cursor = db.query(
             table = DataBase.JOURNAL,
             selection = DataBase.ID + DataBase.Q,
-            selectionArgs = arrayOf(id)
+            selectionArg = id
         )
         val r = if (cursor.moveToFirst()) {
             val i = cursor.getColumnIndex(Const.PLACE)
