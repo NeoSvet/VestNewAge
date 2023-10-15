@@ -100,6 +100,7 @@ data class MarkerStrings(
 
 data class CabinetStrings(
     val selected_status: String,
+    val auth_failed: String,
     val anketa_failed: String,
     val send_status: String,
     val select_status: String,

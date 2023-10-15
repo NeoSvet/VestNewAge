@@ -4,23 +4,23 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import okhttp3.OkHttpClient
+import androidx.core.view.isVisible
 import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helper.CabinetHelper
-import ru.neosvet.vestnewage.network.UnsafeClient
-import ru.neosvet.vestnewage.network.Urls.MainSite
+import ru.neosvet.vestnewage.network.NetConst
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
@@ -28,9 +28,10 @@ import ru.neosvet.vestnewage.view.dialog.CustomDialog
 class CabinetActivity : AppCompatActivity() {
     companion object {
         private const val SCRIPT =
-            "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);s=s.substring(0,s.indexOf('hr2')-12);document.body.innerHTML='<div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';"
+            "var id=setInterval(';',1); for(var i=0;i<id;i++) window.clearInterval(i); var s=document.getElementById('rcol').innerHTML;s=s.substring(s.indexOf('/d')+5);" +
+                    "s=s.substring(0,s.indexOf('hr2')-12); document.body.innerHTML='<style>#rcol A:link{color:#fff; text-decoration:underline;}</style><div id=\"rcol\" style=\"padding-top:10px\" name=\"top\">'+s+'</div>';"
 
-        fun openPage(link: String?) {
+        fun openPage(link: String) {
             val intent = Intent(App.context, CabinetActivity::class.java)
             intent.putExtra(Const.LINK, link)
             if (App.context !is Activity) intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -42,13 +43,25 @@ class CabinetActivity : AppCompatActivity() {
     private lateinit var status: StatusButton
     private var twoPointers = false
     private var currentScale = 1f
+    private var firstUrl = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.cabinet_activity)
         initView()
         status.setLoad(true)
-        wvBrowser.loadUrl(MainSite + intent.getStringExtra(Const.LINK))
+        firstUrl = CabinetHelper.codingUrl(Urls.MainSite + intent.getStringExtra(Const.LINK))
+        val manager = CookieManager.getInstance()
+        manager.setAcceptCookie(true)
+        manager.setAcceptThirdPartyCookies(wvBrowser, true)
+        manager.removeAllCookies {
+            manager.setCookie(Urls.MainSite, CabinetHelper.cookie)
+            if (CabinetHelper.alterUrl.isNotEmpty()) {
+                manager.setCookie(CabinetHelper.alterUrl, CabinetHelper.alterCookie)
+                manager.setCookie(CabinetHelper.alterUrl, CabinetHelper.cookie)
+            }
+            wvBrowser.loadUrl(firstUrl)
+        }
     }
 
     override fun onDestroy() {
@@ -61,7 +74,7 @@ class CabinetActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.visibility = View.VISIBLE
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        toolbar.setNavigationOnClickListener { finish() }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         this.title = ""
         wvBrowser = findViewById(R.id.wvBrowser)
@@ -100,15 +113,17 @@ class CabinetActivity : AppCompatActivity() {
             view: WebView,
             request: WebResourceRequest
         ): WebResourceResponse? {
-            return if (CabinetHelper.cookie.isEmpty())
+            return if (CabinetHelper.alterUrl.isEmpty())
                 super.shouldInterceptRequest(view, request)
             else try {
-                val client = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
-                    UnsafeClient.createHttpClient() else OkHttpClient()
+                val url = request.url.toString()
                 val req = Request.Builder()
-                    .url(request.url.toString())
-                    .addHeader("cookie", CabinetHelper.cookie)
+                    .url(if (url.contains(Urls.MainSite)) CabinetHelper.codingUrl(url) else url)
+                    .addHeader(NetConst.USER_AGENT, App.context.packageName)
+                    .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
+                    .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
                     .build()
+                val client = CabinetHelper.createHttpClient()
                 val response = client.newCall(req).execute()
                 val responseInputStream = response.body.byteStream()
                 WebResourceResponse(null, null, responseInputStream)
@@ -121,24 +136,40 @@ class CabinetActivity : AppCompatActivity() {
             if (url.contains("#")) return
             status.setLoad(true)
             act.title = ""
-            view.visibility = View.GONE
+            view.isVisible = false
             super.onPageStarted(view, url, favicon)
         }
 
         override fun onPageFinished(view: WebView, url: String) {
             if (url.contains("#") || act.isDestroyed) return
-            wvBrowser.evaluateJavascript(Companion.SCRIPT) { status.setLoad(false) }
-            wvBrowser.title?.let { t ->
-                if (!t.contains(":")) {
-                    val alert = CustomDialog(act)
-                    alert.setTitle(getString(R.string.error))
-                    alert.setMessage(getString(R.string.cab_fail))
-                    alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
-                    alert.show(null)
+            if (!url.contains(Urls.MainSite)) {
+                if (url.contains("mailto")) {
+                    Urls.openInApps(url)
+                    wvBrowser.loadUrl(firstUrl)
                     return
                 }
-                wvBrowser.visibility = View.VISIBLE
-                act.title = t.substring(t.indexOf(":") + 3)
+                if (CabinetHelper.alterUrl.isEmpty() || !url.contains(CabinetHelper.alterUrl)) {
+                    wvBrowser.loadUrl(firstUrl)
+                    return
+                }
+            }
+            if (url.contains(".html")) {
+                wvBrowser.title?.let { t ->
+                    if (!t.contains(":")) {
+                        status.setLoad(false)
+                        val alert = CustomDialog(act)
+                        alert.setTitle(getString(R.string.error))
+                        alert.setMessage(getString(R.string.cab_fail))
+                        alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
+                        alert.show(null)
+                        return
+                    }
+                    wvBrowser.evaluateJavascript(SCRIPT) {
+                        status.setLoad(false)
+                        wvBrowser.isVisible = true
+                    }
+                    act.title = t.substring(t.indexOf(":") + 3)
+                }
             }
             super.onPageFinished(view, url)
         }

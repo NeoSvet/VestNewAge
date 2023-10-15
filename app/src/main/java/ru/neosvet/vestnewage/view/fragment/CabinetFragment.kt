@@ -14,6 +14,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.databinding.CabinetFragmentBinding
+import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
@@ -154,6 +155,12 @@ class CabinetFragment : NeoFragment() {
             cbRemPassword.isEnabled = check
             if (!check) cbRemPassword.isChecked = false
         }
+        cbAlterPath.setOnCheckedChangeListener { _, check: Boolean ->
+            if (!check) {
+                CabinetHelper.alterUrl = ""
+                CabinetHelper.alterCookie = ""
+            }
+        }
         bClearEmail.setOnClickListener { etEmail.setText("") }
         bClearPassword.setOnClickListener { etPassword.setText("") }
         root.setOnTouchListener { _, _ ->
@@ -193,7 +200,7 @@ class CabinetFragment : NeoFragment() {
             softKeyboard.hide()
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
-            toiler.login(email, password)
+            toiler.login(email, password, cbAlterPath.isChecked)
             if (cbRemEmail.isChecked)
                 toiler.save(email, if (cbRemPassword.isChecked) password else "")
         }
@@ -203,7 +210,7 @@ class CabinetFragment : NeoFragment() {
         if (isBlocked) return
         when (screen) {
             CabinetScreen.LOGIN -> {
-                val s = when (index) {
+                val link = when (index) {
                     0 -> {
                         Urls.openInApps("http://neosvet.ucoz.ru/vna/vpn.html")
                         return
@@ -215,7 +222,9 @@ class CabinetFragment : NeoFragment() {
                     4 -> "regstat.html"
                     else -> "trans.html"
                 }
-                CabinetActivity.openPage(s)
+                if (binding?.login?.cbAlterPath?.isChecked == true && CabinetHelper.alterUrl.isEmpty())
+                    toiler.openByAlterPath(link)
+                else CabinetActivity.openPage(link)
             }
 
             CabinetScreen.CABINET -> {

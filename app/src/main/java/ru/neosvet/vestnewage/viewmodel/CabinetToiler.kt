@@ -1,13 +1,10 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
-import android.os.Build
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import okhttp3.FormBody
-import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -15,11 +12,10 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.CabinetHelper
-import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
-import ru.neosvet.vestnewage.network.UnsafeClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.activity.CabinetActivity
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -49,6 +45,7 @@ class CabinetToiler : NeoToiler() {
     private val loginList = mutableListOf<BasicItem>()
     private val cabinetList = mutableListOf<BasicItem>()
     private val cabinetItem = BasicItem("")
+    private var isAlterPath = false
 
     override fun getInputData() = Data.Builder()
         .putString(Const.TASK, CabinetHelper.TAG)
@@ -60,6 +57,7 @@ class CabinetToiler : NeoToiler() {
         helper = CabinetHelper(context)
         strings = CabinetStrings(
             selected_status = context.getString(R.string.selected_status),
+            auth_failed = context.getString(R.string.auth_failed),
             anketa_failed = context.getString(R.string.anketa_failed),
             send_status = context.getString(R.string.send_status),
             select_status = context.getString(R.string.select_status),
@@ -101,7 +99,8 @@ class CabinetToiler : NeoToiler() {
         action = Action.None
     }
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, alterPath: Boolean) {
+        isAlterPath = alterPath
         action = Action.Login(email, password)
         load()
     }
@@ -132,24 +131,34 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun doLogin(email: String, password: String) {
         helper.email = email
-        var request: Request = Request.Builder()
-            .url(Urls.MainSite)
+        if (isAlterPath) helper.initAlterPath()
+        var request = Request.Builder()
+            .url(CabinetHelper.codingUrl(Urls.MainSite))
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
+            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .build()
-        val client = createHttpClient()
+        val client = CabinetHelper.createHttpClient()
         var response = client.newCall(request).execute()
-        var cookie = response.header(NetConst.SET_COOKIE)
-        cookie = cookie!!.substring(0, cookie.indexOf(";"))
-        CabinetHelper.cookie = cookie
+        var cookie = ""
+        response.headers.forEach {
+            if (it.second.contains("PHPSESSID"))
+                cookie = it.second
+        }
         response.close()
-        val requestBody: RequestBody = FormBody.Builder()
+        if (cookie.isEmpty()) {
+            postError(strings.auth_failed)
+            return
+        }
+        CabinetHelper.cookie = cookie
+        val requestBody = FormBody.Builder()
             .add("user", email)
             .add("pass", password)
             .build()
         request = Request.Builder()
             .post(requestBody)
-            .url(Urls.MainSite + "auth.php")
+            .url(CabinetHelper.codingUrl(Urls.MainSite + "auth.php"))
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
+            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .addHeader(NetConst.COOKIE, cookie)
             .build()
         response = client.newCall(request).execute()
@@ -183,12 +192,14 @@ class CabinetToiler : NeoToiler() {
     }
 
     private suspend fun loadAnketa(loadWordList: Boolean): String {
-        val builderRequest = Request.Builder()
-        builderRequest.url(Urls.MainSite + "edinenie/anketa.html")
-        builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
-        builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
-        val client = createHttpClient()
-        val response = client.newCall(builderRequest.build()).execute()
+        val request = Request.Builder()
+            .url(CabinetHelper.codingUrl(Urls.MainSite + "edinenie/anketa.html"))
+            .header(NetConst.USER_AGENT, App.context.packageName)
+            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
+            .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
+            .build()
+        val client = CabinetHelper.createHttpClient()
+        val response = client.newCall(request).execute()
         if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
         if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
         val inStream = response.body.byteStream()
@@ -242,18 +253,20 @@ class CabinetToiler : NeoToiler() {
     }
 
     private suspend fun sendWord(index: Int, word: String) {
-        val builderRequest = Request.Builder()
-        builderRequest.url(Urls.MainSite + "savedata.php")
-        builderRequest.header(NetConst.USER_AGENT, App.context.packageName)
-        builderRequest.addHeader(NetConst.COOKIE, CabinetHelper.cookie)
-        val requestBody: RequestBody = FormBody.Builder()
+        val requestBody = FormBody.Builder()
             .add("keyw", (index + 1).toString())
             .add("login", helper.email)
             .add("hash", "")
             .build()
-        builderRequest.post(requestBody)
-        val client = createHttpClient()
-        val response = client.newCall(builderRequest.build()).execute()
+        val request = Request.Builder()
+            .post(requestBody)
+            .url(CabinetHelper.codingUrl(Urls.MainSite + "savedata.php"))
+            .header(NetConst.USER_AGENT, App.context.packageName)
+            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
+            .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
+            .build()
+        val client = CabinetHelper.createHttpClient()
+        val response = client.newCall(request).execute()
         if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
         if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
         val inStream = response.body.byteStream()
@@ -279,17 +292,20 @@ class CabinetToiler : NeoToiler() {
         }
     }
 
-    private fun createHttpClient(): OkHttpClient =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            NeoClient.createHttpClient()
-        else
-            UnsafeClient.createHttpClient()
-
     fun forget(login: Boolean, password: Boolean) {
         helper.forget(login, password)
     }
 
     fun save(login: String, password: String) {
         helper.save(login, password)
+    }
+
+    fun openByAlterPath(link: String) {
+        scope.launch {
+            postState(BasicState.Loading)
+            helper.initAlterPath()
+            postState(BasicState.Ready)
+            CabinetActivity.openPage(link)
+        }
     }
 }
