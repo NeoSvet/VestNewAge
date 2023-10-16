@@ -42,7 +42,7 @@ class MarkersListHelper(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            if (viewHolder.layoutPosition == exceptionIndex) return 0
+            if (viewHolder.layoutPosition <= exceptionIndex) return 0
             return super.getDragDirs(recyclerView, viewHolder)
         }
 
@@ -50,7 +50,7 @@ class MarkersListHelper(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            if (viewHolder.layoutPosition == exceptionIndex) return 0
+            if (viewHolder.layoutPosition <= exceptionIndex) return 0
             return super.getSwipeDirs(recyclerView, viewHolder)
         }
 
@@ -61,7 +61,7 @@ class MarkersListHelper(
         ): Boolean {
             val fromPos = viewHolder.layoutPosition
             val toPos = target.layoutPosition
-            return fromPos != exceptionIndex && toPos != exceptionIndex
+            return fromPos > exceptionIndex && toPos > exceptionIndex
         }
 
         override fun onMoved(

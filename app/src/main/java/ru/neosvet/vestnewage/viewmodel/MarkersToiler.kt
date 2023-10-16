@@ -67,7 +67,8 @@ class MarkersToiler : NeoToiler() {
             page_entirely = context.getString(R.string.page_entirely),
             not_load_page = context.getString(R.string.not_load_page),
             unuse_dot = context.getString(R.string.unuse_dot),
-            cancel_rename = context.getString(R.string.cancel_rename)
+            cancel_rename = context.getString(R.string.cancel_rename),
+            help_edit = context.getString(R.string.help_edit)
         )
     }
 
@@ -164,6 +165,7 @@ class MarkersToiler : NeoToiler() {
         isCollections = true
         scope.launch {
             list.clear()
+            list.add(MarkerItem(-1, strings.help_edit, ""))
             val cursor = storage.getCollections(Const.PLACE)
             var s: String
             var isNull = false

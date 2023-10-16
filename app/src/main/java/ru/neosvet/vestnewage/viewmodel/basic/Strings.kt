@@ -85,7 +85,8 @@ data class MarkersStrings(
     val page_entirely: String,
     val not_load_page: String,
     val unuse_dot: String,
-    val cancel_rename: String
+    val cancel_rename: String,
+    val help_edit: String
 )
 
 data class MarkerStrings(

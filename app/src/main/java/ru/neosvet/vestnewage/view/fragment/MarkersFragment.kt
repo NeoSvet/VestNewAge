@@ -29,13 +29,14 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.fromDpi
+import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.InputDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
-import ru.neosvet.vestnewage.view.list.holder.MarkerHolder
 import ru.neosvet.vestnewage.view.list.helper.MarkersListHelper
 import ru.neosvet.vestnewage.view.list.helper.SwipeButton
+import ru.neosvet.vestnewage.view.list.holder.MarkerHolder
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -236,7 +237,9 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
         selectedIndex = index
         when {
             isCollections -> {
-                toiler.openMarkersList(index)
+                if (index == 0) showEditTip()
+                else if (!adapter.isEditor)
+                    toiler.openMarkersList(index)
                 selectedIndex = -1
             }
 
@@ -245,6 +248,14 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
 
             else -> toiler.openPage(index)
         }
+    }
+
+    private fun showEditTip() {
+        val alert = CustomDialog(act)
+        alert.setTitle(getString(R.string.help_edit))
+        alert.setMessage(getString(R.string.help_edit_markers))
+        alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
+        alert.show(null)
     }
 
     override fun onLongClick(index: Int) {
@@ -368,7 +379,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
             if (state.isEditor) {
                 rvList.layoutManager = GridLayoutManager(requireContext(), 1)
                 act?.setAction(R.drawable.ic_ok)
-                getListHelper().attach(rvList, if (isCollections) 0 else -1)
+                getListHelper().attach(rvList, if (isCollections) 1 else -1)
             } else {
                 rvList.layoutManager = GridLayoutManager(requireContext(), span)
                 act?.setAction(R.drawable.star)

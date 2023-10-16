@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerItem
@@ -70,7 +69,6 @@ class MarkerEditHolder(
 
     override fun setItem(item: MarkerItem) {
         tvTitle.text = item.title
-        if (tvDes == null) ivMove.isVisible = layoutPosition > 0
-        else tvDes.text = item.des
+        tvDes?.text = item.des
     }
 }
