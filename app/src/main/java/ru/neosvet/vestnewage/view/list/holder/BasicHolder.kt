@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.holder
 
 import android.view.View
 import android.widget.TextView
@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 
-class RecyclerHolder(
+class BasicHolder(
     private val root: View,
     private val clicker: (Int, BasicItem) -> Unit,
     private val longClicker: ((Int, BasicItem) -> Boolean)?

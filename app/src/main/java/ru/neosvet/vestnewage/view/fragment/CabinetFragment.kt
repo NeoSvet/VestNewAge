@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.view.activity.CabinetActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.CabinetToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -30,7 +30,7 @@ import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class CabinetFragment : NeoFragment() {
     private var binding: CabinetFragmentBinding? = null
-    private val adapter = RecyclerAdapter(this::onItemClick)
+    private val adapter = BasicAdapter(this::onItemClick)
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding!!.login.etPassword)
     }

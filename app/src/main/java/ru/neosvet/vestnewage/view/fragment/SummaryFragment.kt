@@ -27,7 +27,7 @@ import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.SummaryToiler
@@ -48,7 +48,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     private var binding: TabFragmentBinding? = null
-    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adapter = BasicAdapter(this::onItemClick, this::onItemLongClick)
     private lateinit var adPaging: PagingAdapter
     private val toiler: SummaryToiler
         get() = neotoiler as SummaryToiler

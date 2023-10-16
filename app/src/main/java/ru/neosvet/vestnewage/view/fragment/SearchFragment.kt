@@ -41,7 +41,7 @@ import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.dialog.SearchDialog
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.RequestAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
@@ -73,8 +73,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     private var binding: SearchFragmentBinding? = null
     private lateinit var helper: SearchHelper
     private lateinit var adRequest: RequestAdapter
-    private val adDefault: RecyclerAdapter by lazy {
-        RecyclerAdapter(this::defaultClick)
+    private val adDefault: BasicAdapter by lazy {
+        BasicAdapter(this::defaultClick)
     }
     private val adPaging: PagingAdapter by lazy {
         PagingAdapter(this)

@@ -18,9 +18,9 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.HomeAdapter
-import ru.neosvet.vestnewage.view.list.HomeHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeHolder
 import ru.neosvet.vestnewage.view.list.MenuAdapter
-import ru.neosvet.vestnewage.view.list.HomeListHelper
+import ru.neosvet.vestnewage.view.list.helper.HomeListHelper
 import ru.neosvet.vestnewage.viewmodel.HomeToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState

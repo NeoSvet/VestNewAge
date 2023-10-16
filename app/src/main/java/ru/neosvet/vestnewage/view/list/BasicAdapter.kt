@@ -6,11 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.view.list.holder.BasicHolder
 
-class RecyclerAdapter(
+class BasicAdapter(
     private val clicker: (Int, BasicItem) -> Unit,
     private val longClicker: ((Int, BasicItem) -> Boolean)? = null
-) : RecyclerView.Adapter<RecyclerHolder>() {
+) : RecyclerView.Adapter<BasicHolder>() {
     companion object {
         private const val TYPE_TITLE = 0
         private const val TYPE_SIMPLE = 1
@@ -42,7 +43,7 @@ class RecyclerAdapter(
         else
             TYPE_DETAIL
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicHolder {
         val layout = when (viewType) {
             TYPE_SIMPLE ->
                 LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
@@ -51,10 +52,10 @@ class RecyclerAdapter(
             else ->
                 LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
         }
-        return RecyclerHolder(layout, clicker, longClicker)
+        return BasicHolder(layout, clicker, longClicker)
     }
 
-    override fun onBindViewHolder(holder: RecyclerHolder, position: Int) {
+    override fun onBindViewHolder(holder: BasicHolder, position: Int) {
         holder.setItem(data[position])
     }
 }

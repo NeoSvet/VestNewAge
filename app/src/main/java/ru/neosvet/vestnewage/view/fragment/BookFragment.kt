@@ -25,7 +25,7 @@ import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -45,7 +45,7 @@ class BookFragment : NeoFragment() {
         }
     }
 
-    private val adapter = RecyclerAdapter(this::onItemClick, this::onItemLongClick)
+    private val adapter = BasicAdapter(this::onItemClick, this::onItemLongClick)
     private var alertRnd: CustomDialog? = null
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler

@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.basic.convertDpi
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 
 class WelcomeFragment : BottomSheetDialogFragment() {
     interface ItemClicker {
@@ -36,7 +36,7 @@ class WelcomeFragment : BottomSheetDialogFragment() {
 
     private var clicker: ItemClicker? = null
     val list = mutableListOf<BasicItem>()
-    private val adapter = RecyclerAdapter(this::onItemClick)
+    private val adapter = BasicAdapter(this::onItemClick)
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.NewToiler
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -24,7 +24,7 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NewState
 
 class NewFragment : NeoFragment() {
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    private val adapter: BasicAdapter = BasicAdapter(this::onItemClick)
     private val toiler: NewToiler
         get() = neotoiler as NewToiler
     override val title: String

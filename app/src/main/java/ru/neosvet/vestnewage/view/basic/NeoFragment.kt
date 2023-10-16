@@ -15,8 +15,8 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import ru.neosvet.vestnewage.view.list.ScrollHelper
-import ru.neosvet.vestnewage.view.list.ListHelper
+import ru.neosvet.vestnewage.view.list.helper.ScrollHelper
+import ru.neosvet.vestnewage.view.list.helper.ListHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState

@@ -21,7 +21,7 @@ import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.getItemView
-import ru.neosvet.vestnewage.view.list.RecyclerAdapter
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -42,7 +42,7 @@ class SiteFragment : NeoFragment() {
 
     private val toiler: SiteToiler
         get() = neotoiler as SiteToiler
-    private val adapter: RecyclerAdapter = RecyclerAdapter(this::onItemClick)
+    private val adapter: BasicAdapter = BasicAdapter(this::onItemClick)
     private var binding: TabFragmentBinding? = null
     override val title: String
         get() = getString(R.string.news)

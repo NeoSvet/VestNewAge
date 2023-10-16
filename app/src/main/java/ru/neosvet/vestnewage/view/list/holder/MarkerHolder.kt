@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.holder
 
 import android.annotation.SuppressLint
 import android.view.MotionEvent
@@ -19,7 +19,7 @@ abstract class MarkerHolder(root: View) : RecyclerView.ViewHolder(root) {
     abstract fun setItem(item: MarkerItem)
 }
 
-class Holder(
+class MarkerBaseHolder(
     root: View,
     private val events: Events
 ) : MarkerHolder(root) {
@@ -45,7 +45,7 @@ class Holder(
     }
 }
 
-class EditHolder(
+class MarkerEditHolder(
     root: View,
     private val events: Events
 ) : MarkerHolder(root) {

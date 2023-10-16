@@ -1,7 +1,8 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.helper
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.view.list.holder.EmptyHolder
 
 class HomeListHelper(
     private val events: (Int, Boolean) -> Unit

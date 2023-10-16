@@ -5,6 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerItem
+import ru.neosvet.vestnewage.view.list.holder.MarkerEditHolder
+import ru.neosvet.vestnewage.view.list.holder.MarkerBaseHolder
+import ru.neosvet.vestnewage.view.list.holder.MarkerHolder
 
 class MarkerAdapter(
     private val events: MarkerHolder.Events,
@@ -25,15 +28,15 @@ class MarkerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MarkerHolder =
         when (viewType) {
-            TYPE_SIMPLE -> if (isEditor) EditHolder(
+            TYPE_SIMPLE -> if (isEditor) MarkerEditHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_list_edit, null), events
-            ) else Holder(
+            ) else MarkerBaseHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_list, null), events
             )
 
-            else -> if (isEditor) EditHolder(
+            else -> if (isEditor) MarkerEditHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_detail_edit, null), events
-            ) else Holder(
+            ) else MarkerBaseHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null), events
             )
         }

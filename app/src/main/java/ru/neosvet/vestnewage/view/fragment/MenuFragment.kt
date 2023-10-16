@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils.isTabletLand
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.MenuAdapter
-import ru.neosvet.vestnewage.view.list.ScrollHelper
+import ru.neosvet.vestnewage.view.list.helper.ScrollHelper
 
 class MenuFragment : Fragment() {
     companion object {

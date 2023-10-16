@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.helper
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

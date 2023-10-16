@@ -7,6 +7,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
+import ru.neosvet.vestnewage.view.list.holder.EmptyHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeEditHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeMenuHolder
 import java.util.Timer
 import kotlin.concurrent.timer
 

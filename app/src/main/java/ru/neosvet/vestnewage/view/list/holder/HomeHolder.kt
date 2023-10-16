@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.holder
 
 import android.annotation.SuppressLint
 import android.view.MotionEvent
@@ -120,8 +120,6 @@ class HomeMenuHolder(
         }
     }
 }
-
-class EmptyHolder(root: View) : RecyclerView.ViewHolder(root)
 
 class HomeEditHolder(
     root: View,

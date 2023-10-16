@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.view.list.RecyclerHolder
+import ru.neosvet.vestnewage.view.list.holder.BasicHolder
 
 class PagingAdapter(
     private val parent: Parent
-) : PagingDataAdapter<BasicItem, RecyclerHolder>(ItemsComparator), NeoPaging.Pager {
+) : PagingDataAdapter<BasicItem, BasicHolder>(ItemsComparator), NeoPaging.Pager {
     interface Parent {
         fun onItemClick(index: Int, item: BasicItem)
         fun onItemLongClick(index: Int, item: BasicItem): Boolean
@@ -63,14 +63,14 @@ class PagingAdapter(
             TYPE_DETAIL else TYPE_SIMPLE
     }
 
-    override fun onCreateViewHolder(host: ViewGroup, viewType: Int): RecyclerHolder {
+    override fun onCreateViewHolder(host: ViewGroup, viewType: Int): BasicHolder {
         val layout = if (withTime)
             LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
         else if (viewType == TYPE_SIMPLE)
             LayoutInflater.from(host.context).inflate(R.layout.item_list, null)
         else
             LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)
-        return RecyclerHolder(layout, parent::onItemClick, parent::onItemLongClick)
+        return BasicHolder(layout, parent::onItemClick, parent::onItemLongClick)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -85,7 +85,7 @@ class PagingAdapter(
         recyclerView.removeOnScrollListener(scroller)
     }
 
-    override fun onBindViewHolder(holder: RecyclerHolder, position: Int) {
+    override fun onBindViewHolder(holder: BasicHolder, position: Int) {
         getItem(position)?.let { holder.setItem(it) }
     }
 

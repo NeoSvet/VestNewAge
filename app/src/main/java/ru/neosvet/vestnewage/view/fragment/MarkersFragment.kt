@@ -33,9 +33,9 @@ import ru.neosvet.vestnewage.view.dialog.InputDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
-import ru.neosvet.vestnewage.view.list.MarkerHolder
-import ru.neosvet.vestnewage.view.list.MarkersListHelper
-import ru.neosvet.vestnewage.view.list.SwipeButton
+import ru.neosvet.vestnewage.view.list.holder.MarkerHolder
+import ru.neosvet.vestnewage.view.list.helper.MarkersListHelper
+import ru.neosvet.vestnewage.view.list.helper.SwipeButton
 import ru.neosvet.vestnewage.viewmodel.MarkersToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState

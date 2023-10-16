@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.view.list
+package ru.neosvet.vestnewage.view.list.helper
 
 import androidx.recyclerview.widget.RecyclerView
 
