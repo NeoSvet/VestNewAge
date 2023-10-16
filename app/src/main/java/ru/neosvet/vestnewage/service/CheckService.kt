@@ -38,7 +38,7 @@ class CheckService : LifecycleService() {
 
     private val list = NeoList<Pair<String, String>>() //title and link
     private var isRun = false
-    private val client = NeoClient(NeoClient.Type.CHECK)
+    private val client = NeoClient()
     private val loader = PageLoader(client)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

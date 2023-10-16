@@ -45,7 +45,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private val date: DateUnit
         get() = if (isPoemsTab) dPoems else dEpistles
     private val loader: BookLoader by lazy {
-        BookLoader(NeoClient(NeoClient.Type.SECTION, this))
+        BookLoader(NeoClient(this))
     }
     private val masterLoader: MasterLoader by lazy {
         MasterLoader(this)

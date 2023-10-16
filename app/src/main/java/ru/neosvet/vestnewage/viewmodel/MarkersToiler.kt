@@ -79,7 +79,7 @@ class MarkersToiler : NeoToiler() {
         if (loadIndex == -1) return
         task = Type.LOAD
         val index = loadIndex
-        val loader = PageLoader(NeoClient(NeoClient.Type.SECTION))
+        val loader = PageLoader(NeoClient())
         loader.download(list[index].data, true)
         postState(BasicState.Ready)
         loadIndex = -1

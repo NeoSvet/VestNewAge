@@ -13,7 +13,7 @@ class AdditionFactory(
     private val parent: NeoPaging
 ) : NeoPaging.Factory() {
     private val loader: AdditionLoader by lazy {
-        AdditionLoader(NeoClient(NeoClient.Type.SECTION))
+        AdditionLoader(NeoClient())
     }
 
     override fun getRefreshKey(state: PagingState<Int, BasicItem>): Int? {

@@ -30,7 +30,7 @@ class SiteToiler : NeoToiler() {
 
     private var selectedTab = SiteTab.NEWS
     private lateinit var strings: SiteStrings
-    private val client = NeoClient(NeoClient.Type.SECTION)
+    private val client = NeoClient()
     private val newsStorage = NewsStorage()
     private val devStorage = DevStorage()
     private lateinit var ads: AdsUtils

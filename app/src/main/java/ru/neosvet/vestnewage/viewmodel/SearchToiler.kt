@@ -104,7 +104,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     override suspend fun doLoad() {
-        val client = NeoClient(NeoClient.Type.SECTION)
+        val client = NeoClient()
         val pageLoader = PageLoader(client)
         loadDate?.let { date ->
             val d = dateFromString(date)

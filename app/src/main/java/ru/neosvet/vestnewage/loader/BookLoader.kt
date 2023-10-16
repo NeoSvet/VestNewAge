@@ -19,7 +19,7 @@ class BookLoader(private val client: NeoClient) : Loader {
     private val links = mutableListOf<String>()
     private var isRun = true
     private val clientDoctrine: NeoClient by lazy {
-        NeoClient(NeoClient.Type.MAIN)
+        NeoClient()
     }
 
     override fun load() {

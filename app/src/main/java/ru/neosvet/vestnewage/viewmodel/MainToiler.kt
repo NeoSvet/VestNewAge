@@ -28,7 +28,7 @@ import java.io.InputStreamReader
 
 class MainToiler : NeoToiler() {
     private lateinit var updatedPage: String
-    private var client = NeoClient(NeoClient.Type.MAIN)
+    private var client = NeoClient()
     private var withSplash = true
 
     override fun getInputData(): Data = Data.Builder()

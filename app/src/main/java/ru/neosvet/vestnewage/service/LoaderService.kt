@@ -90,7 +90,7 @@ class LoaderService : LifecycleService(), LoadHandler {
     })
 
 
-    private val client = NeoClient(NeoClient.Type.LOADER)
+    private val client = NeoClient()
     private val loader = MasterLoader(this)
     private val progress = Progress()
     private var mode = 0
@@ -167,6 +167,7 @@ class LoaderService : LifecycleService(), LoadHandler {
                     1 -> loadDoctrine()
                     else -> loadYear(it + 2000)
                 }
+                NeoClient.deleteTempFiles()
                 if (isRun.not()) return@launch
             }
             finishService(null)

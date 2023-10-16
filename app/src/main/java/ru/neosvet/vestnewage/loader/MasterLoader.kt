@@ -31,16 +31,16 @@ class MasterLoader : Loader, LoadHandlerLite {
     constructor(handler: LoadHandler) {
         handlerLite = null
         this.handler = handler
-        client = NeoClient(NeoClient.Type.LOADER)
-        clientBase = NeoClient(NeoClient.Type.LOADER, this)
+        client = NeoClient()
+        clientBase = NeoClient(this)
         loader = PageLoader(client)
     }
 
     constructor(handler: LoadHandlerLite) {
         this.handler = null
         handlerLite = handler
-        client = NeoClient(NeoClient.Type.SECTION, handler)
-        clientBase = NeoClient(NeoClient.Type.SECTION, this)
+        client = NeoClient(handler)
+        clientBase = NeoClient(this)
         loader = PageLoader(client)
     }
 

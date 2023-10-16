@@ -4,24 +4,20 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException.SiteCode
 import ru.neosvet.vestnewage.data.NeoException.SiteNoResponse
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 class NeoClient(
-    private val type: Type,
     private val handler: LoadHandlerLite? = null
 ) {
-    enum class Type(val value: Int) {
-        MAIN(1), LOADER(2), CHECK(3), SECTION(4)
-    }
 
     companion object {
         private const val PATH = "/cache/file"
@@ -38,15 +34,14 @@ class NeoClient(
         fun deleteTempFiles() {
             val d = Files.getFileP("/cache")
             d.listFiles()?.forEach { f ->
-                if (f.isFile && DateUnit.isLongAgo(f.lastModified()))
-                    f.delete()
+                if (f.isFile) f.delete()
             }
         }
     }
 
     private fun urlsUpdate(url: String) {
         if (url.contains("urls")) return
-        Urls.update(NeoClient(Type.MAIN))
+        Urls.update(NeoClient())
     }
 
     fun getStream(url: String): BufferedInputStream {
@@ -75,8 +70,7 @@ class NeoClient(
         }
         val inStream = response.body.byteStream()
         val max = response.body.contentLength().toInt()
-        val file = Files.getFileP(PATH + type.value)
-        if (file.exists()) file.delete()
+        val file = createFile()
         val outStream = FileOutputStream(file)
         val buffer = ByteArray(1024)
         var length = inStream.read(buffer)
@@ -92,5 +86,24 @@ class NeoClient(
         inStream.close()
         outStream.close()
         return BufferedInputStream(FileInputStream(file))
+    }
+
+    private fun isLongAgo(time: Long): Boolean {
+        return System.currentTimeMillis() - time > 300000 // 5 min
+    }
+
+    private fun createFile(): File {
+        var i = 1
+        var file: File
+        while (true) {
+            file = Files.getFileP(PATH + i.toString())
+            if (!file.exists()) return file
+            if (file.exists() && isLongAgo(file.lastModified())) {
+                file.delete()
+                return file
+            }
+
+            i++
+        }
     }
 }

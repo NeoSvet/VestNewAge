@@ -33,7 +33,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
     private val todayY = date.year
     private val calendar = arrayListOf<CalendarItem>()
     private var time = 0L
-    private val client = NeoClient(NeoClient.Type.SECTION)
+    private val client = NeoClient()
     private val masterLoader: MasterLoader by lazy {
         MasterLoader(this)
     }

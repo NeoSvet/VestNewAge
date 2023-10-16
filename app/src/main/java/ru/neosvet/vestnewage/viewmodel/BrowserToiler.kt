@@ -55,7 +55,7 @@ class BrowserToiler : NeoToiler() {
     private var link = ""
     private var idPage = ""
     private val pageLoader: PageLoader by lazy {
-        PageLoader(NeoClient(NeoClient.Type.SECTION))
+        PageLoader(NeoClient())
     }
     private val styleLoader: StyleLoader by lazy {
         StyleLoader()

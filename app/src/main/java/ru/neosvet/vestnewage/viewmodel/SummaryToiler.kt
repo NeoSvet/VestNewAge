@@ -42,7 +42,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     private val paging: NeoPaging by lazy {
         NeoPaging(this)
     }
-    private val client = NeoClient(NeoClient.Type.SECTION)
+    private val client = NeoClient()
     private var jobTime: Job? = null
 
     val isLoading: Boolean

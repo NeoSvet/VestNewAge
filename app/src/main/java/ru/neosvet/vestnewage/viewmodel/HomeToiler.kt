@@ -52,7 +52,7 @@ class HomeToiler : NeoToiler() {
     private var pageStorage: PageStorage? = null
     private var task = Task.NONE
     private lateinit var strings: HomeStrings
-    private val client = NeoClient(NeoClient.Type.SECTION)
+    private val client = NeoClient()
     private var needLoadCalendar = false
     private var needLoadSummary = false
     private var needLoadNews = false
@@ -175,7 +175,7 @@ class HomeToiler : NeoToiler() {
         }
     }
 
-    private suspend fun getHomeList(items: List<HomeItem.Type>): List<HomeItem> {
+    private fun getHomeList(items: List<HomeItem.Type>): List<HomeItem> {
         val list = mutableListOf<HomeItem>()
         items.forEach {
             val item = when (it) {
