@@ -61,7 +61,8 @@ data class HomeStrings(
     val last: String,
     val from: String,
     val new_today: String,
-    val information: String
+    val information: String,
+    val help_edit: String
 )
 
 data class BookStrings(

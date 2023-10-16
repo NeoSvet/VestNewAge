@@ -19,14 +19,17 @@ import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 
-class HomeHolder(
-    root: View,
-    private val clicker: (HomeItem.Type, Action) -> Unit
-) : RecyclerView.ViewHolder(root) {
+interface HomeHolder {
+    fun setItem(item: HomeItem)
     enum class Action {
         TITLE, SUBTITLE, REFRESH
     }
+}
 
+class HomeBaseHolder(
+    root: View,
+    private val clicker: (HomeItem.Type, HomeHolder.Action) -> Unit
+) : RecyclerView.ViewHolder(root), HomeHolder {
     private val ivIcon: ImageView = root.findViewById(R.id.icon)
     private val tvLine1: TextView = root.findViewById(R.id.line1)
     private val tvLine2: TextView = root.findViewById(R.id.line2)
@@ -34,7 +37,7 @@ class HomeHolder(
     private val ivRefresh: ImageView = root.findViewById(R.id.refresh)
     private val ivRefreshBg: ImageView = root.findViewById(R.id.refresh_bg)
 
-    fun setItem(item: HomeItem) {
+    override fun setItem(item: HomeItem) {
         val icon = when (item.type) {
             HomeItem.Type.SUMMARY -> R.drawable.ic_summary
             HomeItem.Type.NEWS -> R.drawable.ic_site
@@ -58,16 +61,16 @@ class HomeHolder(
         tvLine2.text = item.timeString ?: item.lines[1]
         tvLine3.text = item.lines[2]
         tvLine1.setOnClickListener {
-            clicker.invoke(item.type, Action.TITLE)
+            clicker.invoke(item.type, HomeHolder.Action.TITLE)
         }
         tvLine3.setOnClickListener {
-            clicker.invoke(item.type, Action.SUBTITLE)
+            clicker.invoke(item.type, HomeHolder.Action.SUBTITLE)
         }
         if (item.hasRefresh) {
             ivRefresh.isVisible = true
             ivRefreshBg.isVisible = true
             ivRefresh.setOnClickListener {
-                clicker.invoke(item.type, Action.REFRESH)
+                clicker.invoke(item.type, HomeHolder.Action.REFRESH)
             }
         } else {
             ivRefresh.isVisible = false
@@ -100,7 +103,7 @@ class HomeHolder(
 class HomeMenuHolder(
     private val root: View,
     private val clicker: (Int, Section) -> Unit
-) : RecyclerView.ViewHolder(root) {
+) : RecyclerView.ViewHolder(root), HomeHolder {
     private val mIds = listOf(
         listOf(R.id.item1, R.id.icon1, R.id.title1),
         listOf(R.id.item2, R.id.icon2, R.id.title2),
@@ -119,12 +122,14 @@ class HomeMenuHolder(
             clicker.invoke(index, section)
         }
     }
+
+    override fun setItem(item: HomeItem) {}
 }
 
 class HomeEditHolder(
     root: View,
     mover: (RecyclerView.ViewHolder) -> Unit
-) : RecyclerView.ViewHolder(root) {
+) : RecyclerView.ViewHolder(root), HomeHolder {
     private val ivIcon: ImageView = root.findViewById(R.id.icon)
     private val tvTitle: TextView = root.findViewById(R.id.title)
 
@@ -143,7 +148,7 @@ class HomeEditHolder(
         }
     }
 
-    fun setItem(item: HomeItem) {
+    override fun setItem(item: HomeItem) {
         val icon = when (item.type) {
             HomeItem.Type.SUMMARY -> R.drawable.ic_summary
             HomeItem.Type.NEWS -> R.drawable.ic_site

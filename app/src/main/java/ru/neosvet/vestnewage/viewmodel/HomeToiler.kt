@@ -19,9 +19,9 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.storage.AdditionStorage
-import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
+import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -109,7 +109,8 @@ class HomeToiler : NeoToiler() {
             last = context.getString(R.string.last),
             from = context.getString(R.string.from) + " ",
             new_today = context.getString(R.string.new_today),
-            information = context.getString(R.string.information)
+            information = context.getString(R.string.information),
+            help_edit = context.getString(R.string.help_edit)
         )
         loadItems()
     }
@@ -164,6 +165,8 @@ class HomeToiler : NeoToiler() {
             linkCalendar = ""
             linkJournal = ""
             val list = mutableListOf<HomeItem>()
+            if (isEditor)
+                list.add(HomeItem(HomeItem.Type.HELP, listOf(strings.help_edit)))
             list.addAll(getHomeList(items))
             if (isEditor) {
                 initHiddenItems()
@@ -536,45 +539,47 @@ class HomeToiler : NeoToiler() {
     }
 
     fun moveUp(index: Int) {
+        val i = index - 1
         when {
-            index == items.size + 1 -> {
+            i == items.size + 1 -> {
                 val item = hiddenItems[1]
                 hiddenItems.removeAt(1)
                 items.add(item)
             }
 
-            index > items.size -> {
-                val n = index - items.size
+            i > items.size -> {
+                val n = i - items.size
                 val item = hiddenItems[n - 1]
                 hiddenItems.removeAt(n - 1)
                 hiddenItems.add(n, item)
             }
 
             else -> {
-                val n = index - 1
+                val n = i - 1
                 val item = items[n]
                 items.removeAt(n)
-                items.add(index, item)
+                items.add(i, item)
             }
         }
     }
 
     fun moveDown(index: Int) {
+        val i = index - 1
         when {
-            index == items.size - 1 -> {
-                val item = items[index]
-                items.removeAt(index)
+            i == items.size - 1 -> {
+                val item = items[i]
+                items.removeAt(i)
                 hiddenItems.add(1, item)
             }
 
-            index < items.size -> {
-                val item = items[index]
-                items.removeAt(index)
-                items.add(index + 1, item)
+            i < items.size -> {
+                val item = items[i]
+                items.removeAt(i)
+                items.add(i + 1, item)
             }
 
             else -> {
-                val n = index - items.size
+                val n = i - items.size
                 val item = hiddenItems[n]
                 hiddenItems.removeAt(n)
                 hiddenItems.add(n + 1, item)

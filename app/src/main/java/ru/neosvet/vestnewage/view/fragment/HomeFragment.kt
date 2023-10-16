@@ -17,10 +17,11 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.list.HomeAdapter
-import ru.neosvet.vestnewage.view.list.holder.HomeHolder
 import ru.neosvet.vestnewage.view.list.MenuAdapter
 import ru.neosvet.vestnewage.view.list.helper.HomeListHelper
+import ru.neosvet.vestnewage.view.list.holder.HomeHolder
 import ru.neosvet.vestnewage.viewmodel.HomeToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -206,6 +207,14 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 if (action == HomeHolder.Action.TITLE || toiler.linkJournal.isEmpty())
                     act?.setSection(Section.JOURNAL, true)
                 else openReader(toiler.linkJournal)
+
+            HomeItem.Type.HELP -> {
+                val alert = CustomDialog(act)
+                alert.setTitle(getString(R.string.help_edit))
+                alert.setMessage(getString(R.string.help_edit_home))
+                alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
+                alert.show(null)
+            }
 
             else -> {} //HomeItem.Type.MENU, HomeItem.Type.DIV
         }

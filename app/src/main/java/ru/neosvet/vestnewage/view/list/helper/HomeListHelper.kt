@@ -2,12 +2,12 @@ package ru.neosvet.vestnewage.view.list.helper
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import ru.neosvet.vestnewage.view.list.holder.EmptyHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeHolder
+import ru.neosvet.vestnewage.view.list.holder.SimpleHolder
 
 class HomeListHelper(
     private val events: (Int, Boolean) -> Unit
 ) {
-
     private val callback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
     ) {
@@ -15,15 +15,20 @@ class HomeListHelper(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
         ): Int {
-            if (viewHolder is EmptyHolder) return 0
-            return super.getDragDirs(recyclerView, viewHolder)
+            if (viewHolder is HomeHolder)
+                return super.getDragDirs(recyclerView, viewHolder)
+            return 0
         }
 
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
             target: RecyclerView.ViewHolder
-        ): Boolean = viewHolder !is EmptyHolder
+        ): Boolean {
+            if (viewHolder !is HomeHolder) return false
+            if (target is SimpleHolder) return false
+            return true
+        }
 
         override fun onMoved(
             recyclerView: RecyclerView,

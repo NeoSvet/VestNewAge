@@ -8,9 +8,11 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.view.list.holder.EmptyHolder
+import ru.neosvet.vestnewage.view.list.holder.HomeBaseHolder
 import ru.neosvet.vestnewage.view.list.holder.HomeEditHolder
 import ru.neosvet.vestnewage.view.list.holder.HomeHolder
 import ru.neosvet.vestnewage.view.list.holder.HomeMenuHolder
+import ru.neosvet.vestnewage.view.list.holder.SimpleHolder
 import java.util.Timer
 import kotlin.concurrent.timer
 
@@ -116,6 +118,10 @@ class HomeAdapter(
 
     override fun getItemViewType(position: Int): Int = items[position].type.value
 
+    private fun onHelpClick(index: Int) {
+        events.onItemClick(HomeItem.Type.HELP, HomeHolder.Action.TITLE)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             HomeItem.Type.MENU.value -> HomeMenuHolder(
@@ -129,13 +135,18 @@ class HomeAdapter(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_home_div, null)
             )
 
+            HomeItem.Type.HELP.value -> SimpleHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.item_menu, null),
+                this::onHelpClick
+            )
+
             else -> if (isEditor)
                 HomeEditHolder(
                     LayoutInflater.from(parent.context).inflate(
                         R.layout.item_home_edit, null
                     ), events::onItemMove
                 ) else
-                HomeHolder(
+                HomeBaseHolder(
                     LayoutInflater.from(parent.context).inflate(
                         R.layout.item_home, null
                     ), events::onItemClick
@@ -145,7 +156,7 @@ class HomeAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is HomeHolder -> {
+            is HomeBaseHolder -> {
                 holder.setItem(items[position])
                 if (position == loadingIndex)
                     holder.startLoading()
@@ -160,6 +171,9 @@ class HomeAdapter(
                 holder.setCell(2, menu[2])
                 holder.setCell(3, menu[3])
             }
+
+            is SimpleHolder ->
+                holder.setItem(items[position].lines[0], R.drawable.ic_help)
         }
     }
 
