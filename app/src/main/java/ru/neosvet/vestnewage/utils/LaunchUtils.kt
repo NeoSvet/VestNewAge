@@ -289,7 +289,7 @@ class LaunchUtils(context: Context) {
                 InputData(-1, Section.MENU)
             }
 
-            link.contains(Const.RSS) -> {
+            link.contains(Files.RSS) -> {
                 if (intent.hasExtra(DataBase.ID)) {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                     clearSummaryNotif(id)

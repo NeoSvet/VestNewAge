@@ -19,7 +19,7 @@ class SummaryLoader(private val client: NeoClient) : Loader {
     override fun cancel() {}
 
     override fun load() {
-        val stream = client.getStream(Urls.Rss)
+        val stream = client.getStream(Urls.RSS)
         val host = Urls.Host
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
@@ -29,13 +29,13 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         }
         var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         val secFile = if (file.exists())
             DateUnit.putMills(file.lastModified()).timeInSeconds
         else 0L
         val needUpdate = secFile < secList
 
-        val bw = BufferedWriter(FileWriter(Files.file(Const.RSS)))
+        val bw = BufferedWriter(FileWriter(Files.file(Files.RSS)))
         val now = DateUnit.initNow()
         val unread = if (updateUnread) UnreadUtils() else null
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")

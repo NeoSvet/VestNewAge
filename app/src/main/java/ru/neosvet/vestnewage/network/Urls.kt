@@ -111,7 +111,7 @@ object Urls {
         get() = if (isSiteCom) URL[3] + URL[15].ifEmpty { URL[14] }
         else URL[2] + URL[14]
 
-    val Rss: String
+    val RSS: String
         get() {
             return (if (isSiteCom) URL[3] +
                     URL[19].ifEmpty { URL[18] }

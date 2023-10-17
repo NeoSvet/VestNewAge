@@ -8,7 +8,7 @@ class ListsUtils {
     private val timeNow = DateUnit.initNow().timeInSeconds
 
     fun summaryIsOld(): Boolean {
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         if (!file.exists()) return true
         val time = file.lastModified() / DateUnit.SEC_IN_MILLS
         return timeNow - time > DateUnit.DAY_IN_SEC

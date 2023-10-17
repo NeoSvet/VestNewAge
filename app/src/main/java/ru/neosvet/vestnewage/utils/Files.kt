@@ -4,6 +4,8 @@ import ru.neosvet.vestnewage.App
 import java.io.File
 
 object Files {
+    const val RSS = "/rss"
+
     fun file(name: String): File {
         return File(App.context.filesDir.toString() + name)
     }

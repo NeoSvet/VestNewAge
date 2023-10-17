@@ -54,7 +54,7 @@ class SummaryHelper : LinksProvider {
     private lateinit var notifBuilder: NotificationCompat.Builder
 
     override fun getLinkList(): List<String> {
-        val br = BufferedReader(FileReader(App.context.filesDir.toString() + Const.RSS))
+        val br = BufferedReader(FileReader(App.context.filesDir.toString() + Files.RSS))
         val list = mutableListOf<String>()
         while (br.readLine() != null) { //title
             val link = br.readLine() //link
@@ -67,7 +67,7 @@ class SummaryHelper : LinksProvider {
     }
 
     fun updateBook() {
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
         var prevName = ""
@@ -98,7 +98,7 @@ class SummaryHelper : LinksProvider {
         intent.data = Uri.parse(url)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         val piPostpone = notifUtils.getPostponeSummaryNotif(notifId, text, url)
-        val title = if (link == Const.RSS) App.context.getString(R.string.app_name)
+        val title = if (link == Files.RSS) App.context.getString(R.string.app_name)
         else App.context.getString(R.string.site_name)
         notifBuilder = notifUtils.getNotification(
             title, text,
@@ -122,7 +122,7 @@ class SummaryHelper : LinksProvider {
     }
 
     fun groupNotification() {
-        intent.data = Uri.parse(Urls.Site + Const.RSS)
+        intent.data = Uri.parse(Urls.Site + Files.RSS)
         intent.putExtra(DataBase.ID, notifId)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         notifBuilder = notifUtils.getSummaryNotif(

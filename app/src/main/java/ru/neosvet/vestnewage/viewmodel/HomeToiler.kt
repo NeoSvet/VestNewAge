@@ -377,7 +377,7 @@ class HomeToiler : NeoToiler() {
     }
 
     private fun readSummaryLink() {
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         if (file.exists()) {
             val br = BufferedReader(FileReader(file))
             br.readLine() //title
@@ -390,7 +390,7 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.SUMMARY, listOf(strings.summary))
         task = Task.OPEN_SUMMARY
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
         val title: String
         val time: Long

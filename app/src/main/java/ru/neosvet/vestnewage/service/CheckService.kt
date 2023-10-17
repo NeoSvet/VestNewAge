@@ -86,14 +86,14 @@ class CheckService : LifecycleService() {
     private fun checkAddition(): Boolean {
         val loader = AdditionLoader(client)
         if (loader.checkUpdate()) {
-            list.add(Pair(getString(R.string.new_in_additionally), Const.RSS))
+            list.add(Pair(getString(R.string.new_in_additionally), Files.RSS))
             return true
         }
         return false
     }
 
     private fun checkSummary(): Boolean {
-        val stream = client.getStream(Urls.Rss)
+        val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
         if (Urls.isSiteCom) {
@@ -102,7 +102,7 @@ class CheckService : LifecycleService() {
         }
         var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
-        val file = Files.file(Const.RSS)
+        val file = Files.file(Files.RSS)
         val secFile = if (file.exists())
             DateUnit.putMills(file.lastModified()).timeInSeconds
         else 0L
@@ -168,7 +168,7 @@ class CheckService : LifecycleService() {
         val helper = SummaryHelper()
         helper.preparingNotification()
         val several = list.size > 1
-        if (several || list.first().second != Const.RSS)
+        if (several || list.first().second != Files.RSS)
             helper.updateBook()
         list.reset(true)
         list.forEach {
