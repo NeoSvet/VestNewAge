@@ -16,8 +16,7 @@
             android:id="@+id/text_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
+            android:paddingHorizontal="@dimen/def_indent"
             android:textColor="@color/colorAccentLight"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,8 +25,7 @@
             style="@style/Time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
+            android:paddingHorizontal="@dimen/def_indent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_item" />
 
@@ -36,8 +34,7 @@
             style="@style/Des"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
+            android:paddingHorizontal="@dimen/def_indent"
             app:layout_constraintTop_toBottomOf="@id/time_item" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
