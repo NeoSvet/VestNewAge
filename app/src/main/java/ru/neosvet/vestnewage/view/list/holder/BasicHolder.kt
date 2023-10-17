@@ -7,11 +7,19 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 
-class BasicHolder(
+abstract class BasicHolder(root: View) : RecyclerView.ViewHolder(root) {
+
+    val String.fromHTML: CharSequence
+        get() = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY).trimEnd()
+
+    abstract fun setItem(item: BasicItem)
+}
+
+class BaseHolder(
     private val root: View,
     private val clicker: (Int, BasicItem) -> Unit,
     private val longClicker: ((Int, BasicItem) -> Boolean)?
-) : RecyclerView.ViewHolder(root) {
+) : BasicHolder(root) {
     private val tvTitle: TextView = root.findViewById(R.id.text_item)
     private val tvTime: TextView? = root.findViewById(R.id.time_item)
     private val tvDes: TextView? = root.findViewById(R.id.des_item)
@@ -21,10 +29,7 @@ class BasicHolder(
         item.setBackgroundResource(R.drawable.item_bg)
     }
 
-    val String.fromHTML: CharSequence
-        get() = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY).trimEnd()
-
-    fun setItem(item: BasicItem) {
+    override fun setItem(item: BasicItem) {
         tvTitle.text = if (item.title.contains("<"))
             item.title.fromHTML else item.title
 

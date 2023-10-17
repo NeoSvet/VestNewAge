@@ -1,13 +1,9 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -20,7 +16,6 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -42,7 +37,7 @@ class SiteFragment : NeoFragment() {
 
     private val toiler: SiteToiler
         get() = neotoiler as SiteToiler
-    private val adapter: BasicAdapter = BasicAdapter(this::onItemClick)
+    private val adapter = BasicAdapter(this::onItemClick)
     private var binding: TabFragmentBinding? = null
     override val title: String
         get() = getString(R.string.news)
@@ -114,24 +109,6 @@ class SiteFragment : NeoFragment() {
         binding?.pTab?.change(false)
     }
 
-    private fun openMultiLink(links: BasicItem, parent: View) {
-        val pMenu = PopupMenu(requireContext(), parent)
-        links.headsAndLinks().forEach {
-            val caption = if (it.second.contains(".jpg"))
-                getString(R.string.image) + it.first
-            else it.first
-            val item = pMenu.menu.add(caption)
-            item.intent = Intent().apply { this.action = it.second }
-        }
-        pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            item.intent?.action?.let {
-                openPage(it)
-            }
-            true
-        }
-        pMenu.show()
-    }
-
     private fun openSingleLink(link: String) {
         if (link == "#") return
         if (link.contains("rss"))
@@ -184,19 +161,19 @@ class SiteFragment : NeoFragment() {
         binding?.run {
             when (pTab.selectedIndex) {
                 SiteTab.NEWS.value -> if (item.link.length > 1) {
-                    if (item.link.contains(":"))
-                        openMultiLink(item, rvList.getItemView(index))
+                    if (item.link.contains(":") && item.head.isNotEmpty())
+                        adapter.openLinksFor(index)
                     else openPage(item.link)
                 }
 
                 SiteTab.SITE.value -> if (item.hasFewLinks())
-                    openMultiLink(item, rvList.getItemView(index))
+                    adapter.openLinksFor(index)
                 else if (item.des.isNotEmpty()) openPage(item.link)
                 else openSingleLink(item.link)
 
                 SiteTab.DEV.value -> {
                     if (item.hasFewLinks())
-                        openMultiLink(item, rvList.getItemView(index))
+                        adapter.openLinksFor(index)
                     else if (item.link.isNotEmpty()) openPage(item.link)
                     if (item.title.contains(getString(R.string.new_section)))
                         toiler.markAsRead(item)

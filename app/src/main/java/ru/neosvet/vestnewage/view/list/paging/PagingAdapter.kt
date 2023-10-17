@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.view.list.holder.BaseHolder
 import ru.neosvet.vestnewage.view.list.holder.BasicHolder
+import ru.neosvet.vestnewage.view.list.holder.ListHolder
 
 class PagingAdapter(
     private val parent: Parent
@@ -23,6 +25,7 @@ class PagingAdapter(
     companion object {
         private const val TYPE_SIMPLE = 0
         private const val TYPE_DETAIL = 1
+        private const val TYPE_LIST = 2
     }
 
     var withTime = false //for addition 16.11.2022 14:02
@@ -30,12 +33,24 @@ class PagingAdapter(
     private var prevPage = 0
     private lateinit var recyclerView: RecyclerView
     private lateinit var manager: GridLayoutManager
+    private var indexLink = -1
 
     val firstPosition: Int
         get() = startPage * NeoPaging.ON_PAGE + manager.findFirstVisibleItemPosition()
 
     override fun setPage(page: Int) {
+        indexLink = -1
         startPage = page
+    }
+
+    fun openLinksFor(index: Int) {
+        val i = indexLink
+        indexLink = -1
+        if (i > -1)
+            notifyItemChanged(i)
+        if (i == index || index == -1) return
+        indexLink = index
+        notifyItemChanged(indexLink)
     }
 
     private val scroller = object : RecyclerView.OnScrollListener() {
@@ -58,19 +73,26 @@ class PagingAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
+        if (indexLink == position) return TYPE_LIST
         val item = getItem(position)
         return if (item?.des?.isNotEmpty() == true)
             TYPE_DETAIL else TYPE_SIMPLE
     }
 
     override fun onCreateViewHolder(host: ViewGroup, viewType: Int): BasicHolder {
-        val layout = if (withTime)
-            LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
-        else if (viewType == TYPE_SIMPLE)
-            LayoutInflater.from(host.context).inflate(R.layout.item_text, null)
-        else
-            LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)
-        return BasicHolder(layout, parent::onItemClick, parent::onItemLongClick)
+        val layout = when {
+            viewType == TYPE_LIST -> return ListHolder(
+                LayoutInflater.from(host.context).inflate(R.layout.item_list, null),
+                parent::onItemClick, parent::onItemLongClick
+            )
+
+            withTime -> LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
+            viewType == TYPE_SIMPLE -> LayoutInflater.from(host.context)
+                .inflate(R.layout.item_text, null)
+
+            else -> LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)
+        }
+        return BaseHolder(layout, parent::onItemClick, parent::onItemLongClick)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

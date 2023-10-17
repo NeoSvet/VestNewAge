@@ -1,13 +1,10 @@
 package ru.neosvet.vestnewage.view.fragment
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.PopupMenu
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,7 +22,6 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
-import ru.neosvet.vestnewage.view.basic.getItemView
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
@@ -245,31 +241,17 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         binding?.run {
             if (pTab.selectedIndex == SummaryTab.ADDITION.value) {
                 firstPosition = index
-                if (item.hasFewLinks()) openMultiLink(item, rvList.getItemView(index), true)
-                else Urls.openInApps(Urls.TelegramUrl + item.link)
-            } else { //SummaryTab.RSS.value, SummaryTab.DOCTRINE.value
+                if (item.hasFewLinks()) adPaging.openLinksFor(index)
+                else if (item.link.isDigitsOnly())
+                    Urls.openInApps(Urls.TelegramUrl + item.link)
+                else Urls.openInApps(item.link)
+            } else if (item.link.indexOf("http") == 0)
+                Urls.openInBrowser(item.link)
+            else {
                 openedReader = true
                 openReader(item.link, null)
             }
         }
-    }
-
-    private fun openMultiLink(links: BasicItem, parent: View, isAddFirst: Boolean) {
-        val pMenu = PopupMenu(requireContext(), parent)
-        val post = links.link
-        links.headsAndLinks().forEach {
-            if (it.second == post) {
-                if (isAddFirst) pMenu.menu.add(getString(R.string.open_post))
-            } else {
-                val item = pMenu.menu.add(it.first)
-                item.intent = Intent().apply { this.action = it.second }
-            }
-        }
-        pMenu.setOnMenuItemClickListener { item: MenuItem ->
-            Urls.openInApps(item.intent?.action ?: (Urls.TelegramUrl + post))
-            true
-        }
-        pMenu.show()
     }
 
     override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
@@ -286,7 +268,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                     toiler.shareItem(item.head)
 
                 else -> // SummaryTab.DOCTRINE.value
-                    openMultiLink(item, rvList.getItemView(index), false)
+                    adapter.openLinksFor(index)
             }
         }
         return true

@@ -174,6 +174,9 @@
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
     <string name="image">[изображение]</string>
+    <string name="mail">[почта]</string>
+    <string name="webpage">[сайт]</string>
+    <string name="links">Ссылки:</string>
     <string name="Timekeeping_Spiritual_Wave">Хронометраж акции «Импульс Духовной Волны»</string>
     <string name="The_Path_of_the_impulse">Путь Импульса Духовной Волны</string>
     <!--CabmainFragment-->
