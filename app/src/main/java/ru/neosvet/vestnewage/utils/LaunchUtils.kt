@@ -280,6 +280,15 @@ class LaunchUtils(context: Context) {
         var link = data.path ?: return null // without host
         val mLink = link.substring(1).split("/")
         return when {
+            data.host == "chenneling.info" -> {
+                if (link.length < 2) {
+                    val d = DateUnit.initToday()
+                    link = "/poems/$d.html"
+                }
+                openReader(link.substring(1), null)
+                InputData(-1, Section.MENU)
+            }
+
             link.contains(Const.RSS) -> {
                 if (intent.hasExtra(DataBase.ID)) {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)

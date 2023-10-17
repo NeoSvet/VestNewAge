@@ -47,6 +47,7 @@
                 <data android:host="www.otkroveniya.eu"/>
                 <data android:host="www.otkroveniya.ru"/>
                 <data android:host="otkroveniya.ru"/>
+                <data android:host="chenneling.info"/>
             </intent-filter>
         </activity>
         <activity
