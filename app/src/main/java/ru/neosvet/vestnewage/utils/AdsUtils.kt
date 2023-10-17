@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.DevStorage
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.viewmodel.basic.DevStrings
 
 class AdsUtils(
@@ -166,7 +166,7 @@ class AdsUtils(
             return
         }
 
-        val alert = CustomDialog(act).apply {
+        val alert = MessageDialog(act).apply {
             setTitle(strings.ad)
             setMessage(item.head)
         }

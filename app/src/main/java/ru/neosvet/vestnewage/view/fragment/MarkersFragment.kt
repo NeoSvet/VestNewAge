@@ -29,7 +29,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.fromDpi
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.InputDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
@@ -250,7 +250,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
     }
 
     private fun showEditTip() {
-        val alert = CustomDialog(requireActivity())
+        val alert = MessageDialog(requireActivity())
         alert.setTitle(getString(R.string.help_edit))
         alert.setMessage(getString(R.string.help_edit_markers))
         alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

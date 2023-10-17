@@ -23,7 +23,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
@@ -46,7 +46,7 @@ class BookFragment : NeoFragment() {
     }
 
     private val adapter = BasicAdapter(this::onItemClick, this::onItemLongClick)
-    private var alertRnd: CustomDialog? = null
+    private var alertRnd: MessageDialog? = null
     private var binding: BookFragmentBinding? = null
     private val toiler: BookToiler
         get() = neotoiler as BookToiler
@@ -264,7 +264,7 @@ class BookFragment : NeoFragment() {
     }
 
     private fun showRndAlert(state: BookState.Rnd) {
-        alertRnd = CustomDialog(requireActivity()).apply {
+        alertRnd = MessageDialog(requireActivity()).apply {
             setTitle(getString(R.string.rnd))
             setMessage(state.msg)
             setLeftButton(getString(R.string.in_markers)) {

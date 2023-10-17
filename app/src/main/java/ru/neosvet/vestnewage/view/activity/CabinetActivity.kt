@@ -23,7 +23,7 @@ import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.basic.StatusButton
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 
 class CabinetActivity : AppCompatActivity() {
     companion object {
@@ -157,7 +157,7 @@ class CabinetActivity : AppCompatActivity() {
                 wvBrowser.title?.let { t ->
                     if (!t.contains(":")) {
                         status.setLoad(false)
-                        val alert = CustomDialog(act)
+                        val alert = MessageDialog(act)
                         alert.setTitle(getString(R.string.error))
                         alert.setMessage(getString(R.string.cab_fail))
                         alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

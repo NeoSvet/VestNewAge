@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import ru.neosvet.vestnewage.R
 
-class CustomDialog(act: Activity) {
+class MessageDialog(act: Activity) {
     private val dialog: AlertDialog
     private val root: View
 

@@ -20,7 +20,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.CabinetToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -70,7 +70,7 @@ class CabinetFragment : NeoFragment() {
         setStatus(false)
         when (state) {
             is BasicState.Message -> {
-                val alert = CustomDialog(requireActivity())
+                val alert = MessageDialog(requireActivity())
                 alert.setTitle(getString(R.string.error))
                 alert.setMessage(state.message)
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

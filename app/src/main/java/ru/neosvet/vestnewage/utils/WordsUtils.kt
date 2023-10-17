@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.utils
 
 import android.app.Activity
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -33,7 +33,7 @@ object WordsUtils {
 
     fun showAlert(act: Activity, searchFun: (String) -> Unit) {
         val msg = getGodWords()
-        val dialog = CustomDialog(act)
+        val dialog = MessageDialog(act)
         dialog.setTitle(act.getString(R.string.god_words))
         dialog.setRightButton(act.getString(R.string.close)) { dialog.dismiss() }
         if (msg.isEmpty()) {

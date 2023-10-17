@@ -17,7 +17,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
-import ru.neosvet.vestnewage.view.dialog.CustomDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.list.HomeAdapter
 import ru.neosvet.vestnewage.view.list.MenuAdapter
 import ru.neosvet.vestnewage.view.list.helper.HomeListHelper
@@ -209,7 +209,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 else openReader(toiler.linkJournal)
 
             HomeItem.Type.HELP -> {
-                val alert = CustomDialog(requireActivity())
+                val alert = MessageDialog(requireActivity())
                 alert.setTitle(getString(R.string.help_edit))
                 alert.setMessage(getString(R.string.help_edit_home))
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }
