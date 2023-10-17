@@ -785,10 +785,11 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
 
     private fun setPrimary(state: BrowserState.Primary) {
         toast.hide()
-        if (link.isNotEmpty() && link != state.link)
-            position = -1f
+        if (link.isNotEmpty()) {
+            if (link != state.link) position = -1f
+            else positionForRestore = state.position
+        }
         link = state.link
-        positionForRestore = state.position
         finishLoading()
         binding.content.wvBrowser.loadUrl(state.url)
         if (state.type == BrowserState.Type.DOCTRINE) {
