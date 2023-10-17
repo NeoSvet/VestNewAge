@@ -5,6 +5,7 @@ import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.UnreadUtils
@@ -35,7 +36,7 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         else 0L
         val needUpdate = secFile < secList
 
-        val bw = BufferedWriter(FileWriter(Files.file(Files.RSS)))
+        val bw = BufferedWriter(FileWriter(file))
         val now = DateUnit.initNow()
         val unread = if (updateUnread) UnreadUtils() else null
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
@@ -84,5 +85,63 @@ class SummaryLoader(private val client: NeoClient) : Loader {
 
     private fun withOutTag(s: String): String {
         return s.substring(s.indexOf(">") + 1)
+    }
+
+    fun loadDoctrine() {
+        val stream = client.getStream(Urls.DOCTRINE + "feed/")
+        val br = BufferedReader(InputStreamReader(stream), 1000)
+        val file = Files.file(Files.DOCTRINE)
+        val bw = BufferedWriter(FileWriter(file))
+        val m = br.readText().split("<item>")
+        br.close()
+        stream.close()
+        val storage = PageStorage()
+        storage.open(Const.DOCTRINE)
+        var a: Int
+        var b: Int
+        var time: Long
+        for (i in 1 until m.size - 1) {
+            a = m[i].indexOf("<title") + 7
+            b = m[i].indexOf("</", a)
+            val title = m[i].substring(a, b)
+            a = m[i].indexOf("<link", b) + 6
+            b = m[i].indexOf("</", a)
+            val link = m[i].substring(a, b).replace(Urls.DOCTRINE, Const.DOCTRINE)
+            bw.write(title) //title
+            bw.write(Const.N)
+            bw.write(link) //link
+            bw.write(Const.N)
+            storage.putTitle(title, link)
+
+            a = m[i].indexOf("pubDate>", b)
+            b = m[i].indexOf("</", a)
+            time = DateUnit.parse(m[i].substring(a + 8, b)).timeInMills
+            storage.updateTime(link, time)
+
+            a = m[i].indexOf("<des", b) + 22
+            b = m[i].indexOf("]]><", a)
+            bw.write(m[i].substring(a, b)) //des
+            bw.write(Const.N)
+            bw.write(Const.END)
+            bw.write(Const.N)
+
+            bw.write(time.toString() + Const.N) //time
+            bw.flush()
+
+            a = m[i].indexOf("<content", b) + 26
+            b = m[i].indexOf("]]><", a)
+            addContent(
+                storage, storage.getPageId(link),
+                m[i].substring(a, b)
+            )
+        }
+        bw.close()
+    }
+
+    private fun addContent(storage: PageStorage, id: Int, content: String) {
+        storage.deleteParagraphs(id)
+        content.split("<p>").forEach {
+            storage.insertParagraph(id, "<p>$it")
+        }
     }
 }

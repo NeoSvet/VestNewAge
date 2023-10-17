@@ -247,13 +247,18 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val iLink = cursor.getColumnIndex(Const.LINK)
         val list = mutableListOf<BasicItem>()
         while (cursor.moveToNext()) {
-            val title = cursor.getString(iTitle)
             val link = cursor.getString(iLink)
-            list.add(BasicItem(title, link))
+            if (link.isDoctrineBook) {
+                val title = cursor.getString(iTitle)
+                list.add(BasicItem(title, link))
+            }
         }
-        postState(BookState.Book(Urls.DoctrineSite, list))
         cursor.close()
         storage.close()
+        if (list.isEmpty()) {
+            postState(BookState.Book(Urls.DoctrineSite, listOf()))
+            reLoad()
+        } else postState(BookState.Book(Urls.DoctrineSite, list))
     }
 
     @SuppressLint("Range")

@@ -36,6 +36,7 @@ import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
@@ -410,7 +411,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         wvBrowser.addJavascriptInterface(NeoInterface(act), "NeoInterface")
         wvBrowser.webViewClient = WebClient(act, act.packageName)
         wvBrowser.setOnTouchListener { _, event ->
-            if(snackbar.isShown) snackbar.hide()
+            if (snackbar.isShown) snackbar.hide()
             if (event.pointerCount == 2) {
                 if (twoPointers)
                     wvBrowser.setInitialScale((currentScale * 100f).toInt())
@@ -557,7 +558,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             else if (ScreenUtils.isLand)
                 ivHeadBack.setImageResource(R.drawable.head_back_land_d)
             else ivHeadBack.setImageResource(R.drawable.head_back_d)
-            ivHeadFront.setImageResource(R.drawable.head_front_d)
+            if (link.isDoctrineBook)
+                ivHeadFront.setImageResource(R.drawable.head_front_db)
+            else ivHeadFront.setImageResource(R.drawable.head_front_d)
         } else if (ScreenUtils.isTablet && isBigHead)
             ivHeadBack.setImageResource(R.drawable.head_back_tablet)
         else if (ScreenUtils.isLand)
@@ -784,18 +787,24 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         toast.hide()
         if (link.isNotEmpty() && link != state.link)
             position = -1f
+        link = state.link
         positionForRestore = state.position
         finishLoading()
-        setHeadBar(state.type == BrowserState.Type.DOCTRINE)
         binding.content.wvBrowser.loadUrl(state.url)
-        menu.numpar.isVisible = link.isPoem
-        menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+        if (state.type == BrowserState.Type.DOCTRINE) {
+            setHeadBar(true)
+            menu.numpar.isVisible = false
+            menu.refresh.isVisible = link.isDoctrineBook
+        } else {
+            setHeadBar(false)
+            menu.numpar.isVisible = link.isPoem
+            menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+        }
         if (positionForRestore > 0f) snackbar.show(
             view = binding.fabNav,
             msg = getString(R.string.go_to_last_place),
             event = this::restoreLastPosition
         )
-        link = state.link
     }
 
     private fun restoreLastPosition() {

@@ -20,6 +20,7 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.dateFromLink
 import ru.neosvet.vestnewage.utils.hasDate
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.BrowserStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -50,6 +51,7 @@ class BrowserToiler : NeoToiler() {
     private var isRefresh = false
     private var isDoctrine = false
     private var isNumPar = false
+    private var isPaging = false
     private var withOutPosition = false
     private var isLightTheme = true
     private var link = ""
@@ -71,7 +73,9 @@ class BrowserToiler : NeoToiler() {
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
             doctrine_pages = context.getString(R.string.doctrine_pages),
+            doctrine_future = context.getString(R.string.doctrine_future),
             edition_of = context.getString(R.string.edition_of),
+            publication_of = context.getString(R.string.publication_of),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next)
         )
@@ -131,13 +135,15 @@ class BrowserToiler : NeoToiler() {
                 }
             }
             isDoctrine = storage.isDoctrine
-            if (isDoctrine) type = BrowserState.Type.DOCTRINE
+            if (isDoctrine) {
+                type = BrowserState.Type.DOCTRINE
+                isPaging = link.isDoctrineBook
+            } else isPaging = storage.isBook
             if (storage.existsPage(link).not()) {
                 if (loadIfNeed) {
                     isRefresh = false
                     reLoad()
-                } else
-                    postState(BasicState.Ready)
+                } else postState(BasicState.Ready)
                 return@launch
             }
             if (!preparingStyle()) return@launch
@@ -238,7 +244,7 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         bw.write("<div style='margin-top:20px' class='print2'>\n")
-        if (storage.isBook || isDoctrine) {
+        if (isPaging) {
             bw.write(SCRIPT)
             bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
             bw.write(SCRIPT)
@@ -248,10 +254,12 @@ class BrowserToiler : NeoToiler() {
             bw.flush()
         }
         if (isDoctrine) {
-            bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
+            if (link.isDoctrineBook) bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
+            else bw.write(strings.doctrine_future + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
             bw.write(strings.copyright)
             bw.write(DateUnit.initToday().year.toString() + Const.BR)
-            bw.write(strings.edition_of + d.toString())
+            if (link.isDoctrineBook) bw.write(strings.edition_of + d.toString())
+            else bw.write(strings.publication_of + d.toString())
         } else if (link.contains("print")) { // материалы с сайта Откровений
             bw.write(strings.copyright)
             bw.write(d.year.toString() + Const.BR)
@@ -345,11 +353,14 @@ class BrowserToiler : NeoToiler() {
     }
 
     fun nextPage() {
+        if (!isPaging) return
         withOutPosition = true
         storage.open(link)
         storage.getNextPage(link)?.let {
-            openLink(it, false)
-            return
+            if (!isDoctrine || it.isDoctrineBook) {
+                openLink(it, false)
+                return
+            }
         }
         if (isDoctrine) {
             setState(BasicState.Success)
@@ -371,6 +382,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     fun prevPage() {
+        if (!isPaging) return
         withOutPosition = true
         storage.open(link)
         storage.getPrevPage(link)?.let {

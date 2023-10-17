@@ -84,6 +84,7 @@
     <!--SummaryFragment-->
     <string name="new_in_additionally">Новое в Сводке-Дополнительном</string>
     <string name="additionally">Дополнительно</string>
+    <string name="doctrine">Доктрина</string>
     <string name="open_post">Открыть сообщение</string>
     <!--CalendarFragment-->
     <string name="ad">Объявление</string>
@@ -201,7 +202,9 @@
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
     <string name="downloaded">Загружено:&#160;</string>
     <string name="doctrine_pages">Книга «Доктрина Создателя», страницы&#160;</string>
+    <string name="doctrine_future">Сайт «Доктрина Будущего»&#160;</string>
     <string name="edition_of">Редакция от&#160;</string>
+    <string name="publication_of">Публикация от&#160;</string>
     <string name="to_prev">← назад</string>
     <string name="to_next">далее →</string>
     <!--SettingsFragment-->

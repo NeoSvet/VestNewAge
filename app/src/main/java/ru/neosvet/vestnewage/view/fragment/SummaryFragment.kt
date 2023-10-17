@@ -136,11 +136,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun initTabs(tab: Int) = binding?.run {
         val tabs = listOf(
             getString(R.string.summary),
-            getString(R.string.additionally)
+            getString(R.string.additionally),
+            getString(R.string.doctrine)
         )
         pTab.setOnChangeListener {
             rvList.adapter = null
-            if (it == SummaryTab.RSS.value) {
+            if (it != SummaryTab.ADDITION.value) {
                 act?.initScrollBar(0, null)
                 act?.unlockHead()
             }
@@ -156,7 +157,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 act?.showScrollTip(state.message)
 
             is ListState.Primary ->
-                initRss(state)
+                initPrimary(state)
 
             is ListState.Paging ->
                 initAddition(state.max)
@@ -186,7 +187,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         binding?.pTab?.selectedIndex = state.selectedTab
     }
 
-    private fun initRss(state: ListState.Primary) {
+    private fun initPrimary(state: ListState.Primary) {
         act?.updateNew()
         jobList?.cancel()
         val scroll = adapter.itemCount > 0
@@ -242,26 +243,24 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     override fun onItemClick(index: Int, item: BasicItem) {
         if (isBlocked) return
         binding?.run {
-            if (pTab.selectedStart) {
+            if (pTab.selectedIndex == SummaryTab.ADDITION.value) {
+                firstPosition = index
+                if (item.hasFewLinks()) openMultiLink(item, rvList.getItemView(index), true)
+                else Urls.openInApps(Urls.TelegramUrl + item.link)
+            } else { //SummaryTab.RSS.value, SummaryTab.DOCTRINE.value
                 openedReader = true
                 openReader(item.link, null)
-            } else {
-                firstPosition = index
-                if (item.hasFewLinks())
-                    openMultiLink(item, rvList.getItemView(index))
-                else
-                    Urls.openInApps(Urls.TelegramUrl + item.link)
             }
         }
     }
 
-    private fun openMultiLink(links: BasicItem, parent: View) {
+    private fun openMultiLink(links: BasicItem, parent: View, isAddFirst: Boolean) {
         val pMenu = PopupMenu(requireContext(), parent)
         val post = links.link
         links.headsAndLinks().forEach {
-            if (it.second == post)
-                pMenu.menu.add(getString(R.string.open_post))
-            else {
+            if (it.second == post) {
+                if (isAddFirst) pMenu.menu.add(getString(R.string.open_post))
+            } else {
                 val item = pMenu.menu.add(it.first)
                 item.intent = Intent().apply { this.action = it.second }
             }
@@ -274,12 +273,22 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onItemLongClick(index: Int, item: BasicItem): Boolean {
-        if (binding?.pTab?.selectedStart == true) {
-            MarkerActivity.addByPar(
-                requireContext(),
-                item.link, "", item.des.substring(item.des.indexOf(Const.N))
-            )
-        } else toiler.shareItem(item.head)
+        binding?.run {
+            when (pTab.selectedIndex) {
+                SummaryTab.RSS.value -> {
+                    MarkerActivity.addByPar(
+                        requireContext(),
+                        item.link, "", item.des.substring(item.des.indexOf(Const.N))
+                    )
+                }
+
+                SummaryTab.ADDITION.value ->
+                    toiler.shareItem(item.head)
+
+                else -> // SummaryTab.DOCTRINE.value
+                    openMultiLink(item, rvList.getItemView(index), false)
+            }
+        }
         return true
     }
 

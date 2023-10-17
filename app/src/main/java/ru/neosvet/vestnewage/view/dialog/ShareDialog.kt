@@ -24,6 +24,7 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.hasDate
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class ShareDialog : BottomSheetDialogFragment() {
@@ -130,9 +131,11 @@ class ShareDialog : BottomSheetDialogFragment() {
 
         if (selectedLink) when {
             storage.isDoctrine -> {
-                sb.append(getString(R.string.doctrine_pages))
-                sb.appendLine(link.substring(Const.DOCTRINE.length))
-                sb.append(Urls.DoctrineSite)
+                if(link.isDoctrineBook) {
+                    sb.append(getString(R.string.doctrine_pages))
+                    sb.appendLine(link.substring(Const.DOCTRINE.length))
+                    sb.append(Urls.DoctrineSite)
+                } else sb.appendLine(link.replace(Const.DOCTRINE, Urls.DOCTRINE))
             }
 
             !storage.isOldBook -> sb.append(Urls.Site + link)

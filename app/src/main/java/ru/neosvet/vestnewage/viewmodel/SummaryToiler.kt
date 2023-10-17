@@ -32,8 +32,6 @@ import java.io.FileReader
 
 class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     private var selectedTab = SummaryTab.RSS
-    private val isRss: Boolean
-        get() = selectedTab == SummaryTab.RSS
     private var sBack: String = ""
     private var isOpened = false
     private val storage: AdditionStorage by lazy {
@@ -62,14 +60,24 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     override suspend fun doLoad() {
-        if (isRss) {
-            val loader = SummaryLoader(client)
-            loader.load()
-            openRss()
-        } else {
-            val loader = AdditionLoader(client)
-            loader.load(storage, 0)
-            openAddition()
+        when (selectedTab) {
+            SummaryTab.RSS -> {
+                val loader = SummaryLoader(client)
+                loader.load()
+                openFile(Files.RSS)
+            }
+
+            SummaryTab.ADDITION -> {
+                val loader = AdditionLoader(client)
+                loader.load(storage, 0)
+                openAddition()
+            }
+
+            SummaryTab.DOCTRINE -> {
+                val loader = SummaryLoader(client)
+                loader.loadDoctrine()
+                openFile(Files.DOCTRINE)
+            }
         }
     }
 
@@ -79,7 +87,11 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun isNeedReload(): Boolean {
-        val f = if (isRss) Files.file(Files.RSS) else Files.dateBase(DataBase.ADDITION)
+        val f = when (selectedTab) {
+            SummaryTab.RSS -> Files.file(Files.RSS)
+            SummaryTab.ADDITION -> Files.dateBase(DataBase.ADDITION)
+            SummaryTab.DOCTRINE -> Files.file(Files.DOCTRINE)
+        }
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
@@ -102,12 +114,14 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         if (tab != -1)
             selectedTab = convertTab(tab)
         scope.launch {
-            val isEmpty = if (isRss) !openRss()
-            else !openAddition()
-
+            val isEmpty = when (selectedTab) {
+                SummaryTab.RSS -> !openFile(Files.RSS)
+                SummaryTab.ADDITION -> !openAddition()
+                SummaryTab.DOCTRINE -> !openFile(Files.DOCTRINE)
+            }
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
-                if (isRss.not()) {
+                if (selectedTab == SummaryTab.ADDITION) {
                     val f = Files.dateBase(DataBase.ADDITION)
                     f.setLastModified(System.currentTimeMillis())
                 }
@@ -125,31 +139,53 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         return storage.max != 0
     }
 
-    private suspend fun openRss(): Boolean {
+    private suspend fun openFile(name: String): Boolean {
         clearStates()
+        val file = Files.file(name)
+        if (!file.exists()) return false
         val list = mutableListOf<BasicItem>()
         val now = System.currentTimeMillis()
-        val file = Files.file(Files.RSS)
         val br = BufferedReader(FileReader(file))
-        var title: String? = br.readLine()
+        var s: String? = br.readLine()
         var d: String
-        while (title != null) {
+        val isDoc = selectedTab == SummaryTab.DOCTRINE
+        while (s != null) {
             val link = br.readLine()
+            val item = BasicItem(s, link)
             d = br.readLine()
+            if (isDoc) {
+                item.addHead(s)
+                s = br.readLine()
+                while (s != Const.END) {
+                    d += s
+                    s = br.readLine()
+                }
+                scanLink(item, d)
+            }
             val time = br.readLine()
-            d = DateUnit.getDiffDate(now, time.toLong()) +
+            item.des = DateUnit.getDiffDate(now, time.toLong()) +
                     sBack + Const.N + d
-            list.add(BasicItem(title, link).apply {
-                des = d
-            })
-            title = br.readLine()
+            list.add(item)
+            s = br.readLine()
         }
         br.close()
         postState(ListState.Primary(file.lastModified(), list))
         if (list.isEmpty())
             return false
-        if (isRun) loadPages(list)
+        if (isRun && selectedTab == SummaryTab.RSS) loadPages(list)
         return true
+    }
+
+    private fun scanLink(item: BasicItem, s: String) {
+        var a = s.indexOf("href") + 6
+        var b: Int
+        while (a > 5) {
+            b = s.indexOf("\"", a)
+            val link = s.substring(a, b)
+            a = s.indexOf("<", b)
+            item.addLink(s.substring(b + 2, a), link)
+            a = s.indexOf("href", a) + 6
+        }
     }
 
     fun paging(page: Int, pager: NeoPaging.Pager): Flow<PagingData<BasicItem>> {
@@ -183,7 +219,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     private fun convertTab(tab: Int) = when (tab) {
         SummaryTab.RSS.value -> SummaryTab.RSS
-        else -> SummaryTab.ADDITION
+        SummaryTab.ADDITION.value -> SummaryTab.ADDITION
+        else -> SummaryTab.DOCTRINE
     }
 
     fun getTimeOn(position: Int) {
@@ -197,9 +234,9 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     fun shareItem(id: String) {
         scope.launch {
-           storage.getItem(id, true)?.let {
-               postState(ListState.Update(0, it))
-           }
+            storage.getItem(id, true)?.let {
+                postState(ListState.Update(0, it))
+            }
         }
     }
 }
