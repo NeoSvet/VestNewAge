@@ -67,7 +67,7 @@ class SummaryHelper : LinksProvider {
     }
 
     fun updateBook() {
-        val file = Files.getFile(Const.RSS)
+        val file = Files.file(Const.RSS)
         val br = BufferedReader(FileReader(file))
         val storage = PageStorage()
         var prevName = ""

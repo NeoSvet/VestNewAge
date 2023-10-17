@@ -158,7 +158,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     return@launch
                 }
             }
-            if (!Files.getFileDB(date.my).exists()) {
+            if (!Files.dateBase(date.my).exists()) {
                 postPrimary(0L, listOf())
                 if (loadIfNeed) reLoad()
                 return@launch
@@ -283,7 +283,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             var n = (maxY - y) * 12 + maxM - m
             if (maxY > 16) { //проверка на существование текущего месяца
-                val f = Files.getFileDB(d.my)
+                val f = Files.dateBase(d.my)
                 if (!f.exists()) n--
             }
             //определяем случайный месяц:
@@ -408,7 +408,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     fun checkNewDate() {
         scope.launch {
-            val file = Files.getFileS(Const.DATE_FILE)
+            val file = Files.slash(Const.DATE_FILE)
             if (file.exists()) {
                 val stream = DataInputStream(
                     BufferedInputStream(App.context.openFileInput(file.name))

@@ -75,21 +75,21 @@ class LaunchUtils(context: Context) {
             }.start()
         }
         if (previousVer < 65) {
-            val file = Files.getFileP("/cache/file")
+            val file = Files.parent("/cache/file")
             if (file.exists()) file.delete()
         }
         if (previousVer < 67) {
-            val file = Files.getFileDB(DataBase.ADDITION)
+            val file = Files.dateBase(DataBase.ADDITION)
             if (file.exists()) file.delete()
         }
         if (previousVer < 69) {
-            val file = Files.getFileDB("07.23")
+            val file = Files.dateBase("07.23")
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
             listOf(
-                Files.getFileDB(DataBase.JOURNAL), Files.getFileDB("devads"),
-                Files.getFileDB("devads-journal"), Files.getFileS("news")
+                Files.dateBase(DataBase.JOURNAL), Files.dateBase("devads"),
+                Files.dateBase("devads-journal"), Files.slash("news")
             ).forEach {
                 if (it.exists()) it.delete()
             }
@@ -103,7 +103,7 @@ class LaunchUtils(context: Context) {
         var p = App.context.getSharedPreferences(name, Context.MODE_PRIVATE)
         if (!p.getBoolean(TipActivity.TAG, true))
             editor.putBoolean(TipName.CALENDAR.toString(), false)
-        val f = Files.getFileP("/shared_prefs/$name.xml")
+        val f = Files.parent("/shared_prefs/$name.xml")
         f.delete()
 
         p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
@@ -128,7 +128,7 @@ class LaunchUtils(context: Context) {
             d = DateUnit.putYearMonth(2017, 1)
             var n: Int
             while (d.timeInDays < max) {
-                if (Files.getFileDB(d.my).exists()) {
+                if (Files.dateBase(d.my).exists()) {
                     storage.open(d.my)
                     val cursor = storage.getListAll()
                     if (cursor.moveToFirst()) {
@@ -179,7 +179,7 @@ class LaunchUtils(context: Context) {
     }
 
     private fun checkSearchRequests() {
-        val f = Files.getFileS(Const.SEARCH)
+        val f = Files.slash(Const.SEARCH)
         if (!f.exists()) return
         val list = mutableListOf<String>()
         val br = BufferedReader(FileReader(f))

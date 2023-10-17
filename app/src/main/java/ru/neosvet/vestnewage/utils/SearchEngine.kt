@@ -672,7 +672,7 @@ class SearchEngine(
     }
 
     private fun checkMonth(id: Int, date: String): Boolean {
-        val f = Files.getFileDB(date)
+        val f = Files.dateBase(date)
         if (f.exists() && f.length() > DataBase.EMPTY_BASE_SIZE)
             return false
         helper.isNeedLoad = true

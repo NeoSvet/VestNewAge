@@ -141,7 +141,7 @@ class BrowserToiler : NeoToiler() {
                 return@launch
             }
             if (!preparingStyle()) return@launch
-            val file = Files.getFile(PAGE)
+            val file = Files.file(PAGE)
             val isNeedUpdate = if (newPage || !file.exists())
                 generatePage(file)
             else false
@@ -268,8 +268,8 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingStyle(): Boolean {
-        val fLight = Files.getFile(StyleLoader.LIGHT)
-        val fDark = Files.getFile(StyleLoader.DARK)
+        val fLight = Files.file(StyleLoader.LIGHT)
+        val fDark = Files.file(StyleLoader.DARK)
         if (!fLight.exists() && !fDark.exists()) { //download style
             storage.close()
             scope.launch {
@@ -278,7 +278,7 @@ class BrowserToiler : NeoToiler() {
             }
             return false
         }
-        val fStyle = Files.getFile(STYLE)
+        val fStyle = Files.file(STYLE)
         var replace = true
         if (fStyle.exists()) {
             replace = fDark.exists() && !isLightTheme || fLight.exists() && isLightTheme
@@ -297,7 +297,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun preparingFont() {
-        val font = Files.getFile(FONT)
+        val font = Files.file(FONT)
         if (font.exists().not()) {
             val inStream = App.context.resources.openRawResource(R.font.myriad)
             val outStream = FileOutputStream(font)
@@ -328,18 +328,18 @@ class BrowserToiler : NeoToiler() {
             return position
         } catch (e: Exception) {
             dbJournal.close()
-            val file = Files.getFileDB(DataBase.JOURNAL)
+            val file = Files.dateBase(DataBase.JOURNAL)
             file.delete()
         }
         return 0f
     }
 
     private fun restoreStyle() {
-        val fStyle = Files.getFile(STYLE)
+        val fStyle = Files.file(STYLE)
         if (fStyle.exists()) {
-            val fDark = Files.getFile(StyleLoader.DARK)
+            val fDark = Files.file(StyleLoader.DARK)
             if (fDark.exists())
-                fStyle.renameTo(Files.getFile(StyleLoader.LIGHT))
+                fStyle.renameTo(Files.file(StyleLoader.LIGHT))
             else fStyle.renameTo(fDark)
         }
     }

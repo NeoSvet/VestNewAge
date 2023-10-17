@@ -65,7 +65,7 @@ class SettingsToiler : NeoToiler() {
             request.forEach {
                 when (it) {
                     CLEAR_CACHE ->
-                        clearFolder(Files.getFileP("/cache"))
+                        clearFolder(Files.parent("/cache"))
                     CLEAR_MARKERS ->
                         deleteFile(DataBase.MARKERS)
                     CLEAR_ART_AND_ADD -> {
@@ -92,11 +92,11 @@ class SettingsToiler : NeoToiler() {
         val max = DateUnit.putYearMonth(endYear + 1, 1).timeInDays
         var f: File
         while (d.timeInDays < max) {
-            f = Files.getFileDB(d.my)
+            f = Files.dateBase(d.my)
             if (f.exists()) {
                 size += f.length()
                 f.delete()
-                f = Files.getFileDB(d.my + "-journal")
+                f = Files.dateBase(d.my + "-journal")
                 if (f.exists()) {
                     size += f.length()
                     f.delete()
@@ -107,7 +107,7 @@ class SettingsToiler : NeoToiler() {
     }
 
     private fun deleteFile(name: String) {
-        val f = Files.getFileDB(name)
+        val f = Files.dateBase(name)
         if (f.exists()) {
             size += f.length()
             f.delete()

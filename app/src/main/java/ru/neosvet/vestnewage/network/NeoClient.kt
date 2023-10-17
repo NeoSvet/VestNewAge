@@ -32,7 +32,7 @@ class NeoClient(
         }
 
         fun deleteTempFiles() {
-            val d = Files.getFileP("/cache")
+            val d = Files.parent("/cache")
             d.listFiles()?.forEach { f ->
                 if (f.isFile) f.delete()
             }
@@ -96,7 +96,7 @@ class NeoClient(
         var i = 1
         var file: File
         while (true) {
-            file = Files.getFileP(PATH + i.toString())
+            file = Files.parent(PATH + i.toString())
             if (!file.exists()) return file
             if (file.exists() && isLongAgo(file.lastModified())) {
                 file.delete()

@@ -506,7 +506,7 @@ class MarkersToiler : NeoToiler() {
         //изменение id в подборках
         inputStream = App.context.contentResolver.openInputStream(file)
         br = BufferedReader(InputStreamReader(inputStream, Const.ENCODING), 1000)
-        val f = Files.getFileS(DataBase.MARKERS)
+        val f = Files.slash(DataBase.MARKERS)
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(f), Const.ENCODING))
         s = br.readLine()
         while (s != null) {

@@ -79,7 +79,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun isNeedReload(): Boolean {
-        val f = if (isRss) Files.getFile(Const.RSS) else Files.getFileDB(DataBase.ADDITION)
+        val f = if (isRss) Files.file(Const.RSS) else Files.dateBase(DataBase.ADDITION)
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
 
@@ -108,7 +108,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
                 if (isRss.not()) {
-                    val f = Files.getFileDB(DataBase.ADDITION)
+                    val f = Files.dateBase(DataBase.ADDITION)
                     f.setLastModified(System.currentTimeMillis())
                 }
             }
@@ -129,7 +129,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         clearStates()
         val list = mutableListOf<BasicItem>()
         val now = System.currentTimeMillis()
-        val file = Files.getFile(Const.RSS)
+        val file = Files.file(Const.RSS)
         val br = BufferedReader(FileReader(file))
         var title: String? = br.readLine()
         var d: String

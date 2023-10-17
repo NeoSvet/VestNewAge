@@ -4,26 +4,26 @@ import ru.neosvet.vestnewage.App
 import java.io.File
 
 object Files {
-    fun getFile(name: String): File {
+    fun file(name: String): File {
         return File(App.context.filesDir.toString() + name)
     }
 
-    fun getFileS(name: String): File {
+    fun slash(name: String): File {
         return File(App.context.filesDir.toString() + File.separator + name)
     }
 
-    fun getFileP(name: String): File {
+    fun parent(name: String): File {
         return File(App.context.filesDir.parent!! + name)
     }
 
-    fun getFileDB(name: String): File {
-        return getFileP("/databases/$name")
+    fun dateBase(name: String): File {
+        return parent("/databases/$name")
     }
 
-    fun getFileL(link: String): File {
-        var file = getFile(link.substring(0, link.lastIndexOf("/")))
+    fun link(link: String): File {
+        var file = file(link.substring(0, link.lastIndexOf("/")))
         if (!file.exists()) file.mkdirs()
-        file = getFile(link)
+        file = file(link)
         return file
     }
 }

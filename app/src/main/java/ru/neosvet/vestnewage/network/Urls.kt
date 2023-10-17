@@ -54,11 +54,11 @@ object Urls {
     private const val COM_FILE = "/com"
 
     private fun getCom(): Boolean =
-        Files.getFile(COM_FILE).exists().also { isCom = it }
+        Files.file(COM_FILE).exists().also { isCom = it }
 
     fun setCom(value: Boolean) {
         isCom = value
-        val f = Files.getFile(COM_FILE)
+        val f = Files.file(COM_FILE)
         if (value) f.createNewFile()
         else if (f.exists()) f.delete()
     }
@@ -154,7 +154,7 @@ object Urls {
     }
 
     fun restore() {
-        val file = Files.getFile(FILE)
+        val file = Files.file(FILE)
         if (file.exists().not()) return
         val br = BufferedReader(FileReader(file))
         var i = -1
@@ -192,7 +192,7 @@ object Urls {
             }
             br.close()
             stream.close()
-            val file = Files.getFile(FILE)
+            val file = Files.file(FILE)
             if (file.exists()) file.delete()
             val wr = BufferedWriter(FileWriter(file))
             wr.appendLine(TIME.toString())

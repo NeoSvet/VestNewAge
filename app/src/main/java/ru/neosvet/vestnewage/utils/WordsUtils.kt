@@ -14,7 +14,7 @@ object WordsUtils {
 
     fun saveGodWords(words: String) {
         godWords = words
-        val bw = BufferedWriter(FileWriter(Files.getFile(GOD_WORDS)))
+        val bw = BufferedWriter(FileWriter(Files.file(GOD_WORDS)))
         bw.write(words)
         bw.close()
     }
@@ -22,7 +22,7 @@ object WordsUtils {
     private fun getGodWords(): String {
         if (godWords.isNotEmpty())
             return godWords
-        val f = Files.getFile(GOD_WORDS)
+        val f = Files.file(GOD_WORDS)
         if (f.exists().not())
             return godWords
         val br = BufferedReader(FileReader(f))

@@ -168,7 +168,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
             }
             if (calendar.isEmpty())
                 createField()
-            if (!Files.getFileDB(date.my).exists()) {
+            if (!Files.dateBase(date.my).exists()) {
                 time = 0L
                 postPrimary()
                 if (loadIfNeed) reLoad()

@@ -51,7 +51,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         if (startId > maxPost) return
 
         val start = if (startId == 0) {
-            val file = Files.getFileDB(DataBase.ADDITION)
+            val file = Files.dateBase(DataBase.ADDITION)
             file.setLastModified(System.currentTimeMillis())
             maxPost
         } else if (startId < NeoPaging.ON_PAGE) NeoPaging.ON_PAGE
@@ -102,7 +102,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
     }
 
     private fun loadChanges(storage: AdditionStorage) {
-        val baseTime = Files.getFileDB(DataBase.ADDITION).lastModified()
+        val baseTime = Files.dateBase(DataBase.ADDITION).lastModified()
         val stream = client.getStream("${Urls.Addition}changed.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         br.forEachLine {

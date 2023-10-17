@@ -102,7 +102,7 @@ class CheckService : LifecycleService() {
         }
         var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
-        val file = Files.getFile(Const.RSS)
+        val file = Files.file(Const.RSS)
         val secFile = if (file.exists())
             DateUnit.putMills(file.lastModified()).timeInSeconds
         else 0L

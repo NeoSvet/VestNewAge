@@ -25,7 +25,7 @@ class SiteHelper : LinksProvider {
     override fun getLinkList(): List<String> {
         val list = mutableListOf<String>()
         list.add(Urls.News)
-        val file = Files.getFile(SiteToiler.MAIN)
+        val file = Files.file(SiteToiler.MAIN)
         val br = BufferedReader(FileReader(file))
         br.forEachLine {
             if (isNeedLoad(it)) {

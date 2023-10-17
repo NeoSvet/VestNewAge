@@ -18,8 +18,8 @@ class StyleLoader {
 
     private val builderRequest = Request.Builder()
     private val client = NeoClient.createHttpClient()
-    private val fLight = Files.getFileL(LIGHT)
-    private val fDark = Files.getFileL(DARK)
+    private val fLight = Files.link(LIGHT)
+    private val fDark = Files.link(DARK)
 
     init {
         builderRequest.header(NetConst.USER_AGENT, App.context.packageName)

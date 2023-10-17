@@ -41,7 +41,7 @@ class RequestAdapter(
     private val items = mutableListOf<String>()
 
     init {
-        val f = Files.getFileS(Const.SEARCH)
+        val f = Files.slash(Const.SEARCH)
         adapter = ArrayAdapter<String>(context, R.layout.spinner_item)
         if (f.exists() && items.isEmpty()) {
             val br = BufferedReader(FileReader(f))
@@ -99,7 +99,7 @@ class RequestAdapter(
     }
 
     fun save() {
-        val f = Files.getFileS(Const.SEARCH)
+        val f = Files.slash(Const.SEARCH)
         f.delete()
         val bw = BufferedWriter(FileWriter(f))
         items.forEach {
@@ -113,7 +113,7 @@ class RequestAdapter(
         adapter.clear()
         items.clear()
         notifyDataSetChanged()
-        val f = Files.getFileS(Const.SEARCH)
+        val f = Files.slash(Const.SEARCH)
         if (f.exists()) f.delete()
     }
 

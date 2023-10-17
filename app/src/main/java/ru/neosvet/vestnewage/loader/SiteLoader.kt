@@ -33,7 +33,7 @@ class SiteLoader(
 
     fun loadSite() {
         val list = loadList(Urls.Site)
-        val file = Files.getFile(SiteToiler.MAIN)
+        val file = Files.file(SiteToiler.MAIN)
         val bw = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
         list.forEach { item ->
             bw.write(item.title + Const.N)

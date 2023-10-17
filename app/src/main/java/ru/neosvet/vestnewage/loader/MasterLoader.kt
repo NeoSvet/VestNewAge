@@ -116,7 +116,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         val url = findUrl(d)
         if (url != null) {
-            val f = Files.getFileDB(d.my)
+            val f = Files.dateBase(d.my)
             if (!f.exists() || f.length() <= DataBase.EMPTY_BASE_SIZE)
                 loadBase(url + d.my)
         } else
@@ -190,7 +190,7 @@ class MasterLoader : Loader, LoadHandlerLite {
             isDelete = it.contains("delete")
             if (isDelete.not())
                 list.add(name)
-            f = Files.getFileDB(name)
+            f = Files.dateBase(name)
             if (f.exists()) {
                 l = it.substring(it.lastIndexOf(" ") + 1).toLong()
                 if (isDelete) {

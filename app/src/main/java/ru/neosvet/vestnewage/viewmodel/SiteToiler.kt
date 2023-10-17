@@ -145,7 +145,7 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun openSite() {
-        val f = Files.getFile(MAIN)
+        val f = Files.file(MAIN)
         if (f.exists().not()) {
             postState(BasicState.NotLoaded)
             reLoad()
