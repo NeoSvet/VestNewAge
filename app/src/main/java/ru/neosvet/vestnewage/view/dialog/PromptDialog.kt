@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import ru.neosvet.vestnewage.databinding.PromptDialogBinding
 import ru.neosvet.vestnewage.utils.Const
 
-sealed class PromptResult {
-    data object Yes : PromptResult()
-    data object No : PromptResult()
-    data object Cancel : PromptResult()
-}
-
 class PromptDialog : BottomSheetDialogFragment() {
+    sealed class Result {
+        data object Yes : Result()
+        data object No : Result()
+        data object Cancel : Result()
+    }
+
     companion object {
         fun newInstance(message: String) = PromptDialog().apply {
             arguments = Bundle().apply {
@@ -27,7 +27,7 @@ class PromptDialog : BottomSheetDialogFragment() {
             }
         }
 
-        private val resultChannel = Channel<PromptResult>()
+        private val resultChannel = Channel<Result>()
         val result = resultChannel.receiveAsFlow()
     }
 
@@ -49,7 +49,7 @@ class PromptDialog : BottomSheetDialogFragment() {
 
     override fun onDismiss(dialog: DialogInterface) {
         if (binding != null && !isSend)
-            resultChannel.trySend(PromptResult.Cancel)
+            resultChannel.trySend(Result.Cancel)
         super.onDismiss(dialog)
     }
 
@@ -68,12 +68,12 @@ class PromptDialog : BottomSheetDialogFragment() {
     private fun setButtons() = binding?.run {
         btnNo.setOnClickListener {
             isSend = true
-            resultChannel.trySend(PromptResult.No)
+            resultChannel.trySend(Result.No)
             dismiss()
         }
         btnYes.setOnClickListener {
             isSend = true
-            resultChannel.trySend(PromptResult.Yes)
+            resultChannel.trySend(Result.Yes)
             dismiss()
         }
     }

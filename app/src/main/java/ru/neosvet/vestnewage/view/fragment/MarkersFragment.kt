@@ -32,7 +32,6 @@ import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.dialog.CustomDialog
 import ru.neosvet.vestnewage.view.dialog.InputDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
-import ru.neosvet.vestnewage.view.dialog.PromptResult
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.view.list.helper.MarkersListHelper
 import ru.neosvet.vestnewage.view.list.helper.SwipeButton
@@ -211,7 +210,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
-                if (it == PromptResult.Yes)
+                if (it == PromptDialog.Result.Yes)
                     toiler.delete(selectedIndex)
             }
         }
@@ -404,7 +403,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
         collectResult?.cancel()
         collectResult = lifecycleScope.launch {
             PromptDialog.result.collect {
-                if (it == PromptResult.Yes) {
+                if (it == PromptDialog.Result.Yes) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "text/plain"
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
