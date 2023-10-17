@@ -40,6 +40,8 @@ class MarkersToiler : NeoToiler() {
     private var collectionData = ""
     private var collectionTitle = ""
     private var isCollections = true
+    private val title: String
+        get() = if (isCollections) strings.collections else collectionTitle
 
     override fun getInputData(): Data {
         val builder = Data.Builder()
@@ -102,12 +104,12 @@ class MarkersToiler : NeoToiler() {
         if (change) {
             change = false
             openList()
-        } else setState(MarkersState.Primary(strings.collections, list, isCollections))
+        } else setState(MarkersState.Primary(title, list, isCollections))
     }
 
     fun save() {
         if (!change) {
-            setState(MarkersState.Primary(strings.collections, list, isCollections))
+            setState(MarkersState.Primary(title, list, isCollections))
             return
         }
         task = Type.SAVE
@@ -131,7 +133,7 @@ class MarkersToiler : NeoToiler() {
                 row.put(DataBase.MARKERS, t)
                 storage.updateCollectionByTitle(collectionTitle, row)
             }
-            postState(MarkersState.Primary(strings.collections, list, isCollections))
+            postState(MarkersState.Primary(title, list, isCollections))
         }
     }
 
@@ -607,7 +609,7 @@ class MarkersToiler : NeoToiler() {
     }
 
     fun edit() {
-        setState(MarkersState.Primary(strings.collections, list, isCollections, true))
+        setState(MarkersState.Primary(title, list, isCollections, true))
     }
 
     fun openPage(index: Int) {
