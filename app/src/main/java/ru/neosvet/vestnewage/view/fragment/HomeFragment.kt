@@ -209,7 +209,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 else openReader(toiler.linkJournal)
 
             HomeItem.Type.HELP -> {
-                val alert = CustomDialog(act)
+                val alert = CustomDialog(requireActivity())
                 alert.setTitle(getString(R.string.help_edit))
                 alert.setMessage(getString(R.string.help_edit_home))
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

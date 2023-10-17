@@ -70,7 +70,7 @@ class CabinetFragment : NeoFragment() {
         setStatus(false)
         when (state) {
             is BasicState.Message -> {
-                val alert = CustomDialog(act)
+                val alert = CustomDialog(requireActivity())
                 alert.setTitle(getString(R.string.error))
                 alert.setMessage(state.message)
                 alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

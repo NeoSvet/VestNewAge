@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/half_indent"
         android:layout_weight="1"
-        android:paddingStart="@dimen/half_indent"
-        android:paddingEnd="@dimen/half_indent"
+        android:paddingHorizontal="@dimen/half_indent"
         android:textColor="@color/colorAccentLight" />
 
     <View
@@ -31,31 +30,14 @@
             android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/def_indent"
-            android:paddingRight="@dimen/def_indent" />
+            android:paddingHorizontal="@dimen/def_indent" />
     </androidx.core.widget.NestedScrollView>
-
-    <EditText
-        android:id="@+id/input"
-        style="@style/Label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="@dimen/half_indent"
-        android:layout_marginRight="@dimen/half_indent"
-        android:background="@color/colorPrimaryDark"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:padding="@dimen/half_indent"
-        android:textColorHint="@color/light_gray"
-        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="right"
+        android:gravity="end"
         android:orientation="horizontal"
         android:padding="@dimen/half_indent">
 
@@ -63,10 +45,10 @@
             android:id="@+id/leftButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/half_indent"
+            android:layout_marginEnd="@dimen/half_indent"
             android:gravity="center"
-            android:paddingLeft="@dimen/def_indent"
-            android:paddingRight="@dimen/def_indent"
+            android:minWidth="100dp"
+            android:paddingHorizontal="@dimen/def_indent"
             android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
@@ -74,8 +56,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingLeft="@dimen/def_indent"
-            android:paddingRight="@dimen/def_indent" />
+            android:minWidth="100dp"
+            android:paddingHorizontal="@dimen/def_indent" />
 
     </LinearLayout>
 </LinearLayout>

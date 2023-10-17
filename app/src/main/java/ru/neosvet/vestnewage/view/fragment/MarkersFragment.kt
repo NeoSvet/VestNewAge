@@ -251,7 +251,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
     }
 
     private fun showEditTip() {
-        val alert = CustomDialog(act)
+        val alert = CustomDialog(requireActivity())
         alert.setTitle(getString(R.string.help_edit))
         alert.setMessage(getString(R.string.help_edit_markers))
         alert.setRightButton(getString(android.R.string.ok)) { alert.dismiss() }

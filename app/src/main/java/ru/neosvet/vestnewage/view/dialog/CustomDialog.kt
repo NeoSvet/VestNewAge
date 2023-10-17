@@ -1,83 +1,55 @@
-package ru.neosvet.vestnewage.view.dialog;
+package ru.neosvet.vestnewage.view.dialog
 
-import android.app.Activity;
-import android.content.DialogInterface;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.app.Activity
+import android.content.DialogInterface
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import ru.neosvet.vestnewage.R
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+class CustomDialog(act: Activity) {
+    private val dialog: AlertDialog
+    private val root: View
 
-import ru.neosvet.vestnewage.R;
-
-public class CustomDialog {
-    private final Activity act;
-    private AlertDialog dialog;
-    private final View dialogView;
-    private EditText input = null;
-
-    public CustomDialog(Activity act) {
-        this.act = act;
-        LayoutInflater inflater = act.getLayoutInflater();
-        dialogView = inflater.inflate(R.layout.dialog_layout, null);
+    init {
+        val inflater = act.layoutInflater
+        root = inflater.inflate(R.layout.dialog_layout, null)
+        val builder = AlertDialog.Builder(act)
+        builder.setView(root)
+        dialog = builder.create()
     }
 
-    public void show(DialogInterface.OnDismissListener listener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(act);
-        builder.setView(dialogView);
-        dialog = builder.create();
-        if (listener != null)
-            dialog.setOnDismissListener(listener);
-        dialog.show();
+    fun show(listener: DialogInterface.OnDismissListener?) {
+        if (listener != null) dialog.setOnDismissListener(listener)
+        dialog.show()
     }
 
-    public void dismiss() {
-        dialog.dismiss();
+    fun dismiss() {
+        dialog.dismiss()
     }
 
-    public void setTitle(String title) {
-        TextView tv = dialogView.findViewById(R.id.title);
-        tv.setText(title);
+    fun setTitle(title: String) {
+        val tv = root.findViewById<TextView>(R.id.title)
+        tv.text = title
     }
 
-    public void setMessage(@Nullable String msg) {
-        TextView tv = dialogView.findViewById(R.id.message);
-        if (msg == null)
-            tv.setVisibility(View.GONE);
-        else
-            tv.setText(msg);
+    fun setMessage(msg: String) {
+        val tv = root.findViewById<TextView>(R.id.message)
+        tv.text = msg
     }
 
-    public void setLeftButton(String title, View.OnClickListener click) {
-        Button button = dialogView.findViewById(R.id.leftButton);
-        button.setText(title);
-        button.setOnClickListener(click);
-        button.setVisibility(View.VISIBLE);
+    fun setLeftButton(title: String, click: View.OnClickListener) {
+        val button = root.findViewById<Button>(R.id.leftButton)
+        button.text = title
+        button.setOnClickListener(click)
+        button.visibility = View.VISIBLE
     }
 
-    public void setRightButton(String title, View.OnClickListener click) {
-        Button button = dialogView.findViewById(R.id.rightButton);
-        button.setText(title);
-        button.setOnClickListener(click);
-        button.setVisibility(View.VISIBLE);
-    }
-
-    public void setInputText(String text, TextWatcher watcher) {
-        input = dialogView.findViewById(R.id.input);
-        input.setVisibility(View.VISIBLE);
-        input.setText(text);
-        input.setSelection(text.length());
-        input.addTextChangedListener(watcher);
-    }
-
-    public String getInputText() {
-        if (input == null)
-            return "";
-        else
-            return input.getText().toString();
+    fun setRightButton(title: String, click: View.OnClickListener) {
+        val button = root.findViewById<Button>(R.id.rightButton)
+        button.text = title
+        button.setOnClickListener(click)
+        button.visibility = View.VISIBLE
     }
 }

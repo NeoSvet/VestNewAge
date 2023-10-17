@@ -264,7 +264,7 @@ class BookFragment : NeoFragment() {
     }
 
     private fun showRndAlert(state: BookState.Rnd) {
-        alertRnd = CustomDialog(act).apply {
+        alertRnd = CustomDialog(requireActivity()).apply {
             setTitle(getString(R.string.rnd))
             setMessage(state.msg)
             setLeftButton(getString(R.string.in_markers)) {
