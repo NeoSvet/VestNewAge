@@ -125,6 +125,7 @@ class StatusButton(
     }
 
     private fun clearAnimation() {
+        panel.clearAnimation()
         iv.clearAnimation()
         anHide.cancel()
         anRotate.cancel()
