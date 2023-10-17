@@ -46,7 +46,7 @@ class BasicAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicHolder {
         val layout = when (viewType) {
             TYPE_SIMPLE ->
-                LayoutInflater.from(parent.context).inflate(R.layout.item_list, null)
+                LayoutInflater.from(parent.context).inflate(R.layout.item_text, null)
             TYPE_TITLE ->
                 LayoutInflater.from(parent.context).inflate(R.layout.item_title, null)
             else ->

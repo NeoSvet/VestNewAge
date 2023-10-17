@@ -67,7 +67,7 @@ class PagingAdapter(
         val layout = if (withTime)
             LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
         else if (viewType == TYPE_SIMPLE)
-            LayoutInflater.from(host.context).inflate(R.layout.item_list, null)
+            LayoutInflater.from(host.context).inflate(R.layout.item_text, null)
         else
             LayoutInflater.from(host.context).inflate(R.layout.item_detail, null)
         return BasicHolder(layout, parent::onItemClick, parent::onItemLongClick)

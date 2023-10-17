@@ -35,13 +35,13 @@ class MarkerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MarkerHolder =
         when (viewType) {
             TYPE_NO_EDIT -> MarkerBaseHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_list, null), events
+                LayoutInflater.from(parent.context).inflate(R.layout.item_text, null), events
             )
 
             TYPE_SIMPLE -> if (isEditor) MarkerEditHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_list_edit, null), events
+                LayoutInflater.from(parent.context).inflate(R.layout.item_text_edit, null), events
             ) else MarkerBaseHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_list, null), events
+                LayoutInflater.from(parent.context).inflate(R.layout.item_text, null), events
             )
 
             else -> if (isEditor) MarkerEditHolder(
