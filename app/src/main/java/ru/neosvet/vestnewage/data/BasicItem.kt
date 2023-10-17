@@ -1,7 +1,5 @@
 package ru.neosvet.vestnewage.data
 
-import android.util.Pair
-
 class BasicItem {
     var title: String
     var des: String = ""
