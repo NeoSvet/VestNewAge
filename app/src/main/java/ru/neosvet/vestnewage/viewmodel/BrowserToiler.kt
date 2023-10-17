@@ -175,7 +175,7 @@ class BrowserToiler : NeoToiler() {
 
     private fun generatePage(file: File): Boolean { //isNeedUpdate
         if (link.hasDate) {
-            val output = App.context.openFileOutput(Const.DATE_FILE, Context.MODE_PRIVATE)
+            val output = App.context.openFileOutput(Files.DATE, Context.MODE_PRIVATE)
             val stream = DataOutputStream(BufferedOutputStream(output))
             stream.writeInt(link.dateFromLink.timeInDays)
             stream.close()

@@ -408,7 +408,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     fun checkNewDate() {
         scope.launch {
-            val file = Files.slash(Const.DATE_FILE)
+            val file = Files.slash(Files.DATE)
             if (file.exists()) {
                 val stream = DataInputStream(
                     BufferedInputStream(App.context.openFileInput(file.name))

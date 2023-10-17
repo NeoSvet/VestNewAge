@@ -5,6 +5,7 @@ import java.io.File
 
 object Files {
     const val RSS = "/rss"
+    const val DATE = "date"
 
     fun file(name: String): File {
         return File(App.context.filesDir.toString() + name)
