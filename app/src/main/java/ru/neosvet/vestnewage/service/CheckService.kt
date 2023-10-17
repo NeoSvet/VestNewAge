@@ -13,7 +13,6 @@ import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.NotificationUtils
@@ -85,18 +84,11 @@ class CheckService : LifecycleService() {
     }
 
     private fun checkAddition(): Boolean {
-        val storage = AdditionStorage()
-        storage.open()
-        storage.findMax()
         val loader = AdditionLoader(client)
-        val max = loader.loadMax()
-        if (max > storage.max) {
-            loader.load(storage, storage.max)
-            storage.close()
+        if (loader.checkUpdate()) {
             list.add(Pair(getString(R.string.new_in_additionally), Const.RSS))
             return true
         }
-        storage.close()
         return false
     }
 
@@ -186,10 +178,8 @@ class CheckService : LifecycleService() {
                 helper.showNotification()
             }
         }
-        if (several)
-            helper.groupNotification()
-        else
-            helper.singleNotification(list.current().first)
+        if (several) helper.groupNotification()
+        else helper.singleNotification(list.current().first)
         helper.setPreferences()
         helper.showNotification()
         list.clear()

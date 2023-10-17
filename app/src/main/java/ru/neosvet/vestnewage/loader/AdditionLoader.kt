@@ -82,7 +82,18 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         return row
     }
 
-    fun loadMax(): Int {
+    fun checkUpdate(): Boolean {
+        val storage = AdditionStorage()
+        storage.open()
+        loadChanges(storage)
+        storage.findMax()
+        maxPost = loadMax()
+        val has = maxPost > storage.max
+        storage.close()
+        return has
+    }
+
+    private fun loadMax(): Int {
         val stream = client.getStream("${Urls.Addition}max.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val s = br.readLine()
