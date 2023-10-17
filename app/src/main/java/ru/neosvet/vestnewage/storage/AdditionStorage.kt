@@ -107,7 +107,7 @@ class AdditionStorage : Closeable {
             do {
                 val item = BasicItem(cursor.getString(iTitle), cursor.getInt(iLink).toString())
                 item.addHead(cursor.getInt(iID).toString())
-                item.des = getDate(cursor.getString(iTime)) + "@" + cursor.getString(iDes)
+                item.des = getDate(cursor.getString(iTime)) + "$" + cursor.getString(iDes)
                 if (item.des.contains(LINK))
                     addLinks(item.des, item)
                 list.add(item)

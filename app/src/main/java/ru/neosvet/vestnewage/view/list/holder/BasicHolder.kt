@@ -29,7 +29,7 @@ class BasicHolder(
             item.title.fromHTML else item.title
 
         val des = tvTime?.let { //for addition
-            val i = item.des.indexOf("@")
+            val i = item.des.indexOf("$")
             it.text = item.des.substring(0, i)
             item.des.substring(i + 1)
         } ?: item.des
