@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.CheckedTextView
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
@@ -12,6 +15,7 @@ import ru.neosvet.vestnewage.data.CheckItem
 class CheckAdapter(
     private val list: List<CheckItem>,
     private val checkByBg: Boolean = true,
+    private val zeroMargin: Boolean = false,
     private val onChecked: (Int, Boolean) -> Int
 ) : RecyclerView.Adapter<CheckAdapter.ViewHolder>() {
     var sizeCorrector: Byte = 0
@@ -37,10 +41,13 @@ class CheckAdapter(
         private var isSet = true
 
         init {
-            if (checkByBg)
-                checkBox.setBackgroundResource(R.drawable.menu_bg)
-            else
-                checkBox.setCheckMarkDrawable(R.drawable.check_selector)
+            if (checkByBg) checkBox.setBackgroundResource(R.drawable.menu_bg)
+            else checkBox.setCheckMarkDrawable(R.drawable.check_selector)
+            if (zeroMargin)
+                checkBox.updateLayoutParams<MarginLayoutParams> {
+                    updateMargins(0, 0, 0, 0)
+                    width = -2
+                }
             checkBox.setOnClickListener {
                 var index = layoutPosition
                 val isChecked = list[index].isChecked.not()
@@ -49,8 +56,11 @@ class CheckAdapter(
                 index = onChecked.invoke(index, isChecked)
                 if (index == -1)
                     notifyDataSetChanged()
-                else if (index != layoutPosition)
+                else {
+                    if (index == layoutPosition)
+                        list[index].isChecked = !isChecked
                     notifyItemChanged(index)
+                }
             }
         }
 

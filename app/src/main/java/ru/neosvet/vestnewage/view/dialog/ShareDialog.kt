@@ -131,7 +131,7 @@ class ShareDialog : BottomSheetDialogFragment() {
 
         if (selectedLink) when {
             storage.isDoctrine -> {
-                if(link.isDoctrineBook) {
+                if (link.isDoctrineBook) {
                     sb.append(getString(R.string.doctrine_pages))
                     sb.appendLine(link.substring(Const.DOCTRINE.length))
                     sb.append(Urls.DoctrineSite)
@@ -155,7 +155,9 @@ class ShareDialog : BottomSheetDialogFragment() {
             list.add(CheckItem(title = it, isChecked = options[i]))
             i++
         }
-        adapter = CheckAdapter(list, false, this::checkOption)
+        adapter = CheckAdapter(
+            list = list, checkByBg = false, onChecked = this::checkOption
+        )
         if (d.year < 2016) //no share link
             adapter.sizeCorrector = 1
         val span = if (ScreenUtils.isLand || ScreenUtils.isWide) 3 else 1

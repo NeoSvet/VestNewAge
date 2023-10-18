@@ -140,7 +140,9 @@ class SearchDialog(
             list.add(CheckItem(title = it, isChecked = options[i]))
             i++
         }
-        adapter = CheckAdapter(list, false, this::checkOption)
+        adapter = CheckAdapter(
+            list = list, checkByBg = false, onChecked = this::checkOption
+        )
         if (options[SearchHelper.I_BY_WORDS].not())
             adapter.sizeCorrector = 3
         val rv = findViewById<RecyclerView>(R.id.rvOptions)

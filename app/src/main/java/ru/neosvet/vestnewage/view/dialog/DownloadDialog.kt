@@ -60,7 +60,9 @@ class DownloadDialog(
 
     private fun initList() {
         fillInList()
-        adapter = CheckAdapter(list, false, this::onChecked)
+        adapter = CheckAdapter(
+            list = list, checkByBg = false, onChecked = this::onChecked
+        )
         binding.rvList.layoutManager = GridLayoutManager(context, ScreenUtils.span)
         binding.rvList.adapter = adapter
         setAllLabel(calcSelected() == list.size)
