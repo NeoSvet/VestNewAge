@@ -28,14 +28,20 @@ class PageParser(private val client: NeoClient) {
         var start = startString
         var end = "<!--/row-->"
         val stream = client.getStream(url)
-        val br: BufferedReader
-        if (Urls.isSiteCom) {
-            br = BufferedReader(InputStreamReader(stream, "cp1251"), 1000)
-            if (start.isEmpty()) start = "class=\"title"
-            end = "id=\"print2"
-        } else {
-            br = BufferedReader(InputStreamReader(stream), 1000)
-            if (start.isEmpty()) start = "page-title"
+        val br = when {
+            url.contains(Urls.ACADEMY) ->
+                BufferedReader(InputStreamReader(stream), 1000)
+
+            Urls.isSiteCom -> {
+                if (start.isEmpty()) start = "class=\"title"
+                end = "id=\"print2"
+                BufferedReader(InputStreamReader(stream, "cp1251"), 1000)
+            }
+
+            else -> {
+                if (start.isEmpty()) start = "page-title"
+                BufferedReader(InputStreamReader(stream), 1000)
+            }
         }
         if (url.contains("#"))
             start = "a name=\"" + url.substring(url.indexOf("#") + 1)

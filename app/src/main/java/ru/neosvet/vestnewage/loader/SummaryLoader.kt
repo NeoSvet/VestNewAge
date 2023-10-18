@@ -1,8 +1,10 @@
 package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.basic.Loader
+import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -143,5 +145,61 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         content.split("<p>").forEach {
             storage.insertParagraph(id, "<p>$it")
         }
+    }
+
+    fun loadAcademy() {
+        val list = loadAcademyList("")
+        val file = Files.file(Files.ACADEMY)
+        val bw = BufferedWriter(FileWriter(file))
+        var time: Long
+        list.forEach {
+            bw.write(it.title) //title
+            bw.write(Const.N)
+            bw.write(Urls.ACADEMY + it.link) //link
+            bw.write(Const.N)
+            bw.write(Const.N) //des
+            time = DateUnit.parse(it.des).timeInMills
+            bw.write(time.toString()) //time
+            bw.write(Const.N)
+            bw.flush()
+        }
+        bw.close()
+    }
+
+    private fun loadAcademyList(pageUrl: String): List<SimpleItem> {
+        val page = PageParser(client)
+        page.load(Urls.ACADEMY + "/Press/News/" + pageUrl, "row sm-razdel-listnews")
+        var s: String? = page.nextItem
+        var date: String
+        val list = mutableListOf<SimpleItem>()
+        var item = SimpleItem("", "", "")
+        var p = -1
+        val end = if (pageUrl.isEmpty()) "</nav>" else "<nav"
+        do {
+            if (page.isHead) s = page.nextItem
+            page.link?.let {
+                if (it != item.link) {
+                    item.link = it
+                    if (it.contains("pageIndex")) {
+                        p++
+                        if (p > 1)
+                            list.addAll(loadAcademyList(it))
+                    } else item.title = page.text
+                }
+            }
+            s?.let {
+                if (page.isSimple) {
+                    date = it.trim()
+                    if (date.length == 10) {
+                        item.des = date
+                        list.add(item)
+                        item = SimpleItem("", "", "")
+                    }
+                }
+            }
+            s = page.nextItem
+        } while (s?.indexOf(end) != 0)
+        page.clear()
+        return list
     }
 }

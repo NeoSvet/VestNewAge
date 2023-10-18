@@ -19,7 +19,7 @@ enum class SiteTab(val value: Int) {
 }
 
 enum class SummaryTab(val value: Int) {
-    RSS(0), ADDITION(1), DOCTRINE(2)
+    RSS(0), ADDITION(1), DOCTRINE(2), ACADEMY(3)
 }
 
 enum class CabinetScreen {

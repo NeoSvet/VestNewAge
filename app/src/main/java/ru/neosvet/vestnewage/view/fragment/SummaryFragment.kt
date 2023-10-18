@@ -133,7 +133,8 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         val tabs = listOf(
             getString(R.string.summary),
             getString(R.string.additionally),
-            getString(R.string.doctrine)
+            getString(R.string.doctrine),
+            getString(R.string.academy)
         )
         pTab.setOnChangeListener {
             rvList.adapter = null
@@ -267,7 +268,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 SummaryTab.ADDITION.value ->
                     toiler.shareItem(item.head)
 
-                else -> // SummaryTab.DOCTRINE.value
+                SummaryTab.DOCTRINE.value ->
                     adapter.openLinksFor(index)
             }
         }

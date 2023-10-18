@@ -7,6 +7,7 @@ object Files {
     const val RSS = "/rss"
     const val DATE = "date"
     const val DOCTRINE = "/doctrine"
+    const val ACADEMY = "/academy"
 
     fun file(name: String): File {
         return File(App.context.filesDir.toString() + name)

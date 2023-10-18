@@ -12,7 +12,10 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.SummaryTab
+import ru.neosvet.vestnewage.data.SummaryTab.ACADEMY
+import ru.neosvet.vestnewage.data.SummaryTab.ADDITION
+import ru.neosvet.vestnewage.data.SummaryTab.DOCTRINE
+import ru.neosvet.vestnewage.data.SummaryTab.RSS
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.SummaryLoader
@@ -31,7 +34,7 @@ import java.io.BufferedReader
 import java.io.FileReader
 
 class SummaryToiler : NeoToiler(), NeoPaging.Parent {
-    private var selectedTab = SummaryTab.RSS
+    private var selectedTab = RSS
     private var sBack: String = ""
     private var isOpened = false
     private val storage: AdditionStorage by lazy {
@@ -61,22 +64,28 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     override suspend fun doLoad() {
         when (selectedTab) {
-            SummaryTab.RSS -> {
+            RSS -> {
                 val loader = SummaryLoader(client)
                 loader.load()
                 openFile(Files.RSS)
             }
 
-            SummaryTab.ADDITION -> {
+            ADDITION -> {
                 val loader = AdditionLoader(client)
                 loader.load(storage, 0)
                 openAddition()
             }
 
-            SummaryTab.DOCTRINE -> {
+            DOCTRINE -> {
                 val loader = SummaryLoader(client)
                 loader.loadDoctrine()
                 openFile(Files.DOCTRINE)
+            }
+
+            ACADEMY -> {
+                val loader = SummaryLoader(client)
+                loader.loadAcademy()
+                openFile(Files.ACADEMY)
             }
         }
     }
@@ -88,9 +97,10 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
 
     private fun isNeedReload(): Boolean {
         val f = when (selectedTab) {
-            SummaryTab.RSS -> Files.file(Files.RSS)
-            SummaryTab.ADDITION -> Files.dateBase(DataBase.ADDITION)
-            SummaryTab.DOCTRINE -> Files.file(Files.DOCTRINE)
+            RSS -> Files.file(Files.RSS)
+            ADDITION -> Files.dateBase(DataBase.ADDITION)
+            DOCTRINE -> Files.file(Files.DOCTRINE)
+            ACADEMY -> Files.file(Files.ACADEMY)
         }
         return !f.exists() || DateUnit.isLongAgo(f.lastModified())
     }
@@ -115,13 +125,14 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             selectedTab = convertTab(tab)
         scope.launch {
             val isEmpty = when (selectedTab) {
-                SummaryTab.RSS -> !openFile(Files.RSS)
-                SummaryTab.ADDITION -> !openAddition()
-                SummaryTab.DOCTRINE -> !openFile(Files.DOCTRINE)
+                RSS -> !openFile(Files.RSS)
+                ADDITION -> !openAddition()
+                DOCTRINE -> !openFile(Files.DOCTRINE)
+                ACADEMY -> !openFile(Files.ACADEMY)
             }
             if (loadIfNeed && (isEmpty || isNeedReload())) {
                 reLoad()
-                if (selectedTab == SummaryTab.ADDITION) {
+                if (selectedTab == ADDITION) {
                     val f = Files.dateBase(DataBase.ADDITION)
                     f.setLastModified(System.currentTimeMillis())
                 }
@@ -148,7 +159,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         val br = BufferedReader(FileReader(file))
         var s: String? = br.readLine()
         var d: String
-        val isDoc = selectedTab == SummaryTab.DOCTRINE
+        val isDoc = selectedTab == DOCTRINE
         while (s != null) {
             val link = br.readLine()
             val item = BasicItem(s, link)
@@ -162,9 +173,11 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                 }
                 scanLink(item, d)
             }
-            val time = br.readLine()
-            item.des = DateUnit.getDiffDate(now, time.toLong()) +
-                    sBack + Const.N + d
+            val time = br.readLine().toLong()
+            item.des = if (now - time > DateUnit.MONTH_IN_MILLS)
+                DateUnit.putMills(time).toDateString()
+            else DateUnit.getDiffDate(now, time) + sBack
+            if (d.isNotEmpty()) item.des += Const.N + d
             list.add(item)
             s = br.readLine()
         }
@@ -172,7 +185,7 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
         postState(ListState.Primary(file.lastModified(), list))
         if (list.isEmpty())
             return false
-        if (isRun && selectedTab == SummaryTab.RSS) loadPages(list)
+        if (isRun && selectedTab == RSS) loadPages(list)
         return true
     }
 
@@ -218,9 +231,10 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
     }
 
     private fun convertTab(tab: Int) = when (tab) {
-        SummaryTab.RSS.value -> SummaryTab.RSS
-        SummaryTab.ADDITION.value -> SummaryTab.ADDITION
-        else -> SummaryTab.DOCTRINE
+        RSS.value -> RSS
+        ADDITION.value -> ADDITION
+        DOCTRINE.value -> DOCTRINE
+        else -> ACADEMY
     }
 
     fun getTimeOn(position: Int) {
