@@ -35,11 +35,12 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
+import ru.neosvet.vestnewage.view.list.CheckAdapter
 import ru.neosvet.vestnewage.view.list.SettingsAdapter
 import ru.neosvet.vestnewage.viewmodel.SettingsToiler
-import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.state.SettingsState
 
 class SettingsFragment : NeoFragment() {
@@ -69,9 +70,9 @@ class SettingsFragment : NeoFragment() {
         initAnimation()
     }
     private var stopRotate = false
-    private val adapter: SettingsAdapter by lazy {
-        SettingsAdapter(ScreenUtils.isWide)
-    }
+    private val adapter = SettingsAdapter(ScreenUtils.isWide)
+    private lateinit var adapterCheck: CheckAdapter
+    private lateinit var adapterProm: CheckAdapter
 
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[SettingsToiler::class.java]
@@ -292,13 +293,26 @@ class SettingsFragment : NeoFragment() {
             v /= 15
             if (v > 3) v = v / 4 + 2 else v--
         }
+        val list = initCheckList(
+            listOf(
+                getString(R.string.check_also), getString(R.string.additionally),
+                getString(R.string.doctrine), getString(R.string.academy)
+            ), listOf(
+                false, prefSummary.getBoolean(Const.MODE, true),
+                prefSummary.getBoolean(Const.DOCTRINE, false),
+                prefSummary.getBoolean(Const.PLACE, false)
+            )
+        )
+        adapterCheck = CheckAdapter(
+            list = list, checkByBg = true,
+            zeroMargin = true, onChecked = this::onCheckItem
+        )
 
         adapter.addItem(SettingsItem.Notification(
             title = getString(R.string.notif_new),
             offLabel = getString(R.string.less),
             onLabel = getString(R.string.often),
-            checkBoxLabel = getString(R.string.check_additionally),
-            checkBoxValue = prefSummary.getBoolean(Const.MODE, true),
+            listAdapter = adapterCheck,
             valueSeek = v,
             maxSeek = CHECK_MAX,
             changeValue = this::setCheckTime,
@@ -317,17 +331,58 @@ class SettingsFragment : NeoFragment() {
         ))
     }
 
+    private fun initCheckList(label: List<String>, value: List<Boolean>): List<CheckItem> {
+        val list = mutableListOf<CheckItem>()
+        for (i in label.indices) {
+            val item = CheckItem(label[i], i)
+            if (value.size > i && value[i])
+                item.isChecked = true
+            list.add(item)
+        }
+        return list
+    }
+
+    private fun onCheckItem(index: Int, check: Boolean): Int {
+        val name = when (index) {
+            0 -> return 0
+            1 -> Const.MODE
+            2 -> Const.DOCTRINE
+            else -> Const.PLACE //3
+        }
+        val editor = prefSummary.edit()
+        editor.putBoolean(name, check)
+        editor.apply()
+        return 0
+    }
+
+    private fun onPromItem(index: Int, check: Boolean): Int {
+        when (index) {
+            1 -> binding?.pAlarm?.isVisible = true
+            2 -> toiler.openAlarm()
+        }
+        return index
+    }
+
     private fun initPromSection() {
         var v = prefProm.getInt(Const.TIME, Const.TURN_OFF)
         if (v == Const.TURN_OFF)
             v = PROM_MAX
 
+        val list = initCheckList(
+            listOf(
+                getString(R.string.alarm), getString(R.string.set), getString(R.string.look)
+            ), listOf()
+        )
+        adapterProm = CheckAdapter(
+            list = list, checkByBg = true,
+            zeroMargin = true, onChecked = this::onPromItem
+        )
+
         adapter.addItem(SettingsItem.Notification(
             title = getString(R.string.notif_prom),
             offLabel = getString(R.string.advance),
             onLabel = getString(R.string.prom),
-            checkBoxLabel = getString(R.string.set_alarm),
-            checkBoxValue = prefProm.getBoolean(Const.MODE, false),
+            listAdapter = adapterProm,
             valueSeek = v,
             maxSeek = PROM_MAX,
             changeValue = this::setPromTime,
@@ -423,38 +478,25 @@ class SettingsFragment : NeoFragment() {
         act?.finish()
     }
 
-    private fun saveCheck(value: Int, checkAdditionally: Boolean) {
+    private fun saveCheck(value: Int) {
         val editor = prefSummary.edit()
-        if (value > -1) {
-            var v = value
-            if (v < CHECK_MAX) {
-                if (v > 2) v = (v - 2) * 4 else v++
-                v *= 15
-                if (v == 15) v = 20
-            } else v = Const.TURN_OFF
-            editor.putInt(Const.TIME, v)
-            CheckStarter.set(v)
-        }
-        editor.putBoolean(Const.MODE, checkAdditionally)
+        var v = value
+        if (v < CHECK_MAX) {
+            if (v > 2) v = (v - 2) * 4 else v++
+            v *= 15
+            if (v == 15) v = 20
+        } else v = Const.TURN_OFF
+        editor.putInt(Const.TIME, v)
+        CheckStarter.set(v)
         editor.apply()
     }
 
-    private fun saveProm(value: Int, isAlarm: Boolean) {
-        val prevAlarm = prefProm.getBoolean(Const.MODE, false)
+    private fun saveProm(value: Int) {
         val editor = prefProm.edit()
-        val v = if (value > -1) value else -value
-        if (value > -1) {
-            editor.putInt(Const.TIME, if (v == PROM_MAX) Const.TURN_OFF else v)
-            val prom = PromUtils(null)
-            prom.initNotif(v)
-        }
-        editor.putBoolean(Const.MODE, isAlarm)
+        editor.putInt(Const.TIME, if (value == PROM_MAX) Const.TURN_OFF else value)
+        val prom = PromUtils(null)
+        prom.initNotif(value)
         editor.apply()
-        if (!isAlarm && !prevAlarm) return
-        if (!isAlarm || v == PROM_MAX)
-            toiler.offAlarm()
-        else
-            binding?.pAlarm?.isVisible = true
     }
 
     private fun setCheckTime(label: TextView, value: Int) {

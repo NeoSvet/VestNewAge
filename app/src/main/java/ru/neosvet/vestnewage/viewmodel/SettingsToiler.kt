@@ -146,8 +146,8 @@ class SettingsToiler : NeoToiler() {
         App.context.startActivity(intent)
     }
 
-    fun offAlarm() {
-        task = "OffAlarm"
+    fun openAlarm() {
+        task = "Open Alarm"
         val intent = Intent(AlarmClock.ACTION_DISMISS_ALARM)
         intent.putExtra(
             AlarmClock.ALARM_SEARCH_MODE_LABEL,

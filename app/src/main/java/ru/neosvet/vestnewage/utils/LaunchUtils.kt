@@ -87,6 +87,10 @@ class LaunchUtils(context: Context) {
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
+            val prefProm = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
+            val editor = prefProm.edit()
+            editor.remove(Const.MODE)
+            editor.apply()
             listOf(
                 Files.dateBase(DataBase.JOURNAL), Files.dateBase("devads"),
                 Files.dateBase("devads-journal"), Files.slash("news")

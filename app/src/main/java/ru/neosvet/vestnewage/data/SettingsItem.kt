@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.data
 
 import android.widget.TextView
+import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 sealed class SettingsItem {
     data class CheckList(
@@ -21,12 +22,11 @@ sealed class SettingsItem {
         val title: String,
         val offLabel: String,
         val onLabel: String,
-        val checkBoxLabel: String,
-        val checkBoxValue: Boolean,
+        val listAdapter: CheckAdapter,
         val valueSeek: Int,
         val maxSeek: Int,
         val changeValue: (TextView, Int) -> Unit, //label, value
-        val fixValue: (Int, Boolean) -> Unit, //value of seek, value of check
+        val fixValue: (Int) -> Unit, //value of seek
         val onClick: () -> Unit //Настроить сигнал, вибрацию
     ) : SettingsItem()
 
