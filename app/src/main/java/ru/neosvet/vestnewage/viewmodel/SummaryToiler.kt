@@ -102,7 +102,9 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             DOCTRINE -> Files.file(Files.DOCTRINE)
             ACADEMY -> Files.file(Files.ACADEMY)
         }
-        return !f.exists() || DateUnit.isLongAgo(f.lastModified())
+        return if (selectedTab.value < DOCTRINE.value)
+            !f.exists() || DateUnit.isLongAgo(f.lastModified())
+        else !f.exists() || DateUnit.isVeryLongAgo(f.lastModified())
     }
 
     private suspend fun loadPages(pages: List<BasicItem>) {

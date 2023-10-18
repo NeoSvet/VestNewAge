@@ -20,8 +20,8 @@ import ru.neosvet.vestnewage.R;
 
 public class DateUnit {
     public static final byte MONDAY = 1, SUNDAY = 0;
-    public static final int DAY_IN_SEC = 86400, HOUR_IN_MILLS = 3600000,
-            MIN_IN_MILLS = 60000, SEC_IN_MILLS = 1000,
+    public static final int DAY_IN_SEC = 86400, DAY_IN_MILLS = 86400000,
+            HOUR_IN_MILLS = 3600000, MIN_IN_MILLS = 60000, SEC_IN_MILLS = 1000,
             GRAD = 60, DAY_IN_HOUR = 24, OFFSET_MSK = 10800;
     public static final long MONTH_IN_MILLS = 2592000000L;
     private DateTimeFormatter formatter = null;
@@ -113,6 +113,10 @@ public class DateUnit {
 
     public static boolean isLongAgo(long time) {
         return System.currentTimeMillis() - time > HOUR_IN_MILLS * 3;
+    }
+
+    public static boolean isVeryLongAgo(long time) {
+        return System.currentTimeMillis() - time > DAY_IN_MILLS;
     }
 
     public void createTime() {
