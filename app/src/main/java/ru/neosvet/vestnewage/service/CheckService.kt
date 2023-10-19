@@ -10,6 +10,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoList
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.loader.AdditionLoader
+import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
@@ -19,6 +20,7 @@ import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.UnreadUtils
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.FileReader
 import java.io.FileWriter
 import java.io.InputStreamReader
 
@@ -44,12 +46,10 @@ class CheckService : LifecycleService() {
         if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
                 stopForeground(true)
-            else
-                stopForeground(STOP_FOREGROUND_REMOVE)
+            else stopForeground(STOP_FOREGROUND_REMOVE)
             return START_NOT_STICKY
         }
-        if (isRun)
-            return START_NOT_STICKY
+        if (isRun) return START_NOT_STICKY
         isRun = true
         initNotif()
         Thread { startLoad() }.start()
@@ -60,7 +60,7 @@ class CheckService : LifecycleService() {
         val context = applicationContext
         val utils = NotificationUtils()
         val notif = utils.getNotification(
-            context.getString(R.string.site_name),
+            context.getString(R.string.app_name),
             context.getString(R.string.check_new),
             NotificationUtils.CHANNEL_MUTE
         )
@@ -71,11 +71,12 @@ class CheckService : LifecycleService() {
     private fun startLoad() {
         try {
             Urls.restore()
-            val isNewRss = checkSummary()
+            checkSummary()
             val pref = getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
-            val isNewAdd = if (pref.getBoolean(Const.MODE, true)) checkAddition() else false
-            if ((isNewRss || isNewAdd) && list.isNotEmpty)
-                existsUpdates()
+            if (pref.getBoolean(Const.MODE, true)) checkAddition()
+            if (pref.getBoolean(Const.DOCTRINE, false)) checkDoctrine()
+            if (pref.getBoolean(Const.PLACE, false)) checkAcademy()
+            if (list.isNotEmpty) existsUpdates()
         } catch (ignored: Exception) {
         }
         loader.cancel()
@@ -83,16 +84,62 @@ class CheckService : LifecycleService() {
         postCommand(false)
     }
 
-    private fun checkAddition(): Boolean {
-        val loader = AdditionLoader(client)
-        if (loader.checkUpdate()) {
-            list.add(Pair(getString(R.string.new_in_additionally), Files.RSS))
-            return true
+    private fun checkAcademy() {
+        val file = Files.file(Files.ACADEMY)
+        if (file.exists() && !DateUnit.isVeryLongAgo(file.lastModified())) return
+        val stream = client.getStream(Urls.ACADEMY + "/Press/News/")
+        var br = BufferedReader(InputStreamReader(stream), 1000)
+        var s = br.readLine()
+        while (!s.contains("sm-blog-list-date"))
+            s = br.readLine()
+        br.close()
+        val i = s.indexOf("<span>") + 6
+        s = s.substring(i, s.indexOf("<", i))
+        val timeList = DateUnit.parse(s).timeInMills
+        br = BufferedReader(FileReader(file))
+        br.readLine() //title
+        br.readLine() //link
+        br.readLine() //des always empty
+        val timeFile = br.readLine().toLong()
+        br.close()
+        if (timeFile == timeList) {
+            file.setLastModified(System.currentTimeMillis())
+            return
         }
-        return false
+        val loader = SummaryLoader(client)
+        loader.loadAcademy()
+        list.add(Pair(getString(R.string.new_in_academy), Files.RSS + "3"))
     }
 
-    private fun checkSummary(): Boolean {
+    private fun checkDoctrine() {
+        val file = Files.file(Files.DOCTRINE)
+        val timeFile = if (file.exists()) file.lastModified()
+        else 0L
+        if (timeFile > 0L && !DateUnit.isVeryLongAgo(timeFile)) return
+        val stream = client.getStream(Urls.DOCTRINE + "feed/")
+        val br = BufferedReader(InputStreamReader(stream), 1000)
+        var s = br.readLine()
+        while (!s.contains("pubDate"))
+            s = br.readLine()
+        val i = s.indexOf("Date>") + 5
+        br.close()
+        val timeList = DateUnit.parse(s.substring(i, s.indexOf("<", i))).timeInMills
+        if (timeFile == timeList) {
+            file.setLastModified(System.currentTimeMillis())
+            return
+        }
+        val loader = SummaryLoader(client)
+        loader.loadDoctrine()
+        list.add(Pair(getString(R.string.new_in_doctrine), Files.RSS + "2"))
+    }
+
+    private fun checkAddition() {
+        val loader = AdditionLoader(client)
+        if (loader.checkUpdate())
+            list.add(Pair(getString(R.string.new_in_additionally), Files.RSS + "1"))
+    }
+
+    private fun checkSummary() {
         val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
@@ -101,14 +148,13 @@ class CheckService : LifecycleService() {
                 s = br.readLine()
         }
         var a = s.indexOf("Date>") + 5
-        val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
+        val timeList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInMills
         val file = Files.file(Files.RSS)
-        val secFile = if (file.exists())
-            DateUnit.putMills(file.lastModified()).timeInSeconds
+        val timeFile = if (file.exists()) file.lastModified()
         else 0L
-        if (secFile > secList) { //список в загрузке не нуждается
+        if (timeFile > timeList) {
             br.close()
-            return false
+            return
         }
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
         br.close()
@@ -157,7 +203,6 @@ class CheckService : LifecycleService() {
         bw.close()
         loader.finish()
         unread.setBadge()
-        return true
     }
 
     private fun withOutTag(s: String): String {

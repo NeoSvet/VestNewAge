@@ -293,13 +293,17 @@ class LaunchUtils(context: Context) {
                 InputData(-1, Section.MENU)
             }
 
-            link.contains(Files.RSS) -> {
+            link.indexOf(Files.RSS) == 0 -> {
                 if (intent.hasExtra(DataBase.ID)) {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                     clearSummaryNotif(id)
                 }
-                InputData(0, Section.SUMMARY)
+                val tab = link.substring(Files.RSS.length).toInt()
+                InputData(tab, Section.SUMMARY)
             }
+
+            link.contains(Files.RSS) ->
+                InputData(0, Section.SUMMARY)
 
             link.length < 2 || link == "/index.html" ->
                 InputData(1, Section.SITE)

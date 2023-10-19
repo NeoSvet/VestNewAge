@@ -94,12 +94,12 @@ class SummaryHelper : LinksProvider {
     }
 
     fun createNotification(text: String, link: String) {
-        val url = if (!link.contains("://")) Urls.Site + link else link
+        val url = if (!link.contains("://") && !link.contains(Files.RSS))
+            Urls.Site + link else link
         intent.data = Uri.parse(url)
         val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
         val piPostpone = notifUtils.getPostponeSummaryNotif(notifId, text, url)
-        val title = if (link == Files.RSS) App.context.getString(R.string.app_name)
-        else App.context.getString(R.string.site_name)
+        val title = App.context.getString(R.string.app_name)
         notifBuilder = notifUtils.getNotification(
             title, text,
             NotificationUtils.CHANNEL_SUMMARY
