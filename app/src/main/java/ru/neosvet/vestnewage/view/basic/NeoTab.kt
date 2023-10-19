@@ -109,6 +109,7 @@ class NeoTab @JvmOverloads constructor(
     fun setItems(list: List<String>, selectedIndex: Int) {
         if (list.size != adapter.itemCount) adapter.setItems(list)
         this.selectedIndex = selectedIndex
+        rvTab.scrollToPosition(selectedIndex)
     }
 
     fun setOnChangeListener(onChange: (Int) -> Unit) {
