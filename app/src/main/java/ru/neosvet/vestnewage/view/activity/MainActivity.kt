@@ -105,8 +105,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         toiler.setArgument(withSplash)
         if (savedInstanceState == null && withSplash)
             launchSplashScreen()
-        else
-            setTheme(R.style.Theme_MainTheme)
+        else setTheme(R.style.Theme_MainTheme)
         ScreenUtils.init(this)
         if (ScreenUtils.isTabletLand)
             setContentView(R.layout.main_activity_tablet)
@@ -258,8 +257,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         utils = LaunchUtils(this)
         utils.checkAdapterNewVersion()
         utils.openLink(intent)?.let {
-            if (it.tab == -1)
-                exit()
+            if (it.tab == -1) exit()
             firstTab = it.tab
             firstSection = it.section
             return
@@ -624,7 +622,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun firstRun(state: MainState.FirstRun) {
         val intent = intent
-        firstTab = intent.getIntExtra(Const.TAB, 0)
+        if (firstTab == 0)
+            firstTab = intent.getIntExtra(Const.TAB, 0)
         if (helper.isFirstRun)
             firstTab = -1
         else {
