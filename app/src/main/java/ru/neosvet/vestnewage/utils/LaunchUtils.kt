@@ -327,7 +327,7 @@ class LaunchUtils(context: Context) {
                 InputData(-1, Section.MENU)
             }
 
-            link.contains("/poems") -> {
+            link.isPoem -> {
                 if (mLink[1] == "year.html") InputData(0, Section.BOOK)
                 else InputData(mLink[1].substring(0, 4).toInt(), Section.BOOK)
             }

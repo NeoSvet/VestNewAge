@@ -68,7 +68,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         .putString(Const.TASK, BookHelper.TAG)
         .putBoolean(Const.FROM_OTKR, isLoadedOtkr)
         .putString(Const.TAB, selectedTab.toString())
-        .putString("Date", date.toAlterString())
+        .putString("Date", date.toDateString())
         .build()
 
     override fun init(context: Context) {

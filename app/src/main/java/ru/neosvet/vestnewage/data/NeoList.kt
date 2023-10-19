@@ -60,7 +60,7 @@ class NeoList<T> : Iterator<T> {
         val sb = StringBuilder(this.javaClass.simpleName)
         sb.append("[")
         if (first == null)
-            sb.append(first?.item)
+            sb.append("null")
         else {
             reset(true)
             this.forEach {
