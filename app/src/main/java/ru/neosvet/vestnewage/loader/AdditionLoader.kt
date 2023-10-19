@@ -89,6 +89,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         storage.findMax()
         maxPost = loadMax()
         val has = maxPost > storage.max
+        if (has) load(storage, maxPost)
         storage.close()
         return has
     }
