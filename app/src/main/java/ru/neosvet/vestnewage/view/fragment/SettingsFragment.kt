@@ -52,7 +52,9 @@ class SettingsFragment : NeoFragment() {
     private var binding: SettingsFragmentBinding? = null
     private var dialog: SetNotifDialog? = null
     private val prefMain: SharedPreferences by lazy {
-        requireContext().getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
+        requireContext().getSharedPreferences(
+            MainHelper.TAG, Context.MODE_PRIVATE
+        )
     }
     private val prefSummary: SharedPreferences by lazy {
         requireContext().getSharedPreferences(
@@ -352,7 +354,7 @@ class SettingsFragment : NeoFragment() {
         val editor = prefSummary.edit()
         editor.putBoolean(name, check)
         editor.apply()
-        return 0
+        return CheckAdapter.ACTION_NONE
     }
 
     private fun onPromItem(index: Int, check: Boolean): Int {

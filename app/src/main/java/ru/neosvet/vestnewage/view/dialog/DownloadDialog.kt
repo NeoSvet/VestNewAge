@@ -73,7 +73,7 @@ class DownloadDialog(
         list[index].isChecked = checked
         setAllLabel(calcSelected() == list.size)
         calcSize()
-        return -1
+        return CheckAdapter.ACTION_NONE
     }
 
     private fun setViews() = binding.run {

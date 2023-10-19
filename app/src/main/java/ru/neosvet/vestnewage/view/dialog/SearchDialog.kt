@@ -154,11 +154,10 @@ class SearchDialog(
     private fun checkOption(index: Int, checked: Boolean): Int {
         if (index == SearchHelper.I_BY_WORDS) if (checked)
             adapter.sizeCorrector = 0
-        else
-            adapter.sizeCorrector = 3
+        else adapter.sizeCorrector = 3
         adapter.notifyDataSetChanged()
         options[index] = checked
-        return index
+        return CheckAdapter.ACTION_NONE
     }
 
     override fun onRestoreInstanceState(state: Bundle) {

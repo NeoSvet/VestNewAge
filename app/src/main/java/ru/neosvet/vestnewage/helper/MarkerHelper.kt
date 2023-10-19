@@ -3,6 +3,7 @@ package ru.neosvet.vestnewage.helper
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.viewmodel.basic.MarkerStrings
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.list.CheckAdapter
 
 class MarkerHelper(private val strings: MarkerStrings) {
     private var content = ""
@@ -51,7 +52,7 @@ class MarkerHelper(private val strings: MarkerStrings) {
                     return 0
                 }
             }
-            return index
+            return CheckAdapter.ACTION_NONE
         }
         parsList.forEach { item ->
             item.isChecked = isChecked
@@ -61,7 +62,7 @@ class MarkerHelper(private val strings: MarkerStrings) {
 
     fun checkCols(index: Int, isChecked: Boolean): Int {
         colsList[index].isChecked = isChecked
-        return index
+        return CheckAdapter.ACTION_NONE
     }
 
     fun getPosText(p: Float): String {

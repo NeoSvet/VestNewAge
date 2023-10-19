@@ -133,12 +133,10 @@ class SettingsAdapter(
 
             val adapter = CheckAdapter(item.list, false)
             { index, checked ->
-                if (item.isSingleSelect && checked.not()) {
+                if (item.isSingleSelect && checked.not())
                     item.list[index].isChecked = true
-                    return@CheckAdapter index
-                }
-                item.onChecked.invoke(index, checked)
-                return@CheckAdapter index
+                else item.onChecked.invoke(index, checked)
+                return@CheckAdapter CheckAdapter.ACTION_NONE
             }
             val list = root.findViewById(R.id.list) as RecyclerView
             list.layoutManager = GridLayoutManager(root.context, 1)
@@ -157,7 +155,7 @@ class SettingsAdapter(
                 item.list[index].isChecked = checked
                 if (checked) checkedCount++ else checkedCount--
                 button.isEnabled = checkedCount > 0
-                return@CheckAdapter index
+                return@CheckAdapter CheckAdapter.ACTION_NONE
             }
             val list = root.findViewById(R.id.list) as RecyclerView
             list.layoutManager = GridLayoutManager(root.context, 1)

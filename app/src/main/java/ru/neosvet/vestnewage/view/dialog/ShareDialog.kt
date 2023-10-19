@@ -175,6 +175,6 @@ class ShareDialog : BottomSheetDialogFragment() {
             bShare.isEnabled = enabled
             bCopy.isEnabled = enabled
         }
-        return index
+        return CheckAdapter.ACTION_NONE
     }
 }
