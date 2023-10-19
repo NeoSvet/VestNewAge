@@ -138,6 +138,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         )
         pTab.setOnChangeListener {
             rvList.adapter = null
+            adapter.openLinksFor(-1)
             if (it != SummaryTab.ADDITION.value) {
                 act?.initScrollBar(0, null)
                 act?.unlockHead()
