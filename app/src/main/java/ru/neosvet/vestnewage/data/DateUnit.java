@@ -60,6 +60,12 @@ public class DateUnit {
         return putMills(System.currentTimeMillis());
     }
 
+    public static DateUnit initMskNow() {
+        DateUnit d = putMills(System.currentTimeMillis());
+        d.changeSeconds(DateUnit.OFFSET_MSK - d.getOffset());
+        return d;
+    }
+
     public static DateUnit parse(String s) {
         DateTimeFormatter fDate = null;
         switch (s.length()) {
@@ -236,6 +242,12 @@ public class DateUnit {
         }
         dateTime = dateTime.plusSeconds(zoneOffset.getTotalSeconds());
         return dateTime.format(formatter);
+    }
+
+    @NonNull
+    public String toShortDateString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy").withZone(ZoneId.systemDefault());
+        return date.format(formatter);
     }
 
     @NonNull
