@@ -170,27 +170,26 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     override fun onItemClick(type: HomeItem.Type, action: HomeHolder.Action) {
-        when (type) {
-            HomeItem.Type.SUMMARY -> when {
-                action == HomeHolder.Action.REFRESH -> toiler.refreshSummary()
-                action == HomeHolder.Action.TITLE || toiler.linkSummary.isEmpty() ->
-                    act?.setSection(Section.SUMMARY, true)
+        if (action is HomeHolder.Action.SUBTITLE && action.link.isNotEmpty()) {
+            openReader(action.link)
+            return
+        }
 
-                action == HomeHolder.Action.SUBTITLE -> openReader(toiler.linkSummary)
+        when (type) {
+            HomeItem.Type.SUMMARY -> when (action) {
+                HomeHolder.Action.REFRESH -> toiler.refreshSummary()
+                else -> act?.setSection(Section.SUMMARY, true)
             }
 
             HomeItem.Type.ADDITION -> when (action) {
                 HomeHolder.Action.TITLE -> Urls.openInApps(Urls.TelegramUrl)
-                HomeHolder.Action.SUBTITLE -> act?.setSection(Section.SUMMARY, true, 1)
+                is HomeHolder.Action.SUBTITLE -> act?.setSection(Section.SUMMARY, true, 1)
                 HomeHolder.Action.REFRESH -> toiler.refreshAddition()
             }
 
-            HomeItem.Type.CALENDAR -> when {
-                action == HomeHolder.Action.REFRESH -> toiler.refreshCalendar()
-                action == HomeHolder.Action.TITLE || toiler.linkCalendar.isEmpty() ->
-                    act?.setSection(Section.CALENDAR, true)
-
-                action == HomeHolder.Action.SUBTITLE -> openReader(toiler.linkCalendar)
+            HomeItem.Type.CALENDAR -> when (action) {
+                HomeHolder.Action.REFRESH -> toiler.refreshCalendar()
+                else -> act?.setSection(Section.CALENDAR, true)
             }
 
             HomeItem.Type.NEWS -> when (action) {
@@ -199,15 +198,13 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             }
 
             HomeItem.Type.INFO -> {
-                val link = if (action == HomeHolder.Action.SUBTITLE)
+                val link = if (action is HomeHolder.Action.SUBTITLE)
                     Urls.PRECEPT_LINK else Urls.PROM_LINK
                 openReader(link)
             }
 
             HomeItem.Type.JOURNAL ->
-                if (action == HomeHolder.Action.TITLE || toiler.linkJournal.isEmpty())
-                    act?.setSection(Section.JOURNAL, true)
-                else openReader(toiler.linkJournal)
+                act?.setSection(Section.JOURNAL, true)
 
             HomeItem.Type.HELP -> {
                 val alert = MessageDialog(requireActivity())

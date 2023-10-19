@@ -21,8 +21,10 @@ import ru.neosvet.vestnewage.view.basic.fromDpi
 
 interface HomeHolder {
     fun setItem(item: HomeItem)
-    enum class Action {
-        TITLE, SUBTITLE, REFRESH
+    sealed class Action {
+        data object TITLE : Action()
+        data object REFRESH : Action()
+        data class SUBTITLE(val link: String) : Action()
     }
 }
 
@@ -64,7 +66,7 @@ class HomeBaseHolder(
             clicker.invoke(item.type, HomeHolder.Action.TITLE)
         }
         tvLine3.setOnClickListener {
-            clicker.invoke(item.type, HomeHolder.Action.SUBTITLE)
+            clicker.invoke(item.type, HomeHolder.Action.SUBTITLE(item.link))
         }
         if (item.hasRefresh) {
             ivRefresh.isVisible = true

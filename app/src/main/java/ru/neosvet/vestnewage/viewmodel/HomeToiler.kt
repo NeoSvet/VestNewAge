@@ -40,12 +40,9 @@ class HomeToiler : NeoToiler() {
     }
 
     private var titleSummary = ""
-    var linkSummary = ""
-        private set
-    var linkCalendar = ""
-        private set
-    var linkJournal = ""
-        private set
+    private var linkSummary = ""
+    private var linkCalendar = ""
+    private var linkJournal = ""
     var tabNews = SiteTab.NEWS.value
         private set
     private var pageStorage: PageStorage? = null
@@ -345,7 +342,7 @@ class HomeToiler : NeoToiler() {
             title = getJournalTitle()
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
-            lines = listOf(strings.journal, strings.last_readed, title)
+            lines = listOf(strings.journal, strings.last_readed, title, linkJournal)
         )
     }
 
@@ -400,7 +397,7 @@ class HomeToiler : NeoToiler() {
         val d = date.toDateString()
         return HomeItem(
             type = HomeItem.Type.CALENDAR,
-            lines = listOf(strings.calendar, strings.today_msk + d, title)
+            lines = listOf(strings.calendar, strings.today_msk + d, title, linkCalendar)
         )
     }
 
@@ -430,7 +427,7 @@ class HomeToiler : NeoToiler() {
         return HomeItem(
             type = HomeItem.Type.SUMMARY,
             time = time,
-            lines = listOf(strings.summary, des, titleSummary)
+            lines = listOf(strings.summary, des, titleSummary, linkSummary)
         )
     }
 

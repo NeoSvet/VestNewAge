@@ -14,6 +14,9 @@ data class HomeItem(
         INFO(4), JOURNAL(5), MENU(6), DIV(7), HELP(8)
     }
 
+    val link: String
+        get() = if (lines.size == 4) lines[3] else ""
+
     val hasRefresh: Boolean
         get() = type.value < 4
 
