@@ -116,8 +116,11 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         setListEvents(rvList, false)
         tvUpdate.setOnClickListener {
-            if (pTab.selectedIndex == SummaryTab.ADDITION.value)
-                Urls.openInApps(Urls.TelegramUrl)
+            when (pTab.selectedIndex) {
+                SummaryTab.ADDITION.value -> Urls.openInApps(Urls.TelegramUrl)
+                SummaryTab.DOCTRINE.value -> Urls.openInApps(Urls.DOCTRINE)
+                SummaryTab.ACADEMY.value -> Urls.openInApps(Urls.ACADEMY)
+            }
         }
     }
 
@@ -191,7 +194,9 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         val scroll = adapter.itemCount > 0
         adapter.setItems(state.list)
         binding?.run {
-            setUpdateTime(state.time, tvUpdate)
+            if (pTab.selectedStart)
+                setUpdateTime(state.time, tvUpdate)
+            else tvUpdate.setText(R.string.link_to_src)
             rvList.adapter = adapter
             if (scroll)
                 rvList.smoothScrollToPosition(0)
