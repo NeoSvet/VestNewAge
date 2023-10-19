@@ -11,10 +11,8 @@ import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.helper.HomeHelper
-import ru.neosvet.vestnewage.loader.AdditionLoader
-import ru.neosvet.vestnewage.loader.CalendarLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.loader.UpdateLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
@@ -41,11 +39,12 @@ class HomeToiler : NeoToiler() {
         LOAD_CALENDAR, LOAD_NEWS
     }
 
-    var linkSummary: String = ""
+    private var titleSummary = ""
+    var linkSummary = ""
         private set
-    var linkCalendar: String = ""
+    var linkCalendar = ""
         private set
-    var linkJournal: String = ""
+    var linkJournal = ""
         private set
     var tabNews = SiteTab.NEWS.value
         private set
@@ -53,6 +52,7 @@ class HomeToiler : NeoToiler() {
     private var task = Task.NONE
     private lateinit var strings: HomeStrings
     private val client = NeoClient()
+    private val loader = UpdateLoader(client)
     private var needLoadCalendar = false
     private var needLoadSummary = false
     private var needLoadNews = false
@@ -88,6 +88,8 @@ class HomeToiler : NeoToiler() {
         helper = HomeHelper(context)
         strings = HomeStrings(
             nothing = context.getString(R.string.nothing),
+            new = context.getString(R.string.new_section),
+            on_tab = context.getString(R.string.on_tab),
             never = context.getString(R.string.never),
             refreshed = context.getString(R.string.refreshed),
             today_empty = context.getString(R.string.today_empty),
@@ -95,6 +97,8 @@ class HomeToiler : NeoToiler() {
             journal = context.getString(R.string.journal),
             calendar = context.getString(R.string.calendar),
             summary = context.getString(R.string.summary),
+            doctrine = context.getString(R.string.doctrine),
+            academy = context.getString(R.string.academy),
             news = context.getString(R.string.news),
             book = context.getString(R.string.book),
             markers = context.getString(R.string.markers),
@@ -161,6 +165,7 @@ class HomeToiler : NeoToiler() {
         loadIfNeed = task == Task.NONE
         this.isEditor = isEditor
         scope.launch {
+            titleSummary = ""
             linkSummary = ""
             linkCalendar = ""
             linkJournal = ""
@@ -237,6 +242,7 @@ class HomeToiler : NeoToiler() {
             loadSummary()
             needLoadSummary = false
         }
+        isRun = false
         postState(BasicState.Success)
     }
 
@@ -249,10 +255,36 @@ class HomeToiler : NeoToiler() {
         val i = indexSummary
         if (i == -1) return
         postState(HomeState.Loading(i))
-        SummaryLoader(client).load()
-        readSummaryLink()
-        loadPage(linkSummary)
-        clearPrimaryState()
+        val list = loader.checkSummary()
+        val isRss = if (list.isNotEmpty) {
+            titleSummary = strings.new + ": " + list.first().first
+            linkSummary = list.first().second
+            loadPage(linkSummary)
+            clearPrimaryState()
+            true
+        } else false
+        val isDoc = loader.checkDoctrine()
+        val isAc = loader.checkAcademy()
+        if (isDoc || isAc) {
+            val sb = StringBuilder(strings.new)
+            sb.append(strings.on_tab)
+            if (isRss) {
+                sb.append(strings.summary)
+                sb.append(", ")
+            }
+            if (isDoc) {
+                sb.append(strings.doctrine)
+                sb.append(", ")
+            }
+            if (isAc)
+                sb.append(strings.academy)
+            else sb.delete(sb.length - 2, sb.length)
+            titleSummary = sb.toString()
+            linkSummary = ""
+        } else if (!isRss) {
+            postState(HomeState.Loading(i))
+            return
+        }
         postState(ListState.Update(i, createSummaryItem()))
     }
 
@@ -260,20 +292,24 @@ class HomeToiler : NeoToiler() {
         val i = indexAddition
         if (i == -1) return
         postState(HomeState.Loading(i))
-        AdditionLoader(client).load()
-        clearPrimaryState()
-        postState(ListState.Update(i, createAdditionItem()))
+        if (loader.checkAddition()) {
+            clearPrimaryState()
+            postState(ListState.Update(i, createAdditionItem()))
+        } else postState(HomeState.Loading(i))
     }
 
     private suspend fun loadCalendar() {
         val i = indexCalendar
         if (i == -1) return
         postState(HomeState.Loading(i))
-        CalendarLoader(client).load()
-        readCalendarLink()
-        loadPage(linkCalendar)
-        clearPrimaryState()
-        postState(ListState.Update(i, createCalendarItem()))
+        loader.checkCalendar()?.let {
+            linkCalendar = it
+            loadPage(linkCalendar)
+            clearPrimaryState()
+            postState(ListState.Update(i, createCalendarItem()))
+            return
+        }
+        postState(HomeState.Loading(i))
     }
 
     private fun getPage(date: String): PageStorage {
@@ -333,57 +369,39 @@ class HomeToiler : NeoToiler() {
         return r
     }
 
-    private fun readCalendarLink() {
-        val date = DateUnit.initNow()
-        date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
-        val today = date.toAlterString().substring(7).removeRange(6, 8)
-        val cursor = getPage(date.my).searchLink(today)
-        linkCalendar = if (cursor.moveToFirst())
-            cursor.getString(1)
-        else ""
-        cursor.close()
-    }
-
     @SuppressLint("Range")
     private fun createCalendarItem(): HomeItem {
         if (isEditor)
             return HomeItem(HomeItem.Type.CALENDAR, listOf(strings.calendar))
         task = Task.OPEN_CALENDAR
-        val date = DateUnit.initNow()
-        date.changeSeconds(DateUnit.OFFSET_MSK - date.offset)
-        val cursor = getPage(date.my).getListAll()
         var title = strings.today_empty
-        if (cursor.moveToFirst()) {
-            val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
-            needLoadCalendar = loadIfNeed && DateUnit.isLongAgo(time)
-            val iTitle = cursor.getColumnIndex(Const.TITLE)
-            val iLink = cursor.getColumnIndex(Const.LINK)
-            var link: String
-            val today = date.toAlterString().substring(7).removeRange(6, 8)
-            while (cursor.moveToNext()) {
-                link = cursor.getString(iLink)
-                if (link.contains(today)) {
-                    linkCalendar = link
-                    title = cursor.getString(iTitle)
+        val date = DateUnit.initMskNow()
+        if (linkCalendar.isEmpty()) {
+            val cursor = getPage(date.my).getListAll()
+            if (cursor.moveToFirst()) {
+                val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
+                needLoadCalendar = loadIfNeed && DateUnit.isLongAgo(time)
+                val iTitle = cursor.getColumnIndex(Const.TITLE)
+                val iLink = cursor.getColumnIndex(Const.LINK)
+                var link: String
+                val today = date.toShortDateString()
+                while (cursor.moveToNext()) {
+                    link = cursor.getString(iLink)
+                    if (link.contains(today)) {
+                        linkCalendar = link
+                        title = cursor.getString(iTitle)
+                    }
                 }
             }
+            cursor.close()
+        } else {
+            title = getPage(date.my).getTitle(linkCalendar)
         }
-        cursor.close()
-        val d = date.toAlterString().substring(7)
+        val d = date.toDateString()
         return HomeItem(
             type = HomeItem.Type.CALENDAR,
             lines = listOf(strings.calendar, strings.today_msk + d, title)
         )
-    }
-
-    private fun readSummaryLink() {
-        val file = Files.file(Files.RSS)
-        if (file.exists()) {
-            val br = BufferedReader(FileReader(file))
-            br.readLine() //title
-            linkSummary = br.readLine() ?: ""
-            br.close()
-        } else linkSummary = ""
     }
 
     private fun createSummaryItem(): HomeItem {
@@ -392,26 +410,27 @@ class HomeToiler : NeoToiler() {
         task = Task.OPEN_SUMMARY
         val file = Files.file(Files.RSS)
         needLoadSummary = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
-        val title: String
         val time: Long
         val des: String
         if (file.exists()) {
-            val br = BufferedReader(FileReader(file))
-            title = br.readLine() ?: strings.nothing
-            linkSummary = br.readLine() ?: ""
-            br.close()
+            if (titleSummary.isEmpty()) {
+                val br = BufferedReader(FileReader(file))
+                titleSummary = br.readLine() ?: strings.nothing
+                linkSummary = br.readLine() ?: ""
+                br.close()
+            }
             time = file.lastModified()
             des = strings.refreshed + HomeItem.PLACE_TIME + strings.back
         } else {
             time = 0L
-            title = strings.nothing
+            titleSummary = strings.nothing
             des = strings.never
         }
 
         return HomeItem(
             type = HomeItem.Type.SUMMARY,
             time = time,
-            lines = listOf(strings.summary, des, title)
+            lines = listOf(strings.summary, des, titleSummary)
         )
     }
 
@@ -426,9 +445,8 @@ class HomeToiler : NeoToiler() {
         if (cursor.moveToFirst()) {
             val iTime = cursor.getColumnIndex(Const.TIME)
             timeUpdate = cursor.getLong(iTime)
-            if (cursor.moveToNext()) {
+            if (cursor.moveToNext())
                 timeItem = cursor.getLong(iTime)
-            }
         }
         cursor.close()
         storage.close()

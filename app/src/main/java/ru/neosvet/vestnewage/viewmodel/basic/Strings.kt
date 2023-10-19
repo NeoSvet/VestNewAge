@@ -42,6 +42,8 @@ data class DevStrings(
 
 data class HomeStrings(
     val nothing: String,
+    val new: String,
+    val on_tab: String,
     val never: String,
     val refreshed: String,
     val today_empty: String,
@@ -49,6 +51,8 @@ data class HomeStrings(
     val journal: String,
     val calendar: String,
     val summary: String,
+    val doctrine: String,
+    val academy: String,
     val news: String,
     val book: String,
     val markers: String,

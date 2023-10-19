@@ -110,7 +110,8 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             is ListState.Update<*> ->
                 adapter.update(state.index, state.item as HomeItem)
 
-            is HomeState.Loading ->
+            is HomeState.Loading -> if (adapter.loadingIndex == state.index)
+                adapter.finishLoading() else
                 adapter.startLoading(state.index)
 
             is HomeState.Status -> if (state.openedReader)

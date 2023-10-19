@@ -296,6 +296,7 @@
     <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
     <!--HomeFragment-->
     <string name="additionally_from_tg">Дополнительно из Телеграма</string>
+    <string name="on_tab">&#160;на вкладках:&#160;</string>
     <string name="today_msk">Сегодня по Москве</string>
     <string name="today_empty">За сегодня ещё ничего нет</string>
     <string name="last_post_from">Сообщение от %s</string>
