@@ -42,7 +42,6 @@ class HomeToiler : NeoToiler() {
     private var titleSummary = ""
     private var linkSummary = ""
     private var linkCalendar = ""
-    private var linkJournal = ""
     var tabNews = SiteTab.NEWS.value
         private set
     private var pageStorage: PageStorage? = null
@@ -165,7 +164,6 @@ class HomeToiler : NeoToiler() {
             titleSummary = ""
             linkSummary = ""
             linkCalendar = ""
-            linkJournal = ""
             val list = mutableListOf<HomeItem>()
             if (isEditor)
                 list.add(HomeItem(HomeItem.Type.HELP, listOf(strings.help_edit)))
@@ -337,33 +335,35 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.JOURNAL, listOf(strings.journal))
         task = Task.OPEN_JOURNAL
-        var title = getJournalTitle()
-        while (title == null)
-            title = getJournalTitle()
+        var p = getJournalTitle()
+        while (p == null)
+            p = getJournalTitle()
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
-            lines = listOf(strings.journal, strings.last_readed, title, linkJournal)
+            lines = listOf(strings.journal, strings.last_readed, p.first, p.second)
         )
     }
 
     @SuppressLint("Range")
-    private fun getJournalTitle(): String? {
+    private fun getJournalTitle(): Pair<String, String>? {
         val journal = JournalStorage()
-        var r: String? = strings.nothing
+        var title: String? = strings.nothing
+        var link = ""
         journal.getLastId()?.let { id ->
             val m = id.split('&')
             val cursor = getPage(m[0]).getPageById(m[1])
             if (cursor.moveToFirst()) {
-                r = cursor.getString(cursor.getColumnIndex(Const.TITLE))
-                linkJournal = cursor.getString(cursor.getColumnIndex(Const.LINK))
+                title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
+                link = cursor.getString(cursor.getColumnIndex(Const.LINK))
             } else {
-                r = null
+                title = null
                 journal.delete(id)
             }
             cursor.close()
         }
         journal.close()
-        return r
+        title?.let { return Pair(it, link) }
+        return null
     }
 
     @SuppressLint("Range")
