@@ -217,7 +217,7 @@ class SettingsFragment : NeoFragment() {
             screen--
         else {
             list.add(
-                CheckItem(title = getString(R.string.menu), isChecked = screen == list.size)
+                CheckItem(title = getString(R.string.menu), isChecked = screen == 0)
             )
         }
         list.add(
@@ -235,7 +235,7 @@ class SettingsFragment : NeoFragment() {
             list = list,
             onChecked = { index, _ ->
                 val i = if (ScreenUtils.isTablet) index + 1 else index
-                setMainCheckBox(Const.START_SCEEN, i)
+                setStartScreen(i)
             }
         ))
     }
@@ -427,7 +427,8 @@ class SettingsFragment : NeoFragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             adapter.addItem(SettingsItem.Message(
                 title = getString(R.string.about_default),
-                text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_a),
+                text = getString(R.string.info_default) + Const.N
+                        + getString(R.string.info_default_a),
                 buttonLabel = getString(R.string.set_),
                 onClick = {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
@@ -439,7 +440,8 @@ class SettingsFragment : NeoFragment() {
 
         adapter.addItem(SettingsItem.Message(
             title = getString(R.string.about_default),
-            text = getString(R.string.info_default) + "\n" + getString(R.string.info_default_b),
+            text = getString(R.string.info_default) + Const.N
+                    + getString(R.string.info_default_b),
             buttonLabel = getString(R.string.set_),
             onClick = {
                 val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
@@ -461,7 +463,8 @@ class SettingsFragment : NeoFragment() {
 
         adapter.addItem(SettingsItem.Message(
             title = getString(R.string.about_manager),
-            text = getString(R.string.info_manager) + Const.NN + getString(R.string.info_battery),
+            text = getString(R.string.info_manager) + Const.NN
+                    + getString(R.string.info_battery),
             buttonLabel = getString(R.string.set_battery),
             onClick = {
                 val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
@@ -470,9 +473,9 @@ class SettingsFragment : NeoFragment() {
         ))
     }
 
-    private fun setMainCheckBox(name: String, value: Int) {
+    private fun setStartScreen(value: Int) {
         val editor = prefMain.edit()
-        editor.putInt(name, value)
+        editor.putInt(Const.START_SCEEN, value)
         editor.apply()
         val main = Intent(act, MainActivity::class.java)
         main.putExtra(Const.START_SCEEN, false)
