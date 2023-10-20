@@ -16,8 +16,6 @@ import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.list.RequestAdapter
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -108,23 +106,23 @@ class LaunchUtils(context: Context) {
 
     private fun refTips() {
         val name = "calendar"
-        val pref = App.context.getSharedPreferences(TipActivity.TAG, Context.MODE_PRIVATE)
+        val pref = App.context.getSharedPreferences(TipUtils.TAG, Context.MODE_PRIVATE)
         val editor = pref.edit()
         var p = App.context.getSharedPreferences(name, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipActivity.TAG, true))
-            editor.putBoolean(TipName.CALENDAR.toString(), false)
+        if (!p.getBoolean(TipUtils.TAG, true))
+            editor.putBoolean(TipUtils.Type.CALENDAR.toString(), false)
         val f = Files.parent("/shared_prefs/$name.xml")
         f.delete()
 
         p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipActivity.TAG, true))
-            editor.putBoolean(TipName.MAIN_STAR.toString(), false)
-        p.edit().remove(TipActivity.TAG).apply()
+        if (!p.getBoolean(TipUtils.TAG, true))
+            editor.putBoolean(TipUtils.Type.MAIN_STAR.toString(), false)
+        p.edit().remove(TipUtils.TAG).apply()
 
         p = App.context.getSharedPreferences(BrowserHelper.TAG, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipActivity.TAG, true))
-            editor.putBoolean(TipName.BROWSER_PANEL.toString(), false)
-        p.edit().remove(TipActivity.TAG).apply()
+        if (!p.getBoolean(TipUtils.TAG, true))
+            editor.putBoolean(TipUtils.Type.BROWSER_PANEL.toString(), false)
+        p.edit().remove(TipUtils.TAG).apply()
 
         editor.apply()
     }

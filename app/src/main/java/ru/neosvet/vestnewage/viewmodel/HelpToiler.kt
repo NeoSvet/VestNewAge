@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
+import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.viewmodel.basic.HelpStrings
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.HelpState
@@ -196,18 +196,18 @@ class HelpToiler : ViewModel() {
     private fun clickTip(index: Int) {
         when (index) {
             TIP_MAIN ->
-                TipActivity.showTip(TipName.MAIN_STAR)
+                TipActivity.showTip(TipUtils.Type.MAIN_STAR)
 
             TIP_CALENDAR ->
-                TipActivity.showTip(TipName.CALENDAR)
+                TipActivity.showTip(TipUtils.Type.CALENDAR)
 
             TIP_BROWSER -> {
-                TipActivity.showTip(TipName.BROWSER_FULLSCREEN)
-                TipActivity.showTip(TipName.BROWSER_PANEL)
+                TipActivity.showTip(TipUtils.Type.BROWSER_FULLSCREEN)
+                TipActivity.showTip(TipUtils.Type.BROWSER_PANEL)
             }
 
             TIP_SEARCH ->
-                TipActivity.showTip(TipName.SEARCH)
+                TipActivity.showTip(TipUtils.Type.SEARCH)
         }
     }
 

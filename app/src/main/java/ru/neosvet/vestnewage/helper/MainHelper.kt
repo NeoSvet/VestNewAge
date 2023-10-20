@@ -17,12 +17,11 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
-import ru.neosvet.vestnewage.storage.UnreadStorage
+import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.NeoTip
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
@@ -297,7 +296,7 @@ class MainHelper(private val act: MainActivity) {
     }
 
     private fun showTip() {
-        TipActivity.showTipIfNeed(TipName.MAIN_STAR)
+        TipUtils.showTipIfNeed(TipUtils.Type.MAIN_STAR)
     }
 
     fun setBottomMenu(menu: List<Section>) {

@@ -30,11 +30,10 @@ import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.SearchEngine
+import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
-import ru.neosvet.vestnewage.view.activity.TipActivity
-import ru.neosvet.vestnewage.view.activity.TipName
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
@@ -127,7 +126,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                     etSearch.setSelection(request.length)
                 }
             }
-            TipActivity.showTipIfNeed(TipName.SEARCH)
+            TipUtils.showTipIfNeed(TipUtils.Type.SEARCH)
         }
     }
 
