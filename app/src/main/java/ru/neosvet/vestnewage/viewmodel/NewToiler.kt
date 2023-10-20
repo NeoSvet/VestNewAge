@@ -9,7 +9,7 @@ import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -56,7 +56,7 @@ class NewToiler : NeoToiler() {
             var t: String
             var s: String
             var n: Int
-            val unread = UnreadUtils()
+            val unread = UnreadStorage()
             unread.setBadge(storage.unreadCount)
             if (unread.lastModified() > 0) {
                 val links = unread.list
@@ -87,7 +87,7 @@ class NewToiler : NeoToiler() {
     fun clearList() {
         task = Task.CLEAR
         scope.launch {
-            val unread = UnreadUtils()
+            val unread = UnreadStorage()
             unread.clearList()
             unread.setBadge(0)
             postState(BasicState.Empty)

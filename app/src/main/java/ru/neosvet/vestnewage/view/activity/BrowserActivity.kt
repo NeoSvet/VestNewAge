@@ -34,7 +34,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
@@ -99,7 +99,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         NeoToast(binding.tvToast, null)
     }
     private val snackbar = NeoSnackbar()
-    private val unread = UnreadUtils()
+    private val unread = UnreadStorage()
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
     private lateinit var helper: BrowserHelper

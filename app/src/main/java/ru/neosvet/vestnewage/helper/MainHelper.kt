@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.view.activity.TipName
@@ -71,7 +71,7 @@ class MainHelper(private val act: MainActivity) {
     var vsbScrollBar: NeoScrollBar
         private set
 
-    val unread = UnreadUtils()
+    val unread = UnreadStorage()
     var countNew: Int = 0
     var curSection = Section.SETTINGS
     var prevSection: Section? = null

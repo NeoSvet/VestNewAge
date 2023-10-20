@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -103,7 +103,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
-        val unread = UnreadUtils()
+        val unread = UnreadStorage()
         var d: DateUnit
         var title: String
         var link: String

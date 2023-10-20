@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileWriter
@@ -40,7 +40,7 @@ class SummaryLoader(private val client: NeoClient) : Loader {
 
         val bw = BufferedWriter(FileWriter(file))
         val now = DateUnit.initNow()
-        val unread = if (updateUnread) UnreadUtils() else null
+        val unread = if (updateUnread) UnreadStorage() else null
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
         br.close()
         stream.close()

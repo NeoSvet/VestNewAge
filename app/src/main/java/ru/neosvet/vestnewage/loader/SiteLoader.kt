@@ -12,7 +12,7 @@ import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
@@ -90,7 +90,7 @@ class SiteLoader(
                     val sb = StringBuilder()
                     item.headsAndLinks().forEach {
                         sb.appendLine(it.second)
-                        if (it.first.isNullOrEmpty())
+                        if (it.first.isEmpty())
                             sb.appendLine(getHeadFromUrl(it.second))
                         else sb.appendLine(it.first)
                     }
@@ -261,7 +261,7 @@ class SiteLoader(
             time = s.toLong()
             if (update(br)) {
                 hasNew = true
-                val unread = UnreadUtils()
+                val unread = UnreadStorage()
                 unread.setBadge(storage.unreadCount)
             }
         } else time = storage.newTime()

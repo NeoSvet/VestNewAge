@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.UnreadUtils
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.fromHTML
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -138,7 +138,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
     private fun listToStorage(updateUnread: Boolean) {
         storage.open(date.my)
         storage.updateTime()
-        val unread = if (updateUnread) UnreadUtils() else null
+        val unread = if (updateUnread) UnreadStorage() else null
         while (list.isNotEmpty()) {
             val item = if (Urls.isSiteCom)
                 list.removeFirst() else list.removeLast()
