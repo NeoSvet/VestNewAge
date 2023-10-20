@@ -1,12 +1,12 @@
 package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
@@ -91,6 +91,10 @@ class AdditionLoader(private val client: NeoClient) : Loader {
         val has = maxPost > storage.max
         if (has) load(storage, maxPost)
         storage.close()
+        if (!has) {
+            val file = Files.dateBase(DataBase.ADDITION)
+            file.setLastModified(System.currentTimeMillis())
+        }
         return has
     }
 

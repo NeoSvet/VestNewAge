@@ -6,9 +6,9 @@ import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.storage.UnreadStorage
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileReader
@@ -97,6 +97,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         else 0L
         if (timeFile > timeList) {
             br.close()
+            file.setLastModified(System.currentTimeMillis())
             return list
         }
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SummaryTab.ACADEMY
 import ru.neosvet.vestnewage.data.SummaryTab.ADDITION
@@ -22,6 +21,7 @@ import ru.neosvet.vestnewage.loader.SummaryLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.storage.AdditionStorage
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
@@ -132,13 +132,8 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
                 DOCTRINE -> !openFile(Files.DOCTRINE)
                 ACADEMY -> !openFile(Files.ACADEMY)
             }
-            if (loadIfNeed && (isEmpty || isNeedReload())) {
+            if (loadIfNeed && (isEmpty || isNeedReload()))
                 reLoad()
-                if (selectedTab == ADDITION) {
-                    val f = Files.dateBase(DataBase.ADDITION)
-                    f.setLastModified(System.currentTimeMillis())
-                }
-            }
         }
     }
 

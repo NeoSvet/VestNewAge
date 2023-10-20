@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
@@ -17,6 +16,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.storage.AdditionStorage
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.NewsStorage
@@ -276,9 +276,6 @@ class HomeToiler : NeoToiler() {
             else sb.delete(sb.length - 2, sb.length)
             titleSummary = sb.toString()
             linkSummary = ""
-        } else if (!isRss) {
-            postState(HomeState.Loading(i))
-            return
         }
         postState(ListState.Update(i, createSummaryItem()))
     }
@@ -287,10 +284,9 @@ class HomeToiler : NeoToiler() {
         val i = indexAddition
         if (i == -1) return
         postState(HomeState.Loading(i))
-        if (loader.checkAddition()) {
-            clearPrimaryState()
-            postState(ListState.Update(i, createAdditionItem()))
-        } else postState(HomeState.Loading(i))
+        loader.checkAddition()
+        clearPrimaryState()
+        postState(ListState.Update(i, createAdditionItem()))
     }
 
     private suspend fun loadCalendar() {
