@@ -52,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_margin="@dimen/double_indent"
+                android:minWidth="150dp"
                 android:paddingStart="@dimen/def_indent"
                 android:paddingEnd="@dimen/def_indent" />
         </LinearLayout>
