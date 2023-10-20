@@ -19,7 +19,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.SiteLoader
-import ru.neosvet.vestnewage.loader.SummaryLoader
+import ru.neosvet.vestnewage.loader.UpdateLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandler
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
@@ -71,8 +71,7 @@ class LoaderService : LifecycleService(), LoadHandler {
             intent.putExtra(Const.LINK, link)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 App.context.startForegroundService(intent)
-            else
-                App.context.startService(intent)
+            else App.context.startService(intent)
         }
     }
 
@@ -282,11 +281,11 @@ class LoaderService : LifecycleService(), LoadHandler {
 
     private fun loadBasic() {
         val listsUtils = ListsUtils()
-        if (listsUtils.summaryIsOld()) {
-            val summaryLoader = SummaryLoader(client)
-            summaryLoader.updateUnread = false
-            summaryLoader.load()
-        }
+        val updateLoader = UpdateLoader(client)
+        if (listsUtils.summaryIsOld())
+            updateLoader.checkSummary(false)
+        updateLoader.checkDoctrine()
+        updateLoader.checkAcademy()
         if (listsUtils.siteIsOld())
             loadSiteSection()
         loader.loadStyle()
@@ -297,8 +296,11 @@ class LoaderService : LifecycleService(), LoadHandler {
         if (isRun.not()) return
         postMessage(getString(R.string.additionally))
         val additionLoader = AdditionLoader(client)
+        var prev = 0
         additionLoader.loadAll(object : LoadHandlerLite {
             override fun postPercent(value: Int) {
+                if (prev == value) return
+                prev = value
                 if (isRun) postMessage(getString(R.string.additionally) + " ($value%)")
             }
         })

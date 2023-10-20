@@ -17,7 +17,6 @@ import java.io.FileWriter
 import java.io.InputStreamReader
 
 class SummaryLoader(private val client: NeoClient) : Loader {
-    var updateUnread = true
 
     override fun cancel() {}
 
@@ -40,7 +39,7 @@ class SummaryLoader(private val client: NeoClient) : Loader {
 
         val bw = BufferedWriter(FileWriter(file))
         val now = DateUnit.initNow()
-        val unread = if (updateUnread) UnreadStorage() else null
+        val unread = UnreadStorage()
         val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
         br.close()
         stream.close()
@@ -59,7 +58,7 @@ class SummaryLoader(private val client: NeoClient) : Loader {
             bw.write(Const.N)
             bw.write(s) //link
             bw.write(Const.N)
-            unread?.addLink(s, now)
+            unread.addLink(s, now)
 
             a = m[i].indexOf("<des") + 13
             b = m[i].indexOf("</", a)
@@ -78,7 +77,8 @@ class SummaryLoader(private val client: NeoClient) : Loader {
             bw.flush()
         }
         bw.close()
-        unread?.setBadge()
+        unread.setBadge()
+        unread.close()
         if (needUpdate) {
             val summaryHelper = SummaryHelper()
             summaryHelper.updateBook()

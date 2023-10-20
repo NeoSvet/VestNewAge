@@ -81,7 +81,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         return loader.checkUpdate()
     }
 
-    fun checkSummary(): NeoList<Pair<String, String>> {
+    fun checkSummary(updateUnread: Boolean = false): NeoList<Pair<String, String>> {
         val list = NeoList<Pair<String, String>>()
         val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)
@@ -104,7 +104,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
-        val unread = UnreadStorage()
+        val unread = if(updateUnread) UnreadStorage() else null
         var d: DateUnit
         var title: String
         var link: String
@@ -140,14 +140,15 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             bw.write(d.timeInMills.toString() + Const.N) //time
             bw.flush()
 
-            if (unread.addLink(link, d)) {
+            if (unread?.addLink(link, d) == true) {
                 list.add(Pair(title, link))
                 loader.download(link, false)
             }
         }
         bw.close()
         loader.finish()
-        unread.setBadge()
+        unread?.setBadge()
+        unread?.close()
         return list
     }
 
