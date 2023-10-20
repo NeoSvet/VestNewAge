@@ -31,10 +31,11 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
-import ru.neosvet.vestnewage.storage.UnreadStorage
+import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
@@ -136,7 +137,11 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         setViews()
         setContent()
         initWords()
-        if (savedInstanceState == null) initArguments()
+        if (savedInstanceState == null) {
+            initArguments()
+            TipUtils.showTipIfNeed(TipUtils.Type.BROWSER_FULLSCREEN)
+            TipUtils.showTipIfNeed(TipUtils.Type.BROWSER_PANEL)
+        }
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
