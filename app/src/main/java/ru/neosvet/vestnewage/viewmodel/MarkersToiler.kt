@@ -9,7 +9,7 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient

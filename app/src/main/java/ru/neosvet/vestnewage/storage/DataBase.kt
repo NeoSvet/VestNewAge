@@ -1,10 +1,11 @@
-package ru.neosvet.vestnewage.data
+package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.data.NeoException
 import java.io.Closeable
 
 class DataBase(

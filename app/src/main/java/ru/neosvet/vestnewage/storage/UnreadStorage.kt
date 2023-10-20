@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase
 import me.leolin.shortcutbadger.ShortcutBadger
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.Const
 

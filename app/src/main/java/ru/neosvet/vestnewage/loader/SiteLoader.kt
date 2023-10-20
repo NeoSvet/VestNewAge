@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.loader.page.PageParser

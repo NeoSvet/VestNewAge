@@ -1,6 +1,6 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader

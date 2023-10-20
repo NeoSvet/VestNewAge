@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 
 class NewsStorage : DataBase.Parent {

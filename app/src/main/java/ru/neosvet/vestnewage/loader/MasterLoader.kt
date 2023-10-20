@@ -2,7 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.SiteHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper

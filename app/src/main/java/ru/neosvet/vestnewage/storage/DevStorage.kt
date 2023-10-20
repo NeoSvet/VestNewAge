@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.storage
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 
 class DevStorage : DataBase.Parent {

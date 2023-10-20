@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import ru.neosvet.vestnewage.data.*
 import ru.neosvet.vestnewage.helper.SearchHelper
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.viewmodel.basic.SearchStrings

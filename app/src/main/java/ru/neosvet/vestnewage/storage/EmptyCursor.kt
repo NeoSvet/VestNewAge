@@ -1,4 +1,4 @@
-package ru.neosvet.vestnewage.data
+package ru.neosvet.vestnewage.storage
 
 import android.content.ContentResolver
 import android.database.CharArrayBuffer
