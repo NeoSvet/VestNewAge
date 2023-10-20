@@ -85,16 +85,22 @@ class LaunchUtils(context: Context) {
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
-            val prefMain = App.context.getSharedPreferences(
+            var pref = App.context.getSharedPreferences(
+                TipUtils.TAG, Context.MODE_PRIVATE
+            )
+            var editor = pref.edit()
+            editor.remove( "CALENDAR")
+            editor.apply()
+            pref = App.context.getSharedPreferences(
                 MainHelper.TAG, Context.MODE_PRIVATE
             )
-            val editor1 = prefMain.edit()
-            editor1.putInt(Const.START_SCEEN, Section.HOME.value)
-            editor1.apply()
-            val prefProm = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
-            val editor2 = prefProm.edit()
-            editor2.remove(Const.MODE)
-            editor2.apply()
+            editor = pref.edit()
+            editor.putInt(Const.START_SCEEN, Section.HOME.value)
+            editor.apply()
+            pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
+            editor = pref.edit()
+            editor.remove(Const.MODE)
+            editor.apply()
             listOf(
                 Files.dateBase(DataBase.JOURNAL), Files.dateBase("devads"),
                 Files.dateBase("devads-journal"), Files.slash("news")
@@ -105,16 +111,12 @@ class LaunchUtils(context: Context) {
     }
 
     private fun refTips() {
-        val name = "calendar"
+        val f = Files.parent("/shared_prefs/calendar.xml")
+        f.delete()
         val pref = App.context.getSharedPreferences(TipUtils.TAG, Context.MODE_PRIVATE)
         val editor = pref.edit()
-        var p = App.context.getSharedPreferences(name, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipUtils.TAG, true))
-            editor.putBoolean(TipUtils.Type.CALENDAR.toString(), false)
-        val f = Files.parent("/shared_prefs/$name.xml")
-        f.delete()
 
-        p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
+        var p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
         if (!p.getBoolean(TipUtils.TAG, true))
             editor.putBoolean(TipUtils.Type.MAIN_STAR.toString(), false)
         p.edit().remove(TipUtils.TAG).apply()

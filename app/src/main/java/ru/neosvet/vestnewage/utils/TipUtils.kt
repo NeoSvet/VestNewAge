@@ -24,7 +24,7 @@ class TipUtils {
     )
 
     enum class Type {
-        MAIN_STAR, CALENDAR, BROWSER_PANEL, BROWSER_FULLSCREEN, SEARCH
+        MAIN_STAR, BROWSER_PANEL, BROWSER_FULLSCREEN, SEARCH
     }
 
     companion object {
@@ -50,14 +50,6 @@ class TipUtils {
                     imgId = R.drawable.tip_main,
                     alignH = Horizontal.RIGHT,
                     alignV = Vertical.BOTTOM,
-                    addArrow = true
-                )
-
-                Type.CALENDAR -> Unit(
-                    message = App.context.getString(R.string.tip_calendar),
-                    imgId = R.drawable.tip_calendar,
-                    alignH = Horizontal.CENTER,
-                    alignV = Vertical.TOP,
                     addArrow = true
                 )
 

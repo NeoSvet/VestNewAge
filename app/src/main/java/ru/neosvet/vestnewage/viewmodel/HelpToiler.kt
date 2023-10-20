@@ -27,11 +27,10 @@ class HelpToiler : ViewModel() {
         private const val LINK_ON_SITE = 5
         private const val CHANGELOG = 6
         private const val TIPS = 3
-        private const val TIPS_COUNT = 4
+        private const val TIPS_COUNT = 3
         private const val TIP_MAIN = 0
-        private const val TIP_CALENDAR = 1
-        private const val TIP_BROWSER = 2
-        private const val TIP_SEARCH = 3
+        private const val TIP_BROWSER = 1
+        private const val TIP_SEARCH = 2
     }
 
     private val stateChannel = Channel<NeoState>()
@@ -106,8 +105,7 @@ class HelpToiler : ViewModel() {
     private fun getTips(): List<HelpItem> {
         if (listTips.isEmpty()) {
             val icons = arrayOf(
-                R.drawable.little_star, R.drawable.ic_calendar,
-                R.drawable.ic_menu, R.drawable.ic_search
+                R.drawable.little_star, R.drawable.ic_menu, R.drawable.ic_search
             )
             for (i in icons.indices)
                 listTips.add(
@@ -197,9 +195,6 @@ class HelpToiler : ViewModel() {
         when (index) {
             TIP_MAIN ->
                 TipActivity.showTip(TipUtils.Type.MAIN_STAR)
-
-            TIP_CALENDAR ->
-                TipActivity.showTip(TipUtils.Type.CALENDAR)
 
             TIP_BROWSER -> {
                 TipActivity.showTip(TipUtils.Type.BROWSER_FULLSCREEN)

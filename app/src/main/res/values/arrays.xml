@@ -96,7 +96,6 @@
     </string-array>
     <string-array name="tips_sections">
         <item>Основное</item>
-        <item>В разделе «Календарь»</item>
         <item>На экране чтения</item>
         <item>В разделе «Поиск»</item>
     </string-array>
