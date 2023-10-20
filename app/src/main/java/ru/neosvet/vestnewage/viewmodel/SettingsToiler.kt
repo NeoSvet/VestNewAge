@@ -7,20 +7,22 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.storage.DataBase
+import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 class SettingsToiler : NeoToiler() {
     companion object {
         const val CLEAR_CACHE = 0
         const val CLEAR_MARKERS = 1
-        const val CLEAR_ART_AND_ADD = 2
+        const val CLEAR_ARTICLES = 2
         const val CLEAR_DOCTRINE = 3
         const val CLEAR_OLD_BOOK = 4
         const val CLEAR_NEW_BOOK = 5
@@ -60,24 +62,37 @@ class SettingsToiler : NeoToiler() {
     fun startClear(request: List<Int>) {
         task = "Clear"
         isRun = true
+        val hasDoc = request.contains(CLEAR_DOCTRINE)
         scope.launch {
             size = 0
             request.forEach {
                 when (it) {
                     CLEAR_CACHE ->
                         clearFolder(Files.parent("/cache"))
+
                     CLEAR_MARKERS ->
-                        deleteFile(DataBase.MARKERS)
-                    CLEAR_ART_AND_ADD -> {
-                        deleteFile(DataBase.ARTICLES)
-                        deleteFile(DataBase.ADDITION)
+                        deleteBase(DataBase.MARKERS)
+
+                    CLEAR_ARTICLES -> {
+                        deleteBase(DataBase.ARTICLES)
+                        deleteBase(DataBase.ADDITION)
+                        val f = Files.file(Files.DOCTRINE)
+                        if (f.exists()) {
+                            size += f.length()
+                            f.delete()
+                        }
+                        if (!hasDoc) clearDoctrine()
                     }
+
                     CLEAR_DOCTRINE ->
-                        deleteFile(DataBase.DOCTRINE)
+                        deleteBase(DataBase.DOCTRINE)
+
                     CLEAR_OLD_BOOK ->
                         clearBook(2004, 2015)
+
                     CLEAR_NEW_BOOK ->
                         clearBook(2016, currentYear - 2)
+
                     CLEAR_NOW_BOOK ->
                         clearBook(currentYear - 1, currentYear)
                 }
@@ -85,6 +100,25 @@ class SettingsToiler : NeoToiler() {
             postState(BasicState.Message(String.format("%.2f", size / 1048576f))) //to MegaByte
             isRun = false
         }
+    }
+
+    private fun clearDoctrine() {
+        val fileSize = Files.dateBase(DataBase.DOCTRINE).length()
+        val storage = PageStorage()
+        storage.open(DataBase.DOCTRINE, true)
+        val list = mutableListOf<String>()
+        val cursor = storage.getListAll()
+        if (cursor.moveToFirst()) {
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            while (cursor.moveToNext()) {
+                val link = cursor.getString(iLink)
+                if (!link.isDoctrineBook) list.add(link)
+            }
+        }
+        cursor.close()
+        storage.deletePages(list)
+        storage.close()
+        size = fileSize - Files.dateBase(DataBase.DOCTRINE).length()
     }
 
     private fun clearBook(startYear: Int, endYear: Int) {
@@ -106,7 +140,7 @@ class SettingsToiler : NeoToiler() {
         }
     }
 
-    private fun deleteFile(name: String) {
+    private fun deleteBase(name: String) {
         val f = Files.dateBase(name)
         if (f.exists()) {
             size += f.length()

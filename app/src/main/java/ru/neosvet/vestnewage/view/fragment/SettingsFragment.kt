@@ -266,8 +266,8 @@ class SettingsFragment : NeoFragment() {
         list.add(CheckItem(getString(R.string.doctrine_creator), SettingsToiler.CLEAR_DOCTRINE))
         list.add(
             CheckItem(
-                getString(R.string.articles_and_addition),
-                SettingsToiler.CLEAR_ART_AND_ADD
+                getString(R.string.articles_and_summary),
+                SettingsToiler.CLEAR_ARTICLES
             )
         )
         list.add(CheckItem(getString(R.string.markers), SettingsToiler.CLEAR_MARKERS))

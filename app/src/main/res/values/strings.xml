@@ -225,7 +225,7 @@
     <string name="free_storage">Освободить память</string>
     <string name="cache">Кэш (временные файлы)</string>
     <string name="format_book_years">Книга за %d-%d года</string>
-    <string name="articles_and_addition">Статьи, Сводка-Дополнительно</string>
+    <string name="articles_and_summary">Статьи и раздел Сводка</string>
     <string name="completed">Завершено</string>
     <string name="from">от</string>
     <string name="hours">часа</string>
