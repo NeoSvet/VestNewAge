@@ -115,7 +115,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 loader.loadDoctrineList()
                 openDoctrine()
                 if (isRun)
-                    loader.loadDoctrinePages(this)
+                    loader.loadDoctrineBook(this)
                 postState(BasicState.Success)
                 return
             }

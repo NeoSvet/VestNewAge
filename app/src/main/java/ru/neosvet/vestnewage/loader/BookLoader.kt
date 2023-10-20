@@ -1,14 +1,15 @@
 package ru.neosvet.vestnewage.loader
 
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
@@ -118,7 +119,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         storage.close()
     }
 
-    fun loadDoctrinePages(handler: LoadHandlerLite?) {
+    fun loadDoctrineBook(handler: LoadHandlerLite?) {
         isRun = true
         val storage = PageStorage()
         storage.open(DataBase.DOCTRINE)
@@ -133,8 +134,9 @@ class BookLoader(private val client: NeoClient) : Loader {
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iTime = cursor.getColumnIndex(Const.TIME)
         while (cursor.moveToNext() && isRun) {
-            val id = cursor.getInt(iId)
             val link = cursor.getString(iLink)
+            if (!link.isDoctrineBook) continue
+            val id = cursor.getInt(iId)
             time = cursor.getLong(iTime)
             s = link.substring(Const.DOCTRINE.length) //pages
             val stream = clientDoctrine.getStream("$host$s.txt")

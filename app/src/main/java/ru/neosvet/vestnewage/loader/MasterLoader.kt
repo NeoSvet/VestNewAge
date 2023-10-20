@@ -98,7 +98,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadDoctrineList()
-            it.loadDoctrinePages(null)
+            it.loadDoctrineBook(null)
         }
         isRun = false
     }
