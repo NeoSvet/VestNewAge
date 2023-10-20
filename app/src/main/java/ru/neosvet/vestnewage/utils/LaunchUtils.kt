@@ -7,12 +7,12 @@ import android.content.SharedPreferences
 import android.os.Build
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SearchHelper
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -87,10 +87,16 @@ class LaunchUtils(context: Context) {
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
+            val prefMain = App.context.getSharedPreferences(
+                MainHelper.TAG, Context.MODE_PRIVATE
+            )
+            val editor1 = prefMain.edit()
+            editor1.putInt(Const.START_SCEEN, Section.HOME.value)
+            editor1.apply()
             val prefProm = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
-            val editor = prefProm.edit()
-            editor.remove(Const.MODE)
-            editor.apply()
+            val editor2 = prefProm.edit()
+            editor2.remove(Const.MODE)
+            editor2.apply()
             listOf(
                 Files.dateBase(DataBase.JOURNAL), Files.dateBase("devads"),
                 Files.dateBase("devads-journal"), Files.slash("news")
