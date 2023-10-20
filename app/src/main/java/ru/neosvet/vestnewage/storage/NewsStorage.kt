@@ -10,7 +10,7 @@ import ru.neosvet.vestnewage.utils.Const
 
 class NewsStorage : DataBase.Parent {
     companion object {
-        const val NAME = "ads"
+        const val NAME = "news"
     }
 
     private val db = DataBase(NAME, this)

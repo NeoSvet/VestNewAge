@@ -8,7 +8,7 @@ import ru.neosvet.vestnewage.utils.Const
 
 class DevStorage : DataBase.Parent {
     companion object {
-        const val NAME = "devads"
+        const val NAME = "dev"
         const val TYPE_TIME = 0
         const val TYPE_UPDATE = 1
         const val TYPE_ALL = 2
@@ -16,7 +16,8 @@ class DevStorage : DataBase.Parent {
         const val TYPE_LINK = 4
     }
 
-    private val db = DataBase(NewsStorage.NAME, this)
+    private val db = DataBase(NAME, this)
+
     override fun createTable(db: SQLiteDatabase) {
         db.execSQL(
             DataBase.CREATE_TABLE + NAME + " ("
