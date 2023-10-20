@@ -3,19 +3,33 @@ package ru.neosvet.vestnewage.storage
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
-import java.io.Closeable
 
-class NewsStorage : Closeable {
+class NewsStorage : DataBase.Parent {
     companion object {
         const val NAME = "ads"
     }
 
-    private val db = DataBase(NAME)
+    private val db = DataBase(NAME, this)
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + NAME + " ("
+                    + DataBase.ID + " integer primary key,"
+                    + Const.LINK + " text,"
+                    + Const.TITLE + " text,"
+                    + Const.DESCTRIPTION + " text,"
+                    + Const.TIME + " integer);"
+        )
+        val row = ContentValues()
+        row.put(DataBase.ID, 1)
+        row.put(Const.TIME, 0)
+        db.insert(NAME, null, row)
+    }
 
-   override fun close() =
+    override fun close() =
         db.close()
 
     fun insert(row: ContentValues) =

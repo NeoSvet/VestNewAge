@@ -2,15 +2,16 @@ package ru.neosvet.vestnewage.utils
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import me.leolin.shortcutbadger.ShortcutBadger
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 
-class UnreadUtils {
+class UnreadUtils : DataBase.Parent {
     companion object {
         const val NAME = "noread"
     }
@@ -23,7 +24,7 @@ class UnreadUtils {
 
     private fun open() {
         if (!isClosed) return
-        db = DataBase(NAME)
+        db = DataBase(NAME, this)
         isClosed = false
     }
 
@@ -115,7 +116,15 @@ class UnreadUtils {
         time = System.currentTimeMillis()
     }
 
-    private fun close() {
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + NAME + " ("
+                    + Const.LINK + " text primary key,"
+                    + Const.TIME + " integer);"
+        )
+    }
+
+    override fun close() {
         if (isClosed) return
         storage.close()
         db.close()

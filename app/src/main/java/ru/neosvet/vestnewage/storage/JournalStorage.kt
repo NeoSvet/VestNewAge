@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
@@ -10,10 +11,9 @@ import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
-import java.io.Closeable
 import java.util.LinkedList
 
-class JournalStorage : Closeable {
+class JournalStorage : DataBase.Parent {
     companion object {
         private const val LIMIT = 208
         private const val FILTER = "%&%&%"
@@ -23,7 +23,7 @@ class JournalStorage : Closeable {
         ALL, OPENED, RND
     }
 
-    private val db = DataBase(DataBase.JOURNAL)
+    private val db = DataBase(DataBase.JOURNAL, this)
     var filter = Type.ALL
 
     fun update(id: String, row: ContentValues): Boolean =
@@ -58,6 +58,15 @@ class JournalStorage : Closeable {
 
     fun clear() =
         db.delete(DataBase.JOURNAL)
+
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + DataBase.JOURNAL + " ("
+                    + DataBase.ID + " text primary key," // date&id Const.TITLE || date&id Const.TITLE&rnd_place
+                    + Const.PLACE + " real,"
+                    + Const.TIME + " integer);"
+        )
+    }
 
     override fun close() =
         db.close()

@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.storage
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -11,9 +12,8 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
-import java.io.Closeable
 
-class AdditionStorage : Closeable {
+class AdditionStorage : DataBase.Parent {
     companion object {
         private const val LIMIT = " limit "
         private const val LINK = "href=\""
@@ -33,7 +33,7 @@ class AdditionStorage : Closeable {
 
     fun open() {
         if (isClosed.not()) return
-        db = DataBase(DataBase.ADDITION)
+        db = DataBase(DataBase.ADDITION, this)
         isClosed = false
     }
 
@@ -158,6 +158,17 @@ class AdditionStorage : Closeable {
             item.addHead(s.substring(i, n))
             i = s.indexOf(LINK, n)
         }
+    }
+
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + DataBase.ADDITION + " ("
+                    + DataBase.ID + " integer primary key," //number post on site
+                    + Const.LINK + " integer," //number post in Telegram
+                    + Const.TITLE + " text,"
+                    + Const.TIME + " text,"
+                    + Const.DESCTRIPTION + " text);"
+        )
     }
 
     override fun close() {

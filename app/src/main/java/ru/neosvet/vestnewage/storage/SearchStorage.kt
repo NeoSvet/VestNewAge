@@ -2,14 +2,14 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
-import java.io.Closeable
 
-class SearchStorage : Closeable {
-    private var db = DataBase(Const.SEARCH)
+class SearchStorage : DataBase.Parent {
+    private var db = DataBase(Const.SEARCH, this)
     var isDesc = false
     private var isClosed = false
 
@@ -33,6 +33,16 @@ class SearchStorage : Closeable {
     fun clear() =
         db.delete(Const.SEARCH)
 
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + Const.SEARCH + " ("
+                    + Const.LINK + " text primary key,"
+                    + Const.TITLE + " text,"
+                    + DataBase.ID + " integer," //number for sorting
+                    + Const.DESCTRIPTION + " text);"
+        )
+    }
+
     override fun close() {
         if (isClosed) return
         db.close()
@@ -41,11 +51,11 @@ class SearchStorage : Closeable {
 
     fun open() {
         if (isClosed.not()) return
-        db = DataBase(Const.SEARCH)
+        db = DataBase(Const.SEARCH, this)
         isClosed = false
     }
 
-    suspend fun getList(offset: Int): List<BasicItem> {
+    fun getList(offset: Int): List<BasicItem> {
         val list = mutableListOf<BasicItem>()
         open()
         val cursor = getResults(isDesc)

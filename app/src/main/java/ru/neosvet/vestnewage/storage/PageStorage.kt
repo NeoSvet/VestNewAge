@@ -3,15 +3,15 @@ package ru.neosvet.vestnewage.storage
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.utils.*
-import java.io.Closeable
 import java.util.regex.Pattern
 
-class PageStorage : Closeable {
+class PageStorage : DataBase.Parent {
     companion object {
         @JvmStatic
         fun getDatePage(link: String): String {
@@ -59,7 +59,7 @@ class PageStorage : Closeable {
                 return
             db.close()
         }
-        db = DataBase(n, write)
+        db = DataBase(n, this, write)
         isClosed = false
         month = n.substring(0, 2).toInt()
         year = n.substring(3).toInt() + 2000
@@ -126,7 +126,7 @@ class PageStorage : Closeable {
                 curPar.close()
             }
             curTitle.close()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
         return exists
     }
@@ -400,6 +400,25 @@ class PageStorage : Closeable {
         selection = Const.LINK + DataBase.LIKE,
         selectionArg = "%$find%"
     )
+
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + Const.TITLE + " ("
+                    + DataBase.ID + " integer primary key autoincrement," //id Const.TITLE
+                    + Const.LINK + " text,"
+                    + Const.TITLE + " text,"
+                    + Const.TIME + " integer);"
+        )
+        //записываем дату создания (в дальнейшем это будет дата изменений):
+        val row = ContentValues()
+        row.put(Const.TIME, 0)
+        db.insert(Const.TITLE, null, row)
+        db.execSQL(
+            DataBase.CREATE_TABLE + DataBase.PARAGRAPH + " ("
+                    + DataBase.ID + " integer," //id Const.TITLE
+                    + DataBase.PARAGRAPH + " text);"
+        )
+    }
 
     override fun close() {
         if (isClosed) return

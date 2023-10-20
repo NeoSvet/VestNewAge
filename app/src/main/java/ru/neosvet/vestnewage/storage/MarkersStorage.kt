@@ -2,11 +2,13 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
-import java.io.Closeable
 
-class MarkersStorage : Closeable {
+class MarkersStorage : DataBase.Parent {
     companion object {
         fun closeList(s: String?): String {
             return if (s == null) ""
@@ -32,7 +34,7 @@ class MarkersStorage : Closeable {
         }
     }
 
-    private val db = DataBase(DataBase.MARKERS)
+    private val db = DataBase(DataBase.MARKERS, this)
 
     fun updateCollection(id: Int, cv: ContentValues): Boolean =
         db.update(DataBase.COLLECTIONS, cv, DataBase.ID + DataBase.Q, id.toString()) > 0
@@ -72,7 +74,7 @@ class MarkersStorage : Closeable {
         orderBy = Const.PLACE
     )
 
-    fun getCollectionId(title: String): Cursor = db.query(
+    private fun getCollectionId(title: String): Cursor = db.query(
         table = DataBase.COLLECTIONS,
         column = DataBase.ID,
         selection = Const.TITLE + DataBase.Q,
@@ -191,6 +193,28 @@ class MarkersStorage : Closeable {
         }
         collections.close()
         db.delete(DataBase.MARKERS, DataBase.ID + DataBase.Q, id)
+    }
+
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + DataBase.MARKERS + " ("
+                    + DataBase.ID + " integer primary key autoincrement," //id закладки
+                    + Const.LINK + " text," //ссылка на материал
+                    + DataBase.COLLECTIONS + " text," //список id подборок, в которые включен материал
+                    + Const.DESCTRIPTION + " text," //описание
+                    + Const.PLACE + " text);"
+        ) //место в материале
+        db.execSQL(
+            DataBase.CREATE_TABLE + DataBase.COLLECTIONS + " ("
+                    + DataBase.ID + " integer primary key autoincrement," //id подборок
+                    + DataBase.MARKERS + " text," //список id закладок
+                    + Const.PLACE + " integer," //место подборки в списке подоборок
+                    + Const.TITLE + " text);"
+        ) //название Подборки
+        // добавляем подборку по умолчанию - "вне подборок":
+        val row = ContentValues()
+        row.put(Const.TITLE, App.context.getString(R.string.no_collections))
+        db.insert(DataBase.COLLECTIONS, null, row)
     }
 
     override fun close() =

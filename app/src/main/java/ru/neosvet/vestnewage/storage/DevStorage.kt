@@ -2,11 +2,11 @@ package ru.neosvet.vestnewage.storage
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.data.DataBase
 import ru.neosvet.vestnewage.utils.Const
-import java.io.Closeable
 
-class DevStorage : Closeable {
+class DevStorage : DataBase.Parent {
     companion object {
         const val NAME = "devads"
         const val TYPE_TIME = 0
@@ -16,7 +16,17 @@ class DevStorage : Closeable {
         const val TYPE_LINK = 4
     }
 
-    private val db = DataBase(NewsStorage.NAME)
+    private val db = DataBase(NewsStorage.NAME, this)
+    override fun createTable(db: SQLiteDatabase) {
+        db.execSQL(
+            DataBase.CREATE_TABLE + NAME + " ("
+                    + Const.MODE + " integer,"
+                    + Const.UNREAD + " integer default 1,"
+                    + Const.TITLE + " text,"
+                    + Const.LINK + " text,"
+                    + Const.DESCTRIPTION + " text);"
+        )
+    }
 
     override fun close() =
         db.close()
