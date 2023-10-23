@@ -27,30 +27,32 @@ class UpdateLoader(private val client: NeoClient) : Loader {
 
     fun checkAcademy(): Boolean {
         val file = Files.file(Files.ACADEMY)
-        if (file.exists() && !DateUnit.isVeryLongAgo(file.lastModified()))
-            return false
-        val stream = client.getStream(Urls.ACADEMY + "/Press/News/")
-        var br = BufferedReader(InputStreamReader(stream), 1000)
-        var s = br.readLine()
-        while (!s.contains("sm-blog-list-date"))
-            s = br.readLine()
-        br.close()
-        val i = s.indexOf("<span>") + 6
-        s = s.substring(i, s.indexOf("<", i))
-        val timeList = DateUnit.parse(s).timeInMills
-        val timeFile: Long
         if (file.exists()) {
-            br = BufferedReader(FileReader(file))
+            if (!DateUnit.isVeryLongAgo(file.lastModified()))
+                 return false
+            var br = BufferedReader(FileReader(file))
             br.readLine() //title
             br.readLine() //link
             br.readLine() //des always empty
-            timeFile = br.readLine().toLong()
+            val timeFile = br.readLine().toLong()
             br.close()
-        } else timeFile = 0L
-        if (timeFile == timeList) {
-            file.setLastModified(System.currentTimeMillis())
-            return false
+
+            val stream = client.getStream(Urls.ACADEMY + "/Press/News/")
+            br = BufferedReader(InputStreamReader(stream), 1000)
+            var s = br.readLine()
+            while (!s.contains("sm-blog-list-date"))
+                s = br.readLine()
+            br.close()
+            val i = s.indexOf("<span>") + 6
+            s = s.substring(i, s.indexOf("<", i))
+            val timeList = DateUnit.parse(s).timeInMills
+
+            if (timeFile == timeList) {
+                file.setLastModified(System.currentTimeMillis())
+                return false
+            }
         }
+
         val loader = SummaryLoader(client)
         loader.loadAcademy()
         return true
@@ -58,22 +60,31 @@ class UpdateLoader(private val client: NeoClient) : Loader {
 
     fun checkDoctrine(): Boolean {
         val file = Files.file(Files.DOCTRINE)
-        val timeFile = if (file.exists()) file.lastModified()
-        else 0L
-        if (timeFile > 0L && !DateUnit.isVeryLongAgo(timeFile))
-            return false
-        val stream = client.getStream(Urls.DOCTRINE + "feed/")
-        val br = BufferedReader(InputStreamReader(stream), 1000)
-        var s = br.readLine()
-        while (!s.contains("pubDate"))
+        if (file.exists()) {
+            if (!DateUnit.isVeryLongAgo(file.lastModified()))
+                return false
+            var br = BufferedReader(FileReader(file))
+            var s = br.readLine()
+            while (!s.contains(Const.END)) //end of des
+                s = br.readLine()
+            val timeFile = br.readLine().toLong()
+            br.close()
+
+            val stream = client.getStream(Urls.DOCTRINE + "feed/")
+            br = BufferedReader(InputStreamReader(stream), 1000)
             s = br.readLine()
-        val i = s.indexOf("Date>") + 5
-        br.close()
-        val timeList = DateUnit.parse(s.substring(i, s.indexOf("<", i))).timeInMills
-        if (timeFile == timeList) {
-            file.setLastModified(System.currentTimeMillis())
-            return false
+            while (!s.contains("pubDate"))
+                s = br.readLine()
+            val i = s.indexOf("Date>") + 5
+            br.close()
+            val timeList = DateUnit.parse(s.substring(i, s.indexOf("<", i))).timeInMills
+
+            if (timeFile == timeList) {
+                file.setLastModified(System.currentTimeMillis())
+                return false
+            }
         }
+
         val loader = SummaryLoader(client)
         loader.loadDoctrine()
         return true
