@@ -93,7 +93,7 @@
     <string name="ad">Объявление</string>
     <string name="poem">Катрен</string>
     <!--DevAds-->
-    <string name="new_dev_ads">Новые объявления от разработчика</string>
+    <string name="new_dev_ads">Непрочитанные объявления от разработчика</string>
     <string name="access_new_version">Доступна новая версия приложения!</string>
     <string name="current_version">Про текущую версию приложения</string>
     <string name="sync_time">Время сверено с сайтом</string>
