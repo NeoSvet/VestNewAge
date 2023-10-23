@@ -38,12 +38,15 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         val i = s.indexOf("<span>") + 6
         s = s.substring(i, s.indexOf("<", i))
         val timeList = DateUnit.parse(s).timeInMills
-        br = BufferedReader(FileReader(file))
-        br.readLine() //title
-        br.readLine() //link
-        br.readLine() //des always empty
-        val timeFile = br.readLine().toLong()
-        br.close()
+        val timeFile: Long
+        if (file.exists()) {
+            br = BufferedReader(FileReader(file))
+            br.readLine() //title
+            br.readLine() //link
+            br.readLine() //des always empty
+            timeFile = br.readLine().toLong()
+            br.close()
+        } else timeFile = 0L
         if (timeFile == timeList) {
             file.setLastModified(System.currentTimeMillis())
             return false
@@ -104,7 +107,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
-        val unread = if(updateUnread) UnreadStorage() else null
+        val unread = if (updateUnread) UnreadStorage() else null
         var d: DateUnit
         var title: String
         var link: String
