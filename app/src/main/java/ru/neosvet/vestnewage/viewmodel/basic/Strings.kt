@@ -25,6 +25,8 @@ data class BrowserStrings(
 
 data class SiteStrings(
     val novosti: String,
+    val new: String,
+    val mark_read: String,
     val timekeeping: String,
     val path: String
 )

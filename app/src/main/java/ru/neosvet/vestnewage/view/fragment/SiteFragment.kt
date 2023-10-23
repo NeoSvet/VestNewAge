@@ -172,11 +172,14 @@ class SiteFragment : NeoFragment() {
                 else openSingleLink(item.link)
 
                 SiteTab.DEV.value -> {
+                    if (item.title == getString(R.string.mark_read)) {
+                        toiler.allMarkAsRead()
+                        return
+                    }
                     if (item.hasFewLinks())
                         adapter.openLinksFor(index)
                     else if (item.link.isNotEmpty()) openPage(item.link)
-                    if (item.title.contains(getString(R.string.new_section)))
-                        toiler.markAsRead(item)
+                    toiler.markAsRead(item)
                     adapter.notifyItemChanged(index)
                 }
             }

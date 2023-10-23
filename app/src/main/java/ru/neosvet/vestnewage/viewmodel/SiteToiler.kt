@@ -43,6 +43,8 @@ class SiteToiler : NeoToiler() {
     override fun init(context: Context) {
         strings = SiteStrings(
             novosti = context.getString(R.string.novosti),
+            new = context.getString(R.string.new_section) + ":",
+            mark_read = context.getString(R.string.mark_read),
             timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
             path = context.getString(R.string.The_Path_of_the_impulse)
         )
@@ -72,8 +74,12 @@ class SiteToiler : NeoToiler() {
         return BasicItem(strings.novosti).apply { addLink(Urls.News) }
     }
 
-    private suspend fun openAds() {
-        val list = ads.getFullList()
+    private suspend fun openDev() {
+        val list = if (devStorage.unreadCount > 0) {
+            (ads.getFullList() as MutableList<BasicItem>).apply {
+                add(0, BasicItem(strings.mark_read))
+            }
+        } else ads.getFullList()
         postState(ListState.Primary(devStorage.getTime(), list))
     }
 
@@ -85,7 +91,7 @@ class SiteToiler : NeoToiler() {
             when (selectedTab) {
                 SiteTab.NEWS -> openNews()
                 SiteTab.SITE -> openSite()
-                SiteTab.DEV -> openAds()
+                SiteTab.DEV -> openDev()
             }
         }
     }
@@ -187,6 +193,7 @@ class SiteToiler : NeoToiler() {
     }
 
     fun markAsRead(item: BasicItem) {
+        if (item.title.indexOf(strings.new) != 0) return
         item.title = item.title.substring(item.title.indexOf(" ") + 1)
         devStorage.setRead(item.title, item.des)
     }
@@ -199,5 +206,13 @@ class SiteToiler : NeoToiler() {
         SiteTab.NEWS.value -> SiteTab.NEWS
         SiteTab.SITE.value -> SiteTab.SITE
         else -> SiteTab.DEV
+    }
+
+    fun allMarkAsRead() {
+        scope.launch {
+            val list = ads.getFullList()
+            list.forEach { markAsRead(it) }
+            postState(ListState.Primary(devStorage.getTime(), list))
+        }
     }
 }
